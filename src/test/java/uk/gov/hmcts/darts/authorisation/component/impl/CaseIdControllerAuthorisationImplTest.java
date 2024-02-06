@@ -41,11 +41,9 @@ class CaseIdControllerAuthorisationImplTest {
     private static final String METHOD = "POST";
     private static final String URI = "/cases";
     private static final String CASE_ID_PARAM_VALUE = "1";
-
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private Authorisation authorisation;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private Set<SecurityRoleEnum> roles;
 
     private ControllerAuthorisation controllerAuthorisation;
@@ -53,12 +51,12 @@ class CaseIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
-            REQUESTER,
-            APPROVER,
-            TRANSCRIBER,
-            TRANSLATION_QA,
-            RCJ_APPEALS
+              JUDGE,
+              REQUESTER,
+              APPROVER,
+              TRANSCRIBER,
+              TRANSLATION_QA,
+              RCJ_APPEALS
         );
         controllerAuthorisation = new CaseIdControllerAuthorisationImpl(authorisation);
     }
@@ -71,14 +69,14 @@ class CaseIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBody() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -90,13 +88,13 @@ class CaseIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBodyWhenCaseIdMissing() throws JsonProcessingException {
         String body = """
-            {
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -109,7 +107,7 @@ class CaseIdControllerAuthorisationImplTest {
     void checkAuthorisationPathParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/cases/1");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(CASE_ID_PARAM, CASE_ID_PARAM_VALUE)
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(CASE_ID_PARAM, CASE_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -121,8 +119,8 @@ class CaseIdControllerAuthorisationImplTest {
     void checkAuthorisationQueryParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
 
@@ -135,8 +133,8 @@ class CaseIdControllerAuthorisationImplTest {
     void checkAuthorisationHeaderParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.addHeader(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
 
@@ -155,8 +153,8 @@ class CaseIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationSupplierIdMissingParameter() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
         );
 
         assertEquals(BAD_REQUEST_CASE_ID.getTitle(), exception.getMessage());
@@ -169,13 +167,13 @@ class CaseIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenCaseIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_CASE_ID.getTitle(), exception.getMessage());
@@ -188,14 +186,14 @@ class CaseIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenCaseIdInvalid() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(CASE_ID_PARAM, "");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_CASE_ID.getTitle(), exception.getMessage());

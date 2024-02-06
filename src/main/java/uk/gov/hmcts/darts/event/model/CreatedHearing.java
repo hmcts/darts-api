@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 @Data
 @Builder
 public class CreatedHearing {
+
     private final HearingEntity hearingEntity;
 
     private boolean isHearingNew;

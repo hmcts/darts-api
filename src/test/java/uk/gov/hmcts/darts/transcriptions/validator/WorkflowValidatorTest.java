@@ -33,7 +33,7 @@ class WorkflowValidatorTest {
     void validateManualChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, REQUESTED)
+              workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, REQUESTED)
         );
     }
 
@@ -42,13 +42,13 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, REQUESTED)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, REQUESTED)
         );
     }
 
     @ParameterizedTest
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
-        "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
+          "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusAwaitingAuthorisationSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(true, transcriptionTypeEnum, REQUESTED, AWAITING_AUTHORISATION));
@@ -58,7 +58,7 @@ class WorkflowValidatorTest {
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusAwaitingAuthorisationReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, SENTENCING_REMARKS, currentTranscriptionStatus, AWAITING_AUTHORISATION)
+              workflowValidator.validateChangeToWorkflowStatus(true, SENTENCING_REMARKS, currentTranscriptionStatus, AWAITING_AUTHORISATION)
         );
     }
 
@@ -67,13 +67,13 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToWorkflowStatusAwaitingAuthorisationReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, AWAITING_AUTHORISATION)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, AWAITING_AUTHORISATION)
         );
     }
 
     @ParameterizedTest
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
-        "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
+          "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToApprovedWorkflowStatusSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(true, transcriptionTypeEnum, AWAITING_AUTHORISATION, APPROVED));
@@ -90,7 +90,7 @@ class WorkflowValidatorTest {
     void validateManualChangeToApprovedWorkflowStatusReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, INCLUDING_VERDICT, currentTranscriptionStatus, APPROVED)
+              workflowValidator.validateChangeToWorkflowStatus(true, INCLUDING_VERDICT, currentTranscriptionStatus, APPROVED)
         );
     }
 
@@ -99,13 +99,13 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToApprovedWorkflowStatusReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, APPROVED)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, APPROVED)
         );
     }
 
     @ParameterizedTest
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
-        "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
+          "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusRejectedSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(true, transcriptionTypeEnum, AWAITING_AUTHORISATION, REJECTED));
@@ -116,7 +116,7 @@ class WorkflowValidatorTest {
     void validateManualChangeToWorkflowStatusRejectedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, SENTENCING_REMARKS, currentTranscriptionStatus, REJECTED)
+              workflowValidator.validateChangeToWorkflowStatus(true, SENTENCING_REMARKS, currentTranscriptionStatus, REJECTED)
         );
     }
 
@@ -125,20 +125,19 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToWorkflowStatusRejectedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, REJECTED)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, REJECTED)
         );
     }
 
     @ParameterizedTest
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
-        "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
+          "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusWithTranscriberSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(true, transcriptionTypeEnum, APPROVED, WITH_TRANSCRIBER));
     }
 
     @Test
-
     void validateAutomaticChangeToWorkflowStatusWithTranscriberSuccess() {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(false, OTHER, APPROVED, WITH_TRANSCRIBER));
@@ -149,7 +148,7 @@ class WorkflowValidatorTest {
     void validateManualChangeToWorkflowStatusWithTranscriberReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, WITH_TRANSCRIBER)
+              workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, WITH_TRANSCRIBER)
         );
     }
 
@@ -158,20 +157,19 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToWorkflowStatusWithTranscriberReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, WITH_TRANSCRIBER)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, WITH_TRANSCRIBER)
         );
     }
 
     @ParameterizedTest
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
-        "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
+          "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusCompleteSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(true, transcriptionTypeEnum, WITH_TRANSCRIBER, COMPLETE));
     }
 
     @Test
-
     void validateAutomaticChangeToWorkflowStatusCompleteSuccess() {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(false, OTHER, WITH_TRANSCRIBER, COMPLETE));
@@ -182,7 +180,7 @@ class WorkflowValidatorTest {
     void validateManualChangeToWorkflowStatusCompleteReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, COMPLETE)
+              workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, COMPLETE)
         );
     }
 
@@ -191,7 +189,7 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToWorkflowStatusCompleteReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, COMPLETE)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, COMPLETE)
         );
     }
 
@@ -214,7 +212,7 @@ class WorkflowValidatorTest {
     void validateManualChangeToWorkflowStatusClosedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, CLOSED)
+              workflowValidator.validateChangeToWorkflowStatus(true, COURT_LOG, currentTranscriptionStatus, CLOSED)
         );
     }
 
@@ -223,7 +221,7 @@ class WorkflowValidatorTest {
     void validateAutomaticChangeToWorkflowStatusClosedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         assertFalse(
-            workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, CLOSED)
+              workflowValidator.validateChangeToWorkflowStatus(false, OTHER, currentTranscriptionStatus, CLOSED)
         );
     }
 

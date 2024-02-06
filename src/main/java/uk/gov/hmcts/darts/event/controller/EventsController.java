@@ -45,11 +45,8 @@ public class EventsController implements EventApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {XHIBIT, CPP})
-    public ResponseEntity<EventsResponse> eventsPost(
-        @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
-    ) {
+    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {XHIBIT, CPP})
+    public ResponseEntity<EventsResponse> eventsPost(@Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent) {
         eventDispatcher.receive(dartsEvent);
 
         var addDocumentResponse = new EventsResponse();
@@ -63,8 +60,7 @@ public class EventsController implements EventApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER})
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {MID_TIER})
     public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
         DartsEvent dartsEvent = dartsEventMapper.toDartsEvent(courtLogsPostRequestBody);
 
@@ -73,17 +69,16 @@ public class EventsController implements EventApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {XHIBIT, CPP})
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<List<CourtLog>> courtlogsGet(
-        @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
-        @Parameter(name = "case_number", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "case_number", required = true)
-        String caseNumber,
-        @Parameter(name = "start_date_time", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "start_date_time", required = true)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDateTime,
-        @Parameter(name = "end_date_time", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "end_date_time", required = true)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDateTime
-    ) {
+          @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "courthouse") String courthouse,
+          @Parameter(name = "case_number", description = "", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "case_number") String caseNumber,
+          @Parameter(name = "start_date_time", description = "", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "start_date_time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDateTime,
+          @Parameter(name = "end_date_time", description = "", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "end_date_time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDateTime) {
 
         List<CourtLog> courtLogs = courtLogsService.getCourtLogs(courthouse, caseNumber, startDateTime, endDateTime);
 

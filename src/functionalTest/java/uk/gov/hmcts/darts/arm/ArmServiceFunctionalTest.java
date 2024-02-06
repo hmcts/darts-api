@@ -29,33 +29,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
-
+    private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
+    private final List<String> armCollectedBlobsToBeDeleted = new ArrayList<>();
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
-
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
-
     @Value("${darts.storage.arm.folders.collected}")
     private String armCollectedDropZone;
-
     @Autowired
     private ArmService armService;
-
     @Autowired
     private ArmTestUtil armTestUtil;
-
-    private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
-
-    private final List<String> armCollectedBlobsToBeDeleted = new ArrayList<>();
-
 
     @Test
     void saveBlobData() {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        String filename = String.format("%s_functional_test", UUID.randomUUID().toString());
+        String filename = String.format("%s_functional_test", UUID.randomUUID());
         String actualResult = armService.saveBlobData(armContainerName, filename, data);
         armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
@@ -68,7 +60,7 @@ class ArmServiceFunctionalTest {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        String filename = String.format("functional_test_%s", UUID.randomUUID().toString());
+        String filename = String.format("functional_test_%s", UUID.randomUUID());
         String blobPathAndName = armSubmissionDropZone + filename;
 
         String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);

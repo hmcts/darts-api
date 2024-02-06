@@ -532,7 +532,7 @@ components:
         hearings:
           type: array
           items:
-              $ref: '#/components/schemas/advancedSearchResultHearing'
+            $ref: '#/components/schemas/advancedSearchResultHearing'
     advancedSearchResultHearing:
       type: object
       properties:

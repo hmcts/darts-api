@@ -6,7 +6,8 @@ import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableFeignClients(basePackages = { "uk.gov.hmcts.darts" })
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.darts"})
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class FeignCloudConfiguration {
+
 }

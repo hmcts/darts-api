@@ -12,9 +12,9 @@ class PermissionTest {
         String permissionName = "TestPermission";
 
         Permission permission = Permission.builder()
-            .permissionId(permissionId)
-            .permissionName(permissionName)
-            .build();
+              .permissionId(permissionId)
+              .permissionName(permissionName)
+              .build();
 
         assertEquals(permissionId, permission.getPermissionId());
         assertEquals(permissionName, permission.getPermissionName());

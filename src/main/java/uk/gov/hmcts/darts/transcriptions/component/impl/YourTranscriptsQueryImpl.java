@@ -22,272 +22,272 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
     @Override
     public List<YourTranscriptsSummary> getRequesterTranscriptions(Integer userId, Boolean includeHiddenFromRequester) {
         return jdbcTemplate.query(
-            """
-                -- "requester_transcriptions"
-                SELECT
-                    tra.tra_id as transcription_id,
-                    cas.cas_id as case_id,
-                    cas.case_number,
-                    cth.courthouse_name,
-                    hea.hearing_date,
-                    trt.description as transcription_type,
-                    trs.display_name as status,
-                    tru.description as urgency,
-                    trw.workflow_ts as requested_ts
-                FROM
-                    darts.transcription_workflow trw
-                INNER JOIN
-                    darts.transcription tra
-                ON
-                    trw.tra_id = tra.tra_id
-                INNER JOIN
-                    darts.case_transcription_ae case_transcription
-                ON
-                    tra.tra_id = case_transcription.tra_id
-                INNER JOIN
-                    darts.court_case cas
-                ON
-                    case_transcription.cas_id = cas.cas_id
-                INNER JOIN
-                    darts.courthouse cth
-                ON
-                    cas.cth_id = cth.cth_id
-                INNER JOIN
-                    darts.hearing_transcription_ae hearing_transcription
-                ON
-                    tra.tra_id = hearing_transcription.tra_id
-                INNER JOIN
-                    darts.hearing hea
-                ON
-                    hearing_transcription.hea_id = hea.hea_id
-                INNER JOIN
-                    darts.transcription_type trt
-                ON
-                    tra.trt_id = trt.trt_id
-                INNER JOIN
-                    darts.transcription_status trs
-                ON
-                    tra.trs_id = trs.trs_id
-                LEFT JOIN
-                    darts.transcription_urgency tru
-                ON
-                    tra.tru_id = tru.tru_id
-                WHERE
-                    trw.workflow_actor = :usr_id
-                AND trw.trs_id = 1
-                AND tra.trs_id <> 7
-                AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
+              """
+                    -- "requester_transcriptions"
+                    SELECT
+                        tra.tra_id as transcription_id,
+                        cas.cas_id as case_id,
+                        cas.case_number,
+                        cth.courthouse_name,
+                        hea.hearing_date,
+                        trt.description as transcription_type,
+                        trs.display_name as status,
+                        tru.description as urgency,
+                        trw.workflow_ts as requested_ts
+                    FROM
+                        darts.transcription_workflow trw
+                    INNER JOIN
+                        darts.transcription tra
+                    ON
+                        trw.tra_id = tra.tra_id
+                    INNER JOIN
+                        darts.case_transcription_ae case_transcription
+                    ON
+                        tra.tra_id = case_transcription.tra_id
+                    INNER JOIN
+                        darts.court_case cas
+                    ON
+                        case_transcription.cas_id = cas.cas_id
+                    INNER JOIN
+                        darts.courthouse cth
+                    ON
+                        cas.cth_id = cth.cth_id
+                    INNER JOIN
+                        darts.hearing_transcription_ae hearing_transcription
+                    ON
+                        tra.tra_id = hearing_transcription.tra_id
+                    INNER JOIN
+                        darts.hearing hea
+                    ON
+                        hearing_transcription.hea_id = hea.hea_id
+                    INNER JOIN
+                        darts.transcription_type trt
+                    ON
+                        tra.trt_id = trt.trt_id
+                    INNER JOIN
+                        darts.transcription_status trs
+                    ON
+                        tra.trs_id = trs.trs_id
+                    LEFT JOIN
+                        darts.transcription_urgency tru
+                    ON
+                        tra.tru_id = tru.tru_id
+                    WHERE
+                        trw.workflow_actor = :usr_id
+                    AND trw.trs_id = 1
+                    AND tra.trs_id <> 7
+                    AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
 
-                UNION
+                    UNION
 
-                -- Migrated "requester_transcriptions"
-                SELECT
-                    tra.tra_id as transcription_id,
-                    cas.cas_id as case_id,
-                    cas.case_number,
-                    cth.courthouse_name,
-                    tra.hearing_date,
-                    trt.description as transcription_type,
-                    trs.display_name as status,
-                    tru.description as urgency,
-                    trw.workflow_ts as requested_ts
-                FROM
-                    darts.transcription_workflow trw
-                INNER JOIN
-                    darts.transcription tra
-                ON
-                    trw.tra_id = tra.tra_id
-                INNER JOIN
-                    darts.case_transcription_ae case_transcription
-                ON
-                    tra.tra_id = case_transcription.tra_id
-                INNER JOIN
-                    darts.court_case cas
-                ON
-                    case_transcription.cas_id = cas.cas_id
-                INNER JOIN
-                    darts.courthouse cth
-                ON
-                    cas.cth_id = cth.cth_id
-                INNER JOIN
-                    darts.transcription_type trt
-                ON
-                    tra.trt_id = trt.trt_id
-                INNER JOIN
-                    darts.transcription_status trs
-                ON
-                    tra.trs_id = trs.trs_id
-                LEFT JOIN
-                    darts.transcription_urgency tru
-                ON
-                    tra.tru_id = tru.tru_id
-                WHERE
-                    trw.workflow_actor = :usr_id
-                AND trw.trs_id = 1
-                AND tra.trs_id <> 7
-                AND not exists (select 1 from darts.hearing_transcription_ae hear_tran where tra.tra_id = hear_tran.tra_id)
-                AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
-                ORDER BY transcription_id desc
-                """,
-            new MapSqlParameterSource()
-                .addValue("usr_id", userId)
-                .addValue("include_hidden_from_requester", includeHiddenFromRequester),
-            yourTranscriptsSummaryRowMapper
+                    -- Migrated "requester_transcriptions"
+                    SELECT
+                        tra.tra_id as transcription_id,
+                        cas.cas_id as case_id,
+                        cas.case_number,
+                        cth.courthouse_name,
+                        tra.hearing_date,
+                        trt.description as transcription_type,
+                        trs.display_name as status,
+                        tru.description as urgency,
+                        trw.workflow_ts as requested_ts
+                    FROM
+                        darts.transcription_workflow trw
+                    INNER JOIN
+                        darts.transcription tra
+                    ON
+                        trw.tra_id = tra.tra_id
+                    INNER JOIN
+                        darts.case_transcription_ae case_transcription
+                    ON
+                        tra.tra_id = case_transcription.tra_id
+                    INNER JOIN
+                        darts.court_case cas
+                    ON
+                        case_transcription.cas_id = cas.cas_id
+                    INNER JOIN
+                        darts.courthouse cth
+                    ON
+                        cas.cth_id = cth.cth_id
+                    INNER JOIN
+                        darts.transcription_type trt
+                    ON
+                        tra.trt_id = trt.trt_id
+                    INNER JOIN
+                        darts.transcription_status trs
+                    ON
+                        tra.trs_id = trs.trs_id
+                    LEFT JOIN
+                        darts.transcription_urgency tru
+                    ON
+                        tra.tru_id = tru.tru_id
+                    WHERE
+                        trw.workflow_actor = :usr_id
+                    AND trw.trs_id = 1
+                    AND tra.trs_id <> 7
+                    AND not exists (select 1 from darts.hearing_transcription_ae hear_tran where tra.tra_id = hear_tran.tra_id)
+                    AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
+                    ORDER BY transcription_id desc
+                    """,
+              new MapSqlParameterSource()
+                    .addValue("usr_id", userId)
+                    .addValue("include_hidden_from_requester", includeHiddenFromRequester),
+              yourTranscriptsSummaryRowMapper
         );
     }
 
     @Override
     public List<YourTranscriptsSummary> getApproverTranscriptions(Integer userId) {
         return jdbcTemplate.query(
-            """
-                -- approver_transcriptions
-                SELECT
-                    tra.tra_id as transcription_id,
-                    cas.cas_id as case_id,
-                    cas.case_number,
-                    cth.courthouse_name,
-                    hea.hearing_date,
-                    trt.description as transcription_type,
-                    trs.display_name as status,
-                    tru.description as urgency,
-                    trw.workflow_ts as requested_ts
-                FROM
-                    darts.transcription tra
-                INNER JOIN
-                    darts.case_transcription_ae case_transcription
-                ON
-                    tra.tra_id = case_transcription.tra_id
-                INNER JOIN
-                    darts.court_case cas
-                ON
-                    case_transcription.cas_id = cas.cas_id
-                INNER JOIN
-                    darts.courthouse cth
-                ON
-                    cas.cth_id = cth.cth_id
-                AND cth.cth_id IN
-                    (   SELECT
-                            DISTINCT(grc.cth_id)
-                        FROM
-                            darts.user_account usr
-                        INNER JOIN
-                            darts.security_group_user_account_ae gua
-                        ON
-                            usr.usr_id = gua.usr_id
-                        INNER JOIN
-                            darts.security_group grp
-                        ON
-                            gua.grp_id = grp.grp_id
-                        INNER JOIN
-                            darts.security_group_courthouse_ae grc
-                        ON
-                            grp.grp_id = grc.grp_id
-                        WHERE
-                            usr.usr_id = :usr_id
-                        AND grp.rol_id = :rol_id)
-                INNER JOIN
-                    darts.hearing_transcription_ae hearing_transcription
-                ON
-                    tra.tra_id = hearing_transcription.tra_id
-                INNER JOIN
-                    darts.hearing hea
-                ON
-                    hearing_transcription.hea_id = hea.hea_id
-                INNER JOIN
-                    darts.transcription_type trt
-                ON
-                    tra.trt_id = trt.trt_id
-                INNER JOIN
-                    darts.transcription_status trs
-                ON
-                    tra.trs_id = trs.trs_id
-                LEFT JOIN
-                    darts.transcription_urgency tru
-                ON
-                    tra.tru_id = tru.tru_id
-                INNER JOIN
-                    darts.transcription_workflow trw
-                ON
-                    tra.tra_id = trw.tra_id
-                AND trw.trs_id = 1
-                WHERE
-                    tra.trs_id = :trs_id
-                AND trw.workflow_actor <> :usr_id
+              """
+                    -- approver_transcriptions
+                    SELECT
+                        tra.tra_id as transcription_id,
+                        cas.cas_id as case_id,
+                        cas.case_number,
+                        cth.courthouse_name,
+                        hea.hearing_date,
+                        trt.description as transcription_type,
+                        trs.display_name as status,
+                        tru.description as urgency,
+                        trw.workflow_ts as requested_ts
+                    FROM
+                        darts.transcription tra
+                    INNER JOIN
+                        darts.case_transcription_ae case_transcription
+                    ON
+                        tra.tra_id = case_transcription.tra_id
+                    INNER JOIN
+                        darts.court_case cas
+                    ON
+                        case_transcription.cas_id = cas.cas_id
+                    INNER JOIN
+                        darts.courthouse cth
+                    ON
+                        cas.cth_id = cth.cth_id
+                    AND cth.cth_id IN
+                        (   SELECT
+                                DISTINCT(grc.cth_id)
+                            FROM
+                                darts.user_account usr
+                            INNER JOIN
+                                darts.security_group_user_account_ae gua
+                            ON
+                                usr.usr_id = gua.usr_id
+                            INNER JOIN
+                                darts.security_group grp
+                            ON
+                                gua.grp_id = grp.grp_id
+                            INNER JOIN
+                                darts.security_group_courthouse_ae grc
+                            ON
+                                grp.grp_id = grc.grp_id
+                            WHERE
+                                usr.usr_id = :usr_id
+                            AND grp.rol_id = :rol_id)
+                    INNER JOIN
+                        darts.hearing_transcription_ae hearing_transcription
+                    ON
+                        tra.tra_id = hearing_transcription.tra_id
+                    INNER JOIN
+                        darts.hearing hea
+                    ON
+                        hearing_transcription.hea_id = hea.hea_id
+                    INNER JOIN
+                        darts.transcription_type trt
+                    ON
+                        tra.trt_id = trt.trt_id
+                    INNER JOIN
+                        darts.transcription_status trs
+                    ON
+                        tra.trs_id = trs.trs_id
+                    LEFT JOIN
+                        darts.transcription_urgency tru
+                    ON
+                        tra.tru_id = tru.tru_id
+                    INNER JOIN
+                        darts.transcription_workflow trw
+                    ON
+                        tra.tra_id = trw.tra_id
+                    AND trw.trs_id = 1
+                    WHERE
+                        tra.trs_id = :trs_id
+                    AND trw.workflow_actor <> :usr_id
 
-                UNION
+                    UNION
 
-                -- Migrated approver_transcriptions
-                SELECT
-                    tra.tra_id as transcription_id,
-                    cas.cas_id as case_id,
-                    cas.case_number,
-                    cth.courthouse_name,
-                    hearing_date,
-                    trt.description as transcription_type,
-                    trs.display_name as status,
-                    tru.description as urgency,
-                    trw.workflow_ts as requested_ts
-                FROM
-                    darts.transcription tra
-                INNER JOIN
-                    darts.case_transcription_ae case_transcription
-                ON
-                    tra.tra_id = case_transcription.tra_id
-                INNER JOIN
-                    darts.court_case cas
-                ON
-                    case_transcription.cas_id = cas.cas_id
-                INNER JOIN
-                    darts.courthouse cth
-                ON
-                    cas.cth_id = cth.cth_id
-                AND cth.cth_id IN
-                    (   SELECT
-                            DISTINCT(grc.cth_id)
-                        FROM
-                            darts.user_account usr
-                        INNER JOIN
-                            darts.security_group_user_account_ae gua
-                        ON
-                            usr.usr_id = gua.usr_id
-                        INNER JOIN
-                            darts.security_group grp
-                        ON
-                            gua.grp_id = grp.grp_id
-                        INNER JOIN
-                            darts.security_group_courthouse_ae grc
-                        ON
-                            grp.grp_id = grc.grp_id
-                        WHERE
-                            usr.usr_id = :usr_id
-                        AND grp.rol_id = :rol_id)
-                INNER JOIN
-                    darts.transcription_type trt
-                ON
-                    tra.trt_id = trt.trt_id
-                INNER JOIN
-                    darts.transcription_status trs
-                ON
-                    tra.trs_id = trs.trs_id
-                LEFT JOIN
-                    darts.transcription_urgency tru
-                ON
-                    tra.tru_id = tru.tru_id
-                INNER JOIN
-                    darts.transcription_workflow trw
-                ON
-                    tra.tra_id = trw.tra_id
-                AND trw.trs_id = 1
-                WHERE
-                    tra.trs_id = :trs_id
-                AND trw.workflow_actor <> :usr_id
-                AND not exists (select 1 from darts.hearing_transcription_ae hear_tran where tra.tra_id = hear_tran.tra_id)
-                ORDER BY transcription_id desc
-                """,
-            new MapSqlParameterSource("usr_id", userId)
-                .addValue("rol_id", APPROVER.getId())
-                .addValue("trs_id", AWAITING_AUTHORISATION.getId()),
-            yourTranscriptsSummaryRowMapper
+                    -- Migrated approver_transcriptions
+                    SELECT
+                        tra.tra_id as transcription_id,
+                        cas.cas_id as case_id,
+                        cas.case_number,
+                        cth.courthouse_name,
+                        hearing_date,
+                        trt.description as transcription_type,
+                        trs.display_name as status,
+                        tru.description as urgency,
+                        trw.workflow_ts as requested_ts
+                    FROM
+                        darts.transcription tra
+                    INNER JOIN
+                        darts.case_transcription_ae case_transcription
+                    ON
+                        tra.tra_id = case_transcription.tra_id
+                    INNER JOIN
+                        darts.court_case cas
+                    ON
+                        case_transcription.cas_id = cas.cas_id
+                    INNER JOIN
+                        darts.courthouse cth
+                    ON
+                        cas.cth_id = cth.cth_id
+                    AND cth.cth_id IN
+                        (   SELECT
+                                DISTINCT(grc.cth_id)
+                            FROM
+                                darts.user_account usr
+                            INNER JOIN
+                                darts.security_group_user_account_ae gua
+                            ON
+                                usr.usr_id = gua.usr_id
+                            INNER JOIN
+                                darts.security_group grp
+                            ON
+                                gua.grp_id = grp.grp_id
+                            INNER JOIN
+                                darts.security_group_courthouse_ae grc
+                            ON
+                                grp.grp_id = grc.grp_id
+                            WHERE
+                                usr.usr_id = :usr_id
+                            AND grp.rol_id = :rol_id)
+                    INNER JOIN
+                        darts.transcription_type trt
+                    ON
+                        tra.trt_id = trt.trt_id
+                    INNER JOIN
+                        darts.transcription_status trs
+                    ON
+                        tra.trs_id = trs.trs_id
+                    LEFT JOIN
+                        darts.transcription_urgency tru
+                    ON
+                        tra.tru_id = tru.tru_id
+                    INNER JOIN
+                        darts.transcription_workflow trw
+                    ON
+                        tra.tra_id = trw.tra_id
+                    AND trw.trs_id = 1
+                    WHERE
+                        tra.trs_id = :trs_id
+                    AND trw.workflow_actor <> :usr_id
+                    AND not exists (select 1 from darts.hearing_transcription_ae hear_tran where tra.tra_id = hear_tran.tra_id)
+                    ORDER BY transcription_id desc
+                    """,
+              new MapSqlParameterSource("usr_id", userId)
+                    .addValue("rol_id", APPROVER.getId())
+                    .addValue("trs_id", AWAITING_AUTHORISATION.getId()),
+              yourTranscriptsSummaryRowMapper
         );
     }
 

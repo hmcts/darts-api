@@ -32,13 +32,11 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
     @Autowired
+    protected TransientObjectDirectoryStub transientObjectDirectoryStub;
+    @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private Authorisation authorisation;
-
-    @Autowired
-    protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
     @Test
     void audioRequestDeleteShouldReturnSuccess() throws Exception {
@@ -48,26 +46,26 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+              .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                    mediaRequestEntity,
+                    objectRecordStatusEntity,
+                    blobId
+              ));
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
-            mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaRequestEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         MockHttpServletRequestBuilder requestBuilder = delete(URI.create(
-            String.format("/audio-requests/%d", mediaRequestEntity.getId())));
+              String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().is2xxSuccessful());
+              .andExpect(status().is2xxSuccessful());
 
         verify(authorisation).authoriseByMediaRequestId(
-            mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaRequestEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
@@ -76,8 +74,8 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = delete(URI.create("/audio-requests/id"));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         verifyNoInteractions(authorisation);
     }

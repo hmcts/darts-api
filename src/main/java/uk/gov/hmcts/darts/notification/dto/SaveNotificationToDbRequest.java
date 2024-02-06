@@ -10,6 +10,7 @@ import java.util.Map;
 @Data
 @Builder
 public class SaveNotificationToDbRequest {
+
     String eventId;
     Integer caseId;
     String emailAddresses;

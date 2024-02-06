@@ -28,6 +28,15 @@ class AdvancedSearchResponseMapperTest {
     public static final String TEST_1 = "test1";
     ObjectMapper objectMapper;
 
+    private static void compareJson(String actualResponse, String expectedResponse) {
+        try {
+            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        } catch (AssertionError ae) {
+            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
+            throw ae;
+        }
+    }
+
     @BeforeAll
     void beforeAll() {
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
@@ -50,7 +59,7 @@ class AdvancedSearchResponseMapperTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/AdvancedSearchResponseMapperTest/one/expectedResponse.json");
+              "Tests/cases/AdvancedSearchResponseMapperTest/one/expectedResponse.json");
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -72,7 +81,6 @@ class AdvancedSearchResponseMapperTest {
         hearing2.setId(202);
         hearing2.addJudges(CommonTestDataUtil.createJudges(3));
 
-
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
         hearings.add(hearing2);
@@ -81,17 +89,8 @@ class AdvancedSearchResponseMapperTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/AdvancedSearchResponseMapperTest/twoSameCase/expectedResponse.json");
+              "Tests/cases/AdvancedSearchResponseMapperTest/twoSameCase/expectedResponse.json");
         compareJson(actualResponse, expectedResponse);
-    }
-
-    private static void compareJson(String actualResponse, String expectedResponse) {
-        try {
-            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-        } catch (AssertionError ae) {
-            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
-            throw ae;
-        }
     }
 
     @Test
@@ -112,7 +111,6 @@ class AdvancedSearchResponseMapperTest {
         hearing2.setId(202);
         hearing2.addJudges(CommonTestDataUtil.createJudges(3));
 
-
         HearingEntity hearing3 = new HearingEntity();
         hearing3.setCourtCase(CommonTestDataUtil.createCaseWithId("test2", 102));
         hearing3.setCourtroom(CommonTestDataUtil.createCourtroom("2"));
@@ -121,7 +119,6 @@ class AdvancedSearchResponseMapperTest {
         hearing3.setId(203);
         hearing3.addJudges(CommonTestDataUtil.createJudges(4));
 
-
         HearingEntity hearing4 = new HearingEntity();
         hearing4.setCourtCase(CommonTestDataUtil.createCaseWithId("test3", 103));
         hearing4.setCourtroom(CommonTestDataUtil.createCourtroom("2"));
@@ -129,7 +126,6 @@ class AdvancedSearchResponseMapperTest {
         hearing4.setScheduledStartTime(LocalTime.of(13, 0));
         hearing4.setId(204);
         hearing4.addJudges(CommonTestDataUtil.createJudges(5));
-
 
         List<HearingEntity> hearings = new ArrayList<>();
         hearings.add(hearing1);
@@ -141,7 +137,7 @@ class AdvancedSearchResponseMapperTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/AdvancedSearchResponseMapperTest/fourWithTwoSameCase/expectedResponse.json");
+              "Tests/cases/AdvancedSearchResponseMapperTest/fourWithTwoSameCase/expectedResponse.json");
         compareJson(actualResponse, expectedResponse);
     }
 

@@ -42,7 +42,7 @@ class GetEventsResponseMapperTest {
 
         String actualResponse = objectMapper.writeValueAsString(eventResponses);
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToEvents/expectedResponse.json");
+              "Tests/cases/CasesMapperTest/testMapToEvents/expectedResponse.json");
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }

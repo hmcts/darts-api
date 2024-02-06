@@ -74,8 +74,8 @@ public class EventEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
-        joinColumns = {@JoinColumn(name = "eve_id")},
-        inverseJoinColumns = {@JoinColumn(name = "hea_id")})
+          joinColumns = {@JoinColumn(name = "eve_id")},
+          inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private List<HearingEntity> hearingEntities = new ArrayList<>();
 
     public void addHearing(HearingEntity hearingEntity) {

@@ -12,9 +12,9 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 public class ExternalUnstructuredDataStoreDeleter extends ExternalDataStoreDeleterImpl<ExternalObjectDirectoryEntity> {
 
     public ExternalUnstructuredDataStoreDeleter(ObjectRecordStatusRepository objectRecordStatusRepository, UserAccountRepository userAccountRepository,
-                                                JpaRepository<ExternalObjectDirectoryEntity, Integer> repository,
-                                                UnstructuredExternalObjectDirectoryDeletedFinder finder, UnstructuredDataStoreDeleter deleter,
-                                                SystemUserHelper systemUserHelper) {
+          JpaRepository<ExternalObjectDirectoryEntity, Integer> repository,
+          UnstructuredExternalObjectDirectoryDeletedFinder finder, UnstructuredDataStoreDeleter deleter,
+          SystemUserHelper systemUserHelper) {
         super(objectRecordStatusRepository, userAccountRepository, repository, finder, deleter, systemUserHelper);
     }
 }

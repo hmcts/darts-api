@@ -17,8 +17,6 @@ public enum AutomatedTaskName {
     UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore"),
     PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles");
 
-    private final String taskName;
-
     private static final Map<String, AutomatedTaskName> BY_TASK_NAME = new HashMap<>();
 
     static {
@@ -27,15 +25,17 @@ public enum AutomatedTaskName {
         }
     }
 
+    private final String taskName;
+
     AutomatedTaskName(String taskName) {
         this.taskName = taskName;
     }
 
-    public String getTaskName() {
-        return taskName;
-    }
-
     public static AutomatedTaskName valueOfTaskName(String taskName) {
         return BY_TASK_NAME.get(taskName);
+    }
+
+    public String getTaskName() {
+        return taskName;
     }
 }

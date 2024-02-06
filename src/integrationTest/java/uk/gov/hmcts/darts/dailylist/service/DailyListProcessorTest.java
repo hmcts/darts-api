@@ -72,17 +72,17 @@ class DailyListProcessorTest extends IntegrationBase {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         LocalTime dailyListTIme = LocalTime.of(13, 0);
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(
-            dailyListTIme,
-            String.valueOf(SourceType.CPP),
-            swanseaCourtEntity.getCourthouseName(),
-            "tests/dailyListProcessorTest/dailyListCPP.json"
+              dailyListTIme,
+              String.valueOf(SourceType.CPP),
+              swanseaCourtEntity.getCourthouseName(),
+              "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
         DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(
-            dailyListTIme.minusHours(3),
-            String.valueOf(SourceType.CPP),
-            swanseaCourtEntity.getCourthouseName(),
-            "tests/dailyListProcessorTest/dailyListCPP.json"
+              dailyListTIme.minusHours(3),
+              String.valueOf(SourceType.CPP),
+              swanseaCourtEntity.getCourthouseName(),
+              "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
         dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
@@ -110,7 +110,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getDefenceList().size());
         assertEquals(1, newCase2.getProsecutorList().size());
         assertEquals(1, newCase2.getJudges().size());
-
 
         List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
         assertEquals(1, newHearing2.size());
@@ -146,7 +145,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getProsecutorList().size());
         assertEquals(1, newCase2.getJudges().size());
 
-
         CourtCaseEntity newCase3 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_1, SWANSEA).get();
         assertEquals(CASE_NUMBER_1, newCase3.getCaseNumber());
         assertEquals(SWANSEA, newCase3.getCourthouse().getCourthouseName());
@@ -154,7 +152,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase3.getDefenceList().size());
         assertEquals(1, newCase3.getProsecutorList().size());
         assertEquals(1, newCase3.getJudges().size());
-
 
         CourtCaseEntity newCase4 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_2, SWANSEA).get();
         assertEquals(CASE_NUMBER_2, newCase4.getCaseNumber());
@@ -164,7 +161,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase4.getProsecutorList().size());
         assertEquals(1, newCase4.getJudges().size());
 
-
         List<HearingEntity> hearings = hearingRepository.findAll();
         for (HearingEntity hearing : hearings) {
             assertEquals(LocalDate.now(), hearing.getHearingDate());
@@ -172,8 +168,8 @@ class DailyListProcessorTest extends IntegrationBase {
             assertEquals(1, hearing.getJudges().size());
 
             assertThat(
-                hearing.getScheduledStartTime(),
-                Matchers.either(Matchers.is(LocalTime.of(16, 0))).or(Matchers.is(LocalTime.of(11, 0)))
+                  hearing.getScheduledStartTime(),
+                  Matchers.either(Matchers.is(LocalTime.of(16, 0))).or(Matchers.is(LocalTime.of(11, 0)))
             );
 
         }
@@ -222,8 +218,8 @@ class DailyListProcessorTest extends IntegrationBase {
         dailyListProcessor.processAllDailyLists();
 
         var dailyListStatus = dartsDatabase.getDailyListRepository()
-            .findById(dailyListEntities.get(0).getId()).orElseThrow()
-            .getStatus();
+              .findById(dailyListEntities.get(0).getId()).orElseThrow()
+              .getStatus();
 
         Assertions.assertThat(dailyListStatus).isEqualTo(FAILED);
     }
@@ -247,8 +243,8 @@ class DailyListProcessorTest extends IntegrationBase {
         dailyListProcessor.processAllDailyLists();
 
         var dailyListStatus = dartsDatabase.getDailyListRepository()
-            .findById(oldDailyList.getId()).orElseThrow()
-            .getStatus();
+              .findById(oldDailyList.getId()).orElseThrow()
+              .getStatus();
 
         Assertions.assertThat(dailyListStatus).isEqualTo(IGNORED);
     }

@@ -38,9 +38,9 @@ public class UserManagementQueryImpl implements UserManagementQuery {
         boolean isNotBlankEmailAddress = isNotBlank(emailAddress);
         if (isNotBlankEmailAddress) {
             wherePredicates.add(criteriaBuilder.equal(
-                criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
+                  criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
 
-                criteriaBuilder.lower(paramEmailAddress)
+                  criteriaBuilder.lower(paramEmailAddress)
             ));
         }
 

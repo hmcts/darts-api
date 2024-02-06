@@ -16,19 +16,19 @@ class RoleTest {
     @Test
     void builder() {
         Role role = Role.builder()
-            .roleId(APPROVER.getId())
-            .roleName(APPROVER.toString())
-            .permissions(Set.of(
-                Permission.builder()
-                    .permissionId(2)
-                    .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                    .build(),
-                Permission.builder()
-                    .permissionId(4)
-                    .permissionName("LISTEN_TO_AUDIO_FOR_PLAYBACK")
-                    .build()
-            ))
-            .build();
+              .roleId(APPROVER.getId())
+              .roleName(APPROVER.toString())
+              .permissions(Set.of(
+                    Permission.builder()
+                          .permissionId(2)
+                          .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+                          .build(),
+                    Permission.builder()
+                          .permissionId(4)
+                          .permissionName("LISTEN_TO_AUDIO_FOR_PLAYBACK")
+                          .build()
+              ))
+              .build();
 
         assertEquals(APPROVER.getId(), role.getRoleId());
         assertEquals(APPROVER.toString(), role.getRoleName());
@@ -38,10 +38,10 @@ class RoleTest {
     @Test
     void shouldEqualsJudgeRole() {
         Role role = Role.builder()
-            .roleId(JUDGE.getId())
-            .roleName(JUDGE.toString())
-            .permissions(Collections.emptySet())
-            .build();
+              .roleId(JUDGE.getId())
+              .roleName(JUDGE.toString())
+              .permissions(Collections.emptySet())
+              .build();
 
         assertEquals(role, new Role(JUDGE.getId(), JUDGE.toString(), Collections.emptySet()));
     }
@@ -49,10 +49,10 @@ class RoleTest {
     @Test
     void shouldNotEqualsJudgeRole() {
         Role role = Role.builder()
-            .roleId(JUDGE.getId())
-            .roleName(JUDGE.toString())
-            .permissions(Collections.emptySet())
-            .build();
+              .roleId(JUDGE.getId())
+              .roleName(JUDGE.toString())
+              .permissions(Collections.emptySet())
+              .build();
 
         assertNotEquals(role, new Role(REQUESTER.getId(), REQUESTER.toString(), Collections.emptySet()));
     }

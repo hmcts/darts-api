@@ -35,15 +35,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/audio-requests/transformed_media/{transformed_media_id}";
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private Authorisation mockAuthorisation;
-
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
+    @Autowired
+    private MockMvc mockMvc;
+    @MockBean
+    private Authorisation mockAuthorisation;
 
     @Test
     void transformedMediaDeleteShouldReturnSuccess() throws Exception {
@@ -53,36 +50,36 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+              .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                    mediaRequestEntity,
+                    objectRecordStatusEntity,
+                    blobId
+              ));
 
         final Integer transformedMediaId = transientObjectDirectoryEntity.getTransformedMedia().getId();
 
         doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaId,
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         MockHttpServletRequestBuilder requestBuilder = delete(
-            ENDPOINT_URL,
-            transformedMediaId
+              ENDPOINT_URL,
+              transformedMediaId
         );
 
         assertFalse(dartsDatabase.getTransformedMediaRepository().findAll().isEmpty());
         assertFalse(dartsDatabase.getTransientObjectDirectoryRepository().findAll().isEmpty());
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().is2xxSuccessful());
+              .andExpect(status().is2xxSuccessful());
 
         assertTrue(dartsDatabase.getTransformedMediaRepository().findAll().isEmpty());
         assertTrue(dartsDatabase.getTransientObjectDirectoryRepository().findAll().isEmpty());
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaId,
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
@@ -96,56 +93,56 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
         var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+              .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                    mediaRequestEntity,
+                    objectRecordStatusEntity,
+                    blobId
+              ));
 
         final Integer transformedMediaId = transientObjectDirectoryEntity.getTransformedMedia().getId();
 
         doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaId,
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         MockHttpServletRequestBuilder requestBuilder = delete(
-            ENDPOINT_URL,
-            transformedMediaId
+              ENDPOINT_URL,
+              transformedMediaId
         );
 
         assertFalse(dartsDatabase.getTransformedMediaRepository().findAll().isEmpty());
         assertFalse(dartsDatabase.getTransientObjectDirectoryRepository().findAll().isEmpty());
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().is2xxSuccessful());
+              .andExpect(status().is2xxSuccessful());
 
         //create extra one
         TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+              .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                    mediaRequestEntity,
+                    objectRecordStatusEntity,
+                    blobId
+              ));
 
         assertTrue(dartsDatabase.getTransformedMediaRepository().findById(extraTransientObjectDirectoryEntity.getId()).isPresent());
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaId,
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
     @Test
     void transformedMediaDeleteShouldReturnBadRequestWhenNoRequestIdProvided() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = delete(
-            ENDPOINT_URL,
-            "xyz"
+              ENDPOINT_URL,
+              "xyz"
         );
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         verifyNoInteractions(mockAuthorisation);
     }

@@ -15,8 +15,8 @@ public class JudgeTestData {
 
     public static List<JudgeEntity> createListOfJudges(int quantity, CourtCaseEntity courtCase) {
         return rangeClosed(1, quantity)
-            .mapToObj(index -> createJudgeWithName("Judge" + courtCase.getCaseNumber() + "_" + index))
-            .collect(Collectors.toList());
+              .mapToObj(index -> createJudgeWithName("Judge" + courtCase.getCaseNumber() + "_" + index))
+              .collect(Collectors.toList());
     }
 
 

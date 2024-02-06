@@ -47,9 +47,10 @@ import static org.mockito.Mockito.when;
 class RetentionPostServiceImplTest {
 
 
+    @Captor
+    ArgumentCaptor<CaseRetentionEntity> caseRetentionEntityArgumentCaptor;
     @InjectMocks
     private RetentionPostServiceImpl retentionPostService;
-
     @Mock
     private CaseRepository caseRepository;
     @Mock
@@ -62,13 +63,8 @@ class RetentionPostServiceImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private AuditApi auditApi;
-
     @Mock
     private RetentionDateHelper retentionDateHelper;
-
-    @Captor
-    ArgumentCaptor<CaseRetentionEntity> caseRetentionEntityArgumentCaptor;
-
 
     private void setupStubs() {
         CourtCaseEntity courtCase = CommonTestDataUtil.createCase("1");
@@ -96,16 +92,16 @@ class RetentionPostServiceImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
 
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
-                Optional.of(retentionPolicyTypeManual));
+              Optional.of(retentionPolicyTypeManual));
 
         RetentionPolicyTypeEntity retentionPolicyTypePermanent = new RetentionPolicyTypeEntity();
         retentionPolicyTypePermanent.setId(2);
         retentionPolicyTypePermanent.setFixedPolicyKey("PERM");
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
-                any(OffsetDateTime.class)
+              eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
+              any(OffsetDateTime.class)
         )).thenReturn(
-                Optional.of(retentionPolicyTypePermanent));
+              Optional.of(retentionPolicyTypePermanent));
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
@@ -129,8 +125,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(postRetentionRequest)
+              DartsApiException.class,
+              () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
@@ -151,8 +147,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(postRetentionRequest)
+              DartsApiException.class,
+              () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("caseId '101' must be closed before the retention period can be amended.", exception.getDetail());
@@ -171,8 +167,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(postRetentionRequest)
+              DartsApiException.class,
+              () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("caseId '101' must have a retention policy applied before being changed.", exception.getDetail());
@@ -192,8 +188,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(postRetentionRequest)
+              DartsApiException.class,
+              () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("caseId '101' must have a retention date after the last completed automated retention date '2025-10-01'.", exception.getDetail());
@@ -213,8 +209,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(postRetentionRequest)
+              DartsApiException.class,
+              () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("You do not have permission to reduce the retention period.", exception.getDetail());
@@ -300,7 +296,6 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setValidateOnly(true);
         PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
         assertEquals("2027-01-01", response.getRetentionDate().toString());
-
 
         verify(caseRetentionRepository, never()).saveAndFlush(any());
     }

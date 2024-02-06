@@ -26,19 +26,19 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
         TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(
-            externalObjectDirectory,
-            externalObjectDirectory.getId()
+              externalObjectDirectory,
+              externalObjectDirectory.getId()
         );
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId());
         return createTranscriptionArchiveRecord(transcriptionCreateArchiveRecordOperation, uploadNewFileRecord);
     }
 
     private TranscriptionArchiveRecord createTranscriptionArchiveRecord(TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation,
-                                                                        UploadNewFileRecord uploadNewFileRecord) {
+          UploadNewFileRecord uploadNewFileRecord) {
         return TranscriptionArchiveRecord.builder()
-            .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+              .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
+              .uploadNewFileRecord(uploadNewFileRecord)
+              .build();
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId) {
@@ -58,16 +58,16 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                                   Integer relationId) {
+          Integer relationId) {
         return TranscriptionCreateArchiveRecordOperation.builder()
-            .relationId(relationId.toString())
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+              .relationId(relationId.toString())
+              .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+              .build();
     }
 
     private TranscriptionCreateArchiveRecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return TranscriptionCreateArchiveRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .build();
+              .publisher(armDataManagementConfiguration.getPublisher())
+              .build();
     }
 }

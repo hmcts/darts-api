@@ -35,11 +35,11 @@ class DartsEventMapperImplTest {
     @Test
     void toDartsEventFromCourtLogsPostRequestBodyShouldReturnExpectedMapping() {
         var request = new CourtLogsPostRequestBody(
-            SOME_DATE_TIME,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            Arrays.asList(SOME_CASE_ID, SOME_OTHER_CASE_ID),
-            SOME_TEXT
+              SOME_DATE_TIME,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              Arrays.asList(SOME_CASE_ID, SOME_OTHER_CASE_ID),
+              SOME_TEXT
         );
 
         var dartsEvent = dartsEventMapper.toDartsEvent(request);

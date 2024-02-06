@@ -18,7 +18,7 @@ public class AnnotationStub {
     private final AnnotationDocumentRepository annotationDocumentRepository;
 
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
-                                                              String annotationText) {
+          String annotationText) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
@@ -26,12 +26,12 @@ public class AnnotationStub {
     }
 
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
-                                                                              String fileName,
-                                                                              String fileType,
-                                                                              Integer fileSize,
-                                                                              UserAccountEntity uploadedBy,
-                                                                              OffsetDateTime uploadedDateTime,
-                                                                              String checksum) {
+          String fileName,
+          String fileType,
+          Integer fileSize,
+          UserAccountEntity uploadedBy,
+          OffsetDateTime uploadedDateTime,
+          String checksum) {
         AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
         annotationDocument.setAnnotation(annotationEntity);
         annotationDocument.setFileName(fileName);

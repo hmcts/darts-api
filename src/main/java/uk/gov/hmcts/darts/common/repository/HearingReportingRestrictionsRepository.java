@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import java.util.List;
 
 @Repository
-public interface HearingReportingRestrictionsRepository  extends JpaRepository<HearingReportingRestrictionsEntity, Integer> {
+public interface HearingReportingRestrictionsRepository extends JpaRepository<HearingReportingRestrictionsEntity, Integer> {
 
     List<HearingReportingRestrictionsEntity> findAllByCaseId(Integer caseId);
 }

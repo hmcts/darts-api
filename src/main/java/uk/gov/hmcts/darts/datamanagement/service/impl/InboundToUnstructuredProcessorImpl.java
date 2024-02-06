@@ -62,19 +62,42 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final UserAccountRepository userAccountRepository;
     private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
     private final AudioConfigurationProperties audioConfigurationProperties;
-    
+
     private final List<Integer> failureStatesList =
-        new ArrayList<>(Arrays.asList(
-            FAILURE.getId(),
-            FAILURE_FILE_NOT_FOUND.getId(),
-            FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
-            FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
-            FAILURE_CHECKSUM_FAILED.getId(),
-            FAILURE_ARM_INGESTION_FAILED.getId()
-        ));
+          new ArrayList<>(Arrays.asList(
+                FAILURE.getId(),
+                FAILURE_FILE_NOT_FOUND.getId(),
+                FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
+                FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
+                FAILURE_CHECKSUM_FAILED.getId(),
+                FAILURE_ARM_INGESTION_FAILED.getId()
+          ));
     private List<ExternalObjectDirectoryEntity> unstructuredStoredList;
     private List<ExternalObjectDirectoryEntity> unstructuredFailedList;
 
+    private static ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
+          ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
+        if (inbound.getMedia() != null
+              && unstructured.getMedia() != null
+              && (inbound.getMedia().getId().equals(unstructured.getMedia().getId()))) {
+            externalObjectDirectoryEntity = unstructured;
+
+        }
+        if (inbound.getTranscriptionDocumentEntity() != null
+              && unstructured.getTranscriptionDocumentEntity() != null
+              && (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId()))) {
+            externalObjectDirectoryEntity = unstructured;
+
+        }
+        if (inbound.getAnnotationDocumentEntity() != null
+              && unstructured.getAnnotationDocumentEntity() != null
+              && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
+            externalObjectDirectoryEntity = unstructured;
+
+        }
+        return externalObjectDirectoryEntity;
+    }
 
     @Override
     @Transactional
@@ -85,19 +108,19 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private void processAllStoredInboundExternalObjects() {
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(
-            STORED), getType(INBOUND));
+              STORED), getType(INBOUND));
         unstructuredStoredList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
         unstructuredFailedList = externalObjectDirectoryRepository.findByStatusIdInAndType(
-            failureStatesList,
-            getType(UNSTRUCTURED)
+              failureStatesList,
+              getType(UNSTRUCTURED)
         );
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
             ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
             if (unstructuredStatus == null
-                || unstructuredStatus.getId().equals(STORED.getId())
-                || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+                  || unstructuredStatus.getId().equals(STORED.getId())
+                  || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
                 log.info("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
                 continue;
             }
@@ -122,13 +145,13 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 }
             } catch (BlobStorageException e) {
                 log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
-                          getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId()
+                      getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId()
                 );
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             } catch (Exception e) {
                 log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}",
-                          inboundExternalObjectDirectory.getId(), e.getMessage(), e
+                      inboundExternalObjectDirectory.getId(), e.getMessage(), e
                 );
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
@@ -153,7 +176,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             unstructuredExternalObjectDirectoryEntity = getUnstructuredFailed(inboundExternalObjectDirectory);
             if (unstructuredExternalObjectDirectoryEntity == null) {
                 unstructuredExternalObjectDirectoryEntity = createUnstructuredExternalObjectDirectoryEntity(
-                    inboundExternalObjectDirectory);
+                      inboundExternalObjectDirectory);
             }
         }
         return unstructuredExternalObjectDirectoryEntity;
@@ -178,8 +201,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
         for (ExternalObjectDirectoryEntity unstructured : unstructuredStoredList) {
             externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(
-                inbound,
-                unstructured
+                  inbound,
+                  unstructured
             );
             if (externalObjectDirectoryEntity != null) {
                 break;
@@ -190,80 +213,56 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         return externalObjectDirectoryEntity;
     }
 
-    private static ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
-        ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        if (inbound.getMedia() != null
-            && unstructured.getMedia() != null
-            && (inbound.getMedia().getId().equals(unstructured.getMedia().getId()))) {
-            externalObjectDirectoryEntity = unstructured;
-
-        }
-        if (inbound.getTranscriptionDocumentEntity() != null
-            && unstructured.getTranscriptionDocumentEntity() != null
-            && (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId()))) {
-            externalObjectDirectoryEntity = unstructured;
-
-        }
-        if (inbound.getAnnotationDocumentEntity() != null
-            && unstructured.getAnnotationDocumentEntity() != null
-            && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
-            externalObjectDirectoryEntity = unstructured;
-
-        }
-        return externalObjectDirectoryEntity;
-    }
-
     private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
         MediaEntity mediaEntity = inbound.getMedia();
         if (mediaEntity != null) {
             performValidation(
-                unstructured,
-                mediaEntity.getChecksum(),
-                checksum,
-                audioConfigurationProperties.getAllowedMediaFormats(),
-                mediaEntity.getMediaFormat().toLowerCase(),
-                audioConfigurationProperties.getMaxFileSize(),
-                mediaEntity.getFileSize()
+                  unstructured,
+                  mediaEntity.getChecksum(),
+                  checksum,
+                  audioConfigurationProperties.getAllowedMediaFormats(),
+                  mediaEntity.getMediaFormat().toLowerCase(),
+                  audioConfigurationProperties.getMaxFileSize(),
+                  mediaEntity.getFileSize()
             );
         }
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = inbound.getTranscriptionDocumentEntity();
         if (transcriptionDocumentEntity != null) {
             performValidation(
-                unstructured,
-                transcriptionDocumentEntity.getChecksum(),
-                checksum,
-                transcriptionConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(),
-                transcriptionConfigurationProperties.getMaxFileSize(),
-                Long.valueOf(transcriptionDocumentEntity.getFileSize())
+                  unstructured,
+                  transcriptionDocumentEntity.getChecksum(),
+                  checksum,
+                  transcriptionConfigurationProperties.getAllowedExtensions(),
+                  FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(),
+                  transcriptionConfigurationProperties.getMaxFileSize(),
+                  Long.valueOf(transcriptionDocumentEntity.getFileSize())
             );
         }
 
         AnnotationDocumentEntity annotationDocumentEntity = inbound.getAnnotationDocumentEntity();
         if (annotationDocumentEntity != null) {
             performValidation(
-                unstructured,
-                annotationDocumentEntity.getChecksum(),
-                checksum,
-                transcriptionConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(),
-                transcriptionConfigurationProperties.getMaxFileSize(),
-                Long.valueOf(annotationDocumentEntity.getFileSize())
+                  unstructured,
+                  annotationDocumentEntity.getChecksum(),
+                  checksum,
+                  transcriptionConfigurationProperties.getAllowedExtensions(),
+                  FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(),
+                  transcriptionConfigurationProperties.getMaxFileSize(),
+                  Long.valueOf(annotationDocumentEntity.getFileSize())
             );
         }
 
     }
 
     private void performValidation(
-        ExternalObjectDirectoryEntity unstructured,
-        String incomingChecksum, String calculatedChecksum,
-        List<String> allowedMediaFormats, String mediaFormat,
-        Integer maxFileSize, Long fileSize) {
+          ExternalObjectDirectoryEntity unstructured,
+          String incomingChecksum, String calculatedChecksum,
+          List<String> allowedMediaFormats, String mediaFormat,
+          Integer maxFileSize, Long fileSize) {
         if (incomingChecksum == null || calculatedChecksum.compareTo(incomingChecksum) != 0) {
             log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
-                      incomingChecksum, calculatedChecksum, unstructured.getId()
+                  incomingChecksum, calculatedChecksum, unstructured.getId()
             );
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }

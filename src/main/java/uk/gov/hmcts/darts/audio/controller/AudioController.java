@@ -52,8 +52,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioService.getAudioMetadata(hearingId, 1);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
@@ -73,8 +73,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList);
@@ -82,24 +82,24 @@ public class AudioController implements AudioApi {
 
 
     @GetMapping(
-        value = "/audio/preview/{media_id}",
-        produces = {"text/event-stream", "application/json+problem"}
+          value = "/audio/preview/{media_id}",
+          produces = {"text/event-stream", "application/json+problem"}
     )
     @SneakyThrows
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public SseEmitter previewAlternative(
-        @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
-        @PathVariable("media_id") Integer mediaId,
-        @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
-        @RequestHeader(value = "range", required = false) String range
+          @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
+          @PathVariable("media_id") Integer mediaId,
+          @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
+          @RequestHeader(value = "range", required = false) String range
     ) {
         return audioService.startStreamingPreview(
-            mediaId,
-            range,
-            new SseEmitter(Duration.ofMinutes(previewTimeout).toMillis())
+              mediaId,
+              range,
+              new SseEmitter(Duration.ofMinutes(previewTimeout).toMillis())
         );
     }
 }

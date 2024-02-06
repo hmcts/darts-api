@@ -105,7 +105,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public MediaRequestEntity getMediaRequestById(Integer id) {
         return mediaRequestRepository.findById(id).orElseThrow(
-            () -> new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND));
+              () -> new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND));
     }
 
     @Transactional
@@ -121,12 +121,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails) {
 
         var duplicateUserMediaRequests = mediaRequestRepository.findDuplicateUserMediaRequests(
-            hearingRepository.getReferenceById(audioRequestDetails.getHearingId()),
-            userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
-            audioRequestDetails.getStartTime(),
-            audioRequestDetails.getEndTime(),
-            audioRequestDetails.getRequestType(),
-            List.of(OPEN, PROCESSING)
+              hearingRepository.getReferenceById(audioRequestDetails.getHearingId()),
+              userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
+              audioRequestDetails.getStartTime(),
+              audioRequestDetails.getEndTime(),
+              audioRequestDetails.getRequestType(),
+              List.of(OPEN, PROCESSING)
         );
 
         return duplicateUserMediaRequests.isPresent();
@@ -136,11 +136,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
         MediaRequestEntity mediaRequest = saveAudioRequestToDb(
-            hearingRepository.getReferenceById(request.getHearingId()),
-            userAccountRepository.getReferenceById(request.getRequestor()),
-            request.getStartTime(),
-            request.getEndTime(),
-            request.getRequestType()
+              hearingRepository.getReferenceById(request.getHearingId()),
+              userAccountRepository.getReferenceById(request.getRequestor()),
+              request.getStartTime(),
+              request.getEndTime(),
+              request.getRequestType()
         );
         auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
         return mediaRequest;
@@ -150,7 +150,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest) {
         NotificationApi.NotificationTemplate notificationTemplate;
         if (audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequest.getId())
-            .isEmpty()) {
+              .isEmpty()) {
             notificationTemplate = AUDIO_REQUEST_PROCESSING;
         } else {
             notificationTemplate = AUDIO_REQUEST_PROCESSING_ARCHIVE;
@@ -158,10 +158,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         try {
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-                .eventId(notificationTemplate.toString())
-                .caseId(mediaRequest.getHearing().getCourtCase().getId())
-                .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
-                .build();
+                  .eventId(notificationTemplate.toString())
+                  .caseId(mediaRequest.getHearing().getCourtCase().getId())
+                  .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
+                  .build();
             notificationApi.scheduleNotification(saveNotificationToDbRequest);
         } catch (Exception e) {
             log.error("Unable to schedule media request [{}] pending notification [{}]", mediaRequest.getId(), notificationTemplate, e);
@@ -220,8 +220,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     private MediaRequestEntity saveAudioRequestToDb(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                    OffsetDateTime startTime, OffsetDateTime endTime,
-                                                    AudioRequestType requestType) {
+          OffsetDateTime startTime, OffsetDateTime endTime,
+          AudioRequestType requestType) {
 
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
@@ -247,8 +247,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             if (!transformedMediaList.isEmpty()) {
                 TransformedMediaEntity transformedMedia = transformedMediaList.get(0);
                 GetAudioRequestResponseV1 getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
-                    enhancedMediaRequestInfo,
-                    transformedMedia
+                      enhancedMediaRequestInfo,
+                      transformedMedia
                 );
                 response.add(getAudioRequestResponseItem);
             }
@@ -289,29 +289,29 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         Join<CourtCaseEntity, CourthouseEntity> courthouse = courtCase.join(CourtCaseEntity_.courthouse);
 
         criteriaQuery.select(criteriaBuilder.construct(
-            EnhancedMediaRequestInfo.class,
-            mediaRequest.get(MediaRequestEntity_.id),
-            courtCase.get(CourtCaseEntity_.id),
-            courtCase.get(CourtCaseEntity_.caseNumber),
-            courthouse.get(CourthouseEntity_.courthouseName),
-            hearing.get(HearingEntity_.hearingDate),
-            hearing.get(HearingEntity_.id),
-            mediaRequest.get(MediaRequestEntity_.requestType),
-            mediaRequest.get(MediaRequestEntity_.startTime),
-            mediaRequest.get(MediaRequestEntity_.endTime),
-            mediaRequest.get(MediaRequestEntity_.status)
+              EnhancedMediaRequestInfo.class,
+              mediaRequest.get(MediaRequestEntity_.id),
+              courtCase.get(CourtCaseEntity_.id),
+              courtCase.get(CourtCaseEntity_.caseNumber),
+              courthouse.get(CourthouseEntity_.courthouseName),
+              hearing.get(HearingEntity_.hearingDate),
+              hearing.get(HearingEntity_.id),
+              mediaRequest.get(MediaRequestEntity_.requestType),
+              mediaRequest.get(MediaRequestEntity_.startTime),
+              mediaRequest.get(MediaRequestEntity_.endTime),
+              mediaRequest.get(MediaRequestEntity_.status)
         ));
 
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
         criteriaQuery.where(criteriaBuilder.and(
-            criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
-            expiredPredicate(expired, criteriaBuilder, mediaRequest),
-            mediaRequest.get(MediaRequestEntity_.status).in(List.of(DELETED, COMPLETED)).not()
+              criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
+              expiredPredicate(expired, criteriaBuilder, mediaRequest),
+              mediaRequest.get(MediaRequestEntity_.status).in(List.of(DELETED, COMPLETED)).not()
         ));
 
         criteriaQuery.orderBy(List.of(
-            criteriaBuilder.asc(courtCase.get(CourtCaseEntity_.caseNumber)),
-            criteriaBuilder.asc(mediaRequest.get(MediaRequestEntity_.startTime))
+              criteriaBuilder.asc(courtCase.get(CourtCaseEntity_.caseNumber)),
+              criteriaBuilder.asc(mediaRequest.get(MediaRequestEntity_.startTime))
         ));
 
         TypedQuery<EnhancedMediaRequestInfo> query = entityManager.createQuery(criteriaQuery);
@@ -345,7 +345,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,
-                                       Root<MediaRequestEntity> mediaRequest) {
+          Root<MediaRequestEntity> mediaRequest) {
 
         final Predicate expiredPredicate;
         if (expired) {
@@ -374,9 +374,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         final UUID blobId = getBlobId(transformedMediaEntity);
 
         auditApi.recordAudit(
-            auditActivity,
-            this.getUserAccount(),
-            mediaRequestEntity.getHearing().getCourtCase()
+              auditActivity,
+              this.getUserAccount(),
+              mediaRequestEntity.getHearing().getCourtCase()
         );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
     }
@@ -388,9 +388,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         var transientObjectEntity = transientObjectDirectoryEntities.stream()
-            .filter(transientObjectDirectoryEntity -> STORED.getId().equals(transientObjectDirectoryEntity.getStatus().getId()))
-            .findFirst()
-            .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+              .filter(transientObjectDirectoryEntity -> STORED.getId().equals(transientObjectDirectoryEntity.getStatus().getId()))
+              .findFirst()
+              .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
 
         UUID blobId = transientObjectEntity.getExternalLocation();
         if (blobId == null) {
@@ -407,7 +407,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName,
-                                                          AudioRequestOutputFormat audioRequestOutputFormat) {
+          AudioRequestOutputFormat audioRequestOutputFormat) {
 
         mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
         //todo update transformed media info
@@ -420,7 +420,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     private TransformedMediaEntity getTransformedMediaById(Integer id) {
         return transformedMediaRepository.findById(id).orElseThrow(
-            () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
+              () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
     }
 
 }

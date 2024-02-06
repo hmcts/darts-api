@@ -33,7 +33,6 @@ class EventDispatcherImplTest {
         when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(Collections.emptyList());
         EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository);
 
-
         DartsEvent event = new DartsEvent();
         event.setType("TestType");
         event.setSubType("TestSubType");
@@ -41,8 +40,8 @@ class EventDispatcherImplTest {
         var exception = assertThrows(DartsApiException.class, () -> eventDispatcher.receive(event));
 
         assertEquals(
-            "No event handler could be found in the database for messageId: 1 type: TestType and subtype: TestSubType.",
-            exception.getDetail()
+              "No event handler could be found in the database for messageId: 1 type: TestType and subtype: TestSubType.",
+              exception.getDetail()
         );
     }
 
@@ -55,7 +54,6 @@ class EventDispatcherImplTest {
         MockEventHandler mockEventHandler = Mockito.mock(MockEventHandler.class);
         when(mockEventHandler.isHandlerFor(any())).thenReturn(true);
         eventHandlers.add(mockEventHandler);
-
 
         DartsEvent event = new DartsEvent();
         event.setType("TestType");

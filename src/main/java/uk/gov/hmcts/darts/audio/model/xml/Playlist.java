@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.darts.audio.model.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -14,11 +13,12 @@ import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ViqPlaylist", propOrder = {
-    "playlistVersion",
-    "items"
+      "playlistVersion",
+      "items"
 })
 @XmlRootElement(name = "playlist")
 public class Playlist implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -1L;
     @XmlElement(name = "playlistversion", required = true, defaultValue = "1.0")

@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 
 public interface CourthouseApi {
+
     CourthouseEntity retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
-        throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
+          throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
 }

@@ -13,13 +13,14 @@ import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface CourthouseToCourthouseEntityMapper {
+
     CourthouseEntity mapToEntity(Courthouse courthouse);
 
     ExtendedCourthouse mapFromEntityToExtendedCourthouse(CourthouseEntity courthouseEntity);
 
     @Mappings({
-        @Mapping(target = "createdDateTime", source = "createdDateTime", qualifiedByName = "createdDateTime"),
-        @Mapping(target = "lastModifiedDateTime", source = "lastModifiedDateTime", qualifiedByName = "lastModifiedDateTime")
+          @Mapping(target = "createdDateTime", source = "createdDateTime", qualifiedByName = "createdDateTime"),
+          @Mapping(target = "lastModifiedDateTime", source = "lastModifiedDateTime", qualifiedByName = "lastModifiedDateTime")
     })
     List<ExtendedCourthouse> mapFromListEntityToListExtendedCourthouse(List<CourthouseEntity> courthouses);
 

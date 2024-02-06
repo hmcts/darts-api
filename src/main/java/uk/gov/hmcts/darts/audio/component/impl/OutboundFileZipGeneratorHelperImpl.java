@@ -46,10 +46,6 @@ import static java.util.Locale.UK;
 @SuppressWarnings("PMD.ExcessiveImports")
 public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGeneratorHelper {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
-        .withLocale(UK);
-    private static final String DATE_TIME_ATTRIBUTE = "%d";
-    private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
     public static final String README_TXT_FILENAME = "Readme.txt";
     public static final String COURTHOUSE_README_LABEL = "Courthouse";
@@ -58,14 +54,41 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     public static final String END_TIME_README_LABEL = "End Time";
     public static final String REQUEST_TYPE_README_LABEL = "Type";
     public static final String README_FORMAT = ": %s";
-
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
+          .withLocale(UK);
+    private static final String DATE_TIME_ATTRIBUTE = "%d";
+    private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     private final OutboundDocumentGenerator annotationXmlGenerator;
     private final EventRepository eventRepository;
 
     public OutboundFileZipGeneratorHelperImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
-                                              EventRepository eventRepository) {
+          EventRepository eventRepository) {
         this.annotationXmlGenerator = annotationXmlGenerator;
         this.eventRepository = eventRepository;
+    }
+
+    private static ViqPlayListItem createViqPlaylistItem(PlaylistInfo playlistInfo) {
+        ViqPlayListItem playlistItem = new ViqPlayListItem();
+
+        playlistItem.setValue(toPlaylistPathFormat(playlistInfo.getFileLocation()));
+        playlistItem.setCaseNumber(playlistInfo.getCaseNumber());
+
+        ZonedDateTime itemStartTime = playlistInfo.getStartTime();
+
+        playlistItem.setStartTimeInMillis(String.valueOf(itemStartTime.toInstant().toEpochMilli()));
+        playlistItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, itemStartTime.getYear()));
+        playlistItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMonthValue()));
+        playlistItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, itemStartTime.getDayOfMonth()));
+        playlistItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, itemStartTime.getHour()));
+        playlistItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMinute()));
+        playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, itemStartTime.getSecond()));
+
+        return playlistItem;
+    }
+
+    private static String toPlaylistPathFormat(String path) {
+        String playlistPath = path.replace("/", "\\");
+        return playlistPath + "\\";
     }
 
     @Override
@@ -82,10 +105,10 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
             }
 
             playlistFile = XmlUtil.marshalToXmlFile(
-                playlist,
-                Playlist.class,
-                outputFileLocation,
-                PLAYLIST_XML_FILENAME
+                  playlist,
+                  Playlist.class,
+                  outputFileLocation,
+                  PLAYLIST_XML_FILENAME
             );
         } catch (JAXBException | IllegalArgumentException exception) {
             log.error("Unable to generate playlist.xml: {}", exception.getMessage());
@@ -97,17 +120,17 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
 
     @Override
     public String generateAnnotation(HearingEntity hearingEntity, ZonedDateTime startTime, ZonedDateTime endTime,
-                                     String annotationsOutputFile) {
+          String annotationsOutputFile) {
         List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntity, startTime, endTime);
 
         ViqAnnotationData annotationData = ViqAnnotationData.builder()
-            .annotationsStartTime(startTime)
-            .events(events)
-            .build();
+              .annotationsStartTime(startTime)
+              .events(events)
+              .build();
 
         try {
             return annotationXmlGenerator.generateAndWriteXmlFile(annotationData, Path.of(annotationsOutputFile))
-                .toString();
+                  .toString();
         } catch (IOException | TransformerException | ParserConfigurationException exception) {
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
@@ -120,24 +143,24 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         log.debug("Writing readme to {}", readmeFile.getAbsoluteFile());
 
         try (BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-            PrintWriter printWriter = new PrintWriter(fileWriter)) {
+              PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
             printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
             printWriter.println(format(
-                RAISED_BY_README_LABEL + README_FORMAT,
-                StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
+                  RAISED_BY_README_LABEL + README_FORMAT,
+                  StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
             ));
             printWriter.println(format(
-                START_TIME_README_LABEL + README_FORMAT,
-                viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
+                  START_TIME_README_LABEL + README_FORMAT,
+                  viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
             ));
             printWriter.println(format(
-                END_TIME_README_LABEL + README_FORMAT,
-                viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
+                  END_TIME_README_LABEL + README_FORMAT,
+                  viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
             ));
             printWriter.print(format(
-                REQUEST_TYPE_README_LABEL + README_FORMAT,
-                StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
+                  REQUEST_TYPE_README_LABEL + README_FORMAT,
+                  StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
             ));
         } catch (IOException exception) {
             log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
@@ -166,39 +189,15 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         return viqOutputFile;
     }
 
-    private static ViqPlayListItem createViqPlaylistItem(PlaylistInfo playlistInfo) {
-        ViqPlayListItem playlistItem = new ViqPlayListItem();
-
-        playlistItem.setValue(toPlaylistPathFormat(playlistInfo.getFileLocation()));
-        playlistItem.setCaseNumber(playlistInfo.getCaseNumber());
-
-        ZonedDateTime itemStartTime = playlistInfo.getStartTime();
-
-        playlistItem.setStartTimeInMillis(String.valueOf(itemStartTime.toInstant().toEpochMilli()));
-        playlistItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, itemStartTime.getYear()));
-        playlistItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMonthValue()));
-        playlistItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, itemStartTime.getDayOfMonth()));
-        playlistItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, itemStartTime.getHour()));
-        playlistItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMinute()));
-        playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, itemStartTime.getSecond()));
-
-        return playlistItem;
-    }
-
     private List<EventEntity> getHearingEventsByStartAndEndTime(
-        HearingEntity hearingEntity,
-        ZonedDateTime startTime,
-        ZonedDateTime endTime) {
+          HearingEntity hearingEntity,
+          ZonedDateTime startTime,
+          ZonedDateTime endTime) {
         List<EventEntity> hearingEvents = eventRepository.findAllByHearingId(hearingEntity.getId());
         return hearingEvents.stream()
-            .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime.toOffsetDateTime()))
-            .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
-            .sorted(Comparator.comparing(EventEntity::getTimestamp))
-            .collect(Collectors.toList());
-    }
-
-    private static String toPlaylistPathFormat(String path) {
-        String playlistPath = path.replace("/", "\\");
-        return playlistPath + "\\";
+              .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime.toOffsetDateTime()))
+              .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
+              .sorted(Comparator.comparing(EventEntity::getTimestamp))
+              .collect(Collectors.toList());
     }
 }

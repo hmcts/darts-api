@@ -39,8 +39,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     @Test
     void mapsOneReportingRestrictionsCorrectly() {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
@@ -57,8 +57,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     @Test
     void mapsMultipleReportingRestrictionsValuesCorrectly() {
         var reportingRestrictions = createEventsWithDifferentTimestamps(3).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
@@ -75,8 +75,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     @Test
     void ordersMultipleReportingRestrictionsElementCorrectly() {
         var reportingRestrictions = createEventsWithDifferentTimestamps(10).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
         var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
@@ -101,9 +101,9 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
         var hearingEntity = dartsDatabase.saveEventsForHearing(
-            dartsDatabase.getHearingStub().createMinimalHearing(),
-            reportingRestriction,
-            reportingRestrictionLifted
+              dartsDatabase.getHearingStub().createMinimalHearing(),
+              reportingRestriction,
+              reportingRestrictionLifted
         );
         TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
@@ -130,10 +130,10 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, someReportingRestrictionId());
 
         HearingEntity hearingEntity = dartsDatabase.saveEventsForHearing(
-            createSomeMinimalHearing(),
-            reportingRestriction,
-            reportingRestrictionLifted,
-            reappliedReportingRestriction
+              createSomeMinimalHearing(),
+              reportingRestriction,
+              reportingRestrictionLifted,
+              reappliedReportingRestriction
         );
 
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
@@ -142,7 +142,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).hasSize(3);
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).extracting("eventName")
-            .contains("reporting-restrictions-lifted", "reapplying-reporting-restrictions");
+              .contains("reporting-restrictions-lifted", "reapplying-reporting-restrictions");
     }
 
     @Test
@@ -154,65 +154,65 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).hasSize(1);
         assertThat(transcriptionResponse.getCaseReportingRestrictions()).extracting("eventName")
-            .hasSameElementsAs(
-                List.of(caseWithReportingRestrictions.getReportingRestrictions().getEventName()));
+              .hasSameElementsAs(
+                    List.of(caseWithReportingRestrictions.getReportingRestrictions().getEventName()));
     }
 
 
     private List<OffsetDateTime> orderedTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getTimestamp).sorted(naturalOrder())
-            .toList();
+              .map(EventEntity::getTimestamp).sorted(naturalOrder())
+              .toList();
     }
 
     private List<EventEntity> createEventsWithDifferentTimestamps(int quantity) {
         var random = new Random();
         return createEventsWithDefaults(quantity).stream()
-            .peek(event -> event.setTimestamp(now().plusDays(random.nextInt(1, 1000))))
-            .toList();
+              .peek(event -> event.setTimestamp(now().plusDays(random.nextInt(1, 1000))))
+              .toList();
     }
 
     private List<Integer> hearingIdsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .flatMap(eventEntity -> eventEntity.getHearingEntities().stream())
-            .map(HearingEntity::getId)
-            .toList();
+              .flatMap(eventEntity -> eventEntity.getHearingEntities().stream())
+              .map(HearingEntity::getId)
+              .toList();
     }
 
     private List<OffsetDateTime> eventTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(eventEntity -> eventEntity.getTimestamp().truncatedTo(SECONDS))
-            .toList();
+              .map(eventEntity -> eventEntity.getTimestamp().truncatedTo(SECONDS))
+              .toList();
     }
 
     private List<Integer> eventIdsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getId)
-            .toList();
+              .map(EventEntity::getId)
+              .toList();
     }
 
     private List<String> eventTextFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getEventText)
-            .toList();
+              .map(EventEntity::getEventText)
+              .toList();
     }
 
     private List<String> eventNamesFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getEventName)
-            .toList();
+              .map(EventEntity::getEventName)
+              .toList();
     }
 
     private List<EventEntity> createEventsWithDefaults(int quantity) {
         return rangeClosed(1, quantity)
-            .mapToObj(index -> {
-                var event = dartsDatabase.getEventStub().createDefaultEvent();
-                event.setEventName("some-event-name-" + index);
-                event.setEventText("some-event-text-" + index);
-                event.setMessageId("some-message-id-" + index);
-                event.setTimestamp(now());
-                return event;
-            }).toList();
+              .mapToObj(index -> {
+                  var event = dartsDatabase.getEventStub().createDefaultEvent();
+                  event.setEventName("some-event-name-" + index);
+                  event.setEventText("some-event-text-" + index);
+                  event.setMessageId("some-message-id-" + index);
+                  event.setTimestamp(now());
+                  return event;
+              }).toList();
     }
 
 }

@@ -58,14 +58,14 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "hearing_judge_ae",
-        joinColumns = {@JoinColumn(name = HEA_ID)},
-        inverseJoinColumns = {@JoinColumn(name = "jud_id")})
+          joinColumns = {@JoinColumn(name = HEA_ID)},
+          inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "hearing_media_ae",
-        joinColumns = {@JoinColumn(name = HEA_ID)},
-        inverseJoinColumns = {@JoinColumn(name = "med_id")})
+          joinColumns = {@JoinColumn(name = HEA_ID)},
+          inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
@@ -81,8 +81,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @Deprecated()
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
-        joinColumns = {@JoinColumn(name = HEA_ID)},
-        inverseJoinColumns = {@JoinColumn(name = "eve_id")})
+          joinColumns = {@JoinColumn(name = HEA_ID)},
+          inverseJoinColumns = {@JoinColumn(name = "eve_id")})
     private List<EventEntity> eventList = new ArrayList<>();
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -91,8 +91,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany
     @JoinTable(name = "hearing_annotation_ae",
-        joinColumns = {@JoinColumn(name = HEA_ID)},
-        inverseJoinColumns = {@JoinColumn(name = "ann_id")})
+          joinColumns = {@JoinColumn(name = HEA_ID)},
+          inverseJoinColumns = {@JoinColumn(name = "ann_id")})
     private List<AnnotationEntity> annotations = new ArrayList<>();
 
     public void addMedia(MediaEntity mediaEntity) {
@@ -106,7 +106,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
         }
         courtCase.addJudge(judgeEntity);
         if (!judges.contains(judgeEntity)
-            && judges.stream().noneMatch(judge -> judge.getName().equalsIgnoreCase(judgeEntity.getName()))) {
+              && judges.stream().noneMatch(judge -> judge.getName().equalsIgnoreCase(judgeEntity.getName()))) {
             judges.add(judgeEntity);
         }
     }

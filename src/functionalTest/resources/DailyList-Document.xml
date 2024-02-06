@@ -1,101 +1,42 @@
 <cs:DailyList xmlns:apd="http://www.govtalk.gov.uk/people/AddressAndPersonalDetails"
   xmlns:cs="http://www.courtservice.gov.uk/schemas/courtservice"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.courtservice.gov.uk/schemas/courtservice DailyList-v5-2.xsd">
-  <cs:DocumentID>
-    <cs:DocumentName>DL 18/02/10 FINAL v1</cs:DocumentName>
-    <cs:UniqueID>DAVE_20230913_1</cs:UniqueID>
-    <cs:DocumentType>DL</cs:DocumentType>
-    <cs:TimeStamp>2010-02-18T11:13:23.030</cs:TimeStamp>
-    <cs:Version>1.0</cs:Version>
-    <cs:SecurityClassification>NPM</cs:SecurityClassification>
-    <cs:SellByDate>2010-12-15</cs:SellByDate>
-    <cs:XSLstylesheetURL>http://www.courtservice.gov.uk/transforms/courtservice/dailyListHtml.xsl</cs:XSLstylesheetURL>
-  </cs:DocumentID>
-  <cs:ListHeader>
-    <cs:ListCategory>Criminal</cs:ListCategory>
-    <cs:StartDate>2010-02-18</cs:StartDate>
-    <cs:EndDate>2010-02-18</cs:EndDate>
-    <cs:Version>FINAL v1</cs:Version>
-    <cs:CRESTprintRef>MCD/112585</cs:CRESTprintRef>
-    <cs:PublishedTime>2010-02-17T16:16:50</cs:PublishedTime>
-    <cs:CRESTlistID>12298</cs:CRESTlistID>
-  </cs:ListHeader>
-  <cs:CrownCourt>
-    <cs:CourtHouseType>Crown Court</cs:CourtHouseType>
-    <cs:CourtHouseCode CourtHouseShortName="SNARE">457</cs:CourtHouseCode>
-    <cs:CourtHouseName>SWANSEA</cs:CourtHouseName>
-    <cs:CourtHouseAddress>
-      <apd:Line>THE CROWN COURT AT SWANSEA</apd:Line>
-      <apd:Line>75 HIGH STREET</apd:Line>
-      <apd:Line>SWANSEA, LONDON</apd:Line>
-      <apd:PostCode>E11 1QW</apd:PostCode>
-    </cs:CourtHouseAddress>
-    <cs:CourtHouseDX>DX 98240 WANSTEAD 2</cs:CourtHouseDX>
-    <cs:CourtHouseTelephone>02085300000</cs:CourtHouseTelephone>
-    <cs:CourtHouseFax>02085300072</cs:CourtHouseFax>
-  </cs:CrownCourt>
   <cs:CourtLists>
     <cs:CourtList>
       <cs:CourtHouse>
-        <cs:CourtHouseType>Crown Court</cs:CourtHouseType>
         <cs:CourtHouseCode>457</cs:CourtHouseCode>
         <cs:CourtHouseName>SWANSEA</cs:CourtHouseName>
+        <cs:CourtHouseType>Crown Court</cs:CourtHouseType>
       </cs:CourtHouse>
       <cs:Sittings>
         <cs:Sitting>
           <cs:CourtRoomNumber>1</cs:CourtRoomNumber>
-          <cs:SittingSequenceNo>1</cs:SittingSequenceNo>
-          <cs:SittingAt>10:00:00</cs:SittingAt>
-          <cs:SittingPriority>T</cs:SittingPriority>
-          <cs:Judiciary>
-            <cs:Judge>
-              <apd:CitizenNameSurname>N/A</apd:CitizenNameSurname>
-              <apd:CitizenNameRequestedName>N/A</apd:CitizenNameRequestedName>
-              <cs:CRESTjudgeID>0</cs:CRESTjudgeID>
-            </cs:Judge>
-          </cs:Judiciary>
           <cs:Hearings>
             <cs:Hearing>
-              <cs:HearingSequenceNumber>1</cs:HearingSequenceNumber>
-              <cs:HearingDetails HearingType="TRL">
-                <cs:HearingDescription>For Trial</cs:HearingDescription>
-                <cs:HearingDate>2023-09-19</cs:HearingDate>
-              </cs:HearingDetails>
               <cs:CRESThearingID>1</cs:CRESThearingID>
-              <cs:TimeMarkingNote>10:00 AM</cs:TimeMarkingNote>
               <cs:CaseNumber>T20107001</cs:CaseNumber>
-              <cs:Prosecution ProsecutingAuthority="Crown Prosecution Service">
-                <cs:ProsecutingReference>CPS</cs:ProsecutingReference>
-                <cs:ProsecutingOrganisation>
-                  <cs:OrganisationName>Crown Prosecution Service</cs:OrganisationName>
-                </cs:ProsecutingOrganisation>
-              </cs:Prosecution>
               <cs:CommittingCourt>
-                <cs:CourtHouseType>Magistrates Court</cs:CourtHouseType>
-                <cs:CourtHouseCode CourtHouseShortName="BAM">2725</cs:CourtHouseCode>
-                <cs:CourtHouseName>BARNET MAGISTRATES COURT</cs:CourtHouseName>
                 <cs:CourtHouseAddress>
                   <apd:Line>7C HIGH STREET</apd:Line>
                   <apd:Line>-</apd:Line>
                   <apd:Line>BARNET</apd:Line>
                   <apd:PostCode>EN5 5UE</apd:PostCode>
                 </cs:CourtHouseAddress>
+                <cs:CourtHouseCode CourtHouseShortName="BAM">2725</cs:CourtHouseCode>
                 <cs:CourtHouseDX>DX 8626 BARNET</cs:CourtHouseDX>
+                <cs:CourtHouseName>BARNET MAGISTRATES COURT</cs:CourtHouseName>
                 <cs:CourtHouseTelephone>02084419042</cs:CourtHouseTelephone>
+                <cs:CourtHouseType>Magistrates Court</cs:CourtHouseType>
               </cs:CommittingCourt>
               <cs:Defendants>
                 <cs:Defendant>
+                  <cs:ASNs>
+                    <cs:ASN>0723XH1000000262665K</cs:ASN>
+                  </cs:ASNs>
+                  <cs:CRESTdefendantID>29161</cs:CRESTdefendantID>
+                  <cs:CustodyStatus>In custody</cs:CustodyStatus>
+                  <cs:PNCnumber>20123456789L</cs:PNCnumber>
                   <cs:PersonalDetails>
-                    <cs:Name>
-                      <apd:CitizenNameForename>Franz</apd:CitizenNameForename>
-                      <apd:CitizenNameSurname>KAFKA</apd:CitizenNameSurname>
-                    </cs:Name>
-                    <cs:IsMasked>no</cs:IsMasked>
-                    <cs:DateOfBirth>
-                      <apd:BirthDate>1962-06-12</apd:BirthDate>
-                      <apd:VerifiedBy>not verified</apd:VerifiedBy>
-                    </cs:DateOfBirth>
-                    <cs:Sex>male</cs:Sex>
                     <cs:Address>
                       <apd:Line>ADDRESS LINE 1</apd:Line>
                       <apd:Line>ADDRESS LINE 2</apd:Line>
@@ -104,20 +45,79 @@
                       <apd:Line>SOMETOWN, SOMECOUNTY</apd:Line>
                       <apd:PostCode>GU12 7RT</apd:PostCode>
                     </cs:Address>
+                    <cs:DateOfBirth>
+                      <apd:BirthDate>1962-06-12</apd:BirthDate>
+                      <apd:VerifiedBy>not verified</apd:VerifiedBy>
+                    </cs:DateOfBirth>
+                    <cs:IsMasked>no</cs:IsMasked>
+                    <cs:Name>
+                      <apd:CitizenNameForename>Franz</apd:CitizenNameForename>
+                      <apd:CitizenNameSurname>KAFKA</apd:CitizenNameSurname>
+                    </cs:Name>
+                    <cs:Sex>male</cs:Sex>
                   </cs:PersonalDetails>
-                  <cs:ASNs>
-                    <cs:ASN>0723XH1000000262665K</cs:ASN>
-                  </cs:ASNs>
-                  <cs:CRESTdefendantID>29161</cs:CRESTdefendantID>
-                  <cs:PNCnumber>20123456789L</cs:PNCnumber>
                   <cs:URN>62AA1010646</cs:URN>
-                  <cs:CustodyStatus>In custody</cs:CustodyStatus>
                 </cs:Defendant>
               </cs:Defendants>
+              <cs:HearingDetails HearingType="TRL">
+                <cs:HearingDate>2023-09-19</cs:HearingDate>
+                <cs:HearingDescription>For Trial</cs:HearingDescription>
+              </cs:HearingDetails>
+              <cs:HearingSequenceNumber>1</cs:HearingSequenceNumber>
+              <cs:Prosecution ProsecutingAuthority="Crown Prosecution Service">
+                <cs:ProsecutingOrganisation>
+                  <cs:OrganisationName>Crown Prosecution Service</cs:OrganisationName>
+                </cs:ProsecutingOrganisation>
+                <cs:ProsecutingReference>CPS</cs:ProsecutingReference>
+              </cs:Prosecution>
+              <cs:TimeMarkingNote>10:00 AM</cs:TimeMarkingNote>
             </cs:Hearing>
           </cs:Hearings>
+          <cs:Judiciary>
+            <cs:Judge>
+              <apd:CitizenNameRequestedName>N/A</apd:CitizenNameRequestedName>
+              <apd:CitizenNameSurname>N/A</apd:CitizenNameSurname>
+              <cs:CRESTjudgeID>0</cs:CRESTjudgeID>
+            </cs:Judge>
+          </cs:Judiciary>
+          <cs:SittingAt>10:00:00</cs:SittingAt>
+          <cs:SittingPriority>T</cs:SittingPriority>
+          <cs:SittingSequenceNo>1</cs:SittingSequenceNo>
         </cs:Sitting>
       </cs:Sittings>
     </cs:CourtList>
   </cs:CourtLists>
+  <cs:CrownCourt>
+    <cs:CourtHouseAddress>
+      <apd:Line>THE CROWN COURT AT SWANSEA</apd:Line>
+      <apd:Line>75 HIGH STREET</apd:Line>
+      <apd:Line>SWANSEA, LONDON</apd:Line>
+      <apd:PostCode>E11 1QW</apd:PostCode>
+    </cs:CourtHouseAddress>
+    <cs:CourtHouseCode CourtHouseShortName="SNARE">457</cs:CourtHouseCode>
+    <cs:CourtHouseDX>DX 98240 WANSTEAD 2</cs:CourtHouseDX>
+    <cs:CourtHouseFax>02085300072</cs:CourtHouseFax>
+    <cs:CourtHouseName>SWANSEA</cs:CourtHouseName>
+    <cs:CourtHouseTelephone>02085300000</cs:CourtHouseTelephone>
+    <cs:CourtHouseType>Crown Court</cs:CourtHouseType>
+  </cs:CrownCourt>
+  <cs:DocumentID>
+    <cs:DocumentName>DL 18/02/10 FINAL v1</cs:DocumentName>
+    <cs:DocumentType>DL</cs:DocumentType>
+    <cs:SecurityClassification>NPM</cs:SecurityClassification>
+    <cs:SellByDate>2010-12-15</cs:SellByDate>
+    <cs:TimeStamp>2010-02-18T11:13:23.030</cs:TimeStamp>
+    <cs:UniqueID>DAVE_20230913_1</cs:UniqueID>
+    <cs:Version>1.0</cs:Version>
+    <cs:XSLstylesheetURL>http://www.courtservice.gov.uk/transforms/courtservice/dailyListHtml.xsl</cs:XSLstylesheetURL>
+  </cs:DocumentID>
+  <cs:ListHeader>
+    <cs:CRESTlistID>12298</cs:CRESTlistID>
+    <cs:CRESTprintRef>MCD/112585</cs:CRESTprintRef>
+    <cs:EndDate>2010-02-18</cs:EndDate>
+    <cs:ListCategory>Criminal</cs:ListCategory>
+    <cs:PublishedTime>2010-02-17T16:16:50</cs:PublishedTime>
+    <cs:StartDate>2010-02-18</cs:StartDate>
+    <cs:Version>FINAL v1</cs:Version>
+  </cs:ListHeader>
 </cs:DailyList>

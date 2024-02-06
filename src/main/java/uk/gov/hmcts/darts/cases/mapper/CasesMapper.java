@@ -40,10 +40,22 @@ public class CasesMapper {
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final CaseRetentionRepository caseRetentionRepository;
 
+    private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
+        return reportingRestrictions.stream()
+              .sorted(comparing(ReportingRestriction::getEventTs))
+              .collect(toList());
+    }
+
+    private static ReportingRestriction reportingRestrictionWithName(String name) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventName(name);
+        return reportingRestriction;
+    }
+
     public List<ScheduledCase> mapToScheduledCases(List<HearingEntity> hearings) {
         return emptyIfNull(hearings).stream().map(this::mapToScheduledCase)
-            .sorted(comparing(ScheduledCase::getScheduledStart))
-            .toList();
+              .sorted(comparing(ScheduledCase::getScheduledStart))
+              .toList();
     }
 
     public PostCaseResponse mapToPostCaseResponse(CourtCaseEntity caseEntity) {
@@ -104,10 +116,10 @@ public class CasesMapper {
         SingleCase singleCase = new SingleCase();
 
         Optional<CaseRetentionEntity> caseRetentionOptional = caseRetentionRepository
-            .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
-                caseEntity,
-                String.valueOf(CaseRetentionStatus.COMPLETE)
-            );
+              .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
+                    caseEntity,
+                    String.valueOf(CaseRetentionStatus.COMPLETE)
+              );
 
         if (!caseRetentionOptional.isEmpty()) {
             CaseRetentionEntity caseRetention = caseRetentionOptional.get();
@@ -129,29 +141,17 @@ public class CasesMapper {
         singleCase.setJudges(caseEntity.getJudgeStringList());
 
         var reportingRestrictions = hearingReportingRestrictionsRepository.findAllByCaseId(caseEntity.getId()).stream()
-            .map(this::toReportingRestriction)
-            .collect(toList());
+              .map(this::toReportingRestriction)
+              .collect(toList());
 
         if (caseEntity.getReportingRestrictions() != null && reportingRestrictions.isEmpty()) {
             reportingRestrictions.add(
-                reportingRestrictionWithName(caseEntity.getReportingRestrictions().getEventName()));
+                  reportingRestrictionWithName(caseEntity.getReportingRestrictions().getEventName()));
         }
 
         singleCase.setReportingRestrictions(sortedByTimestamp(reportingRestrictions));
 
         return singleCase;
-    }
-
-    private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
-        return reportingRestrictions.stream()
-            .sorted(comparing(ReportingRestriction::getEventTs))
-            .collect(toList());
-    }
-
-    private static ReportingRestriction reportingRestrictionWithName(String name) {
-        var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventName(name);
-        return reportingRestriction;
     }
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {

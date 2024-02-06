@@ -37,7 +37,7 @@ public class SecurityGroupController implements SecurityGroupApi {
         SecurityGroupWithIdAndRole response = securityGroupService.createSecurityGroup(securityGroup);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(response);
+              .body(response);
     }
 
 }

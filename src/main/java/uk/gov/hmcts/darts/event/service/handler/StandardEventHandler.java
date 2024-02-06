@@ -21,11 +21,11 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 public class StandardEventHandler extends EventHandlerBase {
 
     public StandardEventHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 
     @Override
@@ -33,8 +33,8 @@ public class StandardEventHandler extends EventHandlerBase {
         CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
         if (isTheHearingNewOrTheCourtroomIsDifferent(
-            createdHearing.isHearingNew(),
-            createdHearing.isCourtroomDifferentFromHearing()
+              createdHearing.isHearingNew(),
+              createdHearing.isCourtroomDifferentFromHearing()
         )) {
             var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE);
             eventPublisher.publishEvent(notifyEvent);

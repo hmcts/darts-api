@@ -49,13 +49,31 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
+    private static EventHandlerEntity getActiveHandler() {
+        var activeHandler = getHandlerWithDefaults();
+        activeHandler.setActive(true);
+        activeHandler.setIsReportingRestriction(false);
+        return activeHandler;
+    }
+
+    private static EventHandlerEntity getInactiveHandler() {
+        var inactiveHandler = getHandlerWithDefaults();
+        inactiveHandler.setActive(false);
+        inactiveHandler.setIsReportingRestriction(false);
+        return inactiveHandler;
+    }
+
+    private static EventHandlerEntity getHandlerWithDefaults() {
+        return createEventHandlerWith("StandardEventHandler", "ActiveTestType", "ActiveTestSubType");
+    }
+
     @BeforeEach
     void setUp() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
     }
 
@@ -76,31 +94,31 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         courthouse = dartsDatabase.getCourthouseRepository().save(courthouse);
 
         String requestBody = """
-            {
-              "message_id": "12345",
-              "type": "ActiveTestType",
-              "sub_type": "ActiveTestSubType",
-              "courthouse": "swansea",
-              "courtroom": "1",
-              "case_numbers": [
-                "A20230049"
-              ],
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }""";
+              {
+                "message_id": "12345",
+                "type": "ActiveTestType",
+                "sub_type": "ActiveTestSubType",
+                "courthouse": "swansea",
+                "courtroom": "1",
+                "case_numbers": [
+                  "A20230049"
+                ],
+                "date_time": "2023-06-14T08:37:30.945Z"
+              }""";
 
         setupExternalUserForCourthouse(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(requestBody);
+              .header("Content-Type", "application/json")
+              .content(requestBody);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isCreated());
+              .andExpect(MockMvcResultMatchers.status().isCreated());
 
         List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "ActiveTestType".equals(eventEntity.getEventType().getType()))
-            .toList();
+              .stream()
+              .filter(eventEntity -> "ActiveTestType".equals(eventEntity.getEventType().getType()))
+              .toList();
 
         Assertions.assertEquals(1, results.size());
         EventEntity persistedEvent = results.get(0);
@@ -125,31 +143,31 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCase);
 
         String requestBody = """
-            {
-              "message_id": "useExistingCase",
-              "type": "1000",
-              "sub_type": "1002",
-              "courthouse": "swansea1",
-              "courtroom": "1",
-              "case_numbers": [
-                "casenumber"
-              ],
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }""";
+              {
+                "message_id": "useExistingCase",
+                "type": "1000",
+                "sub_type": "1002",
+                "courthouse": "swansea1",
+                "courtroom": "1",
+                "case_numbers": [
+                  "casenumber"
+                ],
+                "date_time": "2023-06-14T08:37:30.945Z"
+              }""";
 
         setupExternalUserForCourthouse(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(requestBody);
+              .header("Content-Type", "application/json")
+              .content(requestBody);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isCreated());
+              .andExpect(MockMvcResultMatchers.status().isCreated());
 
         List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
-            .toList();
+              .stream()
+              .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+              .toList();
 
         Assertions.assertEquals(1, results.size());
 
@@ -169,32 +187,31 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCase);
 
         String requestBody = """
-            {
-              "message_id": "useExistingCase",
-              "type": "40750",
-              "sub_type": "12309",
-              "courthouse": "swansea",
-              "courtroom": "1",
-              "case_numbers": [
-                "casenumber"
-              ],
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }""";
-
+              {
+                "message_id": "useExistingCase",
+                "type": "40750",
+                "sub_type": "12309",
+                "courthouse": "swansea",
+                "courtroom": "1",
+                "case_numbers": [
+                  "casenumber"
+                ],
+                "date_time": "2023-06-14T08:37:30.945Z"
+              }""";
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(requestBody);
+              .header("Content-Type", "application/json")
+              .content(requestBody);
 
         setupExternalUserForCourthouse(courthouse);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isCreated());
+              .andExpect(MockMvcResultMatchers.status().isCreated());
 
         List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
-            .toList();
+              .stream()
+              .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+              .toList();
 
         Assertions.assertEquals(1, results.size());
         Assertions.assertEquals("40750", results.get(0).getEventType().getType());
@@ -215,54 +232,35 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().save(courtCase);
 
         String requestBody = """
-            {
-              "message_id": "useExistingCase",
-              "type": "40750",
-              "sub_type": "1002",
-              "courthouse": "swansea",
-              "courtroom": "1",
-              "case_numbers": [
-                "casenumber"
-              ],
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }""";
-
+              {
+                "message_id": "useExistingCase",
+                "type": "40750",
+                "sub_type": "1002",
+                "courthouse": "swansea",
+                "courtroom": "1",
+                "case_numbers": [
+                  "casenumber"
+                ],
+                "date_time": "2023-06-14T08:37:30.945Z"
+              }""";
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(requestBody);
+              .header("Content-Type", "application/json")
+              .content(requestBody);
 
         setupExternalUserForCourthouse(courthouse);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isCreated());
+              .andExpect(MockMvcResultMatchers.status().isCreated());
 
         List<EventEntity> results = dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
-            .toList();
+              .stream()
+              .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+              .toList();
 
         Assertions.assertEquals(1, results.size());
         Assertions.assertEquals("40750", results.get(0).getEventType().getType());
         Assertions.assertNull(results.get(0).getEventType().getSubType());
-    }
-
-    private static EventHandlerEntity getActiveHandler() {
-        var activeHandler = getHandlerWithDefaults();
-        activeHandler.setActive(true);
-        activeHandler.setIsReportingRestriction(false);
-        return activeHandler;
-    }
-
-    private static EventHandlerEntity getInactiveHandler() {
-        var inactiveHandler = getHandlerWithDefaults();
-        inactiveHandler.setActive(false);
-        inactiveHandler.setIsReportingRestriction(false);
-        return inactiveHandler;
-    }
-
-    private static EventHandlerEntity getHandlerWithDefaults() {
-        return createEventHandlerWith("StandardEventHandler", "ActiveTestType", "ActiveTestSubType");
     }
 
     private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {

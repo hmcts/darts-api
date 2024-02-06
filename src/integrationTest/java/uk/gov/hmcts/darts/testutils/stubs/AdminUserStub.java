@@ -20,9 +20,9 @@ public class AdminUserStub {
         var user = userAccountStub.createAdminUser();
 
         Mockito.when(userIdentity.getUserAccount())
-            .thenReturn(user);
+              .thenReturn(user);
         Mockito.when(userIdentity.userHasGlobalAccess(any()))
-            .thenReturn(true);
+              .thenReturn(true);
 
         return user;
     }
@@ -32,9 +32,9 @@ public class AdminUserStub {
         user.setSecurityGroupEntities(Collections.emptySet());
 
         Mockito.when(userIdentity.getUserAccount())
-            .thenReturn(user);
+              .thenReturn(user);
         Mockito.when(userIdentity.userHasGlobalAccess(any()))
-            .thenReturn(false);
+              .thenReturn(false);
 
         return user;
     }

@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 @SuppressWarnings("PMD.MethodNamingConventions")
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
+
     List<NotificationEntity> findByCourtCase_Id(Integer caseId);
 
     List<NotificationEntity> findByStatusIn(List<NotificationStatus> status);

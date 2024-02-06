@@ -87,10 +87,10 @@ class FileOperationServiceTest extends IntegrationBase {
         var tempFilename = UUID.randomUUID().toString();
 
         filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-            mediaFile,
-            tempFilename,
-            tempDirectory.getAbsolutePath(),
-            true
+              mediaFile,
+              tempFilename,
+              tempDirectory.getAbsolutePath(),
+              true
         );
         assertNotNull(filePath);
     }

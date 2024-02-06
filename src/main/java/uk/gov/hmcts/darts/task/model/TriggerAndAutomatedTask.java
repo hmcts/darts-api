@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 @Data
 @Builder
 public class TriggerAndAutomatedTask {
+
     private Trigger trigger;
     private AutomatedTask automatedTask;
 }

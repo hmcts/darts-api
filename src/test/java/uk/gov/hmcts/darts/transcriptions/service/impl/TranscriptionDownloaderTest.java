@@ -47,6 +47,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @ExtendWith(MockitoExtension.class)
 class TranscriptionDownloaderTest {
 
+    private final Random random = new Random();
     @Mock
     private UserIdentity userIdentity;
     @Mock
@@ -57,8 +58,6 @@ class TranscriptionDownloaderTest {
     private AuditApi auditApi;
     @Mock
     private InputStream inputStreamResource;
-
-    private final Random random = new Random();
     private TranscriptionDownloader transcriptionDownloader;
 
     @BeforeEach
@@ -80,8 +79,8 @@ class TranscriptionDownloaderTest {
         when(transcriptionRepository.findById(any())).thenReturn(empty());
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(random.nextInt()))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+              .isExactlyInstanceOf(DartsApiException.class)
+              .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
     }
 
     @Test
@@ -90,8 +89,8 @@ class TranscriptionDownloaderTest {
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+              .isExactlyInstanceOf(DartsApiException.class)
+              .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
     }
 
     @Test
@@ -103,8 +102,8 @@ class TranscriptionDownloaderTest {
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
-            .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+              .isExactlyInstanceOf(DartsApiException.class)
+              .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
     }
 
     @Test
@@ -113,7 +112,7 @@ class TranscriptionDownloaderTest {
         var transcriptionDocuments = someTranscriptionDocumentsUploadedAtLeast2DaysAgo(3);
         var transcriptionDocumentUploadedToday = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocumentUploadedToday.setExternalObjectDirectoryEntities(
-            someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(1));
+              someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(1));
         transcriptionDocuments.add(transcriptionDocumentUploadedToday);
 
         var transcription = someTranscriptionWith(transcriptionDocuments);
@@ -208,12 +207,12 @@ class TranscriptionDownloaderTest {
 
     private List<TranscriptionDocumentEntity> someTranscriptionDocumentsUploadedAtLeast2DaysAgo(int quantity) {
         return rangeClosed(1, quantity).boxed()
-            .map(i -> {
-                var uploadedDateTime = now().minusDays(2).minusDays(i);
-                var transcriptionDocument = someTranscriptionDocumentWithUploadDate(uploadedDateTime);
-                transcriptionDocument.setExternalObjectDirectoryEntities(someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(i));
-                return transcriptionDocument;
-            }).collect(toList());
+              .map(i -> {
+                  var uploadedDateTime = now().minusDays(2).minusDays(i);
+                  var transcriptionDocument = someTranscriptionDocumentWithUploadDate(uploadedDateTime);
+                  transcriptionDocument.setExternalObjectDirectoryEntities(someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(i));
+                  return transcriptionDocument;
+              }).collect(toList());
     }
 
     private TranscriptionDocumentEntity someTranscriptionDocumentWithUploadDate(OffsetDateTime uploadedDateTime) {
@@ -227,8 +226,8 @@ class TranscriptionDownloaderTest {
 
     private List<ExternalObjectDirectoryEntity> someExternalObjectDirectoriesCreatedAtLeast2DaysAgo(int quantity) {
         return rangeClosed(1, quantity).boxed()
-            .map(i -> someExternalObjectDirectoryWithCreationDate(now().minusDays(2).minusDays(i)))
-            .collect(toList());
+              .map(i -> someExternalObjectDirectoryWithCreationDate(now().minusDays(2).minusDays(i)))
+              .collect(toList());
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryWithCreationDate(OffsetDateTime createdDateTime) {

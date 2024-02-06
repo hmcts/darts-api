@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class CreatedBaseEntity {
+
     @CreationTimestamp
     @Column(name = "created_ts")
     private OffsetDateTime createdDateTime;

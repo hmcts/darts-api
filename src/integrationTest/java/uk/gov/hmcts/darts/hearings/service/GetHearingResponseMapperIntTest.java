@@ -45,8 +45,8 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
     @Test
     void getHearingWithOneReportingRestrictions() {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
@@ -61,8 +61,8 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
     @Test
     void getHearingWithThreeReportingRestrictions() {
         var reportingRestrictions = createEventsWithDefaults(3).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
@@ -76,8 +76,8 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
     @Test
     void getHearingWithOrderedReportingRestrictions() {
         var reportingRestrictions = createEventsWithDifferentTimestamps(10).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         List<OffsetDateTime> expectedOrderedTs = orderedTsFrom(reportingRestrictions);
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
@@ -95,7 +95,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
         var caseWithReportingRestrictions = dartsDatabase.addHandlerToCase(createSomeMinimalCase(), someReportingRestrictionId());
 
         var hearing = dartsDatabase.createHearing("some-courthouse", "some-courtroom",
-                                                  caseWithReportingRestrictions.getCaseNumber(), LocalDate.now()
+              caseWithReportingRestrictions.getCaseNumber(), LocalDate.now()
         );
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearing);
@@ -106,25 +106,25 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
     private List<EventEntity> createEventsWithDefaults(int quantity) {
         return rangeClosed(1, quantity)
-            .mapToObj(index -> {
-                var event = dartsDatabase.getEventStub().createDefaultEvent();
-                event.setEventName("some-event-name-" + index);
-                event.setEventText("some-event-text-" + index);
-                event.setMessageId("some-message-id-" + index);
-                return event;
-            }).toList();
+              .mapToObj(index -> {
+                  var event = dartsDatabase.getEventStub().createDefaultEvent();
+                  event.setEventName("some-event-name-" + index);
+                  event.setEventText("some-event-text-" + index);
+                  event.setMessageId("some-message-id-" + index);
+                  return event;
+              }).toList();
     }
 
     private List<EventEntity> createEventsWithDifferentTimestamps(int quantity) {
         var random = new Random();
         return createEventsWithDefaults(quantity).stream()
-            .peek(event -> event.setTimestamp(OffsetDateTime.of(2020, 4, 10, 10, 0, 0, 0, ZoneOffset.UTC).plusDays(random.nextInt(1, 1000))))
-            .toList();
+              .peek(event -> event.setTimestamp(OffsetDateTime.of(2020, 4, 10, 10, 0, 0, 0, ZoneOffset.UTC).plusDays(random.nextInt(1, 1000))))
+              .toList();
     }
 
     private List<OffsetDateTime> orderedTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getTimestamp).sorted(naturalOrder())
-            .toList();
+              .map(EventEntity::getTimestamp).sorted(naturalOrder())
+              .toList();
     }
 }

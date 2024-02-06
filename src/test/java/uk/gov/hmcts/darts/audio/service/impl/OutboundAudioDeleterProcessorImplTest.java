@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterProcessorImplTest {
+
     @Mock
     LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
 
@@ -44,10 +45,10 @@ class OutboundAudioDeleterProcessorImplTest {
     @BeforeEach
     void setUp() {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
-            transientObjectDirectoryRepository,
-            userAccountRepository,
-            objectRecordStatusRepository, lastAccessedDeletionDayCalculator,
-            systemUserHelper, transformedMediaRepository
+              transientObjectDirectoryRepository,
+              userAccountRepository,
+              objectRecordStatusRepository, lastAccessedDeletionDayCalculator,
+              systemUserHelper, transformedMediaRepository
         );
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
 
@@ -62,7 +63,7 @@ class OutboundAudioDeleterProcessorImplTest {
 
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () ->
-            outboundAudioDeleterProcessorImpl.markForDeletion());
+              outboundAudioDeleterProcessorImpl.markForDeletion());
     }
 
 }

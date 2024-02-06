@@ -32,6 +32,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class DailyListServiceImpSaveDailyListTest {
+
     public static final String CPP = "CPP";
     ObjectMapper objectMapper;
 
@@ -58,11 +59,11 @@ class DailyListServiceImpSaveDailyListTest {
     void ok_WhenCodeNotMatchExceptionThrown() throws IOException, CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
         when(dailyListMapper.createDailyListEntity(
-            any(DailyListPostRequest.class),
-            any(String.class)
+              any(DailyListPostRequest.class),
+              any(String.class)
         )).thenReturn(new DailyListEntity());
         String dailyListJson = getContentsFromFile(
-            "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
+              "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListJson, DailyListJsonObject.class);
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
@@ -78,14 +79,13 @@ class DailyListServiceImpSaveDailyListTest {
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
-                                                                "uniqueId",
-                                                                OffsetDateTime.now(),
-                                                                null
+              "uniqueId",
+              OffsetDateTime.now(),
+              null
         );
         service.saveDailyListToDatabase(request);
 
         verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
-
 
         DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
         assertThat(savedDailyList.getUniqueId()).isEqualTo("uniqueId");

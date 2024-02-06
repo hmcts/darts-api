@@ -31,8 +31,8 @@ public class AuthorisationApiImpl implements AuthorisationApi {
     @Override
     public void checkCourthouseAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
         authorisationService.checkCourthouseAuthorisation(
-            courthouses,
-            securityRoles
+              courthouses,
+              securityRoles
         );
     }
 

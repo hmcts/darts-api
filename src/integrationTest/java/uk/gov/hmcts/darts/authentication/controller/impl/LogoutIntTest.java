@@ -26,19 +26,19 @@ class LogoutIntTest extends IntegrationBase {
         String accessToken = "DummyAccessToken";
 
         String expectedUri = "https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com" +
-                             "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
-                             accessToken +
-                             "&post_logout_redirect_uri=https%3A%2F%2Fdarts.staging.apps.hmcts.net%2Fauth%2Flogout-callback";
+              "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
+              accessToken +
+              "&post_logout_redirect_uri=https%3A%2F%2Fdarts.staging.apps.hmcts.net%2Fauth%2Flogout-callback";
 
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGOUT_ENDPOINT)
-            .header("Authorization", "Bearer " + accessToken);
+              .header("Authorization", "Bearer " + accessToken);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isFound())
-            .andExpect(header().string(
-                HttpHeaders.LOCATION,
-                expectedUri
-            ));
+              .andExpect(status().isFound())
+              .andExpect(header().string(
+                    HttpHeaders.LOCATION,
+                    expectedUri
+              ));
     }
 
     @Test
@@ -46,19 +46,19 @@ class LogoutIntTest extends IntegrationBase {
         String accessToken = "DummyAccessToken";
 
         String expectedUri = "https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com" +
-                             "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
-                             accessToken +
-                             "&post_logout_redirect_uri=https%3A%2F%2Fdarts-portal.com%2Fauth%2Flogout-callback";
+              "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
+              accessToken +
+              "&post_logout_redirect_uri=https%3A%2F%2Fdarts-portal.com%2Fauth%2Flogout-callback";
 
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGOUT_ENDPOINT_WITH_OVERRIDE)
-            .header("Authorization", "Bearer " + accessToken);
+              .header("Authorization", "Bearer " + accessToken);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isFound())
-            .andExpect(header().string(
-                HttpHeaders.LOCATION,
-                expectedUri
-            ));
+              .andExpect(status().isFound())
+              .andExpect(header().string(
+                    HttpHeaders.LOCATION,
+                    expectedUri
+              ));
     }
 
 }

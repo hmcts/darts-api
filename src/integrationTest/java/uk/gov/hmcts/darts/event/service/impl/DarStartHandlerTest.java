@@ -32,6 +32,17 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
     @Autowired
     private EventDispatcher eventDispatcher;
 
+    private static DartsEvent someMinimalDartsEvent() {
+        return new DartsEvent()
+              .messageId("some-message-id")
+              .type(HEARING_STARTED_EVENT_TYPE)
+              .subType(null)
+              .eventId("1")
+              .courthouse(SOME_COURTHOUSE)
+              .courtroom(SOME_ROOM)
+              .eventText("some-text");
+    }
+
     @Test
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
@@ -39,7 +50,7 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
         assertThatThrownBy(() -> eventDispatcher.receive(event))
-            .isInstanceOf(DartsApiException.class);
+              .isInstanceOf(DartsApiException.class);
     }
 
     @Test
@@ -48,29 +59,29 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
+              DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
 
         EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+              .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+              .findFirst()
+              .orElseThrow();
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(today);
+              .type(hearingStartedEventHandler.getType())
+              .subType(hearingStartedEventHandler.getSubType())
+              .caseNumbers(List.of(SOME_CASE_NUMBER))
+              .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
+              SOME_CASE_NUMBER,
+              SOME_COURTHOUSE
         ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+              SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -94,23 +105,23 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
+              DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
 
         EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+              .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+              .findFirst()
+              .orElseThrow();
 
         CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
         createdCase.setClosed(true);
         dartsDatabase.getCaseRepository().saveAndFlush(createdCase);
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
-            .dateTime(today);
+              .type(hearingStartedEventHandler.getType())
+              .subType(hearingStartedEventHandler.getSubType())
+              .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
+              .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
@@ -126,9 +137,8 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
+              DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
-
 
         CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
         createdCase.setClosed(true);
@@ -138,30 +148,19 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
 
         EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+              .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+              .findFirst()
+              .orElseThrow();
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
-            .dateTime(today);
+              .type(hearingStartedEventHandler.getType())
+              .subType(hearingStartedEventHandler.getSubType())
+              .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
+              .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
         dartsGateway.verifyDoesntReceiveDarEvent();
-    }
-
-    private static DartsEvent someMinimalDartsEvent() {
-        return new DartsEvent()
-            .messageId("some-message-id")
-            .type(HEARING_STARTED_EVENT_TYPE)
-            .subType(null)
-            .eventId("1")
-            .courthouse(SOME_COURTHOUSE)
-            .courtroom(SOME_ROOM)
-            .eventText("some-text");
     }
 
 }

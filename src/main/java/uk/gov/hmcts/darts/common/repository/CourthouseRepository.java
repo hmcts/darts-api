@@ -17,15 +17,15 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
     Optional<CourthouseEntity> findByCourthouseNameIgnoreCase(String name);
 
     @Query("""
-        SELECT DISTINCT courthouse
-        FROM UserAccountEntity userAccount
-        JOIN userAccount.securityGroupEntities securityGroup
-        JOIN securityGroup.courthouseEntities courthouse
-        JOIN securityGroup.securityRoleEntity securityRole
-        WHERE (lower(userAccount.emailAddress) = lower(:emailAddress) or
-        userAccount.accountGuid = :guid)
-        AND securityRole.id IN (:roleIds)
-        """)
+          SELECT DISTINCT courthouse
+          FROM UserAccountEntity userAccount
+          JOIN userAccount.securityGroupEntities securityGroup
+          JOIN securityGroup.courthouseEntities courthouse
+          JOIN securityGroup.securityRoleEntity securityRole
+          WHERE (lower(userAccount.emailAddress) = lower(:emailAddress) or
+          userAccount.accountGuid = :guid)
+          AND securityRole.id IN (:roleIds)
+          """)
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
 
 }

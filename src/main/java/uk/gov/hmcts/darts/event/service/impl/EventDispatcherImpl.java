@@ -33,12 +33,21 @@ public class EventDispatcherImpl implements EventDispatcher {
     private final EventHandlerRepository eventHandlerRepository;
     private final Map<String, EventHandlerEntity> eventHandlerCache = new ConcurrentHashMap<>();
 
+    private static void logEvent(DartsEvent event, EventHandler foundHandler) {
+        var caseNumbers = String.join(", ", ofNullable(event.getCaseNumbers()).orElse(emptyList()));
+        log.info(
+              "Executing event handler: {} for event: {} and case number(s): {}",
+              foundHandler.getClass().getName(),
+              requireNonNullElse(event.getEventId(), "non provided"),
+              caseNumbers);
+    }
+
     @Override
     public void receive(DartsEvent event) {
         EventHandlerEntity foundHandlerEntity = findHandler(event);
         Optional<EventHandler> foundHandler = eventHandlers.stream()
-            .filter(handler -> handler.isHandlerFor(foundHandlerEntity.getHandler()))
-            .findAny();
+              .filter(handler -> handler.isHandlerFor(foundHandlerEntity.getHandler()))
+              .findAny();
         if (foundHandler.isPresent()) {
             logEvent(event, foundHandler.get());
             foundHandler.get().handle(event, foundHandlerEntity);
@@ -58,14 +67,14 @@ public class EventDispatcherImpl implements EventDispatcher {
         log.trace("cache miss for key {}", key);
 
         List<EventHandlerEntity> foundMappings = eventHandlerRepository.findByTypeAndSubType(
-            event.getType(),
-            event.getSubType()
+              event.getType(),
+              event.getSubType()
         );
         if (foundMappings.isEmpty()) {
             log.warn(format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
             throw new DartsApiException(
-                EVENT_HANDLER_NOT_FOUND_IN_DB,
-                format(NO_HANDLER_IN_DB_MESSAGE, event.getMessageId(), event.getType(), event.getSubType())
+                  EVENT_HANDLER_NOT_FOUND_IN_DB,
+                  format(NO_HANDLER_IN_DB_MESSAGE, event.getMessageId(), event.getType(), event.getSubType())
             );
         }
 
@@ -73,15 +82,6 @@ public class EventDispatcherImpl implements EventDispatcher {
         EventHandlerEntity eventHandlerEntity = foundMappings.get(0);
         eventHandlerCache.put(key, eventHandlerEntity);
         return eventHandlerEntity;
-    }
-
-    private static void logEvent(DartsEvent event, EventHandler foundHandler) {
-        var caseNumbers = String.join(", ", ofNullable(event.getCaseNumbers()).orElse(emptyList()));
-        log.info(
-            "Executing event handler: {} for event: {} and case number(s): {}",
-            foundHandler.getClass().getName(),
-            requireNonNullElse(event.getEventId(), "non provided"),
-            caseNumbers);
     }
 
 }

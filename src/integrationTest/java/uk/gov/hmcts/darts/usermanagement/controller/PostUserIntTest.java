@@ -62,14 +62,20 @@ class PostUserIntTest extends IntegrationBase {
     private TransactionTemplate transactionTemplate;
     private UserAccountEntity integrationTestUser;
 
+    private static List<Integer> getSecurityGroupIds(UserAccountEntity createdUserAccountEntity) {
+        return createdUserAccountEntity.getSecurityGroupEntities().stream()
+              .map(SecurityGroupEntity::getId)
+              .toList();
+    }
+
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
 
         integrationTestUser = dartsDatabase.getUserAccountStub()
-            .getIntegrationTestUserAccountEntity();
+              .getIntegrationTestUserAccountEntity();
         Mockito.when(authorisationApi.getCurrentUser())
-            .thenReturn(integrationTestUser);
+              .thenReturn(integrationTestUser);
     }
 
     @AfterEach
@@ -82,30 +88,30 @@ class PostUserIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net"
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "James Smith",
+                      "email_address": "james.smith@hmcts.net"
+                    }
+                    """);
 
         MvcResult result = mockMvc.perform(request)
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.full_name").value(USERNAME))
-            .andExpect(jsonPath("$.email_address").value(EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").doesNotExist())
-            .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login").doesNotExist())
-            .andExpect(jsonPath("$.security_group_ids").isEmpty())
-            .andReturn();
+              .andExpect(status().isCreated())
+              .andExpect(jsonPath("$.id").exists())
+              .andExpect(jsonPath("$.full_name").value(USERNAME))
+              .andExpect(jsonPath("$.email_address").value(EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").doesNotExist())
+              .andExpect(jsonPath("$.active").value(true))
+              .andExpect(jsonPath("$.last_login").doesNotExist())
+              .andExpect(jsonPath("$.security_group_ids").isEmpty())
+              .andReturn();
 
         int userId = getUserId(result);
 
         transactionTemplate.execute(status -> {
             UserAccountEntity createdUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
@@ -128,44 +134,44 @@ class PostUserIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net",
-                           "description": "A test user",
-                           "active": true,
-                           "security_group_ids": [
-                             -1, -2
-                           ]
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "James Smith",
+                      "email_address": "james.smith@hmcts.net",
+                      "description": "A test user",
+                      "active": true,
+                      "security_group_ids": [
+                        -1, -2
+                      ]
+                    }
+                    """);
         MvcResult result = mockMvc.perform(request)
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.full_name").value(USERNAME))
-            .andExpect(jsonPath("$.email_address").value(EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").value(DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login").doesNotExist())
-            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
-                SECURITY_GROUP_ID_1,
-                SECURITY_GROUP_ID_2
-            )))
-            .andReturn();
+              .andExpect(status().isCreated())
+              .andExpect(jsonPath("$.id").exists())
+              .andExpect(jsonPath("$.full_name").value(USERNAME))
+              .andExpect(jsonPath("$.email_address").value(EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").value(DESCRIPTION))
+              .andExpect(jsonPath("$.active").value(true))
+              .andExpect(jsonPath("$.last_login").doesNotExist())
+              .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
+                    SECURITY_GROUP_ID_1,
+                    SECURITY_GROUP_ID_2
+              )))
+              .andReturn();
 
         int userId = getUserId(result);
 
         transactionTemplate.execute(status -> {
             UserAccountEntity createdUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertEquals(DESCRIPTION, createdUserAccountEntity.getUserDescription());
             assertEquals(true, createdUserAccountEntity.isActive());
             assertThat(
-                getSecurityGroupIds(createdUserAccountEntity),
-                hasItems(SECURITY_GROUP_ID_1, SECURITY_GROUP_ID_2)
+                  getSecurityGroupIds(createdUserAccountEntity),
+                  hasItems(SECURITY_GROUP_ID_1, SECURITY_GROUP_ID_2)
             );
             assertEquals(SYSTEM_USER_FLAG, createdUserAccountEntity.getIsSystemUser());
 
@@ -184,18 +190,18 @@ class PostUserIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .header("Content-Type", "application/json")
-            .content("""
-                         {
-                           "description": "",
-                           "active": true,
-                           "security_group_ids": [
-                             1
-                           ]
-                         }
-                         """);
+              .header("Content-Type", "application/json")
+              .content("""
+                    {
+                      "description": "",
+                      "active": true,
+                      "security_group_ids": [
+                        1
+                      ]
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest());
+              .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -209,17 +215,17 @@ class PostUserIntTest extends IntegrationBase {
         userAccountEntity.setIsSystemUser(false);
         userAccountEntity.setActive(false);
         dartsDatabase.getUserAccountRepository()
-            .save(userAccountEntity);
+              .save(userAccountEntity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net"
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "James Smith",
+                      "email_address": "james.smith@hmcts.net"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
     }
 
     @Test
@@ -227,34 +233,28 @@ class PostUserIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net",
-                           "security_group_ids": [
-                             9999999
-                           ]
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "James Smith",
+                      "email_address": "james.smith@hmcts.net",
+                      "security_group_ids": [
+                        9999999
+                      ]
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isInternalServerError());
+              .andExpect(status().isInternalServerError());
     }
 
     private MockHttpServletRequestBuilder buildRequest() {
         return post("/admin/users")
-            .header("Content-Type", "application/json");
+              .header("Content-Type", "application/json");
     }
 
     private int getUserId(MvcResult result) throws UnsupportedEncodingException {
         String contentAsString = result.getResponse().getContentAsString();
         return new JSONObject(contentAsString)
-            .getInt("id");
-    }
-
-    private static List<Integer> getSecurityGroupIds(UserAccountEntity createdUserAccountEntity) {
-        return createdUserAccountEntity.getSecurityGroupEntities().stream()
-            .map(SecurityGroupEntity::getId)
-            .toList();
+              .getInt("id");
     }
 
 }

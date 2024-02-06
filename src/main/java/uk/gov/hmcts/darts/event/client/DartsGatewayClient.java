@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 
 @FeignClient(name = "darts-gateway-client",
-    url = "${darts.gateway.url}")
+      url = "${darts.gateway.url}")
 public interface DartsGatewayClient {
 
     @PostMapping(value = "${darts.gateway.events-dar-notify-path}",
-        consumes = {MediaType.APPLICATION_JSON_VALUE},
-        produces = {MediaType.APPLICATION_JSON_VALUE}
+          consumes = {MediaType.APPLICATION_JSON_VALUE},
+          produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     void darNotify(DarNotifyEvent darNotifyEvent);
 

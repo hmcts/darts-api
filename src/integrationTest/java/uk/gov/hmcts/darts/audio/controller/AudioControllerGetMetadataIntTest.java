@@ -42,10 +42,10 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         var mediaChannel4 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 4);
 
         var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            "999",
-            "test",
-            "test",
-            LocalDate.now()
+              "999",
+              "test",
+              "test",
+              LocalDate.now()
         );
         hearingEntity.addMedia(mediaChannel1);
         hearingEntity.addMedia(mediaChannel2);
@@ -53,46 +53,46 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         hearingEntity.addMedia(mediaChannel4);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+              .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            [
-              {
-                "id": 1,
-                "media_start_timestamp": "2023-01-01T12:00:00Z",
-                "media_end_timestamp": "2023-01-01T13:00:00Z"
-              }
-            ]
-            """;
+              [
+                {
+                  "id": 1,
+                  "media_start_timestamp": "2023-01-01T12:00:00Z",
+                  "media_end_timestamp": "2023-01-01T13:00:00Z"
+                }
+              ]
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
     void getAudioMetadataGetShouldReturnEmptyListWhenNoMediaIsAssociatedWithHearing() throws Exception {
         var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            "999",
-            "test",
-            "test",
-            LocalDate.now()
+              "999",
+              "test",
+              "test",
+              LocalDate.now()
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+              .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);

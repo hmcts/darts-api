@@ -31,7 +31,7 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         dartsDatabase.createAndLoadNonAccessedCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .header("user_id", requestor.getId().toString());
+              .header("user_id", requestor.getId().toString());
         List<TransformedMediaEntity> transformedMediaEntities = dartsDatabase.getTransformedMediaRepository().findAll();
         for (TransformedMediaEntity transformedMedia : transformedMediaEntities) {
             transformedMedia.setLastAccessed(null);
@@ -39,10 +39,10 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
         }
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.count").isNumber())
-            .andExpect(jsonPath("$.count").value(1))
-            .andReturn();
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.count").isNumber())
+              .andExpect(jsonPath("$.count").value(1))
+              .andReturn();
 
     }
 
@@ -50,13 +50,13 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
     void getNonAccessedAudioCountForUser_Zero() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .header("user_id", requestor.getId().toString());
+              .header("user_id", requestor.getId().toString());
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.count").isNumber())
-            .andExpect(jsonPath("$.count").value(0))
-            .andReturn();
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.count").isNumber())
+              .andExpect(jsonPath("$.count").value(0))
+              .andReturn();
 
     }
 
@@ -64,12 +64,12 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
     void getNonAccessedAudioCountForUser_NonExistingUser() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .header("user_id", requestor.getId().toString());
+              .header("user_id", requestor.getId().toString());
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.count").isNumber())
-            .andExpect(jsonPath("$.count").value(0))
-            .andReturn();
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.count").isNumber())
+              .andExpect(jsonPath("$.count").value(0))
+              .andReturn();
     }
 }

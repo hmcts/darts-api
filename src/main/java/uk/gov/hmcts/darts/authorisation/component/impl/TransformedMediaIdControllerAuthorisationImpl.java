@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @RequiredArgsConstructor
 @Slf4j
 public class TransformedMediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
-    implements ControllerAuthorisation {
+      implements ControllerAuthorisation {
 
     static final String TRANSFORMED_MEDIA_ID_PARAM = "transformed_media_id";
 
@@ -40,9 +40,9 @@ public class TransformedMediaIdControllerAuthorisationImpl extends BaseControlle
 
         if (transformedMediaIdParamOptional.isEmpty()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
-                TRANSFORMED_MEDIA_ID_PARAM,
-                request.getRequestURI()
+                  BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                  TRANSFORMED_MEDIA_ID_PARAM,
+                  request.getRequestURI()
             ));
             throw new DartsApiException(BAD_REQUEST_TRANSFORMED_MEDIA_ID);
         }
@@ -55,7 +55,7 @@ public class TransformedMediaIdControllerAuthorisationImpl extends BaseControlle
 
         if (idToAuthorise.get().isEmpty()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
+                  BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
             throw new DartsApiException(BAD_REQUEST_TRANSFORMED_MEDIA_ID);
         }
@@ -67,7 +67,7 @@ public class TransformedMediaIdControllerAuthorisationImpl extends BaseControlle
     }
 
     void checkAuthorisationByTransformedMediaId(Optional<String> transformedMediaIdParamOptional,
-                                                Set<SecurityRoleEnum> roles) {
+          Set<SecurityRoleEnum> roles) {
         if (transformedMediaIdParamOptional.isPresent()) {
             try {
                 Integer transformedMedia = Integer.valueOf(transformedMediaIdParamOptional.get());

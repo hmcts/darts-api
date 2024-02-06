@@ -72,6 +72,30 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private ObjectRecordStatusEntity checksumFailedStatus;
     private UserAccountEntity userAccount;
 
+    private static String generateSuffix(String filenameKey) {
+        return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
+    }
+
+    private static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        return externalObjectDirectory.getId().toString()
+              + ARM_FILENAME_SEPARATOR
+              + getObjectTypeId(externalObjectDirectory)
+              + ARM_FILENAME_SEPARATOR
+              + externalObjectDirectory.getTransferAttempts();
+    }
+
+    private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        String objectTypeId = "";
+        if (nonNull(externalObjectDirectory.getMedia())) {
+            objectTypeId = externalObjectDirectory.getMedia().getId().toString();
+        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
+            objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
+        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+            objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
+        }
+        return objectTypeId;
+    }
+
     @Override
     public void processResponseFiles() {
         initialisePreloadedObjects();
@@ -79,7 +103,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
-            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
+              externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
         if (!CollectionUtils.isEmpty(dataSentToArm)) {
             log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
             for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
@@ -146,7 +170,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void readInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename,
-                                     ObjectRecordStatusEntity armDropZoneStatus) {
+          ObjectRecordStatusEntity armDropZoneStatus) {
         try {
             InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
             String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
@@ -200,17 +224,17 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                BinaryData uploadFileBinary,
-                                UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+          BinaryData uploadFileBinary,
+          UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         if (nonNull(uploadFileBinary)) {
             Path jsonPath = null;
             try {
                 boolean appendUuidToWorkspace = true;
                 jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-                    uploadFileBinary,
-                    uploadFileFilenameProcessor.getUploadFileFilename(),
-                    armDataManagementConfiguration.getTempBlobWorkspace(),
-                    appendUuidToWorkspace
+                      uploadFileBinary,
+                      uploadFileFilenameProcessor.getUploadFileFilename(),
+                      armDataManagementConfiguration.getTempBlobWorkspace(),
+                      appendUuidToWorkspace
                 );
 
                 if (jsonPath.toFile().exists()) {
@@ -235,8 +259,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processUploadFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                         UploadFileFilenameProcessor uploadFileFilenameProcessor,
-                                         ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+          UploadFileFilenameProcessor uploadFileFilenameProcessor,
+          ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         if (nonNull(armResponseUploadFileRecord)) {
             //If the filename contains 1
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
@@ -244,10 +268,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             } else {
                 //Read the upload file and log the error code and description with EOD
                 log.warn(
-                    "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
-                    externalObjectDirectory.getId(),
-                    armResponseUploadFileRecord.getExceptionDescription(),
-                    armResponseUploadFileRecord.getErrorStatus()
+                      "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
+                      externalObjectDirectory.getId(),
+                      armResponseUploadFileRecord.getExceptionDescription(),
+                      armResponseUploadFileRecord.getErrorStatus()
                 );
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
             }
@@ -270,7 +294,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processUploadFileDataSuccess(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-                                              ExternalObjectDirectoryEntity externalObjectDirectory) {
+          ExternalObjectDirectoryEntity externalObjectDirectory) {
         // Validate the checksum in external object directory table against the Media, TranscriptionDocument, or AnnotationDocument
         if (nonNull(externalObjectDirectory.getMedia())) {
             MediaEntity media = externalObjectDirectory.getMedia();
@@ -305,8 +329,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-                                               ExternalObjectDirectoryEntity externalObjectDirectory,
-                                               String objectChecksum) {
+          ExternalObjectDirectoryEntity externalObjectDirectory,
+          String objectChecksum) {
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
             UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
             if (nonNull(uploadNewFileRecord)) {
@@ -316,8 +340,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
-                     externalObjectDirectory.getId(),
-                     armResponseUploadFileRecord.getMd5(), objectChecksum
+                  externalObjectDirectory.getId(),
+                  armResponseUploadFileRecord.getMd5(), objectChecksum
             );
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, checksumFailedStatus);
@@ -346,7 +370,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                           ObjectRecordStatusEntity objectRecordStatus) {
+          ObjectRecordStatusEntity objectRecordStatus) {
         if (externalObjectDirectory.getVerificationAttempts() < armDataManagementConfiguration.getMaxRetryAttempts()) {
             int verificationAttempts = externalObjectDirectory.getVerificationAttempts() + 1;
             externalObjectDirectory.setVerificationAttempts(verificationAttempts);
@@ -359,39 +383,15 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity objectRecordStatus) {
         log.info(
-            "ARM Push updating ARM status from {} to {} for ID {}",
-            externalObjectDirectory.getStatus().getDescription(),
-            objectRecordStatus.getDescription(),
-            externalObjectDirectory.getId()
+              "ARM Push updating ARM status from {} to {} for ID {}",
+              externalObjectDirectory.getStatus().getDescription(),
+              objectRecordStatus.getDescription(),
+              externalObjectDirectory.getId()
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userAccount);
         externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
-    }
-
-    private static String generateSuffix(String filenameKey) {
-        return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
-    }
-
-    private static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return new StringBuilder(externalObjectDirectory.getId().toString())
-            .append(ARM_FILENAME_SEPARATOR)
-            .append(getObjectTypeId(externalObjectDirectory))
-            .append(ARM_FILENAME_SEPARATOR)
-            .append(externalObjectDirectory.getTransferAttempts()).toString();
-    }
-
-    private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        String objectTypeId = "";
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            objectTypeId = externalObjectDirectory.getMedia().getId().toString();
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
-        }
-        return objectTypeId;
     }
 
 

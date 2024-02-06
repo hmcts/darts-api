@@ -11,11 +11,11 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query("""
-           SELECT ee
-           FROM EventEntity ee
-           JOIN ee.hearingEntities he
-           WHERE he.id = :hearingId
-           ORDER by ee.timestamp
-        """)
+             SELECT ee
+             FROM EventEntity ee
+             JOIN ee.hearingEntities he
+             WHERE he.id = :hearingId
+             ORDER by ee.timestamp
+          """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 }

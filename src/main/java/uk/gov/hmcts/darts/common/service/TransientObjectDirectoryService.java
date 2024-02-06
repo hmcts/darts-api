@@ -7,5 +7,5 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 public interface TransientObjectDirectoryService {
 
     TransientObjectDirectoryEntity saveTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
-                                                                      BlobClient blobClient);
+          BlobClient blobClient);
 }

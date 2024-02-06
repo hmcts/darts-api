@@ -22,10 +22,10 @@ public class CourtLogsServiceImpl implements CourtLogsService {
     @Override
     public List<CourtLog> getCourtLogs(String courtHouse, String caseNumber, OffsetDateTime start, OffsetDateTime end) {
         List<EventEntity> entities = repository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
-            courtHouse,
-            caseNumber,
-            start,
-            end
+              courtHouse,
+              caseNumber,
+              start,
+              end
         );
         return EventEntityToCourtLogMapper.mapToCourtLogsList(entities);
 

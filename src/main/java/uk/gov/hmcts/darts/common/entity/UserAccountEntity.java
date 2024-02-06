@@ -61,8 +61,8 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany
     @JoinTable(name = "security_group_user_account_ae",
-        joinColumns = {@JoinColumn(name = "usr_id")},
-        inverseJoinColumns = {@JoinColumn(name = "grp_id")})
+          joinColumns = {@JoinColumn(name = "usr_id")},
+          inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
 
     public Boolean isActive() {

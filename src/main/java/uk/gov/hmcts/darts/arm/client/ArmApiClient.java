@@ -13,21 +13,21 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @FeignClient(
-    name = "arm-api-client",
-    url = "${darts.storage.arm-api.url}"
+      name = "arm-api-client",
+      url = "${darts.storage.arm-api.url}"
 )
 public interface ArmApiClient {
 
     @PostMapping(value = "${darts.storage.arm-api.update-metadata-path}",
-        consumes = APPLICATION_JSON_VALUE,
-        produces = APPLICATION_JSON_VALUE
+          consumes = APPLICATION_JSON_VALUE,
+          produces = APPLICATION_JSON_VALUE
     )
     UpdateMetadataResponse updateMetadata(@RequestHeader(AUTHORIZATION) String bearerAuth,
-                                                          @RequestBody UpdateMetadataRequest updateMetadataRequest);
+          @RequestBody UpdateMetadataRequest updateMetadataRequest);
 
     @GetMapping(value = "${darts.storage.arm-api.download-data-path}")
     feign.Response downloadArmData(@RequestHeader(AUTHORIZATION) String bearerAuth,
-                                        @PathVariable("cabinet_id") String cabinetId,
-                                        @PathVariable("record_id") String externalRecordId,
-                                        @PathVariable("file_id") String externalFileId);
+          @PathVariable("cabinet_id") String cabinetId,
+          @PathVariable("record_id") String externalRecordId,
+          @PathVariable("file_id") String externalFileId);
 }

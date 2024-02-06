@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class is a test implementation of SystemCommandExecutor, intended to mimic the side effects of specified system
- * commands without actually executing those commands. This is useful for scenarios where the executable is not present
- * on the host system but the side effects of the command are required by subsequent test steps.
+ * This class is a test implementation of SystemCommandExecutor, intended to mimic the side effects of specified system commands without actually executing
+ * those commands. This is useful for scenarios where the executable is not present on the host system but the side effects of the command are required by
+ * subsequent test steps.
  */
 @Component
 @Slf4j
@@ -27,7 +27,7 @@ public class SystemCommandExecutorStubImpl implements SystemCommandExecutor {
     @Override
     public Boolean execute(CommandLine command) {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-                     + " you should ask questions! ###");
+              + " you should ask questions! ###");
 
         String executable = command.getExecutable();
         List<String> arguments = Arrays.asList(command.getArguments());
@@ -48,7 +48,7 @@ public class SystemCommandExecutorStubImpl implements SystemCommandExecutor {
 
     private boolean isFfmpegConcatOperation(List<String> arguments) {
         return arguments.stream()
-            .anyMatch(argument -> argument.contains("concat="));
+              .anyMatch(argument -> argument.contains("concat="));
     }
 
     private boolean isFfmpegTrimOperation(List<String> arguments) {

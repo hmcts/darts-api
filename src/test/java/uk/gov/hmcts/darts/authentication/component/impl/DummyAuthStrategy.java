@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.authentication.config.AuthenticationConfigurationPrope
 @Setter
 @RequiredArgsConstructor
 public class DummyAuthStrategy implements AuthenticationConfigurationPropertiesStrategy {
+
     private final AuthConfigurationProperties configurationProperties;
     private final AuthProviderConfigurationProperties configurationProviderProperties;
 

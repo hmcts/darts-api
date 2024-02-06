@@ -11,14 +11,14 @@ import org.zalando.problem.spring.common.HttpStatusAdapter;
 import org.zalando.problem.spring.web.advice.AdviceTrait;
 
 /**
- * AdviceTrait for handling Spring 6 {@link org.springframework.web.ErrorResponseException}.
- * Temporary workaround until <a href="https://github.com/zalando/problem-spring-web">problem-spring-web</a> is extended with support for {@link org.springframework.web.ErrorResponse}.
- * For now scope is restricted to {@link org.springframework.web.servlet.resource.NoResourceFoundException}, but additional exceptions can be added as needed.
+ * AdviceTrait for handling Spring 6 {@link org.springframework.web.ErrorResponseException}. Temporary workaround until <a
+ * href="https://github.com/zalando/problem-spring-web">problem-spring-web</a> is extended with support for {@link org.springframework.web.ErrorResponse}. For
+ * now scope is restricted to {@link org.springframework.web.servlet.resource.NoResourceFoundException}, but additional exceptions can be added as needed.
  */
 public interface ErrorResponseAdviceTrait extends AdviceTrait {
 
     @ExceptionHandler({
-        NoResourceFoundException.class,
+          NoResourceFoundException.class,
     })
     default ResponseEntity<Problem> handleErrorResponseException(ErrorResponse errorResponse, Exception errorResponseAsException, NativeWebRequest request) {
 
@@ -32,10 +32,10 @@ public interface ErrorResponseAdviceTrait extends AdviceTrait {
         var problemHttpStatus = new HttpStatusAdapter(errorResponse.getStatusCode());
         ProblemDetail body = errorResponse.getBody();
         return Problem.builder()
-            .withType(body.getType())
-            .withStatus(problemHttpStatus)
-            .withTitle(body.getTitle())
-            .withDetail(body.getDetail())
-            .build();
+              .withType(body.getType())
+              .withStatus(problemHttpStatus)
+              .withTitle(body.getTitle())
+              .withDetail(body.getDetail())
+              .build();
     }
 }

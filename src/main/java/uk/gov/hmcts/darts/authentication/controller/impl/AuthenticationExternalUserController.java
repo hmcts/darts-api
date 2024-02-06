@@ -17,9 +17,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/external-user")
 public class AuthenticationExternalUserController extends AbstractUserController {
+
     public AuthenticationExternalUserController(AuthenticationService authenticationService, AuthorisationApi authorisationApi,
-                                                AuthStrategySelector locator) {
-        super(authenticationService, authorisationApi, locator);
+          AuthStrategySelector locator) {
+        super(locator, authenticationService, authorisationApi);
     }
 
     @Override

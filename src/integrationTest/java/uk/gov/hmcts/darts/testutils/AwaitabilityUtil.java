@@ -13,16 +13,16 @@ public final class AwaitabilityUtil {
 
     public static void waitForMax10SecondsWithOneSecondPoll(Callable<Boolean> callable) {
         await().atMost(Duration.ofSeconds(10))
-            .with().pollInterval(Duration.ofSeconds(1))
-            .until(() -> {
-                boolean verified;
-                try {
-                    verified = callable.call();
-                } catch (Exception e) {
-                    // ignore the error for now
-                    verified = false;
-                }
-                return verified;
-            });
+              .with().pollInterval(Duration.ofSeconds(1))
+              .until(() -> {
+                  boolean verified;
+                  try {
+                      verified = callable.call();
+                  } catch (Exception e) {
+                      // ignore the error for now
+                      verified = false;
+                  }
+                  return verified;
+              });
     }
 }

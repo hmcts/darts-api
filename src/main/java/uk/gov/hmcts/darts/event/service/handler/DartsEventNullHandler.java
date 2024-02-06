@@ -19,20 +19,20 @@ import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 public class DartsEventNullHandler extends EventHandlerBase {
 
     public DartsEventNullHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 
     @Override
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         log.debug(
-            "Null handler selected for message: {} type: {} and subtype: {}. ",
-            dartsEvent.getMessageId(),
-            dartsEvent.getType(),
-            dartsEvent.getSubType()
+              "Null handler selected for message: {} type: {} and subtype: {}. ",
+              dartsEvent.getMessageId(),
+              dartsEvent.getType(),
+              dartsEvent.getSubType()
         );
     }
 }

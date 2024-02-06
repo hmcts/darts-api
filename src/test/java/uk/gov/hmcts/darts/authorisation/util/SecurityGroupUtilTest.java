@@ -15,43 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityGroupUtilTest {
 
-    @Test
-    void matchesAtLeastOneSecurityGroup_false() {
-
-        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities();
-
-
-        List<SecurityRoleEnum> securityRoles = new ArrayList<>();
-        securityRoles.add(SecurityRoleEnum.ADMIN);
-
-        assertFalse(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
-    }
-
-    @Test
-    void matchesAtLeastOneSecurityGroup_true_single() {
-
-        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities();
-
-
-        List<SecurityRoleEnum> securityRoles = new ArrayList<>();
-        securityRoles.add(SecurityRoleEnum.JUDGE);
-
-        assertTrue(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
-    }
-
-    @Test
-    void matchesAtLeastOneSecurityGroup_true_multiple() {
-
-        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities();
-
-
-        List<SecurityRoleEnum> securityRoles = new ArrayList<>();
-        securityRoles.add(SecurityRoleEnum.JUDGE);
-        securityRoles.add(SecurityRoleEnum.ADMIN);
-
-        assertTrue(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
-    }
-
     private static Set<SecurityGroupEntity> getSecurityGroupEntities() {
         SecurityRoleEntity securityRoleEntity1 = new SecurityRoleEntity();
         securityRoleEntity1.setId(1);
@@ -76,6 +39,40 @@ class SecurityGroupUtilTest {
         securityGroupEntities.add(securityGroupEntity2);
         securityGroupEntities.add(securityGroupEntity3);
         return securityGroupEntities;
+    }
+
+    @Test
+    void matchesAtLeastOneSecurityGroup_false() {
+
+        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities();
+
+        List<SecurityRoleEnum> securityRoles = new ArrayList<>();
+        securityRoles.add(SecurityRoleEnum.ADMIN);
+
+        assertFalse(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
+    }
+
+    @Test
+    void matchesAtLeastOneSecurityGroup_true_single() {
+
+        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities();
+
+        List<SecurityRoleEnum> securityRoles = new ArrayList<>();
+        securityRoles.add(SecurityRoleEnum.JUDGE);
+
+        assertTrue(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
+    }
+
+    @Test
+    void matchesAtLeastOneSecurityGroup_true_multiple() {
+
+        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities();
+
+        List<SecurityRoleEnum> securityRoles = new ArrayList<>();
+        securityRoles.add(SecurityRoleEnum.JUDGE);
+        securityRoles.add(SecurityRoleEnum.ADMIN);
+
+        assertTrue(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
     }
 
 }

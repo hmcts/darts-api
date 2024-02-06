@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Slf4j
 @AutoConfigureMockMvc
 class HearingsControllerGetAnnotationsTest extends IntegrationBase {
+
     private static final String ENDPOINT_URL = "/hearings/{hearing_id}/annotations";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
@@ -38,11 +39,11 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     private static final List<String> TAGS_TO_IGNORE = List.of("annotation_id", "uploaded_ts", "hearing_id", "annotation_document_id");
 
     CustomComparator jsonComparator = new CustomComparator(
-        JSONCompareMode.NON_EXTENSIBLE,
-        new Customization("[*].annotation_id", (o1, o2) -> true),
-        new Customization("[*].annotation_documents[*].uploaded_ts", (o1, o2) -> true),
-        new Customization("[*].hearing_id", (o1, o2) -> true),
-        new Customization("[*].annotation_documents.annotation_document_id", (o1, o2) -> true)
+          JSONCompareMode.NON_EXTENSIBLE,
+          new Customization("[*].annotation_id", (o1, o2) -> true),
+          new Customization("[*].annotation_documents[*].uploaded_ts", (o1, o2) -> true),
+          new Customization("[*].hearing_id", (o1, o2) -> true),
+          new Customization("[*].annotation_documents.annotation_document_id", (o1, o2) -> true)
     );
     @Autowired
     private transient MockMvc mockMvc;
@@ -60,36 +61,36 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     @Test
     void annotationsReturnedJudge() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createJudgeUser();
+              .createJudgeUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "annotationText1");
         annotation.addHearing(hearingEntity);
         dartsDatabase.save(annotation);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation,
-            "filename1",
-            "fileType1",
-            1001,
-            testUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation,
+              "filename1",
+              "fileType1",
+              1001,
+              testUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
 
         AnnotationEntity deletedAnnotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, "annotationText1a");
@@ -97,72 +98,70 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
         deletedAnnotation.setDeleted(true);
         dartsDatabase.save(deletedAnnotation);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            deletedAnnotation,
-            "filename1a",
-            "fileType1a",
-            1001,
-            testUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              deletedAnnotation,
+              "filename1a",
+              "fileType1a",
+              1001,
+              testUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
 
-
         UserAccountEntity adminUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+              .createAdminUser();
         AnnotationEntity annotation2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(adminUser, "annotationText1");
         annotation2.addHearing(hearingEntity);
         dartsDatabase.save(annotation2);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation2,
-            "filename1",
-            "fileType1",
-            1001,
-            adminUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation2,
+              "filename1",
+              "fileType1",
+              1001,
+              adminUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
-
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, """
-            [
-              {
-                "annotation_id": 1,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "annotation_text": "annotationText1",
-                "annotation_documents": [
-                  {
-                    "annotation_document_id": 1,
-                    "file_name": "filename1",
-                    "file_type": "fileType1",
-                    "uploaded_by": "JudgedefaultFullName",
-                    "uploaded_ts": "2024-01-31T15:41:04.779601Z"
-                  }
-                ]
-              }
-            ]
-            """);
+              [
+                {
+                  "annotation_id": 1,
+                  "hearing_id": 1,
+                  "hearing_date": "2023-01-01",
+                  "annotation_text": "annotationText1",
+                  "annotation_documents": [
+                    {
+                      "annotation_document_id": 1,
+                      "file_name": "filename1",
+                      "file_type": "fileType1",
+                      "uploaded_by": "JudgedefaultFullName",
+                      "uploaded_ts": "2024-01-31T15:41:04.779601Z"
+                    }
+                  ]
+                }
+              ]
+              """);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+              .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, jsonComparator);
     }
@@ -170,73 +169,72 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     @Test
     void noAnnotationsReturned_DifferentJudge() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
         UserAccountEntity thisTestUser = dartsDatabase.getUserAccountStub()
-            .createJudgeUser("1");
+              .createJudgeUser("1");
         when(mockUserIdentity.getUserAccount()).thenReturn(thisTestUser);
 
         UserAccountEntity otherTestUser = dartsDatabase.getUserAccountStub()
-            .createJudgeUser();
+              .createJudgeUser();
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(otherTestUser, "annotationText1");
         annotation.addHearing(hearingEntity);
         dartsDatabase.save(annotation);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation,
-            "filename1",
-            "fileType1",
-            1001,
-            otherTestUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation,
+              "filename1",
+              "fileType1",
+              1001,
+              otherTestUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
 
         UserAccountEntity adminUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+              .createAdminUser();
         AnnotationEntity annotation2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(adminUser, "annotationText1");
         annotation2.addHearing(hearingEntity);
         dartsDatabase.save(annotation2);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation2,
-            "filename1",
-            "fileType1",
-            1001,
-            adminUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation2,
+              "filename1",
+              "fileType1",
+              1001,
+              adminUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
-
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, """
-            [
+              [
 
-            ]
-            """);
+              ]
+              """);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+              .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, jsonComparator);
     }
@@ -244,102 +242,101 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     @Test
     void allAnnotationsReturned_Admin() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
-
         UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
-            .createJudgeUser();
+              .createJudgeUser();
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(judgeUser, "annotationText1");
         annotation.addHearing(hearingEntity);
         dartsDatabase.save(annotation);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation,
-            "filename1",
-            "fileType1",
-            1001,
-            judgeUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation,
+              "filename1",
+              "fileType1",
+              1001,
+              judgeUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
 
         UserAccountEntity anotherJudgeUser = dartsDatabase.getUserAccountStub()
-            .createJudgeUser("2");
+              .createJudgeUser("2");
         AnnotationEntity annotation2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(anotherJudgeUser, "annotationText1");
         annotation2.addHearing(hearingEntity);
         dartsDatabase.save(annotation2);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation2,
-            "filename1",
-            "fileType1",
-            1001,
-            anotherJudgeUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation2,
+              "filename1",
+              "fileType1",
+              1001,
+              anotherJudgeUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
 
         UserAccountEntity thisTestUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+              .createAdminUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(thisTestUser);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, """
-            [
-              {
-                "annotation_id": 1,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "annotation_text": "annotationText1",
-                "annotation_documents": [
-                  {
-                    "annotation_document_id": 1,
-                    "file_name": "filename1",
-                    "file_type": "fileType1",
-                    "uploaded_by": "JudgedefaultFullName",
-                    "uploaded_ts": "2024-01-31T16:54:14.456498Z"
-                  }
-                ]
-              },
-              {
-                "annotation_id": 2,
-                "hearing_id": 1,
-                "hearing_date": "2023-01-01",
-                "annotation_text": "annotationText1",
-                "annotation_documents": [
-                  {
-                    "annotation_document_id": 2,
-                    "file_name": "filename1",
-                    "file_type": "fileType1",
-                    "uploaded_by": "Judge2FullName",
-                    "uploaded_ts": "2024-01-31T16:54:14.464236Z"
-                  }
-                ]
-              }
-            ]
-            """);
+              [
+                {
+                  "annotation_id": 1,
+                  "hearing_id": 1,
+                  "hearing_date": "2023-01-01",
+                  "annotation_text": "annotationText1",
+                  "annotation_documents": [
+                    {
+                      "annotation_document_id": 1,
+                      "file_name": "filename1",
+                      "file_type": "fileType1",
+                      "uploaded_by": "JudgedefaultFullName",
+                      "uploaded_ts": "2024-01-31T16:54:14.456498Z"
+                    }
+                  ]
+                },
+                {
+                  "annotation_id": 2,
+                  "hearing_id": 1,
+                  "hearing_date": "2023-01-01",
+                  "annotation_text": "annotationText1",
+                  "annotation_documents": [
+                    {
+                      "annotation_document_id": 2,
+                      "file_name": "filename1",
+                      "file_type": "fileType1",
+                      "uploaded_by": "Judge2FullName",
+                      "uploaded_ts": "2024-01-31T16:54:14.464236Z"
+                    }
+                  ]
+                }
+              ]
+              """);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+              .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
 
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -348,40 +345,38 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     @Test
     void fail_NotJudgeOrAdmin() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
-
         UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
-            .createUnauthorisedIntegrationTestUser();
+              .createUnauthorisedIntegrationTestUser();
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(judgeUser, "annotationText1");
         annotation.addHearing(hearingEntity);
         dartsDatabase.save(annotation);
         dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(
-            annotation,
-            "filename1",
-            "fileType1",
-            1001,
-            judgeUser,
-            OffsetDateTime.of(
-                2020,
-                10,
-                10,
-                10,
-                0,
-                0,
-                0,
-                ZoneOffset.UTC
-            ),
-            "xxxx"
+              annotation,
+              "filename1",
+              "fileType1",
+              1001,
+              judgeUser,
+              OffsetDateTime.of(
+                    2020,
+                    10,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    ZoneOffset.UTC
+              ),
+              "xxxx"
         );
 
-
         UserAccountEntity thisTestUser = dartsDatabase.getUserAccountStub()
-            .createTranscriptionCompanyUser(hearingEntity.getCourtroom().getCourthouse());
+              .createTranscriptionCompanyUser(hearingEntity.getCourtroom().getCourthouse());
 
         when(mockUserIdentity.getUserAccount()).thenReturn(thisTestUser);
 

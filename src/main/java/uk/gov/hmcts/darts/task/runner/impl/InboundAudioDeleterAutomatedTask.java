@@ -11,12 +11,12 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DEL
 @Slf4j
 public class InboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedTask {
 
-    protected String taskName = INBOUND_AUDIO_DELETER_TASK_NAME.getTaskName();
     private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
+    protected String taskName = INBOUND_AUDIO_DELETER_TASK_NAME.getTaskName();
 
     public InboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                            InboundAudioDeleterProcessor processor) {
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+          InboundAudioDeleterProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.inboundAudioDeleterProcessor = processor;
     }

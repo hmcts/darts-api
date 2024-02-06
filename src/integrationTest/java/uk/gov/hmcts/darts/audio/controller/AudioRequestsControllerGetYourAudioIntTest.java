@@ -48,9 +48,9 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         currentMediaRequest.setCurrentOwner(currentOwner);
         dartsDatabase.save(currentMediaRequest);
         MediaRequestEntity currentMediaRequest2 = dartsDatabase.createAndLoadCompletedMediaRequestEntity(
-            currentMediaRequest.getHearing(),
-            requestor,
-            AudioRequestType.DOWNLOAD
+              currentMediaRequest.getHearing(),
+              requestor,
+              AudioRequestType.DOWNLOAD
         );
         currentMediaRequest2.setCurrentOwner(currentOwner);
         dartsDatabase.save(currentMediaRequest2);
@@ -62,32 +62,32 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         transformedMediaStub.createTransformedMediaEntity(currentMediaRequest2, "T20231010_0", expiryTime, lastAccessed);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
-            .header(
-                "user_id",
-                currentOwner.getId()
-            );
+              .header(
+                    "user_id",
+                    currentOwner.getId()
+              );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            [
-                {
-                    "media_request_id": 1,
-                    "case_id": 1,
-                    "hearing_id": 1,
-                    "case_number": "2",
-                    "courthouse_name": "NEWCASTLE",
-                    "hearing_date": "2023-06-10",
-                    "media_request_start_ts": "2023-06-26T13:00:00Z",
-                    "media_request_end_ts": "2023-06-26T13:45:00Z",
-                    "media_request_status": "OPEN",
-                    "request_type": "DOWNLOAD"
-                }
-            ]
-            """;
+              [
+                  {
+                      "media_request_id": 1,
+                      "case_id": 1,
+                      "hearing_id": 1,
+                      "case_number": "2",
+                      "courthouse_name": "NEWCASTLE",
+                      "hearing_date": "2023-06-10",
+                      "media_request_start_ts": "2023-06-26T13:00:00Z",
+                      "media_request_end_ts": "2023-06-26T13:45:00Z",
+                      "media_request_status": "OPEN",
+                      "request_type": "DOWNLOAD"
+                  }
+              ]
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -97,9 +97,9 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var currentMediaRequest = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var expiredMediaRequest = dartsDatabase.createAndLoadExpiredMediaRequestEntity(
-            currentMediaRequest.getHearing(),
-            currentMediaRequest.getRequestor(),
-            AudioRequestType.DOWNLOAD
+              currentMediaRequest.getHearing(),
+              currentMediaRequest.getRequestor(),
+              AudioRequestType.DOWNLOAD
         );
 
         TransformedMediaStub transformedMediaStub = dartsDatabase.getTransformedMediaStub();
@@ -107,23 +107,22 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         OffsetDateTime lastAccessed = OffsetDateTime.of(2023, 6, 30, 13, 0, 0, 0, ZoneOffset.UTC);
         transformedMediaStub.createTransformedMediaEntity(expiredMediaRequest, "T20231010_0", expiryTime, lastAccessed);
 
-
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
-            .header(
-                "user_id",
-                requestor.getId()
-            );
+              .header(
+                    "user_id",
+                    requestor.getId()
+              );
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].media_request_id", is(expiredMediaRequest.getId())))
-            .andExpect(jsonPath("$[0].case_id", is(3)))
-            .andExpect(jsonPath("$[0].case_number", is("2")))
-            .andExpect(jsonPath("$[0].courthouse_name", is("NEWCASTLE")))
-            .andExpect(jsonPath("$[0].media_request_start_ts").isString())
-            .andExpect(jsonPath("$[0].media_request_end_ts").isString())
-            .andExpect(jsonPath("$[0].media_request_expiry_ts").isString())
-            .andExpect(jsonPath("$[0].media_request_status", is(EXPIRED.getValue())));
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[0].media_request_id", is(expiredMediaRequest.getId())))
+              .andExpect(jsonPath("$[0].case_id", is(3)))
+              .andExpect(jsonPath("$[0].case_number", is("2")))
+              .andExpect(jsonPath("$[0].courthouse_name", is("NEWCASTLE")))
+              .andExpect(jsonPath("$[0].media_request_start_ts").isString())
+              .andExpect(jsonPath("$[0].media_request_end_ts").isString())
+              .andExpect(jsonPath("$[0].media_request_expiry_ts").isString())
+              .andExpect(jsonPath("$[0].media_request_status", is(EXPIRED.getValue())));
     }
 
     @Test
@@ -132,19 +131,19 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
-            .header(
-                "user_id",
-                requestor.getId()
-            );
+              .header(
+                    "user_id",
+                    requestor.getId()
+              );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            []
-            """;
+              []
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -155,19 +154,19 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
-            .header(
-                "user_id",
-                requestor.getId()
-            );
+              .header(
+                    "user_id",
+                    requestor.getId()
+              );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            []
-            """;
+              []
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -177,22 +176,22 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         var requestBuilder = get(URI.create("/audio-requests"))
-            .header(
-                "user_id",
-                requestor.getId()
-            );
+              .header(
+                    "user_id",
+                    requestor.getId()
+              );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {
-              "title": "Bad Request",
-              "status": 400,
-              "detail": "Required request parameter 'expired' for method parameter type Boolean is not present"
-            }""";
+              {
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "Required request parameter 'expired' for method parameter type Boolean is not present"
+              }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -203,17 +202,17 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {
-              "title": "Bad Request",
-              "status": 400,
-              "detail": "Required request header 'user_id' for method parameter type Integer is not present"
-            }
-            """;
+              {
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "Required request header 'user_id' for method parameter type Integer is not present"
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -221,19 +220,19 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     void getYourAudioShouldReturnEmptyArrayInResponseBodyWhenNoUserAccountExists() throws Exception {
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
-            .header(
-                "user_id",
-                999
-            );
+              .header(
+                    "user_id",
+                    999
+              );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            []
-            """;
+              []
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 

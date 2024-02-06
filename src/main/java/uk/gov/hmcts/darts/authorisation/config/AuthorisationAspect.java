@@ -44,9 +44,9 @@ public class AuthorisationAspect {
 
     @Around("authorisationPointcut() && withinControllerPointcut() && args(@RequestBody body)")
     public Object handleRequestBodyAuthorisationAdvice(ProceedingJoinPoint joinPoint, Object body)
-        throws Throwable {
+          throws Throwable {
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
-            .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
+              .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         if (!authorisationAnnotation.bodyAuthorisation() || !handleRequestBodyAuthorisation(request.getMethod())) {
@@ -70,8 +70,8 @@ public class AuthorisationAspect {
             if (!roles.isEmpty()) {
                 JsonNode jsonNode = objectMapper.valueToTree(body);
                 controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(
-                    jsonNode,
-                    roles
+                      jsonNode,
+                      roles
                 );
             } else {
                 throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
@@ -84,7 +84,7 @@ public class AuthorisationAspect {
     @Before("authorisationPointcut() && withinControllerPointcut()")
     public void handleRequestParametersAuthorisationAdvice(JoinPoint joinPoint) {
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
-            .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
+              .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         if (authorisationAnnotation.bodyAuthorisation() || !handleRequestParametersAuthorisation(request.getMethod())) {

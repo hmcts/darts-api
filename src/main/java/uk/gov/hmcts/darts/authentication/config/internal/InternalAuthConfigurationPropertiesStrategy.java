@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.util.RequestMatcher;
 @Configuration
 @RequiredArgsConstructor
 public class InternalAuthConfigurationPropertiesStrategy implements AuthenticationConfigurationPropertiesStrategy {
+
     private final InternalAuthConfigurationProperties configuration;
 
     private final InternalAuthProviderConfigurationProperties provider;

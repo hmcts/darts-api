@@ -13,8 +13,8 @@ public class RetentionsPostRequestValidator {
         if (BooleanUtils.isTrue(postRetentionRequest.getIsPermanentRetention())) {
             if (postRetentionRequest.getRetentionDate() != null) {
                 throw new DartsApiException(
-                    RetentionApiError.INVALID_REQUEST,
-                    "Both 'is_permanent_retention' and 'retention_date' cannot be set, must be either one or the other."
+                      RetentionApiError.INVALID_REQUEST,
+                      "Both 'is_permanent_retention' and 'retention_date' cannot be set, must be either one or the other."
                 );
             }
         } else {

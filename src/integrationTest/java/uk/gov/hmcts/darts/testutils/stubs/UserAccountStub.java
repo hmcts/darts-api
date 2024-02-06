@@ -151,7 +151,7 @@ public class UserAccountStub {
     }
 
     private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity,
-                                              CourthouseEntity courthouseEntity) {
+          CourthouseEntity courthouseEntity) {
         if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
             securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
             securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -249,7 +249,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
-                                                CourthouseEntity courthouseEntity) {
+          CourthouseEntity courthouseEntity) {
         if (nonNull(courthouseEntity)) {
             securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         }
@@ -267,7 +267,7 @@ public class UserAccountStub {
     @Transactional
     public UserAccountEntity createAdminUser() {
         var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
-            .orElseThrow();
+              .orElseThrow();
         adminGroup.setGlobalAccess(true);
         adminGroup.getCourthouseEntities().clear();
         adminGroup.getCourthouseEntities().addAll(courthouseRepository.findAll());

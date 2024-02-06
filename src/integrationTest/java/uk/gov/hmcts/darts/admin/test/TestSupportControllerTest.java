@@ -76,7 +76,7 @@ class TestSupportControllerTest extends IntegrationBase {
     @Test
     void createsCourthouseAndCourtroom() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNotNull();
     }
@@ -84,9 +84,9 @@ class TestSupportControllerTest extends IntegrationBase {
     @Test
     void createsCourtroomForExistingCourthouse() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr2"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNotNull();
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr2")).isNotNull();
@@ -96,10 +96,10 @@ class TestSupportControllerTest extends IntegrationBase {
     @Test
     void createsAudit() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
 
         mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
 
@@ -110,10 +110,10 @@ class TestSupportControllerTest extends IntegrationBase {
         when(auditActivityRepository.getReferenceById(anyInt())).thenThrow(DataIntegrityViolationException.class);
 
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
 
         mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
-            .andExpect(status().isBadRequest());
+              .andExpect(status().isBadRequest());
 
         assertEquals(0, dartsDatabase.getCaseRepository().findAll().size());
         assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
@@ -129,8 +129,8 @@ class TestSupportControllerTest extends IntegrationBase {
         when(mockBankHolidaysService.getBankHolidays()).thenReturn(events);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL + "/bank-holidays/2023"))
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualResponseBody = response.getResponse().getContentAsString();
         assertThat(actualResponseBody.contains("christmas"));
@@ -139,8 +139,8 @@ class TestSupportControllerTest extends IntegrationBase {
     @Test
     void createRetention() throws Exception {
         MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/case-retentions/caseNumber/func-case-a"))
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().isEmpty());
     }
@@ -148,10 +148,10 @@ class TestSupportControllerTest extends IntegrationBase {
     @Test
     void cleansData() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/func-cr1"))
-            .andExpect(status().isCreated());
+              .andExpect(status().isCreated());
 
         mockMvc.perform(delete(ENDPOINT_URL + "/clean"))
-            .andExpect(status().is2xxSuccessful());
+              .andExpect(status().is2xxSuccessful());
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNull();
     }

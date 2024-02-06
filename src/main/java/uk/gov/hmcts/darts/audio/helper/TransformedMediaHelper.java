@@ -29,6 +29,7 @@ import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaData
 @Component
 @RequiredArgsConstructor
 public class TransformedMediaHelper {
+
     private final TransientObjectDirectoryService transientObjectDirectoryService;
     private final TransformedMediaRepository transformedMediaRepository;
     private final DataManagementApi dataManagementApi;
@@ -47,8 +48,8 @@ public class TransformedMediaHelper {
         //save in database
         TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename, startTime, endTime, binaryData.getLength());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
-            transformedMediaEntity,
-            blobClient
+              transformedMediaEntity,
+              blobClient
         );
 
         dataManagementApi.addMetadata(blobClient, TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
@@ -57,8 +58,8 @@ public class TransformedMediaHelper {
 
     @Transactional
     public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename,
-                                                               OffsetDateTime startTime, OffsetDateTime endTime,
-                                                               Long fileSize) {
+          OffsetDateTime startTime, OffsetDateTime endTime,
+          Long fileSize) {
         AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
         if (mediaRequest.getRequestType().equals(DOWNLOAD)) {
             audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;

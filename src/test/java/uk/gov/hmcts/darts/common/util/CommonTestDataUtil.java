@@ -45,12 +45,12 @@ public class CommonTestDataUtil {
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
         return createEventWith(eventName, eventText,
-                               hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
+              hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
     public static EventEntity createEventWith(String eventName, String eventText,
-                                              HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
+          HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
@@ -64,16 +64,16 @@ public class CommonTestDataUtil {
     }
 
     public static EventEntity createEventWith(String eventName, String eventText,
-                                              HearingEntity hearingEntity,
-                                              EventHandlerEntity eventHandlerEntity) {
+          HearingEntity hearingEntity,
+          EventHandlerEntity eventHandlerEntity) {
 
         return createEventWith(eventName, eventText, hearingEntity,
-                               eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00")
+              eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity,
-                                              EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
+          EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
@@ -87,18 +87,106 @@ public class CommonTestDataUtil {
         return event;
     }
 
+    public static OffsetDateTime createOffsetDateTime(String timestamp) {
+
+        return OffsetDateTime.parse(String.format("%sZ", timestamp));
+    }
+
+    public static List<DefenceEntity> createDefenceList(CourtCaseEntity courtCase) {
+        DefenceEntity defence1 = createDefence(courtCase, "1");
+        DefenceEntity defence2 = createDefence(courtCase, "2");
+        return new ArrayList<>(List.of(defence1, defence2));
+    }
+
+    public static DefenceEntity createDefence(CourtCaseEntity courtCase, String number) {
+        DefenceEntity defenceEntity = new DefenceEntity();
+        defenceEntity.setCourtCase(courtCase);
+        defenceEntity.setName("defence_" + courtCase.getCaseNumber() + "_" + number);
+        return defenceEntity;
+    }
+
+    public static List<DefendantEntity> createDefendantList(CourtCaseEntity courtCase) {
+        DefendantEntity defendant1 = createDefendant(courtCase, "1");
+        DefendantEntity defendant2 = createDefendant(courtCase, "2");
+        return new ArrayList<>(List.of(defendant1, defendant2));
+    }
+
+    public static DefendantEntity createDefendant(CourtCaseEntity courtCase, String number) {
+        DefendantEntity defendantEntity = new DefendantEntity();
+        defendantEntity.setCourtCase(courtCase);
+        defendantEntity.setName("defendant_" + courtCase.getCaseNumber() + "_" + number);
+        return defendantEntity;
+    }
+
+    public static List<ProsecutorEntity> createProsecutorList(CourtCaseEntity courtCase) {
+        ProsecutorEntity prosecutor1 = createProsecutor(courtCase, "1");
+        ProsecutorEntity prosecutor2 = createProsecutor(courtCase, "2");
+        return new ArrayList<>(List.of(prosecutor1, prosecutor2));
+    }
+
+    public static ProsecutorEntity createProsecutor(CourtCaseEntity courtCase, String number) {
+        ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
+        prosecutorEntity.setCourtCase(courtCase);
+        prosecutorEntity.setName("prosecutor_" + courtCase.getCaseNumber() + "_" + number);
+        return prosecutorEntity;
+    }
+
+    private static List<TranscriptionDocumentEntity> createTranscriptionDocuments() {
+        List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setFileName("test.doc");
+        transcriptionDocumentEntities.add(transcriptionDocumentEntity);
+        return transcriptionDocumentEntities;
+    }
+
+    private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity.setTranscriptionComments(createTranscriptionComments("workflowcommenta"));
+        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflowEntity.setWorkflowActor(createUserAccount("workflow user"));
+        transcriptionWorkflowEntity.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.REQUESTED));
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity2.setTranscriptionComments(createTranscriptionComments("workflowcommentb"));
+        transcriptionWorkflowEntity2.setWorkflowActor(createUserAccount("workflow user 2"));
+        transcriptionWorkflowEntity2.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.APPROVED));
+
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity);
+        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity2);
+        return transcriptionWorkflowEntities;
+    }
+
+    private static TranscriptionStatusEntity createTranscriptionStatus(TranscriptionStatusEnum statusEnum) {
+        TranscriptionStatusEntity entity = new TranscriptionStatusEntity();
+        entity.setStatusType(statusEnum.name());
+        entity.setId(statusEnum.getId());
+        entity.setStatusType(statusEnum.name());
+        return entity;
+
+    }
+
+    private static List<TranscriptionCommentEntity> createTranscriptionComments() {
+        return createTranscriptionComments("comment");
+    }
+
+    private static List<TranscriptionCommentEntity> createTranscriptionComments(String prefixMessage) {
+        List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
+        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
+        TranscriptionCommentEntity transcriptionCommentEntity2 = new TranscriptionCommentEntity();
+        transcriptionCommentEntity.setComment(prefixMessage + "1");
+        transcriptionCommentEntity2.setComment(prefixMessage + "2");
+        transcriptionCommentEntities.add(transcriptionCommentEntity);
+        transcriptionCommentEntities.add(transcriptionCommentEntity2);
+        return transcriptionCommentEntities;
+    }
+
     public EventHandlerEntity createEventHandlerWith(String eventName, String type, String subType) {
         EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
         eventHandlerEntity.setEventName(eventName);
         eventHandlerEntity.setType(type);
         eventHandlerEntity.setSubType(subType);
         return eventHandlerEntity;
-    }
-
-
-    public static OffsetDateTime createOffsetDateTime(String timestamp) {
-
-        return OffsetDateTime.parse(String.format("%sZ", timestamp));
     }
 
     public CourthouseEntity createCourthouse(String name) {
@@ -143,45 +231,6 @@ public class CommonTestDataUtil {
         courtCase.setJudges(createJudges(2));
         courtCase.setId(id);
         return courtCase;
-    }
-
-    public static List<DefenceEntity> createDefenceList(CourtCaseEntity courtCase) {
-        DefenceEntity defence1 = createDefence(courtCase, "1");
-        DefenceEntity defence2 = createDefence(courtCase, "2");
-        return new ArrayList<>(List.of(defence1, defence2));
-    }
-
-    public static DefenceEntity createDefence(CourtCaseEntity courtCase, String number) {
-        DefenceEntity defenceEntity = new DefenceEntity();
-        defenceEntity.setCourtCase(courtCase);
-        defenceEntity.setName("defence_" + courtCase.getCaseNumber() + "_" + number);
-        return defenceEntity;
-    }
-
-    public static List<DefendantEntity> createDefendantList(CourtCaseEntity courtCase) {
-        DefendantEntity defendant1 = createDefendant(courtCase, "1");
-        DefendantEntity defendant2 = createDefendant(courtCase, "2");
-        return new ArrayList<>(List.of(defendant1, defendant2));
-    }
-
-    public static DefendantEntity createDefendant(CourtCaseEntity courtCase, String number) {
-        DefendantEntity defendantEntity = new DefendantEntity();
-        defendantEntity.setCourtCase(courtCase);
-        defendantEntity.setName("defendant_" + courtCase.getCaseNumber() + "_" + number);
-        return defendantEntity;
-    }
-
-    public static List<ProsecutorEntity> createProsecutorList(CourtCaseEntity courtCase) {
-        ProsecutorEntity prosecutor1 = createProsecutor(courtCase, "1");
-        ProsecutorEntity prosecutor2 = createProsecutor(courtCase, "2");
-        return new ArrayList<>(List.of(prosecutor1, prosecutor2));
-    }
-
-    public static ProsecutorEntity createProsecutor(CourtCaseEntity courtCase, String number) {
-        ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
-        prosecutorEntity.setCourtCase(courtCase);
-        prosecutorEntity.setName("prosecutor_" + courtCase.getCaseNumber() + "_" + number);
-        return prosecutorEntity;
     }
 
     public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date) {
@@ -246,56 +295,6 @@ public class CommonTestDataUtil {
             transcription.setTranscriptionStatus(transcriptionStatus);
         }
         return List.of(transcription);
-    }
-
-    private static List<TranscriptionDocumentEntity> createTranscriptionDocuments() {
-        List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
-        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setFileName("test.doc");
-        transcriptionDocumentEntities.add(transcriptionDocumentEntity);
-        return transcriptionDocumentEntities;
-    }
-
-    private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
-        transcriptionWorkflowEntity.setTranscriptionComments(createTranscriptionComments("workflowcommenta"));
-        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
-        transcriptionWorkflowEntity.setWorkflowActor(createUserAccount("workflow user"));
-        transcriptionWorkflowEntity.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.REQUESTED));
-
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = new TranscriptionWorkflowEntity();
-        transcriptionWorkflowEntity2.setTranscriptionComments(createTranscriptionComments("workflowcommentb"));
-        transcriptionWorkflowEntity2.setWorkflowActor(createUserAccount("workflow user 2"));
-        transcriptionWorkflowEntity2.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.APPROVED));
-
-        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
-        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity);
-        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity2);
-        return transcriptionWorkflowEntities;
-    }
-
-    private static TranscriptionStatusEntity createTranscriptionStatus(TranscriptionStatusEnum statusEnum) {
-        TranscriptionStatusEntity entity = new TranscriptionStatusEntity();
-        entity.setStatusType(statusEnum.name());
-        entity.setId(statusEnum.getId());
-        entity.setStatusType(statusEnum.name());
-        return entity;
-
-    }
-
-    private static List<TranscriptionCommentEntity> createTranscriptionComments() {
-        return createTranscriptionComments("comment");
-    }
-
-    private static List<TranscriptionCommentEntity> createTranscriptionComments(String prefixMessage) {
-        List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
-        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
-        TranscriptionCommentEntity transcriptionCommentEntity2 = new TranscriptionCommentEntity();
-        transcriptionCommentEntity.setComment(prefixMessage + "1");
-        transcriptionCommentEntity2.setComment(prefixMessage + "2");
-        transcriptionCommentEntities.add(transcriptionCommentEntity);
-        transcriptionCommentEntities.add(transcriptionCommentEntity2);
-        return transcriptionCommentEntities;
     }
 
     public UserAccountEntity createUserAccount() {

@@ -16,7 +16,7 @@ public class CourthouseApiImpl implements CourthouseApi {
 
     @Override
     public CourthouseEntity retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
-        throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+          throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
         return courthouseService.retrieveAndUpdateCourtHouse(courthouseCode, courthouseName);
     }
 }

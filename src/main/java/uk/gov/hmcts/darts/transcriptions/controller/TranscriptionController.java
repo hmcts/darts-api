@@ -61,8 +61,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
 
@@ -79,7 +79,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
-                                                                           UpdateTranscription updateTranscription) {
+          UpdateTranscription updateTranscription) {
 
         return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription));
     }
@@ -88,41 +88,41 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {TRANSCRIBER})
     public ResponseEntity<AttachTranscriptResponse> attachTranscript(Integer transcriptionId,
-                                                                     MultipartFile transcript) {
+          MultipartFile transcript) {
         return ResponseEntity.ok(transcriptionService.attachTranscript(transcriptionId, transcript));
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
-            transcriptionId);
+              transcriptionId);
         return ResponseEntity.ok()
-            .header(
-                CONTENT_DISPOSITION,
-                String.format("attachment; filename=\"%s\"", downloadTranscriptResponse.getFileName())
-            )
-            .header(
-                "external_location",
-                downloadTranscriptResponse.getExternalLocation().toString()
-            )
-            .header(
-                "transcription_document_id",
-                String.valueOf(downloadTranscriptResponse.getTranscriptionDocumentId())
-            )
-            .contentType(MediaType.parseMediaType(downloadTranscriptResponse.getContentType()))
-            .body(downloadTranscriptResponse.getResource());
+              .header(
+                    CONTENT_DISPOSITION,
+                    String.format("attachment; filename=\"%s\"", downloadTranscriptResponse.getFileName())
+              )
+              .header(
+                    "external_location",
+                    downloadTranscriptResponse.getExternalLocation().toString()
+              )
+              .header(
+                    "transcription_document_id",
+                    String.valueOf(downloadTranscriptResponse.getTranscriptionDocumentId())
+              )
+              .contentType(MediaType.parseMediaType(downloadTranscriptResponse.getContentType()))
+              .body(downloadTranscriptResponse.getResource());
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<TranscriptionTypeResponse>> getTranscriptionTypes() {
         return new ResponseEntity<>(
-            transcriptionService.getTranscriptionTypes(),
-            HttpStatus.OK
+              transcriptionService.getTranscriptionTypes(),
+              HttpStatus.OK
         );
     }
 
@@ -130,8 +130,8 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<TranscriptionUrgencyResponse>> getTranscriptionUrgencies() {
         return new ResponseEntity<>(
-            transcriptionService.getTranscriptionUrgenciesByDisplayState(),
-            HttpStatus.OK
+              transcriptionService.getTranscriptionUrgenciesByDisplayState(),
+              HttpStatus.OK
         );
     }
 
@@ -150,15 +150,15 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
-        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
-            in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
+          @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
+                in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
     ) {
         return new ResponseEntity<>(
-            transcriptionService.getTranscription(transcriptionId),
-            HttpStatus.OK
+              transcriptionService.getTranscription(transcriptionId),
+              HttpStatus.OK
         );
     }
 
@@ -173,14 +173,14 @@ public class TranscriptionController implements TranscriptionApi {
 
         // we authorise the transcription ids
         authorisation.authoriseWithIdsForTranscription(request,
-                                                       e -> e.getTranscriptionId().toString(),
-                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-                                                       executeOnAuth
+              e -> e.getTranscriptionId().toString(),
+              new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+              executeOnAuth
         );
 
         return new ResponseEntity<>(
-            responseList,
-            HttpStatus.OK
+              responseList,
+              HttpStatus.OK
         );
     }
 

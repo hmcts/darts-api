@@ -14,15 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 class AuditSearchFunctionalTest extends FunctionalTest {
+
     private static final String SEARCH_ENDPOINT = "/audit/search";
 
 
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/clean"))
-            .redirects().follow(false)
-            .delete();
+              .baseUri(getUri("/functional-tests/clean"))
+              .redirects().follow(false)
+              .delete();
     }
 
     @Test
@@ -31,28 +32,27 @@ class AuditSearchFunctionalTest extends FunctionalTest {
 
         Response response;
         response = buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/func-swansea/courtroom/func-1"))
-            .redirects().follow(false)
-            .post();
-
-
-        log.info(response.asPrettyString());
-
-        response = buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/audit/REQUEST_AUDIO/courthouse/func-swansea"))
-            .redirects().follow(false)
-            .post();
+              .baseUri(getUri("/functional-tests/courthouse/func-swansea/courtroom/func-1"))
+              .redirects().follow(false)
+              .post();
 
         log.info(response.asPrettyString());
 
         response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("from_date", OffsetDateTime.now().minusHours(1).toString())
-            .queryParam("to_date", OffsetDateTime.now().plusHours(1).toString())
-            .when()
-            .baseUri(getUri(SEARCH_ENDPOINT))
-            .redirects().follow(false)
-            .get().then().extract().response();
+              .baseUri(getUri("/functional-tests/audit/REQUEST_AUDIO/courthouse/func-swansea"))
+              .redirects().follow(false)
+              .post();
+
+        log.info(response.asPrettyString());
+
+        response = buildRequestWithExternalAuth()
+              .contentType(ContentType.JSON)
+              .queryParam("from_date", OffsetDateTime.now().minusHours(1).toString())
+              .queryParam("to_date", OffsetDateTime.now().plusHours(1).toString())
+              .when()
+              .baseUri(getUri(SEARCH_ENDPOINT))
+              .redirects().follow(false)
+              .get().then().extract().response();
 
         log.info(response.asPrettyString());
 
@@ -64,19 +64,19 @@ class AuditSearchFunctionalTest extends FunctionalTest {
     void searchForNonExistingAudit() {
 
         Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("case_id", "-99")
-            .when()
-            .baseUri(getUri(SEARCH_ENDPOINT))
-            .redirects().follow(false)
-            .get().then().extract().response();
+              .contentType(ContentType.JSON)
+              .queryParam("case_id", "-99")
+              .when()
+              .baseUri(getUri(SEARCH_ENDPOINT))
+              .redirects().follow(false)
+              .get().then().extract().response();
 
         log.info(response.asPrettyString());
 
         assertEquals("""
-                         [
-                            \s
-                         ]""", response.asPrettyString());
+              [
+                 \s
+              ]""", response.asPrettyString());
         assertEquals(200, response.statusCode());
     }
 

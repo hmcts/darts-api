@@ -19,11 +19,11 @@ import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 public class SetReportingRestrictionEventHandler extends EventHandlerBase {
 
     public SetReportingRestrictionEventHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 
     @Transactional

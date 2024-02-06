@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @RequiredArgsConstructor
 @Slf4j
 class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisation
-    implements ControllerAuthorisation {
+      implements ControllerAuthorisation {
 
     static final String TRANSCRIPTION_ID_PARAM = "transcription_id";
 
@@ -44,9 +44,9 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
 
         if (transcriptionIdParamOptional.isEmpty()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
-                TRANSCRIPTION_ID_PARAM,
-                request.getRequestURI()
+                  BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                  TRANSCRIPTION_ID_PARAM,
+                  request.getRequestURI()
             ));
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
         }
@@ -57,7 +57,7 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
         checkAuthorisationByTranscriptionId(idToAuthorise.get(), roles);
         if (idToAuthorise.get().isEmpty()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
+                  BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
         }
@@ -69,7 +69,7 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
     }
 
     void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional,
-                                             Set<SecurityRoleEnum> roles) {
+          Set<SecurityRoleEnum> roles) {
         if (transcriptionIdParamOptional.isPresent()) {
             try {
                 Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());

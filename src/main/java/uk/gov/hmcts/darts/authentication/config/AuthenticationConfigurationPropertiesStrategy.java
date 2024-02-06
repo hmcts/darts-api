@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 
 
 public interface AuthenticationConfigurationPropertiesStrategy extends RequestMatcher {
+
     AuthConfigurationProperties getConfiguration();
 
     AuthProviderConfigurationProperties getProviderConfiguration();
@@ -16,9 +17,9 @@ public interface AuthenticationConfigurationPropertiesStrategy extends RequestMa
     @SneakyThrows(URISyntaxException.class)
     default URI getLoginUri(String redirectUri) {
         return buildCommonAuthUri(getProviderConfiguration().getAuthorizationUri(), redirectUri)
-            .addParameter("response_mode", getConfiguration().getResponseMode())
-            .addParameter("response_type", getConfiguration().getResponseType())
-            .build();
+              .addParameter("response_mode", getConfiguration().getResponseMode())
+              .addParameter("response_type", getConfiguration().getResponseType())
+              .build();
     }
 
     default URI getLandingPageUri() {
@@ -32,17 +33,17 @@ public interface AuthenticationConfigurationPropertiesStrategy extends RequestMa
             redirectUri = redirectUriOverride;
         }
         return new URIBuilder(
-            getProviderConfiguration().getLogoutUri())
-            .addParameter("id_token_hint", accessToken)
-            .addParameter("post_logout_redirect_uri", redirectUri)
-            .build();
+              getProviderConfiguration().getLogoutUri())
+              .addParameter("id_token_hint", accessToken)
+              .addParameter("post_logout_redirect_uri", redirectUri)
+              .build();
     }
 
     @SneakyThrows(URISyntaxException.class)
     default URI getResetPasswordUri(String redirectUri) {
         return buildCommonAuthUri(getProviderConfiguration().getResetPasswordUri(), redirectUri)
-            .addParameter("response_type", "id_token")
-            .build();
+              .addParameter("response_type", "id_token")
+              .build();
     }
 
     @SneakyThrows(URISyntaxException.class)
@@ -52,9 +53,9 @@ public interface AuthenticationConfigurationPropertiesStrategy extends RequestMa
             redirectUri = redirectUriOverride;
         }
         return new URIBuilder(uri)
-            .addParameter("client_id", getConfiguration().getClientId())
-            .addParameter("redirect_uri", redirectUri)
-            .addParameter("scope", getConfiguration().getScope())
-            .addParameter("prompt", getConfiguration().getPrompt());
+              .addParameter("client_id", getConfiguration().getClientId())
+              .addParameter("redirect_uri", redirectUri)
+              .addParameter("scope", getConfiguration().getScope())
+              .addParameter("prompt", getConfiguration().getPrompt());
     }
 }

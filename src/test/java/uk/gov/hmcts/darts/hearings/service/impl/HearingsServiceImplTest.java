@@ -56,12 +56,12 @@ class HearingsServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new HearingsServiceImpl(
-            getHearingResponseMapper,
-            hearingRepository,
-            transcriptionRepository,
-            eventRepository,
-            annotationRepository,
-            authorisationApi
+              getHearingResponseMapper,
+              hearingRepository,
+              transcriptionRepository,
+              eventRepository,
+              annotationRepository,
+              authorisationApi
         );
     }
 
@@ -73,16 +73,16 @@ class HearingsServiceImplTest {
         caseEntity.setId(1);
 
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing(
-            caseEntity,
-            courtroomEntity,
-            LocalDate.now()
+              caseEntity,
+              courtroomEntity,
+              LocalDate.now()
         );
 
         EventHandlerEntity eventType = mock(EventHandlerEntity.class);
         Mockito.when(eventType.getEventName()).thenReturn("TestEvent");
 
         List<EventEntity> event = List.of(
-            CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
+              CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
         Mockito.when(eventRepository.findAllByHearingId(hearingEntity.getId())).thenReturn(event);
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());

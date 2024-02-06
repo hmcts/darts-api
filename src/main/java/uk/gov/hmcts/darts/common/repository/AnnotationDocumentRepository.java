@@ -6,4 +6,5 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 
 @Repository
 public interface AnnotationDocumentRepository extends JpaRepository<AnnotationDocumentEntity, Integer> {
+
 }

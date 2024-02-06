@@ -64,8 +64,8 @@ public class SecurityGroupEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany
     @JoinTable(name = "security_group_courthouse_ae",
-        joinColumns = {@JoinColumn(name = "grp_id")},
-        inverseJoinColumns = {@JoinColumn(name = "cth_id")})
+          joinColumns = {@JoinColumn(name = "grp_id")},
+          inverseJoinColumns = {@JoinColumn(name = "cth_id")})
     private Set<CourthouseEntity> courthouseEntities = new LinkedHashSet<>();
 
     @ManyToMany(mappedBy = UserAccountEntity_.SECURITY_GROUP_ENTITIES)

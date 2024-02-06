@@ -24,17 +24,17 @@ public class DuplicateRequestDetector {
         if (requestDetails.getStartDateTime() != null && requestDetails.getEndDateTime() != null) {
 
             List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(
-                requestDetails.getHearingId(),
-                getTranscriptionTypeById(requestDetails.getTranscriptionTypeId()),
-                requestDetails.getStartDateTime(),
-                requestDetails.getEndDateTime(),
-                isManual
+                  requestDetails.getHearingId(),
+                  getTranscriptionTypeById(requestDetails.getTranscriptionTypeId()),
+                  requestDetails.getStartDateTime(),
+                  requestDetails.getEndDateTime(),
+                  isManual
             );
             if (!matchingTranscriptions.isEmpty()) {
                 var duplicateTranscriptionIds = matchingTranscriptions.get(0).getId();
                 throw new DartsApiException(
-                    TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
-                    Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionIds)
+                      TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
+                      Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionIds)
                 );
             }
         }

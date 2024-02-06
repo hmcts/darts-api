@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.util.RequestMatcher;
 @Component
 @RequiredArgsConstructor
 public class ExternalAuthConfigurationPropertiesStrategy implements AuthenticationConfigurationPropertiesStrategy {
+
     private final ExternalAuthConfigurationProperties configuration;
 
     private final ExternalAuthProviderConfigurationProperties provider;

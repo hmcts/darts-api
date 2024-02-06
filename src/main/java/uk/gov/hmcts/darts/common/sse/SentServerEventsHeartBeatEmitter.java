@@ -35,8 +35,8 @@ public class SentServerEventsHeartBeatEmitter {
         try {
             do {
                 SseEmitter.SseEventBuilder event = SseEmitter.event()
-                    .id(String.valueOf(counter++))
-                    .name(HEARTBEAT_EVENT_NAME);
+                      .id(String.valueOf(counter++))
+                      .name(HEARTBEAT_EVENT_NAME);
                 emitter.send(event);
                 Thread.sleep(Duration.ofSeconds(waitBetweenHeartBeats).toMillis());
             } while (latch.getCount() > 0);

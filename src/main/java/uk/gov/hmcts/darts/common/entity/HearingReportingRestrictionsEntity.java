@@ -14,6 +14,7 @@ import java.util.List;
 @Immutable
 @Getter
 public class HearingReportingRestrictionsEntity {
+
     public static final String VIEW_NAME = "hearing_reporting_restrictions";
 
     @Id
@@ -58,25 +59,18 @@ public class HearingReportingRestrictionsEntity {
 
     @Column(name = "event_ts")
     OffsetDateTime eventDateTime;
-
-    @Column(name = "case_number")
-    private List<String> caseNumberList = new ArrayList<>();
-
     @Column(name = "version_label")
     String versionLabel;
-
     @Column(name = "message_id")
     String messageId;
-
     @Column(name = "created_ts")
     OffsetDateTime createdDateTime;
-
     @Column(name = "created_by")
     Integer createdBy;
-
     @Column(name = "last_modified_ts")
     OffsetDateTime lastModifiedDateTime;
-
     @Column(name = "last_modified_by")
     Integer lastModifiedBy;
+    @Column(name = "case_number")
+    private List<String> caseNumberList = new ArrayList<>();
 }

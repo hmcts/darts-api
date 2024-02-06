@@ -17,13 +17,13 @@ public class ControllerAuthorisationFactoryImpl implements ControllerAuthorisati
     @Override
     public ControllerAuthorisation getHandler(ContextIdEnum contextId) {
         return handlers
-            .stream()
-            .filter(handler -> contextId.equals(handler.getContextId()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException(String.format(
-                "The Authorisation annotation contextId is not known: %s",
-                contextId
-            )));
+              .stream()
+              .filter(handler -> contextId.equals(handler.getContextId()))
+              .findFirst()
+              .orElseThrow(() -> new IllegalStateException(String.format(
+                    "The Authorisation annotation contextId is not known: %s",
+                    contextId
+              )));
     }
 
 }

@@ -33,6 +33,17 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
     @Autowired
     private EventDispatcher eventDispatcher;
 
+    private static DartsEvent someMinimalDartsEvent() {
+        return new DartsEvent()
+              .messageId("some-message-id")
+              .type(HEARING_ENDED_EVENT_TYPE)
+              .subType(null)
+              .eventId("1")
+              .courthouse(SOME_COURTHOUSE)
+              .courtroom(SOME_ROOM)
+              .eventText("some-text");
+    }
+
     @Test
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
@@ -40,7 +51,7 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
         assertThatThrownBy(() -> eventDispatcher.receive(event))
-            .isInstanceOf(DartsApiException.class);
+              .isInstanceOf(DartsApiException.class);
     }
 
     @Test
@@ -52,29 +63,29 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            STOP_AND_CLOSE_HANDLER);
+              STOP_AND_CLOSE_HANDLER);
         assertEquals(3, eventHandlerEntityList.size());
 
         EventHandlerEntity hearingEndedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_ENDED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+              .filter(eventHandlerEntity -> HEARING_ENDED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+              .findFirst()
+              .orElseThrow();
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingEndedEventHandler.getType())
-            .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(today);
+              .type(hearingEndedEventHandler.getType())
+              .subType(hearingEndedEventHandler.getSubType())
+              .caseNumbers(List.of(SOME_CASE_NUMBER))
+              .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
+              SOME_CASE_NUMBER,
+              SOME_COURTHOUSE
         ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+              SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -85,20 +96,9 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
 
         assertThat(persistedCase.getClosed()).isTrue();
         assertThat(persistedCase.getCaseClosedTimestamp()
-                       .isAfter(OffsetDateTime.parse("2023-08-08T00:00:00.000Z"))).isTrue();
+              .isAfter(OffsetDateTime.parse("2023-08-08T00:00:00.000Z"))).isTrue();
 
         dartsGateway.verifyReceivedNotificationType(2);
-    }
-
-    private static DartsEvent someMinimalDartsEvent() {
-        return new DartsEvent()
-            .messageId("some-message-id")
-            .type(HEARING_ENDED_EVENT_TYPE)
-            .subType(null)
-            .eventId("1")
-            .courthouse(SOME_COURTHOUSE)
-            .courtroom(SOME_ROOM)
-            .eventText("some-text");
     }
 
 }

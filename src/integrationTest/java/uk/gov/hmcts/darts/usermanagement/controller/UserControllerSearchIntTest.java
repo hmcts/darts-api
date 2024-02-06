@@ -60,18 +60,18 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("@example");
 
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isForbidden())
-            .andReturn();
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
+              {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+              """;
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
@@ -86,28 +86,28 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("");
 
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String expectedResponse = """
-            {
-              "violations": [
-                {
-                  "field": "emailAddress",
-                  "message": "size must be between 1 and 256"
-                }
-              ],
-              "type": "https://zalando.github.io/problem/constraint-violation",
-              "status": 400,
-              "title": "Constraint Violation"
-            }
-            """;
+              {
+                "violations": [
+                  {
+                    "field": "emailAddress",
+                    "message": "size must be between 1 and 256"
+                  }
+                ],
+                "type": "https://zalando.github.io/problem/constraint-violation",
+                "status": 400,
+                "title": "Constraint Violation"
+              }
+              """;
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verifyNoInteractions(userIdentity);
@@ -121,16 +121,16 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("@test");
 
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andReturn();
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andReturn();
 
         String expectedResponse = "[]";
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
@@ -145,16 +145,16 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("adminUserAccount");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
-            .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
-            .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].security_group_ids").isArray())
-            .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[0].id").isNumber())
+              .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+              .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
+              .andExpect(jsonPath("$[0].active").value(true))
+              .andExpect(jsonPath("$[0].security_group_ids").isArray())
+              .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
+              .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -168,16 +168,16 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setFullName("adminUserAccount");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
-            .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
-            .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].security_group_ids").isArray())
-            .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[0].id").isNumber())
+              .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+              .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
+              .andExpect(jsonPath("$[0].active").value(true))
+              .andExpect(jsonPath("$[0].security_group_ids").isArray())
+              .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
+              .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -192,16 +192,16 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setFullName("adminUserAccountUsername");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
-            .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
-            .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].security_group_ids").isArray())
-            .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[0].id").isNumber())
+              .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+              .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
+              .andExpect(jsonPath("$[0].active").value(true))
+              .andExpect(jsonPath("$[0].security_group_ids").isArray())
+              .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
+              .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -223,11 +223,11 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setFullName(randomStr + "-user");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
-            .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
+              .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -252,12 +252,12 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setActive(false);
 
         mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(hasItems(inactiveUser.getUserName())))
-            .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
-            .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[*].full_name").value(hasItems(inactiveUser.getUserName())))
+              .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
+              .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -282,12 +282,12 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setActive(true);
 
         mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[*].full_name").value(hasItems(activeUser.getUserName())))
-            .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
-            .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
+                    .header("Content-Type", "application/json")
+                    .content(objectMapper.writeValueAsString(userSearch)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[*].full_name").value(hasItems(activeUser.getUserName())))
+              .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
+              .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);

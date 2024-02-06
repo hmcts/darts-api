@@ -33,10 +33,10 @@ class TranscriptionRequestHandlerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of("test.user@example.com"))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of("test.user@example.com"))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
         dartsDatabase.createTestUserAccount();
     }
@@ -49,14 +49,14 @@ class TranscriptionRequestHandlerTest extends IntegrationBase {
         var startTime = OffsetDateTime.of(2023, 6, 13, 8, 13, 9, 0, ZoneOffset.UTC);
         var endTime = startTime.plusHours(2);
         DartsEvent dartsEvent = new DartsEvent()
-            .messageId("some-message-id")
-            .type("3010")
-            .courthouse(SWANSEA_COURTHOUSE)
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .courtroom(SOME_COURTROOM)
-            .dateTime(eventTime)
-            .startTime(startTime)
-            .endTime(endTime);
+              .messageId("some-message-id")
+              .type("3010")
+              .courthouse(SWANSEA_COURTHOUSE)
+              .caseNumbers(List.of(SOME_CASE_NUMBER))
+              .courtroom(SOME_COURTROOM)
+              .dateTime(eventTime)
+              .startTime(startTime)
+              .endTime(endTime);
 
         eventDispatcher.receive(dartsEvent);
 
@@ -68,16 +68,15 @@ class TranscriptionRequestHandlerTest extends IntegrationBase {
         assertEquals(SOME_CASE_NUMBER, persistedTranscription.getCourtCase().getCaseNumber());
         assertEquals(TranscriptionStatusEnum.APPROVED.getId(), persistedTranscription.getTranscriptionStatus().getId());
 
-
         var persistedTranscriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository().findAll();
         TranscriptionWorkflowEntity persistedTranscriptionWorkflow = persistedTranscriptionWorkflows.get(1);
         assertEquals(
-            TranscriptionStatusEnum.APPROVED.getId(),
-            persistedTranscriptionWorkflow.getTranscriptionStatus().getId()
+              TranscriptionStatusEnum.APPROVED.getId(),
+              persistedTranscriptionWorkflow.getTranscriptionStatus().getId()
         );
         assertEquals(
-            "Transcription Automatically approved",
-            dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
+              "Transcription Automatically approved",
+              dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
         );
     }
 

@@ -8,7 +8,7 @@ public enum ArchiveRecordType {
     TRANSCRIPTION_ARCHIVE_TYPE("Transcription"),
     ANNOTATION_ARCHIVE_TYPE("Annotation");
 
-    private String archiveTypeDescription;
+    private final String archiveTypeDescription;
 
     ArchiveRecordType(String archiveTypeDescription) {
         this.archiveTypeDescription = archiveTypeDescription;

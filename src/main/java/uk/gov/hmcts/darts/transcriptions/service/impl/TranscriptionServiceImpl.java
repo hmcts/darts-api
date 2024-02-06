@@ -97,9 +97,8 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @SuppressWarnings({"PMD.ExcessiveImports"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
-    private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
     public static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
-
+    private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
     private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
 
     private final TranscriptionRepository transcriptionRepository;
@@ -136,7 +135,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public RequestTranscriptionResponse saveTranscriptionRequest(
-        TranscriptionRequestDetails transcriptionRequestDetails, boolean isManual) {
+          TranscriptionRequestDetails transcriptionRequestDetails, boolean isManual) {
 
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
@@ -144,32 +143,32 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         duplicateRequestDetector.checkForDuplicate(transcriptionRequestDetails, isManual);
 
         TranscriptionEntity transcription = saveTranscription(
-            userAccount,
-            transcriptionRequestDetails,
-            transcriptionStatus,
-            getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-            getTranscriptionUrgencyById(transcriptionRequestDetails.getTranscriptionUrgencyId()),
-            isManual
+              userAccount,
+              transcriptionRequestDetails,
+              transcriptionStatus,
+              getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
+              getTranscriptionUrgencyById(transcriptionRequestDetails.getTranscriptionUrgencyId()),
+              isManual
         );
 
         transcription.getTranscriptionWorkflowEntities().add(
-            saveTranscriptionWorkflow(
-                userAccount,
-                transcription,
-                transcriptionStatus,
-                transcriptionRequestDetails.getComment()
-            ));
+              saveTranscriptionWorkflow(
+                    userAccount,
+                    transcription,
+                    transcriptionStatus,
+                    transcriptionRequestDetails.getComment()
+              ));
 
         if (transcription.getIsManualTranscription()) {
             transcriptionStatus = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
 
             transcription.getTranscriptionWorkflowEntities().add(
-                saveTranscriptionWorkflow(
-                    userAccount,
-                    transcription,
-                    transcriptionStatus,
-                    null
-                ));
+                  saveTranscriptionWorkflow(
+                        userAccount,
+                        transcription,
+                        transcriptionStatus,
+                        null
+                  ));
 
             transcriptionNotifications.notifyApprovers(transcription);
         }
@@ -185,7 +184,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Transactional
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                           UpdateTranscription updateTranscription) {
+          UpdateTranscription updateTranscription) {
         return updateTranscription(transcriptionId, updateTranscription, false);
     }
 
@@ -193,20 +192,20 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Transactional
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                           UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
+          UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
-            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+              .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
         validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection);
 
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
-            getUserAccount(),
-            transcriptionEntity,
-            transcriptionStatusEntity,
-            updateTranscription.getWorkflowComment()
+              getUserAccount(),
+              transcriptionEntity,
+              transcriptionStatusEntity,
+              updateTranscription.getWorkflowComment()
         );
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
@@ -218,35 +217,35 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
+          UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
         if (!allowSelfApprovalOrRejection && getUserAccount().getUserName().equals(transcription.getCreatedBy().getUserName())
-            && (desiredTargetTranscriptionStatus.equals(REJECTED) || desiredTargetTranscriptionStatus.equals(APPROVED))) {
+              && (desiredTargetTranscriptionStatus.equals(REJECTED) || desiredTargetTranscriptionStatus.equals(APPROVED))) {
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
         }
 
         if (!workflowValidator.validateChangeToWorkflowStatus(
-            transcription.getIsManualTranscription(),
-            TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId()),
-            TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()),
-            desiredTargetTranscriptionStatus
+              transcription.getIsManualTranscription(),
+              TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId()),
+              TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()),
+              desiredTargetTranscriptionStatus
         )) {
             throw new DartsApiException(TRANSCRIPTION_WORKFLOW_ACTION_INVALID);
         }
 
         if (REJECTED.equals(desiredTargetTranscriptionStatus)
-            && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
+              && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
     }
 
     private TranscriptionEntity saveTranscription(UserAccountEntity userAccount,
-                                                  TranscriptionRequestDetails transcriptionRequestDetails,
-                                                  TranscriptionStatusEntity transcriptionStatus,
-                                                  TranscriptionTypeEntity transcriptionType,
-                                                  TranscriptionUrgencyEntity transcriptionUrgency, boolean isManual) {
+          TranscriptionRequestDetails transcriptionRequestDetails,
+          TranscriptionStatusEntity transcriptionStatus,
+          TranscriptionTypeEntity transcriptionType,
+          TranscriptionUrgencyEntity transcriptionUrgency, boolean isManual) {
 
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
@@ -277,9 +276,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
-                                                                  TranscriptionEntity transcription,
-                                                                  TranscriptionStatusEntity transcriptionStatus,
-                                                                  String workflowComment) {
+          TranscriptionEntity transcription,
+          TranscriptionStatusEntity transcriptionStatus,
+          String workflowComment) {
 
         TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
         transcriptionWorkflow.setTranscription(transcription);
@@ -288,7 +287,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now(UTC));
 
         TranscriptionWorkflowEntity savedTranscriptionWorkFlow = transcriptionWorkflowRepository.saveAndFlush(
-            transcriptionWorkflow);
+              transcriptionWorkflow);
 
         if (StringUtils.isNotBlank(workflowComment)) {
             createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow, transcription);
@@ -297,8 +296,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment,
-                                      TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
-                                      TranscriptionEntity transcription) {
+          TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
+          TranscriptionEntity transcription) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment(workflowComment);
         transcriptionCommentEntity.setTranscriptionWorkflow(savedTranscriptionWorkFlow);
@@ -330,12 +329,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         try {
             List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
             OffsetDateTime lastCreatedDateTime = OffsetDateTime.now()
-                .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
+                  .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
             List<TranscriptionEntity> transcriptionsToBeClosed =
-                transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
-                    finishedTranscriptionStatuses,
-                    lastCreatedDateTime
-                );
+                  transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+                        finishedTranscriptionStatuses,
+                        lastCreatedDateTime
+                  );
             if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
                 log.info("No transcriptions to be closed off");
             } else {
@@ -374,7 +373,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
-                                                     MultipartFile transcript) {
+          MultipartFile transcript) {
 
         transcriptFileValidator.validate(transcript);
 
@@ -403,7 +402,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
 
         final var externalObjectDirectoryEntity = saveExternalObjectDirectory(
-            externalLocation, checksum, userAccountEntity, transcriptionDocumentEntity);
+              externalLocation, checksum, userAccountEntity, transcriptionDocumentEntity);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
@@ -412,7 +411,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
         attachTranscriptResponse.setTranscriptionDocumentId(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()
-                                                                .getId());
+              .getId());
         attachTranscriptResponse.setTranscriptionWorkflowId(updateTranscription.getTranscriptionWorkflowId());
 
         return attachTranscriptResponse;
@@ -458,13 +457,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
-                                                                      String checksum,
-                                                                      UserAccountEntity userAccountEntity,
-                                                                      TranscriptionDocumentEntity transcriptionDocumentEntity) {
+          String checksum,
+          UserAccountEntity userAccountEntity,
+          TranscriptionDocumentEntity transcriptionDocumentEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.STORED.getId()));
+              ObjectRecordStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
@@ -487,7 +486,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Transactional
     public GetTranscriptionByIdResponse getTranscription(Integer transcriptionId) {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
-            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+              .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
         return transcriptionResponseMapper.mapToTranscriptionResponse(transcription);
     }
 
@@ -529,8 +528,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         if (!validated.isEmpty()) {
             validated.forEach(entity -> UpdateTranscriptionEntityHelper.updateTranscriptionEntity(
-                entity,
-                getTranscriptionsItemForId(entity.getId(), request).get()
+                  entity,
+                  getTranscriptionsItemForId(entity.getId(), request).get()
             ));
 
             transcriptionRepository.saveAll(validated);
@@ -555,8 +554,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private Optional<TranscriptionEntity> getTranscriptionEntityForId(Integer transcriptionId,
-                                                                      List<TranscriptionEntity> updateTranscriptions) {
+          List<TranscriptionEntity> updateTranscriptions) {
         return updateTranscriptions.stream().filter(e ->
-                                                        e.getId().equals(transcriptionId)).findAny();
+              e.getId().equals(transcriptionId)).findAny();
     }
 }

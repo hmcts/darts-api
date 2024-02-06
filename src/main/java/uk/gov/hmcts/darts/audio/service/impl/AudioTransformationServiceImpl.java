@@ -76,24 +76,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     private static final String NO_DEFENDANTS = "There are no defendants for this hearing";
     private static final String NOT_AVAILABLE = "N/A";
-
-    private final MediaRequestService mediaRequestService;
-    private final OutboundFileProcessor outboundFileProcessor;
-    private final OutboundFileZipGenerator outboundFileZipGenerator;
-
-    private final FileOperationService fileOperationService;
-
-    private final MediaRepository mediaRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-
-    private final DataManagementApi dataManagementApi;
-    private final NotificationApi notificationApi;
-    private final UserAccountRepository userAccountRepository;
-
-    private final TransformedMediaHelper transformedMediaHelper;
-
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
             return media1.getChannel().compareTo(media2.getChannel());
@@ -101,6 +83,45 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             return media1.getStart().compareTo(media2.getStart());
         }
     };
+    private final MediaRequestService mediaRequestService;
+    private final OutboundFileProcessor outboundFileProcessor;
+    private final OutboundFileZipGenerator outboundFileZipGenerator;
+    private final FileOperationService fileOperationService;
+    private final MediaRepository mediaRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final DataManagementApi dataManagementApi;
+    private final NotificationApi notificationApi;
+    private final UserAccountRepository userAccountRepository;
+    private final TransformedMediaHelper transformedMediaHelper;
+
+    private static String getFormattedHearingDate(LocalDate dateOfHearing) {
+
+        if (dateOfHearing != null) {
+            int day = dateOfHearing.getDayOfMonth();
+            Month month = dateOfHearing.getMonth();
+            int year = dateOfHearing.getYear();
+
+            String strMonth = Pattern.compile("^.").matcher(month.toString().toLowerCase(Locale.UK)).replaceFirst(m -> m.group().toUpperCase(Locale.UK));
+            return day + getNthNumber(day) + " " + strMonth + " " + year;
+        } else {
+            return NOT_AVAILABLE;
+        }
+    }
+
+    public static String getNthNumber(int day) {
+        if (day > 3 && day < 21) {
+            return "th";
+        }
+
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
+    }
 
     @Override
     public BinaryData getUnstructuredAudioBlob(UUID location) {
@@ -129,17 +150,17 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         ObjectRecordStatusEntity objectRecordStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
-            media, objectRecordStatus, externalLocationType
+              media, objectRecordStatus, externalLocationType
         );
 
         if (!externalObjectDirectoryEntityList.isEmpty()) {
             if (externalObjectDirectoryEntityList.size() != 1) {
                 log.warn(
-                    "Only one External Object Directory expected, but found {} for mediaId={}, statusEnum={}, externalLocationTypeId={}",
-                    externalObjectDirectoryEntityList.size(),
-                    media.getId(),
-                    STORED,
-                    externalLocationType.getId()
+                      "Only one External Object Directory expected, but found {} for mediaId={}, statusEnum={}, externalLocationTypeId={}",
+                      externalObjectDirectoryEntityList.size(),
+                      media.getId(),
+                      STORED,
+                      externalLocationType.getId()
                 );
             }
             externalLocation = Optional.ofNullable(externalObjectDirectoryEntityList.get(0).getExternalLocation());
@@ -166,8 +187,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     /**
-     * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound
-     * storage.
+     * For all audio related to a given AudioRequest, download, transform and upload the processed file to outbound storage.
      *
      * @param requestId The id of the AudioRequest to be processed.
      */
@@ -194,14 +214,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             if (mediaEntitiesForHearing.isEmpty()) {
                 throw new DartsApiException(
-                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
-                    "No media present to process"
+                      AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
+                      "No media present to process"
                 );
             }
 
             List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-                mediaEntitiesForHearing,
-                mediaRequestEntity
+                  mediaEntitiesForHearing,
+                  mediaRequestEntity
             );
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
@@ -217,16 +237,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             int index = 1;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
             final String fileNamePrefix = String.format(
-                "%s_%s_",
-                hearingEntity.getCourtCase().getCaseNumber(),
-                hearingEntity.getHearingDate().format(formatter)
+                  "%s_%s_",
+                  hearingEntity.getCourtCase().getCaseNumber(),
+                  hearingEntity.getHearingDate().format(formatter)
             );
             for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
                 final String fileName = String.format(
-                    "%s%d.%s",
-                    fileNamePrefix,
-                    index++,
-                    audioRequestOutputFormat.getExtension()
+                      "%s%d.%s",
+                      fileNamePrefix,
+                      index++,
+                      audioRequestOutputFormat.getExtension()
                 );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
@@ -238,10 +258,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
                 mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
                 log.debug(
-                    "Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
-                    requestId,
-                    fileName,
-                    blobId
+                      "Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
+                      requestId,
+                      fileName,
+                      blobId
                 );
             }
 
@@ -249,15 +269,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         } catch (Exception e) {
             log.error(
-                "Exception occurred for request id {}.",
-                requestId,
-                e
+                  "Exception occurred for request id {}.",
+                  requestId,
+                  e
             );
             mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
-                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                      NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 
@@ -268,16 +288,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
-                                                                                     MediaRequestEntity mediaRequestEntity) {
+          MediaRequestEntity mediaRequestEntity) {
         return mediaEntitiesForRequest.stream()
-            .filter(media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd()))
-            .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
-            .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
-            .collect(Collectors.toList());
+              .filter(media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd()))
+              .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
+              .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
+              .collect(Collectors.toList());
     }
 
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
-        throws IOException {
+          throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
             Path downloadPath = saveMediaToWorkspace(mediaEntity);
@@ -290,8 +310,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
         UUID id = getMediaLocation(mediaEntity).orElseThrow(
-            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-            )));
+              () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
+              )));
 
         log.debug("Downloading audio blob for {} from unstructured datastore", id);
         BinaryData binaryData = getUnstructuredAudioBlob(id);
@@ -304,8 +324,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @SuppressWarnings("PMD.LawOfDemeter")
     private List<AudioFileInfo> generateFilesForRequestType(MediaRequestEntity mediaRequestEntity,
-                                                            Map<MediaEntity, Path> downloadedMedias)
-        throws ExecutionException, InterruptedException, IOException {
+          Map<MediaEntity, Path> downloadedMedias)
+          throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
 
@@ -315,45 +335,45 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             return handlePlaybacks(downloadedMedias, mediaRequestEntity);
         } else {
             throw new NotImplementedException(
-                String.format("No handler exists for request type %s", requestType));
+                  String.format("No handler exists for request type %s", requestType));
         }
     }
 
     private List<AudioFileInfo> handleDownloads(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         List<List<AudioFileInfo>> processedAudio = outboundFileProcessor.processAudioForDownload(
-            downloadedMedias,
-            mediaRequestEntity.getStartTime(),
-            mediaRequestEntity.getEndTime()
+              downloadedMedias,
+              mediaRequestEntity.getStartTime(),
+              mediaRequestEntity.getEndTime()
         );
 
         AudioFileInfo zipAudioFileInfo = new AudioFileInfo(
-            mediaRequestEntity.getStartTime().toInstant(),
-            mediaRequestEntity.getEndTime().toInstant(),
-            0,
-            outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity),
-            false
+              mediaRequestEntity.getStartTime().toInstant(),
+              mediaRequestEntity.getEndTime().toInstant(),
+              0,
+              outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity),
+              false
         );
 
         return Collections.singletonList(zipAudioFileInfo);
     }
 
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         return outboundFileProcessor.processAudioForPlaybacks(
-            downloadedMedias,
-            mediaRequestEntity.getStartTime(),
-            mediaRequestEntity.getEndTime()
+              downloadedMedias,
+              mediaRequestEntity.getStartTime(),
+              mediaRequestEntity.getEndTime()
         );
     }
 
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
-                           CourtCaseEntity courtCase,
-                           String notificationTemplateName) {
+          CourtCaseEntity courtCase,
+          String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
-                 courtCase.getId()
+              courtCase.getId()
         );
 
         Optional<UserAccountEntity> userAccount = userAccountRepository.findById(mediaRequestEntity.getRequestor().getId());
@@ -372,15 +392,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
                 String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() != null
-                    ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
+                      ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
 
                 String hearingDate = getFormattedHearingDate(mediaRequestEntity.getHearing().getHearingDate());
 
                 String audioStartTime = mediaRequestEntity.getStartTime() != null
-                    ? mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
+                      ? mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
 
                 String audioEndTime = mediaRequestEntity.getEndTime() != null
-                    ? mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
+                      ? mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
                 templateParams.put(COURTHOUSE, courthouseName);
@@ -391,11 +411,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             }
 
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-                .eventId(notificationTemplateName)
-                .caseId(courtCase.getId())
-                .emailAddresses(userAccount.get().getEmailAddress())
-                .templateValues(templateParams)
-                .build();
+                  .eventId(notificationTemplateName)
+                  .caseId(courtCase.getId())
+                  .emailAddresses(userAccount.get().getEmailAddress())
+                  .templateValues(templateParams)
+                  .build();
 
             notificationApi.scheduleNotification(saveNotificationToDbRequest);
 
@@ -403,33 +423,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         } else {
             log.error("No notification scheduled for request id {} and court case {} ", mediaRequestEntity.getId(), courtCase.getId());
         }
-    }
-
-    private static String getFormattedHearingDate(LocalDate dateOfHearing) {
-
-        if (dateOfHearing != null) {
-            int day = dateOfHearing.getDayOfMonth();
-            Month month = dateOfHearing.getMonth();
-            int year = dateOfHearing.getYear();
-
-            String strMonth = Pattern.compile("^.").matcher(month.toString().toLowerCase(Locale.UK)).replaceFirst(m -> m.group().toUpperCase(Locale.UK));
-            return day + getNthNumber(day) + " " + strMonth + " " + year;
-        } else {
-            return NOT_AVAILABLE;
-        }
-    }
-
-    public static String getNthNumber(int day) {
-        if (day > 3 && day < 21) {
-            return "th";
-        }
-
-        return switch (day % 10) {
-            case 1 -> "st";
-            case 2 -> "nd";
-            case 3 -> "rd";
-            default -> "th";
-        };
     }
 
 }

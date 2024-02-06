@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOpe
 @Value
 @Builder
 public class MediaArchiveRecord implements ArchiveRecord {
+
     private MediaCreateArchiveRecordOperation mediaCreateArchiveRecord;
     private UploadNewFileRecord uploadNewFileRecord;
 

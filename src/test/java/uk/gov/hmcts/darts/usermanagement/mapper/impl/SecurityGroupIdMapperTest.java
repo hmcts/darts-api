@@ -25,7 +25,7 @@ class SecurityGroupIdMapperTest {
         SecurityGroupIdMapper securityGroupIdMapper = new SecurityGroupIdMapper(userAccountMapper);
 
         UserWithIdAndTimestamps userWithIdAndTimestamps =
-            securityGroupIdMapper.mapToUserWithSecurityGroups(userAccountEntity);
+              securityGroupIdMapper.mapToUserWithSecurityGroups(userAccountEntity);
         assertEquals(2, userWithIdAndTimestamps.getSecurityGroupIds().size());
 
 

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderCon
 @Component
 @RequiredArgsConstructor
 public class DefaultAuthConfigurationPropertiesStrategy implements AuthenticationConfigurationPropertiesStrategy {
+
     private final ExternalAuthConfigurationProperties configuration;
 
     private final ExternalAuthProviderConfigurationProperties provider;

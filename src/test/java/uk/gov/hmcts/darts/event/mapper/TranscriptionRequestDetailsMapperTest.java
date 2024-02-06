@@ -10,6 +10,16 @@ import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.
 
 class TranscriptionRequestDetailsMapperTest {
 
+    private static DartsEvent someMinimalDartsEvent() {
+        return new DartsEvent()
+              .messageId("some-message-id")
+              .type("40790")
+              .eventId("1")
+              .courthouse("some-court-house")
+              .courtroom("some-court-room")
+              .eventText("some-text");
+    }
+
     @Test
     void createsTranscriptionRequestWithCorrectDetails() {
         var dartsEvent = someMinimalDartsEvent();
@@ -21,16 +31,6 @@ class TranscriptionRequestDetailsMapperTest {
         assertThat(transcriptionRequestDetails.getHearingId()).isEqualTo(2);
         assertThat(transcriptionRequestDetails.getStartDateTime()).isEqualTo(dartsEvent.getStartTime());
         assertThat(transcriptionRequestDetails.getEndDateTime()).isEqualTo(dartsEvent.getEndTime());
-    }
-
-    private static DartsEvent someMinimalDartsEvent() {
-        return new DartsEvent()
-            .messageId("some-message-id")
-            .type("40790")
-            .eventId("1")
-            .courthouse("some-court-house")
-            .courtroom("some-court-room")
-            .eventText("some-text");
     }
 
     private HearingEntity someMinimalHearing() {

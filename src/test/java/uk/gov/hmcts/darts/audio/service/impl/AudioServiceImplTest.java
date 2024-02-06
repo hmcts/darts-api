@@ -115,21 +115,21 @@ class AudioServiceImplTest {
         AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService);
         FileContentChecksum fileContentChecksum = new FileContentChecksum();
         audioService = new AudioServiceImpl(
-            audioTransformationService,
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            mediaRepository,
-            audioOperationService,
-            fileOperationService,
-            retrieveCoreObjectService,
-            hearingRepository,
-            mapper,
-            dataManagementApi,
-            userIdentity,
-            fileContentChecksum,
-            courtLogEventRepository,
-            audioConfigurationProperties, heartBeatEmitter
+              audioTransformationService,
+              externalObjectDirectoryRepository,
+              objectRecordStatusRepository,
+              externalLocationTypeRepository,
+              mediaRepository,
+              audioOperationService,
+              fileOperationService,
+              retrieveCoreObjectService,
+              hearingRepository,
+              mapper,
+              dataManagementApi,
+              userIdentity,
+              fileContentChecksum,
+              courtLogEventRepository,
+              audioConfigurationProperties, heartBeatEmitter
         );
     }
 
@@ -184,8 +184,8 @@ class AudioServiceImplTest {
         when(inputStream.read(any())).thenThrow(new IOException());
 
         audioService.startStreamingPreview(
-                mediaEntity.getId(),
-                "bytes=0-1024", emitter
+              mediaEntity.getId(),
+              "bytes=0-1024", emitter
         );
         CountDownLatch latch = new CountDownLatch(1);
         Mockito.doAnswer(invocationOnMock -> {
@@ -217,8 +217,8 @@ class AudioServiceImplTest {
         when(mediaRepository.findById(mediaRequestId)).thenReturn(Optional.empty());
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioService.preview(mediaRequestId)
+              DartsApiException.class,
+              () -> audioService.preview(mediaRequestId)
         );
 
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
@@ -229,17 +229,17 @@ class AudioServiceImplTest {
     void addAudio() throws IOException {
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
-            anyString(),
-            anyString(),
-            anyString(),
-            any()
+              anyString(),
+              anyString(),
+              anyString(),
+              any()
         )).thenReturn(hearingEntity);
 
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");
         CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
         when(retrieveCoreObjectService.retrieveOrCreateCourtroom("SWANSEA", "1"))
-            .thenReturn(courtroomEntity);
+              .thenReturn(courtroomEntity);
 
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
@@ -248,10 +248,10 @@ class AudioServiceImplTest {
         when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         MockMultipartFile audioFile = new MockMultipartFile(
-            "addAudio",
-            "audio_sample.mp2",
-            "audio/mpeg",
-            DUMMY_FILE_CONTENT.getBytes()
+              "addAudio",
+              "audio_sample.mp2",
+              "audio/mpeg",
+              DUMMY_FILE_CONTENT.getBytes()
         );
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
 
@@ -260,7 +260,6 @@ class AudioServiceImplTest {
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
         var binaryData = inboundBlobStorageArgumentCaptor.getValue();
         assertEquals(BinaryData.fromStream(audioFile.getInputStream()).toString(), binaryData.toString());
-
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
@@ -286,7 +285,7 @@ class AudioServiceImplTest {
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
-            .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
+              .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
 
         audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(0)).saveAndFlush(any());
@@ -304,10 +303,10 @@ class AudioServiceImplTest {
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
+              anyString(),
+              anyString(),
+              any(),
+              any()
         )).thenReturn(List.of(eventEntity));
 
         audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
@@ -330,10 +329,10 @@ class AudioServiceImplTest {
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            anyString(),
-            anyString(),
-            any(),
-            any()
+              anyString(),
+              anyString(),
+              any(),
+              any()
         )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
 
         audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
@@ -374,10 +373,10 @@ class AudioServiceImplTest {
 
         HearingEntity hearing = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
-            anyString(),
-            anyString(),
-            anyString(),
-            any()
+              anyString(),
+              anyString(),
+              anyString(),
+              any()
         )).thenReturn(hearing);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());

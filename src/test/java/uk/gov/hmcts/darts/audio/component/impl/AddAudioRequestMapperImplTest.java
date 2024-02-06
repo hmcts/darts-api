@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AddAudioRequestMapperImplTest {
+
     @Mock
     RetrieveCoreObjectService courtroomRepository;
 
@@ -37,7 +38,7 @@ class AddAudioRequestMapperImplTest {
 
         CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
         when(courtroomRepository.retrieveOrCreateCourtroom(anyString(), anyString())).thenReturn(
-            courtroomEntity);
+              courtroomEntity);
 
         OffsetDateTime start = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endDate = OffsetDateTime.now();
@@ -51,18 +52,18 @@ class AddAudioRequestMapperImplTest {
         media.setCaseNumberList(List.of("case1", "case2"));
 
         MediaEntity result = addAudioRequestMapperImpl.mapToMedia(
-            new AddAudioMetadataRequest(
-                start,
-                endDate,
-                1,
-                2,
-                "mp3",
-                "test",
-                "courthouse",
-                "courtroom",
-                1000L,
-                List.of("case1", "case2")
-            ));
+              new AddAudioMetadataRequest(
+                    start,
+                    endDate,
+                    1,
+                    2,
+                    "mp3",
+                    "test",
+                    "courthouse",
+                    "courtroom",
+                    1000L,
+                    List.of("case1", "case2")
+              ));
         Assertions.assertEquals(media.getStart(), result.getStart());
         Assertions.assertEquals(media.getEnd(), result.getEnd());
         Assertions.assertEquals(media.getChannel(), result.getChannel());

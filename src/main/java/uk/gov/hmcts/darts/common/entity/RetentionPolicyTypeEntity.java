@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
+
     public static final String ID = "rpt_id";
     public static final String TABLE_NAME = "retention_policy_type";
 

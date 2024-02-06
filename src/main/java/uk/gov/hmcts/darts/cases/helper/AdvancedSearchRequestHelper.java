@@ -47,6 +47,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 @SuppressWarnings({"PMD.TooManyMethods"})
 @RequiredArgsConstructor
 public class AdvancedSearchRequestHelper {
+
     @PersistenceContext
     private final EntityManager entityManager;
 
@@ -87,8 +88,8 @@ public class AdvancedSearchRequestHelper {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(caseRoot.get(CourtCaseEntity_.CASE_NUMBER)),
-                surroundWithPercentagesUpper(request.getCaseNumber())
+                  criteriaBuilder.upper(caseRoot.get(CourtCaseEntity_.CASE_NUMBER)),
+                  surroundWithPercentagesUpper(request.getCaseNumber())
             ));
         }
         return predicateList;
@@ -108,8 +109,8 @@ public class AdvancedSearchRequestHelper {
             Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(caseRoot);
 
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(courtroomJoin.get(CourtroomEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getCourtroom())
+                  criteriaBuilder.upper(courtroomJoin.get(CourtroomEntity_.NAME)),
+                  surroundWithPercentagesUpper(request.getCourtroom())
             ));
         }
         return predicateList;
@@ -121,8 +122,8 @@ public class AdvancedSearchRequestHelper {
             Join<CourtCaseEntity, DefendantEntity> defendantJoin = joinDefendantEntity(caseRoot);
 
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(defendantJoin.get(DefendantEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getDefendantName())
+                  criteriaBuilder.upper(defendantJoin.get(DefendantEntity_.NAME)),
+                  surroundWithPercentagesUpper(request.getDefendantName())
             ));
         }
         return predicateList;
@@ -134,8 +135,8 @@ public class AdvancedSearchRequestHelper {
             Join<CourtCaseEntity, EventEntity> eventJoin = joinEventEntity(caseRoot);
 
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(eventJoin.get(EventEntity_.EVENT_TEXT)),
-                surroundWithPercentagesUpper(request.getEventTextContains())
+                  criteriaBuilder.upper(eventJoin.get(EventEntity_.EVENT_TEXT)),
+                  surroundWithPercentagesUpper(request.getEventTextContains())
             ));
         }
         return predicateList;
@@ -146,8 +147,8 @@ public class AdvancedSearchRequestHelper {
         if (StringUtils.isNotBlank(request.getCourthouse())) {
             Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(courthouseJoin.get(CourthouseEntity_.COURTHOUSE_NAME)),
-                surroundWithPercentagesUpper(request.getCourthouse())
+                  criteriaBuilder.upper(courthouseJoin.get(CourthouseEntity_.COURTHOUSE_NAME)),
+                  surroundWithPercentagesUpper(request.getCourthouse())
             ));
         }
         return predicateList;
@@ -158,8 +159,8 @@ public class AdvancedSearchRequestHelper {
         Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
 
         predicateList.add(criteriaBuilder.equal(
-            criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
-            userIdentity.getUserAccount().getEmailAddress().toLowerCase()
+              criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
+              userIdentity.getUserAccount().getEmailAddress().toLowerCase()
         ));
 
         return predicateList;
@@ -170,8 +171,8 @@ public class AdvancedSearchRequestHelper {
         if (StringUtils.isNotBlank(request.getJudgeName())) {
             Join<CourtCaseEntity, JudgeEntity> judgeJoin = joinJudge(caseRoot);
             predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(judgeJoin.get(JudgeEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getJudgeName())
+                  criteriaBuilder.upper(judgeJoin.get(JudgeEntity_.NAME)),
+                  surroundWithPercentagesUpper(request.getJudgeName())
             ));
         }
         return predicateList;
@@ -183,14 +184,14 @@ public class AdvancedSearchRequestHelper {
             Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
             if (request.getDateFrom() != null) {
                 predicateList.add(criteriaBuilder.greaterThanOrEqualTo(
-                    hearingJoin.get(HearingEntity_.HEARING_DATE),
-                    request.getDateFrom()
+                      hearingJoin.get(HearingEntity_.HEARING_DATE),
+                      request.getDateFrom()
                 ));
             }
             if (request.getDateTo() != null) {
                 predicateList.add(criteriaBuilder.lessThanOrEqualTo(
-                    hearingJoin.get(HearingEntity_.HEARING_DATE),
-                    request.getDateTo()
+                      hearingJoin.get(HearingEntity_.HEARING_DATE),
+                      request.getDateTo()
                 ));
             }
         }
@@ -201,9 +202,9 @@ public class AdvancedSearchRequestHelper {
     @SuppressWarnings("unchecked")
     private Join<CourtCaseEntity, HearingEntity> joinHearing(Root<CourtCaseEntity> caseRoot) {
         Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            CourtCaseEntity_.HEARINGS)).findAny();
+              CourtCaseEntity_.HEARINGS)).findAny();
         return foundJoin.map(courtCaseEntityJoin -> (Join<CourtCaseEntity, HearingEntity>) courtCaseEntityJoin)
-            .orElseGet(() -> caseRoot.join(CourtCaseEntity_.hearings, JoinType.INNER));
+              .orElseGet(() -> caseRoot.join(CourtCaseEntity_.hearings, JoinType.INNER));
     }
 
     private Join<CourtCaseEntity, JudgeEntity> joinJudge(Root<CourtCaseEntity> caseRoot) {
@@ -215,8 +216,8 @@ public class AdvancedSearchRequestHelper {
         Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
 
         Join<CourthouseEntity, SecurityGroupEntity> securityGroupJoin = courthouseJoin.join(
-            CourthouseEntity_.SECURITY_GROUPS,
-            JoinType.INNER
+              CourthouseEntity_.SECURITY_GROUPS,
+              JoinType.INNER
         );
         return securityGroupJoin.join(SecurityGroupEntity_.USERS, JoinType.INNER);
     }
@@ -226,18 +227,18 @@ public class AdvancedSearchRequestHelper {
         Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
 
         Optional<Join<HearingEntity, ?>> foundJoin = hearingJoin.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            HearingEntity_.COURTROOM)).findAny();
+              HearingEntity_.COURTROOM)).findAny();
         return foundJoin.map(hearingEntityJoin -> (Join<HearingEntity, CourtroomEntity>) hearingEntityJoin)
-            .orElseGet(() -> hearingJoin.join(HearingEntity_.COURTROOM, JoinType.INNER));
+              .orElseGet(() -> hearingJoin.join(HearingEntity_.COURTROOM, JoinType.INNER));
 
     }
 
     @SuppressWarnings("unchecked")
     private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Root<CourtCaseEntity> caseRoot) {
         Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            CourtroomEntity_.COURTHOUSE)).findAny();
+              CourtroomEntity_.COURTHOUSE)).findAny();
         return foundJoin.map(join -> (Join<CourtCaseEntity, CourthouseEntity>) join)
-            .orElseGet(() -> caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER));
+              .orElseGet(() -> caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER));
     }
 
     private Join<CourtCaseEntity, DefendantEntity> joinDefendantEntity(Root<CourtCaseEntity> caseRoot) {

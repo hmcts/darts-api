@@ -11,6 +11,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class CourthouseStub {
+
     private final CourthouseRepository courthouseRepository;
 
     @Transactional

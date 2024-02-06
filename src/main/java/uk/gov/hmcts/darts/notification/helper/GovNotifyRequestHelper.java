@@ -50,12 +50,12 @@ public class GovNotifyRequestHelper {
 
     private void addCommonParameters(NotificationEntity notification, Map<String, String> parameterMap) {
         parameterMap.put(
-            NotificationConstants.ParameterMapValues.CASE_NUMBER,
-            String.valueOf(notification.getCourtCase().getCaseNumber())
+              NotificationConstants.ParameterMapValues.CASE_NUMBER,
+              String.valueOf(notification.getCourtCase().getCaseNumber())
         );
         parameterMap.put(
-            NotificationConstants.ParameterMapValues.PORTAL_URL,
-            portalUrl
+              NotificationConstants.ParameterMapValues.PORTAL_URL,
+              portalUrl
         );
     }
 }

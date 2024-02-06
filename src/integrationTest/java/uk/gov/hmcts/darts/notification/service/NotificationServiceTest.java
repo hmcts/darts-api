@@ -43,10 +43,10 @@ class NotificationServiceTest extends IntegrationBase {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .emailAddresses(TEST_EMAIL_ADDRESS)
-            .build();
+              .eventId("An eventId")
+              .caseId(caseId)
+              .emailAddresses(TEST_EMAIL_ADDRESS)
+              .build();
         service.scheduleNotification(request);
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
@@ -60,10 +60,10 @@ class NotificationServiceTest extends IntegrationBase {
     void saveNotificationToDbMultipleEmails() {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .emailAddresses("test@test.com,test2@test.com")
-            .build();
+              .eventId("An eventId")
+              .caseId(caseId)
+              .emailAddresses("test@test.com,test2@test.com")
+              .build();
 
         service.scheduleNotification(request);
 
@@ -77,10 +77,10 @@ class NotificationServiceTest extends IntegrationBase {
     void scheduleNotificationInvalidEmail() {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .emailAddresses("test@test@.com")
-            .build();
+              .eventId("An eventId")
+              .caseId(caseId)
+              .emailAddresses("test@test@.com")
+              .build();
 
         service.scheduleNotification(request);
 
@@ -92,7 +92,7 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyNow() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
-            "976bf288-705d-4cbb-b24f-c5529abf14cf");
+              "976bf288-705d-4cbb-b24f-c5529abf14cf");
         Map<String, String> templateParams = new HashMap<>();
         templateParams.put("key1", "value1");
         templateParams.put("key2", "value2");
@@ -101,11 +101,11 @@ class NotificationServiceTest extends IntegrationBase {
         templateParams.put("key5", "value5");
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER.toString())
-            .caseId(caseId)
-            .emailAddresses(TEST_EMAIL_ADDRESS)
-            .templateValues(templateParams)
-            .build();
+              .eventId(REQUEST_TO_TRANSCRIBER.toString())
+              .caseId(caseId)
+              .emailAddresses(TEST_EMAIL_ADDRESS)
+              .templateValues(templateParams)
+              .build();
 
         service.scheduleNotification(request);
         service.sendNotificationToGovNotifyNow();
@@ -119,14 +119,14 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyInvalidTemplateId() throws TemplateNotFoundException, NotificationClientException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString()))
-            .thenReturn("INVALID-TEMPLATE-ID");
+              .thenReturn("INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
-            .thenThrow(new NotificationClientException(""));
+              .thenThrow(new NotificationClientException(""));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER.toString())
-            .caseId(caseId)
-            .emailAddresses(TEST_EMAIL_ADDRESS)
-            .build();
+              .eventId(REQUEST_TO_TRANSCRIBER.toString())
+              .caseId(caseId)
+              .emailAddresses(TEST_EMAIL_ADDRESS)
+              .build();
 
         service.scheduleNotification(request);
         service.sendNotificationToGovNotifyNow();
@@ -141,15 +141,15 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyFailureRetryExceeded() throws TemplateNotFoundException, NotificationClientException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString()))
-            .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
+              .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
-            .thenThrow(new NotificationClientException(""));
+              .thenThrow(new NotificationClientException(""));
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER.toString())
-            .caseId(caseId)
-            .emailAddresses(TEST_EMAIL_ADDRESS)
-            .build();
+              .eventId(REQUEST_TO_TRANSCRIBER.toString())
+              .caseId(caseId)
+              .emailAddresses(TEST_EMAIL_ADDRESS)
+              .build();
         service.scheduleNotification(request);
 
         for (int counter = 0; counter <= 3; counter++) {
@@ -166,12 +166,12 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyInvalidTemplateName() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId("invalid"))
-            .thenThrow(new TemplateNotFoundException("oh no"));
+              .thenThrow(new TemplateNotFoundException("oh no"));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("invalid")
-            .caseId(caseId)
-            .emailAddresses(TEST_EMAIL_ADDRESS)
-            .build();
+              .eventId("invalid")
+              .caseId(caseId)
+              .emailAddresses(TEST_EMAIL_ADDRESS)
+              .build();
 
         service.scheduleNotification(request);
         service.sendNotificationToGovNotifyNow();
@@ -195,10 +195,10 @@ class NotificationServiceTest extends IntegrationBase {
 
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .userAccountsToEmail(List.of(userAccount1, userAccount2))
-            .build();
+              .eventId("An eventId")
+              .caseId(caseId)
+              .userAccountsToEmail(List.of(userAccount1, userAccount2))
+              .build();
         service.scheduleNotification(request);
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
@@ -219,11 +219,11 @@ class NotificationServiceTest extends IntegrationBase {
 
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .emailAddresses("testEmail3@test.com, testEmail4@test.com")
-            .userAccountsToEmail(List.of(userAccount1, userAccount2))
-            .build();
+              .eventId("An eventId")
+              .caseId(caseId)
+              .emailAddresses("testEmail3@test.com, testEmail4@test.com")
+              .userAccountsToEmail(List.of(userAccount1, userAccount2))
+              .build();
         service.scheduleNotification(request);
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
@@ -238,7 +238,7 @@ class NotificationServiceTest extends IntegrationBase {
     void sendWrongTypeOfMap() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
-            "976bf288-705d-4cbb-b24f-c5529abf14cf");
+              "976bf288-705d-4cbb-b24f-c5529abf14cf");
         Map<String, String> templateParams = new LinkedMap<>();
         templateParams.put("key1", "value1");
         templateParams.put("key2", "value2");
@@ -247,11 +247,11 @@ class NotificationServiceTest extends IntegrationBase {
         templateParams.put("key5", "value5");
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER.toString())
-            .caseId(caseId)
-            .emailAddresses(TEST_EMAIL_ADDRESS)
-            .templateValues(templateParams)
-            .build();
+              .eventId(REQUEST_TO_TRANSCRIBER.toString())
+              .caseId(caseId)
+              .emailAddresses(TEST_EMAIL_ADDRESS)
+              .templateValues(templateParams)
+              .build();
 
         service.scheduleNotification(request);
     }

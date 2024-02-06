@@ -12,13 +12,13 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRU
 @SuppressWarnings({"squid:S1135"})
 public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomatedTask {
 
-    protected String taskName = INBOUND_TO_UNSTRUCTURED_TASK_NAME.getTaskName();
     private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+    protected String taskName = INBOUND_TO_UNSTRUCTURED_TASK_NAME.getTaskName();
 
     public InboundToUnstructuredAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                              LockProvider lockProvider,
-                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                              InboundToUnstructuredProcessor processor) {
+          LockProvider lockProvider,
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+          InboundToUnstructuredProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.inboundToUnstructuredProcessor = processor;
     }

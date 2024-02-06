@@ -25,6 +25,7 @@ public class UpdateMetadataRequest {
     @Builder
     @Jacksonized
     public static class Manifest {
+
         @JsonProperty("event_date")
         private OffsetDateTime eventDate;
     }

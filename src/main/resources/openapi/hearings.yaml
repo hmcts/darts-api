@@ -230,7 +230,7 @@ components:
 
     events_response:
       type: array
-      default: []
+      default: [ ]
       items:
         $ref: '#/components/schemas/event_response'
     event_response:

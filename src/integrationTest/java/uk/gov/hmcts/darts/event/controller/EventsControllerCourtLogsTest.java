@@ -51,14 +51,13 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     public static final String START_DATE_TIME = "start_date_time";
     public static final String CASE_NUMBER = "case_number";
     public static final String COURTHOUSE = "courthouse";
+    public static final String LOG = "LOG";
     private static final URI ENDPOINT = URI.create("/courtlogs");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
     private static final String SOME_TEXT = "some-text";
-    public static final String LOG = "LOG";
-
     @Autowired
     private EventRepository eventRepository;
 
@@ -71,10 +70,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
     }
@@ -82,15 +81,15 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Test
     void courtLogsPostShouldPersistLogEventToDatabaseAndReturnCreated() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsBytes(createRequestBody()));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsBytes(createRequestBody()));
 
         Assertions.assertEquals(0, getAllLogEventsMatchingText().size(), "Precondition failed");
 
         setupExternalMidTierUserForCourthouse(null);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isCreated());
+              .andExpect(MockMvcResultMatchers.status().isCreated());
 
         List<EventEntity> persistedEvents = getAllLogEventsMatchingText();
 
@@ -117,31 +116,31 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Test
     void courtLogsPostShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .contentType(MediaType.APPLICATION_JSON);
+              .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isBadRequest()).andExpect(
-            MockMvcResultMatchers.header().string(
-                "Content-Type",
-                "application/problem+json"
-            ));
+              MockMvcResultMatchers.header().string(
+                    "Content-Type",
+                    "application/problem+json"
+              ));
     }
 
     private CourtLogsPostRequestBody createRequestBody() {
         return new CourtLogsPostRequestBody(
-            SOME_DATE_TIME,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            Collections.singletonList(SOME_CASE_ID),
-            SOME_TEXT
+              SOME_DATE_TIME,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              Collections.singletonList(SOME_CASE_ID),
+              SOME_TEXT
         );
     }
 
     private List<EventEntity> getAllLogEventsMatchingText() {
         return dartsDatabase.getAllEvents()
-            .stream()
-            .filter(eventEntity -> LOG.equals(eventEntity.getEventType().getType()))
-            .filter(eventEntity -> SOME_TEXT.equals(eventEntity.getEventText()))
-            .toList();
+              .stream()
+              .filter(eventEntity -> LOG.equals(eventEntity.getEventType().getType()))
+              .filter(eventEntity -> SOME_TEXT.equals(eventEntity.getEventText()))
+              .toList();
     }
 
     @Test
@@ -149,11 +148,11 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         setupExternalUserForCourthouse(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam(COURTHOUSE, "Swansea")
-            .queryParam(CASE_NUMBER, NEW_CASE)
-            .queryParam(START_DATE_TIME, String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
-            .queryParam(END_DATE_TIME, String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .queryParam(COURTHOUSE, "Swansea")
+              .queryParam(CASE_NUMBER, NEW_CASE)
+              .queryParam(START_DATE_TIME, String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
+              .queryParam(END_DATE_TIME, String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
 
     }
@@ -164,10 +163,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT).contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isBadRequest()).andExpect(
-            MockMvcResultMatchers.header().string(
-                "Content-Type",
-                "application/problem+json"
-            ));
+              MockMvcResultMatchers.header().string(
+                    "Content-Type",
+                    "application/problem+json"
+              ));
     }
 
     @Test
@@ -184,17 +183,17 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam(COURTHOUSE, courthouseName)
-            .queryParam(CASE_NUMBER, caseNumber)
-            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
-            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .queryParam(COURTHOUSE, courthouseName)
+              .queryParam(CASE_NUMBER, caseNumber)
+              .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+              .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(caseNumber)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.is("test")));
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(caseNumber)))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.is("test")));
     }
 
     @Test
@@ -219,14 +218,14 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam(COURTHOUSE, courthouseName)
-            .queryParam(CASE_NUMBER, caseNumber)
-            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
-            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .queryParam(COURTHOUSE, courthouseName)
+              .queryParam(CASE_NUMBER, caseNumber)
+              .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+              .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
+              .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
 
     @Test
@@ -239,10 +238,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
 
         HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            NEW_CASE,
-            SOME_COURTHOUSE,
-            "CR1",
-            SOME_DATE_TIME.toLocalDate()
+              NEW_CASE,
+              SOME_COURTHOUSE,
+              "CR1",
+              SOME_DATE_TIME.toLocalDate()
         );
 
         var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
@@ -258,18 +257,18 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam(COURTHOUSE, SOME_COURTHOUSE)
-            .queryParam(CASE_NUMBER, NEW_CASE)
-            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
-            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .queryParam(COURTHOUSE, SOME_COURTHOUSE)
+              .queryParam(CASE_NUMBER, NEW_CASE)
+              .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+              .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(NEW_CASE)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.notNullValue()))
-            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(NEW_CASE)))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.notNullValue()))
+              .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
 
     @Test
@@ -277,21 +276,21 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam(COURTHOUSE, SOME_COURTHOUSE)
-            .queryParam(CASE_NUMBER, NEW_CASE)
-            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
-            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .queryParam(COURTHOUSE, SOME_COURTHOUSE)
+              .queryParam(CASE_NUMBER, NEW_CASE)
+              .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+              .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andReturn();
+              .andExpect(MockMvcResultMatchers.status().isForbidden())
+              .andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
+              {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }

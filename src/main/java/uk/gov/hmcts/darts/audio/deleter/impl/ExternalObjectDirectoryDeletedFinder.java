@@ -25,14 +25,14 @@ public class ExternalObjectDirectoryDeletedFinder implements ObjectDirectoryDele
     @Override
     public List<ExternalObjectDirectoryEntity> findMarkedForDeletion() {
         return externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(
-            externalLocationTypeRepository.getReferenceById(locationType.getId()),
-            getMarkedForDeletionStatus()
+              externalLocationTypeRepository.getReferenceById(locationType.getId()),
+              getMarkedForDeletionStatus()
         );
 
     }
 
     private ObjectRecordStatusEntity getMarkedForDeletionStatus() {
         return objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
+              ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
     }
 }

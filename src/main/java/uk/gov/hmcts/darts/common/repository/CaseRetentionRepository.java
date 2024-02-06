@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEntity, Integer> {
+
     List<CaseRetentionEntity> findAllByCourtCase(CourtCaseEntity courtCase);
 
     List<CaseRetentionEntity> findByCourtCase_Id(Integer courtCaseId);
@@ -18,35 +19,35 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
     Optional<CaseRetentionEntity> findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase, String currentState);
 
     @Query("""
-        SELECT c
-        FROM CaseRetentionEntity c
-        WHERE c.courtCase = :courtCase
-        and c.retentionPolicyType.fixedPolicyKey not in ('PERM', 'MANUAL')
-        AND c.currentState='COMPLETE'
-        ORDER BY c.createdDateTime desc
-        limit 1
-        """
+          SELECT c
+          FROM CaseRetentionEntity c
+          WHERE c.courtCase = :courtCase
+          and c.retentionPolicyType.fixedPolicyKey not in ('PERM', 'MANUAL')
+          AND c.currentState='COMPLETE'
+          ORDER BY c.createdDateTime desc
+          limit 1
+          """
     )
     Optional<CaseRetentionEntity> findLatestCompletedAutomatedRetention(CourtCaseEntity courtCase);
 
     @Query("""
-        SELECT c
-        FROM CaseRetentionEntity c
-        WHERE courtCase = :courtCase
-        AND currentState='COMPLETE'
-        ORDER BY c.createdDateTime desc
-        limit 1
-        """
+          SELECT c
+          FROM CaseRetentionEntity c
+          WHERE courtCase = :courtCase
+          AND currentState='COMPLETE'
+          ORDER BY c.createdDateTime desc
+          limit 1
+          """
     )
     Optional<CaseRetentionEntity> findLatestCompletedRetention(CourtCaseEntity courtCase);
 
     @Query("""
-        SELECT c
-        FROM CaseRetentionEntity c, CourtCaseEntity case
-        WHERE case.id = :caseId
-        AND c.courtCase = case
-        ORDER BY c.createdDateTime
-        """
+          SELECT c
+          FROM CaseRetentionEntity c, CourtCaseEntity case
+          WHERE case.id = :caseId
+          AND c.courtCase = case
+          ORDER BY c.createdDateTime
+          """
     )
     List<CaseRetentionEntity> findByCaseId(Integer caseId);
 }

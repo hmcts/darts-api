@@ -49,11 +49,11 @@ class ArmApiServiceIntTest extends IntegrationBase {
     void setup() {
         armTokenRequest = new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
         when(armTokenClient.getToken(armTokenRequest))
-            .thenReturn(ArmTokenResponse.builder()
-                            .accessToken("some-token")
-                            .tokenType("Bearer")
-                            .expiresIn("3600")
-                            .build());
+              .thenReturn(ArmTokenResponse.builder()
+                    .accessToken("some-token")
+                    .tokenType("Bearer")
+                    .expiresIn("3600")
+                    .build());
     }
 
     @Test
@@ -63,25 +63,25 @@ class ArmApiServiceIntTest extends IntegrationBase {
 
         var bearerAuth = "Bearer some-token";
         var updateMetadataRequest = UpdateMetadataRequest.builder()
-            .itemId(EXTERNAL_RECORD_ID)
-            .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
-                          .build())
-            .useGuidsForFields(false)
-            .build();
+              .itemId(EXTERNAL_RECORD_ID)
+              .manifest(UpdateMetadataRequest.Manifest.builder()
+                    .eventDate(eventTimestamp)
+                    .build())
+              .useGuidsForFields(false)
+              .build();
         var updateMetadataResponse = UpdateMetadataResponse.builder()
-            .itemId(UUID.fromString(EXTERNAL_RECORD_ID))
-            .cabinetId(101)
-            .objectId(UUID.fromString("4bfe4fc7-4e2f-4086-8a0e-146cc4556260"))
-            .objectType(1)
-            .fileName("UpdateMetadata-20241801-122819.json")
-            .isError(false)
-            .responseStatus(0)
-            .responseStatusMessages(null)
-            .build();
+              .itemId(UUID.fromString(EXTERNAL_RECORD_ID))
+              .cabinetId(101)
+              .objectId(UUID.fromString("4bfe4fc7-4e2f-4086-8a0e-146cc4556260"))
+              .objectType(1)
+              .fileName("UpdateMetadata-20241801-122819.json")
+              .isError(false)
+              .responseStatus(0)
+              .responseStatusMessages(null)
+              .build();
         when(armApiClient.updateMetadata(
-            bearerAuth,
-            updateMetadataRequest
+              bearerAuth,
+              updateMetadataRequest
         )).thenReturn(updateMetadataResponse);
 
         // When
@@ -100,11 +100,11 @@ class ArmApiServiceIntTest extends IntegrationBase {
         // Given
         byte[] binaryData = "some binary content".getBytes();
         Response response = Response.builder()
-            .status(200)
-            .headers(new HashMap<>())
-            .request(Mockito.mock(feign.Request.class))
-            .body(new ByteArrayInputStream(binaryData), binaryData.length)
-            .build();
+              .status(200)
+              .headers(new HashMap<>())
+              .request(Mockito.mock(feign.Request.class))
+              .body(new ByteArrayInputStream(binaryData), binaryData.length)
+              .build();
         when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(response);
 
         // When

@@ -11,6 +11,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class TransientObjectDirectoryDeletedFinder implements ObjectDirectoryDeletedFinder<TransientObjectDirectoryEntity> {
+
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
 
@@ -21,6 +22,6 @@ public class TransientObjectDirectoryDeletedFinder implements ObjectDirectoryDel
 
     private ObjectRecordStatusEntity getMarkedForDeletionStatus() {
         return objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
+              ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
     }
 }

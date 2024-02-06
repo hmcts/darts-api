@@ -42,15 +42,15 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
 
         TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
-            mediaRequestEntity,
-            "aFilename",
-            mediaRequestEntity.getStartTime(),
-            mediaRequestEntity.getEndTime(),
-            1000L
+              mediaRequestEntity,
+              "aFilename",
+              mediaRequestEntity.getStartTime(),
+              mediaRequestEntity.getEndTime(),
+              1000L
         );
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
-            transformedMediaEntity,
-            blobClientBuilder.buildClient()
+              transformedMediaEntity,
+              blobClientBuilder.buildClient()
         );
 
         assertNotNull(transientObjectDirectoryEntity);
@@ -60,9 +60,9 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         assertEquals(blodId, transientObjectDirectoryEntity.getExternalLocation().toString());
         assertNull(transientObjectDirectoryEntity.getChecksum());
         assertTrue(transientObjectDirectoryEntity.getCreatedDateTime()
-                       .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
+              .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
         assertTrue(transientObjectDirectoryEntity.getLastModifiedDateTime()
-                       .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
+              .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
         assertNotNull(transientObjectDirectoryEntity.getLastModifiedBy());
     }
 

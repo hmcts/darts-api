@@ -53,25 +53,25 @@ public class SecurityConfig {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public SecurityFilterChain patternFilterChain(HttpSecurity http) throws Exception {
         applyCommonConfig(http)
-            .securityMatcher(
-                "/swagger-ui.html",
-                "/swagger-ui/**",
-                "/swagger-resources/**",
-                "/v3/**",
-                "/favicon.ico",
-                "/health/**",
-                "/mappings",
-                "/info",
-                "/metrics",
-                "/metrics/**",
-                "/external-user/login-or-refresh",
-                "/external-user/handle-oauth-code",
-                "/external-user/reset-password",
-                "/internal-user/login-or-refresh",
-                "/internal-user/handle-oauth-code",
-                "/"
-            )
-            .authorizeHttpRequests().anyRequest().permitAll();
+              .securityMatcher(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/swagger-resources/**",
+                    "/v3/**",
+                    "/favicon.ico",
+                    "/health/**",
+                    "/mappings",
+                    "/info",
+                    "/metrics",
+                    "/metrics/**",
+                    "/external-user/login-or-refresh",
+                    "/external-user/handle-oauth-code",
+                    "/external-user/reset-password",
+                    "/internal-user/login-or-refresh",
+                    "/internal-user/handle-oauth-code",
+                    "/"
+              )
+              .authorizeHttpRequests().anyRequest().permitAll();
 
         return http.build();
     }
@@ -80,10 +80,10 @@ public class SecurityConfig {
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException", "squid:S4502"})
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         applyCommonConfig(http)
-            .addFilterBefore(new AuthorisationTokenExistenceFilter(), OAuth2LoginAuthenticationFilter.class)
-            .authorizeHttpRequests().anyRequest().authenticated()
-            .and()
-            .oauth2ResourceServer().authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver());
+              .addFilterBefore(new AuthorisationTokenExistenceFilter(), OAuth2LoginAuthenticationFilter.class)
+              .authorizeHttpRequests().anyRequest().authenticated()
+              .and()
+              .oauth2ResourceServer().authenticationManagerResolver(jwtIssuerAuthenticationManagerResolver());
 
         return http.build();
     }
@@ -91,28 +91,28 @@ public class SecurityConfig {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private HttpSecurity applyCommonConfig(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .csrf().disable()
-            .formLogin().disable()
-            .logout().disable();
+              .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+              .and()
+              .csrf().disable()
+              .formLogin().disable()
+              .logout().disable();
     }
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
-            createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
-                externalAuthProviderConfigurationProperties.getJwkSetUri()),
-            createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
-                internalAuthProviderConfigurationProperties.getJwkSetUri())
+              createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
+                    externalAuthProviderConfigurationProperties.getJwkSetUri()),
+              createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
+                    internalAuthProviderConfigurationProperties.getJwkSetUri())
         );
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
-        String jwkSetUri) {
+          String jwkSetUri) {
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
-            .jwsAlgorithm(SignatureAlgorithm.RS256)
-            .build();
+              .jwsAlgorithm(SignatureAlgorithm.RS256)
+              .build();
 
         OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefaultWithIssuer(issuer);
         jwtDecoder.setJwtValidator(jwtValidator);
@@ -126,7 +126,7 @@ public class SecurityConfig {
 
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+              throws ServletException, IOException {
 
             String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer")) {

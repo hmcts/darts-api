@@ -50,9 +50,9 @@ public class AuditController implements AuditApi {
         List<ObjectError> errors = dataBinder.getBindingResult().getAllErrors();
         if (!errors.isEmpty()) {
             String validationMessages = errors
-                .stream()
-                .map(objectError -> objectError.getDefaultMessage() + " ")
-                .collect(Collectors.joining(", "));
+                  .stream()
+                  .map(objectError -> objectError.getDefaultMessage() + " ")
+                  .collect(Collectors.joining(", "));
 
             throw new ValidationException(validationMessages);
         }

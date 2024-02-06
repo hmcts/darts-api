@@ -31,27 +31,27 @@ public class TokenValidatorImpl implements TokenValidator {
         log.debug("Validating JWT: {}", accessToken);
 
         var keySelector = new JWSVerificationKeySelector<>(
-            JWSAlgorithm.RS256,
-            providerConfig.getJwkSource()
+              JWSAlgorithm.RS256,
+              providerConfig.getJwkSource()
         );
 
         var jwtProcessor = new DefaultJWTProcessor<>();
         jwtProcessor.setJWSKeySelector(keySelector);
 
         JWTClaimsSet jwtClaimsSet = new Builder()
-            .issuer(configuration.getIssuerUri())
-            .build();
+              .issuer(configuration.getIssuerUri())
+              .build();
         var claimsVerifier = new DefaultJWTClaimsVerifier<>(
-            configuration.getClientId(),
-            jwtClaimsSet,
-            new HashSet<>(Arrays.asList(
-                JWTClaimNames.AUDIENCE,
-                JWTClaimNames.ISSUER,
-                JWTClaimNames.EXPIRATION_TIME,
-                JWTClaimNames.ISSUED_AT,
-                JWTClaimNames.SUBJECT,
-                configuration.getClaims()
-            ))
+              configuration.getClientId(),
+              jwtClaimsSet,
+              new HashSet<>(Arrays.asList(
+                    JWTClaimNames.AUDIENCE,
+                    JWTClaimNames.ISSUER,
+                    JWTClaimNames.EXPIRATION_TIME,
+                    JWTClaimNames.ISSUED_AT,
+                    JWTClaimNames.SUBJECT,
+                    configuration.getClaims()
+              ))
         );
         jwtProcessor.setJWTClaimsSetVerifier(claimsVerifier);
 

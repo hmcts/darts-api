@@ -31,29 +31,25 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Slf4j
 class HearingsGetControllerTest extends IntegrationBase {
 
-    @Autowired
-    private transient MockMvc mockMvc;
-
     public static final String ENDPOINT_URL = "/hearings/{hearingId}";
-
-    @MockBean
-    private UserIdentity mockUserIdentity;
-
-    private HearingEntity hearingEntity;
-
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
+    @Autowired
+    private transient MockMvc mockMvc;
+    @MockBean
+    private UserIdentity mockUserIdentity;
+    private HearingEntity hearingEntity;
 
     @BeforeEach
     void setUp() {
 
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_NUMBER,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
@@ -62,7 +58,7 @@ class HearingsGetControllerTest extends IntegrationBase {
         dartsDatabase.save(courtCase);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+              .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -74,20 +70,20 @@ class HearingsGetControllerTest extends IntegrationBase {
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {
-               "hearing_id": <hearing-id>,
-               "courthouse": "some-courthouse",
-               "courtroom": "some-courtroom",
-               "hearing_date": "<hearing-date>",
-               "case_id": <case-id>,
-               "case_number": "1",
-               "judges": [
-                 "1judge1"
-               ],
-               "transcription_count": 0,
-               "case_reporting_restrictions":[]
-             }
-            """;
+              {
+                 "hearing_id": <hearing-id>,
+                 "courthouse": "some-courthouse",
+                 "courtroom": "some-courtroom",
+                 "hearing_date": "<hearing-date>",
+                 "case_id": <case-id>,
+                 "case_number": "1",
+                 "judges": [
+                   "1judge1"
+                 ],
+                 "transcription_count": 0,
+                 "case_reporting_restrictions":[]
+               }
+              """;
         log.info(actualJson);
         expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
         expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
@@ -105,12 +101,12 @@ class HearingsGetControllerTest extends IntegrationBase {
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {
-              "type": "HEARING_100",
-              "title": "The requested hearing cannot be found",
-              "status": 404
-            }
-            """;
+              {
+                "type": "HEARING_100",
+                "title": "The requested hearing cannot be found",
+                "status": 404
+              }
+              """;
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -120,10 +116,10 @@ class HearingsGetControllerTest extends IntegrationBase {
     void hearingsGetEndpointShouldReturnForbiddenError() throws Exception {
 
         HearingEntity hearing = dartsDatabase.createHearing(
-            "testCourthouse",
-            "testCourtroom",
-            "testCaseNumber",
-            LocalDate.of(2020, 6, 20)
+              "testCourthouse",
+              "testCourtroom",
+              "testCaseNumber",
+              LocalDate.of(2020, 6, 20)
         );
 
         JudgeEntity testJudge = dartsDatabase.createSimpleJudge("testJudge");
@@ -135,14 +131,14 @@ class HearingsGetControllerTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearing.getId());
 
         MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andReturn();
+              .andExpect(MockMvcResultMatchers.status().isForbidden())
+              .andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
+              {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

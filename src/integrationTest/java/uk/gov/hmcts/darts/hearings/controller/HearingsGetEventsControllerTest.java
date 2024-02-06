@@ -30,30 +30,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Slf4j
 class HearingsGetEventsControllerTest extends IntegrationBase {
 
-    @Autowired
-    private transient MockMvc mockMvc;
-
     private static final String ENDPOINT_URL = "/hearings/{hearingId}/events";
-
-    @MockBean
-    private UserIdentity mockUserIdentity;
-
-    private HearingEntity hearingEntity;
-    private EventEntity event;
-
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
+    @Autowired
+    private transient MockMvc mockMvc;
+    @MockBean
+    private UserIdentity mockUserIdentity;
+    private HearingEntity hearingEntity;
+    private EventEntity event;
 
     @BeforeEach
     void setUp() {
 
         HearingEntity hearing = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_NUMBER,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
         CourtCaseEntity courtCase = hearing.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
@@ -65,7 +61,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
         hearingEntity = dartsDatabase.getHearingRepository().findById(hearing.getId()).orElseThrow();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+              .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -78,8 +74,8 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         log.info("actualJson: {}", actualJson);
         String expectedJson = """
-            [{"id":<<eventId>>,"timestamp":"2020-06-20T10:00:00Z","name":"Defendant recalled","text":"testEventText"}]
-            """;
+              [{"id":<<eventId>>,"timestamp":"2020-06-20T10:00:00Z","name":"Defendant recalled","text":"testEventText"}]
+              """;
         expectedJson = expectedJson.replace("<<eventId>>", event.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -94,12 +90,12 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {
-              "type": "HEARING_100",
-              "title": "The requested hearing cannot be found",
-              "status": 404
-            }
-            """;
+              {
+                "type": "HEARING_100",
+                "title": "The requested hearing cannot be found",
+                "status": 404
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -111,14 +107,14 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andReturn();
+              .andExpect(MockMvcResultMatchers.status().isForbidden())
+              .andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
+              {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }

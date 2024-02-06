@@ -23,16 +23,16 @@ public class GovNotifyServiceImpl implements GovNotifyService {
         SendEmailResponse emailResponse;
         try {
             emailResponse = client.sendEmail(
-                request.getTemplateId(),
-                request.getEmailAddress(),
-                request.getParameterMap(),
-                request.getReference()
+                  request.getTemplateId(),
+                  request.getEmailAddress(),
+                  request.getParameterMap(),
+                  request.getReference()
             );
         } catch (NotificationClientException e) {
             log.error(
-                "Notification with Id {} failed to send. Error message from GovNotify:- {}",
-                request.getReference(),
-                e.getMessage()
+                  "Notification with Id {} failed to send. Error message from GovNotify:- {}",
+                  request.getReference(),
+                  e.getMessage()
             );
             throw e;
         }

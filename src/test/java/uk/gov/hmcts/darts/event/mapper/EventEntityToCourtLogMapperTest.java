@@ -38,7 +38,7 @@ class EventEntityToCourtLogMapperTest {
 
         String actualResponse = objectMapper.writeValueAsString(courtLogs);
         String expectedResponse = getContentsFromFile(
-            "Tests/CourtLogs/EventEntityToMapperTest/expectedResponseSingleEntity.json");
+              "Tests/CourtLogs/EventEntityToMapperTest/expectedResponseSingleEntity.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
@@ -63,7 +63,7 @@ class EventEntityToCourtLogMapperTest {
         String actualResponse = objectMapper.writeValueAsString(courtLogs);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/CourtLogs/EventEntityToMapperTest/expectedResponseMultipleEntities.json");
+              "Tests/CourtLogs/EventEntityToMapperTest/expectedResponseMultipleEntities.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }

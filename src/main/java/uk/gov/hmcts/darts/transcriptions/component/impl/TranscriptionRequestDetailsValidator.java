@@ -33,7 +33,7 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
     private final HearingsService hearingsService;
 
     /**
-     *  TODO: This method has been lifted-and-shifted as-is from TranscriptionController and would benefit from refactoring to reduce complexity (ref DMP-2083).
+     * TODO: This method has been lifted-and-shifted as-is from TranscriptionController and would benefit from refactoring to reduce complexity (ref DMP-2083).
      */
     @Override
     public void validate(@NotNull TranscriptionRequestDetails transcriptionRequestDetails) {
@@ -43,8 +43,8 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
             HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
             if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
                 log.error(
-                    "Transcription could not be requested. No audio found for hearing id {}",
-                    transcriptionRequestDetails.getHearingId()
+                      "Transcription could not be requested. No audio found for hearing id {}",
+                      transcriptionRequestDetails.getHearingId()
                 );
                 throw new DartsApiException(AUDIO_NOT_FOUND);
             } else {
@@ -53,14 +53,14 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
                 OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
                 if (requestStartDateTime != null && requestEndDateTime != null) {
                     boolean validTimes = hearing.getMediaList().stream().anyMatch(
-                        m -> checkStartTime(m.getStart().truncatedTo(ChronoUnit.SECONDS),
-                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS))
-                            && checkEndTime(m.getEnd().truncatedTo(ChronoUnit.SECONDS),
-                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)));
+                          m -> checkStartTime(m.getStart().truncatedTo(ChronoUnit.SECONDS),
+                                requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS))
+                                && checkEndTime(m.getEnd().truncatedTo(ChronoUnit.SECONDS),
+                                requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)));
                     if (!validTimes) {
                         log.error(
-                            "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
-                            transcriptionRequestDetails.getHearingId()
+                              "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
+                              transcriptionRequestDetails.getHearingId()
                         );
                         throw new DartsApiException(TIMES_OUTSIDE_OF_HEARING_TIMES);
                     }
@@ -75,15 +75,15 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
         TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getTranscriptionUrgencyId());
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
-            && !transcriptionDatesAreSet(
-            transcriptionRequestDetails.getStartDateTime(),
-            transcriptionRequestDetails.getEndDateTime()
+              && !transcriptionDatesAreSet(
+              transcriptionRequestDetails.getStartDateTime(),
+              transcriptionRequestDetails.getEndDateTime()
         )) {
             log.error(
-                "This transcription type {} requires both the start date ({}) and end dates ({})",
-                transcriptionRequestDetails.getTranscriptionTypeId(),
-                transcriptionRequestDetails.getStartDateTime(),
-                transcriptionRequestDetails.getEndDateTime()
+                  "This transcription type {} requires both the start date ({}) and end dates ({})",
+                  transcriptionRequestDetails.getTranscriptionTypeId(),
+                  transcriptionRequestDetails.getStartDateTime(),
+                  transcriptionRequestDetails.getEndDateTime()
             );
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
@@ -99,7 +99,7 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
 
     private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {
         return SPECIFIED_TIMES.getId().equals(transcriptionTypeId)
-            || COURT_LOG.getId().equals(transcriptionTypeId);
+              || COURT_LOG.getId().equals(transcriptionTypeId);
     }
 
     private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {

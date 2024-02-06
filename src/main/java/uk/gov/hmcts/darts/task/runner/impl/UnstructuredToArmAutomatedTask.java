@@ -11,13 +11,13 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 @Slf4j
 public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTask {
 
-    protected String taskName = UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName();
     private final UnstructuredToArmProcessor unstructuredToArmProcessor;
+    protected String taskName = UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName();
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                          LockProvider lockProvider,
-                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                          UnstructuredToArmProcessor processor) {
+          LockProvider lockProvider,
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+          UnstructuredToArmProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.unstructuredToArmProcessor = processor;
     }

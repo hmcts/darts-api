@@ -36,45 +36,45 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
     @Test
     void updatedMoreThan24HrsAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
-            .thenReturn(OffsetDateTime.now().plusHours(500));
+              .thenReturn(OffsetDateTime.now().plusHours(500));
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
 
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND),
-            uuid
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND),
+              uuid
         );
         dartsDatabase.save(inboundEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            uuid
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+              uuid
         );
         dartsDatabase.save(armEod);
 
         inboundAudioDeleterProcessor.markForDeletion();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND)
+              savedMedia,
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND)
         );
 
         assertEquals(1, foundMediaList.size());
@@ -86,47 +86,46 @@ class InboundAudioDeleterProcessorTest extends IntegrationBase {
     @Test
     void updatedLessThan24HrsAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
-            .thenReturn(OffsetDateTime.now().plusHours(1));
+              .thenReturn(OffsetDateTime.now().plusHours(1));
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
 
         ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND),
-            uuid
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND),
+              uuid
         );
         dartsDatabase.save(inboundEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            uuid
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+              uuid
         );
         dartsDatabase.save(armEod);
 
         inboundAudioDeleterProcessor.markForDeletion();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND)
+              savedMedia,
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.INBOUND)
         );
-
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);

@@ -6,4 +6,5 @@ import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 
 @Repository
 public interface DefenceRepository extends JpaRepository<DefenceEntity, Integer> {
+
 }

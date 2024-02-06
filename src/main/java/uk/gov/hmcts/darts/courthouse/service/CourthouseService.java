@@ -20,5 +20,5 @@ public interface CourthouseService {
     CourthouseEntity addCourtHouse(Courthouse courthouse);
 
     CourthouseEntity retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
-        throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
+          throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
 }

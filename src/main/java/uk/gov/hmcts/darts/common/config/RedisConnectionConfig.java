@@ -42,41 +42,59 @@ public class RedisConnectionConfig {
     @Value("${darts.redis.ssl-enabled}")
     private boolean sslEnabled;
 
+    static RedisConnectionProperties redisConnectionPropertiesFrom(String redisConnectionString) {
+        var redisUri = RedisURI.create(redisConnectionString);
+
+        var redisPassword = RedisPassword.of(redisUri.getPassword());
+        char[] decodedPasswordChars = {};
+        if (redisPassword.isPresent()) {
+            var encodedPassword = redisPassword.get();
+            var decodedPasswordString = URLDecoder.decode(String.valueOf(encodedPassword), defaultCharset());
+            decodedPasswordChars = decodedPasswordString.toCharArray();
+        }
+
+        return new RedisConnectionProperties(
+              redisUri.getUsername(),
+              decodedPasswordChars,
+              redisUri.getHost(),
+              redisUri.getPort());
+    }
+
     @Bean
     public LettuceConnectionFactory connectionFactory() {
         var redisConnectionProperties = redisConnectionPropertiesFrom(redisConnectionString);
         var mappingSocketAddressResolver = MappingSocketAddressResolver.create(
-            DnsResolvers.JVM_DEFAULT,
-            getHostAndPortMappingFunctionFor(redisConnectionProperties.host())
+              DnsResolvers.JVM_DEFAULT,
+              getHostAndPortMappingFunctionFor(redisConnectionProperties.host())
         );
 
         var clientResources = ClientResources.builder()
-            .nettyCustomizer(new CustomNettyConfig())
-            .socketAddressResolver(mappingSocketAddressResolver)
-            .build();
+              .nettyCustomizer(new CustomNettyConfig())
+              .socketAddressResolver(mappingSocketAddressResolver)
+              .build();
 
         var socketOptions = SocketOptions.builder()
-            .connectTimeout(ofSeconds(20))
-            .build();
+              .connectTimeout(ofSeconds(20))
+              .build();
 
         var clientOptions = ClientOptions.builder()
-            .timeoutOptions(TimeoutOptions.enabled(ofSeconds(20)))
-            .socketOptions(socketOptions)
-            .disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
-            .build();
+              .timeoutOptions(TimeoutOptions.enabled(ofSeconds(20)))
+              .socketOptions(socketOptions)
+              .disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
+              .build();
 
         var clientConfigurationBuilder = LettuceClientConfiguration.builder();
         clientConfigurationBuilder
-            .commandTimeout(ofSeconds(20))
-            .clientOptions(clientOptions)
-            .clientResources(clientResources);
+              .commandTimeout(ofSeconds(20))
+              .clientOptions(clientOptions)
+              .clientResources(clientResources);
         if (sslEnabled) {
             clientConfigurationBuilder.useSsl();
         }
 
         var redisConfig = new RedisStandaloneConfiguration(
-            redisConnectionProperties.host(),
-            redisConnectionProperties.port()
+              redisConnectionProperties.host(),
+              redisConnectionProperties.port()
         );
         redisConfig.setPassword(RedisPassword.of(redisConnectionProperties.password()));
 
@@ -110,24 +128,6 @@ public class RedisConnectionConfig {
             bootstrap.option(NioChannelOption.of(ExtendedSocketOptions.TCP_KEEPINTERVAL), 5);
             bootstrap.option(NioChannelOption.of(ExtendedSocketOptions.TCP_KEEPCOUNT), 3);
         }
-    }
-
-    static RedisConnectionProperties redisConnectionPropertiesFrom(String redisConnectionString) {
-        var redisUri = RedisURI.create(redisConnectionString);
-
-        var redisPassword = RedisPassword.of(redisUri.getPassword());
-        char[] decodedPasswordChars = {};
-        if (redisPassword.isPresent()) {
-            var encodedPassword = redisPassword.get();
-            var decodedPasswordString = URLDecoder.decode(String.valueOf(encodedPassword), defaultCharset());
-            decodedPasswordChars = decodedPasswordString.toCharArray();
-        }
-
-        return new RedisConnectionProperties(
-            redisUri.getUsername(),
-            decodedPasswordChars,
-            redisUri.getHost(),
-            redisUri.getPort());
     }
 
     public record RedisConnectionProperties(String username, char[] password, String host, Integer port) {

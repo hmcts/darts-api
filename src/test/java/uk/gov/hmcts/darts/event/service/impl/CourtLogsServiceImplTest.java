@@ -33,17 +33,17 @@ class CourtLogsServiceImplTest {
         List<EventEntity> event = List.of(CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity));
 
         Mockito.when(repository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
-            "SWANSEA",
-            CASE_0000001,
-            CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00"),
-            CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00")
+              "SWANSEA",
+              CASE_0000001,
+              CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00"),
+              CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00")
         )).thenReturn(event);
 
         List<CourtLog> entities = courtLogsService.getCourtLogs(
-            "SWANSEA",
-            CASE_0000001,
-            CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00"),
-            CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00")
+              "SWANSEA",
+              CASE_0000001,
+              CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00"),
+              CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00")
         );
 
         assertEquals("SWANSEA", entities.get(0).getCourthouse());

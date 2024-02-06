@@ -12,79 +12,79 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 @RequiredArgsConstructor
 public enum TranscriptionApiError implements DartsApiError {
     FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST(
-        "100",
-        HttpStatus.BAD_REQUEST,
-        "Failed to validate transcription request"
+          "100",
+          HttpStatus.BAD_REQUEST,
+          "Failed to validate transcription request"
     ),
     TRANSCRIPTION_NOT_FOUND(
-        "101",
-        HttpStatus.NOT_FOUND,
-        "The requested transcription cannot be found"
+          "101",
+          HttpStatus.NOT_FOUND,
+          "The requested transcription cannot be found"
     ),
     BAD_REQUEST_TRANSCRIPTION_STATUS(
-        "102",
-        HttpStatus.BAD_REQUEST,
-        "Unexpected transcription status for this workflow"
+          "102",
+          HttpStatus.BAD_REQUEST,
+          "Unexpected transcription status for this workflow"
     ),
     BAD_REQUEST_WORKFLOW_COMMENT(
-        "103",
-        HttpStatus.BAD_REQUEST,
-        "The workflow comment is required for this transcription update"
+          "103",
+          HttpStatus.BAD_REQUEST,
+          "The workflow comment is required for this transcription update"
     ),
     BAD_REQUEST_TRANSCRIPTION_TYPE(
-        "104",
-        HttpStatus.BAD_REQUEST,
-        "Unexpected transcription type for this workflow"
+          "104",
+          HttpStatus.BAD_REQUEST,
+          "Unexpected transcription type for this workflow"
     ),
     TRANSCRIPTION_WORKFLOW_ACTION_INVALID(
-        "105",
-        HttpStatus.CONFLICT,
-        "Transcription workflow action is not permitted"
+          "105",
+          HttpStatus.CONFLICT,
+          "Transcription workflow action is not permitted"
     ),
     BAD_REQUEST_TRANSCRIPTION_URGENCY(
-        "106",
-        HttpStatus.BAD_REQUEST,
-        "Unexpected transcription urgency for this workflow"
+          "106",
+          HttpStatus.BAD_REQUEST,
+          "Unexpected transcription urgency for this workflow"
     ),
     DUPLICATE_TRANSCRIPTION(
-        "107",
-        HttpStatus.CONFLICT,
-        "A transcription already exists with these properties"
+          "107",
+          HttpStatus.CONFLICT,
+          "A transcription already exists with these properties"
     ),
     FAILED_TO_ATTACH_TRANSCRIPT(
-        "108",
-        HttpStatus.BAD_REQUEST,
-        "Failed to attach transcript"
+          "108",
+          HttpStatus.BAD_REQUEST,
+          "Failed to attach transcript"
     ),
     FAILED_TO_DOWNLOAD_TRANSCRIPT(
-        "109",
-        HttpStatus.BAD_REQUEST,
-        "Failed to download transcript"
+          "109",
+          HttpStatus.BAD_REQUEST,
+          "Failed to download transcript"
     ),
     AUDIO_NOT_FOUND(
-        "110",
-        HttpStatus.NOT_FOUND,
-        "Transcription could not be requested, no audio"
+          "110",
+          HttpStatus.NOT_FOUND,
+          "Transcription could not be requested, no audio"
     ),
     TIMES_OUTSIDE_OF_HEARING_TIMES(
-        "111",
-        HttpStatus.NOT_FOUND,
-        "Transcription could not be requested, times outside of hearing times"
+          "111",
+          HttpStatus.NOT_FOUND,
+          "Transcription could not be requested, times outside of hearing times"
     ),
     FAILED_TO_UPDATE_TRANSCRIPTIONS(
-        UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
-        HttpStatus.BAD_REQUEST,
-        "Failed to update some of the transcriptions"
+          UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
+          HttpStatus.BAD_REQUEST,
+          "Failed to update some of the transcriptions"
     ),
     USER_NOT_TRANSCRIBER(
-        TranscriptionAuthorisation403ErrorCode.USER_NOT_TRANSCRIBER.getValue(),
-        HttpStatus.FORBIDDEN,
-        "User is not a transcriber user"
+          TranscriptionAuthorisation403ErrorCode.USER_NOT_TRANSCRIBER.getValue(),
+          HttpStatus.FORBIDDEN,
+          "User is not a transcriber user"
     ),
     BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER(
-        UpdateTranscription400ErrorCode.REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER.getValue(),
-        HttpStatus.BAD_REQUEST,
-        "Transcription requestor cannot approve or reject their own transcription requests."
+          UpdateTranscription400ErrorCode.REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER.getValue(),
+          HttpStatus.BAD_REQUEST,
+          "Transcription requestor cannot approve or reject their own transcription requests."
     );
 
 

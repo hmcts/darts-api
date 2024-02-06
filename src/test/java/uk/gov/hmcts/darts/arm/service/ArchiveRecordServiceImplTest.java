@@ -48,6 +48,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
+
     public static final String TEST_MEDIA_ARCHIVE_A_360 = "1234-1-1.a360";
     public static final String MP_2 = "mp2";
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
@@ -82,6 +83,17 @@ class ArchiveRecordServiceImplTest {
     @InjectMocks
     private ArchiveRecordServiceImpl archiveRecordService;
 
+    private static String getFileContents(File archiveFile) throws IOException {
+        StringBuilder fileContents = new StringBuilder();
+        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContents.append(line);
+            }
+        }
+        return fileContents.toString();
+    }
+
     @BeforeEach
     void setUp() {
         ArchiveRecordFileGenerator archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
@@ -91,11 +103,11 @@ class ArchiveRecordServiceImplTest {
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
         archiveRecordService = new ArchiveRecordServiceImpl(
-            armDataManagementConfiguration,
-            archiveRecordFileGenerator,
-            mediaArchiveRecordMapper,
-            transcriptionArchiveRecordMapper,
-            annotationArchiveRecordMapper
+              armDataManagementConfiguration,
+              archiveRecordFileGenerator,
+              mediaArchiveRecordMapper,
+              transcriptionArchiveRecordMapper,
+              annotationArchiveRecordMapper
         );
 
     }
@@ -154,7 +166,7 @@ class ArchiveRecordServiceImplTest {
     @Test
     void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() throws IOException {
         ArchiveRecordFileInfo archiveRecordFileInfo =
-            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+              archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
 
         assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
     }
@@ -218,17 +230,6 @@ class ArchiveRecordServiceImplTest {
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-    }
-
-    private static String getFileContents(File archiveFile) throws IOException {
-        StringBuilder fileContents = new StringBuilder();
-        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileContents.append(line);
-            }
-        }
-        return fileContents.toString();
     }
 
 }

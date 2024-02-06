@@ -21,9 +21,9 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/clean"))
-            .redirects().follow(false)
-            .delete();
+              .baseUri(getUri("/functional-tests/clean"))
+              .redirects().follow(false)
+              .delete();
     }
 
     @Test
@@ -35,66 +35,64 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         String randomCaseNumber = randomCaseNumber();
         String randomEventText1 = randomAlphanumeric(15);
         String requestBody = String.format(
-            """
-            {
-              "message_id": "12345",
-              "type": "1000",
-              "sub_type": "1002",
-              "event_id": "12345",
-              "courthouse": "%s",
-              "courtroom": "%s",
-              "case_numbers": [
-                "%s"
-              ],
-              "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06.085Z"
-            }""",
-            COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
+              """
+                    {
+                      "message_id": "12345",
+                      "type": "1000",
+                      "sub_type": "1002",
+                      "event_id": "12345",
+                      "courthouse": "%s",
+                      "courtroom": "%s",
+                      "case_numbers": [
+                        "%s"
+                      ],
+                      "event_text": "%s",
+                      "date_time": "2023-08-08T14:01:06.085Z"
+                    }""",
+              COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
 
         buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .body(requestBody)
-            .when()
-            .baseUri(getUri(ADD_EVENT_URL))
-            .redirects().follow(false)
-            .post();
-
+              .contentType(ContentType.JSON)
+              .body(requestBody)
+              .when()
+              .baseUri(getUri(ADD_EVENT_URL))
+              .redirects().follow(false)
+              .post();
 
         String randomEventText2 = randomAlphanumeric(15);
         requestBody = String.format(
-            """
-            {
-              "message_id": "12345",
-              "type": "1000",
-              "sub_type": "1002",
-              "event_id": "12345",
-              "courthouse": "%s",
-              "courtroom": "%s",
-              "case_numbers": [
-                "%s"
-              ],
-              "event_text": "%s",
-              "date_time": "2023-08-08T14:01:06.085Z"
-            }""",
-            COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
+              """
+                    {
+                      "message_id": "12345",
+                      "type": "1000",
+                      "sub_type": "1002",
+                      "event_id": "12345",
+                      "courthouse": "%s",
+                      "courtroom": "%s",
+                      "case_numbers": [
+                        "%s"
+                      ],
+                      "event_text": "%s",
+                      "date_time": "2023-08-08T14:01:06.085Z"
+                    }""",
+              COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
 
         buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .body(requestBody)
-            .when()
-            .baseUri(getUri(ADD_EVENT_URL))
-            .redirects().follow(false)
-            .post();
-
+              .contentType(ContentType.JSON)
+              .body(requestBody)
+              .when()
+              .baseUri(getUri(ADD_EVENT_URL))
+              .redirects().follow(false)
+              .post();
 
         int hearingId = getHearingIdByCaseNumber(randomCaseNumber);
         Response response = buildRequestWithExternalAuth()
-            .pathParam("hearingId", hearingId)
-            .when()
-            .redirects().follow(false)
-            .get(getUri(ENDPOINT_URL))
-            .then()
-            .extract().response();
+              .pathParam("hearingId", hearingId)
+              .when()
+              .redirects().follow(false)
+              .get(getUri(ENDPOINT_URL))
+              .then()
+              .extract().response();
 
         String responsePrettyString = response.asPrettyString();
         assertThat(responsePrettyString).contains(randomEventText1);
@@ -103,22 +101,22 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
     private int getHearingIdByCaseNumber(String caseNumber) {
         String caseBody = """
-        {
-            "case_number": "<<caseNumber>>"
-        }
-            """;
+              {
+                  "case_number": "<<caseNumber>>"
+              }
+                  """;
 
         caseBody = caseBody.replace("<<caseNumber>>", caseNumber);
 
         // search for case using case number
         Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASE_SEARCH_URL))
-            .body(caseBody)
-            .post()
-            .then()
-            .extract().response();
+              .contentType(ContentType.JSON)
+              .when()
+              .baseUri(getUri(CASE_SEARCH_URL))
+              .body(caseBody)
+              .post()
+              .then()
+              .extract().response();
 
         var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
         var firstCase = caseList.get(0);

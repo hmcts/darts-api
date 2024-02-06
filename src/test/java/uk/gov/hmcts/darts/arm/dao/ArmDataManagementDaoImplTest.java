@@ -18,16 +18,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ArmDataManagementDaoImplTest {
 
+    public static final String BLOB_CONTAINER_NAME = "arm_dummy_container";
+    private static final String BLOB_FILENAME = "12_45_1";
+    private static final String SAS_ENDPOINT = "https://dartssasdummy.blob.core.windows.net/darts-arm?sp=r&st=2011-11-11T11:11:11Z&" +
+          "se=2011-11-11T11:11:21Z&spr=https&sv=2022-11-02&sr=c&sig=AAAAAAA";
+    private static final String ARM_DROP_ZONE = "dummy/dropzone/submission/";
     @InjectMocks
     private ArmDataManagementDaoImpl armDataManagementDao;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-    private static final String BLOB_FILENAME = "12_45_1";
-    public static final String BLOB_CONTAINER_NAME = "arm_dummy_container";
-    private static final String SAS_ENDPOINT = "https://dartssasdummy.blob.core.windows.net/darts-arm?sp=r&st=2011-11-11T11:11:11Z&" +
-        "se=2011-11-11T11:11:21Z&spr=https&sv=2022-11-02&sr=c&sig=AAAAAAA";
-
-    private static final String ARM_DROP_ZONE = "dummy/dropzone/submission/";
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
 

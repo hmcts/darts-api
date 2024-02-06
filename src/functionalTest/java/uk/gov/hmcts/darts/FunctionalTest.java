@@ -28,10 +28,10 @@ import java.text.MessageFormat;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @SpringBootTest(
-    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
-        AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class,
-        AzureAdB2CDarPcMidtierGlobalAuthenticationProperties.class},
-    webEnvironment = WebEnvironment.NONE
+      classes = {AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
+            AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class,
+            AzureAdB2CDarPcMidtierGlobalAuthenticationProperties.class},
+      webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
@@ -53,6 +53,10 @@ public class FunctionalTest {
 
     @Value("${deployed-application-uri}")
     private URI baseUri;
+
+    protected static String randomCaseNumber() {
+        return "func-case-" + randomAlphanumeric(7);
+    }
 
     @BeforeEach
     void setUp() {
@@ -82,14 +86,14 @@ public class FunctionalTest {
 
     public void clean() {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/clean"))
-            .redirects().follow(false)
-            .delete();
+              .baseUri(getUri("/functional-tests/clean"))
+              .redirects().follow(false)
+              .delete();
     }
 
     private RequestSpecification buildRequestWithAuth(AccessTokenClient accessTokenClient) {
         return RestAssured.given()
-            .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));
+              .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));
     }
 
     private void configureRestAssured() {
@@ -108,26 +112,22 @@ public class FunctionalTest {
 
     }
 
-    protected static String randomCaseNumber() {
-        return "func-case-" + randomAlphanumeric(7);
-    }
-
     protected void createCourtroomAndCourthouse(String courthouseName, String courtroomName) {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
-            .redirects().follow(false)
-            .post();
+              .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
+              .redirects().follow(false)
+              .post();
     }
 
     protected String createCaseRetentions() {
         String caseNumber = randomCaseNumber();
         Response response = buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/case-retentions/caseNumber/" + caseNumber))
-            .redirects().follow(false)
-            .post().then()
-            .assertThat()
-            .statusCode(200)
-            .extract().response();
+              .baseUri(getUri("/functional-tests/case-retentions/caseNumber/" + caseNumber))
+              .redirects().follow(false)
+              .post().then()
+              .assertThat()
+              .statusCode(200)
+              .extract().response();
         return response.asString();
     }
 

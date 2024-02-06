@@ -69,61 +69,62 @@ class AudioControllerPreviewWithSendServerEventsIntTest {
         mediaEntity = given.getMediaEntity1();
         given.externalObjectDirForMedia(mediaEntity);
         doNothing().when(authorisation).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
         webClient = webClient.mutate()
-            .responseTimeout(Duration.ofMillis(TIMEOUT))
-            .build();
+              .responseTimeout(Duration.ofMillis(TIMEOUT))
+              .build();
 
     }
 
     @Test
     void previewShouldReturnSuccess() {
         FluxExchangeResult<ServerSentEvent<String>> result = webClient.get().uri(uriBuilder -> uriBuilder.path(
-                URL + mediaEntity.getId()).build())
-            .header(RANGE, RANGE_1024)
-            .accept(TEXT_EVENT_STREAM)
-            .exchange()
-            .expectStatus().isOk().returnResult(new ParameterizedTypeReference<>() {
-            });
+                    URL + mediaEntity.getId()).build())
+              .header(RANGE, RANGE_1024)
+              .accept(TEXT_EVENT_STREAM)
+              .exchange()
+              .expectStatus().isOk().returnResult(new ParameterizedTypeReference<>() {
+              });
         StepVerifier.create(result.getResponseBody())
-            .recordWith(ArrayList::new)
-            .thenConsumeWhile(x -> true)
-            .consumeRecordedWith(elements -> {
-                ArrayList<ServerSentEvent<String>> events = (ArrayList<ServerSentEvent<String>>) elements;
-                assertTrue(elements.stream().anyMatch(e -> Objects.equals(e.event(), HEARTBEAT_EVENT_NAME)));
-                assertTrue(elements.stream().anyMatch(e -> Objects.equals(e.event(), AUDIO_EVENT_NAME)));
-                WebTestResponse re = null;
-                try {
-                    re = objectMapper.readValue(events.get(events.size() - 1).data(), WebTestResponse.class);
-                } catch (JsonProcessingException e) {
-                    fail(e.getMessage());
-                }
-                assertEquals(Base64.encode(new byte[1025]), re.getBody());
+              .recordWith(ArrayList::new)
+              .thenConsumeWhile(x -> true)
+              .consumeRecordedWith(elements -> {
+                  ArrayList<ServerSentEvent<String>> events = (ArrayList<ServerSentEvent<String>>) elements;
+                  assertTrue(elements.stream().anyMatch(e -> Objects.equals(e.event(), HEARTBEAT_EVENT_NAME)));
+                  assertTrue(elements.stream().anyMatch(e -> Objects.equals(e.event(), AUDIO_EVENT_NAME)));
+                  WebTestResponse re = null;
+                  try {
+                      re = objectMapper.readValue(events.get(events.size() - 1).data(), WebTestResponse.class);
+                  } catch (JsonProcessingException e) {
+                      fail(e.getMessage());
+                  }
+                  assertEquals(Base64.encode(new byte[1025]), re.getBody());
 
 
-            })
-            .verifyComplete();
+              })
+              .verifyComplete();
     }
 
     @Test
     void previewShouldReturnError() {
         webClient.get().uri(uriBuilder -> uriBuilder.path(
-                        URL + -1).build())
-                .header(RANGE, RANGE_1024)
-                .accept(TEXT_EVENT_STREAM)
-                .exchange()
-                .expectBody().consumeWith(c -> {
-                    String fullResponse = new String(Objects.requireNonNull(c.getResponseBody()));
-                    assertTrue(fullResponse.contains("{\"type\":\"AUDIO_101\",\"title\":\"The requested data cannot be located\",\"status\":500}"));
-                });
+                    URL + -1).build())
+              .header(RANGE, RANGE_1024)
+              .accept(TEXT_EVENT_STREAM)
+              .exchange()
+              .expectBody().consumeWith(c -> {
+                  String fullResponse = new String(Objects.requireNonNull(c.getResponseBody()));
+                  assertTrue(fullResponse.contains("{\"type\":\"AUDIO_101\",\"title\":\"The requested data cannot be located\",\"status\":500}"));
+              });
 
     }
 
     @Setter
     @Getter
     private static class WebTestResponse {
+
         Object headers;
         String body;
         Integer statusCodeValue;

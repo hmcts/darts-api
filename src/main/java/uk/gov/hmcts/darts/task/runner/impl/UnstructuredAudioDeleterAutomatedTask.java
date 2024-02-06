@@ -11,15 +11,14 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_AUDI
 @Slf4j
 public class UnstructuredAudioDeleterAutomatedTask extends AbstractLockableAutomatedTask {
 
+    private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
     protected String taskName = UNSTRUCTURED_AUDIO_DELETER_TASK_NAME.getTaskName();
 
-    private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
-
     public UnstructuredAudioDeleterAutomatedTask(
-        AutomatedTaskRepository automatedTaskRepository,
-        LockProvider lockProvider,
-        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-        UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor) {
+          AutomatedTaskRepository automatedTaskRepository,
+          LockProvider lockProvider,
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+          UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.unstructuredAudioDeleterProcessor = unstructuredAudioDeleterProcessor;
     }

@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -28,6 +27,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 @Slf4j
 @RequiredArgsConstructor
 public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProcessor {
+
     private final UserAccountRepository userAccountRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -41,21 +41,18 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     @Transactional
     public void markForDeletion() {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.STORED.getId());
+              ObjectRecordStatusEnum.STORED.getId());
         ExternalLocationTypeEntity inboundLocation = externalLocationTypeRepository.getReferenceById(
-            ExternalLocationTypeEnum.INBOUND.getId());
+              ExternalLocationTypeEnum.INBOUND.getId());
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(
-            ExternalLocationTypeEnum.ARM.getId());
-        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
-            hoursInArm,
-            ChronoUnit.HOURS
-        );
+              ExternalLocationTypeEnum.ARM.getId());
+        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minusHours(hoursInArm);
         List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findMediaFileIdsIn2StorageLocationsBeforeTime(
-            storedStatus,
-            storedStatus,
-            inboundLocation,
-            armLocation,
-            lastModifiedBefore
+              storedStatus,
+              storedStatus,
+              inboundLocation,
+              armLocation,
+              lastModifiedBefore
         );
 
         if (audioFileIdsToBeMarked.isEmpty()) {
@@ -65,14 +62,14 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         log.debug("Marking the following ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
         ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(
-            MARKED_FOR_DELETION.getId());
+              MARKED_FOR_DELETION.getId());
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
         externalObjectDirectoryRepository.updateStatus(
-            deletionStatus,
-            user,
-            audioFileIdsToBeMarked,
-            OffsetDateTime.now()
+              deletionStatus,
+              user,
+              audioFileIdsToBeMarked,
+              OffsetDateTime.now()
         );
     }
 }

@@ -20,7 +20,7 @@ class OutboundAudioDeleterAutomatedTaskTest {
     @Test
     void runTask() {
         OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask =
-            new OutboundAudioDeleterAutomatedTask(null, provider, null, processor);
+              new OutboundAudioDeleterAutomatedTask(null, provider, null, processor);
 
         outboundAudioDeleterAutomatedTask.runTask();
 

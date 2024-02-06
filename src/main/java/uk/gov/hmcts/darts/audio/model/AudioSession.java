@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 public class AudioSession {
+
     private Instant startTime;
     private Instant endTime;
 

@@ -77,33 +77,33 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
-            transcriptionEntity.getCreatedDateTime().plusHours(1),
-            transcriptionStub.getTranscriptionStatusByEnum(APPROVED)
+              transcriptionEntity,
+              transcriptionEntity.getLastModifiedBy(),
+              transcriptionEntity.getCreatedDateTime().plusHours(1),
+              transcriptionStub.getTranscriptionStatusByEnum(APPROVED)
         );
 
         TranscriptionWorkflowEntity withTranscriberTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
-            transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(15),
-            transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+              transcriptionEntity,
+              transcriptionEntity.getLastModifiedBy(),
+              transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(15),
+              transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
         );
 
         TranscriptionWorkflowEntity completeTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
-            transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(30),
-            transcriptionStub.getTranscriptionStatusByEnum(COMPLETE)
+              transcriptionEntity,
+              transcriptionEntity.getLastModifiedBy(),
+              transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(30),
+              transcriptionStub.getTranscriptionStatusByEnum(COMPLETE)
         );
 
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         transcriptionEntity.getTranscriptionWorkflowEntities()
-            .addAll(List.of(
-                approvedTranscriptionWorkflowEntity,
-                withTranscriberTranscriptionWorkflowEntity,
-                completeTranscriptionWorkflowEntity
-            ));
+              .addAll(List.of(
+                    approvedTranscriptionWorkflowEntity,
+                    withTranscriberTranscriptionWorkflowEntity,
+                    completeTranscriptionWorkflowEntity
+              ));
         transcriptionEntity.setTranscriptionStatus(completeTranscriptionWorkflowEntity.getTranscriptionStatus());
         transcriptionEntity = dartsDatabase.getTranscriptionRepository().save(transcriptionEntity);
 
@@ -116,7 +116,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         doNothing().when(mockAuditApi)
-            .recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+              .recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -124,20 +124,20 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
-            .header(
-                "accept",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            );
+              .header(
+                    "accept",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              );
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
+              {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -146,20 +146,20 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     @Test
     void downloadTranscriptShouldReturnBadRequestError() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
-            .header(
-                "accept",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            );
+              .header(
+                    "accept",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              );
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_109","title":"Failed to download transcript","status":400}
-            """;
+              {"type":"TRANSCRIPTION_109","title":"Failed to download transcript","status":400}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -171,48 +171,48 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
         final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(
-            STORED);
+              STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
-            UNSTRUCTURED);
+              UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(
-            transcriptionEntity,
-            fileName,
-            fileType,
-            fileSize,
-            testUser,
-            objectRecordStatusEntity,
-            externalLocationTypeEntity,
-            externalLocation,
-            checksum
+              transcriptionEntity,
+              fileName,
+              fileType,
+              fileSize,
+              testUser,
+              objectRecordStatusEntity,
+              externalLocationTypeEntity,
+              externalLocation,
+              checksum
         );
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
-            .header(
-                "accept",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            );
+              .header(
+                    "accept",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              );
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(header().string(
-                CONTENT_DISPOSITION,
-                "attachment; filename=\"" + fileName + "\""
-            ))
-            .andExpect(header().string(
-                CONTENT_TYPE,
-                fileType
-            ))
-            .andExpect(header().string(
-                EXTERNAL_LOCATION_HEADER,
-                externalLocation.toString()
-            ))
-            .andExpect(header().string(
-                TRANSCRIPTION_DOCUMENT_ID_HEADER,
-                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
-            ));
+              .andExpect(status().isOk())
+              .andExpect(header().string(
+                    CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileName + "\""
+              ))
+              .andExpect(header().string(
+                    CONTENT_TYPE,
+                    fileType
+              ))
+              .andExpect(header().string(
+                    EXTERNAL_LOCATION_HEADER,
+                    externalLocation.toString()
+              ))
+              .andExpect(header().string(
+                    TRANSCRIPTION_DOCUMENT_ID_HEADER,
+                    String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
+              ));
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
@@ -223,48 +223,48 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileType = "application/msword";
         final int fileSize = 22_528;
         final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(
-            STORED);
+              STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
-            UNSTRUCTURED);
+              UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";
 
         transcriptionEntity = transcriptionStub.updateTranscriptionWithDocument(
-            transcriptionEntity,
-            fileName,
-            fileType,
-            fileSize,
-            testUser,
-            objectRecordStatusEntity,
-            externalLocationTypeEntity,
-            externalLocation,
-            checksum
+              transcriptionEntity,
+              fileName,
+              fileType,
+              fileSize,
+              testUser,
+              objectRecordStatusEntity,
+              externalLocationTypeEntity,
+              externalLocation,
+              checksum
         );
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
-            .header(
-                "accept",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            );
+              .header(
+                    "accept",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              );
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(header().string(
-                CONTENT_DISPOSITION,
-                "attachment; filename=\"" + fileName + "\""
-            ))
-            .andExpect(header().string(
-                CONTENT_TYPE,
-                fileType
-            ))
-            .andExpect(header().string(
-                EXTERNAL_LOCATION_HEADER,
-                externalLocation.toString()
-            ))
-            .andExpect(header().string(
-                TRANSCRIPTION_DOCUMENT_ID_HEADER,
-                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
-            ));
+              .andExpect(status().isOk())
+              .andExpect(header().string(
+                    CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileName + "\""
+              ))
+              .andExpect(header().string(
+                    CONTENT_TYPE,
+                    fileType
+              ))
+              .andExpect(header().string(
+                    EXTERNAL_LOCATION_HEADER,
+                    externalLocation.toString()
+              ))
+              .andExpect(header().string(
+                    TRANSCRIPTION_DOCUMENT_ID_HEADER,
+                    String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
+              ));
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }

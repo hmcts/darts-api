@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @RequiredArgsConstructor
 @Slf4j
 class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
-    implements ControllerAuthorisation {
+      implements ControllerAuthorisation {
 
     static final String MEDIA_ID_PARAM = "media_id";
 
@@ -44,9 +44,9 @@ class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
 
         if (mediaIdParamOptional.isEmpty()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
-                MEDIA_ID_PARAM,
-                request.getRequestURI()
+                  BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                  MEDIA_ID_PARAM,
+                  request.getRequestURI()
             ));
             throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
         }
@@ -58,7 +58,7 @@ class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
 
         if (!idToAuthorise.get().isPresent()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
+                  BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
             throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
         }

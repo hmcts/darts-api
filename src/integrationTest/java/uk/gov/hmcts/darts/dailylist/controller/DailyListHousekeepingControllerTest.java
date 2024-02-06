@@ -21,10 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DailyListHousekeepingControllerTest extends IntegrationBase {
 
     @Autowired
-    private transient MockMvc mockMvc;
-
-    @Autowired
     protected DailyListStub dailyListStub;
+    @Autowired
+    private transient MockMvc mockMvc;
 
     @Test
     void housekeepingPostEndpoint() throws Exception {
@@ -34,7 +33,7 @@ class DailyListHousekeepingControllerTest extends IntegrationBase {
         Assertions.assertEquals(50, resultList.size());
 
         MockHttpServletRequestBuilder requestBuilder = post("/dailylists/housekeeping")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
         List<DailyListEntity> newResultList = dartsDatabase.getDailyListRepository().findAll();

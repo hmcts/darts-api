@@ -37,10 +37,10 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(REQUESTER_EMAIL))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of(REQUESTER_EMAIL))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
         dartsDatabase.createTestUserAccount();
     }
@@ -71,11 +71,11 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
         eventDispatcher.receive(sentencingRemarksDartsEvent);
 
         var transcriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository().findAll().stream()
-            .filter(t -> SOME_CASE_NUMBER.equals(t.getTranscription().getCourtCase().getCaseNumber()))
-            .toList();
+              .filter(t -> SOME_CASE_NUMBER.equals(t.getTranscription().getCourtCase().getCaseNumber()))
+              .toList();
 
         assertThat(transcriptionWorkflows).extracting("transcriptionStatus.id")
-            .hasSameElementsAs(List.of(REQUESTED.getId(), APPROVED.getId()));
+              .hasSameElementsAs(List.of(REQUESTED.getId(), APPROVED.getId()));
     }
 
     @Test
@@ -99,7 +99,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
 
         var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER);
         assertThat(notifications).extracting("emailAddress")
-            .hasSameElementsAs(List.of(transcriber.getEmailAddress(), REQUESTER_EMAIL));
+              .hasSameElementsAs(List.of(transcriber.getEmailAddress(), REQUESTER_EMAIL));
 
     }
 
@@ -116,15 +116,15 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
         var startTime = OffsetDateTime.parse("2023-06-13T08:13:09Z");
         var endTime = startTime.plusHours(2);
         return new DartsEvent()
-            .messageId("some-message-id")
-            .type("40730")
-            .subType("10808")
-            .courthouse(courthouseName)
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .courtroom(SOME_COURTROOM)
-            .dateTime(eventTime)
-            .startTime(startTime)
-            .endTime(endTime);
+              .messageId("some-message-id")
+              .type("40730")
+              .subType("10808")
+              .courthouse(courthouseName)
+              .caseNumbers(List.of(SOME_CASE_NUMBER))
+              .courtroom(SOME_COURTROOM)
+              .dateTime(eventTime)
+              .startTime(startTime)
+              .endTime(endTime);
     }
 
 }

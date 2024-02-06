@@ -36,7 +36,7 @@ public final class TestUtils {
 
     public static String removeIds(String input) {
         return input.replaceAll("\"case_id\".{1,6},", "")
-            .replaceAll("\"id\".{1,6},", "");
+              .replaceAll("\"id\".{1,6},", "");
     }
 
     public static String removeTags(List<String> tagsToRemove, String json) {

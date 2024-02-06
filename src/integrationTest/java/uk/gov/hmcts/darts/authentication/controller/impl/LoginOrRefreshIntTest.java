@@ -30,11 +30,11 @@ class LoginOrRefreshIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isFound())
-            .andExpect(header().string(
-                HttpHeaders.LOCATION,
-                EXPECTED_LOGIN_REDIRECT_URL
-            ));
+              .andExpect(status().isFound())
+              .andExpect(header().string(
+                    HttpHeaders.LOCATION,
+                    EXPECTED_LOGIN_REDIRECT_URL
+              ));
     }
 
     @Test
@@ -42,24 +42,24 @@ class LoginOrRefreshIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT_WITH_OVERRIDE);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isFound())
-            .andExpect(header().string(
-                HttpHeaders.LOCATION,
-                EXPECTED_LOGIN_REDIRECT_URL_WITH_OVERRIDE
-            ));
+              .andExpect(status().isFound())
+              .andExpect(header().string(
+                    HttpHeaders.LOCATION,
+                    EXPECTED_LOGIN_REDIRECT_URL_WITH_OVERRIDE
+              ));
     }
 
     @Test
     void loginOrRefreshShouldReturnRedirectWhenNoSessionExistsInCache() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT)
-            .queryParam("session-id", UUID.randomUUID().toString());
+              .queryParam("session-id", UUID.randomUUID().toString());
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isFound())
-            .andExpect(header().string(
-                HttpHeaders.LOCATION,
-                EXPECTED_LOGIN_REDIRECT_URL
-            ));
+              .andExpect(status().isFound())
+              .andExpect(header().string(
+                    HttpHeaders.LOCATION,
+                    EXPECTED_LOGIN_REDIRECT_URL
+              ));
     }
 
 }

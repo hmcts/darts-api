@@ -34,23 +34,81 @@ class ExceptionHandlerTest extends IntegrationBase {
     @MockBean
     private MockController mockController;
 
-    @RestController
-    static class MockController {
+    @Test
+    void shouldReturnRfc7807ResponseWhenADartsApiExceptionIsThrown() throws Exception {
+        Mockito.when(mockController.test())
+              .thenThrow(new DartsApiException(TestError.TEST_ERROR));
 
-        @GetMapping(ENDPOINT)
-        public ResponseEntity<Void> test() {
-            return ResponseEntity.ok()
-                .build();
-        }
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+              .andExpect(status().isIAmATeapot())
+              .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+              {
+                  "type":"TEST_999",
+                  "title":"A descriptive title",
+                  "status":418
+              }
+              """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void shouldReturnRfc7807ResponseWithDetailFieldPopulatedWhenADartsApiExceptionIsThrownWithDetail()
+          throws Exception {
+        Mockito.when(mockController.test())
+              .thenThrow(new DartsApiException(TestError.TEST_ERROR, "Some descriptive details"));
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+              .andExpect(status().isIAmATeapot())
+              .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+              {
+                  "type":"TEST_999",
+                  "title":"A descriptive title",
+                  "status":418,
+                  "detail":"Some descriptive details"
+              }
+              """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void shouldReturnAGenericRfc7807ResponseWhenARuntimeExceptionIsThrown() throws Exception {
+        Mockito.when(mockController.test())
+              .thenThrow(new RuntimeException("A runtime exception occurred"));
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+              .andExpect(status().isInternalServerError())
+              .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+              {
+                  "title":"Internal Server Error",
+                  "status":500,
+                  "detail":"A runtime exception occurred"
+              }
+              """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Getter
     @RequiredArgsConstructor
     enum TestError implements DartsApiError {
         TEST_ERROR(
-            "999",
-            HttpStatus.I_AM_A_TEAPOT,
-            "A descriptive title"
+              "999",
+              HttpStatus.I_AM_A_TEAPOT,
+              "A descriptive title"
         );
 
         private static final String ERROR_TYPE_PREFIX = "TEST";
@@ -65,72 +123,14 @@ class ExceptionHandlerTest extends IntegrationBase {
         }
     }
 
-    @Test
-    void shouldReturnRfc7807ResponseWhenADartsApiExceptionIsThrown() throws Exception {
-        Mockito.when(mockController.test())
-            .thenThrow(new DartsApiException(TestError.TEST_ERROR));
+    @RestController
+    static class MockController {
 
-        MvcResult response = mockMvc.perform(get(ENDPOINT))
-            .andExpect(status().isIAmATeapot())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "type":"TEST_999",
-                "title":"A descriptive title",
-                "status":418
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void shouldReturnRfc7807ResponseWithDetailFieldPopulatedWhenADartsApiExceptionIsThrownWithDetail()
-        throws Exception {
-        Mockito.when(mockController.test())
-            .thenThrow(new DartsApiException(TestError.TEST_ERROR, "Some descriptive details"));
-
-        MvcResult response = mockMvc.perform(get(ENDPOINT))
-            .andExpect(status().isIAmATeapot())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "type":"TEST_999",
-                "title":"A descriptive title",
-                "status":418,
-                "detail":"Some descriptive details"
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void shouldReturnAGenericRfc7807ResponseWhenARuntimeExceptionIsThrown() throws Exception {
-        Mockito.when(mockController.test())
-            .thenThrow(new RuntimeException("A runtime exception occurred"));
-
-        MvcResult response = mockMvc.perform(get(ENDPOINT))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "title":"Internal Server Error",
-                "status":500,
-                "detail":"A runtime exception occurred"
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+        @GetMapping(ENDPOINT)
+        public ResponseEntity<Void> test() {
+            return ResponseEntity.ok()
+                  .build();
+        }
     }
 
 }

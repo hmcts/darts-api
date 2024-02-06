@@ -13,47 +13,47 @@ import java.util.List;
 public interface TransformedMediaRepository extends JpaRepository<TransformedMediaEntity, Integer> {
 
     @Query("""
-        SELECT tm FROM TransformedMediaEntity tm
-        WHERE tm.mediaRequest.id = :mediaRequestId
-        """)
+          SELECT tm FROM TransformedMediaEntity tm
+          WHERE tm.mediaRequest.id = :mediaRequestId
+          """)
     List<TransformedMediaEntity> findByMediaRequestId(Integer mediaRequestId);
 
     @Query("""
-        SELECT new uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto (mr.id,
-        tm.id,
-        case.id,
-        he.id,
-        mr.requestType,
-        case.caseNumber,
-        ch.courthouseName,
-        he.hearingDate,
-        tm.startTime,
-        tm.endTime,
-        tm.expiryTime,
-        mr.status,
-        tm.outputFilename,
-        tm.outputFormat,
-        tm.lastAccessed)
+          SELECT new uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto (mr.id,
+          tm.id,
+          case.id,
+          he.id,
+          mr.requestType,
+          case.caseNumber,
+          ch.courthouseName,
+          he.hearingDate,
+          tm.startTime,
+          tm.endTime,
+          tm.expiryTime,
+          mr.status,
+          tm.outputFilename,
+          tm.outputFormat,
+          tm.lastAccessed)
 
-        FROM TransformedMediaEntity tm, MediaRequestEntity mr, HearingEntity he, CourtCaseEntity case, CourthouseEntity ch
-        WHERE tm.mediaRequest = mr
-        and mr.hearing = he
-        and he.courtCase = case
-        and case.courthouse = ch
-        and mr.currentOwner.id = :userId
-        and ((true = :expired and tm.expiryTime < current_timestamp and mr.status in ('EXPIRED', 'COMPLETED')) or
-        (false = :expired and (tm.expiryTime is null or tm.expiryTime >= current_timestamp) and mr.status = 'COMPLETED'))
-        order by 1
-        """)
+          FROM TransformedMediaEntity tm, MediaRequestEntity mr, HearingEntity he, CourtCaseEntity case, CourthouseEntity ch
+          WHERE tm.mediaRequest = mr
+          and mr.hearing = he
+          and he.courtCase = case
+          and case.courthouse = ch
+          and mr.currentOwner.id = :userId
+          and ((true = :expired and tm.expiryTime < current_timestamp and mr.status in ('EXPIRED', 'COMPLETED')) or
+          (false = :expired and (tm.expiryTime is null or tm.expiryTime >= current_timestamp) and mr.status = 'COMPLETED'))
+          order by 1
+          """)
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
 
 
     @Query("""
-        SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
-        WHERE tm.mediaRequest = mr
-        AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
-             OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
-        """)
+          SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
+          WHERE tm.mediaRequest = mr
+          AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
+               OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
+          """)
     List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
 
 }

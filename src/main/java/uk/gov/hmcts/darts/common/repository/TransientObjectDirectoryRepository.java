@@ -13,10 +13,10 @@ import java.util.Optional;
 public interface TransientObjectDirectoryRepository extends JpaRepository<TransientObjectDirectoryEntity, Integer> {
 
     @Query("""
-        SELECT tod FROM TransformedMediaEntity tm, TransientObjectDirectoryEntity tod
-        WHERE tod.transformedMedia = tm
-        and tm.id = :transformedMediaId
-        """)
+          SELECT tod FROM TransformedMediaEntity tm, TransientObjectDirectoryEntity tod
+          WHERE tod.transformedMedia = tm
+          and tm.id = :transformedMediaId
+          """)
     List<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
 
 
@@ -24,19 +24,19 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
 
 
     @Query("""
-        SELECT tod FROM MediaRequestEntity mr, TransformedMediaEntity tm, TransientObjectDirectoryEntity tod
-        WHERE tod.transformedMedia = tm
-        AND tm.mediaRequest = mr
-        and mr.id = :mediaRequestId
-        """)
+          SELECT tod FROM MediaRequestEntity mr, TransformedMediaEntity tm, TransientObjectDirectoryEntity tod
+          WHERE tod.transformedMedia = tm
+          AND tm.mediaRequest = mr
+          and mr.id = :mediaRequestId
+          """)
     Optional<TransientObjectDirectoryEntity> findByMediaRequestId(Integer mediaRequestId);
 
     @Query("""
-        SELECT tod FROM MediaRequestEntity mr, TransformedMediaEntity tm, TransientObjectDirectoryEntity tod
-        WHERE tod.transformedMedia = tm
-        AND tm.mediaRequest = mr
-        and mr.id in :mediaRequestIds
-        """)
+          SELECT tod FROM MediaRequestEntity mr, TransformedMediaEntity tm, TransientObjectDirectoryEntity tod
+          WHERE tod.transformedMedia = tm
+          AND tm.mediaRequest = mr
+          and mr.id in :mediaRequestIds
+          """)
     List<TransientObjectDirectoryEntity> findByMediaRequestIds(List<Integer> mediaRequestIds);
 
     List<TransientObjectDirectoryEntity> findByStatus(ObjectRecordStatusEntity status);

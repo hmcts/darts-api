@@ -36,6 +36,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 class DailyListUpdater {
+
     public static final String DL_TIME_NOT_BEFORE = "NOT BEFORE ";
     public static final String DL_TIME_SITTING_AT = "SITTING AT ";
     public static final String TIME_MARKING_NOTE_FORMAT = "hh:mm a";
@@ -57,7 +58,7 @@ class DailyListUpdater {
 
             String courtHouseName = courtList.getCourtHouse().getCourtHouseName();
             Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
-                courtHouseName);
+                  courtHouseName);
 
             if (foundCourthouse.isPresent()) {
                 List<Sitting> sittings = courtList.getSittings();
@@ -68,8 +69,8 @@ class DailyListUpdater {
                         String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                            courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
+                              courtHouseName, sitting.getCourtRoomNumber(),
+                              caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
@@ -85,7 +86,7 @@ class DailyListUpdater {
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
                 log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                              + dailyListEntity.getId() + " has not been processed");
+                      + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType);
@@ -106,7 +107,7 @@ class DailyListUpdater {
                 return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                             + timeMarkingNoteText, dateTimeException);
+                      + timeMarkingNoteText, dateTimeException);
             }
         }
 
@@ -115,7 +116,7 @@ class DailyListUpdater {
                 return getTimeFromSittingAt(sitting);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                             + sitting.getSittingAt(), dateTimeException);
+                      + sitting.getSittingAt(), dateTimeException);
             }
         }
         return null;
@@ -124,9 +125,9 @@ class DailyListUpdater {
     private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
         if (StringUtils.isNotBlank(sitting.getSittingAt())) {
             return LocalTime.parse(sitting.getSittingAt(), new DateTimeFormatterBuilder()
-                .parseCaseInsensitive()
-                .appendPattern(SITTING_AT_FORMAT)
-                .toFormatter(Locale.ENGLISH));
+                  .parseCaseInsensitive()
+                  .appendPattern(SITTING_AT_FORMAT)
+                  .toFormatter(Locale.ENGLISH));
         }
         return null;
     }
@@ -145,9 +146,9 @@ class DailyListUpdater {
             }
 
             return LocalTime.parse(rawTime, new DateTimeFormatterBuilder()
-                .parseCaseInsensitive()
-                .appendPattern(TIME_MARKING_NOTE_FORMAT)
-                .toFormatter(Locale.ENGLISH));
+                  .parseCaseInsensitive()
+                  .appendPattern(TIME_MARKING_NOTE_FORMAT)
+                  .toFormatter(Locale.ENGLISH));
         }
         return null;
     }
@@ -175,8 +176,8 @@ class DailyListUpdater {
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         advocates.forEach(advocate ->
-                              courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                                  buildFullName(advocate.getName()), courtCase)));
+              courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                    buildFullName(advocate.getName()), courtCase)));
 
     }
 
@@ -184,7 +185,7 @@ class DailyListUpdater {
         for (Defendant defendant : defendants) {
             for (PersonalDetails personalDetails : defendant.getCounsel()) {
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(personalDetails.getName()), courtCase));
+                      buildFullName(personalDetails.getName()), courtCase));
             }
         }
     }
@@ -192,8 +193,8 @@ class DailyListUpdater {
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
             courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
-                buildFullName(defendant.getPersonalDetails().getName()),
-                courtCase
+                  buildFullName(defendant.getPersonalDetails().getName()),
+                  courtCase
             ));
         }
 

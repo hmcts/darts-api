@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.arm.model.record.operation.AnnotationCreateArchiveReco
 @Value
 @Builder
 public class AnnotationArchiveRecord implements ArchiveRecord {
+
     private AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation;
     private UploadNewFileRecord uploadNewFileRecord;
 

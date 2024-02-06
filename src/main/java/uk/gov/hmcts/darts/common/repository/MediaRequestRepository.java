@@ -19,27 +19,27 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
     Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(MediaRequestStatus status);
 
     @Query("""
-        SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
-        WHERE tm.mediaRequest = mr
-        AND mr.requestor.id = :userId
-        AND tm.lastAccessed is null
-        AND mr.status = :status
-        """)
+          SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
+          WHERE tm.mediaRequest = mr
+          AND mr.requestor.id = :userId
+          AND tm.lastAccessed is null
+          AND mr.status = :status
+          """)
     long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, MediaRequestStatus status);
 
     @Query("""
-        SELECT mr
-        FROM MediaRequestEntity mr
-        WHERE mr.hearing = :hearing
-        AND mr.requestor = :userAccount
-        AND mr.startTime = :startTime
-        AND mr.endTime = :endTime
-        AND mr.requestType = :requestType
-        AND mr.status IN :requestStatuses
-        """)
+          SELECT mr
+          FROM MediaRequestEntity mr
+          WHERE mr.hearing = :hearing
+          AND mr.requestor = :userAccount
+          AND mr.startTime = :startTime
+          AND mr.endTime = :endTime
+          AND mr.requestType = :requestType
+          AND mr.status IN :requestStatuses
+          """)
     Optional<MediaRequestEntity> findDuplicateUserMediaRequests(HearingEntity hearing, UserAccountEntity userAccount,
-                                                                OffsetDateTime startTime, OffsetDateTime endTime,
-                                                                AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
+          OffsetDateTime startTime, OffsetDateTime endTime,
+          AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
 
 
 }

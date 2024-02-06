@@ -31,12 +31,12 @@ class DartsEventNullHandlerTest extends IntegrationBase {
 
     private static DartsEvent someMinimalDartsEvent() {
         return new DartsEvent()
-            .messageId("some-message-id")
-            .type("40790")
-            .eventId("1")
-            .courthouse(SOME_COURTHOUSE)
-            .courtroom(SOME_ROOM)
-            .eventText("some-text");
+              .messageId("some-message-id")
+              .type("40790")
+              .eventId("1")
+              .courthouse(SOME_COURTHOUSE)
+              .courtroom(SOME_ROOM)
+              .eventText("some-text");
     }
 
     @Test

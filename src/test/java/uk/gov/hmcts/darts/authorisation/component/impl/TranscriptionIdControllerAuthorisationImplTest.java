@@ -41,11 +41,9 @@ class TranscriptionIdControllerAuthorisationImplTest {
     private static final String METHOD = "POST";
     private static final String URI = "/transcriptions";
     private static final String TRANSCRIPTION_ID_PARAM_VALUE = "5";
-
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private Authorisation authorisation;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private Set<SecurityRoleEnum> roles;
 
     private ControllerAuthorisation controllerAuthorisation;
@@ -53,12 +51,12 @@ class TranscriptionIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
-            REQUESTER,
-            APPROVER,
-            TRANSCRIBER,
-            TRANSLATION_QA,
-            RCJ_APPEALS
+              JUDGE,
+              REQUESTER,
+              APPROVER,
+              TRANSCRIBER,
+              TRANSLATION_QA,
+              RCJ_APPEALS
         );
         controllerAuthorisation = new TranscriptionIdControllerAuthorisationImpl(authorisation);
     }
@@ -71,14 +69,14 @@ class TranscriptionIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBody() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -90,13 +88,13 @@ class TranscriptionIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBodyWhenTranscriptionIdMissing() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -109,7 +107,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
     void checkAuthorisationPathParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/cases/1");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE)
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -121,8 +119,8 @@ class TranscriptionIdControllerAuthorisationImplTest {
     void checkAuthorisationQueryParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE);
 
@@ -135,8 +133,8 @@ class TranscriptionIdControllerAuthorisationImplTest {
     void checkAuthorisationHeaderParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.addHeader(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE);
 
@@ -149,13 +147,13 @@ class TranscriptionIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenTranscriptionIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());
@@ -174,8 +172,8 @@ class TranscriptionIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationSupplierIdMissingParameter() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());
@@ -188,14 +186,14 @@ class TranscriptionIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenTranscriptionIdInvalid() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(TRANSCRIPTION_ID_PARAM, "");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());

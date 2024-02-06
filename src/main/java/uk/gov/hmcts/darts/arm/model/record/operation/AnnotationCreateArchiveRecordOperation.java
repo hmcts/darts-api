@@ -13,6 +13,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @Data
 @Builder
 public class AnnotationCreateArchiveRecordOperation implements ArchiveRecordOperation {
+
     @JsonProperty("operation")
     private final String operation = CREATE_RECORD;
     @JsonProperty("relation_id")

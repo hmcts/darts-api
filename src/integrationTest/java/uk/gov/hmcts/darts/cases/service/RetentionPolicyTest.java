@@ -20,11 +20,10 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class RetentionPolicyTest extends IntegrationBase {
 
-    @Autowired
-    private CasesMapper casesMapper;
-
     @MockBean
     CurrentTimeHelper currentTimeHelper;
+    @Autowired
+    private CasesMapper casesMapper;
 
     @BeforeEach
     void setup() {

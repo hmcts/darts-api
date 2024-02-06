@@ -44,26 +44,26 @@ class EventsControllerTest {
     @Test
     void eventsApiPostEndpoint() throws Exception {
         String requestBody = """
-            {
-              "message_id": "18422",
-              "type": "1000",
-              "sub_type": "1002",
-              "courthouse": "SNARESBROOK",
-              "courtroom": "1",
-              "case_numbers": [
-                "A20230049"
-              ],
-              "date_time": "2023-06-14T08:37:30.945Z"
-            }""";
+              {
+                "message_id": "18422",
+                "type": "1000",
+                "sub_type": "1002",
+                "courthouse": "SNARESBROOK",
+                "courtroom": "1",
+                "case_numbers": [
+                  "A20230049"
+                ],
+                "date_time": "2023-06-14T08:37:30.945Z"
+              }""";
 
         String expectedResponse = """
-            {
-              "code": "201",
-              "message": "CREATED"
-            }""";
+              {
+                "code": "201",
+                "message": "CREATED"
+              }""";
         MockHttpServletRequestBuilder requestBuilder = post("/events")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
         assertEquals(expectedResponse, response.getResponse().getContentAsString(), NON_EXTENSIBLE);

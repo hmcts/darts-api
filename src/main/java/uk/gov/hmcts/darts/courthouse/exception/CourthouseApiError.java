@@ -10,14 +10,14 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum CourthouseApiError implements DartsApiError {
 
     COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS(
-        "100",
-        HttpStatus.CONFLICT,
-        "Provided courthouse name already exists."
+          "100",
+          HttpStatus.CONFLICT,
+          "Provided courthouse name already exists."
     ),
     COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS(
-        "101",
-        HttpStatus.CONFLICT,
-        "Provided courthouse code already exists."
+          "101",
+          HttpStatus.CONFLICT,
+          "Provided courthouse code already exists."
     );
 
     private static final String ERROR_TYPE_PREFIX = "COURTHOUSE";

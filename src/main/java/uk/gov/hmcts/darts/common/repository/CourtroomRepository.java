@@ -13,17 +13,17 @@ import static uk.gov.hmcts.darts.common.entity.CourtroomEntity.TABLE_NAME;
 public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Integer> {
 
     @Query("""
-        SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr\s
-        WHERE upper(ch.courthouseName) = upper(:courthouse)\s
-        AND upper(cr.name) = upper(:courtroom)\s
-        AND cr.courthouse = ch
-        """
+          SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr\s
+          WHERE upper(ch.courthouseName) = upper(:courthouse)\s
+          AND upper(cr.name) = upper(:courtroom)\s
+          AND cr.courthouse = ch
+          """
     )
     Optional<CourtroomEntity> findByCourthouseNameAndCourtroomName(String courthouse, String courtroom);
 
     @Query(value = "SELECT * FROM {h-schema}" + TABLE_NAME + " cr " +
-        "WHERE upper(cr." + CourtroomEntity.COURTROOM_NAME + ") = upper(:courtroom) " +
-        "AND cr." + CourtroomEntity.CTH_ID + " = :courthouseId ", nativeQuery = true
+          "WHERE upper(cr." + CourtroomEntity.COURTROOM_NAME + ") = upper(:courtroom) " +
+          "AND cr." + CourtroomEntity.CTH_ID + " = :courthouseId ", nativeQuery = true
     )
     Optional<CourtroomEntity> findByNameAndId(int courthouseId, String courtroom);
 

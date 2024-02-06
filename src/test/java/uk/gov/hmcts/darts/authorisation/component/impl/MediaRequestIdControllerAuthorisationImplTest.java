@@ -41,11 +41,9 @@ class MediaRequestIdControllerAuthorisationImplTest {
     private static final String METHOD = "POST";
     private static final String URI = "/audio-requests";
     private static final String MEDIA_REQUEST_ID_PARAM_VALUE = "4";
-
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private Authorisation authorisation;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private Set<SecurityRoleEnum> roles;
 
     private ControllerAuthorisation controllerAuthorisation;
@@ -53,12 +51,12 @@ class MediaRequestIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
-            REQUESTER,
-            APPROVER,
-            TRANSCRIBER,
-            TRANSLATION_QA,
-            RCJ_APPEALS
+              JUDGE,
+              REQUESTER,
+              APPROVER,
+              TRANSCRIBER,
+              TRANSLATION_QA,
+              RCJ_APPEALS
         );
         controllerAuthorisation = new MediaRequestIdControllerAuthorisationImpl(authorisation);
     }
@@ -71,14 +69,14 @@ class MediaRequestIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBody() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -90,13 +88,13 @@ class MediaRequestIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBodyWhenMediaRequestIdMissing() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -109,7 +107,7 @@ class MediaRequestIdControllerAuthorisationImplTest {
     void checkAuthorisationPathParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/audio-requests/4");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE)
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -121,8 +119,8 @@ class MediaRequestIdControllerAuthorisationImplTest {
     void checkAuthorisationQueryParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE);
 
@@ -135,8 +133,8 @@ class MediaRequestIdControllerAuthorisationImplTest {
     void checkAuthorisationHeaderParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.addHeader(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE);
 
@@ -149,13 +147,13 @@ class MediaRequestIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenMediaRequestIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_MEDIA_REQUEST_ID.getTitle(), exception.getMessage());
@@ -174,8 +172,8 @@ class MediaRequestIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationSupplierIdMissingParameter() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
         );
 
         assertEquals(BAD_REQUEST_MEDIA_REQUEST_ID.getTitle(), exception.getMessage());
@@ -187,14 +185,14 @@ class MediaRequestIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenMediaRequestIdInvalid() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(MEDIA_REQUEST_ID_PARAM, "");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_MEDIA_REQUEST_ID.getTitle(), exception.getMessage());

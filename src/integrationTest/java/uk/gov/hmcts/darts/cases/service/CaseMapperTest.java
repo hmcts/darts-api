@@ -44,8 +44,8 @@ class CaseMapperTest extends IntegrationBase {
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
@@ -68,8 +68,8 @@ class CaseMapperTest extends IntegrationBase {
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T14:45:12Z"));
 
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
@@ -97,8 +97,8 @@ class CaseMapperTest extends IntegrationBase {
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T12:15:00Z"));
         eventDateTimes.add(OffsetDateTime.parse("2023-06-26T12:25:12Z"));
         var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+              .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+              .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
@@ -157,7 +157,7 @@ class CaseMapperTest extends IntegrationBase {
 
         assertThat(singleCase.getReportingRestrictions()).hasSize(3);
         assertThat(singleCase.getReportingRestrictions()).extracting("eventName")
-            .contains("reporting-restrictions-lifted", "reapplying-reporting-restrictions");
+              .contains("reporting-restrictions-lifted", "reapplying-reporting-restrictions");
     }
 
     @Test
@@ -168,57 +168,57 @@ class CaseMapperTest extends IntegrationBase {
 
         assertThat(singleCase.getReportingRestrictions()).hasSize(1);
         assertThat(singleCase.getReportingRestrictions()).extracting("eventName")
-            .hasSameElementsAs(
-                List.of(caseWithReportingRestrictions.getReportingRestrictions().getEventName()));
+              .hasSameElementsAs(
+                    List.of(caseWithReportingRestrictions.getReportingRestrictions().getEventName()));
     }
 
     private List<OffsetDateTime> orderedTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getTimestamp).sorted(naturalOrder())
-            .toList();
+              .map(EventEntity::getTimestamp).sorted(naturalOrder())
+              .toList();
     }
 
     private List<EventEntity> createEventsWithDifferentTimestamps(List<OffsetDateTime> eventDateTimes) {
         return rangeClosed(1, eventDateTimes.size())
-            .mapToObj(index -> {
-                var event = dartsDatabase.getEventStub().createDefaultEvent();
-                event.setEventName("some-event-name-" + index);
-                event.setEventText("some-event-text-" + index);
-                event.setMessageId("some-message-id-" + index);
-                event.setTimestamp(eventDateTimes.get(index - 1));
-                return event;
-            }).toList();
+              .mapToObj(index -> {
+                  var event = dartsDatabase.getEventStub().createDefaultEvent();
+                  event.setEventName("some-event-name-" + index);
+                  event.setEventText("some-event-text-" + index);
+                  event.setMessageId("some-message-id-" + index);
+                  event.setTimestamp(eventDateTimes.get(index - 1));
+                  return event;
+              }).toList();
     }
 
     private List<Integer> hearingIdsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .flatMap(eventEntity -> eventEntity.getHearingEntities().stream())
-            .map(HearingEntity::getId)
-            .toList();
+              .flatMap(eventEntity -> eventEntity.getHearingEntities().stream())
+              .map(HearingEntity::getId)
+              .toList();
     }
 
     private List<OffsetDateTime> eventTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(eventEntity -> eventEntity.getTimestamp().truncatedTo(MILLIS))
-            .toList();
+              .map(eventEntity -> eventEntity.getTimestamp().truncatedTo(MILLIS))
+              .toList();
     }
 
     private List<Integer> eventIdsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getId)
-            .toList();
+              .map(EventEntity::getId)
+              .toList();
     }
 
     private List<String> eventTextFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getEventText)
-            .toList();
+              .map(EventEntity::getEventText)
+              .toList();
     }
 
     private List<String> eventNamesFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getEventName)
-            .toList();
+              .map(EventEntity::getEventName)
+              .toList();
     }
 
 }

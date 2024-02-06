@@ -24,10 +24,10 @@ class PatchCaseRequestValidatorTest {
         PatchRequestObject patchRequestObject = new PatchRequestObject();
         patchRequestObject.setRetainUntil(null);
         DartsApiException exception = assertThrows(DartsApiException.class, () ->
-            PatchCaseRequestValidator.validate(patchRequestObject));
+              PatchCaseRequestValidator.validate(patchRequestObject));
         assertEquals(
-            "The request does not contain any values that are supported by the PATCH operation.",
-            exception.getMessage()
+              "The request does not contain any values that are supported by the PATCH operation.",
+              exception.getMessage()
         );
     }
 }

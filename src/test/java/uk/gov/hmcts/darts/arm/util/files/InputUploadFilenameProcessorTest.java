@@ -24,7 +24,7 @@ class InputUploadFilenameProcessorTest {
         String inputUploadFilenameProcessor = "12345_111_2_6a374f19a9ce7dc9cc480ea8d4eca0fb_1";
 
         assertThrows(IllegalArgumentException.class, () ->
-            new InputUploadFilenameProcessor(inputUploadFilenameProcessor));
+              new InputUploadFilenameProcessor(inputUploadFilenameProcessor));
     }
 
     @Test
@@ -32,6 +32,6 @@ class InputUploadFilenameProcessorTest {
         String inputUploadFilenameProcessor = "12345111_2_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
 
         assertThrows(IllegalArgumentException.class, () ->
-            new InputUploadFilenameProcessor(inputUploadFilenameProcessor));
+              new InputUploadFilenameProcessor(inputUploadFilenameProcessor));
     }
 }

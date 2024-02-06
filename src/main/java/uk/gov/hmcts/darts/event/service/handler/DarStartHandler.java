@@ -18,11 +18,11 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.START_RECORDING;
 public class DarStartHandler extends EventHandlerBase {
 
     public DarStartHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 
     @Override

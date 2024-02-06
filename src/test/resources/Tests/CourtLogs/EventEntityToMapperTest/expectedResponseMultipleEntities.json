@@ -1,14 +1,14 @@
 [
   {
-    "courthouse":"SWANSEA",
-    "caseNumber":"Case0000001",
-    "timestamp":"2023-07-01T10:00:00Z",
-    "eventText":"Test"
+    "courthouse": "SWANSEA",
+    "caseNumber": "Case0000001",
+    "timestamp": "2023-07-01T10:00:00Z",
+    "eventText": "Test"
   },
   {
-    "courthouse":"SWANSEA",
-    "caseNumber":"Case0000002",
-    "timestamp":"2023-07-01T10:00:00Z",
-    "eventText":"Test"
+    "courthouse": "SWANSEA",
+    "caseNumber": "Case0000002",
+    "timestamp": "2023-07-01T10:00:00Z",
+    "eventText": "Test"
   }
 ]

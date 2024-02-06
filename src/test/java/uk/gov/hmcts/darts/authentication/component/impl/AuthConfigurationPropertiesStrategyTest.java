@@ -36,9 +36,9 @@ class AuthConfigurationPropertiesStrategyTest {
         URI authUrl = authConfig.getLoginUri(null);
 
         assertEquals(
-            "AuthUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
-                "&response_mode=ResponseMode&response_type=ResponseType",
-            authUrl.toString()
+              "AuthUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                    "&response_mode=ResponseMode&response_type=ResponseType",
+              authUrl.toString()
         );
     }
 
@@ -54,9 +54,9 @@ class AuthConfigurationPropertiesStrategyTest {
         URI authUrl = authConfig.getLoginUri("OverriddenRedirectUri");
 
         assertEquals(
-            "AuthUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
-                "&response_mode=ResponseMode&response_type=ResponseType",
-            authUrl.toString()
+              "AuthUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
+                    "&response_mode=ResponseMode&response_type=ResponseType",
+              authUrl.toString()
         );
     }
 
@@ -76,8 +76,8 @@ class AuthConfigurationPropertiesStrategyTest {
         URI logoutUri = authConfig.getLogoutUri("DUMMY_SESSION_ID", null);
 
         assertEquals(
-            "LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=LogoutRedirectUrl",
-            logoutUri.toString()
+              "LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=LogoutRedirectUrl",
+              logoutUri.toString()
         );
     }
 
@@ -89,8 +89,8 @@ class AuthConfigurationPropertiesStrategyTest {
         URI logoutUri = authConfig.getLogoutUri("DUMMY_SESSION_ID", "OverriddenRedirectUri");
 
         assertEquals(
-            "LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=OverriddenRedirectUri",
-            logoutUri.toString()
+              "LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=OverriddenRedirectUri",
+              logoutUri.toString()
         );
     }
 
@@ -103,9 +103,9 @@ class AuthConfigurationPropertiesStrategyTest {
         URI logoutUri = authConfig.getResetPasswordUri(null);
 
         assertEquals(
-            "ResetUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
-                "&response_type=id_token",
-            logoutUri.toString()
+              "ResetUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                    "&response_type=id_token",
+              logoutUri.toString()
         );
     }
 
@@ -118,9 +118,9 @@ class AuthConfigurationPropertiesStrategyTest {
         URI logoutUri = authConfig.getResetPasswordUri("OverriddenRedirectUri");
 
         assertEquals(
-            "ResetUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
-                "&response_type=id_token",
-            logoutUri.toString()
+              "ResetUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
+                    "&response_type=id_token",
+              logoutUri.toString()
         );
     }
 

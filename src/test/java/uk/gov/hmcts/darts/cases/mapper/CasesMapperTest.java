@@ -38,6 +38,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class CasesMapperTest {
+
     public static final String SWANSEA = "SWANSEA";
     public static final String CASE_NUMBER = "casenumber1";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapperConfig().objectMapper();
@@ -77,14 +78,14 @@ class CasesMapperTest {
         CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
 
         HearingEntity hearing = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity,
-                                                                 LocalDate.of(2023, Month.JULY, 7)
+              LocalDate.of(2023, Month.JULY, 7)
         );
 
         ScheduledCase scheduledCases = caseMapper.mapToScheduledCase(hearing);
 
         String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testOk/expectedResponseWithCase.json");
+              "Tests/cases/CasesMapperTest/testOk/expectedResponseWithCase.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -99,7 +100,6 @@ class CasesMapperTest {
         caseEntity.setProsecutorList(createProsecutorList(caseEntity));
         caseEntity.setDefenceList(createDefenceList(caseEntity));
         caseEntity.setDefendantList(createDefendantList(caseEntity));
-
 
         AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
         request.setProsecutors(new ArrayList<>(List.of("New Prosecutor")));
@@ -158,7 +158,7 @@ class CasesMapperTest {
 
         String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testOrderedByTime/expectedResponse.json");
+              "Tests/cases/CasesMapperTest/testOrderedByTime/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -173,7 +173,7 @@ class CasesMapperTest {
         String actualResponse = OBJECT_MAPPER.writeValueAsString(singleCase);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToSingleCase/expectedResponse.json");
+              "Tests/cases/CasesMapperTest/testMapToSingleCase/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -188,7 +188,7 @@ class CasesMapperTest {
         String actualResponse = OBJECT_MAPPER.writeValueAsString(singleCase);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
+              "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class ChannelAudio {
+
     Integer channel;
     List<AudioFileInfo> audioFiles;
 

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class CourthouseNameNotFoundException extends Exception {
+
     String courthouseName;
 
 }

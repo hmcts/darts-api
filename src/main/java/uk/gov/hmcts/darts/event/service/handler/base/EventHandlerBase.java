@@ -25,12 +25,11 @@ import static java.lang.String.join;
 public abstract class EventHandlerBase implements EventHandler {
 
     private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
-
-    private RetrieveCoreObjectService retrieveCoreObjectService;
     protected EventRepository eventRepository;
     protected HearingRepository hearingRepository;
     protected CaseRepository caseRepository;
     protected ApplicationEventPublisher eventPublisher;
+    private RetrieveCoreObjectService retrieveCoreObjectService;
 
     @Override
     public boolean isHandlerFor(String handlerName) {
@@ -58,20 +57,20 @@ public abstract class EventHandlerBase implements EventHandler {
 
         String caseNumber = caseNumbers.get(0);
         HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
-            dartsEvent.getCourthouse(),
-            dartsEvent.getCourtroom(),
-            caseNumber,
-            dartsEvent.getDateTime().toLocalDate()
+              dartsEvent.getCourthouse(),
+              dartsEvent.getCourtroom(),
+              caseNumber,
+              dartsEvent.getDateTime().toLocalDate()
         );
 
         saveEvent(dartsEvent, hearingEntity, eventHandler);
         setHearingToActive(hearingEntity);
 
         return CreatedHearing.builder()
-            .hearingEntity(hearingEntity)
-            .isHearingNew(hearingEntity.isNew())
-            .isCourtroomDifferentFromHearing(false)//for now always creating a new one
-            .build();
+              .hearingEntity(hearingEntity)
+              .isHearingNew(hearingEntity.isNew())
+              .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+              .build();
     }
 
     private void setHearingToActive(HearingEntity hearingEntity) {

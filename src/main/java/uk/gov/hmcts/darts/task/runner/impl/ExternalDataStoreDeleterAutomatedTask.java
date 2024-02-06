@@ -21,10 +21,10 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
     protected String taskName = EXTERNAL_DATASTORE_DELETER.getTaskName();
 
     public ExternalDataStoreDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                                 AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                 ExternalInboundDataStoreDeleter inboundDeleter,
-                                                 ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
-                                                 ExternalOutboundDataStoreDeleter outboundDeleter) {
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+          ExternalInboundDataStoreDeleter inboundDeleter,
+          ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
+          ExternalOutboundDataStoreDeleter outboundDeleter) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.inboundDeleter = inboundDeleter;
         this.unstructuredDeleter = unstructuredDeleter;

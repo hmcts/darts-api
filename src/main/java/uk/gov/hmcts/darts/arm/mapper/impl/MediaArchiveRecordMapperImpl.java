@@ -31,27 +31,27 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         MediaEntity media = externalObjectDirectory.getMedia();
         MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(
-            externalObjectDirectory,
-            externalObjectDirectory.getId()
+              externalObjectDirectory,
+              externalObjectDirectory.getId()
         );
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId());
         return createMediaArchiveRecord(mediaCreateArchiveRecordOperation, uploadNewFileRecord);
     }
 
     private MediaArchiveRecord createMediaArchiveRecord(MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation,
-                                                        UploadNewFileRecord uploadNewFileRecord) {
+          UploadNewFileRecord uploadNewFileRecord) {
         return MediaArchiveRecord.builder()
-            .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+              .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
+              .uploadNewFileRecord(uploadNewFileRecord)
+              .build();
     }
 
     private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                           Integer relationId) {
+          Integer relationId) {
         return MediaCreateArchiveRecordOperation.builder()
-            .relationId(relationId.toString())
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+              .relationId(relationId.toString())
+              .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+              .build();
     }
 
     private MediaCreateArchiveRecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
@@ -59,21 +59,21 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
 
         MediaCreateArchiveRecordMetadata metadata = MediaCreateArchiveRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .recordClass(armDataManagementConfiguration.getMediaRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(formatter))
-            .region(armDataManagementConfiguration.getRegion())
-            .id(media.getId().toString())
-            .type(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription())
-            .channel(media.getChannel().toString())
-            .maxChannels(media.getTotalChannels().toString())
-            .courthouse(media.getCourtroom().getCourthouse().getCourthouseName())
-            .courtroom(media.getCourtroom().getName())
-            .fileName(media.getMediaFile())
-            .fileFormat(media.getMediaFormat())
-            .startDateTime(media.getStart().format(formatter))
-            .endDateTime(media.getEnd().format(formatter))
-            .build();
+              .publisher(armDataManagementConfiguration.getPublisher())
+              .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+              .recordDate(currentTimeHelper.currentOffsetDateTime().format(formatter))
+              .region(armDataManagementConfiguration.getRegion())
+              .id(media.getId().toString())
+              .type(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription())
+              .channel(media.getChannel().toString())
+              .maxChannels(media.getTotalChannels().toString())
+              .courthouse(media.getCourtroom().getCourthouse().getCourthouseName())
+              .courtroom(media.getCourtroom().getName())
+              .fileName(media.getMediaFile())
+              .fileFormat(media.getMediaFormat())
+              .startDateTime(media.getStart().format(formatter))
+              .endDateTime(media.getEnd().format(formatter))
+              .build();
 
         if (nonNull(media.getCreatedDateTime())) {
             metadata.setCreatedDateTime(media.getCreatedDateTime().format(formatter));

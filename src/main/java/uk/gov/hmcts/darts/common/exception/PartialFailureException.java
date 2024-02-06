@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class PartialFailureException extends DartsApiException {
+
     PartialFailureException(DartsApiError error, String payload) {
         super(error);
         this.getCustomProperties().put("partial_failure", payload);

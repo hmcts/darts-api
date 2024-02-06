@@ -19,10 +19,10 @@ public interface DartsApiTrait extends AdviceTrait {
         HttpStatusAdapter problemHttpStatus = new HttpStatusAdapter(error.getHttpStatus());
 
         ProblemBuilder problemBuilder = Problem.builder()
-            .withType(error.getType())
-            .withStatus(problemHttpStatus)
-            .withTitle(error.getTitle())
-            .withDetail(exception.getDetail());
+              .withType(error.getType())
+              .withStatus(problemHttpStatus)
+              .withTitle(error.getTitle())
+              .withDetail(exception.getDetail());
 
         for (Entry<String, Object> stringStringEntry : exception.getCustomProperties().entrySet()) {
             problemBuilder.with(stringStringEntry.getKey(), stringStringEntry.getValue());

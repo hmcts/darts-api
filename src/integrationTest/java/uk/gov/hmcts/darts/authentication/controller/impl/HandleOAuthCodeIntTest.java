@@ -56,7 +56,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 class HandleOAuthCodeIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE =
-        "/external-user/handle-oauth-code?code=abc";
+          "/external-user/handle-oauth-code?code=abc";
     private static final String KEY_ID_VALUE = "dummy_key_id";
     private static final String CONFIGURED_ISSUER_VALUE = "dummy_issuer_uri";
     private static final String CONFIGURED_AUDIENCE_VALUE = "dummy_client_id";
@@ -75,25 +75,25 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     @Test
     void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
         when(mockAuthorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
-            .thenReturn(Optional.ofNullable(UserState.builder()
-                                                .userId(-1)
-                                                .userName("Test User")
-                                                .roles(Set.of(Role.builder()
-                                                                  .roleId(TRANSCRIBER.getId())
-                                                                  .roleName(TRANSCRIBER.toString())
-                                                                  .permissions(new HashSet<>())
-                                                                  .build()))
-                                                .build())
-            );
+              .thenReturn(Optional.ofNullable(UserState.builder()
+                    .userId(-1)
+                    .userName("Test User")
+                    .roles(Set.of(Role.builder()
+                          .roleId(TRANSCRIBER.getId())
+                          .roleName(TRANSCRIBER.toString())
+                          .permissions(new HashSet<>())
+                          .build()))
+                    .build())
+              );
 
         KeyPair keyPair = setTokenStub(List.of(VALID_EMAIL_VALUE));
         setKeyStoreStub(keyPair);
 
         mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.accessToken").isString())
-            .andExpect(jsonPath("$.userState").exists());
+                    EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+              .andExpect(status().is2xxSuccessful())
+              .andExpect(jsonPath("$.accessToken").isString())
+              .andExpect(jsonPath("$.userState").exists());
 
         verify(mockAuthorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
 
@@ -105,13 +105,13 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         reset(mockAuthorisationApi);
 
         when(mockAuthorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
-            .thenReturn(Optional.empty());
+              .thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.accessToken").isString())
-            .andExpect(jsonPath("$.userState").doesNotExist());
+                    EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+              .andExpect(status().is2xxSuccessful())
+              .andExpect(jsonPath("$.accessToken").isString())
+              .andExpect(jsonPath("$.userState").doesNotExist());
 
         verify(mockAuthorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
     }
@@ -122,19 +122,19 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         setKeyStoreStub(keyPair);
 
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
+                    EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+              .andExpect(status().isInternalServerError())
+              .andReturn();
 
         String actualResponseBody = response.getResponse().getContentAsString();
 
         String expectedResponseBody = """
-            {
-                "type":"AUTHENTICATION_101",
-                "title":"Failed to validate access token",
-                "status":500
-            }
-            """;
+              {
+                  "type":"AUTHENTICATION_101",
+                  "title":"Failed to validate access token",
+                  "status":500
+              }
+              """;
 
         JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -144,26 +144,26 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     @Test
     void handleOAuthCodeShouldReturnErrorResponseWhenDownstreamCallToAzureFails() throws Exception {
         stubFor(
-            WireMock.post(OAUTH_TOKEN_ENDPOINT)
-                .willReturn(
-                    aResponse().withStatus(500)
-                )
+              WireMock.post(OAUTH_TOKEN_ENDPOINT)
+                    .willReturn(
+                          aResponse().withStatus(500)
+                    )
         );
 
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
+                    EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+              .andExpect(status().isInternalServerError())
+              .andReturn();
 
         String actualResponseBody = response.getResponse().getContentAsString();
 
         String expectedResponseBody = """
-            {
-                "type":"AUTHENTICATION_100",
-                "title":"Failed to obtain access token",
-                "status":500
-            }
-            """;
+              {
+                  "type":"AUTHENTICATION_100",
+                  "title":"Failed to obtain access token",
+                  "status":500
+              }
+              """;
 
         JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -173,35 +173,35 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         setTokenStub(List.of(VALID_EMAIL_VALUE));
 
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
+                    EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+              .andExpect(status().isInternalServerError())
+              .andReturn();
 
         String actualResponseBody = response.getResponse().getContentAsString();
 
         String expectedResponseBody = """
-            {
-                "type":"AUTHENTICATION_101",
-                "title":"Failed to validate access token",
-                "status":500
-            }
-            """;
+              {
+                  "type":"AUTHENTICATION_101",
+                  "title":"Failed to validate access token",
+                  "status":500
+              }
+              """;
 
         JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     /**
-     * To test the access token validation aspects of the /handle-oauth-code flow, we must ensure the Azure /token stub
-     * provides a token whose signature can be verified against a public key provided by the configured Remote JWKS.
-     * This setup method generates these private and public RSA keys and sets the stub responses accordingly.
+     * To test the access token validation aspects of the /handle-oauth-code flow, we must ensure the Azure /token stub provides a token whose signature can be
+     * verified against a public key provided by the configured Remote JWKS. This setup method generates these private and public RSA keys and sets the stub
+     * responses accordingly.
      */
     private KeyPair setTokenStub(List<String> emails) {
         JWTClaimsSet.Builder claimBuilder = new JWTClaimsSet.Builder()
-            .audience(CONFIGURED_AUDIENCE_VALUE)
-            .issuer(CONFIGURED_ISSUER_VALUE)
-            .expirationTime(createDateInFuture())
-            .issueTime(Date.from(Instant.now()))
-            .subject(VALID_SUBJECT_VALUE);
+              .audience(CONFIGURED_AUDIENCE_VALUE)
+              .issuer(CONFIGURED_ISSUER_VALUE)
+              .expirationTime(createDateInFuture())
+              .issueTime(Date.from(Instant.now()))
+              .subject(VALID_SUBJECT_VALUE);
 
         if (!emails.isEmpty()) {
             claimBuilder = claimBuilder.claim(EMAILS_CLAIM_NAME, emails);
@@ -213,11 +213,11 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         String signedJwt = createSignedJwt(jwtClaimsSet, keyPair).serialize();
 
         stubFor(
-            WireMock.post(OAUTH_TOKEN_ENDPOINT)
-                .willReturn(
-                    aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody(
-                        "{\"id_token\":\"" + signedJwt + "\"}")
-                )
+              WireMock.post(OAUTH_TOKEN_ENDPOINT)
+                    .willReturn(
+                          aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody(
+                                "{\"id_token\":\"" + signedJwt + "\"}")
+                    )
         );
 
         return keyPair;
@@ -228,22 +228,22 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         Encoder encoder = Base64.getEncoder();
         JwksKey jwksKey = new JwksKey(
-            "RSA",
-            "sig",
-            KEY_ID_VALUE,
-            encoder.encodeToString(publicKey.getModulus().toByteArray()),
-            encoder.encodeToString(publicKey.getPublicExponent().toByteArray()),
-            CONFIGURED_ISSUER_VALUE
+              "RSA",
+              "sig",
+              KEY_ID_VALUE,
+              encoder.encodeToString(publicKey.getModulus().toByteArray()),
+              encoder.encodeToString(publicKey.getPublicExponent().toByteArray()),
+              CONFIGURED_ISSUER_VALUE
         );
         JwksKeySet jwksKeySet = new JwksKeySet(Collections.singletonList(jwksKey));
 
         String jwksKeySetJson = new ObjectMapper().writeValueAsString(jwksKeySet);
 
         stubFor(
-            WireMock.get(OAUTH_KEYS_ENDPOINT)
-                .willReturn(
-                    aResponse().withStatus(200).withBody(jwksKeySetJson)
-                )
+              WireMock.get(OAUTH_KEYS_ENDPOINT)
+                    .willReturn(
+                          aResponse().withStatus(200).withBody(jwksKeySetJson)
+                    )
         );
     }
 
@@ -258,9 +258,9 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     @SneakyThrows(JOSEException.class)
     private SignedJWT createSignedJwt(JWTClaimsSet jwtClaimsSet, KeyPair keyPair) {
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256)
-            .keyID(KEY_ID_VALUE)
-            .type(JOSEObjectType.JWT)
-            .build();
+              .keyID(KEY_ID_VALUE)
+              .type(JOSEObjectType.JWT)
+              .build();
 
         SignedJWT signedJwt = new SignedJWT(jwsHeader, jwtClaimsSet);
 

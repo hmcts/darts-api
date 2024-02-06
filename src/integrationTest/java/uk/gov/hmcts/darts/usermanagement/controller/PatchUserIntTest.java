@@ -59,6 +59,12 @@ class PatchUserIntTest extends IntegrationBase {
 
     private TransactionTemplate transactionTemplate;
 
+    private static List<Integer> getSecurityGroupIds(UserAccountEntity createdUserAccountEntity) {
+        return createdUserAccountEntity.getSecurityGroupEntities().stream()
+              .map(SecurityGroupEntity::getId)
+              .toList();
+    }
+
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
@@ -77,34 +83,34 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "full_name": "Jimmy Smith"
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "Jimmy Smith"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
-            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
-                ORIGINAL_SECURITY_GROUP_ID_1,
-                ORIGINAL_SECURITY_GROUP_ID_2
-            )));
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
+              .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
+              .andExpect(jsonPath("$.active").value(true))
+              .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+              .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
+                    ORIGINAL_SECURITY_GROUP_ID_1,
+                    ORIGINAL_SECURITY_GROUP_ID_2
+              )));
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
             assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
             assertEquals(true, latestUserAccountEntity.isActive());
             assertThat(
-                getSecurityGroupIds(latestUserAccountEntity),
-                hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2)
+                  getSecurityGroupIds(latestUserAccountEntity),
+                  hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2)
             );
             assertEquals(ORIGINAL_SYSTEM_USER_FLAG, latestUserAccountEntity.getIsSystemUser());
 
@@ -126,27 +132,27 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "full_name": "Jimmy Smith",
-                           "description": "An updated description",
-                           "active": false,
-                           "security_group_ids": [ ]
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "Jimmy Smith",
+                      "description": "An updated description",
+                      "active": false,
+                      "security_group_ids": [ ]
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
-            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").value("An updated description"))
-            .andExpect(jsonPath("$.active").value(false))
-            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_group_ids").isEmpty());
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
+              .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").value("An updated description"))
+              .andExpect(jsonPath("$.active").value(false))
+              .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+              .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
             assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals("An updated description", latestUserAccountEntity.getUserDescription());
@@ -173,16 +179,16 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "full_name": " ",
-                           "description": ""
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": " ",
+                      "description": ""
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations[*].field", hasItems("fullName", "description")));
+              .andExpect(status().isBadRequest())
+              .andExpect(jsonPath("$.title").value("Constraint Violation"))
+              .andExpect(jsonPath("$.violations[*].field", hasItems("fullName", "description")));
     }
 
     @Test
@@ -190,14 +196,14 @@ class PatchUserIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest(818_231)
-            .content("""
-                         {
-                           "full_name": "Jimmy Smith"
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "Jimmy Smith"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_100"));
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_100"));
     }
 
     @Test
@@ -208,24 +214,24 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "active": false
-                         }
-                         """);
+              .content("""
+                    {
+                      "active": false
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
-            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(false))
-            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_group_ids").isEmpty());
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+              .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
+              .andExpect(jsonPath("$.active").value(false))
+              .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+              .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
 
             assertEquals(false, latestUserAccountEntity.isActive());
             assertThat(getSecurityGroupIds(latestUserAccountEntity), empty());
@@ -242,24 +248,24 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "active": true
-                         }
-                         """);
+              .content("""
+                    {
+                      "active": true
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
-            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_group_ids").isEmpty());
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+              .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
+              .andExpect(jsonPath("$.active").value(true))
+              .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+              .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
 
             assertEquals(true, latestUserAccountEntity.isActive());
             assertThat(getSecurityGroupIds(latestUserAccountEntity), empty());
@@ -276,36 +282,36 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "security_group_ids": [ -3, -4 ]
-                         }
-                         """);
+              .content("""
+                    {
+                      "security_group_ids": [ -3, -4 ]
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
-            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
-            .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_group_ids", not(Matchers.containsInAnyOrder(
-                ORIGINAL_SECURITY_GROUP_ID_1,
-                ORIGINAL_SECURITY_GROUP_ID_2
-            ))))
-            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(-3, -4)));
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+              .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
+              .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
+              .andExpect(jsonPath("$.active").value(true))
+              .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+              .andExpect(jsonPath("$.security_group_ids", not(Matchers.containsInAnyOrder(
+                    ORIGINAL_SECURITY_GROUP_ID_1,
+                    ORIGINAL_SECURITY_GROUP_ID_2
+              ))))
+              .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(-3, -4)));
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
-                .findById(userId)
-                .orElseThrow();
+                  .findById(userId)
+                  .orElseThrow();
 
             assertThat(
-                getSecurityGroupIds(latestUserAccountEntity),
-                not(hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2))
+                  getSecurityGroupIds(latestUserAccountEntity),
+                  not(hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2))
             );
             assertThat(
-                getSecurityGroupIds(latestUserAccountEntity),
-                hasItems(-3, -4)
+                  getSecurityGroupIds(latestUserAccountEntity),
+                  hasItems(-3, -4)
             );
 
             return null;
@@ -320,15 +326,15 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "email_address": "jimmy.nail@hmcts.net"
-                         }
-                         """);
+              .content("""
+                    {
+                      "email_address": "jimmy.nail@hmcts.net"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
-            .andExpect(jsonPath("$.email_address").value("jimmy.nail@hmcts.net"));
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+              .andExpect(jsonPath("$.email_address").value("jimmy.nail@hmcts.net"));
 
 
     }
@@ -341,15 +347,15 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "email_address": "james.smith@hmcts.net"
-                         }
-                         """);
+              .content("""
+                    {
+                      "email_address": "james.smith@hmcts.net"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
-            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS));
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+              .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS));
     }
 
     @Test
@@ -361,17 +367,17 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = secondAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "email_address": "james.smith@hmcts.net"
-                         }
-                         """);
+              .content("""
+                    {
+                      "email_address": "james.smith@hmcts.net"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_101"))
-            .andExpect(jsonPath("$.title").value("The provided email already exists"))
-            .andExpect(jsonPath("$.status").value(409))
-            .andExpect(jsonPath("$.detail").value("User with email james.smith@hmcts.net already exists"));
+              .andExpect(status().isConflict())
+              .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_101"))
+              .andExpect(jsonPath("$.title").value("The provided email already exists"))
+              .andExpect(jsonPath("$.status").value(409))
+              .andExpect(jsonPath("$.detail").value("User with email james.smith@hmcts.net already exists"));
     }
 
     @Test
@@ -382,13 +388,13 @@ class PatchUserIntTest extends IntegrationBase {
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
-            .content("""
-                         {
-                           "full_name": "Jimmy Smith"
-                         }
-                         """);
+              .content("""
+                    {
+                      "full_name": "Jimmy Smith"
+                    }
+                    """);
         mockMvc.perform(request)
-            .andExpect(status().isForbidden());
+              .andExpect(status().isForbidden());
     }
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email) {
@@ -405,15 +411,15 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setLastModifiedBy(user);
 
         SecurityGroupEntity securityGroupEntity1 = dartsDatabase.getSecurityGroupRepository()
-            .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_1);
+              .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_1);
         SecurityGroupEntity securityGroupEntity2 = dartsDatabase.getSecurityGroupRepository()
-            .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_2);
+              .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_2);
         userAccountEntity.setSecurityGroupEntities(Set.of(securityGroupEntity1, securityGroupEntity2));
 
         return dartsDatabase.getUserAccountRepository()
-            .save(userAccountEntity);
+              .save(userAccountEntity);
     }
-    
+
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
         return createEnabledUserAccountEntity(user, ORIGINAL_EMAIL_ADDRESS);
     }
@@ -434,18 +440,12 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
 
         return dartsDatabase.getUserAccountRepository()
-            .save(userAccountEntity);
+              .save(userAccountEntity);
     }
 
     private MockHttpServletRequestBuilder buildRequest(int userId) {
         return patch("/admin/users/" + userId)
-            .header("Content-Type", "application/json");
-    }
-
-    private static List<Integer> getSecurityGroupIds(UserAccountEntity createdUserAccountEntity) {
-        return createdUserAccountEntity.getSecurityGroupEntities().stream()
-            .map(SecurityGroupEntity::getId)
-            .toList();
+              .header("Content-Type", "application/json");
     }
 
 }

@@ -2,12 +2,12 @@ openapi: 3.0.1
 info:
   title: An include file to define sortable attributes
   version: 1.0.0
-paths: {}
+paths: { }
 components:
   schemas:
     reporting_restrictions:
       type: array
-      default: []
+      default: [ ]
       items:
         $ref: 'common.yaml#/components/schemas/reporting_restriction'
     reporting_restriction:

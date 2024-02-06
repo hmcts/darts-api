@@ -60,19 +60,19 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
     void updateTransformedMediaLastAccessedTimestampShouldReturnSuccess() throws Exception {
         Integer transformedMediaId = transformedMediaEntity.getId();
         doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaId,
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
         doNothing().when(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, transformedMediaId);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isNoContent())
-            .andReturn();
+              .andExpect(status().isNoContent())
+              .andReturn();
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
         verify(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
     }
@@ -80,46 +80,46 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
     @Test
     void updateTransformedMediaLastAccessedTimestampShouldReturnNotFound() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = patch(
-            ENDPOINT_URL,
-            -999
+              ENDPOINT_URL,
+              -999
         );
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
     }
 
     @Test
     void updateTransformedMediaLastAccessedTimestampShouldReturnForbiddenErrorWhenRequestorDifferentUser() throws Exception {
         Integer transformedMediaId = transformedMediaEntity.getId();
         doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))
-            .when(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
+              .when(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
 
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, transformedMediaId);
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {
-              "type":"AUDIO_REQUESTS_101",
-              "title":"The audio request is not valid for this user",
-              "status":403
-            }""";
+              {
+                "type":"AUDIO_REQUESTS_101",
+                "title":"The audio request is not valid for this user",
+                "status":403
+              }""";
 
         assertEquals(expectedJson, actualJson, NON_EXTENSIBLE);
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              transformedMediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
         verify(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
     }

@@ -32,60 +32,61 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     @Test
     void shouldCreateSecurityGroup() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/security-groups"))
-            .contentType(ContentType.JSON)
-            .body("""
+              .baseUri(getUri("/admin/security-groups"))
+              .contentType(ContentType.JSON)
+              .body("""
                     {
                       "name": "ACME",
                       "display_name": "ACME Transcription Services",
                       "description": "A temporary group created by functional test"
                     }
                       """)
-            .post()
-            .thenReturn();
+              .post()
+              .thenReturn();
 
         assertEquals(201, response.statusCode());
 
         JSONAssert.assertEquals(
-            """
-                {
-                  "id": "",
-                  "name": "ACME",
-                  "display_name": "ACME Transcription Services",
-                  "description": "A temporary group created by functional test",
-                  "display_state": true,
-                  "global_access": false,
-                  "security_role_id": 4
-                }
-                """,
-            response.asString(),
-            new CustomComparator(
-                JSONCompareMode.NON_EXTENSIBLE,
-                new Customization("id", new RegularExpressionValueMatcher<>("\\d+"))
-            )
+              """
+                    {
+                      "id": "",
+                      "name": "ACME",
+                      "display_name": "ACME Transcription Services",
+                      "description": "A temporary group created by functional test",
+                      "display_state": true,
+                      "global_access": false,
+                      "security_role_id": 4
+                    }
+                    """,
+              response.asString(),
+              new CustomComparator(
+                    JSONCompareMode.NON_EXTENSIBLE,
+                    new Customization("id", new RegularExpressionValueMatcher<>("\\d+"))
+              )
         );
     }
 
     @Test
     void shouldGetSecurityGroups() throws JsonProcessingException {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/security-groups"))
-            .contentType(ContentType.JSON)
-            .get()
-            .thenReturn();
+              .baseUri(getUri("/admin/security-groups"))
+              .contentType(ContentType.JSON)
+              .get()
+              .thenReturn();
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+              new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+              });
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
         List<SecurityGroupWithIdAndRole> staticGroups =
-            securityGroupWithIdAndRoles.stream()
-                .filter(group -> group.getId() == 1
-                    || group.getId() >= -6 && group.getId() <= -1
-                    || group.getId() >= -17 && group.getId() <= -14)
-                .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
-                .toList();
+              securityGroupWithIdAndRoles.stream()
+                    .filter(group -> group.getId() == 1
+                          || group.getId() >= -6 && group.getId() <= -1
+                          || group.getId() >= -17 && group.getId() <= -14)
+                    .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
+                    .toList();
 
         checkGroup(staticGroups.get(0), "ADMIN", true, 11, true, null);
         checkGroup(staticGroups.get(1), "hmcts_staff_1", false, 1, true, 1);
@@ -102,7 +103,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     private void checkGroup(SecurityGroupWithIdAndRole group, String name, boolean globalAccess, Integer roleId, boolean displayState,
-                            Integer courtroomId) {
+          Integer courtroomId) {
         assertEquals(name, group.getName());
         assertEquals(globalAccess, group.getGlobalAccess());
         assertEquals(roleId, group.getSecurityRoleId());

@@ -16,13 +16,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class RetentionServiceImpl implements RetentionService {
+
     private final CaseRetentionRepository caseRetentionRepository;
     private final RetentionMapper retentionMapper;
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
         List<CaseRetentionEntity> caseRetentionEntities =
-            caseRetentionRepository.findByCaseId(caseId);
+              caseRetentionRepository.findByCaseId(caseId);
 
         List<GetCaseRetentionsResponse> caseRetentions = new ArrayList<>();
         for (CaseRetentionEntity caseRetentionEntity : caseRetentionEntities) {

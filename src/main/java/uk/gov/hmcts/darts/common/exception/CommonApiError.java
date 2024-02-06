@@ -9,9 +9,9 @@ import org.springframework.http.HttpStatus;
 public enum CommonApiError implements DartsApiError {
 
     COURTHOUSE_PROVIDED_DOES_NOT_EXIST(
-        "100",
-        HttpStatus.BAD_REQUEST,
-        "Provided courthouse does not exist"
+          "100",
+          HttpStatus.BAD_REQUEST,
+          "Provided courthouse does not exist"
     );
 
     private static final String ERROR_TYPE_PREFIX = "COMMON";

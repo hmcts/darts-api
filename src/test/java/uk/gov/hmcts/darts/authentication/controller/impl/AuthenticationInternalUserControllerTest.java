@@ -64,7 +64,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
         when(authenticationService.loginOrRefresh(null, null))
-            .thenReturn(DUMMY_AUTHORIZATION_URI);
+              .thenReturn(DUMMY_AUTHORIZATION_URI);
 
         ModelAndView modelAndView = controller.loginOrRefresh(null, null);
 
@@ -75,21 +75,21 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken("test.user@example.com"));
+              .thenReturn(createDummyAccessToken("test.user@example.com"));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
-            internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
+              internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
-            Optional.ofNullable(UserState.builder()
-                                    .userId(-1)
-                                    .userName("Test User")
-                                    .roles(Set.of(Role.builder()
-                                                      .roleId(TRANSCRIBER.getId())
-                                                      .roleName(TRANSCRIBER.toString())
-                                                      .permissions(new HashSet<>())
-                                                      .build()))
-                                    .build())
+              Optional.ofNullable(UserState.builder()
+                    .userId(-1)
+                    .userName("Test User")
+                    .roles(Set.of(Role.builder()
+                          .roleId(TRANSCRIBER.getId())
+                          .roleName(TRANSCRIBER.toString())
+                          .permissions(new HashSet<>())
+                          .build()))
+                    .build())
         );
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
@@ -104,9 +104,9 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken("test.missing@example.com"));
+              .thenReturn(createDummyAccessToken("test.missing@example.com"));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
-            internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
+              internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
@@ -120,7 +120,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void logoutShouldReturnLogoutPageUriAsRedirectWhenTokenExistsInSession() {
         when(authenticationService.logout(DUMMY_TOKEN, null))
-            .thenReturn(DUMMY_LOGOUT_URI);
+              .thenReturn(DUMMY_LOGOUT_URI);
 
         ModelAndView modelAndView = controller.logout("Bearer " + DUMMY_TOKEN, null);
 
@@ -131,7 +131,7 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void resetPasswordShouldReturnResetPageAsRedirect() {
         when(authenticationService.resetPassword(any()))
-            .thenReturn(DUMMY_AUTHORIZATION_URI);
+              .thenReturn(DUMMY_AUTHORIZATION_URI);
 
         ModelAndView modelAndView = controller.resetPassword(null);
 
@@ -142,9 +142,9 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithoutClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken("test.missing@example.com"));
+              .thenReturn(createDummyAccessToken("test.missing@example.com"));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
-            internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
+              internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
         assertNotNull(securityToken);
@@ -157,29 +157,29 @@ class AuthenticationInternalUserControllerTest {
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     private String createDummyAccessToken(String emails) throws JOSEException {
         RSAKey rsaKey = new RSAKeyGenerator(2048)
-            .keyID("123")
-            .generate();
+              .keyID("123")
+              .generate();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-            .claim("ver", "1.0")
-            .issuer(String.format("https://<tenant-name>.b2clogin.com/%s/v2.0/", UUID.randomUUID().toString()))
-            .subject(UUID.randomUUID().toString())
-            .audience(UUID.randomUUID().toString())
-            .expirationTime(new Date(1690973493))
-            .claim("nonce", "defaultNonce")
-            .issueTime(new Date(1690969893))
-            .claim("auth_time", new Date(1690969893))
-            .claim("preferred_username", emails)
-            .claim("name", "Test User")
-            .claim("given_name", "Test")
-            .claim("family_name", "User")
-            .claim("tfp", "policy_name")
-            .claim("nbf", new Date(1690969893))
-            .build();
+              .claim("ver", "1.0")
+              .issuer(String.format("https://<tenant-name>.b2clogin.com/%s/v2.0/", UUID.randomUUID()))
+              .subject(UUID.randomUUID().toString())
+              .audience(UUID.randomUUID().toString())
+              .expirationTime(new Date(1690973493))
+              .claim("nonce", "defaultNonce")
+              .issueTime(new Date(1690969893))
+              .claim("auth_time", new Date(1690969893))
+              .claim("preferred_username", emails)
+              .claim("name", "Test User")
+              .claim("given_name", "Test")
+              .claim("family_name", "User")
+              .claim("tfp", "policy_name")
+              .claim("nbf", new Date(1690969893))
+              .build();
 
         SignedJWT signedJwt = new SignedJWT(
-            new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.getKeyID()).build(),
-            claimsSet
+              new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.getKeyID()).build(),
+              claimsSet
         );
 
         signedJwt.sign(new RSASSASigner(rsaKey));

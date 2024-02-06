@@ -49,16 +49,16 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
+              .createAuthorisedIntegrationTestUser(courthouseEntity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -97,9 +97,9 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
         String expected = TestUtils.removeTags(
-            TAGS_TO_IGNORE,
-            getContentsFromFile(
-                "tests/transcriptions/transcription/expectedResponse.json")
+              TAGS_TO_IGNORE,
+              getContentsFromFile(
+                    "tests/transcriptions/transcription/expectedResponse.json")
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());

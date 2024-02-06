@@ -33,9 +33,9 @@ class CourthouseApiTest extends IntegrationBase {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON =
-        "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
+          "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON =
-        "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseDisplayName.json";
+          "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseDisplayName.json";
     private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
 
     @Autowired
@@ -46,18 +46,18 @@ class CourthouseApiTest extends IntegrationBase {
         Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", addedId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+              .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+              .andExpect(jsonPath("$.code", is(761)))
+              .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+              .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
     @Test
     void courthousesGetNonExistingId() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", 900)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
 
@@ -65,43 +65,42 @@ class CourthouseApiTest extends IntegrationBase {
     void courthousesGetAll() throws Exception {
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
-            REQUEST_BODY_HAVERFORDWEST_JSON);
+              REQUEST_BODY_HAVERFORDWEST_JSON);
         MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_TEST_JSON);
 
-
         ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(
-            haverfordwestResponse.getResponse().getContentAsString(),
-            ExtendedCourthouse.class
+              haverfordwestResponse.getResponse().getContentAsString(),
+              ExtendedCourthouse.class
         );
         ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(
-            swanseaResponse.getResponse().getContentAsString(),
-            ExtendedCourthouse.class
+              swanseaResponse.getResponse().getContentAsString(),
+              ExtendedCourthouse.class
         );
 
         // Truncate created and modified to milliseconds as the post (saveAndFlush) returns a more precise timestamp
         haverfordwestCourthouse.setCreatedDateTime(haverfordwestCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
         haverfordwestCourthouse.setLastModifiedDateTime(haverfordwestCourthouse.getLastModifiedDateTime().truncatedTo(
-            ChronoUnit.MILLIS));
+              ChronoUnit.MILLIS));
         swanseaCourthouse.setCreatedDateTime(swanseaCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
         swanseaCourthouse.setLastModifiedDateTime(swanseaCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andDo(print()).andReturn();
 
         List<ExtendedCourthouse> courthouseList = objectMapper.readValue(
-            response.getResponse().getContentAsString(),
-            new TypeReference<>() {
-            }
+              response.getResponse().getContentAsString(),
+              new TypeReference<>() {
+              }
         );
         for (ExtendedCourthouse extendedCourthouse : courthouseList) {
             extendedCourthouse.setCreatedDateTime(extendedCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
             extendedCourthouse.setLastModifiedDateTime(extendedCourthouse.getLastModifiedDateTime().truncatedTo(
-                ChronoUnit.MILLIS));
+                  ChronoUnit.MILLIS));
         }
         assertTrue(
-            courthouseList.contains(haverfordwestCourthouse),
-            haverfordwestResponse.getResponse().getContentAsString()
+              courthouseList.contains(haverfordwestCourthouse),
+              haverfordwestResponse.getResponse().getContentAsString()
         );
         assertTrue(courthouseList.contains(swanseaCourthouse), swanseaResponse.getResponse().getContentAsString());
     }
@@ -109,28 +108,28 @@ class CourthouseApiTest extends IntegrationBase {
     @Test
     void courthousesPost() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
         mockMvc.perform(requestBuilder).andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id", is(notNullValue())))
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+              .andExpect(jsonPath("$.id", is(notNullValue())))
+              .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+              .andExpect(jsonPath("$.code", is(761)))
+              .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+              .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
     @Test
     void courthousesPostTwoCourthousesWithSameCode() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
 
         mockMvc.perform(requestBuilder).andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id", is(notNullValue())))
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+              .andExpect(jsonPath("$.id", is(notNullValue())))
+              .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+              .andExpect(jsonPath("$.code", is(761)))
+              .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+              .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
 
         mockMvc.perform(requestBuilder).andExpect(status().isConflict());
 
@@ -139,26 +138,26 @@ class CourthouseApiTest extends IntegrationBase {
     @Test
     void courthousesPostWithMissingCourthouseName() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
 
         assertEquals(
-            "{\"violations\":[{\"field\":\"courthouseName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
-            response.getResponse().getContentAsString()
+              "{\"violations\":[{\"field\":\"courthouseName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
+              response.getResponse().getContentAsString()
         );
     }
 
     @Test
     void courthousesPostWithMissingCourthouseDisplayName() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON));
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
 
         assertEquals(
-            "{\"violations\":[{\"field\":\"displayName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
-            response.getResponse().getContentAsString()
+              "{\"violations\":[{\"field\":\"displayName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
+              response.getResponse().getContentAsString()
         );
     }
 
@@ -168,26 +167,26 @@ class CourthouseApiTest extends IntegrationBase {
 
         String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
         requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.courthouse_name", is("test")))
-            .andExpect(jsonPath("$.code", is(9001)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+              .andExpect(jsonPath("$.courthouse_name", is("test")))
+              .andExpect(jsonPath("$.code", is(9001)))
+              .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+              .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
     @Test
     void courthousesPutWhenIdDoesNotExist() throws Exception {
         String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 123)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(requestBody);
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
@@ -197,11 +196,11 @@ class CourthouseApiTest extends IntegrationBase {
         Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         MockHttpServletRequestBuilder requestBuilder = delete("/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
         requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
 
@@ -213,8 +212,8 @@ class CourthouseApiTest extends IntegrationBase {
      */
     private MvcResult makeRequestToAddCourthouseToDatabase(String fileLocation) throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(fileLocation));
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(getContentsFromFile(fileLocation));
         return mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andDo(print()).andReturn();
     }
 

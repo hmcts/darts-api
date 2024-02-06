@@ -10,14 +10,14 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum EventError implements DartsApiError {
 
     EVENT_DATA_NOT_FOUND(
-        "100",
-        HttpStatus.UNPROCESSABLE_ENTITY,
-        "Data on the event could not be reconciled with Darts records"
+          "100",
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          "Data on the event could not be reconciled with Darts records"
     ),
     EVENT_HANDLER_NOT_FOUND_IN_DB(
-        "101",
-        HttpStatus.NOT_FOUND,
-        "No event handler found in database"
+          "101",
+          HttpStatus.NOT_FOUND,
+          "No event handler found in database"
     );
 
     private static final String ERROR_TYPE_PREFIX = "EVENT";

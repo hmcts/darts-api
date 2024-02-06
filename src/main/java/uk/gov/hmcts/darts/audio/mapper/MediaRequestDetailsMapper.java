@@ -17,8 +17,8 @@ public interface MediaRequestDetailsMapper {
     List<MediaRequestDetails> map(List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList);
 
     @Mappings({
-        @Mapping(source = "mediaRequestStartTs", target = "startTs"),
-        @Mapping(source = "mediaRequestEndTs", target = "endTs")
+          @Mapping(source = "mediaRequestStartTs", target = "startTs"),
+          @Mapping(source = "mediaRequestEndTs", target = "endTs")
     })
     MediaRequestDetails map(EnhancedMediaRequestInfo enhancedMediaRequestInfo);
 

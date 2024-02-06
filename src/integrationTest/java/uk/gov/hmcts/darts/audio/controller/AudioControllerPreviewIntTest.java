@@ -48,8 +48,8 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         mediaEntity = given.getMediaEntity1();
         given.externalObjectDirForMedia(mediaEntity);
         doNothing().when(authorisation).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
@@ -57,13 +57,13 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     void previewShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
-            String.format("/audio/preview/%d", mediaEntity.getId())));
+              String.format("/audio/preview/%d", mediaEntity.getId())));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
         verify(authorisation).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
@@ -71,25 +71,25 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     void previewShouldReturnErrorWhenNoMediaIdExistsInDatabase() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(
-            String.format("/audio/preview/%s", "1234567"));
+              String.format("/audio/preview/%s", "1234567"));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.type").value("AUDIO_101"));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isInternalServerError())
+              .andExpect(jsonPath("$.type").value("AUDIO_101"));
     }
 
     @Test
     void previewWithRangeFromStartShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
-            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-1023");
+              String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-1023");
 
         mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
         verify(authorisation).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
@@ -97,13 +97,13 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     void previewWithRangeFromStartWithNoEndShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
-            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-");
+              String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-");
 
         mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
         verify(authorisation).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 
@@ -111,13 +111,13 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     void previewWithRangeShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
-            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=1024-2047");
+              String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=1024-2047");
 
         mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
         verify(authorisation).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+              mediaEntity.getId(),
+              Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
 }

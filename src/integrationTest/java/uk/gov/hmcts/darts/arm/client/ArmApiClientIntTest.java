@@ -32,7 +32,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @TestPropertySource(properties = {
-    "darts.storage.arm-api.url=http://localhost:8080"
+      "darts.storage.arm-api.url=http://localhost:8080"
 })
 @SuppressWarnings("PMD.CloseResource")
 class ArmApiClientIntTest extends IntegrationBase {
@@ -57,11 +57,11 @@ class ArmApiClientIntTest extends IntegrationBase {
         var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
 
         stubFor(
-            WireMock.post(urlEqualTo(UPDATE_METADATA_PATH))
-                .willReturn(
-                    aResponse()
-                        .withHeader("Content-type", "application/json")
-                        .withBody("""
+              WireMock.post(urlEqualTo(UPDATE_METADATA_PATH))
+                    .willReturn(
+                          aResponse()
+                                .withHeader("Content-type", "application/json")
+                                .withBody("""
                                       {
                                           "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
                                           "cabinetId": 101,
@@ -73,29 +73,29 @@ class ArmApiClientIntTest extends IntegrationBase {
                                           "responseStatusMessages": null
                                       }
                                       """
-                        )
-                        .withStatus(200)));
+                                )
+                                .withStatus(200)));
 
         var updateMetadataRequest = UpdateMetadataRequest.builder()
-            .itemId(externalRecordId)
-            .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
-                          .build())
-            .useGuidsForFields(false)
-            .build();
+              .itemId(externalRecordId)
+              .manifest(UpdateMetadataRequest.Manifest.builder()
+                    .eventDate(eventTimestamp)
+                    .build())
+              .useGuidsForFields(false)
+              .build();
 
         // When
         UpdateMetadataResponse updateMetadataResponse = armApiClient.updateMetadata(bearerAuth, updateMetadataRequest);
 
         // Then
         wireMockServer.verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
-                                  .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-                                  .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                                  .withRequestBody(
-                                      matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
-                                          .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
-                                          .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
-                                  ));
+              .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+              .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+              .withRequestBody(
+                    matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
+                          .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
+                          .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
+              ));
 
         assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
     }
@@ -105,12 +105,12 @@ class ArmApiClientIntTest extends IntegrationBase {
     void downloadArmDataShouldSucceedIfServerReturns200Success() {
         // Given
         stubFor(
-            WireMock.get(urlPathMatching(DOWNLOAD_ARM_DATA_PATH))
-                .willReturn(
-                    aResponse()
-                        .withHeader("Content-type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                        .withBodyFile("testAudio.mp3")
-                        .withStatus(200)));
+              WireMock.get(urlPathMatching(DOWNLOAD_ARM_DATA_PATH))
+                    .willReturn(
+                          aResponse()
+                                .withHeader("Content-type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                                .withBodyFile("testAudio.mp3")
+                                .withStatus(200)));
 
         // When
         feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);

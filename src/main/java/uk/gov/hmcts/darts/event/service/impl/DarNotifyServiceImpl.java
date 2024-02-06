@@ -33,12 +33,12 @@ public class DarNotifyServiceImpl {
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (!openCaseNumbers.isEmpty()) {
             DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
-                .notificationType(darNotifyType.getNotificationType())
-                .timestamp(dartsEvent.getDateTime())
-                .courthouse(dartsEvent.getCourthouse())
-                .courtroom(dartsEvent.getCourtroom())
-                .caseNumbers(openCaseNumbers)
-                .build();
+                  .notificationType(darNotifyType.getNotificationType())
+                  .timestamp(dartsEvent.getDateTime())
+                  .courthouse(dartsEvent.getCourthouse())
+                  .courtroom(dartsEvent.getCourtroom())
+                  .caseNumbers(openCaseNumbers)
+                  .build();
 
             dartsGatewayClient.darNotify(darNotifyEvent);
             log.trace("response from DarNotify for event {} is successful", event.getDartsEvent().getEventId());

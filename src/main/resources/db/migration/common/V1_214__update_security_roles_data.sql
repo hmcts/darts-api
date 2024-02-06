@@ -18,5 +18,6 @@ UPDATE security_role
 set role_name='LANGUAGE_SHOP_USER'
 WHERE rol_id = 5;
 
-INSERT into security_role (rol_id, role_name) values (6, 'RCJ_APPEALS');
+INSERT into security_role (rol_id, role_name)
+values (6, 'RCJ_APPEALS');
 ALTER SEQUENCE rol_seq RESTART WITH 7;

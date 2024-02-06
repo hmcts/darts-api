@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.model.ArchiveMetadata;
 @Builder
 //TODO fill in fields
 public class AnnotationCreateArchiveRecordMetadata implements ArchiveMetadata {
+
     @JsonProperty("publisher")
     private String publisher;
 }

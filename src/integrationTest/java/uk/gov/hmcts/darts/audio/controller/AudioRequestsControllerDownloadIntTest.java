@@ -50,15 +50,12 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
 
     private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivity.EXPORT_AUDIO.getId();
-    @MockBean
-    private Authorisation mockAuthorisation;
-
-    @MockBean
-    private UserIdentity mockUserIdentity;
-
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
-
+    @MockBean
+    private Authorisation mockAuthorisation;
+    @MockBean
+    private UserIdentity mockUserIdentity;
     @Autowired
     private AuthorisationStub authorisationStub;
 
@@ -86,28 +83,28 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         var objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
 
         var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+              .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                    mediaRequestEntity,
+                    objectRecordStatusEntity,
+                    blobId
+              ));
 
         final Integer transformedMediaId = transientObjectDirectoryEntity.getTransformedMedia().getId();
 
         doNothing().when(mockAuthorisation)
-            .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
+              .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+              .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk());
+              .andExpect(status().isOk());
 
         verify(dataManagementService).getBlobData(eq("darts-outbound"), any());
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(TRANSCRIBER)
+              transformedMediaId,
+              Set.of(TRANSCRIBER)
         );
 
         AuditSearchQuery searchQuery = new AuditSearchQuery();
@@ -124,12 +121,12 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     @Test
     void audioRequestDownloadGetShouldReturnNotFound() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", "-999");
+              .queryParam("transformed_media_id", "-999");
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
     }
 
     @Test
@@ -144,19 +141,19 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         final Integer transformedMediaId = authorisationStub.getTransformedMediaEntity().getId();
 
         doNothing().when(mockAuthorisation)
-            .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
+              .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+              .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_102"));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest())
+              .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_102"));
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(TRANSCRIBER)
+              transformedMediaId,
+              Set.of(TRANSCRIBER)
         );
     }
 
@@ -168,19 +165,19 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         final Integer transformedMediaId = authorisationStub.getTransformedMediaEntity().getId();
 
         doNothing().when(mockAuthorisation)
-            .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
+              .authoriseByTransformedMediaId(transformedMediaId, Set.of(TRANSCRIBER));
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+              .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.type").value("AUDIO_101"));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isInternalServerError())
+              .andExpect(jsonPath("$.type").value("AUDIO_101"));
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
-            transformedMediaId,
-            Set.of(TRANSCRIBER)
+              transformedMediaId,
+              Set.of(TRANSCRIBER)
         );
     }
 
@@ -189,8 +186,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest());
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest());
 
         verifyNoInteractions(mockAuthorisation);
     }

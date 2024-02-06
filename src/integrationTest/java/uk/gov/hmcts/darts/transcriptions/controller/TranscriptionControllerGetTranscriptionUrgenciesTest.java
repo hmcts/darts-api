@@ -33,7 +33,7 @@ class TranscriptionControllerGetTranscriptionUrgenciesTest extends IntegrationBa
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_urgencies/expectedResponse.json");
+              "tests/transcriptions/transcription_urgencies/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }

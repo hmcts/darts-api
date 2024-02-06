@@ -17,12 +17,12 @@ public class DuplicateEmailValidator implements Validator<User> {
     @Override
     public void validate(User user) {
         userAccountRepository.findByEmailAddressIgnoreCaseAndActive(user.getEmailAddress(), true)
-            .stream().findFirst()
-            .ifPresent(existingUser -> {
-                throw new DartsApiException(
-                    UserManagementError.DUPLICATE_EMAIL,
-                    String.format("User with email %s already exists", existingUser.getEmailAddress())
-                );
-            });
+              .stream().findFirst()
+              .ifPresent(existingUser -> {
+                  throw new DartsApiException(
+                        UserManagementError.DUPLICATE_EMAIL,
+                        String.format("User with email %s already exists", existingUser.getEmailAddress())
+                  );
+              });
     }
 }

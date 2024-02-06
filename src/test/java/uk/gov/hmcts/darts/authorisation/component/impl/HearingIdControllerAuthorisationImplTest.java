@@ -41,11 +41,9 @@ class HearingIdControllerAuthorisationImplTest {
     private static final String METHOD = "POST";
     private static final String URI = "/hearings";
     private static final String HEARING_ID_PARAM_VALUE = "2";
-
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private Authorisation authorisation;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private Set<SecurityRoleEnum> roles;
 
     private ControllerAuthorisation controllerAuthorisation;
@@ -53,12 +51,12 @@ class HearingIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
-            REQUESTER,
-            APPROVER,
-            TRANSCRIBER,
-            TRANSLATION_QA,
-            RCJ_APPEALS
+              JUDGE,
+              REQUESTER,
+              APPROVER,
+              TRANSCRIBER,
+              TRANSLATION_QA,
+              RCJ_APPEALS
         );
         controllerAuthorisation = new HearingIdControllerAuthorisationImpl(authorisation);
     }
@@ -71,14 +69,14 @@ class HearingIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBody() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -90,13 +88,13 @@ class HearingIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBodyWhenHearingIdMissing() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -109,7 +107,7 @@ class HearingIdControllerAuthorisationImplTest {
     void checkAuthorisationPathParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/hearings/2");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE)
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -121,8 +119,8 @@ class HearingIdControllerAuthorisationImplTest {
     void checkAuthorisationQueryParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE);
 
@@ -135,8 +133,8 @@ class HearingIdControllerAuthorisationImplTest {
     void checkAuthorisationHeaderParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         request.addHeader(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE);
@@ -156,8 +154,8 @@ class HearingIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationSupplierIdMissingParameter() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
         );
 
         assertEquals(BAD_REQUEST_HEARING_ID.getTitle(), exception.getMessage());
@@ -169,13 +167,13 @@ class HearingIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenHearingIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_HEARING_ID.getTitle(), exception.getMessage());
@@ -188,14 +186,14 @@ class HearingIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenHearingIdInvalid() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(HEARING_ID_PARAM, "");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_HEARING_ID.getTitle(), exception.getMessage());

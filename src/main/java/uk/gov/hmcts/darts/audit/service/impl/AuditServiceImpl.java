@@ -25,6 +25,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class AuditServiceImpl implements AuditService {
+
     private final AuditActivityRepository auditActivityRepository;
     private final AuditRepository auditRepository;
 
@@ -47,8 +48,8 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public List<AuditEntity> search(AuditSearchQuery auditSearchQuery) {
         Specification<AuditEntity> specification = isCourtCase(auditSearchQuery.getCaseId())
-            .and(isWithInDates(auditSearchQuery.getFromDate(), auditSearchQuery.getToDate()))
-            .and(isAuditActivity(auditSearchQuery.getAuditActivityId()));
+              .and(isWithInDates(auditSearchQuery.getFromDate(), auditSearchQuery.getToDate()))
+              .and(isAuditActivity(auditSearchQuery.getAuditActivityId()));
 
         return auditRepository.findAll(specification);
     }
@@ -69,9 +70,9 @@ public class AuditServiceImpl implements AuditService {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.between(
-                root.get(AuditEntity_.createdDateTime),
-                fromDate,
-                toDate
+                  root.get(AuditEntity_.createdDateTime),
+                  fromDate,
+                  toDate
             );
         };
 
@@ -83,8 +84,8 @@ public class AuditServiceImpl implements AuditService {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(
-                root.get(AuditEntity_.auditActivity).get(AuditActivityEntity_.id),
-                auditActivityId
+                  root.get(AuditEntity_.auditActivity).get(AuditActivityEntity_.id),
+                  auditActivityId
             );
         };
 

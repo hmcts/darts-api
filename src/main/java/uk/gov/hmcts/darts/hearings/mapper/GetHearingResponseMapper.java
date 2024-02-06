@@ -20,6 +20,12 @@ public class GetHearingResponseMapper {
 
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
+    public static ReportingRestriction reportingRestrictionWithName(String name) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventName(name);
+        return reportingRestriction;
+    }
+
     @Transactional
     public GetHearingResponse map(HearingEntity hearing) {
         GetHearingResponse getHearingResponse = new GetHearingResponse();
@@ -32,14 +38,14 @@ public class GetHearingResponseMapper {
         getHearingResponse.setJudges(hearing.getJudgesStringList());
         getHearingResponse.setTranscriptionCount(hearing.getTranscriptions().size());
         List<HearingReportingRestrictionsEntity> restrictions
-            = hearingReportingRestrictionsRepository.findAllByCaseId(hearing.getCourtCase().getId());
+              = hearingReportingRestrictionsRepository.findAllByCaseId(hearing.getCourtCase().getId());
 
         restrictions.sort(Comparator.comparing(HearingReportingRestrictionsEntity::getEventDateTime));
         restrictions.forEach(repRes -> getHearingResponse.addCaseReportingRestrictionsItem(buildReportingRestrictionFrom(repRes)));
 
         if (hearing.getCourtCase().getReportingRestrictions() != null && restrictions.isEmpty()) {
             getHearingResponse.addCaseReportingRestrictionsItem(
-                    reportingRestrictionWithName(hearing.getCourtCase().getReportingRestrictions().getEventName()));
+                  reportingRestrictionWithName(hearing.getCourtCase().getReportingRestrictions().getEventName()));
         }
 
         return getHearingResponse;
@@ -52,12 +58,6 @@ public class GetHearingResponseMapper {
         reportingRestriction.setEventText(restrictionsEntity.getEventText());
         reportingRestriction.setHearingId(restrictionsEntity.getHearingId());
         reportingRestriction.setEventTs(restrictionsEntity.getEventDateTime());
-        return reportingRestriction;
-    }
-
-    public static ReportingRestriction reportingRestrictionWithName(String name) {
-        var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventName(name);
         return reportingRestriction;
     }
 

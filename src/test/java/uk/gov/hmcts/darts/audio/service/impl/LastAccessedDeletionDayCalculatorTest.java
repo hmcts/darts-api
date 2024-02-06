@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = LastAccessedDeletionDayCalculator.class)
 @ActiveProfiles({"dev", "h2db"})
 class LastAccessedDeletionDayCalculatorTest {
+
     @MockBean
     private BankHolidaysService bankHolidaysService;
 
@@ -46,8 +47,8 @@ class LastAccessedDeletionDayCalculatorTest {
 
         //2023-10-19 is a Thursday
         assertEquals(
-            OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
-            lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
+              OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
+              lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
         );
     }
 
@@ -61,8 +62,8 @@ class LastAccessedDeletionDayCalculatorTest {
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
 
         assertEquals(
-            OffsetDateTime.of(2023, 10, 20, 22, 0, 0, 0, ZoneOffset.UTC),
-            lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
+              OffsetDateTime.of(2023, 10, 20, 22, 0, 0, 0, ZoneOffset.UTC),
+              lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
         );
 
     }
@@ -70,8 +71,8 @@ class LastAccessedDeletionDayCalculatorTest {
     @Test
     void getStartDateWithChangedDefault() {
         assertEquals(
-            OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC),
-            this.lastAccessedDeletionDayCalculator.getStartDateForDeletion(4)
+              OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC),
+              this.lastAccessedDeletionDayCalculator.getStartDateForDeletion(4)
         );
     }
 
@@ -95,8 +96,8 @@ class LastAccessedDeletionDayCalculatorTest {
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
 
         assertEquals(
-            OffsetDateTime.of(2023, 12, 22, 22, 0, 0, 0, ZoneOffset.UTC),
-            lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
+              OffsetDateTime.of(2023, 12, 22, 22, 0, 0, 0, ZoneOffset.UTC),
+              lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
         );
     }
 
@@ -127,8 +128,8 @@ class LastAccessedDeletionDayCalculatorTest {
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
 
         assertEquals(
-            OffsetDateTime.of(2023, 12, 14, 22, 0, 0, 0, ZoneOffset.UTC),
-            lastAccessedDeletionDayCalculator.getStartDateForDeletion(10)
+              OffsetDateTime.of(2023, 12, 14, 22, 0, 0, 0, ZoneOffset.UTC),
+              lastAccessedDeletionDayCalculator.getStartDateForDeletion(10)
         );
     }
 

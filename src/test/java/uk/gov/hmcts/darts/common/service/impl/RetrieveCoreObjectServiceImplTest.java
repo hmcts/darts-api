@@ -50,13 +50,13 @@ class RetrieveCoreObjectServiceImplTest {
         HearingEntity hearingToBeFound = new HearingEntity();
         hearingToBeFound.setId(123);
         when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
-            Optional.of(hearingToBeFound));
+              Optional.of(hearingToBeFound));
 
         HearingEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
-            COURTHOUSE_1,
-            COURTROOM_1,
-            CASE_NUMBER_1,
-            LocalDate.now()
+              COURTHOUSE_1,
+              COURTROOM_1,
+              CASE_NUMBER_1,
+              LocalDate.now()
         );
 
         assertEquals(123, response.getId());
@@ -66,13 +66,13 @@ class RetrieveCoreObjectServiceImplTest {
     void hearingCreate() {
         mockCourthouse();
         when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
-            Optional.empty());
+              Optional.empty());
 
         HearingEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
-            COURTHOUSE_1,
-            COURTROOM_1,
-            CASE_NUMBER_1,
-            LocalDate.now()
+              COURTHOUSE_1,
+              COURTROOM_1,
+              CASE_NUMBER_1,
+              LocalDate.now()
         );
 
         assertEquals(COURTROOM_1, response.getCourtroom().getName());
@@ -84,11 +84,11 @@ class RetrieveCoreObjectServiceImplTest {
     void courtroomCreate() {
         mockCourthouse();
         when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
-            Optional.empty());
+              Optional.empty());
 
         CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
-            COURTHOUSE_1,
-            COURTROOM_1
+              COURTHOUSE_1,
+              COURTROOM_1
         );
 
         assertEquals(COURTROOM_1, response.getName());
@@ -100,11 +100,11 @@ class RetrieveCoreObjectServiceImplTest {
 
         CourtroomEntity courtroom = CommonTestDataUtil.createCourtroom(COURTROOM_1);
         when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
-            Optional.of(courtroom));
+              Optional.of(courtroom));
 
         CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
-            COURTHOUSE_1,
-            COURTROOM_1
+              COURTHOUSE_1,
+              COURTROOM_1
         );
 
         assertEquals(COURTROOM_1, response.getName());
@@ -115,16 +115,16 @@ class RetrieveCoreObjectServiceImplTest {
         HearingEntity hearingToBeFound = new HearingEntity();
         hearingToBeFound.setId(123);
         when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
-            Optional.empty());
+              Optional.empty());
 
         DartsApiException exception = assertThrows(
-            DartsApiException.class,
-            () -> retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
-                COURTHOUSE_1,
-                COURTROOM_1,
-                CASE_NUMBER_1,
-                LocalDate.now()
-            )
+              DartsApiException.class,
+              () -> retrieveCoreObjectServiceImpl.retrieveOrCreateHearing(
+                    COURTHOUSE_1,
+                    COURTROOM_1,
+                    CASE_NUMBER_1,
+                    LocalDate.now()
+              )
         );
 
         assertEquals("Provided courthouse does not exist. Courthouse 'courthouse1' not found.", exception.getMessage());
@@ -135,7 +135,7 @@ class RetrieveCoreObjectServiceImplTest {
         courthouse.setId(1);
         courthouse.setCourthouseName("Swansea");
         when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(
-            Optional.of(courthouse));
+              Optional.of(courthouse));
     }
 
 }

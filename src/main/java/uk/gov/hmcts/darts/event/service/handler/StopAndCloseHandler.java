@@ -22,12 +22,12 @@ public class StopAndCloseHandler extends EventHandlerBase {
     private final DarNotifyServiceImpl darNotifyService;
 
     public StopAndCloseHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                               EventRepository eventRepository,
-                               HearingRepository hearingRepository,
-                               CaseRepository caseRepository,
-                               ApplicationEventPublisher eventPublisher,
-                               DarNotifyServiceImpl darNotifyService) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher,
+          DarNotifyServiceImpl darNotifyService) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
         this.darNotifyService = darNotifyService;
     }
 

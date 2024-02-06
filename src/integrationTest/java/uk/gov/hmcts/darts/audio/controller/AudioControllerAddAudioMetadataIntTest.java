@@ -38,13 +38,13 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime ENDED_AT = OffsetDateTime.of(2024, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC);
     @Autowired
+    HearingStub hearingStub;
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private AuthorisationStub authorisationStub;
     @Autowired
     private EventStub eventStub;
-    @Autowired
-    HearingStub hearingStub;
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -76,26 +76,25 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp3",
-            "audio/mpeg",
-            "Test Document (doc)".getBytes()
+              "file",
+              "audio.mp3",
+              "audio/mpeg",
+              "Test Document (doc)".getBytes()
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+              "metadata",
+              null,
+              "application/json",
+              objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
 
-
         mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isOk())
-            .andReturn();
+                    multipart(ENDPOINT)
+                          .file(audioFile)
+                          .file(metadataJson))
+              .andExpect(status().isOk())
+              .andReturn();
 
         List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
 
@@ -120,9 +119,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         }
 
         List<HearingEntity> hearingsInAnotherCourtroom = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate(
-            "bristol",
-            "2",
-            STARTED_AT.toLocalDate()
+              "bristol",
+              "2",
+              STARTED_AT.toLocalDate()
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
@@ -135,29 +134,29 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
-            "file",
-            "audio.mp3",
-            "audio/mpeg",
-            "Test Document (doc)".getBytes()
+              "file",
+              "audio.mp3",
+              "audio/mpeg",
+              "Test Document (doc)".getBytes()
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
-            "metadata",
-            null,
-            "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+              "metadata",
+              null,
+              "application/json",
+              objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                multipart(ENDPOINT)
-                    .file(audioFile)
-                    .file(metadataJson))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                    multipart(ENDPOINT)
+                          .file(audioFile)
+                          .file(metadataJson))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"COMMON_100","title":"Provided courthouse does not exist","status":400,"detail":"Courthouse 'TEST' not found."}""";
+              {"type":"COMMON_100","title":"Provided courthouse does not exist","status":400,"detail":"Courthouse 'TEST' not found."}""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

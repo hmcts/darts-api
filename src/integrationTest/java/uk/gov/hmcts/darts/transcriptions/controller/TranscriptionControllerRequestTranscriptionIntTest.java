@@ -86,11 +86,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private static void assertTranscriptionFailed100Error(String actualJson) {
         String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_100",
-              "title": "Failed to validate transcription request",
-              "status": 400
-            }""";
+              {
+                "type": "TRANSCRIPTION_100",
+                "title": "Failed to validate transcription request",
+                "status": 400
+              }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -107,25 +107,25 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES","OTHER"})
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES", "OTHER"})
     void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_id");
+              .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
         TranscriptionRepository transcriptionRepository = dartsDatabase.getTranscriptionRepository();
@@ -134,16 +134,16 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
-                                    REQUESTED, testUser
+              REQUESTED, testUser
         );
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
-                                    AWAITING_AUTHORISATION, testUser
+              AWAITING_AUTHORISATION, testUser
         );
 
         assertThat(dartsDatabase.getTranscriptionCommentRepository().findAll())
-            .hasSize(1)
-            .extracting(TranscriptionCommentEntity::getComment)
-            .containsExactly(TEST_COMMENT);
+              .hasSize(1)
+              .extracting(TranscriptionCommentEntity::getComment)
+              .containsExactly(TEST_COMMENT);
 
         List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
@@ -153,12 +153,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
-                                             TranscriptionStatusEnum expectedTranscriptionStatus,
-                                             UserAccountEntity expectedWorkflowActor) {
+          TranscriptionStatusEnum expectedTranscriptionStatus,
+          UserAccountEntity expectedWorkflowActor) {
 
         assertEquals(
-            expectedTranscriptionStatus.getId(),
-            transcriptionWorkflowToCheck.getTranscriptionStatus().getId()
+              expectedTranscriptionStatus.getId(),
+              transcriptionWorkflowToCheck.getTranscriptionStatus().getId()
         );
         assertEquals(expectedWorkflowActor, transcriptionWorkflowToCheck.getWorkflowActor());
     }
@@ -186,27 +186,27 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilderDup)
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
-            .andReturn();
+              .andExpect(status().isConflict())
+              .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
+              .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
+              .andReturn();
     }
 
     @Test
@@ -215,25 +215,25 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilderDup)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
     }
 
 
@@ -243,20 +243,20 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         hearing.setMediaList(null);
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertFailedTranscription110Error(actualJson);
@@ -267,12 +267,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private void assertFailedTranscription110Error(String actualJson) {
         String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_110",
-              "title": "Transcription could not be requested, no audio",
-              "status": 404
-            }
-            """;
+              {
+                "type": "TRANSCRIPTION_110",
+                "title": "Transcription could not be requested, no audio",
+                "status": 404
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -282,19 +282,19 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, now().minusHours(1), now().plusMinutes(10)
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, now().minusHours(1), now().plusMinutes(10)
         );
 
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertFailedTranscription111Error(actualJson);
@@ -308,19 +308,19 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, now().plusMinutes(1), now().plusHours(10)
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, now().plusMinutes(1), now().plusHours(10)
         );
 
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertFailedTranscription111Error(actualJson);
@@ -337,22 +337,22 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         OffsetDateTime endTime = hearing.getMediaList().get(0).getEnd().truncatedTo(ChronoUnit.SECONDS);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
         );
 
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_id");
+              .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
         assertAudit(1);
@@ -367,22 +367,22 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         OffsetDateTime endTime = hearing.getMediaList().get(0).getEnd().minusMinutes(15);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
         );
 
         dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_id");
+              .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
         assertAudit(1);
@@ -390,36 +390,36 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private void assertFailedTranscription111Error(String actualJson) {
         String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_111",
-              "title": "Transcription could not be requested, times outside of hearing times",
-              "status": 404
-            }
-            """;
+              {
+                "type": "TRANSCRIPTION_111",
+                "title": "Transcription could not be requested, times outside of hearing times",
+                "status": 404
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
     void transcriptionRequestWithNullDatesAndSentencingRemarksTypeShouldReturnSuccess()
-        throws Exception {
+          throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_id");
+              .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
         assertAudit(1);
@@ -431,18 +431,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              null, null, transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertFailedAuthentication107Error(actualJson);
@@ -452,35 +452,35 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private void assertFailedAuthentication107Error(String actualJson) {
         String expectedJson = """
-            {
-              "type": "AUTHORISATION_107",
-              "title": "Failed to check authorisation",
-              "status": 403
-            }
-            """;
+              {
+                "type": "AUTHORISATION_107",
+                "title": "Failed to check authorisation",
+                "status": 403
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @ParameterizedTest
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
     void transcriptionRequestWithNullStartDateAndRequiredDatesTranscriptionTypeShouldThrowException(
-        TranscriptionTypeEnum transcriptionTypeEnum)
-        throws Exception {
+          TranscriptionTypeEnum transcriptionTypeEnum)
+          throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, null, END_TIME
+              hearing.getId(), null, transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, null, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
@@ -491,24 +491,24 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @ParameterizedTest
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
     void transcriptionRequestWithNullEndDateAndRequiredDatesTranscriptionTypeShouldThrowException(
-        TranscriptionTypeEnum transcriptionTypeEnum)
-        throws Exception {
+          TranscriptionTypeEnum transcriptionTypeEnum)
+          throws Exception {
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, null
+              hearing.getId(), null, transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, null
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
@@ -521,18 +521,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), 123,
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              hearing.getId(), courtCase.getId(), 123,
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest())
+              .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
 
         assertAudit(0);
     }
@@ -542,18 +542,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), null,
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              hearing.getId(), courtCase.getId(), null,
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         assertAudit(0);
     }
@@ -563,18 +563,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            123, TEST_COMMENT, START_TIME, END_TIME
+              hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+              123, TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isBadRequest())
+              .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
 
         assertAudit(0);
     }
@@ -585,18 +585,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            999_999, null, transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              999_999, null, transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertHearingNotFound404Error(actualJson);
@@ -606,24 +606,24 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private void assertHearingNotFound404Error(String actualJson) {
         String expectedJson = """
-            {
-              "type": "HEARING_100",
-              "title": "The requested hearing cannot be found",
-              "status": 404
-            }
-            """;
+              {
+                "type": "HEARING_100",
+                "title": "The requested hearing cannot be found",
+                "status": 404
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
     private void assertCaseNotFound404Error(String actualJson) {
         String expectedJson = """
-            {
-              "type": "CASE_104",
-              "title": "The requested case cannot be found",
-              "status": 404
-            }
-            """;
+              {
+                "type": "CASE_104",
+                "title": "The requested case cannot be found",
+                "status": 404
+              }
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -633,18 +633,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, 999_999, transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              null, 999_999, transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(header().string("Content-Type", "application/problem+json"))
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
 
@@ -658,13 +658,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+              hearing.getId(), null, transcriptionUrgencyEnum.getId(),
+              transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
@@ -672,12 +672,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
-                                                                          Integer caseId,
-                                                                          Integer urgencyId,
-                                                                          Integer transcriptionTypeId,
-                                                                          String comment,
-                                                                          OffsetDateTime startDateTime,
-                                                                          OffsetDateTime endDateTime
+          Integer caseId,
+          Integer urgencyId,
+          Integer transcriptionTypeId,
+          String comment,
+          OffsetDateTime startDateTime,
+          OffsetDateTime endDateTime
     ) {
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);

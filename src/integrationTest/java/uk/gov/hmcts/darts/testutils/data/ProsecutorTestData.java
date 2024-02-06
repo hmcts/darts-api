@@ -23,11 +23,11 @@ public class ProsecutorTestData {
 
     public static List<ProsecutorEntity> createListOfProsecutor(int quantity, CourtCaseEntity courtCase) {
         return rangeClosed(1, quantity)
-            .mapToObj(index -> {
-                var defendant = createProsecutorWithCaseBasedName(index, courtCase);
-                defendant.setCourtCase(courtCase);
-                return defendant;
-            }).collect(toList());
+              .mapToObj(index -> {
+                  var defendant = createProsecutorWithCaseBasedName(index, courtCase);
+                  defendant.setCourtCase(courtCase);
+                  return defendant;
+              }).collect(toList());
     }
 
     private static ProsecutorEntity createProsecutorWithCaseBasedName(int index, CourtCaseEntity courtCase) {

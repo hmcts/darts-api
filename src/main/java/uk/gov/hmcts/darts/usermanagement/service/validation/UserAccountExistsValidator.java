@@ -17,8 +17,8 @@ public class UserAccountExistsValidator implements Validator<Integer> {
     public void validate(Integer userId) {
         if (!userAccountRepository.existsById(userId)) {
             throw new DartsApiException(
-                UserManagementError.USER_NOT_FOUND,
-                String.format("User id %d not found", userId));
+                  UserManagementError.USER_NOT_FOUND,
+                  String.format("User id %d not found", userId));
         }
     }
 }

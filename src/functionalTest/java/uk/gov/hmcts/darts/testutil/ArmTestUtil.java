@@ -19,9 +19,8 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class ArmTestUtil {
 
-    private static final int DELETE_TIMEOUT = 60;
     public static final int STATUS_CODE_202 = 202;
-
+    private static final int DELETE_TIMEOUT = 60;
     private final ArmDataManagementDao armDataManagementDao;
 
 
@@ -31,10 +30,10 @@ public class ArmTestUtil {
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
 
             Response<Boolean> response = blobClient.deleteIfExistsWithResponse(
-                DeleteSnapshotsOptionType.INCLUDE,
-                null,
-                Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
-                null
+                  DeleteSnapshotsOptionType.INCLUDE,
+                  null,
+                  Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
+                  null
             );
 
             log.info("deleteBlobData for container {}, Blob path {}, Returned status code {}", containerName, response.getStatusCode());

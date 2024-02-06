@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 
 public interface AzureDao {
+
     OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig,
-                                              AuthConfigurationProperties configuration) throws AzureDaoException;
+          AuthConfigurationProperties configuration) throws AzureDaoException;
 }

@@ -11,6 +11,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @Data
 @NoArgsConstructor
 public class ArmResponseCreateRecord {
+
     @JsonProperty("operation")
     private final String operation = CREATE_RECORD;
     @JsonProperty("transaction_id")

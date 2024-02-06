@@ -32,23 +32,23 @@ public class AccessTokenClient {
     @SneakyThrows
     public String getAccessToken() {
         Map<String, String> params = Map.of("client_id", clientId,
-                                            "client_secret", clientSecret,
-                                            "scope", scope,
-                                            "grant_type", GrantType.PASSWORD.getValue(),
-                                            "username", username,
-                                            "password", password
+              "client_secret", clientSecret,
+              "scope", scope,
+              "grant_type", GrantType.PASSWORD.getValue(),
+              "username", username,
+              "password", password
         );
         HttpRequest request = HttpRequest.newBuilder(URI.create(tokenUri))
-            .POST(encode(params))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .build();
+              .POST(encode(params))
+              .header("Content-Type", "application/x-www-form-urlencoded")
+              .build();
 
         String response = HttpClient.newHttpClient()
-            .send(request, BodyHandlers.ofString())
-            .body();
+              .send(request, BodyHandlers.ofString())
+              .body();
 
         TokenResponse tokenResponse = new ObjectMapper()
-            .readValue(response, TokenResponse.class);
+              .readValue(response, TokenResponse.class);
 
         return tokenResponse.accessToken();
     }
@@ -56,17 +56,19 @@ public class AccessTokenClient {
     @SuppressWarnings("PMD.LawOfDemeter")
     private BodyPublisher encode(Map<String, String> params) {
         String urlEncoded = params.entrySet()
-            .stream()
-            .map(entry -> new StringJoiner("=")
-                .add(entry.getKey())
-                .add(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
-                .toString())
-            .collect(Collectors.joining("&"));
+              .stream()
+              .map(entry -> new StringJoiner("=")
+                    .add(entry.getKey())
+                    .add(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+                    .toString())
+              .collect(Collectors.joining("&"));
 
         return HttpRequest.BodyPublishers.ofString(urlEncoded);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record TokenResponse(@JsonProperty("access_token") String accessToken) {}
+    private record TokenResponse(@JsonProperty("access_token") String accessToken) {
+
+    }
 
 }

@@ -30,6 +30,7 @@ public class ArmDataManagementConfiguration {
     @Getter
     @Setter
     public static class Folders {
+
         private String submission;
         private String collected;
         private String response;

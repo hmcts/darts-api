@@ -44,13 +44,13 @@ public class HearingTestData {
 
     public static HearingEntity createHearingWith(String caseNumber, LocalTime scheduledStartTime) {
         HearingEntity hearing1 = createHearingWithDefaults(
-            createCaseWithCaseNumber(caseNumber),
-            createCourtRoomWithNameAtCourthouse(
-                createCourthouse("NEWCASTLE"),
-                "1"
-            ),
-            LocalDate.of(2023, 6, 20),
-            null
+              createCaseWithCaseNumber(caseNumber),
+              createCourtRoomWithNameAtCourthouse(
+                    createCourthouse("NEWCASTLE"),
+                    "1"
+              ),
+              LocalDate.of(2023, 6, 20),
+              null
         );
         hearing1.setScheduledStartTime(scheduledStartTime);
         return hearing1;

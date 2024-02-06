@@ -49,21 +49,19 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final DataManagementApi dataManagementApi;
     private final ArmDataManagementApi armDataManagementApi;
-    private UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-
     private final FileOperationService fileOperationService;
     private final ArchiveRecordService archiveRecordService;
-
     private final EnumMap<ObjectRecordStatusEnum, ObjectRecordStatusEntity> armStatuses =
-        new EnumMap<>(ObjectRecordStatusEnum.class);
+          new EnumMap<>(ObjectRecordStatusEnum.class);
+    private final UserIdentity userIdentity;
 
     public UnstructuredToArmProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                          ObjectRecordStatusRepository objectRecordStatusRepository,
-                                          ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
-                                          ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
-                                          ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
-                                          ArchiveRecordService archiveRecordService) {
+          ObjectRecordStatusRepository objectRecordStatusRepository,
+          ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
+          ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
+          ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
+          ArchiveRecordService archiveRecordService) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.externalLocationTypeRepository = externalLocationTypeRepository;
@@ -87,7 +85,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         }
         if (!armStatuses.containsKey(FAILURE_ARM_MANIFEST_FILE_FAILED)) {
             ObjectRecordStatusEntity failedArmManifestFileStatus =
-                objectRecordStatusRepository.getReferenceById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId());
+                  objectRecordStatusRepository.getReferenceById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId());
             armStatuses.put(FAILURE_ARM_MANIFEST_FILE_FAILED, failedArmManifestFileStatus);
         }
         if (!armStatuses.containsKey(ARM_INGESTION)) {
@@ -110,12 +108,12 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         preloadObjectRecordStatuses(objectRecordStatusRepository);
 
         ExternalLocationTypeEntity inboundLocation = externalLocationTypeRepository.getReferenceById(
-            ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+              ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(
-            ExternalLocationTypeEnum.ARM.getId());
+              ExternalLocationTypeEnum.ARM.getId());
 
         List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities =
-            getArmExternalObjectDirectoryEntities(inboundLocation, armLocation);
+              getArmExternalObjectDirectoryEntities(inboundLocation, armLocation);
 
         for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
 
@@ -145,10 +143,10 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             String filename = generateFilename(armExternalObjectDirectory);
 
             boolean copyRawDataToArmSuccessful = copyRawDataToArm(
-                unstructuredExternalObjectDirectory,
-                armExternalObjectDirectory,
-                filename,
-                previousStatus
+                  unstructuredExternalObjectDirectory,
+                  armExternalObjectDirectory,
+                  filename,
+                  previousStatus
             );
             if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
                 updateExternalObjectDirctoryStatus(armExternalObjectDirectory, ARM_DROP_ZONE);
@@ -158,7 +156,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private void updateExternalObjectDirctoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEnum armStatus) {
         log.debug("Updating ARM status from {} to {} for ID {}", armExternalObjectDirectory.getStatus().getDescription(), armStatus.name(),
-                  armExternalObjectDirectory.getId()
+              armExternalObjectDirectory.getId()
         );
         armExternalObjectDirectory.setStatus(armStatuses.get(armStatus));
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
@@ -167,8 +165,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(
-            armExternalObjectDirectory,
-            armExternalObjectDirectory.getTransferAttempts()
+              armExternalObjectDirectory,
+              armExternalObjectDirectory.getTransferAttempts()
         );
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
@@ -198,22 +196,22 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
-                                                                                      ExternalLocationTypeEntity armLocation) {
+          ExternalLocationTypeEntity armLocation) {
 
         List<ObjectRecordStatusEntity> failedArmStatuses = new ArrayList<>();
         failedArmStatuses.add(armStatuses.get(FAILURE_ARM_RAW_DATA_FAILED));
         failedArmStatuses.add(armStatuses.get(FAILURE_ARM_MANIFEST_FILE_FAILED));
 
         var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
-            armStatuses.get(STORED),
-            inboundLocation,
-            armLocation
+              armStatuses.get(STORED),
+              inboundLocation,
+              armLocation
         );
 
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            failedArmStatuses,
-            armLocation,
-            armDataManagementConfiguration.getMaxRetryAttempts()
+              failedArmStatuses,
+              armLocation,
+              armDataManagementConfiguration.getMaxRetryAttempts()
         );
 
         return Stream.concat(pendingUnstructuredExternalObjectDirectoryEntities.stream(), failedArmExternalObjectDirectoryEntities.stream()).toList();
@@ -221,15 +219,15 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-                                     ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                     String filename,
-                                     ObjectRecordStatusEntity previousStatus) {
+          ExternalObjectDirectoryEntity armExternalObjectDirectory,
+          String filename,
+          ObjectRecordStatusEntity previousStatus) {
         try {
             if (previousStatus == null
-                || FAILURE_ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
-                || ARM_INGESTION.getId().equals(previousStatus.getId())) {
+                  || FAILURE_ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
+                  || ARM_INGESTION.getId().equals(previousStatus.getId())) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
-                    unstructuredExternalObjectDirectory.getExternalLocation());
+                      unstructuredExternalObjectDirectory.getExternalLocation());
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
@@ -243,16 +241,16 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 log.info("BLOB raw data already exists {}", e.getMessage());
             } else {
                 log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
-                          e.getMessage()
+                      e.getMessage()
                 );
                 updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
                 return false;
             }
         } catch (Exception e) {
             log.error(
-                "Error moving BLOB data for file {} due to {}",
-                unstructuredExternalObjectDirectory.getExternalLocation(),
-                e.getMessage()
+                  "Error moving BLOB data for file {} due to {}",
+                  unstructuredExternalObjectDirectory.getExternalLocation(),
+                  e.getMessage()
             );
 
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
@@ -263,9 +261,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                                             ObjectRecordStatusEnum objectRecordStatusEnum) {
+          ObjectRecordStatusEnum objectRecordStatusEnum) {
         log.debug("Updating ARM status from {} to {} for ID ", armExternalObjectDirectory.getStatus().getDescription(), objectRecordStatusEnum.name(),
-                  armExternalObjectDirectory.getId()
+              armExternalObjectDirectory.getId()
         );
         armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);
@@ -275,14 +273,14 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private Optional<ExternalObjectDirectoryEntity> getUnstructuredExternalObjectDirectoryEntity(
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+          ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         return externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
-            armStatuses.get(STORED),
-            externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
-            externalObjectDirectoryEntity.getMedia(),
-            externalObjectDirectoryEntity.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntity.getAnnotationDocumentEntity(),
-            externalObjectDirectoryEntity.getCaseDocument()
+              armStatuses.get(STORED),
+              externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
+              externalObjectDirectoryEntity.getMedia(),
+              externalObjectDirectoryEntity.getTranscriptionDocumentEntity(),
+              externalObjectDirectoryEntity.getAnnotationDocumentEntity(),
+              externalObjectDirectoryEntity.getCaseDocument()
         );
     }
 
@@ -293,7 +291,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         armExternalObjectDirectoryEntity.setStatus(armStatuses.get(ARM_INGESTION));
         armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
         armExternalObjectDirectoryEntity.setVerificationAttempts(1);
-
 
         if (nonNull(externalObjectDirectory.getMedia())) {
             armExternalObjectDirectoryEntity.setMedia(externalObjectDirectory.getMedia());

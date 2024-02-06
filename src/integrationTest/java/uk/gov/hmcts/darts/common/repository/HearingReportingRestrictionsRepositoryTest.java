@@ -23,10 +23,10 @@ class HearingReportingRestrictionsRepositoryTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
         //54 and 188 are is_reporting_restriction = true
@@ -40,7 +40,7 @@ class HearingReportingRestrictionsRepositoryTest extends IntegrationBase {
     @Test
     void checkViewExists() {
         List<HearingReportingRestrictionsEntity> hearingReportingRestrictionsEntities
-            = dartsDatabase.getHearingReportingRestrictionsRepository().findAll();
+              = dartsDatabase.getHearingReportingRestrictionsRepository().findAll();
 
         assertEquals(3, hearingReportingRestrictionsEntities.size());
     }

@@ -23,12 +23,6 @@ public class Application implements CommandLineRunner {
 
     private final AudioApi audioApi;
 
-    @PostConstruct
-    public void started() {
-        TimeZone.setDefault(TimeZone.getTimeZone(UTC));
-        log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
-    }
-
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
         final var instance = application.run(args);
@@ -38,6 +32,12 @@ public class Application implements CommandLineRunner {
             instance.close();
         }
 
+    }
+
+    @PostConstruct
+    public void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone(UTC));
+        log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
     }
 
     @Override

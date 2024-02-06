@@ -10,37 +10,37 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 @Mapper(componentModel = "spring",
-    unmappedSourcePolicy = ReportingPolicy.IGNORE,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE)
+      unmappedSourcePolicy = ReportingPolicy.IGNORE,
+      unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserAccountMapper {
 
     @Mappings({
-        @Mapping(source = "fullName", target = "userName"),
-        @Mapping(source = "fullName", target = "userFullName"),
-        @Mapping(source = "emailAddress", target = "emailAddress"),
-        @Mapping(source = "description", target = "userDescription"),
-        @Mapping(source = "active", target = "active"),
+          @Mapping(source = "fullName", target = "userName"),
+          @Mapping(source = "fullName", target = "userFullName"),
+          @Mapping(source = "emailAddress", target = "emailAddress"),
+          @Mapping(source = "description", target = "userDescription"),
+          @Mapping(source = "active", target = "active"),
     })
     UserAccountEntity mapToUserEntity(User user);
 
     @Mappings({
-        @Mapping(source = "id", target = "id"),
-        @Mapping(source = "userName", target = "fullName"),
-        @Mapping(source = "emailAddress", target = "emailAddress"),
-        @Mapping(source = "userDescription", target = "description"),
-        @Mapping(source = "active", target = "active")
+          @Mapping(source = "id", target = "id"),
+          @Mapping(source = "userName", target = "fullName"),
+          @Mapping(source = "emailAddress", target = "emailAddress"),
+          @Mapping(source = "userDescription", target = "description"),
+          @Mapping(source = "active", target = "active")
     })
     UserWithId mapToUserWithIdModel(UserAccountEntity userAccountEntity);
 
     @Mappings({
-        @Mapping(source = "id", target = "id"),
-        @Mapping(source = "userName", target = "fullName"),
-        @Mapping(source = "emailAddress", target = "emailAddress"),
-        @Mapping(source = "userDescription", target = "description"),
-        @Mapping(source = "active", target = "active"),
-        @Mapping(source = "lastLoginTime", target = "lastLoginAt"),
-        @Mapping(source = "lastModifiedDateTime", target = "lastModifiedAt"),
-        @Mapping(source = "createdDateTime", target = "createdAt")
+          @Mapping(source = "id", target = "id"),
+          @Mapping(source = "userName", target = "fullName"),
+          @Mapping(source = "emailAddress", target = "emailAddress"),
+          @Mapping(source = "userDescription", target = "description"),
+          @Mapping(source = "active", target = "active"),
+          @Mapping(source = "lastLoginTime", target = "lastLoginAt"),
+          @Mapping(source = "lastModifiedDateTime", target = "lastModifiedAt"),
+          @Mapping(source = "createdDateTime", target = "createdAt")
     })
     UserWithIdAndTimestamps mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
 }

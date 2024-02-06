@@ -26,23 +26,6 @@ public class BankHolidayCacheConfig {
     @Value("${darts.cache.bank-holiday.expiry}")
     private Duration bankHolidayExpiry;
 
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, RedisCacheConfiguration redisCacheConfiguration) {
-        log.debug("Initializing Redis for caching...");
-        return RedisCacheManager
-            .builder(redisConnectionFactory)
-            .cacheDefaults(redisCacheConfiguration)
-            .build();
-    }
-
-    @Bean
-    public RedisCacheConfiguration cacheConfiguration() {
-        return RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(bankHolidayExpiry)
-            .disableCachingNullValues()
-            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer()));
-    }
-
     private static GenericJackson2JsonRedisSerializer redisSerializer() {
         var serializer = new GenericJackson2JsonRedisSerializer();
         serializer.configure(objectMapper -> {
@@ -50,6 +33,23 @@ public class BankHolidayCacheConfig {
             objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         });
         return serializer;
+    }
+
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, RedisCacheConfiguration redisCacheConfiguration) {
+        log.debug("Initializing Redis for caching...");
+        return RedisCacheManager
+              .builder(redisConnectionFactory)
+              .cacheDefaults(redisCacheConfiguration)
+              .build();
+    }
+
+    @Bean
+    public RedisCacheConfiguration cacheConfiguration() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+              .entryTtl(bankHolidayExpiry)
+              .disableCachingNullValues()
+              .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer()));
     }
 
 }

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 @Component
 @RequiredArgsConstructor
 public class CourtroomStub {
+
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final CourthouseStub courthouseStub;
 

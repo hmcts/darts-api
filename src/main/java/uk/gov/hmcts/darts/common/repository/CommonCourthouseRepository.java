@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface CommonCourthouseRepository extends JpaRepository<CourthouseEntity, Integer> {
+
     Optional<CourthouseEntity> findByCourthouseNameIgnoreCase(String name);
 }

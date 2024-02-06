@@ -32,6 +32,7 @@ import java.util.Optional;
 @Slf4j
 @SuppressWarnings("PMD.TooManyMethods")
 public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService {
+
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
     private final JudgeRepository judgeRepository;
@@ -44,16 +45,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
-            courthouseName,
-            courtroomName,
-            caseNumber,
-            hearingDate
+              courthouseName,
+              courtroomName,
+              caseNumber,
+              hearingDate
         );
         return foundHearing.orElseGet(() -> createHearing(
-            courthouseName,
-            courtroomName,
-            caseNumber,
-            hearingDate
+              courthouseName,
+              courtroomName,
+              caseNumber,
+              hearingDate
         ));
     }
 
@@ -73,8 +74,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
-            courthouse.getId(),
-            courtroomName
+              courthouse.getId(),
+              courtroomName
         );
         return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName));
     }
@@ -83,8 +84,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(
-            courthouseName,
-            courtroomName
+              courthouseName,
+              courtroomName
         );
         if (foundCourtroom.isPresent()) {
             return foundCourtroom.get();
@@ -106,8 +107,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-            caseNumber,
-            courthouseName
+              caseNumber,
+              courthouseName
         );
         return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber));
     }

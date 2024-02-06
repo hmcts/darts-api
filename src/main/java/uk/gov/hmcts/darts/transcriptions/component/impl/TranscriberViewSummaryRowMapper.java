@@ -15,16 +15,16 @@ public class TranscriberViewSummaryRowMapper implements RowMapper<TranscriberVie
     @Override
     public TranscriberViewSummary mapRow(ResultSet rs, int rowNum) throws SQLException {
         var summary = new TranscriberViewSummary(
-            rs.getInt("transcription_id"),
-            rs.getInt("case_id"),
-            rs.getString("case_number"),
-            rs.getString("courthouse_name"),
-            rs.getObject("hearing_date", LocalDate.class),
-            rs.getString("transcription_type"),
-            rs.getString("status"),
-            rs.getObject("requested_ts", OffsetDateTime.class),
-            rs.getObject("state_change_ts", OffsetDateTime.class),
-            rs.getBoolean("is_manual")
+              rs.getInt("transcription_id"),
+              rs.getInt("case_id"),
+              rs.getString("case_number"),
+              rs.getString("courthouse_name"),
+              rs.getObject("hearing_date", LocalDate.class),
+              rs.getString("transcription_type"),
+              rs.getString("status"),
+              rs.getObject("requested_ts", OffsetDateTime.class),
+              rs.getObject("state_change_ts", OffsetDateTime.class),
+              rs.getBoolean("is_manual")
         );
         summary.setUrgency(rs.getString("urgency"));
         return summary;

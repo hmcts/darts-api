@@ -29,7 +29,7 @@ class ExternalDataStoreDeleterAutomatedTaskTest {
     @Test
     void runTask() {
         ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask =
-            new ExternalDataStoreDeleterAutomatedTask(null, provider, null, inboundDeleter, unstructuredDeleter, outboundDeleter);
+              new ExternalDataStoreDeleterAutomatedTask(null, provider, null, inboundDeleter, unstructuredDeleter, outboundDeleter);
 
         externalDataStoreDeleterAutomatedTask.runTask();
 

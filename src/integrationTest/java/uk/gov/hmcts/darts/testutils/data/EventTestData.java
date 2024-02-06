@@ -33,7 +33,7 @@ public class EventTestData {
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity, OffsetDateTime eventTime,
-                                              EventHandlerEntity eventHandlerEntity) {
+          EventHandlerEntity eventHandlerEntity) {
         EventEntity event = someMinimalEvent();
         event.setHearingEntities(List.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
@@ -46,7 +46,7 @@ public class EventTestData {
 
     public static int someReportingRestrictionId() {
         return REPORTING_RESTRICTIONS_DB_IDS.get(
-            new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));
+              new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));
     }
 
     private EventHandlerEntity createTestEventHandlerEntity() {

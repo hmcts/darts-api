@@ -40,8 +40,8 @@ public class RetentionController implements RetentionApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ContextIdEnum.CASE_ID, bodyAuthorisation = true,
-            securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
-            globalAccessSecurityRoles = {JUDGE, ADMIN})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
+          globalAccessSecurityRoles = {JUDGE, ADMIN})
     @Override
     public ResponseEntity<PostRetentionResponse> retentionsPost(PostRetentionRequest postRetentionRequest) {
         RetentionsPostRequestValidator.validate(postRetentionRequest);

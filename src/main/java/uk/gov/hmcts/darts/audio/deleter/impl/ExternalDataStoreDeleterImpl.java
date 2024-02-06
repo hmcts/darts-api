@@ -36,17 +36,16 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     public List<T> delete() {
         List<T> toBeDeleted = finder.findMarkedForDeletion();
 
-
         UserAccountEntity systemUser = getSystemUser();
         ObjectRecordStatusEntity deletedStatus = getDeletedStatus();
 
         for (T entityToBeDeleted : toBeDeleted) {
             UUID externalLocation = entityToBeDeleted.getLocation();
             log.info(
-                "Deleting data with location: {} for entity with id: {} and status: {}",
-                externalLocation,
-                entityToBeDeleted.getId(),
-                entityToBeDeleted.getStatusId()
+                  "Deleting data with location: {} for entity with id: {} and status: {}",
+                  externalLocation,
+                  entityToBeDeleted.getId(),
+                  entityToBeDeleted.getStatusId()
             );
 
             try {

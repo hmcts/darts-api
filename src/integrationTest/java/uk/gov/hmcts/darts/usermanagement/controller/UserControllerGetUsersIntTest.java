@@ -29,10 +29,9 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 @AutoConfigureMockMvc
 class UserControllerGetUsersIntTest extends IntegrationBase {
 
-    private static final String ENDPOINT_URL = "/admin/users";
     public static final String EMAIL_ADDRESS = "Email-Address";
     public static final String COURTHOUSE_ID = "courthouse_id";
-
+    private static final String ENDPOINT_URL = "/admin/users";
     private static final String ORIGINAL_USERNAME = "James Smith";
     private static final String ORIGINAL_EMAIL_ADDRESS = "james.smith@hmcts.net";
     private static final String ORIGINAL_DESCRIPTION = "A test user";
@@ -55,16 +54,16 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
+              {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+              """;
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
@@ -78,17 +77,17 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         mockMvc.perform(get(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value(ORIGINAL_USERNAME))
-            .andExpect(jsonPath("$[0].email_address").value(ORIGINAL_EMAIL_ADDRESS))
-            .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].last_login_at").value("2023-10-27T22:00:00Z"))
-            .andExpect(jsonPath("$[0].last_modified_at").exists())
-            .andExpect(jsonPath("$[0].created_at").exists())
-            .andReturn();
+                    .header("Content-Type", "application/json")
+                    .header(EMAIL_ADDRESS, "james.smith@hmcts.net"))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$[0].id").isNumber())
+              .andExpect(jsonPath("$[0].full_name").value(ORIGINAL_USERNAME))
+              .andExpect(jsonPath("$[0].email_address").value(ORIGINAL_EMAIL_ADDRESS))
+              .andExpect(jsonPath("$[0].active").value(true))
+              .andExpect(jsonPath("$[0].last_login_at").value("2023-10-27T22:00:00Z"))
+              .andExpect(jsonPath("$[0].last_modified_at").exists())
+              .andExpect(jsonPath("$[0].created_at").exists())
+              .andReturn();
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
@@ -101,9 +100,9 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                            .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
-                            .queryParam(COURTHOUSE_ID, "21"))
-            .andReturn();
+                    .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
+                    .queryParam(COURTHOUSE_ID, "21"))
+              .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.com"));
         assertEquals(200, response.getResponse().getStatus());
@@ -115,9 +114,9 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
-                            .queryParam(COURTHOUSE_ID, "21"))
-            .andReturn();
+                    .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
+                    .queryParam(COURTHOUSE_ID, "21"))
+              .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.net"));
         assertEquals(403, response.getResponse().getStatus());
@@ -138,7 +137,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         userAccountEntity.setLastModifiedBy(user);
 
         return dartsDatabase.getUserAccountRepository()
-            .save(userAccountEntity);
+              .save(userAccountEntity);
     }
 
 }

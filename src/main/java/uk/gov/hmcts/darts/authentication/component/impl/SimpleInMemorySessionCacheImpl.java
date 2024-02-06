@@ -18,7 +18,7 @@ public class SimpleInMemorySessionCacheImpl implements SessionCache {
     @PostConstruct
     public void postConstruct() {
         log.warn(
-            "### This implementation is intended only for dev and test purposes, and is not intended for production ###"
+              "### This implementation is intended only for dev and test purposes, and is not intended for production ###"
         );
     }
 

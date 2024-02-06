@@ -26,19 +26,19 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
         AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(
-            externalObjectDirectory,
-            externalObjectDirectory.getId()
+              externalObjectDirectory,
+              externalObjectDirectory.getId()
         );
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId());
         return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
     }
 
     private AnnotationArchiveRecord createAnnotationArchiveRecord(AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation,
-                                                                  UploadNewFileRecord uploadNewFileRecord) {
+          UploadNewFileRecord uploadNewFileRecord) {
         return AnnotationArchiveRecord.builder()
-            .annotationCreateArchiveRecordOperation(annotationCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+              .annotationCreateArchiveRecordOperation(annotationCreateArchiveRecordOperation)
+              .uploadNewFileRecord(uploadNewFileRecord)
+              .build();
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Integer relationId) {
@@ -58,16 +58,16 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     }
 
     private AnnotationCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                                Integer relationId) {
+          Integer relationId) {
         return AnnotationCreateArchiveRecordOperation.builder()
-            .relationId(relationId.toString())
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+              .relationId(relationId.toString())
+              .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+              .build();
     }
 
     private AnnotationCreateArchiveRecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return AnnotationCreateArchiveRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .build();
+              .publisher(armDataManagementConfiguration.getPublisher())
+              .build();
     }
 }

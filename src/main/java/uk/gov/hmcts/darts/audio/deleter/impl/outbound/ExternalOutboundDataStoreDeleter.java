@@ -13,9 +13,9 @@ public class ExternalOutboundDataStoreDeleter extends ExternalDataStoreDeleterIm
 
 
     public ExternalOutboundDataStoreDeleter(ObjectRecordStatusRepository objectRecordStatusRepository, UserAccountRepository userAccountRepository,
-                                            TransientObjectDirectoryRepository repository,
-                                            OutboundExternalObjectDirectoryDeletedFinder finder, OutboundDataStoreDeleter
-                                                deleter, SystemUserHelper systemUserHelper) {
+          TransientObjectDirectoryRepository repository,
+          OutboundExternalObjectDirectoryDeletedFinder finder, OutboundDataStoreDeleter
+          deleter, SystemUserHelper systemUserHelper) {
         super(objectRecordStatusRepository, userAccountRepository, repository, finder, deleter, systemUserHelper);
     }
 }

@@ -106,13 +106,13 @@ class AuthorisationServiceTest extends IntegrationBase {
         Set<Permission> judgePermissions = judgeRole.getPermissions();
         assertEquals(12, judgePermissions.size());
         assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionId(5)
-                                                 .permissionName("READ_JUDGES_NOTES")
-                                                 .build()));
+              .permissionId(5)
+              .permissionName("READ_JUDGES_NOTES")
+              .build()));
         assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionId(11)
-                                                 .permissionName("UPLOAD_JUDGES_NOTES")
-                                                 .build()));
+              .permissionId(11)
+              .permissionName("UPLOAD_JUDGES_NOTES")
+              .build()));
     }
 
     @Test
@@ -128,18 +128,18 @@ class AuthorisationServiceTest extends IntegrationBase {
         Set<Permission> approverPermissions = approverRole.getPermissions();
         assertEquals(11, approverPermissions.size());
         assertTrue(approverPermissions.contains(Permission.builder()
-                                                    .permissionId(2)
-                                                    .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                                                    .build()));
+              .permissionId(2)
+              .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+              .build()));
 
         Role requesterRole = roleIterator.next();
         assertEquals(REQUESTER.getId(), requesterRole.getRoleId());
         Set<Permission> requesterPermissions = requesterRole.getPermissions();
         assertEquals(10, requesterPermissions.size());
         assertFalse(requesterPermissions.contains(Permission.builder()
-                                                      .permissionId(2)
-                                                      .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                                                      .build()));
+              .permissionId(2)
+              .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+              .build()));
     }
 
     @Test
@@ -168,8 +168,8 @@ class AuthorisationServiceTest extends IntegrationBase {
         var c3Court = dartsDatabase.createCourthouseUnlessExists("C3 COURT");
 
         var bristolUser = dartsDatabase.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
-            .stream().findFirst()
-            .orElseThrow();
+              .stream().findFirst()
+              .orElseThrow();
         final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
@@ -177,8 +177,8 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
         assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
-            List.of(a1Court, c3Court),
-            Set.of(APPROVER, REQUESTER)
+              List.of(a1Court, c3Court),
+              Set.of(APPROVER, REQUESTER)
         ));
     }
 
@@ -190,11 +190,11 @@ class AuthorisationServiceTest extends IntegrationBase {
         var b2Court = dartsDatabase.createCourthouseUnlessExists("B2 COURT");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationService.checkCourthouseAuthorisation(
-                List.of(a1Court, b2Court),
-                Collections.emptySet()
-            )
+              DartsApiException.class,
+              () -> authorisationService.checkCourthouseAuthorisation(
+                    List.of(a1Court, b2Court),
+                    Collections.emptySet()
+              )
         );
         assertEquals("Could not obtain user details", exception.getMessage());
     }

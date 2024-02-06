@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionMapperTranscriptionTypeTest {
+
     private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper();
 
     @Mock
@@ -38,12 +39,12 @@ class TranscriptionMapperTranscriptionTypeTest {
         List<TranscriptionTypeEntity> transcriptionTypeEntities = CommonTestDataUtil.createTranscriptionTypeEntities();
 
         List<TranscriptionTypeResponse> transcriptionTypes =
-            transcriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeEntities);
+              transcriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeEntities);
 
         String actualResponse = objectMapper.writeValueAsString(transcriptionTypes);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/transcriptions/service/TranscriptionTypeResponse/expectedResponseMultipleEntities.json");
+              "Tests/transcriptions/service/TranscriptionTypeResponse/expectedResponseMultipleEntities.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 }

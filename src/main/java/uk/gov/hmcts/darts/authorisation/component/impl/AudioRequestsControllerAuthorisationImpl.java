@@ -21,15 +21,22 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEAR
 @RequiredArgsConstructor
 @Slf4j
 class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisation
-    implements ControllerAuthorisation {
+      implements ControllerAuthorisation {
 
-    static final String HEARING_ID_PARAM = "hearing_id";
     public static final String REQUEST_TYPE = "request_type";
     public static final String DOWNLOAD_REQUEST_TYPE = "DOWNLOAD";
-
+    static final String HEARING_ID_PARAM = "hearing_id";
     private final Authorisation authorisation;
 
     private final HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation;
+
+    private static Set<SecurityRoleEnum> setDownloadRequestSecurityRoles(Set<SecurityRoleEnum> roles, String requestType) {
+        if (DOWNLOAD_REQUEST_TYPE.equals(requestType)) {
+            roles = new HashSet<>();
+            roles.add(SecurityRoleEnum.TRANSCRIBER);
+        }
+        return roles;
+    }
 
     @Override
     public ContextIdEnum getContextId() {
@@ -61,14 +68,6 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
         String requestType = jsonNode.path(REQUEST_TYPE).textValue();
         roles = setDownloadRequestSecurityRoles(roles, requestType);
         authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
-    }
-
-    private static Set<SecurityRoleEnum> setDownloadRequestSecurityRoles(Set<SecurityRoleEnum> roles, String requestType) {
-        if (DOWNLOAD_REQUEST_TYPE.equals(requestType)) {
-            roles = new HashSet<>();
-            roles.add(SecurityRoleEnum.TRANSCRIBER);
-        }
-        return roles;
     }
 
 }

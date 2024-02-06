@@ -31,15 +31,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
-    @Autowired
-    private transient MockMvc mockMvc;
-
-    private static String endpointUrl = "/cases/{case_id}/hearings";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
-
+    private static final String endpointUrl = "/cases/{case_id}/hearings";
+    @Autowired
+    private transient MockMvc mockMvc;
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -48,17 +46,17 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
+              .createAuthorisedIntegrationTestUser(courthouseEntity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -73,8 +71,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
+              {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -95,10 +93,10 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
 
     }
 
@@ -106,10 +104,10 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     void casesSearchGetEndpointMultipleObjectsReturned() throws Exception {
 
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            "CR1",
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              "CR1",
+              SOME_DATE_TIME.toLocalDate()
         );
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
@@ -121,12 +119,12 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[1].courtroom", Matchers.is("CR1")));
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
+              .andExpect(MockMvcResultMatchers.jsonPath("$[1].courtroom", Matchers.is("CR1")));
 
     }
 
@@ -136,8 +134,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andExpect(
-            MockMvcResultMatchers.jsonPath(
-                "$[0]").doesNotExist());
+              MockMvcResultMatchers.jsonPath(
+                    "$[0]").doesNotExist());
 
     }
 
@@ -154,8 +152,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath(
-                "$.case_id").doesNotExist());
+              .andExpect(MockMvcResultMatchers.jsonPath(
+                    "$.case_id").doesNotExist());
 
     }
 

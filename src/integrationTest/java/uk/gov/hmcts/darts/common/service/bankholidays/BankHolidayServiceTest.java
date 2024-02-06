@@ -11,42 +11,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BankHolidayServiceTest extends IntegrationBase {
 
     public static final String VALID_BANK_HOLIDAY_JSON = """
-        {
-          "england-and-wales": {
-            "division": "england-and-wales",
-            "events": [
-              {
-                "title": "New Year’s Day",
-                "date": "2020-01-01",
-                "notes": "",
-                "bunting": true
-              },
-              {
-                "title": "Good Friday",
-                "date": "2018-03-30",
-                "notes": "",
-                "bunting": false
-              }
-            ]
-          },
-          "some-other-division": {
-            "division": "some-other-division",
-            "events": [
-              {
-                "title": "New Year’s Day",
-                "date": "2018-01-01",
-                "notes": "",
-                "bunting": true
-              }
-            ]
+          {
+            "england-and-wales": {
+              "division": "england-and-wales",
+              "events": [
+                {
+                  "title": "New Year’s Day",
+                  "date": "2020-01-01",
+                  "notes": "",
+                  "bunting": true
+                },
+                {
+                  "title": "Good Friday",
+                  "date": "2018-03-30",
+                  "notes": "",
+                  "bunting": false
+                }
+              ]
+            },
+            "some-other-division": {
+              "division": "some-other-division",
+              "events": [
+                {
+                  "title": "New Year’s Day",
+                  "date": "2018-01-01",
+                  "notes": "",
+                  "bunting": true
+                }
+              ]
+            }
           }
-        }
-        """;
-
+          """;
+    private final BankHolidayApiStub bankHolidayApiStub = new BankHolidayApiStub();
     @Autowired
     private BankHolidaysService bankHolidaysService;
-
-    private final BankHolidayApiStub bankHolidayApiStub = new BankHolidayApiStub();
 
     @Test
     void returnsBankHolidays() {

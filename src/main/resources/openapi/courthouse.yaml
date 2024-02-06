@@ -24,7 +24,7 @@ paths:
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
-            description: Resource already exists.
+          description: Resource already exists.
         '500':
           description: Internal Server Error
     get:
@@ -85,7 +85,7 @@ paths:
         '409':
           description: Returned in the case where courthouse name or code amended is not unique.
         '404':
-            description: Resource with the provided id does not exist.
+          description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
     delete:

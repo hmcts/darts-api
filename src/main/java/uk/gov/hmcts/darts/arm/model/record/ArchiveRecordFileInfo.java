@@ -9,6 +9,7 @@ import java.io.File;
 @Data
 @Builder
 public class ArchiveRecordFileInfo {
+
     private File archiveRecordFile;
     private boolean fileGenerationSuccessful;
     private ArchiveRecordType archiveRecordType;

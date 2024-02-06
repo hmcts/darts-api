@@ -27,12 +27,12 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
     private final TranscriptionsApi transcriptionsApi;
 
     public SentencingRemarksAndRetentionPolicyHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                                                      EventRepository eventRepository,
-                                                      HearingRepository hearingRepository,
-                                                      CaseRepository caseRepository,
-                                                      ApplicationEventPublisher eventPublisher,
-                                                      TranscriptionsApi transcriptionsApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher,
+          TranscriptionsApi transcriptionsApi) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
         this.transcriptionsApi = transcriptionsApi;
     }
 
@@ -40,8 +40,8 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
     @Transactional
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var transcriptionRequestDetails = transcriptionRequestDetailsFrom(
-            dartsEvent,
-            createHearingAndSaveEvent(dartsEvent, eventHandler).getHearingEntity());
+              dartsEvent,
+              createHearingAndSaveEvent(dartsEvent, eventHandler).getHearingEntity());
 
         transcriptionRequestDetails.setTranscriptionTypeId(SENTENCING_REMARKS.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(STANDARD.getId());

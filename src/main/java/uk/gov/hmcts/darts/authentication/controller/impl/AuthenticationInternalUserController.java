@@ -16,9 +16,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/internal-user")
 public class AuthenticationInternalUserController extends AbstractUserController {
+
     public AuthenticationInternalUserController(AuthenticationService authenticationService, AuthorisationApi authorisationApi,
-                                                AuthStrategySelector locator) {
-        super(authenticationService, authorisationApi, locator);
+          AuthStrategySelector locator) {
+        super(locator, authenticationService, authorisationApi);
     }
 
     @Override

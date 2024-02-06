@@ -29,6 +29,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.LawOfDemeter")
 class AuditServiceImplTest {
+
+    private static final String APP_SERVER = "APP_SERVER";
     @Mock
     AuditActivityRepository auditActivityRepository;
     @Mock
@@ -37,13 +39,9 @@ class AuditServiceImplTest {
     UserAccountRepository userAccountRepository;
     @Mock
     HearingRepository hearingRepository;
-
     AuditServiceImpl auditServiceImpl;
-
     @Captor
     ArgumentCaptor<AuditEntity> auditEntityArgumentCaptor;
-
-    private static final String APP_SERVER = "APP_SERVER";
 
     @BeforeEach
     void setUp() {

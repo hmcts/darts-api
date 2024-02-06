@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveR
 @Value
 @Builder
 public class TranscriptionArchiveRecord implements ArchiveRecord {
+
     private TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation;
     private UploadNewFileRecord uploadNewFileRecord;
 

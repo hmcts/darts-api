@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,7 +46,7 @@ class DataManagementServiceTest {
 
         var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
 
-        assertTrue(uniqueBlobName instanceof UUID);
+        assertInstanceOf(UUID.class, uniqueBlobName);
     }
 
     @Test
@@ -57,8 +58,8 @@ class DataManagementServiceTest {
         var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
 
         var blobData = dataManagementService.getBlobData(
-            unstructuredStorageContainerName,
-            uniqueBlobName
+              unstructuredStorageContainerName,
+              uniqueBlobName
         );
 
         assertEquals(TEST_BINARY_STRING, blobData.toString());
@@ -67,10 +68,10 @@ class DataManagementServiceTest {
     @Test
     void whenGetShouldThrowExceptionWhenProvidedWithInvalidContainerName() {
         assertThrows(BlobStorageException.class, () ->
-            dataManagementService.getBlobData(
-                "INVALID_CONTAINER_NAME",
-                UUID.fromString(TEST_BLOB_ID)
-            ));
+              dataManagementService.getBlobData(
+                    "INVALID_CONTAINER_NAME",
+                    UUID.fromString(TEST_BLOB_ID)
+              ));
     }
 
     @Test

@@ -82,22 +82,22 @@ class OutboundFileZipGeneratorHelperImplTest {
     void generatePlaylistReturnsXmlFile() throws IOException, JAXBException {
         Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
         PlaylistInfo playlistInfo1 = PlaylistInfo.builder()
-            .caseNumber(CASE_NUMBER)
-            .startTime(ZonedDateTime.ofInstant(
-                Instant.parse("2023-06-11T12:00:00Z"),
-                EUROPE_LONDON_ZONE
-            ))
-            .fileLocation("daudio/localaudio/T2023/041301_1/0001")
-            .build();
+              .caseNumber(CASE_NUMBER)
+              .startTime(ZonedDateTime.ofInstant(
+                    Instant.parse("2023-06-11T12:00:00Z"),
+                    EUROPE_LONDON_ZONE
+              ))
+              .fileLocation("daudio/localaudio/T2023/041301_1/0001")
+              .build();
         playlistInfos.add(playlistInfo1);
         PlaylistInfo playlistInfo2 = PlaylistInfo.builder()
-            .caseNumber(CASE_NUMBER)
-            .startTime(ZonedDateTime.ofInstant(
-                Instant.parse("2023-06-11T13:00:00Z"),
-                EUROPE_LONDON_ZONE
-            ))
-            .fileLocation("daudio/localaudio/T2023/041301_1/0002")
-            .build();
+              .caseNumber(CASE_NUMBER)
+              .startTime(ZonedDateTime.ofInstant(
+                    Instant.parse("2023-06-11T13:00:00Z"),
+                    EUROPE_LONDON_ZONE
+              ))
+              .fileLocation("daudio/localaudio/T2023/041301_1/0002")
+              .build();
         playlistInfos.add(playlistInfo2);
 
         String playlistOutputFile = tempDirectory.getAbsolutePath();
@@ -135,20 +135,20 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         HearingEntity hearingEntity = createHearingInfo();
         ZonedDateTime startTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-07-01T09:00:00Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-07-01T09:00:00Z"),
+              EUROPE_LONDON_ZONE
         );
         ZonedDateTime endTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-07-01T12:00:00Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-07-01T12:00:00Z"),
+              EUROPE_LONDON_ZONE
         );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
         String annotationsFile = outboundFileZipGeneratorHelper.generateAnnotation(
-            hearingEntity,
-            startTime,
-            endTime,
-            annotationsOutputFile.toString()
+              hearingEntity,
+              startTime,
+              endTime,
+              annotationsOutputFile.toString()
         );
 
         assertTrue(Files.exists(Path.of(annotationsFile)));
@@ -173,20 +173,20 @@ class OutboundFileZipGeneratorHelperImplTest {
         HearingEntity hearingEntity = createHearingInfo();
 
         ZonedDateTime startTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-07-01T09:00:00Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-07-01T09:00:00Z"),
+              EUROPE_LONDON_ZONE
         );
         ZonedDateTime endTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-07-01T09:59:59Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-07-01T09:59:59Z"),
+              EUROPE_LONDON_ZONE
         );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
         String annotationsFile = outboundFileZipGeneratorHelper.generateAnnotation(
-            hearingEntity,
-            startTime,
-            endTime,
-            annotationsOutputFile.toString()
+              hearingEntity,
+              startTime,
+              endTime,
+              annotationsOutputFile.toString()
         );
 
         assertTrue(Files.exists(Path.of(annotationsFile)));
@@ -200,22 +200,22 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         HearingEntity hearingEntity = createHearingInfo();
         ZonedDateTime startTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-07-01T09:00:00Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-07-01T09:00:00Z"),
+              EUROPE_LONDON_ZONE
         );
         ZonedDateTime endTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-07-01T09:59:59Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-07-01T09:59:59Z"),
+              EUROPE_LONDON_ZONE
         );
         String invalidPath = "/non_existent_directory/0_annotations.xml";
 
         var exception = assertThrows(DartsApiException.class, () ->
-            outboundFileZipGeneratorHelper.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
+              outboundFileZipGeneratorHelper.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
 
         assertEquals("Failed to process audio request", exception.getMessage());
         assertEquals(
-            "java.nio.file.NoSuchFileException: /non_existent_directory/0_annotations.xml",
-            exception.getCause().toString()
+              "java.nio.file.NoSuchFileException: /non_existent_directory/0_annotations.xml",
+              exception.getCause().toString()
         );
     }
 
@@ -223,21 +223,21 @@ class OutboundFileZipGeneratorHelperImplTest {
     void generateReadmeCreatesReadmeWithContent() throws IOException {
 
         ZonedDateTime startTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-03-24T09:00:00.000Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-03-24T09:00:00.000Z"),
+              EUROPE_LONDON_ZONE
         );
         ZonedDateTime endTime = ZonedDateTime.ofInstant(
-            Instant.parse("2023-03-24T12:00:00.000Z"),
-            EUROPE_LONDON_ZONE
+              Instant.parse("2023-03-24T12:00:00.000Z"),
+              EUROPE_LONDON_ZONE
         );
 
         ViqMetaData viqMetaData = ViqMetaData.builder()
-            .courthouse("Trainwell Crown Court")
-            .raisedBy(null)
-            .startTime(startTime)
-            .endTime(endTime)
-            .type(null)
-            .build();
+              .courthouse("Trainwell Crown Court")
+              .raisedBy(null)
+              .startTime(startTime)
+              .endTime(endTime)
+              .type(null)
+              .build();
 
         String fileLocation = tempDirectory.getAbsolutePath();
         String readmeFile = outboundFileZipGeneratorHelper.generateReadme(viqMetaData, fileLocation);
@@ -269,11 +269,11 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
         AudioFileInfo audioFileInfo = new AudioFileInfo(
-            Instant.parse("2023-04-28T09:23:11Z"),
-            Instant.parse("2023-04-28T10:30:00Z"),
-            1,
-            sourceFile,
-            true
+              Instant.parse("2023-04-28T09:23:11Z"),
+              Instant.parse("2023-04-28T10:30:00Z"),
+              1,
+              sourceFile,
+              true
         );
         Path outputFile = Path.of(tempDirectory.getAbsolutePath(), "0001.a00");
 
@@ -296,11 +296,11 @@ class OutboundFileZipGeneratorHelperImplTest {
         Path outputFile = mock(Path.class);
         when(outputFile.toFile()).thenThrow(RuntimeException.class);
         AudioFileInfo audioFileInfo = new AudioFileInfo(
-            Instant.parse("2023-04-28T09:00:00Z"),
-            Instant.parse("2023-04-28T10:30:00Z"),
-            1,
-            Paths.get("src/test/resources/Tests/audio/testAudio.mp2"),
-            true
+              Instant.parse("2023-04-28T09:00:00Z"),
+              Instant.parse("2023-04-28T10:30:00Z"),
+              1,
+              Paths.get("src/test/resources/Tests/audio/testAudio.mp2"),
+              true
         );
 
         assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile));
@@ -312,11 +312,11 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
         AudioFileInfo audioFileInfo = new AudioFileInfo(
-            Instant.parse("2023-04-28T09:00:00Z"),
-            Instant.parse("2023-04-28T10:30:00Z"),
-            1,
-            sourceFile,
-            false
+              Instant.parse("2023-04-28T09:00:00Z"),
+              Instant.parse("2023-04-28T10:30:00Z"),
+              1,
+              sourceFile,
+              false
         );
         Path outputFile = Path.of(tempDirectory.getAbsolutePath(), "0001.a00");
 
@@ -331,7 +331,7 @@ class OutboundFileZipGeneratorHelperImplTest {
         List<EventEntity> eventEntities = new ArrayList<>();
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
         EventEntity eventEntity = CommonTestDataUtil.createEventWith("LOG", "Start Recording", hearingEntity,
-                                                                     OffsetDateTime.parse("2023-07-01T10:00:00Z")
+              OffsetDateTime.parse("2023-07-01T10:00:00Z")
         );
 
         eventEntities.add(eventEntity);

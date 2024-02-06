@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -29,36 +28,32 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 @RequiredArgsConstructor
 public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioDeleterProcessor {
 
-    @Value("${darts.data-management.retention-period.unstructured.arm-minimum.weeks}")
-    int weeksInArm;
-
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final UserAccountRepository userAccountRepository;
     private final SystemUserHelper systemUserHelper;
+    @Value("${darts.data-management.retention-period.unstructured.arm-minimum.weeks}")
+    int weeksInArm;
 
     @Transactional
     public void markForDeletion() {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.STORED.getId());
+              ObjectRecordStatusEnum.STORED.getId());
         ExternalLocationTypeEntity unstructuredLocation = externalLocationTypeRepository.getReferenceById(
-            ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+              ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(
-            ExternalLocationTypeEnum.ARM.getId());
+              ExternalLocationTypeEnum.ARM.getId());
 
-        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
-            weeksInArm,
-            ChronoUnit.WEEKS
-        );
+        OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minusWeeks(weeksInArm);
 
         List<Integer> audioFileIdsToBeMarked = externalObjectDirectoryRepository.findMediaFileIdsIn2StorageLocationsBeforeTime(
-            storedStatus,
-            storedStatus,
-            unstructuredLocation,
-            armLocation,
-            lastModifiedBefore
+              storedStatus,
+              storedStatus,
+              unstructuredLocation,
+              armLocation,
+              lastModifiedBefore
         );
 
         if (audioFileIdsToBeMarked.isEmpty()) {
@@ -68,14 +63,14 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
         ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(
-            MARKED_FOR_DELETION.getId());
+              MARKED_FOR_DELETION.getId());
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
         externalObjectDirectoryRepository.updateStatus(
-            deletionStatus,
-            user,
-            audioFileIdsToBeMarked,
-            OffsetDateTime.now()
+              deletionStatus,
+              user,
+              audioFileIdsToBeMarked,
+              OffsetDateTime.now()
         );
     }
 }

@@ -33,13 +33,13 @@ public class RetentionDateHelper {
 
     public RetentionPolicyTypeEntity getRetentionPolicy(RetentionPolicyEnum policy) {
         Optional<RetentionPolicyTypeEntity> manualPolicyEntityOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                policy.getPolicyKey(),
-                currentTimeHelper.currentOffsetDateTime()
+              policy.getPolicyKey(),
+              currentTimeHelper.currentOffsetDateTime()
         );
         if (manualPolicyEntityOpt.isEmpty()) {
             throw new DartsApiException(
-                    RetentionApiError.INTERNAL_SERVER_ERROR,
-                    MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policy.getPolicyKey())
+                  RetentionApiError.INTERNAL_SERVER_ERROR,
+                  MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policy.getPolicyKey())
             );
         }
         return manualPolicyEntityOpt.get();

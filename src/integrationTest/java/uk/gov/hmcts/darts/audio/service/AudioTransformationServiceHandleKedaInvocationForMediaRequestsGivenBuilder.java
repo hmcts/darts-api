@@ -49,32 +49,32 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     public void aMediaEntityGraph() {
 
         var externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
-            ExternalLocationTypeEnum.UNSTRUCTURED);
+              ExternalLocationTypeEnum.UNSTRUCTURED);
         var objectRecordStatusEntity = dartsDatabaseStub.getObjectRecordStatusEntity(STORED);
 
         for (int channelNumber = 1; channelNumber <= 4; channelNumber++) {
 
             var mediaEntity = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                                                                  TIME_12_01,
-                                                                  TIME_12_20,
-                                                                  channelNumber
+                  TIME_12_01,
+                  TIME_12_20,
+                  channelNumber
             );
             var mediaEntity2 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                                                                   TIME_12_20,
-                                                                   TIME_12_40,
-                                                                   channelNumber
+                  TIME_12_20,
+                  TIME_12_40,
+                  channelNumber
             );
 
             var mediaEntity3 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                                                                   TIME_12_40,
-                                                                   TIME_13_01,
-                                                                   channelNumber
+                  TIME_12_40,
+                  TIME_13_01,
+                  channelNumber
             );
 
             var mediaEntity4 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                                                                   TIME_13_30,
-                                                                   TIME_14_00,
-                                                                   channelNumber
+                  TIME_13_30,
+                  TIME_14_00,
+                  channelNumber
             );
 
             hearingEntity.addMedia(mediaEntity);
@@ -83,36 +83,35 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             hearingEntity.addMedia(mediaEntity4);
             dartsDatabaseStub.getHearingRepository().saveAndFlush(hearingEntity);
 
-
             var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(
-                    mediaEntity,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
-                    UUID.randomUUID()
-                );
+                  .createExternalObjectDirectory(
+                        mediaEntity,
+                        objectRecordStatusEntity,
+                        externalLocationTypeEntity,
+                        UUID.randomUUID()
+                  );
             var externalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(
-                    mediaEntity2,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
-                    UUID.randomUUID()
-                );
+                  .createExternalObjectDirectory(
+                        mediaEntity2,
+                        objectRecordStatusEntity,
+                        externalLocationTypeEntity,
+                        UUID.randomUUID()
+                  );
             var externalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(
-                    mediaEntity3,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
-                    UUID.randomUUID()
-                );
+                  .createExternalObjectDirectory(
+                        mediaEntity3,
+                        objectRecordStatusEntity,
+                        externalLocationTypeEntity,
+                        UUID.randomUUID()
+                  );
 
             var externalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
-                .createExternalObjectDirectory(
-                    mediaEntity4,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
-                    UUID.randomUUID()
-                );
+                  .createExternalObjectDirectory(
+                        mediaEntity4,
+                        objectRecordStatusEntity,
+                        externalLocationTypeEntity,
+                        UUID.randomUUID()
+                  );
 
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity2);
@@ -127,24 +126,24 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         userAccountEntity.setEmailAddress(emailAddress);
 
         dartsDatabaseStub.getUserAccountRepository()
-            .saveAndFlush(userAccountEntity);
+              .saveAndFlush(userAccountEntity);
 
         return userAccountEntity;
     }
 
     public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         hearingEntity = dartsDatabaseStub.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            caseNumber,
-            courthouseName,
-            courtroomName,
-            hearingDate
+              caseNumber,
+              courthouseName,
+              courtroomName,
+              hearingDate
         );
 
         return hearingEntity;
     }
 
     public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType,
-                                                             UserAccountEntity userAccountEntity) {
+          UserAccountEntity userAccountEntity) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
         mediaRequestEntity.setStatus(OPEN);
@@ -157,11 +156,11 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         mediaRequestEntity.setLastModifiedBy(userAccountEntity);
 
         dartsDatabaseStub.getMediaRequestRepository()
-            .saveAndFlush(mediaRequestEntity);
+              .saveAndFlush(mediaRequestEntity);
     }
 
     public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType,
-                                                             UserAccountEntity userAccountEntity, OffsetDateTime start, OffsetDateTime end) {
+          UserAccountEntity userAccountEntity, OffsetDateTime start, OffsetDateTime end) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
         mediaRequestEntity.setStatus(OPEN);
@@ -174,7 +173,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         mediaRequestEntity.setLastModifiedBy(userAccountEntity);
 
         dartsDatabaseStub.getMediaRequestRepository()
-            .saveAndFlush(mediaRequestEntity);
+              .saveAndFlush(mediaRequestEntity);
     }
 
 }

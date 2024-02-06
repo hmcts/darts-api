@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.testutils.TestUtils;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -44,9 +43,18 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Autowired
     CaseService service;
+    CourthouseEntity swanseaCourthouse;
     @MockBean
     private UserIdentity mockUserIdentity;
-    CourthouseEntity swanseaCourthouse;
+
+    private static void compareJson(String actualResponse, String expectedResponse) {
+        try {
+            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        } catch (AssertionError ae) {
+            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
+            throw ae;
+        }
+    }
 
     @BeforeEach
     void setupData() {
@@ -59,7 +67,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
+        case2.setDefendantList(List.of(createDefendantForCaseWithName(case2, "Defendant2")));
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
@@ -127,12 +135,12 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         HearingEntity hearing8 = createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
-                              hearing2a, hearing2b, hearing2c,
-                              hearing3a, hearing3b, hearing3c,
-                              hearing4a, hearing4b, hearing4c,
-                              hearing5a, hearing5b, hearing5c,
-                              hearing6a, hearing6b, hearing6c,
-                              hearing7a, hearing7b, hearing8
+              hearing2a, hearing2b, hearing2c,
+              hearing3a, hearing3b, hearing3c,
+              hearing4a, hearing4b, hearing4c,
+              hearing5a, hearing5b, hearing5c,
+              hearing6a, hearing6b, hearing6c,
+              hearing7a, hearing7b, hearing8
 
         );
 
@@ -145,40 +153,31 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCaseNumber() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("sE1")
-            .build();
+              .caseNumber("sE1")
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
 
         compareJson(actualResponse, expectedResponse);
-    }
-
-    private static void compareJson(String actualResponse, String expectedResponse) {
-        try {
-            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-        } catch (AssertionError ae) {
-            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
-            throw ae;
-        }
     }
 
     @Test
     void getWithDateRangeFrom() throws IOException {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .dateFrom(LocalDate.of(2023, 7, 21))
-            .build();
+              .dateFrom(LocalDate.of(2023, 7, 21))
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFrom/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFrom/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -186,15 +185,15 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithDateRangeTo() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .dateTo(LocalDate.of(2023, 6, 21))
-            .build();
+              .dateTo(LocalDate.of(2023, 6, 21))
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeTo/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeTo/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -202,16 +201,16 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithDateRangeFromTo() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .dateFrom(LocalDate.of(2023, 6, 21))
-            .dateTo(LocalDate.of(2023, 7, 21))
-            .build();
+              .dateFrom(LocalDate.of(2023, 6, 21))
+              .dateTo(LocalDate.of(2023, 7, 21))
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromTo/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromTo/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -219,16 +218,16 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithDateRangeFromToSameDate() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .dateFrom(LocalDate.of(2023, 10, 22))
-            .dateTo(LocalDate.of(2023, 10, 22))
-            .build();
+              .dateFrom(LocalDate.of(2023, 10, 22))
+              .dateTo(LocalDate.of(2023, 10, 22))
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromToSameDate/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromToSameDate/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -236,15 +235,15 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithJudge() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .judgeName("3A")
-            .build();
+              .judgeName("3A")
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithJudge/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithJudge/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -252,15 +251,15 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm2")
-            .build();
+              .courtroom("roOm2")
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroom/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroom/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -268,15 +267,15 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithEventText() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .eventTextContains("nT5b")
-            .build();
+              .eventTextContains("nT5b")
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithEventText/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithEventText/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -285,16 +284,16 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void getWithCourtroomJudge() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .courtroom("roOm3")
-            .judgeName("dGe6B")
-            .build();
+              .courtroom("roOm3")
+              .judgeName("dGe6B")
+              .build();
 
         setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroomJudge/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroomJudge/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -302,8 +301,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void whenAdvancedSearchIsRunForUserWithGlobalAccessWithNoCourthouseAccess_thenShouldReturnResultsOk() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("sE1")
-            .build();
+              .caseNumber("sE1")
+              .build();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
@@ -312,7 +311,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
+              "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
 
         compareJson(actualResponse, expectedResponse);
     }
@@ -321,8 +320,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     void whenAdvancedSearchIsRunForUserWithoutGlobalAccessWithNoCourthouseAccess_thenShouldReturnEmptyArray() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("sE1")
-            .build();
+              .caseNumber("sE1")
+              .build();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
@@ -336,7 +335,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     private void setupUserAccountAndSecurityGroup() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(swanseaCourthouse);
+              .createAuthorisedIntegrationTestUser(swanseaCourthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 

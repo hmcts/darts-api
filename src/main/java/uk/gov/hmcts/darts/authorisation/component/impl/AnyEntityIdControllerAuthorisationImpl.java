@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @AllArgsConstructor
 @Slf4j
 public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthorisation
-    implements ControllerAuthorisation {
+      implements ControllerAuthorisation {
 
     private final Authorisation authorisation;
 
@@ -32,6 +32,11 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
     private final MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation;
     private final TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation;
     private final TransformedMediaIdControllerAuthorisationImpl transformedMediaIdControllerAuthorisation;
+
+    private static void entitiesNotFound(String authLocation) {
+        log.error("Unable to find entity/entities in {} for authorisation", authLocation);
+        throw new DartsApiException(BAD_REQUEST_ANY_ID);
+    }
 
     @Override
     public ContextIdEnum getContextId() {
@@ -59,11 +64,11 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         transformedMediaIdControllerAuthorisation.checkAuthorisationByTransformedMediaId(transformedMediaIdParamOptional, roles);
 
         if (hearingIdParamOptional.isEmpty()
-            && caseIdParamOptional.isEmpty()
-            && mediaIdParamOptional.isEmpty()
-            && mediaRequestIdParamOptional.isEmpty()
-            && transcriptionIdParamOptional.isEmpty()
-            && transformedMediaIdParamOptional.isEmpty()
+              && caseIdParamOptional.isEmpty()
+              && mediaIdParamOptional.isEmpty()
+              && mediaRequestIdParamOptional.isEmpty()
+              && transcriptionIdParamOptional.isEmpty()
+              && transformedMediaIdParamOptional.isEmpty()
         ) {
             entitiesNotFound("parameters");
         }
@@ -114,12 +119,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
 
     private boolean checkEntityExists(JsonNode jsonNode, String entityIdParam) {
         return jsonNode.path(entityIdParam) != null
-            && jsonNode.path(entityIdParam).intValue() != 0;
-    }
-
-    private static void entitiesNotFound(String authLocation) {
-        log.error("Unable to find entity/entities in {} for authorisation", authLocation);
-        throw new DartsApiException(BAD_REQUEST_ANY_ID);
+              && jsonNode.path(entityIdParam).intValue() != 0;
     }
 
 }

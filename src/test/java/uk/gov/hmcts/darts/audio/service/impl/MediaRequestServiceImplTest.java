@@ -138,12 +138,12 @@ class MediaRequestServiceImplTest {
     @Test
     void countNonAccessedAudioForUser() {
         when(mockMediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(
-            any(),
-            eq(COMPLETED)
+              any(),
+              eq(COMPLETED)
         )).thenReturn(10L);
 
         AudioNonAccessedResponse result = mediaRequestService.countNonAccessedAudioForUser(
-            TEST_REQUESTER);
+              TEST_REQUESTER);
 
         assertEquals(10, result.getCount());
     }
@@ -190,12 +190,12 @@ class MediaRequestServiceImplTest {
         when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         when(mockMediaRequestRepository.findDuplicateUserMediaRequests(
-            mockHearingEntity,
-            mockUserAccountEntity,
-            requestDetails.getStartTime(),
-            requestDetails.getEndTime(),
-            requestDetails.getRequestType(),
-            List.of(OPEN, PROCESSING)
+              mockHearingEntity,
+              mockUserAccountEntity,
+              requestDetails.getStartTime(),
+              requestDetails.getEndTime(),
+              requestDetails.getRequestType(),
+              List.of(OPEN, PROCESSING)
         )).thenReturn(Optional.empty());
 
         boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
@@ -219,12 +219,12 @@ class MediaRequestServiceImplTest {
         when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         when(mockMediaRequestRepository.findDuplicateUserMediaRequests(
-            mockHearingEntity,
-            mockUserAccountEntity,
-            requestDetails.getStartTime(),
-            requestDetails.getEndTime(),
-            requestDetails.getRequestType(),
-            List.of(OPEN, PROCESSING)
+              mockHearingEntity,
+              mockUserAccountEntity,
+              requestDetails.getStartTime(),
+              requestDetails.getEndTime(),
+              requestDetails.getRequestType(),
+              List.of(OPEN, PROCESSING)
         )).thenReturn(Optional.of(mockMediaRequestEntity));
 
         boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
@@ -244,15 +244,15 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
-            .thenReturn(emptyList());
+              .thenReturn(emptyList());
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId(AUDIO_REQUEST_PROCESSING.toString())
-            .caseId(1001)
-            .emailAddresses("test@test.com")
-            .build();
+              .eventId(AUDIO_REQUEST_PROCESSING.toString())
+              .caseId(1001)
+              .emailAddresses("test@test.com")
+              .build();
         verify(audioRequestBeingProcessedFromArchiveQuery).getResults(mediaRequestId);
         verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);
     }
@@ -269,20 +269,20 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
 
         when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
-            .thenReturn(List.of(
-                new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
-                new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
-            ));
+              .thenReturn(List.of(
+                    new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
+                    new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
+                    new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
+                    new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+              ));
 
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId(AUDIO_REQUEST_PROCESSING_ARCHIVE.toString())
-            .caseId(1001)
-            .emailAddresses("test@test.com")
-            .build();
+              .eventId(AUDIO_REQUEST_PROCESSING_ARCHIVE.toString())
+              .caseId(1001)
+              .emailAddresses("test@test.com")
+              .build();
         verify(audioRequestBeingProcessedFromArchiveQuery).getResults(mediaRequestId);
         verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);
     }
@@ -299,10 +299,10 @@ class MediaRequestServiceImplTest {
         transformedMediaEntity.setId(1);
 
         when(mockTransformedMediaRepository.findByMediaRequestId(mediaRequestId))
-            .thenReturn(List.of(transformedMediaEntity));
+              .thenReturn(List.of(transformedMediaEntity));
 
         when(mockTransientObjectDirectoryRepository.findByTransformedMediaId(any()))
-            .thenReturn(List.of(transientObjectDirectoryEntity));
+              .thenReturn(List.of(transientObjectDirectoryEntity));
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -322,11 +322,10 @@ class MediaRequestServiceImplTest {
         transformedMediaEntity.setId(1);
 
         when(mockTransformedMediaRepository.findByMediaRequestId(mediaRequestId))
-            .thenReturn(List.of(transformedMediaEntity));
+              .thenReturn(List.of(transformedMediaEntity));
 
         when(mockTransientObjectDirectoryRepository.findByTransformedMediaId(any()))
-            .thenReturn(List.of(transientObjectDirectoryEntity));
-
+              .thenReturn(List.of(transientObjectDirectoryEntity));
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -342,10 +341,10 @@ class MediaRequestServiceImplTest {
         transformedMediaEntity.setId(1);
 
         when(mockTransformedMediaRepository.findByMediaRequestId(mediaRequestId))
-            .thenReturn(List.of(transformedMediaEntity));
+              .thenReturn(List.of(transformedMediaEntity));
 
         when(mockTransientObjectDirectoryRepository.findByTransformedMediaId(any()))
-            .thenReturn(new ArrayList<>());
+              .thenReturn(new ArrayList<>());
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -383,13 +382,13 @@ class MediaRequestServiceImplTest {
         mockTransformedMediaEntity.setId(transformedMediaId);
 
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
-            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
+              .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
 
         try (InputStream inputStream = mediaRequestService.download(transformedMediaId)) {
             byte[] bytes = inputStream.readAllBytes();
@@ -406,8 +405,8 @@ class MediaRequestServiceImplTest {
         var transformedMediaId = 1;
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.download(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.download(transformedMediaId)
         );
 
         assertEquals(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND, exception.getError());
@@ -424,11 +423,11 @@ class MediaRequestServiceImplTest {
         mockTransformedMediaEntity.setId(transformedMediaId);
 
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.download(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.download(transformedMediaId)
         );
 
         assertEquals(AudioRequestsApiError.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, exception.getError());
@@ -445,11 +444,11 @@ class MediaRequestServiceImplTest {
 
         var transformedMediaId = 1;
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.download(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.download(transformedMediaId)
         );
 
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
@@ -472,11 +471,11 @@ class MediaRequestServiceImplTest {
 
         var transformedMediaId = 1;
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.download(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.download(transformedMediaId)
         );
 
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
@@ -510,13 +509,13 @@ class MediaRequestServiceImplTest {
         mockTransformedMediaEntity.setId(transformedMediaId);
 
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
         doNothing().when(auditApi).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
-            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
+              .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
 
         try (InputStream inputStream = mediaRequestService.playback(transformedMediaId)) {
             byte[] bytes = inputStream.readAllBytes();
@@ -533,8 +532,8 @@ class MediaRequestServiceImplTest {
         var transformedMediaId = 1;
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.playback(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.playback(transformedMediaId)
         );
 
         assertEquals(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND, exception.getError());
@@ -551,11 +550,11 @@ class MediaRequestServiceImplTest {
         mockTransformedMediaEntity.setId(transformedMediaId);
 
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.playback(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.playback(transformedMediaId)
         );
 
         assertEquals(AudioRequestsApiError.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, exception.getError());
@@ -572,11 +571,11 @@ class MediaRequestServiceImplTest {
 
         var transformedMediaId = 1;
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.playback(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.playback(transformedMediaId)
         );
 
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
@@ -599,11 +598,11 @@ class MediaRequestServiceImplTest {
 
         var transformedMediaId = 1;
         when(mockTransformedMediaRepository.findById(transformedMediaId))
-            .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
+              .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> mediaRequestService.playback(transformedMediaId)
+              DartsApiException.class,
+              () -> mediaRequestService.playback(transformedMediaId)
         );
 
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());

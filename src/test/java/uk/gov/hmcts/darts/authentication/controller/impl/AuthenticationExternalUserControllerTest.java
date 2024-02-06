@@ -68,7 +68,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
         when(authenticationService.loginOrRefresh(null, null))
-            .thenReturn(DUMMY_AUTHORIZATION_URI);
+              .thenReturn(DUMMY_AUTHORIZATION_URI);
 
         ModelAndView modelAndView = controller.loginOrRefresh(null, null);
 
@@ -79,21 +79,21 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
+              .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
-            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+              externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
         when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
-            Optional.ofNullable(UserState.builder()
-                                    .userId(-1)
-                                    .userName("Test User")
-                                    .roles(Set.of(Role.builder()
-                                                      .roleId(TRANSCRIBER.getId())
-                                                      .roleName(TRANSCRIBER.toString())
-                                                      .permissions(new HashSet<>())
-                                                      .build()))
-                                    .build())
+              Optional.ofNullable(UserState.builder()
+                    .userId(-1)
+                    .userName("Test User")
+                    .roles(Set.of(Role.builder()
+                          .roleId(TRANSCRIBER.getId())
+                          .roleName(TRANSCRIBER.toString())
+                          .permissions(new HashSet<>())
+                          .build()))
+                    .build())
         );
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
@@ -109,11 +109,11 @@ class AuthenticationExternalUserControllerTest {
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         String accessToken = createDummyAccessToken(List.of("test.missing@example.com"));
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(accessToken);
+              .thenReturn(accessToken);
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(Optional.empty());
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
-            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+              externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
         when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
@@ -128,7 +128,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void logoutShouldReturnLogoutPageUriAsRedirectWhenTokenExistsInSession() {
         when(authenticationService.logout(DUMMY_TOKEN, null))
-            .thenReturn(DUMMY_LOGOUT_URI);
+              .thenReturn(DUMMY_LOGOUT_URI);
 
         ModelAndView modelAndView = controller.logout("Bearer " + DUMMY_TOKEN, null);
 
@@ -139,7 +139,7 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void resetPasswordShouldReturnResetPageAsRedirect() {
         when(authenticationService.resetPassword(any()))
-            .thenReturn(DUMMY_AUTHORIZATION_URI);
+              .thenReturn(DUMMY_AUTHORIZATION_URI);
 
         ModelAndView modelAndView = controller.resetPassword(null);
 
@@ -150,9 +150,9 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
+              .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
-            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+              externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
         assertNotNull(securityToken);
@@ -165,9 +165,9 @@ class AuthenticationExternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithEmptyClaim() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken(new ArrayList<>()));
+              .thenReturn(createDummyAccessToken(new ArrayList<>()));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
-            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+              externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
         when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
@@ -181,29 +181,29 @@ class AuthenticationExternalUserControllerTest {
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     private String createDummyAccessToken(List<String> emails) throws JOSEException {
         RSAKey rsaKey = new RSAKeyGenerator(2048)
-            .keyID("123")
-            .generate();
+              .keyID("123")
+              .generate();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-            .claim("ver", "1.0")
-            .issuer(String.format("https://<tenant-name>.b2clogin.com/%s/v2.0/", UUID.randomUUID().toString()))
-            .subject(UUID.randomUUID().toString())
-            .audience(UUID.randomUUID().toString())
-            .expirationTime(new Date(1690973493))
-            .claim("nonce", "defaultNonce")
-            .issueTime(new Date(1690969893))
-            .claim("auth_time", new Date(1690969893))
-            .claim("emails", emails)
-            .claim("name", "Test User")
-            .claim("given_name", "Test")
-            .claim("family_name", "User")
-            .claim("tfp", "policy_name")
-            .claim("nbf", new Date(1690969893))
-            .build();
+              .claim("ver", "1.0")
+              .issuer(String.format("https://<tenant-name>.b2clogin.com/%s/v2.0/", UUID.randomUUID()))
+              .subject(UUID.randomUUID().toString())
+              .audience(UUID.randomUUID().toString())
+              .expirationTime(new Date(1690973493))
+              .claim("nonce", "defaultNonce")
+              .issueTime(new Date(1690969893))
+              .claim("auth_time", new Date(1690969893))
+              .claim("emails", emails)
+              .claim("name", "Test User")
+              .claim("given_name", "Test")
+              .claim("family_name", "User")
+              .claim("tfp", "policy_name")
+              .claim("nbf", new Date(1690969893))
+              .build();
 
         SignedJWT signedJwt = new SignedJWT(
-            new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.getKeyID()).build(),
-            claimsSet
+              new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.getKeyID()).build(),
+              claimsSet
         );
 
         signedJwt.sign(new RSASSASigner(rsaKey));

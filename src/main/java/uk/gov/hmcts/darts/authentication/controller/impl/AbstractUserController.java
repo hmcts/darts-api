@@ -20,10 +20,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class AbstractUserController implements AuthenticationController {
 
+    protected final AuthStrategySelector locator;
     private final AuthenticationService authenticationService;
     private final AuthorisationApi authorisationApi;
-
-    protected final AuthStrategySelector locator;
 
     abstract Optional<String> parseEmailAddressFromAccessToken(String accessToken) throws ParseException;
 
@@ -41,7 +40,7 @@ public abstract class AbstractUserController implements AuthenticationController
     public SecurityToken handleOauthCode(String code) {
         String accessToken = authenticationService.handleOauthCode(code);
         var securityTokenBuilder = SecurityToken.builder()
-            .accessToken(accessToken);
+              .accessToken(accessToken);
 
         try {
             Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(accessToken);

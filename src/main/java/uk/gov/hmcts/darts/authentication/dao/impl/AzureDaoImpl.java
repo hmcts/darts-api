@@ -25,8 +25,8 @@ public class AzureDaoImpl implements AzureDao {
 
     @Override
     public OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig,
-                                                     AuthConfigurationProperties configuration)
-        throws AzureDaoException {
+          AuthConfigurationProperties configuration)
+          throws AzureDaoException {
         log.debug("Fetching access token(s) for authorization code: {}", code);
 
         if (StringUtils.isBlank(code)) {
@@ -35,25 +35,25 @@ public class AzureDaoImpl implements AzureDao {
 
         try {
             HTTPResponse response = azureActiveDirectoryClient.fetchAccessToken(providerConfig,
-                                                                                   configuration.getRedirectUri(),
-                                                                                   code,
-                                                                                   configuration.getClientId(),
-                                                                                   configuration.getClientSecret(),
-                                                                                   configuration.getScope());
+                  configuration.getRedirectUri(),
+                  code,
+                  configuration.getClientId(),
+                  configuration.getClientSecret(),
+                  configuration.getScope());
             String parsedResponse = response.getContent();
 
             if (HttpStatus.SC_OK != response.getStatusCode()) {
                 throw new AzureDaoException(
-                    "Unexpected HTTP response code received from Azure",
-                    parsedResponse,
-                    response.getStatusCode()
+                      "Unexpected HTTP response code received from Azure",
+                      parsedResponse,
+                      response.getStatusCode()
                 );
             }
 
             ObjectMapper mapper = new ObjectMapper();
             OAuthProviderRawResponse tokenResponse = mapper.readValue(
-                parsedResponse,
-                OAuthProviderRawResponse.class
+                  parsedResponse,
+                  OAuthProviderRawResponse.class
             );
 
             log.debug("Obtained access token for authorization code: {}, {}", code, tokenResponse);

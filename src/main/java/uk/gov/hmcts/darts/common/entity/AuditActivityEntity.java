@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 @Getter
 @Setter
 public class AuditActivityEntity extends CreatedModifiedBaseEntity {
+
     @Id
     @Column(name = "aua_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aua_gen")

@@ -61,23 +61,23 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnOneSessionWithOneAudioWhenProvidedWithOneAudio()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo trimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(trimmedAudioFileInfo);
+              .thenReturn(trimmedAudioFileInfo);
 
         var mediaEntity = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity, SOME_DOWNLOAD_PATH);
 
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
-            mediaEntityToDownloadLocation,
-            TIME_12_00,
-            TIME_12_10
+              mediaEntityToDownloadLocation,
+              TIME_12_00,
+              TIME_12_10
         );
 
         assertEquals(1, sessions.size());
@@ -92,32 +92,32 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnTwoSessionsEachWithOneAudioWhenProvidedWithTwoContinuousAudios()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
         var secondTrimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(firstTrimmedAudioFileInfo)
-            .thenReturn(secondTrimmedAudioFileInfo);
+              .thenReturn(firstTrimmedAudioFileInfo)
+              .thenReturn(secondTrimmedAudioFileInfo);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_10,
-            TIME_12_20,
-            1
+              TIME_12_10,
+              TIME_12_20,
+              1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
-            mediaEntityToDownloadLocation,
-            TIME_12_00,
-            TIME_12_20
+              mediaEntityToDownloadLocation,
+              TIME_12_00,
+              TIME_12_20
         );
 
         assertEquals(2, sessions.size());
@@ -136,32 +136,32 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnOneSessionWithTwoAudioWhenProvidedWithTwoNonContinuousAudiosWithDifferentChannelsAndSameTimestamp()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
         var secondTrimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(firstTrimmedAudioFileInfo)
-            .thenReturn(secondTrimmedAudioFileInfo);
+              .thenReturn(firstTrimmedAudioFileInfo)
+              .thenReturn(secondTrimmedAudioFileInfo);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            2
+              TIME_12_00,
+              TIME_12_10,
+              2
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
-            mediaEntityToDownloadLocation,
-            TIME_12_00,
-            TIME_12_10
+              mediaEntityToDownloadLocation,
+              TIME_12_00,
+              TIME_12_10
         );
 
         assertEquals(1, sessions.size());
@@ -177,32 +177,32 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnTwoSessionsEachWithOneAudioWhenProvidedWithTwoNonContinuousAudios()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
         var secondTrimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(firstTrimmedAudioFileInfo)
-            .thenReturn(secondTrimmedAudioFileInfo);
+              .thenReturn(firstTrimmedAudioFileInfo)
+              .thenReturn(secondTrimmedAudioFileInfo);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_20,
-            TIME_12_30,
-            1
+              TIME_12_20,
+              TIME_12_30,
+              1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
-            mediaEntityToDownloadLocation,
-            TIME_12_00,
-            TIME_12_30
+              mediaEntityToDownloadLocation,
+              TIME_12_00,
+              TIME_12_30
         );
 
         assertEquals(2, sessions.size());
@@ -221,99 +221,99 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForPlaybackShouldPerformExpectedAudioOperations()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
         AudioFileInfo concatenatedAudioFileInfo = new AudioFileInfo();
-        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(concatenatedAudioFileInfo));
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(List.of(concatenatedAudioFileInfo));
         when(audioOperationService.concatenateWithGaps(any(), any(), any()))
-            .thenReturn(concatenatedAudioFileInfoList);
+              .thenReturn(concatenatedAudioFileInfoList);
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(
-            TIME_12_00.toInstant(),
-            TIME_12_20.toInstant(),
-            1,
-            null,
-            false
+              TIME_12_00.toInstant(),
+              TIME_12_20.toInstant(),
+              1,
+              null,
+              false
         );
         when(audioOperationService.merge(any(), any()))
-            .thenReturn(mergedAudioFile);
+              .thenReturn(mergedAudioFile);
 
         var trimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(trimmedAudioFileInfo);
+              .thenReturn(trimmedAudioFileInfo);
 
         var reEncodedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.reEncode(any(), any()))
-            .thenReturn(reEncodedAudioFileInfo);
+              .thenReturn(reEncodedAudioFileInfo);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_10,
-            TIME_12_20,
-            1
+              TIME_12_10,
+              TIME_12_20,
+              1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
         outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
 
         verify(audioOperationService, times(1)).concatenateWithGaps(
-            any(),
-            any(),
-            any()
+              any(),
+              any(),
+              any()
         );
         verify(audioOperationService, times(1)).merge(
-            eq(Collections.singletonList(concatenatedAudioFileInfo)),
-            any()
+              eq(Collections.singletonList(concatenatedAudioFileInfo)),
+              any()
         );
         // now that we have potentially multiple playback files - actual start/end of each segment is used
         // and there are no negative durations
         verify(audioOperationService, times(1)).trim(
-            any(),
-            eq(mergedAudioFile),
-            eq(Duration.of(0, MINUTES)),
-            eq(Duration.of(20, MINUTES))
+              any(),
+              eq(mergedAudioFile),
+              eq(Duration.of(0, MINUTES)),
+              eq(Duration.of(20, MINUTES))
         );
         verify(audioOperationService, times(1)).reEncode(
-            any(),
-            eq(trimmedAudioFileInfo)
+              any(),
+              eq(trimmedAudioFileInfo)
         );
     }
 
     @Test
     void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
         AudioFileInfo concatenatedAudioFileInfo = new AudioFileInfo();
-        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(concatenatedAudioFileInfo));
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(List.of(concatenatedAudioFileInfo));
         when(audioOperationService.concatenateWithGaps(any(), any(), any()))
-            .thenReturn(concatenatedAudioFileInfoList);
+              .thenReturn(concatenatedAudioFileInfoList);
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(
-            TIME_12_00.toInstant(),
-            TIME_12_20.toInstant(),
-            1,
-            null,
-            false
+              TIME_12_00.toInstant(),
+              TIME_12_20.toInstant(),
+              1,
+              null,
+              false
         );
         when(audioOperationService.merge(any(), any()))
-            .thenReturn(mergedAudioFile);
+              .thenReturn(mergedAudioFile);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_10,
-            TIME_12_20,
-            1
+              TIME_12_10,
+              TIME_12_20,
+              1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
         outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
@@ -321,66 +321,66 @@ class OutboundFileProcessorImplTest {
         // now that we have potentially multiple playback files - actual start/end of each segment is used
         // and there are no negative durations
         verify(audioOperationService, times(1)).trim(
-            any(),
-            eq(mergedAudioFile),
-            eq(Duration.of(0, MINUTES)),
-            eq(Duration.of(20, MINUTES))
+              any(),
+              eq(mergedAudioFile),
+              eq(Duration.of(0, MINUTES)),
+              eq(Duration.of(20, MINUTES))
         );
     }
 
     @Test
     void processAudioForPlaybackShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
         var secondTrimmedAudioFileInfo = new AudioFileInfo();
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
-                                                          TIME_12_20.toInstant(),
-                                                          1,null,false);
+              TIME_12_20.toInstant(),
+              1, null, false);
 
         var reEncodedAudioFileInfo1 = new AudioFileInfo();
         var reEncodedAudioFileInfo2 = new AudioFileInfo();
         when(audioOperationService.reEncode(any(), any()))
-            .thenReturn(reEncodedAudioFileInfo1).thenReturn(reEncodedAudioFileInfo2);
+              .thenReturn(reEncodedAudioFileInfo1).thenReturn(reEncodedAudioFileInfo2);
 
         when(audioOperationService.merge(any(), any()))
-            .thenReturn(mergedAudioFile);
+              .thenReturn(mergedAudioFile);
 
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(firstTrimmedAudioFileInfo)
-            .thenReturn(secondTrimmedAudioFileInfo);
+              .thenReturn(firstTrimmedAudioFileInfo)
+              .thenReturn(secondTrimmedAudioFileInfo);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
+              TIME_12_00,
+              TIME_12_10,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            2
+              TIME_12_00,
+              TIME_12_10,
+              2
         );
         var mediaEntity3 = createMediaEntity(
-            TIME_12_20,
-            TIME_12_30,
-            1
+              TIME_12_20,
+              TIME_12_30,
+              1
         );
         var mediaEntity4 = createMediaEntity(
-            TIME_12_20,
-            TIME_12_30,
-            2
+              TIME_12_20,
+              TIME_12_30,
+              2
         );
         var mediaEntity5 = createMediaEntity(
-            TIME_12_40,
-            TIME_12_50,
-            1
+              TIME_12_40,
+              TIME_12_50,
+              1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity3, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity4, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity5, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH,
+              mediaEntity3, SOME_DOWNLOAD_PATH,
+              mediaEntity4, SOME_DOWNLOAD_PATH,
+              mediaEntity5, SOME_DOWNLOAD_PATH
         );
 
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
@@ -398,51 +398,51 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForPlaybackShouldReturnTwoSessionsWhenProvidedAudiosWithVaryingStartEndTimesOnSameChannel()
-        throws ExecutionException, InterruptedException, IOException {
+          throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo(TIME_10_01.toInstant(),
-                                                          TIME_11_00.toInstant(),
-                                                          1,null,true);
+              TIME_11_00.toInstant(),
+              1, null, true);
         var secondTrimmedAudioFileInfo = new AudioFileInfo(TIME_11_01.toInstant(),
-                                                           TIME_11_59.toInstant(),
-                                                           1,null,true);
+              TIME_11_59.toInstant(),
+              1, null, true);
 
         AudioFileInfo mergedAudioFile1 = new AudioFileInfo(TIME_10_00.toInstant(),
-                                                           TIME_11_00.toInstant(),
-                                                           1,null,false);
+              TIME_11_00.toInstant(),
+              1, null, false);
 
         AudioFileInfo mergedAudioFile2 = new AudioFileInfo(TIME_11_00.toInstant(),
-                                                           TIME_12_00.toInstant(),
-                                                           1,null,false);
+              TIME_12_00.toInstant(),
+              1, null, false);
         var reEncodedAudioFileInfo1 = firstTrimmedAudioFileInfo;
         var reEncodedAudioFileInfo2 = secondTrimmedAudioFileInfo;
         when(audioOperationService.reEncode(any(), any()))
-            .thenReturn(reEncodedAudioFileInfo1).thenReturn(reEncodedAudioFileInfo2);
+              .thenReturn(reEncodedAudioFileInfo1).thenReturn(reEncodedAudioFileInfo2);
 
         when(audioOperationService.merge(any(), any()))
-            .thenReturn(mergedAudioFile1).thenReturn(mergedAudioFile2);
+              .thenReturn(mergedAudioFile1).thenReturn(mergedAudioFile2);
 
         when(audioOperationService.trim(any(), any(), any(), any()))
-            .thenReturn(firstTrimmedAudioFileInfo)
-            .thenReturn(secondTrimmedAudioFileInfo);
+              .thenReturn(firstTrimmedAudioFileInfo)
+              .thenReturn(secondTrimmedAudioFileInfo);
 
-        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(mergedAudioFile1,mergedAudioFile2));
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(mergedAudioFile1, mergedAudioFile2));
         when(audioOperationService.concatenateWithGaps(any(), any(), any()))
-            .thenReturn(concatenatedAudioFileInfoList);
+              .thenReturn(concatenatedAudioFileInfoList);
 
         var mediaEntity1 = createMediaEntity(
-            TIME_10_00,
-            TIME_11_00,
-            1
+              TIME_10_00,
+              TIME_11_00,
+              1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_11_01,
-            TIME_12_00,
-            1
+              TIME_11_01,
+              TIME_12_00,
+              1
         );
 
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+              mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_10_01, TIME_11_59);

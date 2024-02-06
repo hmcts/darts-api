@@ -34,6 +34,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @AutoConfigureMockMvc
 @Transactional
 class HearingsControllerGetTranscriptsTest extends IntegrationBase {
+
     private static final String ENDPOINT_URL_HEARINGS = "/hearings/{hearing_id}/transcripts";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
@@ -49,17 +50,17 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
     void setUp() {
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
+              .createAuthorisedIntegrationTestUser(courthouseEntity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -80,9 +81,9 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
-            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
+              "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+              .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -99,9 +100,9 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
-            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
+              "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+              .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -139,9 +140,9 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, hearingEntity.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
-            "tests/hearings/HearingsControllerGetTranscriptsTest/ignoreAutomaticTranscripts.json"));
+              "tests/hearings/HearingsControllerGetTranscriptsTest/ignoreAutomaticTranscripts.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
+              .andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

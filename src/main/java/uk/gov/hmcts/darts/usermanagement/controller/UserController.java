@@ -40,7 +40,7 @@ public class UserController implements UserApi {
         UserWithId createdUser = userManagementService.createUser(user);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(createdUser);
+              .body(createdUser);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdDelete(
-        @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
+          @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
         courthouseService.deleteCourthouseById(courthouseId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -40,11 +40,11 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     public ResponseEntity<ExtendedCourthouse> courthousesCourthouseIdGet(
-        @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
+          @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
         try {
             CourthouseEntity courtHouseEntity = courthouseService.getCourtHouseById(
-                courthouseId);
+                  courthouseId);
             ExtendedCourthouse responseEntity = mapper.mapFromEntityToExtendedCourthouse(courtHouseEntity);
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } catch (EntityNotFoundException | JpaObjectRetrievalFailureException e) {
@@ -54,8 +54,8 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdPut(
-        @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId,
-        @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
+          @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId,
+          @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
         try {
             courthouseService.amendCourthouseById(courthouse, courthouseId);
@@ -78,7 +78,7 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     public ResponseEntity<ExtendedCourthouse> courthousesPost(
-        @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
+          @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
         CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
         ExtendedCourthouse extendedCourthouse = mapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);

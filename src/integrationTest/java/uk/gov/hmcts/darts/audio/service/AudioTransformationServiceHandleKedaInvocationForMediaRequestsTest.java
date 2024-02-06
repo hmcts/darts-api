@@ -45,17 +45,16 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
 
-    private static final String EMAIL_ADDRESS = "test@test.com";
     public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
     public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
     public static final String MOCK_COURTHOUSE_NAME = "some-courthouse";
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
-    private static final String MOCK_PLAYBACK_REQUEST_ID = "1";
-    private static final String MOCK_DOWNLOAD_REQUEST_ID = "2";
     public static final String TIME_12_00 = "12:00:00";
     public static final String TIME_13_00 = "13:00:00";
     public static final String NOT_AVAILABLE = "N/A";
-
+    private static final String EMAIL_ADDRESS = "test@test.com";
+    private static final String MOCK_PLAYBACK_REQUEST_ID = "1";
+    private static final String MOCK_DOWNLOAD_REQUEST_ID = "2";
     @Autowired
     private AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder given;
 
@@ -66,6 +65,19 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     private MediaRequestService mediaRequestService;
 
     private HearingEntity hearing;
+
+    private static Map<String, String> getTemplateValuesMap(NotificationEntity notificationEntity) {
+        String templateValues = notificationEntity.getTemplateValues();
+
+        templateValues = templateValues != null
+              ? templateValues.replace("{\"", "").replace("\"}", "") : "";
+
+        return Arrays.stream(templateValues
+                    .split("\",\""))
+              .map(kv -> kv.split("\":\""))
+              .filter(kvArray -> kvArray.length == 2)
+              .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+    }
 
     @BeforeEach
     void setUp() {
@@ -80,9 +92,9 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
-            hearing,
-            AudioRequestType.DOWNLOAD,
-            userAccountEntity
+              hearing,
+              AudioRequestType.DOWNLOAD,
+              userAccountEntity
         );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
@@ -90,12 +102,12 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         audioTransformationService.handleKedaInvocationForMediaRequests();
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
-            .findById(mediaRequestId)
-            .orElseThrow();
+              .findById(mediaRequestId)
+              .orElseThrow();
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
 
         List<NotificationEntity> scheduledNotifications = dartsDatabase.getNotificationRepository()
-            .findAll();
+              .findAll();
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
@@ -112,9 +124,9 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
-            hearing,
-            AudioRequestType.PLAYBACK,
-            userAccountEntity
+              hearing,
+              AudioRequestType.PLAYBACK,
+              userAccountEntity
         );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
@@ -122,12 +134,12 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         audioTransformationService.handleKedaInvocationForMediaRequests();
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
-            .findById(mediaRequestId)
-            .orElseThrow();
+              .findById(mediaRequestId)
+              .orElseThrow();
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
 
         List<NotificationEntity> scheduledNotifications = dartsDatabase.getNotificationRepository()
-            .findAll();
+              .findAll();
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
@@ -142,30 +154,30 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @Transactional
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
-        AudioRequestType audioRequestType) {
+          AudioRequestType audioRequestType) {
 
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
-            hearing,
-            audioRequestType,
-            userAccountEntity
+              hearing,
+              audioRequestType,
+              userAccountEntity
         );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioTransformationService.handleKedaInvocationForMediaRequests()
+              DartsApiException.class,
+              () -> audioTransformationService.handleKedaInvocationForMediaRequests()
         );
 
         assertEquals("Failed to process audio request", exception.getMessage());
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
-            .findById(mediaRequestId)
-            .orElseThrow();
+              .findById(mediaRequestId)
+              .orElseThrow();
         assertEquals(FAILED, mediaRequestEntity.getStatus());
 
         List<NotificationEntity> scheduledNotifications = dartsDatabase.getNotificationRepository()
-            .findAll();
+              .findAll();
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
@@ -195,25 +207,11 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
     @Transactional
     public void handleKedaInvocationForMediaRequestsShouldNotInvokeProcessAudioRequestWhenNoOpenMediaRequestsExist(
-        AudioRequestType audioRequestType) {
+          AudioRequestType audioRequestType) {
         given.aUserAccount(EMAIL_ADDRESS);
 
         audioTransformationService.handleKedaInvocationForMediaRequests();
 
         verify(mediaRequestService, never()).updateAudioRequestStatus(any(), any());
-    }
-
-
-    private static Map<String, String> getTemplateValuesMap(NotificationEntity notificationEntity) {
-        String templateValues = notificationEntity.getTemplateValues();
-
-        templateValues = templateValues != null
-            ? templateValues.replace("{\"", "").replace("\"}", "") : "";
-
-        return Arrays.stream(templateValues
-                                 .split("\",\""))
-            .map(kv -> kv.split("\":\""))
-            .filter(kvArray -> kvArray.length == 2)
-            .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
     }
 }

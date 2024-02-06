@@ -23,12 +23,13 @@ import java.net.URISyntaxException;
 
 @Component
 public class OAuthClientImpl implements OAuthClient {
+
     @SneakyThrows({URISyntaxException.class, IOException.class})
     public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
-                                         String redirectType, String authCode,
-                                         String clientId,
-                                         String authClientSecret,
-                                         String scope) {
+          String redirectType, String authCode,
+          String clientId,
+          String authClientSecret,
+          String scope) {
         AuthorizationCode code = new AuthorizationCode(authCode);
         URI callback = new URI(redirectType);
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);

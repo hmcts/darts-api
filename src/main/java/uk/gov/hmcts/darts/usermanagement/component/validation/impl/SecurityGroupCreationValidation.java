@@ -21,13 +21,13 @@ public class SecurityGroupCreationValidation implements Validator<SecurityGroup>
         String name = securityGroup.getName();
 
         securityGroupRepository.findByGroupName(name)
-            .ifPresent(existingGroup -> {
-                throw new DartsApiException(
-                    UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
-                    "Attempt to create group that already exists",
-                    Collections.singletonMap("existing_group_id", existingGroup.getId())
-                );
-            });
+              .ifPresent(existingGroup -> {
+                  throw new DartsApiException(
+                        UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
+                        "Attempt to create group that already exists",
+                        Collections.singletonMap("existing_group_id", existingGroup.getId())
+                  );
+              });
     }
 
 }

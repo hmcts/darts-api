@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessArmResponseFilesAutomatedTaskTest {
+
     @Mock
     private LockProvider lockProvider;
     @Mock
@@ -18,12 +19,12 @@ class ProcessArmResponseFilesAutomatedTaskTest {
     @Test
     void runTask() {
         ProcessArmResponseFilesAutomatedTask processArmResponseFilesAutomatedTask =
-            new ProcessArmResponseFilesAutomatedTask(
-                null,
-                lockProvider,
-                null,
-                armResponseFilesProcessor
-            );
+              new ProcessArmResponseFilesAutomatedTask(
+                    null,
+                    lockProvider,
+                    null,
+                    armResponseFilesProcessor
+              );
 
         processArmResponseFilesAutomatedTask.runTask();
         Mockito.verify(armResponseFilesProcessor, Mockito.times(1)).processResponseFiles();

@@ -27,6 +27,7 @@ public class UpdateMetadataResponse {
     @Builder
     @Jacksonized
     public static class ResponseStatusMessage {
+
         private String message;
         private boolean isError;
     }

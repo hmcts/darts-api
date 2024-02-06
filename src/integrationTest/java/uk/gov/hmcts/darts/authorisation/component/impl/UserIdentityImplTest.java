@@ -47,10 +47,10 @@ class UserIdentityImplTest extends IntegrationBase {
     @Test
     void getUserAccountGetEmailAddress() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of("integrationtest.user@example.com"))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of("integrationtest.user@example.com"))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         assertEquals("integrationtest.user@example.com", userIdentity.getUserAccount().getEmailAddress());
@@ -59,10 +59,10 @@ class UserIdentityImplTest extends IntegrationBase {
     @Test
     void getUserAccountShouldThrowExceptionWhenUnexpectedNumberOfEmails() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of("test.user@example.com", "test.user2@example.com"))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of("test.user@example.com", "test.user2@example.com"))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
@@ -72,9 +72,9 @@ class UserIdentityImplTest extends IntegrationBase {
     @Test
     void getUserAccountShouldThrowExceptionWhenMissingEmailsClaim() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
@@ -84,10 +84,10 @@ class UserIdentityImplTest extends IntegrationBase {
     @Test
     void getUserAccountGetEmailAddressForInternalUser() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("preferred_username", "integrationtest.user@example.com")
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("preferred_username", "integrationtest.user@example.com")
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         assertEquals("integrationtest.user@example.com", userIdentity.getUserAccount().getEmailAddress());
@@ -96,10 +96,10 @@ class UserIdentityImplTest extends IntegrationBase {
     @Test
     void getUserAccountShouldThrowExceptionWithEmptyClaims() {
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(1))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of(1))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
@@ -110,10 +110,10 @@ class UserIdentityImplTest extends IntegrationBase {
     void getUserAccount() {
         String email = "integrationtest.user@example.com";
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(email))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of(email))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         assertEquals(email, userIdentity.getUserAccount().getEmailAddress());
@@ -128,15 +128,15 @@ class UserIdentityImplTest extends IntegrationBase {
     void getUserAccountForNonExistingEmailAddressThrowsException() {
         String email = "non-existing-user@example.com";
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(email))
-            .build();
+              .header("alg", "RS256")
+              .claim("sub", UUID.randomUUID().toString())
+              .claim("emails", List.of(email))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> userIdentity.getUserAccount()
+              DartsApiException.class,
+              () -> userIdentity.getUserAccount()
         );
 
         assertEquals(USER_DETAILS_INVALID.getTitle(), exception.getMessage());
@@ -149,9 +149,9 @@ class UserIdentityImplTest extends IntegrationBase {
     void getGuid() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("oid", guid)
-            .build();
+              .header("alg", "RS256")
+              .claim("oid", guid)
+              .build();
 
         dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, null);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
@@ -164,9 +164,9 @@ class UserIdentityImplTest extends IntegrationBase {
     void userHasGlobalAccess() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("oid", guid)
-            .build();
+              .header("alg", "RS256")
+              .claim("oid", guid)
+              .build();
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
@@ -181,9 +181,9 @@ class UserIdentityImplTest extends IntegrationBase {
     void userHasGlobalAccessReturnsFalseWhenUserHasNoGlobalAccess() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("oid", guid)
-            .build();
+              .header("alg", "RS256")
+              .claim("oid", guid)
+              .build();
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
@@ -198,9 +198,9 @@ class UserIdentityImplTest extends IntegrationBase {
     void whenEmailAddressIsWrongCaseInToken_thenUserHasGlobalAccessReturnsTrue() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
-            .header("alg", "RS256")
-            .claim("preferred_username", "integrationtest.user@EXAMPLE.COM")
-            .build();
+              .header("alg", "RS256")
+              .claim("preferred_username", "integrationtest.user@EXAMPLE.COM")
+              .build();
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 

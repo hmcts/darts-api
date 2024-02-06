@@ -20,23 +20,23 @@ public class TransientObjectDirectoryStub {
     private final TransformedMediaStub transformedMediaStub;
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(MediaRequestEntity mediaRequestEntity,
-                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                               UUID externalLocation) {
+          ObjectRecordStatusEntity objectRecordStatusEntity,
+          UUID externalLocation) {
         TransformedMediaEntity transformedMediaEntity = transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity, null, null, null);
         return createTransientObjectDirectoryEntity(transformedMediaEntity, objectRecordStatusEntity, externalLocation);
     }
 
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(MediaRequestEntity mediaRequestEntity,
-                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                               UUID externalLocation, OffsetDateTime lastAccessedDate) {
+          ObjectRecordStatusEntity objectRecordStatusEntity,
+          UUID externalLocation, OffsetDateTime lastAccessedDate) {
         TransformedMediaEntity transformedMediaEntity = transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity, null, null, lastAccessedDate);
         return createTransientObjectDirectoryEntity(transformedMediaEntity, objectRecordStatusEntity, externalLocation);
     }
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
-                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                               UUID externalLocation) {
+          ObjectRecordStatusEntity objectRecordStatusEntity,
+          UUID externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
         transientObjectDirectoryEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());

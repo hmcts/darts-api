@@ -28,12 +28,12 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
     private final TranscriptionsApi transcriptionsApi;
 
     public TranscriptionRequestHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                                       EventRepository eventRepository,
-                                       HearingRepository hearingRepository,
-                                       CaseRepository caseRepository,
-                                       ApplicationEventPublisher eventPublisher,
-                                       TranscriptionsApi transcriptionsApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+          EventRepository eventRepository,
+          HearingRepository hearingRepository,
+          CaseRepository caseRepository,
+          ApplicationEventPublisher eventPublisher,
+          TranscriptionsApi transcriptionsApi) {
+        super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
         this.transcriptionsApi = transcriptionsApi;
     }
 
@@ -48,7 +48,7 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
         transcriptionRequestDetails.setTranscriptionTypeId(TranscriptionTypeEnum.OTHER.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.OVERNIGHT.getId());
         RequestTranscriptionResponse transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(
-            transcriptionRequestDetails, false);
+              transcriptionRequestDetails, false);
 
         //automatically approve the transcription request
         UpdateTranscription updateTranscription = new UpdateTranscription();

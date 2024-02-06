@@ -14,8 +14,8 @@ public class AudioResponseMapperImpl implements AudioResponseMapper {
     @Override
     public List<AudioMetadata> mapToAudioMetadata(List<MediaEntity> mediaEntities) {
         return mediaEntities.stream()
-            .map(this::mapToAudioMetadata)
-            .toList();
+              .map(this::mapToAudioMetadata)
+              .toList();
     }
 
     private AudioMetadata mapToAudioMetadata(MediaEntity mediaEntity) {

@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * This class is a test implementation of DataManagementService, intended to mimic the basic behaviour of Azure
- * Blob Storage. TODO: Hopefully this will be replaced by a more functional implementation (see DMP-597).
+ * This class is a test implementation of DataManagementService, intended to mimic the basic behaviour of Azure Blob Storage. TODO: Hopefully this will be
+ * replaced by a more functional implementation (see DMP-597).
  */
 @Component
 @Slf4j
@@ -72,7 +72,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-                     + " you should ask questions! ###");
+              + " you should ask questions! ###");
     }
 
 }

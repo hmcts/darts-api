@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @RequiredArgsConstructor
 @Slf4j
 class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
-    implements ControllerAuthorisation {
+      implements ControllerAuthorisation {
 
     static final String HEARING_ID_PARAM = "hearing_id";
 
@@ -44,9 +44,9 @@ class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
 
         if (hearingIdParamOptional.isEmpty()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
-                HEARING_ID_PARAM,
-                request.getRequestURI()
+                  BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                  HEARING_ID_PARAM,
+                  request.getRequestURI()
             ));
             throw new DartsApiException(BAD_REQUEST_HEARING_ID);
         }
@@ -58,7 +58,7 @@ class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
 
         if (!idToAuthorise.get().isPresent()) {
             log.error(String.format(
-                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
+                  BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
             throw new DartsApiException(BAD_REQUEST_HEARING_ID);
         }

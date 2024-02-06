@@ -88,7 +88,7 @@ public class CourthouseServiceImpl implements CourthouseService {
     @Override
     @SuppressWarnings("PMD.UselessParentheses")
     public CourthouseEntity retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
-        throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+          throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
         CourthouseEntity foundCourthouse = retrieveCourthouse(courthouseCode, courthouseName);
         if (foundCourthouse.getCode() == null && courthouseCode != null) {
             //update courthouse in database with new code
@@ -96,7 +96,7 @@ public class CourthouseServiceImpl implements CourthouseService {
             courthouseRepository.saveAndFlush(foundCourthouse);
         } else {
             if (!StringUtils.equalsIgnoreCase(foundCourthouse.getCourthouseName(), courthouseName)
-                || (courthouseCode != null && !Objects.equals(courthouseCode, foundCourthouse.getCode()))) {
+                  || (courthouseCode != null && !Objects.equals(courthouseCode, foundCourthouse.getCode()))) {
                 throw new CourthouseCodeNotMatchException(foundCourthouse, courthouseCode, courthouseName);
             }
         }

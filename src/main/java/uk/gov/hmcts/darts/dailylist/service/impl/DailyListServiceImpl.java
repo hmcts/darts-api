@@ -63,8 +63,8 @@ public class DailyListServiceImpl implements DailyListService {
         } else {
             //insert new record
             savedDailyListEntity = dailyListMapper.createDailyListEntity(
-                postRequest,
-                listingCourthouse
+                  postRequest,
+                  listingCourthouse
             );
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         }
@@ -107,9 +107,9 @@ public class DailyListServiceImpl implements DailyListService {
             foundDailyList.setContent(objectMapper.writeValueAsString(patchRequest.getDailyListJson()));
         } catch (JsonProcessingException e) {
             log.error(
-                "An Error has occurred trying to save the json for id {} to the database",
-                patchRequest.getDailyListId(),
-                e
+                  "An Error has occurred trying to save the json for id {} to the database",
+                  patchRequest.getDailyListId(),
+                  e
             );
             throw new DartsApiException(DailyListError.INTERNAL_ERROR);
         }
@@ -122,7 +122,7 @@ public class DailyListServiceImpl implements DailyListService {
 
     @Override
     @SchedulerLock(name = "DailyListService_Housekeeping",
-        lockAtLeastFor = "PT20S", lockAtMostFor = "PT5M")
+          lockAtLeastFor = "PT20S", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.daily-list.housekeeping.cron}")
     public void runHouseKeeping() {
         runHouseKeepingNow();

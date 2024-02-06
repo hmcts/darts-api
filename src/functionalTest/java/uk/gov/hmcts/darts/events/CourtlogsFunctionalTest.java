@@ -23,9 +23,9 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @AfterAll
     void cleanData() {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/clean"))
-            .redirects().follow(false)
-            .delete();
+              .baseUri(getUri("/functional-tests/clean"))
+              .redirects().follow(false)
+              .delete();
     }
 
     @Test
@@ -37,27 +37,27 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String bodyText = """
-                      {
-                        "log_entry_date_time": "1999-05-23T09:15:25Z",
-                        "courthouse": "<<courtHouseName>>",
-                        "courtroom": "<<courtroomName>>",
-                        "case_numbers": [
-                          "func-CASE1001"
-                        ],
-                        "text": "System : Start Recording : Record: Case Code:0008, New Case"
-                      }""";
+              {
+                "log_entry_date_time": "1999-05-23T09:15:25Z",
+                "courthouse": "<<courtHouseName>>",
+                "courtroom": "<<courtroomName>>",
+                "case_numbers": [
+                  "func-CASE1001"
+                ],
+                "text": "System : Start Recording : Record: Case Code:0008, New Case"
+              }""";
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
 
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .body(bodyText)
-            .when()
-            .baseUri(getUri(ENDPOINT_URL))
-            .redirects().follow(false)
-            .post()
-            .then()
-            .extract().response();
+              .contentType(ContentType.JSON)
+              .body(bodyText)
+              .when()
+              .baseUri(getUri(ENDPOINT_URL))
+              .redirects().follow(false)
+              .post()
+              .then()
+              .extract().response();
 
         assertEquals(201, response.statusCode());
     }
@@ -66,23 +66,23 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Order(2)
     void postFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .body("""
-                      {
-                        "log_entry_date_time": "2023-05-23T09:15:25Z",
-                        "courthouse": "",
-                        "courtroom": "1",
-                        "case_numbers": [
-                          "func-CASE1001"
-                        ],
-                        "text": "System : Start Recording : Record: Case Code:0008, New Case"
-                      }""")
-            .when()
-            .baseUri(getUri(ENDPOINT_URL))
-            .redirects().follow(false)
-            .post()
-            .then()
-            .extract().response();
+              .contentType(ContentType.JSON)
+              .body("""
+                    {
+                      "log_entry_date_time": "2023-05-23T09:15:25Z",
+                      "courthouse": "",
+                      "courtroom": "1",
+                      "case_numbers": [
+                        "func-CASE1001"
+                      ],
+                      "text": "System : Start Recording : Record: Case Code:0008, New Case"
+                    }""")
+              .when()
+              .baseUri(getUri(ENDPOINT_URL))
+              .redirects().follow(false)
+              .post()
+              .then()
+              .extract().response();
 
         assertEquals(400, response.statusCode());
     }
@@ -91,27 +91,27 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Order(3)
     void getSuccess() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .param("courthouse", courthouseName)
-            .param("case_number", "func-CASE1001")
-            .param("start_date_time", "1999-05-23T09:15:25Z")
-            .param("end_date_time", "1999-05-23T09:15:25Z")
-            .when()
-            .baseUri(getUri(ENDPOINT_URL))
-            .redirects().follow(false)
-            .get()
-            .then()
-            .extract().response();
+              .contentType(ContentType.JSON)
+              .param("courthouse", courthouseName)
+              .param("case_number", "func-CASE1001")
+              .param("start_date_time", "1999-05-23T09:15:25Z")
+              .param("end_date_time", "1999-05-23T09:15:25Z")
+              .when()
+              .baseUri(getUri(ENDPOINT_URL))
+              .redirects().follow(false)
+              .get()
+              .then()
+              .extract().response();
 
         String expectedResponse = """
-                         [
-                             {
-                                 "courthouse": "<<courtHouseName>>",
-                                 "caseNumber": "func-CASE1001",
-                                 "timestamp": "1999-05-23T09:15:25Z",
-                                 "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
-                             }
-                         ]""";
+              [
+                  {
+                      "courthouse": "<<courtHouseName>>",
+                      "caseNumber": "func-CASE1001",
+                      "timestamp": "1999-05-23T09:15:25Z",
+                      "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
+                  }
+              ]""";
         expectedResponse = expectedResponse.replace("<<courtHouseName>>", courthouseName);
         assertEquals(expectedResponse, response.asPrettyString());
     }
@@ -120,21 +120,21 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Order(4)
     void getFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .param("courthouse", "func-liverpool")
-            .param("case_number", "func-CASE1001")
-            .param("start_date_time1", "2023-05-24T09:15:25Z")
-            .param("end_date_time", "2023-05-23T09:15:25Z")
-            .when()
-            .baseUri(getUri(ENDPOINT_URL))
-            .redirects().follow(false)
-            .get()
-            .then()
-            .extract().response();
+              .contentType(ContentType.JSON)
+              .param("courthouse", "func-liverpool")
+              .param("case_number", "func-CASE1001")
+              .param("start_date_time1", "2023-05-24T09:15:25Z")
+              .param("end_date_time", "2023-05-23T09:15:25Z")
+              .when()
+              .baseUri(getUri(ENDPOINT_URL))
+              .redirects().follow(false)
+              .get()
+              .then()
+              .extract().response();
 
         assertEquals(400, response.statusCode());
         assertThat(response.asPrettyString()).contains(
-            "Required request parameter 'start_date_time' for method parameter type OffsetDateTime is not present");
+              "Required request parameter 'start_date_time' for method parameter type OffsetDateTime is not present");
 
     }
 

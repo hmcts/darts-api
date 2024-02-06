@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 @Component
 @RequiredArgsConstructor
 public class RetentionMapper {
+
     public GetCaseRetentionsResponse mapToCaseRetention(CaseRetentionEntity caseRetentionEntity) {
         GetCaseRetentionsResponse caseRetention = new GetCaseRetentionsResponse();
         caseRetention.setRetentionLastChangedDate(caseRetentionEntity.getLastModifiedDateTime());

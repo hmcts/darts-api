@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 class AuthorisationUnitOfWorkTest {
+
     @Test
     void testAuthorisationForTransaction() throws Exception {
 
@@ -101,7 +102,7 @@ class AuthorisationUnitOfWorkTest {
         AuthorisationUnitOfWork unitOfWork = new AuthorisationUnitOfWork(authorisationList);
 
         Assertions.assertThrows(DartsApiException.class, () ->
-            unitOfWork.authoriseWithIds(idobject, (e) -> e.getId(), ContextIdEnum.HEARING_ID, rolesArr, runnable, true));
+              unitOfWork.authoriseWithIds(idobject, (e) -> e.getId(), ContextIdEnum.HEARING_ID, rolesArr, runnable, true));
 
         Mockito.verifyNoInteractions(runnable);
     }
@@ -142,7 +143,7 @@ class AuthorisationUnitOfWorkTest {
         AuthorisationUnitOfWork unitOfWork = new AuthorisationUnitOfWork(authorisationList);
 
         Assertions.assertThrows(DartsApiException.class, () ->
-            unitOfWork.authoriseWithIds(idobject, (e) -> e.getId(), ContextIdEnum.HEARING_ID, rolesArr, runnable, false));
+              unitOfWork.authoriseWithIds(idobject, (e) -> e.getId(), ContextIdEnum.HEARING_ID, rolesArr, runnable, false));
 
         Mockito.verifyNoInteractions(runnable);
     }
@@ -188,6 +189,7 @@ class AuthorisationUnitOfWorkTest {
     }
 
     static class IdSource {
+
         public String getId() {
             return "200";
         }

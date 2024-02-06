@@ -72,10 +72,10 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         TranscriptionStatusEntity approvedTranscriptionStatus = transcriptionStub.getTranscriptionStatusByEnum(APPROVED);
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
-            transcriptionEntity.getCreatedDateTime().plusHours(1),
-            approvedTranscriptionStatus
+              transcriptionEntity,
+              transcriptionEntity.getLastModifiedBy(),
+              transcriptionEntity.getCreatedDateTime().plusHours(1),
+              approvedTranscriptionStatus
         );
 
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
@@ -93,7 +93,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         testUserId = testUser.getId();
 
         doNothing().when(mockAuditApi)
-            .recordAudit(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+              .recordAudit(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -103,29 +103,29 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/transcriptions/%d", transcriptionId)))
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscription));
+              String.format("/transcriptions/%d", transcriptionId)))
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         Integer transcriptionWorkflowId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_workflow_id");
+              .read("$.transcription_workflow_id");
         assertNotNull(transcriptionWorkflowId);
 
         final TranscriptionEntity withTranscriberTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcriptionId).orElseThrow();
+              .findById(transcriptionId).orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), withTranscriberTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(testUserId, withTranscriberTranscriptionEntity.getCreatedBy().getId());
         assertEquals(testUserId, withTranscriberTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = withTranscriberTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
-            .get(transcriptionWorkflowEntities.size() - 1);
+              .get(transcriptionWorkflowEntities.size() - 1);
         assertEquals(transcriptionWorkflowId, transcriptionWorkflowEntity.getId());
         assertEquals(
-            updateTranscription.getTranscriptionStatusId(),
-            transcriptionWorkflowEntity.getTranscriptionStatus().getId()
+              updateTranscription.getTranscriptionStatusId(),
+              transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
@@ -139,17 +139,17 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/transcriptions/%d", -1)))
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscription));
+              String.format("/transcriptions/%d", -1)))
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
-            """;
+              {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -161,17 +161,17 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         updateTranscription.setTranscriptionStatusId(COMPLETE.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/transcriptions/%d", transcriptionId)))
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscription));
+              String.format("/transcriptions/%d", transcriptionId)))
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isConflict())
-            .andReturn();
+              .andExpect(status().isConflict())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
-            """;
+              {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -189,17 +189,17 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/transcriptions/%d", transcriptionId)))
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscription));
+              String.format("/transcriptions/%d", transcriptionId)))
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
-            """;
+              {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -214,36 +214,36 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         userAccountRepository.save(testUser);
 
         testUser = dartsDatabase.getUserAccountStub()
-            .createTranscriptionCompanyUser(authorisationStub.getCourthouseEntity());
+              .createTranscriptionCompanyUser(authorisationStub.getCourthouseEntity());
         assertEquals(1, testUser.getSecurityGroupEntities().size());
 
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/transcriptions/%d", transcriptionId)))
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscription));
+              String.format("/transcriptions/%d", transcriptionId)))
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         Integer transcriptionWorkflowId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
-            .read("$.transcription_workflow_id");
+              .read("$.transcription_workflow_id");
         assertNotNull(transcriptionWorkflowId);
 
         final TranscriptionEntity withTranscriberTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcriptionId).orElseThrow();
+              .findById(transcriptionId).orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), withTranscriberTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(testUserId, withTranscriberTranscriptionEntity.getCreatedBy().getId());
         assertEquals(testUserId, withTranscriberTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = withTranscriberTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
-            .get(transcriptionWorkflowEntities.size() - 1);
+              .get(transcriptionWorkflowEntities.size() - 1);
         assertEquals(transcriptionWorkflowId, transcriptionWorkflowEntity.getId());
         assertEquals(
-            updateTranscription.getTranscriptionStatusId(),
-            transcriptionWorkflowEntity.getTranscriptionStatus().getId()
+              updateTranscription.getTranscriptionStatusId(),
+              transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());

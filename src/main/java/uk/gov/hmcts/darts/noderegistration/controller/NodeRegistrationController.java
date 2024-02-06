@@ -29,23 +29,23 @@ public class NodeRegistrationController implements DevicesApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER, DAR_PC})
+          globalAccessSecurityRoles = {MID_TIER, DAR_PC})
     public ResponseEntity<PostNodeRegistrationResponse> registerDevicesPost(
-        @Parameter(name = "node_type", description = "The type of device being registered, might just be DAR", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "node_type") String nodeType,
-        @Parameter(name = "courthouse", description = "The name of the location of the courtroom containing the device", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "courthouse") String courtHouse,
-        @Parameter(name = "courtroom", description = "The name of the courtroom containing the device", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "courtroom") String courtRoom,
-        @Parameter(name = "host_name", description = "The host name of the device on the network", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "host_name") String hostName,
-        @Parameter(name = "ip_address", description = "The IP address of the device on the network", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "ip_address") String ipAddress,
-        @Parameter(name = "mac_address", description = "Tha MAC address of the device", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "mac_address") String macAddress
+          @Parameter(name = "node_type", description = "The type of device being registered, might just be DAR", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "node_type") String nodeType,
+          @Parameter(name = "courthouse", description = "The name of the location of the courtroom containing the device", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "courthouse") String courtHouse,
+          @Parameter(name = "courtroom", description = "The name of the courtroom containing the device", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "courtroom") String courtRoom,
+          @Parameter(name = "host_name", description = "The host name of the device on the network", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "host_name") String hostName,
+          @Parameter(name = "ip_address", description = "The IP address of the device on the network", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "ip_address") String ipAddress,
+          @Parameter(name = "mac_address", description = "Tha MAC address of the device", in = ParameterIn.QUERY)
+          @Valid @RequestParam(value = "mac_address") String macAddress
     ) {
         Integer nodeId = nodeRegistrationService.registerDevices(nodeType, courtHouse, courtRoom,
-                                                                 hostName, ipAddress, macAddress
+              hostName, ipAddress, macAddress
         );
 
         PostNodeRegistrationResponse postRegisterDeviceResponse = new PostNodeRegistrationResponse();

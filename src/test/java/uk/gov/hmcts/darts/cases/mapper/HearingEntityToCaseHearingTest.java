@@ -37,7 +37,7 @@ class HearingEntityToCaseHearingTest {
         String actualResponse = objectMapper.writeValueAsString(hearingList);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/HearingEntityToCaseHearingTest/testWithSingleHearing/expectedResponse.json");
+              "Tests/cases/HearingEntityToCaseHearingTest/testWithSingleHearing/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
@@ -52,7 +52,7 @@ class HearingEntityToCaseHearingTest {
         String actualResponse = objectMapper.writeValueAsString(hearingList);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/HearingEntityToCaseHearingTest/testWithMultipleHearings/expectedResponse.json");
+              "Tests/cases/HearingEntityToCaseHearingTest/testWithMultipleHearings/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
@@ -67,7 +67,7 @@ class HearingEntityToCaseHearingTest {
         String actualResponse = objectMapper.writeValueAsString(hearingList);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/HearingEntityToCaseHearingTest/testWithNoHearings/expectedResponse.json");
+              "Tests/cases/HearingEntityToCaseHearingTest/testWithNoHearings/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }

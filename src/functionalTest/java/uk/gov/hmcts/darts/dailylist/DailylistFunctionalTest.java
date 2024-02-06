@@ -24,9 +24,9 @@ class DailylistFunctionalTest extends FunctionalTest {
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/clean"))
-            .redirects().follow(false)
-            .delete();
+              .baseUri(getUri("/functional-tests/clean"))
+              .redirects().follow(false)
+              .delete();
     }
 
     @ParameterizedTest
@@ -44,17 +44,17 @@ class DailylistFunctionalTest extends FunctionalTest {
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("source_system", sourceType)
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .header("xml_document", xmlDocument)
-            .when()
-            .baseUri(getUri(POST_DAILYLIST_URL))
-            .redirects().follow(false)
-            .post().then().extract().response();
+              .contentType(ContentType.JSON)
+              .queryParam("source_system", sourceType)
+              .queryParam("courthouse", courthouseName)
+              .queryParam("hearing_date", tomorrowDateString)
+              .queryParam("unique_id", uniqueId)
+              .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
+              .header("xml_document", xmlDocument)
+              .when()
+              .baseUri(getUri(POST_DAILYLIST_URL))
+              .redirects().follow(false)
+              .post().then().extract().response();
 
         assertEquals(200, response.getStatusCode());
 
@@ -64,13 +64,13 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         //then patch it with JSON
         response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("dal_id", dalId)
-            .header("json_string", jsonDocument)
-            .when()
-            .baseUri(getUri(POST_DAILYLIST_URL))
-            .redirects().follow(false)
-            .patch().then().extract().response();
+              .contentType(ContentType.JSON)
+              .queryParam("dal_id", dalId)
+              .header("json_string", jsonDocument)
+              .when()
+              .baseUri(getUri(POST_DAILYLIST_URL))
+              .redirects().follow(false)
+              .patch().then().extract().response();
 
         assertEquals(200, response.getStatusCode());
     }
@@ -94,16 +94,16 @@ class DailylistFunctionalTest extends FunctionalTest {
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("source_system", "XHB")
-            .queryParam("courthouse", "Swansea")
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", "1111111")
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .when()
-            .baseUri(getUri(POST_DAILYLIST_URL))
-            .redirects().follow(false)
-            .post().then().extract().response();
+              .contentType(ContentType.JSON)
+              .queryParam("source_system", "XHB")
+              .queryParam("courthouse", "Swansea")
+              .queryParam("hearing_date", tomorrowDateString)
+              .queryParam("unique_id", "1111111")
+              .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
+              .when()
+              .baseUri(getUri(POST_DAILYLIST_URL))
+              .redirects().follow(false)
+              .post().then().extract().response();
 
         assertEquals(400, response.getStatusCode());
         assertTrue(response.getBody().jsonPath().getString("title").contains("xml_document"));

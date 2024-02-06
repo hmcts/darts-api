@@ -23,8 +23,8 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
         media.setChannel(addAudioMetadataRequest.getChannel());
         media.setTotalChannels(addAudioMetadataRequest.getTotalChannels());
         CourtroomEntity foundCourtroom = retrieveCoreObjectService.retrieveOrCreateCourtroom(
-            addAudioMetadataRequest.getCourthouse(),
-            addAudioMetadataRequest.getCourtroom()
+              addAudioMetadataRequest.getCourthouse(),
+              addAudioMetadataRequest.getCourtroom()
         );
         media.setCourtroom(foundCourtroom);
         media.setCaseNumberList(addAudioMetadataRequest.getCases());

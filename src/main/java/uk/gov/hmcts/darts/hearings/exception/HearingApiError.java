@@ -10,9 +10,9 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum HearingApiError implements DartsApiError {
 
     HEARING_NOT_FOUND(
-        "100",
-        HttpStatus.NOT_FOUND,
-        "The requested hearing cannot be found"
+          "100",
+          HttpStatus.NOT_FOUND,
+          "The requested hearing cannot be found"
     );
 
     private static final String ERROR_TYPE_PREFIX = "HEARING";

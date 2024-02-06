@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalInboundDataStoreDeleterImplTest {
+
     private ExternalInboundDataStoreDeleter deleter;
 
     @Mock
@@ -57,11 +58,11 @@ class ExternalInboundDataStoreDeleterImplTest {
     @BeforeEach
     public void setUp() {
         this.deleter = new ExternalInboundDataStoreDeleter(
-            objectRecordStatusRepository,
-            userAccountRepository,
-            externalObjectDirectoryRepository,
-            finder,
-            inboundDataStoreDeleter, systemUserHelper
+              objectRecordStatusRepository,
+              userAccountRepository,
+              externalObjectDirectoryRepository,
+              finder,
+              inboundDataStoreDeleter, systemUserHelper
         );
 
 
@@ -77,33 +78,31 @@ class ExternalInboundDataStoreDeleterImplTest {
         this.deletedStatus = new ObjectRecordStatusEntity();
         deletedStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
         when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
-            deletedStatus);
+              deletedStatus);
     }
 
     @Test
     void deleteFromInboundAndUnstructuredDatastore() {
         mockStatus();
 
-
         mockSystemUser();
 
         List<ExternalObjectDirectoryEntity> inboundData = createInboundData();
-
 
         when(finder.findMarkedForDeletion()).thenReturn(inboundData);
 
         List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete();
 
         assertThat(
-            deletedItems,
-            containsInAnyOrder(
-                allOf(
-                    Matchers.hasProperty("id", is(1))
-                ),
-                allOf(
-                    Matchers.hasProperty("id", is(2))
-                )
-            )
+              deletedItems,
+              containsInAnyOrder(
+                    allOf(
+                          Matchers.hasProperty("id", is(1))
+                    ),
+                    allOf(
+                          Matchers.hasProperty("id", is(2))
+                    )
+              )
         );
         assertEquals(2, deletedItems.size());
 

@@ -9,9 +9,9 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 @RequiredArgsConstructor
 public enum ArchiveRecordApiError implements DartsApiError {
     FAILED_TO_GENERATE_ARCHIVE_RECORD(
-        "100",
-        null,
-        "Failed to generate arm record"
+          "100",
+          null,
+          "Failed to generate arm record"
     );
 
     private static final String ERROR_TYPE_PREFIX = "ArchiveRecord";

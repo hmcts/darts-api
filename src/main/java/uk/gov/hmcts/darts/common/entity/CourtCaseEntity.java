@@ -94,8 +94,8 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_judge_ae",
-        joinColumns = {@JoinColumn(name = "cas_id")},
-        inverseJoinColumns = {@JoinColumn(name = "jud_id")})
+          joinColumns = {@JoinColumn(name = "cas_id")},
+          inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
     public void addDefence(DefenceEntity defence) {
@@ -106,7 +106,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public void addDefence(String name) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(
-            name))) {
+              name))) {
             DefenceEntity defenceEntity = new DefenceEntity();
             defenceEntity.setName(name);
             defenceEntity.setCourtCase(this);
@@ -122,7 +122,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public void addDefendant(String name) {
         if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(
-            name))) {
+              name))) {
             DefendantEntity defendantEntity = new DefendantEntity();
             defendantEntity.setName(name);
             defendantEntity.setCourtCase(this);
@@ -138,14 +138,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public void addProsecutor(ProsecutorEntity prosecutor) {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
-            prosecutor.getName()))) {
+              prosecutor.getName()))) {
             prosecutorList.add(prosecutor);
         }
     }
 
     public void addProsecutor(String name) {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
-            name))) {
+              name))) {
             ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
             prosecutorEntity.setName(name);
             prosecutorEntity.setCourtCase(this);

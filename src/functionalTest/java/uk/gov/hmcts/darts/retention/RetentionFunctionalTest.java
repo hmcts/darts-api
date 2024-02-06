@@ -23,15 +23,15 @@ class RetentionFunctionalTest extends FunctionalTest {
         String caseId = createCaseRetentions();
 
         Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASE_RETENTION_URI))
-            .param("case_id", caseId)
-            .get()
-            .then()
-            .assertThat()
-            .statusCode(OK)
-            .extract().response();
+              .contentType(ContentType.JSON)
+              .when()
+              .baseUri(getUri(CASE_RETENTION_URI))
+              .param("case_id", caseId)
+              .get()
+              .then()
+              .assertThat()
+              .statusCode(OK)
+              .extract().response();
 
         assertEquals(200, response.getStatusCode());
 

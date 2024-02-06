@@ -10,13 +10,14 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPO
 
 @Slf4j
 public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask {
-    protected String taskName = PROCESS_ARM_RESPONSE_FILES_TASK_NAME.getTaskName();
+
     private final ArmResponseFilesProcessor armResponseFilesProcessor;
+    protected String taskName = PROCESS_ARM_RESPONSE_FILES_TASK_NAME.getTaskName();
 
     public ProcessArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                                LockProvider lockProvider,
-                                                AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                ArmResponseFilesProcessor armResponseFilesProcessor) {
+          LockProvider lockProvider,
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+          ArmResponseFilesProcessor armResponseFilesProcessor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.armResponseFilesProcessor = armResponseFilesProcessor;
     }

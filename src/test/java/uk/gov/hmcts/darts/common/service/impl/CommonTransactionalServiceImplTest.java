@@ -29,16 +29,16 @@ class CommonTransactionalServiceImplTest {
     @Test
     void courtroomAlreadyExists() {
         when(courtroomRepository.findByNameAndId(
-            anyInt(),
-            anyString()
+              anyInt(),
+              anyString()
         )).thenReturn(Optional.of(CommonTestDataUtil.createCourtroom(
-            "test result")));
+              "test result")));
 
         CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("test");
         courthouse.setId(100);
         CourtroomEntity createdCourtroom = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
-            courthouse,
-            "Courtroom Name 1"
+              courthouse,
+              "Courtroom Name 1"
         );
         assertEquals("test result", createdCourtroom.getName());
     }

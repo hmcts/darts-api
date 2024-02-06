@@ -10,54 +10,54 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum AuthorisationError implements DartsApiError {
 
     USER_NOT_AUTHORISED_FOR_COURTHOUSE(
-        "100",
-        HttpStatus.FORBIDDEN,
-        "User is not authorised for the associated courthouse"
+          "100",
+          HttpStatus.FORBIDDEN,
+          "User is not authorised for the associated courthouse"
     ),
     BAD_REQUEST_CASE_ID(
-        "101",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the case"
+          "101",
+          HttpStatus.BAD_REQUEST,
+          "Failed to check authorisation for the case"
     ),
     BAD_REQUEST_HEARING_ID(
-        "102",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the hearing"
+          "102",
+          HttpStatus.BAD_REQUEST,
+          "Failed to check authorisation for the hearing"
     ),
     BAD_REQUEST_MEDIA_REQUEST_ID(
-        "103",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the media request"
+          "103",
+          HttpStatus.BAD_REQUEST,
+          "Failed to check authorisation for the media request"
     ),
     BAD_REQUEST_MEDIA_ID(
-        "104",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the media"
+          "104",
+          HttpStatus.BAD_REQUEST,
+          "Failed to check authorisation for the media"
     ),
     BAD_REQUEST_TRANSCRIPTION_ID(
-        "105",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the transcription"
+          "105",
+          HttpStatus.BAD_REQUEST,
+          "Failed to check authorisation for the transcription"
     ),
     USER_DETAILS_INVALID(
-        "106",
-        HttpStatus.FORBIDDEN,
-        "Could not obtain user details"
+          "106",
+          HttpStatus.FORBIDDEN,
+          "Could not obtain user details"
     ),
     BAD_REQUEST_ANY_ID(
-        "107",
-        HttpStatus.FORBIDDEN,
-        "Failed to check authorisation"
+          "107",
+          HttpStatus.FORBIDDEN,
+          "Failed to check authorisation"
     ),
     BAD_REQUEST_TRANSFORMED_MEDIA_ID(
-        "108",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the transformed media"
+          "108",
+          HttpStatus.BAD_REQUEST,
+          "Failed to check authorisation for the transformed media"
     ),
     USER_NOT_AUTHORISED_FOR_ENDPOINT(
-        "109",
-        HttpStatus.FORBIDDEN,
-        "User is not authorised for this endpoint"
+          "109",
+          HttpStatus.FORBIDDEN,
+          "User is not authorised for this endpoint"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

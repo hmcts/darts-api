@@ -25,18 +25,18 @@ public class StreamingResponseEntityUtil {
             String contentLengthStr = String.valueOf(requestedContentLength);
             String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
             return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .header("Content-Type", "audio/mpeg")
-                .header("Content-Length", contentLengthStr)
-                .header("Content-Range", contentRange)
-                .body(readByteRange(bytes, rangeStart, rangeEnd));
+                  .header("Content-Type", "audio/mpeg")
+                  .header("Content-Length", contentLengthStr)
+                  .header("Content-Range", contentRange)
+                  .body(readByteRange(bytes, rangeStart, rangeEnd));
         }
         long rangeEnd = fileSize - 1;
         String contentRange = "bytes 0-" + rangeEnd + "/" + fileSize;
         return ResponseEntity.status(HttpStatus.OK)
-            .header("Content-Type", "audio/mpeg")
-            .header("Content-Length", String.valueOf(bytes.length))
-            .header("Content-Range", contentRange)
-            .body(bytes);
+              .header("Content-Type", "audio/mpeg")
+              .header("Content-Length", String.valueOf(bytes.length))
+              .header("Content-Range", contentRange)
+              .body(bytes);
     }
 
     private static long getRangeEnd(long fileSize, String[] ranges) {

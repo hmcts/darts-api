@@ -31,9 +31,9 @@ class UserAccountExistsValidatorTest {
         when(userAccountRepository.existsById(1)).thenReturn(false);
 
         assertThatThrownBy(() -> userAccountExistsValidator.validate(1))
-            .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", USER_NOT_FOUND)
-            .hasFieldOrPropertyWithValue("detail", "User id 1 not found");
+              .isInstanceOf(DartsApiException.class)
+              .hasFieldOrPropertyWithValue("error", USER_NOT_FOUND)
+              .hasFieldOrPropertyWithValue("detail", "User id 1 not found");
     }
 
     @Test

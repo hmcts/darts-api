@@ -81,15 +81,15 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @BeforeEach
     void setupData() {
         unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            dataManagementApi,
-            armDataManagementApi,
-            userIdentity,
-            armDataManagementConfiguration,
-            fileOperationService,
-            archiveRecordService
+              externalObjectDirectoryRepository,
+              objectRecordStatusRepository,
+              externalLocationTypeRepository,
+              dataManagementApi,
+              armDataManagementApi,
+              userIdentity,
+              armDataManagementConfiguration,
+              fileOperationService,
+              archiveRecordService
         );
 
     }
@@ -98,34 +98,34 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     void movePendingMediaDataFromUnstructuredToArmStorage() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+              .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -135,16 +135,16 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Test
     void movePendingAnnotationDataFromUnstructuredToArmStorage() {
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+              .createAndSaveAnnotationEntityWith(testUser, testAnnotation);
 
         hearing.addAnnotation(annotation);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -156,25 +156,25 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                                                       testUser, uploadedDateTime, checksum
-            );
+              .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                    testUser, uploadedDateTime, checksum
+              );
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocument,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              annotationDocument,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByStatusAndType(
-                dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-                dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
-            );
+              .findByStatusAndType(
+                    dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+                    dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
+              );
 
         assertEquals(1, foundList.size());
         ExternalObjectDirectoryEntity objectDirectory = foundList.get(0);
@@ -194,25 +194,25 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, uploadedBy, checksum);
+              transcriptionEntity, fileName, fileType, fileSize, uploadedBy, checksum);
 
         when(userIdentity.getUserAccount()).thenReturn(uploadedBy);
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            transcriptionDocumentEntity,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              transcriptionDocumentEntity,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByStatusAndType(
-                dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-                dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
-            );
+              .findByStatusAndType(
+                    dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+                    dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
+              );
 
         assertEquals(1, foundList.size());
         ExternalObjectDirectoryEntity objectDirectory = foundList.get(0);
@@ -222,33 +222,33 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Test
     void movePreviousRawDataFailedAttemptFromUnstructuredToArmStorage() {
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RAW_DATA_FAILED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RAW_DATA_FAILED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+              UUID.randomUUID()
         );
 
         armEod.setTransferAttempts(1);
@@ -260,7 +260,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+              .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -271,33 +271,33 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Test
     void movePreviousManifestFailedAttemptFromUnstructuredToArmStorage() {
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+              UUID.randomUUID()
         );
 
         armEod.setTransferAttempts(2);
@@ -309,7 +309,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+              .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -320,33 +320,33 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Test
     void skipMovePreviousManifestFailedAttemptFromUnstructuredToArmStorageWhenMaxTransferAttemptReached() {
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+              UUID.randomUUID()
         );
 
         armEod.setTransferAttempts(4);
@@ -358,7 +358,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+              .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -369,25 +369,25 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Test
     void updateTransferAttemptIfUnableToFindUnstructuredRecordFromFailedArmEod() {
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+              UUID.randomUUID()
         );
         armEod.setStatus(dartsDatabase.getObjectRecordStatusRepository().getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId()));
         armEod.setTransferAttempts(1);
@@ -399,8 +399,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
+              savedMedia,
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
         );
 
         assertEquals(1, foundMediaList.size());
@@ -413,27 +413,27 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     void moveRawDataToArmStorageButFailManifestFileMove() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
+              "NEWCASTLE",
+              "Int Test Courtroom 2",
+              "2",
+              HEARING_DATE
         );
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
         MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+              MediaTestData.createMediaWith(
+                    hearing.getCourtroom(),
+                    OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                    1
+              ));
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
-            UUID.randomUUID()
+              savedMedia,
+              dartsDatabase.getObjectRecordStatusEntity(STORED),
+              dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+              UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
 
@@ -445,7 +445,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+              .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);

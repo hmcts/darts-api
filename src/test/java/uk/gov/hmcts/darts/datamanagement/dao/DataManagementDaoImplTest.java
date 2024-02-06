@@ -19,15 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(MockitoExtension.class)
 class DataManagementDaoImplTest {
 
+    public static final String BLOB_CONTAINER_NAME = "dummy_container";
+    public static final UUID BLOB_ID = UUID.randomUUID();
+    private static final String CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
+          "AccountKey=KBHBeksoGMGw;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
     @InjectMocks
     private DataManagementDaoImpl dataManagementDaoImpl;
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
-
-    public static final String BLOB_CONTAINER_NAME = "dummy_container";
-    public static final UUID BLOB_ID = UUID.randomUUID();
-    private static final String CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
-        "AccountKey=KBHBeksoGMGw;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
 

@@ -54,10 +54,10 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(systemUser);
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_ID,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+              SOME_CASE_ID,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              SOME_DATE_TIME.toLocalDate()
         );
 
         hearing = dartsDatabase.save(hearingEntity);
@@ -70,18 +70,18 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(REQUESTED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
@@ -89,7 +89,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(closedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -100,17 +100,17 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(REQUESTED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         transcriptionService.closeTranscriptions();
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(requestedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -121,25 +121,25 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(AWAITING_AUTHORISATION.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(closedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -150,25 +150,25 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, approvedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, approvedTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(APPROVED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(closedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -179,24 +179,24 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, rejectedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, rejectedTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(REJECTED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(rejectedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -207,25 +207,25 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(WITH_TRANSCRIBER.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
 
         TranscriptionStatusEntity closedTranscriptionStatus = dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(CLOSED);
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(closedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -236,24 +236,24 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, completeTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, completeTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(COMPLETE.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(completeTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 
@@ -264,24 +264,24 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(hearing, transcriptionType, closedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+              .createAndSaveTranscriptionEntity(hearing, transcriptionType, closedTranscriptionStatus,
+                    transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CLOSED.getId(), requestedTranscriptionEntity.getTranscriptionStatus().getId());
 
         requestedTranscriptionEntity.setCreatedDateTime(CREATED_DATE);
         dartsDatabase.save(requestedTranscriptionEntity);
 
         final TranscriptionEntity transcriptionEntityWithOldCreatedDate = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(CREATED_DATE, transcriptionEntityWithOldCreatedDate.getCreatedDateTime());
 
         transcriptionService.closeTranscriptions();
 
         final TranscriptionEntity closedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcription.getId()).orElseThrow();
+              .findById(transcription.getId()).orElseThrow();
         assertEquals(closedTranscriptionStatus.getId(), closedTranscriptionEntity.getTranscriptionStatus().getId());
     }
 

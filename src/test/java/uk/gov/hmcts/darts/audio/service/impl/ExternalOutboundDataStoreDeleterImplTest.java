@@ -58,11 +58,11 @@ class ExternalOutboundDataStoreDeleterImplTest {
     @BeforeEach
     void setUp() {
         this.deleter = new ExternalOutboundDataStoreDeleter(
-            objectRecordStatusRepository,
-            userAccountRepository,
-            transientObjectDirectoryRepository,
-            finder,
-            outboundDataStoreDeleter, systemUserHelper
+              objectRecordStatusRepository,
+              userAccountRepository,
+              transientObjectDirectoryRepository,
+              finder,
+              outboundDataStoreDeleter, systemUserHelper
         );
     }
 
@@ -70,7 +70,7 @@ class ExternalOutboundDataStoreDeleterImplTest {
         this.markedForDeletionStatus = new ObjectRecordStatusEntity();
         markedForDeletionStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
         when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
-            markedForDeletionStatus);
+              markedForDeletionStatus);
     }
 
     private void mockSystemUser() {
@@ -107,8 +107,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
         List<TransientObjectDirectoryEntity> deletedItems = deleter.delete();
 
         assertThat(deletedItems, containsInAnyOrder(
-            hasProperty("id", is(1)),
-            hasProperty("id", is(21))
+              hasProperty("id", is(1)),
+              hasProperty("id", is(21))
         ));
         assertEquals(2, deletedItems.size());
 

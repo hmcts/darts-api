@@ -36,11 +36,10 @@ class DailyListEntityTest extends IntegrationBase {
     public static final String SOURCE_SYSTEM = "source_system";
     public static final String JSON_STRING = "json_string";
     public static final String DAL_ID = "dal_id";
-    @Autowired
-    private transient MockMvc mockMvc;
-
     @MockBean
     UserIdentity mockUserIdentity;
+    @Autowired
+    private transient MockMvc mockMvc;
 
     @Test
     void dailyListAddDailyListEndpoint() throws Exception {
@@ -48,9 +47,9 @@ class DailyListEntityTest extends IntegrationBase {
 
         String jsonDocument = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .header(JSON_STRING, jsonDocument);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .queryParam(SOURCE_SYSTEM, "CPP")
+              .header(JSON_STRING, jsonDocument);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         assertThat(response.getResponse().getContentAsString()).contains(DAL_ID);
@@ -62,9 +61,9 @@ class DailyListEntityTest extends IntegrationBase {
 
         String jsonDocument = "";
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .header(JSON_STRING, jsonDocument);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .queryParam(SOURCE_SYSTEM, "CPP")
+              .header(JSON_STRING, jsonDocument);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is5xxServerError()).andReturn();
 
         assertEquals(500, response.getResponse().getStatus());
@@ -76,9 +75,9 @@ class DailyListEntityTest extends IntegrationBase {
 
         String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .header("xml_document", xmlString);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .queryParam(SOURCE_SYSTEM, "CPP")
+              .header("xml_document", xmlString);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
         assertEquals(400, response.getResponse().getStatus());
@@ -100,9 +99,9 @@ class DailyListEntityTest extends IntegrationBase {
         String jsonDocument2 = getContentsFromFile("tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
 
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .header(JSON_STRING, jsonDocument1);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .queryParam(SOURCE_SYSTEM, "CPP")
+              .header(JSON_STRING, jsonDocument1);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         DailyListJsonObject dailyList = objectMapper.readValue(jsonDocument1, DailyListJsonObject.class);
@@ -115,10 +114,10 @@ class DailyListEntityTest extends IntegrationBase {
         String dalID = String.valueOf(postDailyListResponse.getDalId());
 
         MockHttpServletRequestBuilder requestBuilder2 = patch(DAILYLISTS)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(DAL_ID, dalID)
-            .header(JSON_STRING, jsonDocument2);
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .queryParam(SOURCE_SYSTEM, "CPP")
+              .queryParam(DAL_ID, dalID)
+              .header(JSON_STRING, jsonDocument2);
         MvcResult patchResponse = mockMvc.perform(requestBuilder2).andExpect(status().isOk()).andReturn();
 
         assertThat(patchResponse.getResponse().getContentAsString()).contains(DAL_ID);

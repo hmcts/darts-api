@@ -41,11 +41,9 @@ class AnyEntityIdControllerAuthorisationImplTest {
     private static final String METHOD = "POST";
     private static final String CASES_URI = "/cases";
     private static final String CASE_ID_PARAM_VALUE = "1";
-
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private Authorisation authorisation;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private Set<SecurityRoleEnum> roles;
 
     private ControllerAuthorisation controllerAuthorisation;
@@ -53,33 +51,33 @@ class AnyEntityIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
-            REQUESTER,
-            APPROVER,
-            TRANSCRIBER,
-            TRANSLATION_QA,
-            RCJ_APPEALS
+              JUDGE,
+              REQUESTER,
+              APPROVER,
+              TRANSCRIBER,
+              TRANSLATION_QA,
+              RCJ_APPEALS
         );
         CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation =
-            new CaseIdControllerAuthorisationImpl(authorisation);
+              new CaseIdControllerAuthorisationImpl(authorisation);
         HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation =
-            new HearingIdControllerAuthorisationImpl(authorisation);
+              new HearingIdControllerAuthorisationImpl(authorisation);
         MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation =
-            new MediaIdControllerAuthorisationImpl(authorisation);
+              new MediaIdControllerAuthorisationImpl(authorisation);
         MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation =
-            new MediaRequestIdControllerAuthorisationImpl(authorisation);
+              new MediaRequestIdControllerAuthorisationImpl(authorisation);
         TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation =
-            new TranscriptionIdControllerAuthorisationImpl(authorisation);
+              new TranscriptionIdControllerAuthorisationImpl(authorisation);
         TransformedMediaIdControllerAuthorisationImpl transformedMediaIdControllerAuthorisation =
-            new TransformedMediaIdControllerAuthorisationImpl(authorisation);
+              new TransformedMediaIdControllerAuthorisationImpl(authorisation);
         controllerAuthorisation = new AnyEntityIdControllerAuthorisationImpl(
-            authorisation,
-            caseIdControllerAuthorisation,
-            hearingIdControllerAuthorisation,
-            mediaIdControllerAuthorisation,
-            mediaRequestIdControllerAuthorisation,
-            transcriptionIdControllerAuthorisation,
-            transformedMediaIdControllerAuthorisation
+              authorisation,
+              caseIdControllerAuthorisation,
+              hearingIdControllerAuthorisation,
+              mediaIdControllerAuthorisation,
+              mediaRequestIdControllerAuthorisation,
+              transcriptionIdControllerAuthorisation,
+              transformedMediaIdControllerAuthorisation
         );
     }
 
@@ -91,15 +89,15 @@ class AnyEntityIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBody() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5,
-              "transformed_media_id": 6
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5,
+                "transformed_media_id": 6
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -111,14 +109,14 @@ class AnyEntityIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBodyWhenCaseIdMissing() throws JsonProcessingException {
         String body = """
-            {
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5,
-              "transformed_media_id": 6
-            }
-            """;
+              {
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5,
+                "transformed_media_id": 6
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -136,7 +134,7 @@ class AnyEntityIdControllerAuthorisationImplTest {
     void checkAuthorisationPathParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/cases/1");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(CASE_ID_PARAM, CASE_ID_PARAM_VALUE)
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(CASE_ID_PARAM, CASE_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -148,8 +146,8 @@ class AnyEntityIdControllerAuthorisationImplTest {
     void checkAuthorisationQueryParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
 
@@ -162,8 +160,8 @@ class AnyEntityIdControllerAuthorisationImplTest {
     void checkAuthorisationHeaderParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.addHeader(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
 
@@ -176,13 +174,13 @@ class AnyEntityIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenCaseIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_ANY_ID.getTitle(), exception.getMessage());
@@ -195,14 +193,14 @@ class AnyEntityIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenCaseIdInvalid() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(CASE_ID_PARAM, "");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_CASE_ID.getTitle(), exception.getMessage());

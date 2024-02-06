@@ -31,11 +31,9 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/security-groups";
     @Autowired
-    private AdminUserStub adminUserStub;
-
-    @Autowired
     CourthouseStub courthouseStub;
-
+    @Autowired
+    private AdminUserStub adminUserStub;
     @MockBean
     private UserIdentity userIdentity;
 
@@ -50,11 +48,12 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         List<SecurityGroupWithIdAndRole> groups = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+              new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+              });
 
         assertFalse(groups.isEmpty());
 
@@ -89,14 +88,14 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
         securityGroupRepository.saveAndFlush(securityGroupEntity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}""";
+              {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}""";
 
         assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString());
     }
 
 
-    }
+}

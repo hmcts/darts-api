@@ -42,5 +42,4 @@ public class EventHandlerEntity extends CreatedBaseEntity {
     private Boolean isReportingRestriction;
 
 
-
 }

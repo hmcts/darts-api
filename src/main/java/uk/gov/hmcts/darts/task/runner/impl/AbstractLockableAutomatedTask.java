@@ -28,32 +28,30 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     public static final int DEFAULT_LOCK_AT_MOST_SECONDS = 600;
     public static final int DEFAULT_LOCK_AT_LEAST_SECONDS = 20;
-
-    private AutomatedTaskStatus automatedTaskStatus = AutomatedTaskStatus.NOT_STARTED;
-
-    private String lastCronExpression;
-
     private final AutomatedTaskRepository automatedTaskRepository;
-
+    private final LockingTaskExecutor lockingTaskExecutor;
+    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+    private AutomatedTaskStatus automatedTaskStatus = AutomatedTaskStatus.NOT_STARTED;
+    private String lastCronExpression;
     private Instant start = Instant.now();
 
-    private final LockingTaskExecutor lockingTaskExecutor;
-
-    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
-
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
         this.automatedTaskRepository = automatedTaskRepository;
         this.lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
     }
 
+    protected static Duration getLockAtLeastFor() {
+        return Duration.ofSeconds(DEFAULT_LOCK_AT_LEAST_SECONDS);
+    }
+
     private void setupUserAuthentication() {
 
         Jwt jwt = Jwt.withTokenValue("automated-task")
-            .header("alg", "RS256")
-            .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
-            .build();
+              .header("alg", "RS256")
+              .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
+              .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
     }
@@ -72,7 +70,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 } else {
                     setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
                     log.warn("Not running task {} now as cron expression has been changed in the database from '{}' to '{}'",
-                             getTaskName(), getLastCronExpression(), dbCronExpression);
+                          getTaskName(), getLastCronExpression(), dbCronExpression);
                 }
             }
         } catch (Exception exception) {
@@ -88,13 +86,18 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         return automatedTaskStatus;
     }
 
+    protected void setAutomatedTaskStatus(AutomatedTaskStatus automatedTaskStatus) {
+        log.debug("{} changing status from {} to {}", getTaskName(), this.automatedTaskStatus, automatedTaskStatus);
+        this.automatedTaskStatus = automatedTaskStatus;
+    }
+
     @Override
     public LockConfiguration getLockConfiguration() {
         return new LockConfiguration(
-            Instant.now(),
-            getTaskName(),
-            getLockAtMostFor(),
-            getLockAtLeastFor());
+              Instant.now(),
+              getTaskName(),
+              getLockAtMostFor(),
+              getLockAtLeastFor());
     }
 
     @Override
@@ -109,15 +112,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     protected Duration getLockAtMostFor() {
         return Duration.ofSeconds(DEFAULT_LOCK_AT_MOST_SECONDS);
-    }
-
-    protected static Duration getLockAtLeastFor() {
-        return Duration.ofSeconds(DEFAULT_LOCK_AT_LEAST_SECONDS);
-    }
-
-    protected void setAutomatedTaskStatus(AutomatedTaskStatus automatedTaskStatus) {
-        log.debug("{} changing status from {} to {}", getTaskName(), this.automatedTaskStatus, automatedTaskStatus);
-        this.automatedTaskStatus = automatedTaskStatus;
     }
 
     protected abstract void runTask();
@@ -142,10 +136,11 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
         log.info("Task : {} finished running at: {}", getTaskName(), LocalDateTime.now());
-        log.debug("Task : {} time elapsed: {} ms",getTaskName(), timeElapsed);
+        log.debug("Task : {} time elapsed: {} ms", getTaskName(), timeElapsed);
     }
 
     class LockedTask implements Runnable {
+
         @Override
         public void run() {
             try {

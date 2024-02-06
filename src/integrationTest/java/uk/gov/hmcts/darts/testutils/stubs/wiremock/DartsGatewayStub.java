@@ -17,9 +17,17 @@ public class DartsGatewayStub {
 
     public static final String DAR_NOTIFY_PATH = "/events/dar-notify";
 
+    private static void wait(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void darNotificationReturnsSuccess() {
         stubFor(post(urlEqualTo(DAR_NOTIFY_PATH))
-                    .willReturn(aResponse().withStatus(200).withBody("")));
+              .willReturn(aResponse().withStatus(200).withBody("")));
     }
 
     public void verifyDoesntReceiveDarEvent() {
@@ -31,20 +39,12 @@ public class DartsGatewayStub {
         var notificationType = "\"notification_type\":\"" + type + "\"";
         waitForMax10SecondsWithOneSecondPoll(() -> {
             verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-                .withRequestBody(containing(notificationType)));
+                  .withRequestBody(containing(notificationType)));
             return true;
         });
     }
 
     public void clearStubs() {
         WireMock.reset();
-    }
-
-    private static void wait(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

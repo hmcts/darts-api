@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @Component
 @RequiredArgsConstructor
 public class DailyListStub {
+
     private final DailyListRepository dailyListRepository;
 
     public void createEmptyDailyList(LocalDate date, String courthouse) {

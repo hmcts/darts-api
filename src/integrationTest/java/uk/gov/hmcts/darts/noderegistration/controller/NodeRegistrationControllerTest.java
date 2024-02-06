@@ -48,7 +48,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-                                                                    courtroomEntity.getName(), "DAR");
+              courtroomEntity.getName(), "DAR");
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("node_id"));
@@ -65,7 +65,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     @Test
     void testEmptyParams() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/register-devices")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
+              .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
         String response = mvcResult.getResponse().getContentAsString();
@@ -81,7 +81,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-                                                                    courtroomEntity.getName(), "UPLOADER");
+              courtroomEntity.getName(), "UPLOADER");
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("node_id"));
@@ -95,7 +95,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-                                                                    courtroomEntity.getName(), "DAR");
+              courtroomEntity.getName(), "DAR");
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
@@ -115,24 +115,24 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-                                                                    courtroomEntity.getName(), "");
+              courtroomEntity.getName(), "");
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("size must be between 1 and 2147483647"));
     }
 
     private MockHttpServletRequestBuilder buildRequest(String courthouseName, String courtroomName,
-                                                       String nodeType) {
+          String nodeType) {
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";
         return post("/register-devices")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param("node_type", nodeType)
-            .param("courthouse", courthouseName)
-            .param("courtroom", courtroomName)
-            .param("host_name", "XXXXX.MMM.net")
-            .param("ip_address", ipAddress)
-            .param("mac_address", "6A-5F-90-A4-2C-12");
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .param("node_type", nodeType)
+              .param("courthouse", courthouseName)
+              .param("courtroom", courtroomName)
+              .param("host_name", "XXXXX.MMM.net")
+              .param("ip_address", ipAddress)
+              .param("mac_address", "6A-5F-90-A4-2C-12");
     }
 
     private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {

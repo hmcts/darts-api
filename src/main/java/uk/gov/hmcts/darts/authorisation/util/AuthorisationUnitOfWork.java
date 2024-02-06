@@ -15,9 +15,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A unit of work that performs a set of operations if and only if the auth passes for a
- * number of stipulated. This class offers a nice way to authorise against a set of bespoke request
- * body ids as an alternative to the statically defined authorisation annotation
+ * A unit of work that performs a set of operations if and only if the auth passes for a number of stipulated. This class offers a nice way to authorise against
+ * a set of bespoke request body ids as an alternative to the statically defined authorisation annotation
  * {@link uk.gov.hmcts.darts.authorisation.annotation.Authorisation}
  */
 @Component
@@ -27,14 +26,13 @@ public class AuthorisationUnitOfWork {
     private final List<ControllerAuthorisation> authorisation;
 
     public <T> void authoriseWithIdsForTranscription(List<T> idTypes, Function<T, String> getId,
-                                                     SecurityRoleEnum[] roles, Runnable runnableOnAuth) {
+          SecurityRoleEnum[] roles, Runnable runnableOnAuth) {
         authoriseWithIds(idTypes, getId, ContextIdEnum.TRANSCRIPTION_ID, roles, runnableOnAuth, true);
     }
 
 
     /**
-     * Generic method to check a list of objects has authorisation.
-     * Pass in the relevant objects and functions.
+     * Generic method to check a list of objects has authorisation. Pass in the relevant objects and functions.
      *
      * @param objectList             - list of objects that contain the ids to be checked
      * @param gatherIdFunction       - the function that gets the id from the objectList object
@@ -45,9 +43,9 @@ public class AuthorisationUnitOfWork {
      * @param <T>                    - response
      */
     public <T> void authoriseWithIds(List<T> objectList, Function<T, String> gatherIdFunction,
-                                     ContextIdEnum contextIdEnum,
-                                     SecurityRoleEnum[] rolesToValidate, Runnable runnable,
-                                     boolean suppressDataValidation) {
+          ContextIdEnum contextIdEnum,
+          SecurityRoleEnum[] rolesToValidate, Runnable runnable,
+          boolean suppressDataValidation) {
         authorisation.forEach(auth -> {
             if (auth.getContextId() == contextIdEnum) {
                 objectList.forEach(idType -> {

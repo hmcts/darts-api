@@ -7,4 +7,5 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 
 @Repository
 public interface TranscriptionCommentRepository extends JpaRepository<TranscriptionCommentEntity, Integer> {
+
 }

@@ -40,8 +40,8 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_transcription_ae",
-        joinColumns = {@JoinColumn(name = "tra_id")},
-        inverseJoinColumns = {@JoinColumn(name = "cas_id")})
+          joinColumns = {@JoinColumn(name = "tra_id")},
+          inverseJoinColumns = {@JoinColumn(name = "cas_id")})
     private List<CourtCaseEntity> courtCases = new ArrayList<>();
 
     @ManyToOne
@@ -58,8 +58,8 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "hearing_transcription_ae",
-        joinColumns = {@JoinColumn(name = "tra_id")},
-        inverseJoinColumns = {@JoinColumn(name = "hea_id")})
+          joinColumns = {@JoinColumn(name = "tra_id")},
+          inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private List<HearingEntity> hearings = new ArrayList<>();
 
     @ManyToOne

@@ -56,30 +56,30 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "name": "ACME",
-                           "display_name": "ACME Transcription Services"
-                         }
-                           """);
+              .content("""
+                    {
+                      "name": "ACME",
+                      "display_name": "ACME Transcription Services"
+                    }
+                      """);
 
         MvcResult result = mockMvc.perform(request)
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.name").value("ACME"))
-            .andExpect(jsonPath("$.display_name").value("ACME Transcription Services"))
-            .andExpect(jsonPath("$.description").doesNotExist())
-            .andExpect(jsonPath("$.display_state").value(true))
-            .andExpect(jsonPath("$.global_access").value(false))
-            .andExpect(jsonPath("$.security_role_id").isNumber())
-            .andReturn();
+              .andExpect(status().isCreated())
+              .andExpect(jsonPath("$.id").exists())
+              .andExpect(jsonPath("$.name").value("ACME"))
+              .andExpect(jsonPath("$.display_name").value("ACME Transcription Services"))
+              .andExpect(jsonPath("$.description").doesNotExist())
+              .andExpect(jsonPath("$.display_state").value(true))
+              .andExpect(jsonPath("$.global_access").value(false))
+              .andExpect(jsonPath("$.security_role_id").isNumber())
+              .andReturn();
 
         var id = new JSONObject(result.getResponse().getContentAsString())
-            .getInt("id");
+              .getInt("id");
 
         transactionTemplate.execute(status -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
-                .orElseThrow();
+                  .orElseThrow();
 
             assertEquals("ACME", createdSecurityGroupEntity.getGroupName());
             assertEquals("ACME Transcription Services", createdSecurityGroupEntity.getDisplayName());
@@ -97,31 +97,31 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "name": "Scribe It",
-                           "display_name": "Scribe It Transcription Services",
-                           "description": "A test group"
-                         }
-                           """);
+              .content("""
+                    {
+                      "name": "Scribe It",
+                      "display_name": "Scribe It Transcription Services",
+                      "description": "A test group"
+                    }
+                      """);
 
         MvcResult result = mockMvc.perform(request)
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.name").value("Scribe It"))
-            .andExpect(jsonPath("$.display_name").value("Scribe It Transcription Services"))
-            .andExpect(jsonPath("$.description").value(DESCRIPTION))
-            .andExpect(jsonPath("$.display_state").value(true))
-            .andExpect(jsonPath("$.global_access").value(false))
-            .andExpect(jsonPath("$.security_role_id").isNumber())
-            .andReturn();
+              .andExpect(status().isCreated())
+              .andExpect(jsonPath("$.id").exists())
+              .andExpect(jsonPath("$.name").value("Scribe It"))
+              .andExpect(jsonPath("$.display_name").value("Scribe It Transcription Services"))
+              .andExpect(jsonPath("$.description").value(DESCRIPTION))
+              .andExpect(jsonPath("$.display_state").value(true))
+              .andExpect(jsonPath("$.global_access").value(false))
+              .andExpect(jsonPath("$.security_role_id").isNumber())
+              .andReturn();
 
         var id = new JSONObject(result.getResponse().getContentAsString())
-            .getInt("id");
+              .getInt("id");
 
         transactionTemplate.execute(status -> {
             var createdSecurityGroupEntity = securityGroupRepository.findById(id)
-                .orElseThrow();
+                  .orElseThrow();
 
             assertEquals("Scribe It", createdSecurityGroupEntity.getGroupName());
             assertEquals("Scribe It Transcription Services", createdSecurityGroupEntity.getDisplayName());
@@ -139,14 +139,14 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "name": "ACME"
-                         }
-                           """);
+              .content("""
+                    {
+                      "name": "ACME"
+                    }
+                      """);
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest());
+              .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -154,29 +154,29 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestForInitialGroup = buildRequest()
-            .content("""
-                         {
-                           "name": "Weyland",
-                           "display_name": "Weyland Transcription Services"
-                         }
-                           """);
+              .content("""
+                    {
+                      "name": "Weyland",
+                      "display_name": "Weyland Transcription Services"
+                    }
+                      """);
         MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
-            .andExpect(status().isCreated())
-            .andReturn();
+              .andExpect(status().isCreated())
+              .andReturn();
         JSONObject initialSecurityGroup = new JSONObject(initialResponse.getResponse()
-                                                             .getContentAsString());
+              .getContentAsString());
 
         MockHttpServletRequestBuilder requestForDuplicateGroup = buildRequest()
-            .content("""
-                         {
-                           "name": "Weyland",
-                           "display_name": "Trying to create a group whose name already exists"
-                         }
-                           """);
+              .content("""
+                    {
+                      "name": "Weyland",
+                      "display_name": "Trying to create a group whose name already exists"
+                    }
+                      """);
         mockMvc.perform(requestForDuplicateGroup)
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"))
-            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
+              .andExpect(status().isConflict())
+              .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"))
+              .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 
     @Test
@@ -184,19 +184,19 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         adminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
-            .content("""
-                         {
-                           "name": "ACME",
-                           "display_name": "ACME Transcription Services"
-                         }
-                           """);
+              .content("""
+                    {
+                      "name": "ACME",
+                      "display_name": "ACME Transcription Services"
+                    }
+                      """);
         mockMvc.perform(request)
-            .andExpect(status().isForbidden());
+              .andExpect(status().isForbidden());
     }
 
     private MockHttpServletRequestBuilder buildRequest() {
         return post("/admin/security-groups")
-            .header("Content-Type", "application/json");
+              .header("Content-Type", "application/json");
     }
 
 }

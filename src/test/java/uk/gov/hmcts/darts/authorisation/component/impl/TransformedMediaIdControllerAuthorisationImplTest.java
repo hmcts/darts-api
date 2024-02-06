@@ -41,11 +41,9 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     private static final String METHOD = "POST";
     private static final String URI = "/audio-requests";
     private static final String TRANSFORMED_MEDIA_ID_PARAM_VALUE = "6";
-
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private Authorisation authorisation;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private Set<SecurityRoleEnum> roles;
 
     private ControllerAuthorisation controllerAuthorisation;
@@ -53,12 +51,12 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     @BeforeEach
     void setUp() {
         roles = Set.of(
-            JUDGE,
-            REQUESTER,
-            APPROVER,
-            TRANSCRIBER,
-            TRANSLATION_QA,
-            RCJ_APPEALS
+              JUDGE,
+              REQUESTER,
+              APPROVER,
+              TRANSCRIBER,
+              TRANSLATION_QA,
+              RCJ_APPEALS
         );
         controllerAuthorisation = new TransformedMediaIdControllerAuthorisationImpl(authorisation);
     }
@@ -71,15 +69,15 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBody() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5,
-              "transformed_media_id": 6
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5,
+                "transformed_media_id": 6
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -91,14 +89,14 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationRequestBodyWhenTransformedMediaIdMissing() throws JsonProcessingException {
         String body = """
-            {
-              "case_id": 1,
-              "hearing_id": 2,
-              "media_id": 3,
-              "media_request_id": 4,
-              "transcription_id": 5
-            }
-            """;
+              {
+                "case_id": 1,
+                "hearing_id": 2,
+                "media_id": 3,
+                "media_request_id": 4,
+                "transcription_id": 5
+              }
+              """;
 
         JsonNode jsonNode = mapper.readTree(body);
 
@@ -111,7 +109,7 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     void checkAuthorisationPathParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/audio-requests/transformed_media/6");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(TRANSFORMED_MEDIA_ID_PARAM, TRANSFORMED_MEDIA_ID_PARAM_VALUE)
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(TRANSFORMED_MEDIA_ID_PARAM, TRANSFORMED_MEDIA_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -123,8 +121,8 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     void checkAuthorisationQueryParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(TRANSFORMED_MEDIA_ID_PARAM, TRANSFORMED_MEDIA_ID_PARAM_VALUE);
 
@@ -137,8 +135,8 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     void checkAuthorisationHeaderParameter() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.addHeader(TRANSFORMED_MEDIA_ID_PARAM, TRANSFORMED_MEDIA_ID_PARAM_VALUE);
 
@@ -151,13 +149,13 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenTransformedMediaIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSFORMED_MEDIA_ID.getTitle(), exception.getMessage());
@@ -176,8 +174,8 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     @Test
     void checkAuthorisationSupplierIdMissingParameter() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(Optional::empty, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(Optional::empty, roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSFORMED_MEDIA_ID.getTitle(), exception.getMessage());
@@ -190,14 +188,14 @@ class TransformedMediaIdControllerAuthorisationImplTest {
     void checkAuthorisationShouldThrowBadRequestWhenTransformedMediaIdInvalid() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-            Collections.emptyMap()
+              URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+              Collections.emptyMap()
         );
         request.setParameter(TRANSFORMED_MEDIA_ID_PARAM, "");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+              DartsApiException.class,
+              () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSFORMED_MEDIA_ID.getTitle(), exception.getMessage());

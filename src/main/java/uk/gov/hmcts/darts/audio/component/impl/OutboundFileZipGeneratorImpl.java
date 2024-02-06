@@ -54,22 +54,22 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
         try {
             Path mediaRequestDir = Path.of(
-                audioConfigurationProperties.getTempBlobWorkspace(),
-                mediaRequestEntity.getId().toString()
+                  audioConfigurationProperties.getTempBlobWorkspace(),
+                  mediaRequestEntity.getId().toString()
             );
             if (Files.notExists(mediaRequestDir)) {
                 mediaRequestDir = Files.createDirectory(mediaRequestDir);
             }
 
             Map<Path, Path> sourceToDestinationPaths = generateZipStructure(
-                audioSessions,
-                mediaRequestEntity,
-                mediaRequestDir.toString()
+                  audioSessions,
+                  mediaRequestEntity,
+                  mediaRequestDir.toString()
             );
 
             var outputPath = Path.of(
-                audioConfigurationProperties.getTempBlobWorkspace(),
-                String.format("%s.zip", UUID.randomUUID())
+                  audioConfigurationProperties.getTempBlobWorkspace(),
+                  String.format("%s.zip", UUID.randomUUID())
             );
             writeZip(sourceToDestinationPaths, outputPath);
 
@@ -81,24 +81,24 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     private ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity) {
         return ViqMetaData.builder()
-            .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
-            .raisedBy(null)
-            .startTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getStartTime()))
-            .endTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getEndTime()))
-            .build();
+              .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
+              .raisedBy(null)
+              .startTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getStartTime()))
+              .endTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getEndTime()))
+              .build();
     }
 
     private Map<Path, Path> generateZipStructure(List<List<AudioFileInfo>> audioSessions,
-                                                 MediaRequestEntity mediaRequestEntity,
-                                                 String mediaRequestDirString) {
+          MediaRequestEntity mediaRequestEntity,
+          String mediaRequestDirString) {
         Map<Path, Path> sourceToDestinationPaths = new HashMap<>();
 
         HearingEntity hearingEntity = mediaRequestEntity.getHearing();
         final String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
         sourceToDestinationPaths.put(Path.of(outboundFileZipGeneratorHelper.generateReadme(
-            createViqMetaData(mediaRequestEntity),
-            mediaRequestDirString
+              createViqMetaData(mediaRequestEntity),
+              mediaRequestDirString
         )), Path.of("readMe.txt"));
 
         Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
@@ -107,12 +107,12 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
             List<AudioFileInfo> audioSession = audioSessions.get(i);
             for (AudioFileInfo audioFileInfo : audioSession) {
                 ZonedDateTime localStartTime = ZonedDateTime.ofInstant(
-                    audioFileInfo.getStartTime(),
-                    EUROPE_LONDON_ZONE
+                      audioFileInfo.getStartTime(),
+                      EUROPE_LONDON_ZONE
                 );
                 ZonedDateTime localEndTime = ZonedDateTime.ofInstant(
-                    audioFileInfo.getEndTime(),
-                    EUROPE_LONDON_ZONE
+                      audioFileInfo.getEndTime(),
+                      EUROPE_LONDON_ZONE
                 );
 
                 Path path = generateZipPath(caseNumber, i, audioFileInfo);
@@ -122,29 +122,29 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
                 String parentPathString = path.getParent().toString();
                 playlistInfos.add(PlaylistInfo.builder()
-                                      .caseNumber(caseNumber)
-                                      .startTime(localStartTime)
-                                      .fileLocation(parentPathString)
-                                      .build());
+                      .caseNumber(caseNumber)
+                      .startTime(localStartTime)
+                      .fileLocation(parentPathString)
+                      .build());
 
                 Path annotationsOutputFile = Path.of(
-                    mediaRequestDirString,
-                    String.format("%d_%s", i, "annotations.xml")
+                      mediaRequestDirString,
+                      String.format("%d_%s", i, "annotations.xml")
                 );
                 if (Files.notExists(annotationsOutputFile)) {
                     sourceToDestinationPaths.put(Path.of(outboundFileZipGeneratorHelper.generateAnnotation(
-                        hearingEntity,
-                        localStartTime,
-                        localEndTime,
-                        annotationsOutputFile.toString()
+                          hearingEntity,
+                          localStartTime,
+                          localEndTime,
+                          annotationsOutputFile.toString()
                     )), Path.of(parentPathString, "annotations.xml"));
                 }
             }
         }
 
         sourceToDestinationPaths.put(Path.of(outboundFileZipGeneratorHelper.generatePlaylist(
-            playlistInfos,
-            mediaRequestDirString
+              playlistInfos,
+              mediaRequestDirString
         )), Path.of("playlist.xml"));
 
         log.debug("Generated zip structure: {}", sourceToDestinationPaths);

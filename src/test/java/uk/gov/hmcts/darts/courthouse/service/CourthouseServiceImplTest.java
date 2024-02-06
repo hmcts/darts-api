@@ -56,12 +56,10 @@ class CourthouseServiceImplTest {
 
         Courthouse courthouseModel = new Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseModel.setCode((int) CODE);
-
+        courthouseModel.setCode(CODE);
 
         Mockito.when(mapper.mapToEntity(courthouseModel)).thenReturn(courthouseEntity);
         Mockito.when(repository.saveAndFlush(courthouseEntity)).thenReturn(courthouseEntity);
-
 
         CourthouseEntity returnedEntity = courthouseService.addCourtHouse(courthouseModel);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
@@ -76,14 +74,13 @@ class CourthouseServiceImplTest {
 
         Courthouse courthouseModel = new Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseModel.setCode((int) CODE);
-
+        courthouseModel.setCode(CODE);
 
         Mockito.when(repository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.of(new CourthouseEntity()));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> courthouseService.addCourtHouse(courthouseModel)
+              DartsApiException.class,
+              () -> courthouseService.addCourtHouse(courthouseModel)
         );
 
         assertEquals("Provided courthouse name already exists.", exception.getMessage());
@@ -97,15 +94,14 @@ class CourthouseServiceImplTest {
 
         Courthouse courthouseModel = new Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseModel.setCode((int) CODE);
-
+        courthouseModel.setCode(CODE);
 
         Mockito.when(repository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.empty());
         Mockito.when(repository.findByCode(any(Integer.class))).thenReturn(Optional.of(new CourthouseEntity()));
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> courthouseService.addCourtHouse(courthouseModel)
+              DartsApiException.class,
+              () -> courthouseService.addCourtHouse(courthouseModel)
         );
 
         assertEquals("Provided courthouse code already exists.", exception.getMessage());
@@ -135,15 +131,13 @@ class CourthouseServiceImplTest {
         courthouseEntityChanged.setCourthouseName("Changed courthouse");
         courthouseEntityChanged.setCode(543);
 
-
         Mockito.when(repository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);
         Mockito.when(repository.saveAndFlush(any())).thenReturn(courthouseEntityChanged);
 
         CourthouseEntity returnedEntity = courthouseService.amendCourthouseById(
-            courthouseModelAmendment,
-            COURTHOUSE_ID
+              courthouseModelAmendment,
+              COURTHOUSE_ID
         );
-
 
         assertEquals("Changed courthouse", returnedEntity.getCourthouseName());
         assertEquals((short) 543, returnedEntity.getCode());
@@ -157,7 +151,6 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCode(CODE);
 
         Mockito.when(repository.getReferenceById(anyInt())).thenReturn(courthouseEntity);
-
 
         CourthouseEntity returnedEntity = courthouseService.getCourtHouseById(COURTHOUSE_ID);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
@@ -177,7 +170,6 @@ class CourthouseServiceImplTest {
         List<CourthouseEntity> courthouseList = Arrays.asList(courthouseEntity, courthouseEntity2);
         Mockito.when(repository.findAll()).thenReturn(courthouseList);
 
-
         List<CourthouseEntity> returnedEntities = courthouseService.getAllCourthouses();
         assertEquals(2, returnedEntities.size());
     }
@@ -185,7 +177,7 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         Mockito.when(repository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
-            createSwanseaCourthouseEntity()));
+              createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
         assertEquals(SWANSEA_CODE, courthouse.getCode());
@@ -194,7 +186,7 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingCodeAndName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         Mockito.when(repository.findByCode(SWANSEA_CODE)).thenReturn(Optional.of(
-            createSwanseaCourthouseEntity()));
+              createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(SWANSEA_CODE, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
         assertEquals(SWANSEA_CODE, courthouse.getCode());
@@ -204,11 +196,11 @@ class CourthouseServiceImplTest {
     void retrieveCourthouseUsingNameAndDifferentCode() {
         Mockito.when(repository.findByCode(458)).thenReturn(Optional.empty());
         Mockito.when(repository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
-            createSwanseaCourthouseEntity()));
+              createSwanseaCourthouseEntity()));
 
         CourthouseCodeNotMatchException thrownException = assertThrows(
-            CourthouseCodeNotMatchException.class,
-            () -> courthouseService.retrieveAndUpdateCourtHouse(458, SWANSEA_NAME)
+              CourthouseCodeNotMatchException.class,
+              () -> courthouseService.retrieveAndUpdateCourtHouse(458, SWANSEA_NAME)
         );
 
         CourthouseEntity courthouse = thrownException.getDatabaseCourthouse();
@@ -222,8 +214,8 @@ class CourthouseServiceImplTest {
         Mockito.when(repository.findByCourthouseNameIgnoreCase("TEST")).thenReturn(Optional.empty());
 
         assertThrows(
-            CourthouseNameNotFoundException.class,
-            () -> courthouseService.retrieveAndUpdateCourtHouse(458, "test")
+              CourthouseNameNotFoundException.class,
+              () -> courthouseService.retrieveAndUpdateCourtHouse(458, "test")
         );
 
     }

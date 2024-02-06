@@ -46,15 +46,14 @@ class ProcessAllDailyListsTest {
     private DailyListEntity latestDailyListForLeeds;
 
 
-
     @BeforeEach
     void setUp() {
         dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater);
         setCourthouseForStubs("Swansea", dailyListForSwansea);
         setCourthouseForStubs("Leeds",
-                              oldestDailyListForLeeds,
-                              oldDailyListForLeeds,
-                              latestDailyListForLeeds
+              oldestDailyListForLeeds,
+              oldDailyListForLeeds,
+              latestDailyListForLeeds
         );
     }
 
@@ -62,7 +61,7 @@ class ProcessAllDailyListsTest {
     @EnumSource(SourceType.class)
     void handlesScenarioWhereNoDailyListsAreFound(SourceType sourceType) {
         lenient().when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, sourceType.name()))
-            .thenReturn(emptyList());
+              .thenReturn(emptyList());
 
         dailyListProcessor.processAllDailyLists();
 
@@ -74,9 +73,9 @@ class ProcessAllDailyListsTest {
     @Test
     void handlesSingleDailyListItemForOneSourceType() throws JsonProcessingException {
         when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.XHB.name()))
-            .thenReturn(emptyList());
+              .thenReturn(emptyList());
         when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.CPP.name()))
-            .thenReturn(List.of(dailyListForSwansea));
+              .thenReturn(List.of(dailyListForSwansea));
 
         dailyListProcessor.processAllDailyLists();
 
@@ -87,9 +86,9 @@ class ProcessAllDailyListsTest {
     @Test
     void groupsDailyListsByListingCourthouse() throws JsonProcessingException {
         when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.XHB.name()))
-            .thenReturn(emptyList());
+              .thenReturn(emptyList());
         when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.CPP.name()))
-            .thenReturn(List.of(latestDailyListForLeeds, oldDailyListForLeeds, oldestDailyListForLeeds, dailyListForSwansea));
+              .thenReturn(List.of(latestDailyListForLeeds, oldDailyListForLeeds, oldestDailyListForLeeds, dailyListForSwansea));
 
         dailyListProcessor.processAllDailyLists();
 
@@ -101,9 +100,9 @@ class ProcessAllDailyListsTest {
     @Test
     void handlesDailyListsFromBothSourceTypes() throws JsonProcessingException {
         when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.XHB.name()))
-            .thenReturn(List.of(oldDailyListForLeeds));
+              .thenReturn(List.of(oldDailyListForLeeds));
         when(dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(NEW, NOW, SourceType.CPP.name()))
-            .thenReturn(List.of(latestDailyListForLeeds, oldestDailyListForLeeds));
+              .thenReturn(List.of(latestDailyListForLeeds, oldestDailyListForLeeds));
 
         dailyListProcessor.processAllDailyLists();
 
@@ -114,6 +113,6 @@ class ProcessAllDailyListsTest {
 
     private void setCourthouseForStubs(String listingCourthouse, DailyListEntity... dailyListEntityForSwansea) {
         stream(dailyListEntityForSwansea)
-            .forEach(dailyListEntity -> lenient().when(dailyListEntity.getListingCourthouse()).thenReturn(listingCourthouse));
+              .forEach(dailyListEntity -> lenient().when(dailyListEntity.getListingCourthouse()).thenReturn(listingCourthouse));
     }
 }

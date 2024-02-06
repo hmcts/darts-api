@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.DU
 
 @ExtendWith(MockitoExtension.class)
 class DuplicateEmailValidatorTest {
+
     private static final String NEW_EMAIL_ADDRESS = "new-email@hmcts.net";
     private static final String EXISTING_EMAIL_ADDRESS = "existing-email@hmcts.net";
 
@@ -36,7 +37,7 @@ class DuplicateEmailValidatorTest {
     @Test
     void doesNotThrowExceptionIfEmailNotCurrentlyAssociatedWithActiveUser() {
         when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(NEW_EMAIL_ADDRESS, true))
-            .thenReturn(Collections.emptyList());
+              .thenReturn(Collections.emptyList());
 
         duplicateEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS));
 
@@ -46,12 +47,12 @@ class DuplicateEmailValidatorTest {
     @Test
     void throwsExceptionIfEmailAlreadyAssociatedWithActiveUser() {
         when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(EXISTING_EMAIL_ADDRESS, true))
-            .thenReturn(List.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
+              .thenReturn(List.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
 
         assertThatThrownBy(() -> duplicateEmailValidator.validate(someUserWithEmail(EXISTING_EMAIL_ADDRESS)))
-            .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", DUPLICATE_EMAIL)
-            .hasFieldOrPropertyWithValue("detail", String.format("User with email %s already exists", EXISTING_EMAIL_ADDRESS));
+              .isInstanceOf(DartsApiException.class)
+              .hasFieldOrPropertyWithValue("error", DUPLICATE_EMAIL)
+              .hasFieldOrPropertyWithValue("detail", String.format("User with email %s already exists", EXISTING_EMAIL_ADDRESS));
     }
 
     private UserAccountEntity someUserAccountWithEmail(String email) {

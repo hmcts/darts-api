@@ -15,14 +15,14 @@ public class YourTranscriptsSummaryRowMapper implements RowMapper<YourTranscript
     @Override
     public YourTranscriptsSummary mapRow(ResultSet rs, int rowNum) throws SQLException {
         var summary = new YourTranscriptsSummary(
-            Integer.valueOf(rs.getInt("transcription_id")),
-            Integer.valueOf(rs.getInt("case_id")),
-            rs.getString("case_number"),
-            rs.getString("courthouse_name"),
-            rs.getObject("hearing_date", LocalDate.class),
-            rs.getString("transcription_type"),
-            rs.getString("status"),
-            rs.getObject("requested_ts", OffsetDateTime.class)
+              Integer.valueOf(rs.getInt("transcription_id")),
+              Integer.valueOf(rs.getInt("case_id")),
+              rs.getString("case_number"),
+              rs.getString("courthouse_name"),
+              rs.getObject("hearing_date", LocalDate.class),
+              rs.getString("transcription_type"),
+              rs.getString("status"),
+              rs.getObject("requested_ts", OffsetDateTime.class)
         );
         summary.setUrgency(rs.getString("urgency"));
         return summary;

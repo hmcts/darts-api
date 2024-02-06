@@ -32,6 +32,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_
 @RequiredArgsConstructor
 @Slf4j
 public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterProcessor {
+
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -48,21 +49,21 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(deletionDays);
 
         List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findAllDeletableTransformedMedia(
-            deletionStartDateTime
+              deletionStartDateTime
         );
 
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository
-            .findByTransformedMediaIdIn(transformedMediaList.stream().map(TransformedMediaEntity::getId)
-                                            .collect(Collectors.toList()));
+              .findByTransformedMediaIdIn(transformedMediaList.stream().map(TransformedMediaEntity::getId)
+                    .collect(Collectors.toList()));
 
         UserAccountEntity systemUser = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid(
-            "housekeeping"));
+              "housekeeping"));
 
         if (systemUser == null) {
             throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
         }
         ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(
-            MARKED_FOR_DELETION.getId());
+              MARKED_FOR_DELETION.getId());
 
         List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
@@ -81,7 +82,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     }
 
     private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
-                                                       ObjectRecordStatusEntity deletionStatus) {
+          ObjectRecordStatusEntity deletionStatus) {
         entity.setLastModifiedBy(systemUser);
         entity.setStatus(deletionStatus);
     }

@@ -50,5 +50,4 @@ public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
     private Boolean taskEnabled;
 
 
-
 }

@@ -11,6 +11,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @Data
 @NoArgsConstructor
 public class ArmResponseUploadFileRecord {
+
     @JsonProperty("operation")
     private final String operation = UPLOAD_NEW_FILE;
     @JsonProperty("transaction_id")

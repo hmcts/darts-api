@@ -34,8 +34,8 @@ public class UserIdentityImpl implements UserIdentity {
     private String getEmailAddressFromToken() {
         if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
             Object principalObject = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+                  .getAuthentication()
+                  .getPrincipal();
 
             if (principalObject instanceof Jwt jwt) {
                 Object emailsAddressesObject = jwt.getClaims().get(EMAILS);
@@ -45,8 +45,8 @@ public class UserIdentityImpl implements UserIdentity {
                 if (emailsAddressesObject instanceof List<?> emails) {
                     if (emails.size() != 1) {
                         throw new IllegalStateException(String.format(
-                            "Unexpected number of email addresses: %d",
-                            emails.size()
+                              "Unexpected number of email addresses: %d",
+                              emails.size()
                         ));
                     }
                     Object emailAddressObject = emails.get(0);
@@ -65,8 +65,8 @@ public class UserIdentityImpl implements UserIdentity {
     private String getGuidFromToken() {
         if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
             Object principalObject = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+                  .getAuthentication()
+                  .getPrincipal();
 
             Object oid = null;
             if (principalObject instanceof Jwt jwt) {
@@ -88,8 +88,8 @@ public class UserIdentityImpl implements UserIdentity {
         }
         if (isNull(userAccount)) {
             userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(getEmailAddressFromToken(), true).stream()
-                .findFirst()
-                .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
+                  .findFirst()
+                  .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
         }
         return userAccount;
     }
@@ -108,10 +108,10 @@ public class UserIdentityImpl implements UserIdentity {
 
         if (nonNull(guid) || nonNull(emailAddress)) {
             List<UserAccountEntity> userAccountEntities =
-                userAccountRepository.findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(
-                    emailAddress, guid,
-                    globalAccessRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet())
-                );
+                  userAccountRepository.findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(
+                        emailAddress, guid,
+                        globalAccessRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet())
+                  );
             if (!userAccountEntities.isEmpty()) {
                 userHasGlobalAccess = true;
             }

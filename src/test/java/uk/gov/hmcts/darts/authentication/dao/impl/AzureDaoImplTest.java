@@ -44,20 +44,20 @@ class AzureDaoImplTest {
     void fetchAccessTokenShouldReturnResponseWhenAzureCallIsSuccessful() throws AzureDaoException {
         HTTPResponse response = mockSuccessResponse();
         when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(
-            response);
+              response);
 
         OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken(
-            "CODE",
-            authenticationProviderConfiguration,
-            authenticationConfiguration
+              "CODE",
+              authenticationProviderConfiguration,
+              authenticationConfiguration
         );
 
         assertEquals(
-            "test_id_token",
-            Objects.nonNull(rawResponse.getIdToken()) ? rawResponse.getIdToken() : rawResponse.getAccessToken()
+              "test_id_token",
+              Objects.nonNull(rawResponse.getIdToken()) ? rawResponse.getIdToken() : rawResponse.getAccessToken()
         );
         assertEquals(
-            1234L, rawResponse.getIdTokenExpiresIn());
+              1234L, rawResponse.getIdTokenExpiresIn());
     }
 
     @ParameterizedTest
@@ -65,7 +65,7 @@ class AzureDaoImplTest {
     @NullAndEmptySource
     void fetchAccessTokenShouldThrowExceptionWhenProvidedCodeIsBlankOrNull(String code) {
         AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(
-            code, authenticationProviderConfiguration, authenticationConfiguration));
+              code, authenticationProviderConfiguration, authenticationConfiguration));
 
         assertEquals("Null code not permitted", exception.getMessage());
     }
@@ -76,8 +76,8 @@ class AzureDaoImplTest {
         when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(failedResponse);
 
         AzureDaoException exception = assertThrows(
-            AzureDaoException.class,
-            () -> azureDaoImpl.fetchAccessToken("CODE", authenticationProviderConfiguration, authenticationConfiguration)
+              AzureDaoException.class,
+              () -> azureDaoImpl.fetchAccessToken("CODE", authenticationProviderConfiguration, authenticationConfiguration)
         );
 
         assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());

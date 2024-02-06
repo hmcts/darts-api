@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.exception.AuditApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 public class AuditSearchQueryValidator implements Validator {
+
     @Override
     public boolean supports(Class<?> clazz) {
         return AuditSearchQuery.class.equals(clazz);
@@ -16,9 +17,9 @@ public class AuditSearchQueryValidator implements Validator {
     public void validate(Object target, Errors errors) {
         AuditSearchQuery auditSearchQuery = (AuditSearchQuery) target;
         if (auditSearchQuery.getCaseId() == null
-            && auditSearchQuery.getAuditActivityId() == null
-            && auditSearchQuery.getFromDate() == null
-            && auditSearchQuery.getToDate() == null) {
+              && auditSearchQuery.getAuditActivityId() == null
+              && auditSearchQuery.getFromDate() == null
+              && auditSearchQuery.getToDate() == null) {
             throw new DartsApiException(AuditApiError.FILTERS_WERE_EMPTY);
         }
 

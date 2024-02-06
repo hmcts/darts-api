@@ -59,8 +59,8 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
 
     @ManyToMany
     @JoinTable(name = "hearing_annotation_ae",
-        joinColumns = {@JoinColumn(name = "ann_id")},
-        inverseJoinColumns = {@JoinColumn(name = "hea_id")})
+          joinColumns = {@JoinColumn(name = "ann_id")},
+          inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private List<HearingEntity> hearingList = new ArrayList<>();
 
 

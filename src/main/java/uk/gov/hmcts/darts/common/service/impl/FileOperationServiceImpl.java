@@ -25,7 +25,7 @@ public class FileOperationServiceImpl implements FileOperationService {
     public Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
 
         Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace())
-            .resolve(UUID.randomUUID().toString());
+              .resolve(UUID.randomUUID().toString());
         Path targetTempFile = targetTempDirectory.resolve(fileName);
 
         try (InputStream audioInputStream = mediaFile.toStream()) {
@@ -43,7 +43,7 @@ public class FileOperationServiceImpl implements FileOperationService {
 
     @Override
     public Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUuidToWorkspace)
-        throws IOException {
+          throws IOException {
 
         Path workspacePath = Path.of(workspace);
         if (appendUuidToWorkspace) {

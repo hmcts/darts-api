@@ -64,19 +64,19 @@ class OutboundFileZipGeneratorImplTest {
     @BeforeEach
     void setUp() throws IOException, ParserConfigurationException {
         OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(
-            new AnnotationXmlGeneratorImpl(), eventRepository
+              new AnnotationXmlGeneratorImpl(), eventRepository
         );
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
-            audioConfigurationProperties,
-            outboundFileZipGeneratorHelper
+              audioConfigurationProperties,
+              outboundFileZipGeneratorHelper
         );
 
         var tempDirectoryName = UUID.randomUUID().toString();
         tempDirectory = Files.createTempDirectory(tempDirectoryName);
 
         when(audioConfigurationProperties.getTempBlobWorkspace())
-            .thenReturn(tempDirectory.toString());
+              .thenReturn(tempDirectory.toString());
     }
 
     @Test
@@ -84,19 +84,19 @@ class OutboundFileZipGeneratorImplTest {
         var audioWithSession1AndChannel1 = createDummyFileAndAudioFileInfo(1);
         var audioWithSession1AndChannel2 = createDummyFileAndAudioFileInfo(2);
         List<AudioFileInfo> session1 = List.of(
-            audioWithSession1AndChannel1,
-            audioWithSession1AndChannel2
+              audioWithSession1AndChannel1,
+              audioWithSession1AndChannel2
         );
 
         var audioWithSession2AndChannel1 = createDummyFileAndAudioFileInfo(1);
         List<AudioFileInfo> session2 = List.of(
-            audioWithSession2AndChannel1
+              audioWithSession2AndChannel1
         );
 
         var caseNumber = "T20190024";
         Path path = outboundFileZipGenerator.generateAndWriteZip(
-            List.of(session1, session2),
-            createDummyMediaRequestEntity(caseNumber)
+              List.of(session1, session2),
+              createDummyMediaRequestEntity(caseNumber)
         );
 
         assertTrue(Files.exists(path));

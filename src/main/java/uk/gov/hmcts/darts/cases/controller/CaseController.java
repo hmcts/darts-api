@@ -48,11 +48,11 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {DAR_PC})
+          globalAccessSecurityRoles = {DAR_PC})
     public ResponseEntity<List<ScheduledCase>> casesGet(
-        String courthouse,
-        String courtroom,
-        LocalDate date
+          String courthouse,
+          String courtroom,
+          LocalDate date
     ) {
         GetCasesRequest request = new GetCasesRequest();
         request.setCourthouse(courthouse.toUpperCase(Locale.ROOT));
@@ -66,7 +66,7 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        globalAccessSecurityRoles = {MID_TIER})
+          globalAccessSecurityRoles = {MID_TIER})
     public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
     }
@@ -74,17 +74,17 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
-        AdvancedSearchDetails advancedSearchDetails
+          AdvancedSearchDetails advancedSearchDetails
     ) {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber(StringUtils.trimToNull(advancedSearchDetails.getCaseNumber()))
-            .courthouse(StringUtils.trimToNull(advancedSearchDetails.getCourthouse()))
-            .courtroom(StringUtils.trimToNull(advancedSearchDetails.getCourtroom()))
-            .judgeName(StringUtils.trimToNull(advancedSearchDetails.getJudgeName()))
-            .defendantName(StringUtils.trimToNull(advancedSearchDetails.getDefendantName()))
-            .dateFrom(advancedSearchDetails.getDateFrom()).dateTo(advancedSearchDetails.getDateTo())
-            .eventTextContains(StringUtils.trimToNull(advancedSearchDetails.getEventTextContains()))
-            .build();
+              .caseNumber(StringUtils.trimToNull(advancedSearchDetails.getCaseNumber()))
+              .courthouse(StringUtils.trimToNull(advancedSearchDetails.getCourthouse()))
+              .courtroom(StringUtils.trimToNull(advancedSearchDetails.getCourtroom()))
+              .judgeName(StringUtils.trimToNull(advancedSearchDetails.getJudgeName()))
+              .defendantName(StringUtils.trimToNull(advancedSearchDetails.getDefendantName()))
+              .dateFrom(advancedSearchDetails.getDateFrom()).dateTo(advancedSearchDetails.getDateTo())
+              .eventTextContains(StringUtils.trimToNull(advancedSearchDetails.getEventTextContains()))
+              .build();
 
         RequestValidator.validate(request);
         List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
@@ -95,8 +95,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
 
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
@@ -105,8 +105,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
@@ -117,8 +117,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
         PatchCaseRequestValidator.validate(patchRequestObject);
         return new ResponseEntity<>(caseService.patchCase(caseId, patchRequestObject), HttpStatus.OK);
@@ -127,8 +127,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE})
+          securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
+          globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getTranscriptsByCaseId(caseId), HttpStatus.OK);
     }

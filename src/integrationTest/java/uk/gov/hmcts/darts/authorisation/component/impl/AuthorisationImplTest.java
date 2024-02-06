@@ -53,15 +53,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByCaseId() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseByCaseId(
-            authorisationStub.getCourtCaseEntity().getId(), Set.of(APPROVER, REQUESTER)));
+              authorisationStub.getCourtCaseEntity().getId(), Set.of(APPROVER, REQUESTER)));
     }
 
     @Test
     void authoriseByCaseIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByCaseId(
-                authorisationStub.getCourtCaseEntity().getId(), Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByCaseId(
+                    authorisationStub.getCourtCaseEntity().getId(), Set.of(JUDGE))
         );
 
         assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
@@ -71,9 +71,9 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByCaseIdShouldThrowCaseApiErrorCaseNotFound() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByCaseId(
-                -1, Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByCaseId(
+                    -1, Set.of(JUDGE))
         );
 
         assertEquals(CASE_NOT_FOUND.getTitle(), exception.getMessage());
@@ -83,15 +83,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByHearingId() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseByHearingId(
-            authorisationStub.getHearingEntity().getId(), Set.of(APPROVER, REQUESTER)));
+              authorisationStub.getHearingEntity().getId(), Set.of(APPROVER, REQUESTER)));
     }
 
     @Test
     void authoriseByHearingIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByHearingId(
-                authorisationStub.getHearingEntity().getId(), Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByHearingId(
+                    authorisationStub.getHearingEntity().getId(), Set.of(JUDGE))
         );
 
         assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
@@ -101,9 +101,9 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByHearingIdShouldThrowHearingApiErrorHearingNotFound() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByHearingId(
-                -1, Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByHearingId(
+                    -1, Set.of(JUDGE))
         );
 
         assertEquals(HEARING_NOT_FOUND.getTitle(), exception.getMessage());
@@ -113,15 +113,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByMediaRequestId() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseByMediaRequestId(
-            authorisationStub.getMediaRequestEntity().getId(), Set.of(APPROVER, REQUESTER)));
+              authorisationStub.getMediaRequestEntity().getId(), Set.of(APPROVER, REQUESTER)));
     }
 
     @Test
     void authoriseByMediaRequestIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByMediaRequestId(
-                authorisationStub.getMediaRequestEntity().getId(), Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByMediaRequestId(
+                    authorisationStub.getMediaRequestEntity().getId(), Set.of(JUDGE))
         );
 
         assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
@@ -131,9 +131,9 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByMediaRequestIdShouldThrowAudioRequestsApiErrorMediaRequestNotFound() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByMediaRequestId(
-                -1, Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByMediaRequestId(
+                    -1, Set.of(JUDGE))
         );
 
         assertEquals(MEDIA_REQUEST_NOT_FOUND.getTitle(), exception.getMessage());
@@ -143,15 +143,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseMediaRequestAgainstUser() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseMediaRequestAgainstUser(
-            authorisationStub.getMediaRequestEntity().getId()));
+              authorisationStub.getMediaRequestEntity().getId()));
     }
 
     @Test
     void authoriseMediaRequestAgainstUserShouldThrowAudioRequestsApiErrorMediaRequestNotValidForUser() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseMediaRequestAgainstUser(
-                authorisationStub.getMediaRequestEntitySystemUser().getId())
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseMediaRequestAgainstUser(
+                    authorisationStub.getMediaRequestEntitySystemUser().getId())
         );
 
         assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER.getTitle(), exception.getMessage());
@@ -161,15 +161,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByMediaId() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseByMediaId(
-            authorisationStub.getMediaEntity().getId(), Set.of(APPROVER, REQUESTER)));
+              authorisationStub.getMediaEntity().getId(), Set.of(APPROVER, REQUESTER)));
     }
 
     @Test
     void authoriseByMediaIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByMediaId(
-                authorisationStub.getMediaEntity().getId(), Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByMediaId(
+                    authorisationStub.getMediaEntity().getId(), Set.of(JUDGE))
         );
 
         assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
@@ -179,9 +179,9 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByMediaIdShouldThrowAudioApiErrorMediaNotFound() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByMediaId(
-                -1, Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByMediaId(
+                    -1, Set.of(JUDGE))
         );
 
         assertEquals(MEDIA_NOT_FOUND.getTitle(), exception.getMessage());
@@ -191,15 +191,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByTranscriptionId() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseByTranscriptionId(
-            authorisationStub.getTranscriptionEntity().getId(), Set.of(APPROVER, REQUESTER)));
+              authorisationStub.getTranscriptionEntity().getId(), Set.of(APPROVER, REQUESTER)));
     }
 
     @Test
     void authoriseByTranscriptionIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByTranscriptionId(
-                authorisationStub.getTranscriptionEntity().getId(), Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByTranscriptionId(
+                    authorisationStub.getTranscriptionEntity().getId(), Set.of(JUDGE))
         );
 
         assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
@@ -209,9 +209,9 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByTranscriptionIdShouldThrowTranscriptionApiErrorTranscriptionNotFound() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByTranscriptionId(
-                -1, Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByTranscriptionId(
+                    -1, Set.of(JUDGE))
         );
 
         assertEquals(TRANSCRIPTION_NOT_FOUND.getTitle(), exception.getMessage());
@@ -221,15 +221,15 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByTransformedMediaId() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseByTransformedMediaId(
-            authorisationStub.getTransformedMediaEntity().getId(), Set.of(APPROVER, REQUESTER)));
+              authorisationStub.getTransformedMediaEntity().getId(), Set.of(APPROVER, REQUESTER)));
     }
 
     @Test
     void authoriseByTransformedMediaIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByTransformedMediaId(
-                authorisationStub.getTransformedMediaEntity().getId(), Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByTransformedMediaId(
+                    authorisationStub.getTransformedMediaEntity().getId(), Set.of(JUDGE))
         );
 
         assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
@@ -239,9 +239,9 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseByTransformedMediaIdShouldThrowAudioRequestsApiErrorTransformedMediaNotFound() {
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseByTransformedMediaId(
-                -1, Set.of(JUDGE))
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseByTransformedMediaId(
+                    -1, Set.of(JUDGE))
         );
 
         assertEquals(TRANSFORMED_MEDIA_NOT_FOUND.getTitle(), exception.getMessage());
@@ -251,7 +251,7 @@ class AuthorisationImplTest extends IntegrationBase {
     @Test
     void authoriseTransformedMediaAgainstUser() {
         assertDoesNotThrow(() -> authorisationToTest.authoriseTransformedMediaAgainstUser(
-            authorisationStub.getTransformedMediaEntity().getId()));
+              authorisationStub.getTransformedMediaEntity().getId()));
     }
 
     @Test
@@ -260,9 +260,9 @@ class AuthorisationImplTest extends IntegrationBase {
         TransformedMediaEntity transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> authorisationToTest.authoriseTransformedMediaAgainstUser(
-                transformedMediaEntity.getId())
+              DartsApiException.class,
+              () -> authorisationToTest.authoriseTransformedMediaAgainstUser(
+                    transformedMediaEntity.getId())
         );
 
         assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER.getTitle(), exception.getMessage());

@@ -20,10 +20,10 @@ public class TranscriptFileValidator {
     public void validate(MultipartFile transcript) {
 
         if (!transcriptionConfigurationProperties.getAllowedExtensions()
-            .contains(FilenameUtils.getExtension(transcript.getOriginalFilename()).toLowerCase())
-            || !transcriptionConfigurationProperties.getAllowedContentTypes()
-            .contains(transcript.getContentType())
-            || transcript.getSize() > multipartProperties.getMaxFileSize().toBytes()
+              .contains(FilenameUtils.getExtension(transcript.getOriginalFilename()).toLowerCase())
+              || !transcriptionConfigurationProperties.getAllowedContentTypes()
+              .contains(transcript.getContentType())
+              || transcript.getSize() > multipartProperties.getMaxFileSize().toBytes()
         ) {
             throw new DartsApiException(FAILED_TO_ATTACH_TRANSCRIPT);
         }

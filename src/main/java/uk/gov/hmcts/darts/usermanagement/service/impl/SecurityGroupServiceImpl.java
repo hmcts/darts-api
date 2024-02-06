@@ -50,7 +50,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     public List<SecurityGroupWithIdAndRole> getSecurityGroups() {
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = securityGroupEntities.stream()
-            .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
+              .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
 
         return securityGroupWithIdAndRoles;
     }

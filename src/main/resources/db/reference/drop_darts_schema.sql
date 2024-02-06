@@ -33,33 +33,33 @@ DROP TABLE judge;
 DROP TABLE node_register;
 DROP TABLE transient_object_directory;
 DROP TABLE transformed_media;
-DROP TABLE external_object_directory; 
-DROP TABLE case_document; 
-DROP TABLE object_record_status; 
-DROP TABLE external_location_type;  
+DROP TABLE external_object_directory;
+DROP TABLE case_document;
+DROP TABLE object_record_status;
+DROP TABLE external_location_type;
 DROP TABLE annotation_document;
 DROP TABLE hearing_annotation_ae;
 DROP TABLE hearing_transcription_ae;
-DROP TABLE annotation ;
+DROP TABLE annotation;
 DROP TABLE media_request;
 
 DROP TABLE hearing_event_ae;
-DROP TABLE hearing_media_ae ;
+DROP TABLE hearing_media_ae;
 DROP TABLE courthouse_region_ae;
 DROP TABLE region;
-DROP TABLE daily_list  ;              
-DROP TABLE event       ; 
+DROP TABLE daily_list;
+DROP TABLE event;
 
 DROP TABLE transcription_document;
-DROP TABLE transcription_comment ;
+DROP TABLE transcription_comment;
 DROP TABLE transcription_workflow;
-  
-DROP TABLE transcription ; 
+
+DROP TABLE transcription;
 DROP TABLE transcription_urgency;
-DROP TABLE hearing     ;              
-DROP TABLE media       ;
-DROP TABLE notification;              
-DROP TABLE report      ;      
+DROP TABLE hearing;
+DROP TABLE media;
+DROP TABLE notification;
+DROP TABLE report;
 DROP TABLE automated_task;
 
 DROP TABLE audit;
@@ -68,13 +68,13 @@ DROP TABLE external_service_auth_token;
 
 DROP TABLE case_overflow;
 DROP TABLE court_case;
-DROP TABLE event_handler; 
+DROP TABLE event_handler;
 DROP TABLE transcription_status;
 DROP TABLE transcription_type;
-DROP TABLE courtroom; 
-DROP TABLE courthouse;   
+DROP TABLE courtroom;
+DROP TABLE courthouse;
 DROP TABLE user_account;
- 
+
 DROP SEQUENCE ann_seq;
 DROP SEQUENCE ado_seq;
 DROP SEQUENCE aud_seq;
@@ -109,7 +109,6 @@ DROP SEQUENCE trd_seq;
 DROP SEQUENCE trw_seq;
 DROP SEQUENCE trm_seq;
 DROP SEQUENCE usr_seq;
-
 
 
 

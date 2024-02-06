@@ -9,14 +9,14 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @FeignClient(
-    name = "arm-token-client",
-    url = "${darts.storage.arm-api.url}",
-    configuration = ArmClientConfig.class
+      name = "arm-token-client",
+      url = "${darts.storage.arm-api.url}",
+      configuration = ArmClientConfig.class
 )
 public interface ArmTokenClient {
 
     @GetMapping(value = "${darts.storage.arm-api.token-path}",
-        consumes = TEXT_PLAIN_VALUE)
+          consumes = TEXT_PLAIN_VALUE)
     ArmTokenResponse getToken(ArmTokenRequest armTokenRequest);
 
 }

@@ -10,9 +10,9 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum NodeRegistrationApiError implements DartsApiError {
 
     INVALID_COURTROOM(
-        "100",
-        HttpStatus.BAD_REQUEST,
-        "Could not find the courtroom."
+          "100",
+          HttpStatus.BAD_REQUEST,
+          "Could not find the courtroom."
     );
 
     private static final String ERROR_TYPE_PREFIX = "NODE_REGISTRATION";

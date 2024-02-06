@@ -5,6 +5,7 @@ import com.azure.core.util.BinaryData;
 import java.util.List;
 
 public interface ArmService {
+
     String saveBlobData(String containerName, String filename, BinaryData binaryData);
 
     String saveBlobData(String containerName, BinaryData binaryData, String blobPathAndName);

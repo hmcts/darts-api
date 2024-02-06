@@ -69,10 +69,10 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     @BeforeEach
     void beforeEach() {
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE,
-            SOME_COURTROOM,
-            LocalDate.parse(HEARING_DATE)
+              SOME_CASE_NUMBER,
+              SOME_COURTHOUSE,
+              SOME_COURTROOM,
+              LocalDate.parse(HEARING_DATE)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
@@ -81,7 +81,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         dartsDatabase.save(courtCase);
 
         testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+              .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -93,8 +93,8 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(audioRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(audioRequestDetails));
 
         mockMvc.perform(requestBuilder).andExpect(status().isForbidden());
     }
@@ -105,27 +105,27 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_PLAYBACK);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(audioRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(audioRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.request_id").isNumber())
-            .andExpect(jsonPath("$.case_id").isNumber())
-            .andExpect(jsonPath("$.case_number").value(SOME_CASE_NUMBER))
-            .andExpect(jsonPath("$.courthouse_name").value(SOME_COURTHOUSE))
-            .andExpect(jsonPath("$.defendants").isNotEmpty())
-            .andExpect(jsonPath("$.hearing_date").value(HEARING_DATE))
-            .andExpect(jsonPath("$.start_time").value(SOME_START_TIME))
-            .andExpect(jsonPath("$.end_time").value(SOME_END_TIME))
-            .andReturn();
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.request_id").isNumber())
+              .andExpect(jsonPath("$.case_id").isNumber())
+              .andExpect(jsonPath("$.case_number").value(SOME_CASE_NUMBER))
+              .andExpect(jsonPath("$.courthouse_name").value(SOME_COURTHOUSE))
+              .andExpect(jsonPath("$.defendants").isNotEmpty())
+              .andExpect(jsonPath("$.hearing_date").value(HEARING_DATE))
+              .andExpect(jsonPath("$.start_time").value(SOME_START_TIME))
+              .andExpect(jsonPath("$.end_time").value(SOME_END_TIME))
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         Integer mediaRequestId = JsonPath.parse(actualJson).read("$.request_id");
         assertNotNull(mediaRequestId);
 
         MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestRepository().findById(mediaRequestId)
-            .orElseThrow();
+              .orElseThrow();
 
         assertEquals(hearingEntity.getId(), mediaRequestEntity.getHearing().getId());
         assertEquals(testUser.getId(), mediaRequestEntity.getRequestor().getId());
@@ -136,19 +136,19 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(0, mediaRequestEntity.getAttempts());
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()
-            .findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
+              .findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
         assertEquals(1, notifications.size());
         assertEquals(
-            NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
-            notifications.get(0).getEventId()
+              NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
+              notifications.get(0).getEventId()
         );
         assertEquals(
-            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
-            notifications.get(0).getEmailAddress()
+              dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
+              notifications.get(0).getEmailAddress()
         );
         assertEquals(
-            mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
-            notifications.get(0).getCourtCase().getCaseNumber()
+              mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
+              notifications.get(0).getCourtCase().getCaseNumber()
         );
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
@@ -160,27 +160,27 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(audioRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(audioRequestDetails));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.request_id").isNumber())
-            .andExpect(jsonPath("$.case_id").isNumber())
-            .andExpect(jsonPath("$.case_number").value(SOME_CASE_NUMBER))
-            .andExpect(jsonPath("$.courthouse_name").value(SOME_COURTHOUSE))
-            .andExpect(jsonPath("$.defendants").isNotEmpty())
-            .andExpect(jsonPath("$.hearing_date").value(HEARING_DATE))
-            .andExpect(jsonPath("$.start_time").value(SOME_START_TIME))
-            .andExpect(jsonPath("$.end_time").value(SOME_END_TIME))
-            .andReturn();
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.request_id").isNumber())
+              .andExpect(jsonPath("$.case_id").isNumber())
+              .andExpect(jsonPath("$.case_number").value(SOME_CASE_NUMBER))
+              .andExpect(jsonPath("$.courthouse_name").value(SOME_COURTHOUSE))
+              .andExpect(jsonPath("$.defendants").isNotEmpty())
+              .andExpect(jsonPath("$.hearing_date").value(HEARING_DATE))
+              .andExpect(jsonPath("$.start_time").value(SOME_START_TIME))
+              .andExpect(jsonPath("$.end_time").value(SOME_END_TIME))
+              .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         Integer mediaRequestId = JsonPath.parse(actualJson).read("$.request_id");
         assertNotNull(mediaRequestId);
 
         MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestRepository().findById(mediaRequestId)
-            .orElseThrow();
+              .orElseThrow();
 
         assertEquals(hearingEntity.getId(), mediaRequestEntity.getHearing().getId());
         assertEquals(testUser.getId(), mediaRequestEntity.getRequestor().getId());
@@ -191,19 +191,19 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(0, mediaRequestEntity.getAttempts());
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()
-            .findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
+              .findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
         assertEquals(1, notifications.size());
         assertEquals(
-            NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
-            notifications.get(0).getEventId()
+              NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
+              notifications.get(0).getEventId()
         );
         assertEquals(
-            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
-            notifications.get(0).getEmailAddress()
+              dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
+              notifications.get(0).getEmailAddress()
         );
         assertEquals(
-            mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
-            notifications.get(0).getCourtCase().getCaseNumber()
+              mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
+              notifications.get(0).getCourtCase().getCaseNumber()
         );
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
@@ -218,18 +218,18 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(audioRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(audioRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
     }
 
     @Test
     void duplicateAddAudioRequestShouldThrowConflictError() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser("NEWCASTLE");
+              .createAuthorisedIntegrationTestUser("NEWCASTLE");
 
         var audioRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         when(mockUserIdentity.getUserAccount()).thenReturn(requestor);
@@ -242,13 +242,13 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         audioRequestDetails.setRequestor(audioRequestEntity.getRequestor().getId());
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(audioRequestDetails));
+              .header("Content-Type", "application/json")
+              .content(objectMapper.writeValueAsString(audioRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_104"))
-            .andReturn();
+              .andExpect(status().isConflict())
+              .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_104"))
+              .andReturn();
     }
 
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity, AudioRequestType audioRequestTypeDownload) {

@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.event.enums.DarNotifyType;
 
 @Getter
 public class DarNotifyApplicationEvent extends ApplicationEvent {
+
     private final DartsEvent dartsEvent;
     private final DarNotifyType darNotifyType;
 

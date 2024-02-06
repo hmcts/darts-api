@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 
 class PartialFailureExceptionTest {
+
     @Test
     void testJsonParse() {
         PartialFailureException ex = PartialFailureException.getPartialPayloadJson(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS, new DummyJson());
@@ -21,6 +22,7 @@ class PartialFailureExceptionTest {
     }
 
     class DummyJson {
+
         private String name = "test";
 
         public String getName() {

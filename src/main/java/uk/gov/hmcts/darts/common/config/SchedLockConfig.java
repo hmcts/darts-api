@@ -24,10 +24,9 @@ import javax.sql.DataSource;
 @Slf4j
 public class SchedLockConfig {
 
+    private final Environment environment;
     @Value("${spring.datasource.schema}")
     private String schema;
-
-    private final Environment environment;
 
     @Bean
     public LockProvider lockProvider(DataSource dataSource) {
@@ -36,12 +35,12 @@ public class SchedLockConfig {
             tablename = schema + "." + tablename;
         }
         return new JdbcTemplateLockProvider(
-            JdbcTemplateLockProvider.Configuration.builder()
-                .withJdbcTemplate(new JdbcTemplate(dataSource))
-                .withLockedByValue(getLockedBy())
-                .usingDbTime()
-                .withTableName(tablename)
-                .build());
+              JdbcTemplateLockProvider.Configuration.builder()
+                    .withJdbcTemplate(new JdbcTemplate(dataSource))
+                    .withLockedByValue(getLockedBy())
+                    .usingDbTime()
+                    .withTableName(tablename)
+                    .build());
     }
 
     // TODO this will need to be revised to see if this works in the azure pods

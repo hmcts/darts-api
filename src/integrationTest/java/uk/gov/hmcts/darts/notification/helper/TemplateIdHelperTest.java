@@ -38,7 +38,6 @@ class TemplateIdHelperTest extends IntegrationBase {
             templateIdHelper.findTemplateId("test");
         });
 
-
         assertEquals("Unable to find template with name 'test'.", thrown.getMessage());
     }
 

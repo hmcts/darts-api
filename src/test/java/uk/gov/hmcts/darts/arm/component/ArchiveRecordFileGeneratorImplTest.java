@@ -37,6 +37,17 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private ArchiveRecordFileGeneratorImpl archiveRecordFileGenerator;
 
+    private static String getFileContents(File archiveFile) throws IOException {
+        StringBuilder fileContents = new StringBuilder();
+        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContents.append(line);
+            }
+        }
+        return fileContents.toString();
+    }
+
     @BeforeEach
     void setUp() {
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
@@ -66,50 +77,39 @@ class ArchiveRecordFileGeneratorImplTest {
         assertFalse(result);
     }
 
-    private static String getFileContents(File archiveFile) throws IOException {
-        StringBuilder fileContents = new StringBuilder();
-        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileContents.append(line);
-            }
-        }
-        return fileContents.toString();
-    }
-
     private MediaArchiveRecord createMediaArchiveRecord(String relationId) {
         return MediaArchiveRecord.builder()
-            .mediaCreateArchiveRecord(createMediaArchiveRecordOperation(relationId))
-            .uploadNewFileRecord(createMediaUploadNewFileRecord(relationId))
-            .build();
+              .mediaCreateArchiveRecord(createMediaArchiveRecordOperation(relationId))
+              .uploadNewFileRecord(createMediaUploadNewFileRecord(relationId))
+              .build();
     }
 
     private MediaCreateArchiveRecordOperation createMediaArchiveRecordOperation(String relationId) {
         return MediaCreateArchiveRecordOperation.builder()
-            .relationId(relationId)
-            .recordMetadata(createMediaArchiveRecordMetadata())
-            .build();
+              .relationId(relationId)
+              .recordMetadata(createMediaArchiveRecordMetadata())
+              .build();
     }
 
     private MediaCreateArchiveRecordMetadata createMediaArchiveRecordMetadata() {
         return MediaCreateArchiveRecordMetadata.builder()
-            .publisher("DARTS")
-            .recordClass("DARTSMedia")
-            .recordDate("2023-07-19T11:39:30Z")
-            .region("GBR")
-            .id("12345")
-            .type("Media")
-            .channel("1")
-            .maxChannels("4")
-            .courthouse("Swansea")
-            .courtroom("1234")
-            .fileName("media_filename")
-            .fileFormat("mp2")
-            .startDateTime("2023-07-18T11:39:30Z")
-            .endDateTime("2023-07-18T12:39:30Z")
-            .createdDateTime("2023-07-14T12:39:30Z")
-            .caseNumbers("Case_1|Case_2|Case_3")
-            .build();
+              .publisher("DARTS")
+              .recordClass("DARTSMedia")
+              .recordDate("2023-07-19T11:39:30Z")
+              .region("GBR")
+              .id("12345")
+              .type("Media")
+              .channel("1")
+              .maxChannels("4")
+              .courthouse("Swansea")
+              .courtroom("1234")
+              .fileName("media_filename")
+              .fileFormat("mp2")
+              .startDateTime("2023-07-18T11:39:30Z")
+              .endDateTime("2023-07-18T12:39:30Z")
+              .createdDateTime("2023-07-14T12:39:30Z")
+              .caseNumbers("Case_1|Case_2|Case_3")
+              .build();
     }
 
 

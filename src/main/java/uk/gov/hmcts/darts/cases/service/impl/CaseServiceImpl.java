@@ -57,9 +57,9 @@ public class CaseServiceImpl implements CaseService {
     public List<ScheduledCase> getHearings(GetCasesRequest request) {
 
         List<HearingEntity> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
-            request.getCourthouse(),
-            request.getCourtroom(),
-            request.getDate()
+              request.getCourthouse(),
+              request.getCourtroom(),
+              request.getDate()
         );
         createCourtroomIfMissing(hearings, request);
         return casesMapper.mapToScheduledCases(hearings);
@@ -106,16 +106,16 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public PostCaseResponse addCaseOrUpdate(AddCaseRequest addCaseRequest) {
         CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
-            addCaseRequest.getCourthouse(),
-            addCaseRequest.getCaseNumber()
+              addCaseRequest.getCourthouse(),
+              addCaseRequest.getCaseNumber()
         );
         return updateCase(addCaseRequest, courtCase);
     }
 
     private PostCaseResponse updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
         CourtCaseEntity updatedCaseEntity = casesMapper.addDefendantProsecutorDefenderJudge(
-            existingCase,
-            addCaseRequest
+              existingCase,
+              addCaseRequest
         );
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
@@ -151,8 +151,8 @@ public class CaseServiceImpl implements CaseService {
     private List<TranscriptionEntity> findNonAutomaticTranscripts(List<TranscriptionEntity> transcriptionEntities) {
         //only show manual transcriptions or ones that came from legacy. Do not show Modernised automatic transcriptions.
         return transcriptionEntities.stream()
-            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
-            .toList();
+              .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
+                    || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
+              .toList();
     }
 }

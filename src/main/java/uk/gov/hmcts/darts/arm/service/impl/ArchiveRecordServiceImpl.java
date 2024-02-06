@@ -37,10 +37,10 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     private final AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
 
     public ArchiveRecordFileInfo generateArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                       Integer archiveRecordAttempt) {
+          Integer archiveRecordAttempt) {
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(false)
-            .build();
+              .fileGenerationSuccessful(false)
+              .build();
         try {
             if (nonNull(externalObjectDirectory.getMedia())) {
                 generateMediaArchiveRecordFile(externalObjectDirectory, archiveRecordAttempt, archiveRecordFileInfo);
@@ -57,7 +57,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
 
     private void generateMediaArchiveRecordFile(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt,
-                                                ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
+          ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
 
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
@@ -69,58 +69,57 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
         MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile);
         archiveRecordFileInfo.setFileGenerationSuccessful(
-            archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
+              archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
         );
 
     }
 
     private void generateTranscriptionArchiveRecordFile(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt,
-                                                        ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
+          ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
 
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE);
 
         String fullFilename =
-            generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getTranscriptionDocumentEntity().getId(), archiveRecordAttempt);
+              generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getTranscriptionDocumentEntity().getId(), archiveRecordAttempt);
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         TranscriptionArchiveRecord transcriptionArchiveRecord =
-            transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, archiveRecordFile);
+              transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, archiveRecordFile);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
-            archiveRecordFileGenerator.generateArchiveRecord(transcriptionArchiveRecord, archiveRecordFile, ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE)
+              archiveRecordFileGenerator.generateArchiveRecord(transcriptionArchiveRecord, archiveRecordFile, ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE)
         );
     }
 
     private void generateAnnotationArchiveRecordFile(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt,
-                                                     ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
+          ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
 
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
 
         String fullFilename =
-            generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getAnnotationDocumentEntity().getId(), archiveRecordAttempt);
+              generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getAnnotationDocumentEntity().getId(), archiveRecordAttempt);
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         AnnotationArchiveRecord annotationArchiveRecord =
-            annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, archiveRecordFile);
+              annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, archiveRecordFile);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
-            archiveRecordFileGenerator.generateArchiveRecord(annotationArchiveRecord, archiveRecordFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE)
+              archiveRecordFileGenerator.generateArchiveRecord(annotationArchiveRecord, archiveRecordFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE)
         );
     }
 
     private String generateArchiveFilename(Integer externalObjectDirectoryId, Integer id, Integer archiveRecordAttempt) {
-        return new StringBuilder(externalObjectDirectoryId.toString())
-            .append(FILENAME_SEPERATOR)
-            .append(id.toString())
-            .append(FILENAME_SEPERATOR)
-            .append(archiveRecordAttempt)
-            .append(FILE_EXTENSION_PERIOD)
-            .append(armDataManagementConfiguration.getFileExtension())
-            .toString();
+        return externalObjectDirectoryId.toString()
+              + FILENAME_SEPERATOR
+              + id.toString()
+              + FILENAME_SEPERATOR
+              + archiveRecordAttempt
+              + FILE_EXTENSION_PERIOD
+              + armDataManagementConfiguration.getFileExtension();
     }
 
 }

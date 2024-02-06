@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 @Component
 @RequiredArgsConstructor
 public class CaseRetentionStub {
+
     private final UserAccountRepository userAccountRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CaseRetentionRepository caseRetentionRepository;
@@ -25,17 +26,17 @@ public class CaseRetentionStub {
 
     @Transactional
     public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
-                                                         CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
+          CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
         RetentionPolicyTypeEntity policy;
         if (isManual) {
             policy = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                RetentionPolicyEnum.MANUAL.getPolicyKey(),
-                currentTimeHelper.currentOffsetDateTime()
+                  RetentionPolicyEnum.MANUAL.getPolicyKey(),
+                  currentTimeHelper.currentOffsetDateTime()
             ).get();
         } else {
             policy = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                RetentionPolicyEnum.DEFAULT.getPolicyKey(),
-                currentTimeHelper.currentOffsetDateTime()
+                  RetentionPolicyEnum.DEFAULT.getPolicyKey(),
+                  currentTimeHelper.currentOffsetDateTime()
             ).get();
         }
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();

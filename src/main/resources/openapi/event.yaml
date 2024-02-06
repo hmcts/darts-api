@@ -345,7 +345,7 @@ components:
         - "ADD_EVENT_101"
         - "ADD_EVENT_102"
         - "ADD_EVENT_103"
-      x-enum-varnames: [EVENT_COURT_HOUSE_NOT_FOUND, EVENT_DOCUMENT_CANT_PARSED, PROCESSOR_NOT_FOUND]
+      x-enum-varnames: [ EVENT_COURT_HOUSE_NOT_FOUND, EVENT_DOCUMENT_CANT_PARSED, PROCESSOR_NOT_FOUND ]
 
 
     GetCourtLogsErrorCode:
@@ -353,7 +353,7 @@ components:
       enum:
         - "GET_COURTLOG_101"
         - "GET_COURTLOG_102"
-      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND]
+      x-enum-varnames: [ COURTLOG_COURT_HOUSE_NOT_FOUND ]
 
 
     PostCourtLogsErrorCode:
@@ -362,4 +362,4 @@ components:
         - "ADD_COURTLOG_101"
         - "ADD_COURTLOG_102"
         - "ADD_COURTLOG_103"
-      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED]
+      x-enum-varnames: [ COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED ]

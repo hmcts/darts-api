@@ -1,28 +1,45 @@
-insert into security_permission (per_id, permission_name) values (16,'EXPORT_PROCESSED_PLAYBACK_AUDIO');
-insert into security_permission (per_id, permission_name) values (17,'EXPORT_PROCESSED_DOWNLOAD_AUDIO');
+insert into security_permission (per_id, permission_name)
+values (16, 'EXPORT_PROCESSED_PLAYBACK_AUDIO');
+insert into security_permission (per_id, permission_name)
+values (17, 'EXPORT_PROCESSED_DOWNLOAD_AUDIO');
 
 ALTER SEQUENCE per_seq RESTART WITH 18;
 
 
-insert into security_role_permission_ae(rol_id, per_id) values (6, 4);
-insert into security_role_permission_ae(rol_id, per_id) values (6, 6);
-insert into security_role_permission_ae(rol_id, per_id) values (6, 7);
-insert into security_role_permission_ae(rol_id, per_id) values (6, 10);
-insert into security_role_permission_ae(rol_id, per_id) values (6, 13);
-insert into security_role_permission_ae(rol_id, per_id) values (6, 14);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 4);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 6);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 7);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 10);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 13);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 14);
 
 
-insert into security_role_permission_ae(rol_id, per_id) values (4, 4);
-insert into security_role_permission_ae(rol_id, per_id) values (5, 4);
+insert into security_role_permission_ae(rol_id, per_id)
+values (4, 4);
+insert into security_role_permission_ae(rol_id, per_id)
+values (5, 4);
 
-insert into security_role_permission_ae(rol_id, per_id) values (1, 16);
-insert into security_role_permission_ae(rol_id, per_id) values (2, 16);
-insert into security_role_permission_ae(rol_id, per_id) values (3, 16);
-insert into security_role_permission_ae(rol_id, per_id) values (4, 16);
-insert into security_role_permission_ae(rol_id, per_id) values (5, 16);
-insert into security_role_permission_ae(rol_id, per_id) values (6, 16);
+insert into security_role_permission_ae(rol_id, per_id)
+values (1, 16);
+insert into security_role_permission_ae(rol_id, per_id)
+values (2, 16);
+insert into security_role_permission_ae(rol_id, per_id)
+values (3, 16);
+insert into security_role_permission_ae(rol_id, per_id)
+values (4, 16);
+insert into security_role_permission_ae(rol_id, per_id)
+values (5, 16);
+insert into security_role_permission_ae(rol_id, per_id)
+values (6, 16);
 
-insert into security_role_permission_ae(rol_id, per_id) values (4, 17);
+insert into security_role_permission_ae(rol_id, per_id)
+values (4, 17);
 
 UPDATE security_permission
 SET permission_name = 'ACCEPT_TRANSCRIPTION_JOB_REQUEST'

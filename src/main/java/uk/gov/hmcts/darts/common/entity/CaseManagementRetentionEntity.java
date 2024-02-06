@@ -18,6 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CaseManagementRetentionEntity {
+
     public static final String ID = "cmr_id";
     public static final String TABLE_NAME = "case_management_retention";
 

@@ -60,21 +60,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceImplTest {
-    private static final OffsetDateTime TIME_11_59 = OffsetDateTime.parse("2023-01-01T11:59Z");
-    private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
-    private static final OffsetDateTime TIME_12_20 = OffsetDateTime.parse("2023-01-01T12:20Z");
-    private static final OffsetDateTime TIME_12_21 = OffsetDateTime.parse("2023-01-01T12:21Z");
-    private static final OffsetDateTime TIME_12_39 = OffsetDateTime.parse("2023-01-01T12:39Z");
-    private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
-    private static final OffsetDateTime TIME_12_59 = OffsetDateTime.parse("2023-01-01T12:59Z");
-    private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
-    private static final OffsetDateTime TIME_13_01 = OffsetDateTime.parse("2023-01-01T13:01Z");
 
-
-    private static final UUID BLOB_LOCATION = UUID.randomUUID();
-    private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
-    private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
     public static final String MOCK_DEFENDANT_NAME = "Any Defendant";
     public static final String MOCK_DEFENDANT_LIST = "Any Defendant, Any Defendant";
@@ -86,7 +72,19 @@ class AudioTransformationServiceImplTest {
     public static final int MOCK_CASEID = 99;
     public static final String TEST_EXTENSION = AudioRequestOutputFormat.MP3.getExtension();
     public static final String TEST_FILE_NAME = "case1_23_Nov_2023" + "." + TEST_EXTENSION;
-
+    private static final OffsetDateTime TIME_11_59 = OffsetDateTime.parse("2023-01-01T11:59Z");
+    private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
+    private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
+    private static final OffsetDateTime TIME_12_20 = OffsetDateTime.parse("2023-01-01T12:20Z");
+    private static final OffsetDateTime TIME_12_21 = OffsetDateTime.parse("2023-01-01T12:21Z");
+    private static final OffsetDateTime TIME_12_39 = OffsetDateTime.parse("2023-01-01T12:39Z");
+    private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
+    private static final OffsetDateTime TIME_12_59 = OffsetDateTime.parse("2023-01-01T12:59Z");
+    private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
+    private static final OffsetDateTime TIME_13_01 = OffsetDateTime.parse("2023-01-01T13:01Z");
+    private static final UUID BLOB_LOCATION = UUID.randomUUID();
+    private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
+    private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     @Mock
     private DataManagementApi mockDataManagementApi;
 
@@ -142,7 +140,7 @@ class AudioTransformationServiceImplTest {
     @Test
     void testGetAudioBlobData() {
         when(mockDataManagementApi.getBlobDataFromUnstructuredContainer(BLOB_LOCATION))
-            .thenReturn(BINARY_DATA);
+              .thenReturn(BINARY_DATA);
 
         BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
         assertEquals(BINARY_DATA, binaryData);
@@ -153,7 +151,7 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> expectedResults = Collections.singletonList(new MediaEntity());
 
         when(mediaRepository.findAllByHearingId(any()))
-            .thenReturn(expectedResults);
+              .thenReturn(expectedResults);
 
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(1);
 
@@ -165,7 +163,7 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> expectedResults = Collections.emptyList();
 
         when(mediaRepository.findAllByHearingId(any()))
-            .thenReturn(expectedResults);
+              .thenReturn(expectedResults);
 
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(1);
 
@@ -185,17 +183,17 @@ class AudioTransformationServiceImplTest {
         BlobClient blobClient = blobClientBuilder.buildClient();
 
         when(mockDataManagementApi.saveBlobDataToContainer(any(), any(), any()))
-            .thenReturn(blobClient);
+              .thenReturn(blobClient);
 
         when(mockTransientObjectDirectoryService.saveTransientObjectDirectoryEntity(
-            any(),
-            any()
+              any(),
+              any()
         )).thenReturn(mockTransientObjectDirectoryEntity);
 
         TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
         transformedMediaEntity.setId(1);
         when(transformedMediaRepository.save(
-            any()
+              any()
         )).thenReturn(transformedMediaEntity);
 
         when(mockTransientObjectDirectoryEntity.getTransformedMedia(
@@ -204,9 +202,9 @@ class AudioTransformationServiceImplTest {
         AudioFileInfo audioFileInfo = new AudioFileInfo(Instant.now(), Instant.now(), 0, null, false);
 
         transformedMediaHelper.saveToStorage(
-            mediaRequestEntity,
-            BINARY_DATA, "filename",
-            audioFileInfo
+              mediaRequestEntity,
+              BINARY_DATA, "filename",
+              audioFileInfo
         );
 
         verify(mockDataManagementApi).saveBlobDataToContainer(eq(BINARY_DATA), eq(DatastoreContainerType.OUTBOUND), anyMap());
@@ -219,7 +217,7 @@ class AudioTransformationServiceImplTest {
 
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
-            .thenReturn(Optional.of(mockMediaRequestEntity));
+              .thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
 
@@ -230,7 +228,7 @@ class AudioTransformationServiceImplTest {
     void testHandleKedaInvocationForMediaRequestsCaseNull() {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
-            .thenReturn(Optional.of(mockMediaRequestEntity));
+              .thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
         when(mockMediaRequestEntity.getRequestType()).thenReturn(DOWNLOAD);
@@ -244,8 +242,8 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-            mediaEntities,
-            mediaRequestEntity
+              mediaEntities,
+              mediaRequestEntity
         );
 
         assertEquals(3, mediaEntitiesResult.size());
@@ -258,8 +256,8 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_01, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-            mediaEntities,
-            mediaRequestEntity
+              mediaEntities,
+              mediaRequestEntity
         );
         assertEquals(3, mediaEntitiesResult.size());
         assertEquals(TIME_12_01, mediaEntitiesResult.get(0).getStart());
@@ -271,8 +269,8 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-            mediaEntities,
-            mediaRequestEntity
+              mediaEntities,
+              mediaRequestEntity
         );
         assertEquals(3, mediaEntitiesResult.size());
         assertEquals(TIME_11_59, mediaEntitiesResult.get(0).getStart());
@@ -284,8 +282,8 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_20, TIME_12_40);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-            mediaEntities,
-            mediaRequestEntity
+              mediaEntities,
+              mediaRequestEntity
         );
         assertEquals(1, mediaEntitiesResult.size());
         assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
@@ -297,8 +295,8 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_21, TIME_12_39);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-            mediaEntities,
-            mediaRequestEntity
+              mediaEntities,
+              mediaRequestEntity
         );
         assertEquals(1, mediaEntitiesResult.size());
         assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
@@ -310,15 +308,15 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_13_00, TIME_13_01);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
-            mediaEntities,
-            mediaRequestEntity
+              mediaEntities,
+              mediaRequestEntity
         );
         assertEquals(0, mediaEntitiesResult.size());
     }
 
     private List<MediaEntity> createMediaEntities(OffsetDateTime startTime1, OffsetDateTime endTime1,
-                                                  OffsetDateTime startTime2, OffsetDateTime endTime2,
-                                                  OffsetDateTime startTime3, OffsetDateTime endTime3) {
+          OffsetDateTime startTime2, OffsetDateTime endTime2,
+          OffsetDateTime startTime3, OffsetDateTime endTime3) {
         List<MediaEntity> mediaEntities = new ArrayList<>();
         mediaEntities.add(createMediaEntity(startTime1, endTime1));
         mediaEntities.add(createMediaEntity(startTime2, endTime2));
@@ -487,11 +485,11 @@ class AudioTransformationServiceImplTest {
         mediaRequest.setRequestType(AudioRequestType.PLAYBACK);
 
         TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
-            mediaRequest,
-            "case1_23_Nov_2023.mp3",
-            TIME_11_59,
-            TIME_12_00,
-            BINARY_DATA.getLength()
+              mediaRequest,
+              "case1_23_Nov_2023.mp3",
+              TIME_11_59,
+              TIME_12_00,
+              BINARY_DATA.getLength()
         );
 
         assertEquals(TEST_FILE_NAME, transformedMediaEntity.getOutputFilename());

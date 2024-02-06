@@ -50,6 +50,72 @@ class TranscriptionRequestDetailsValidatorTest {
 
     private TranscriptionRequestDetailsValidator validator;
 
+    private static Stream<Arguments> requestsWithInvalidTimings() {
+        return Stream.of(
+              // Boundary cases around media 1 timespan
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME.minusSeconds(1), MEDIA_1_END_TIME)),
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME.plusSeconds(1))),
+
+              // Boundary cases around media 2 timespan
+              Arguments.of(createRequestDetails(MEDIA_2_START_TIME.minusSeconds(1), MEDIA_2_END_TIME)),
+              Arguments.of(createRequestDetails(MEDIA_2_START_TIME, MEDIA_2_END_TIME.plusSeconds(1))),
+
+              // Boundary cases around overall timespan
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_2_END_TIME)),
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME.minusSeconds(1), MEDIA_2_END_TIME)),
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_2_END_TIME.plusSeconds(1)))
+        );
+    }
+
+    private static Stream<Arguments> requestsThatRequireDatesButNoDatesArePresent() {
+        return Stream.of(
+              Arguments.of(createRequestDetails(TranscriptionTypeEnum.SPECIFIED_TIMES)),
+              Arguments.of(createRequestDetails(TranscriptionTypeEnum.COURT_LOG))
+        );
+    }
+
+    private static Stream<Arguments> requestsThatRequireDatesAndDatesArePresent() {
+        return Stream.of(
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME, TranscriptionTypeEnum.SPECIFIED_TIMES)),
+              Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME, TranscriptionTypeEnum.COURT_LOG))
+        );
+    }
+
+    private static TranscriptionRequestDetails createRequestDetails(OffsetDateTime startTime,
+          OffsetDateTime endTime) {
+        var requestDetails = new TranscriptionRequestDetails();
+        requestDetails.setStartDateTime(startTime);
+        requestDetails.setEndDateTime(endTime);
+
+        requestDetails.setHearingId(DUMMY_HEARING_ID);
+
+        return requestDetails;
+    }
+
+    private static TranscriptionRequestDetails createRequestDetails(TranscriptionTypeEnum transcriptionTypeEnum) {
+        var requestDetails = new TranscriptionRequestDetails();
+        requestDetails.setTranscriptionTypeId(transcriptionTypeEnum.getId());
+
+        requestDetails.setCaseId(DUMMY_CASE_ID);
+        requestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.STANDARD.getId());
+
+        return requestDetails;
+    }
+
+    private static TranscriptionRequestDetails createRequestDetails(OffsetDateTime startTime,
+          OffsetDateTime endTime,
+          TranscriptionTypeEnum transcriptionTypeEnum) {
+        var requestDetails = new TranscriptionRequestDetails();
+        requestDetails.setStartDateTime(startTime);
+        requestDetails.setEndDateTime(endTime);
+        requestDetails.setTranscriptionTypeId(transcriptionTypeEnum.getId());
+        requestDetails.setCaseId(DUMMY_CASE_ID);
+
+        requestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.STANDARD.getId());
+
+        return requestDetails;
+    }
+
     @BeforeEach
     void setUp() {
         validator = new TranscriptionRequestDetailsValidator(caseServiceMock, hearingsServiceMock);
@@ -78,7 +144,7 @@ class TranscriptionRequestDetailsValidatorTest {
         hearingEntity.setMediaList(mediaEntityList);
 
         Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
-            .thenReturn(hearingEntity);
+              .thenReturn(hearingEntity);
 
         var validatable = new TranscriptionRequestDetails();
         validatable.hearingId(DUMMY_HEARING_ID);
@@ -95,7 +161,7 @@ class TranscriptionRequestDetailsValidatorTest {
         // Given
         var bubbledException = new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         Mockito.when(caseServiceMock.getCourtCaseById(DUMMY_CASE_ID))
-            .thenThrow(bubbledException);
+              .thenThrow(bubbledException);
 
         var validatable = new TranscriptionRequestDetails();
         validatable.setCaseId(DUMMY_CASE_ID);
@@ -114,30 +180,13 @@ class TranscriptionRequestDetailsValidatorTest {
         var hearingEntity = new HearingEntity();
         hearingEntity.setMediaList(createMediaList());
         Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
-            .thenReturn(hearingEntity);
+              .thenReturn(hearingEntity);
 
         // When
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(requestDetails));
 
         // Then
         assertEquals(URI.create("TRANSCRIPTION_111"), actualException.getError().getType());
-    }
-
-    private static Stream<Arguments> requestsWithInvalidTimings() {
-        return Stream.of(
-            // Boundary cases around media 1 timespan
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME.minusSeconds(1), MEDIA_1_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME.plusSeconds(1))),
-
-            // Boundary cases around media 2 timespan
-            Arguments.of(createRequestDetails(MEDIA_2_START_TIME.minusSeconds(1), MEDIA_2_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_2_START_TIME, MEDIA_2_END_TIME.plusSeconds(1))),
-
-            // Boundary cases around overall timespan
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_2_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME.minusSeconds(1), MEDIA_2_END_TIME)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_2_END_TIME.plusSeconds(1)))
-        );
     }
 
     @ParameterizedTest
@@ -148,24 +197,10 @@ class TranscriptionRequestDetailsValidatorTest {
         assertEquals(URI.create("TRANSCRIPTION_100"), actualException.getError().getType());
     }
 
-    private static Stream<Arguments> requestsThatRequireDatesButNoDatesArePresent() {
-        return Stream.of(
-            Arguments.of(createRequestDetails(TranscriptionTypeEnum.SPECIFIED_TIMES)),
-            Arguments.of(createRequestDetails(TranscriptionTypeEnum.COURT_LOG))
-        );
-    }
-
     @ParameterizedTest
     @MethodSource("requestsThatRequireDatesAndDatesArePresent")
     void validateShouldSucceedWhenTranscriptTypeRequiresDatesAndDatesArePresent(TranscriptionRequestDetails requestDetails) {
         assertDoesNotThrow(() -> validator.validate(requestDetails));
-    }
-
-    private static Stream<Arguments> requestsThatRequireDatesAndDatesArePresent() {
-        return Stream.of(
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME, TranscriptionTypeEnum.SPECIFIED_TIMES)),
-            Arguments.of(createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME, TranscriptionTypeEnum.COURT_LOG))
-        );
     }
 
     @Test
@@ -174,7 +209,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var hearingEntity = new HearingEntity();
         hearingEntity.setMediaList(createMediaList());
         Mockito.when(hearingsServiceMock.getHearingById(DUMMY_HEARING_ID))
-            .thenReturn(hearingEntity);
+              .thenReturn(hearingEntity);
 
         var requestDetails = createRequestDetails(MEDIA_1_START_TIME, MEDIA_1_END_TIME);
         requestDetails.setTranscriptionTypeId(TranscriptionTypeEnum.SPECIFIED_TIMES.getId());
@@ -186,8 +221,8 @@ class TranscriptionRequestDetailsValidatorTest {
 
     private List<MediaEntity> createMediaList() {
         return Arrays.asList(
-            createMediaEntity(MEDIA_1_START_TIME, MEDIA_1_END_TIME),
-            createMediaEntity(MEDIA_2_START_TIME, MEDIA_2_END_TIME)
+              createMediaEntity(MEDIA_1_START_TIME, MEDIA_1_END_TIME),
+              createMediaEntity(MEDIA_2_START_TIME, MEDIA_2_END_TIME)
         );
     }
 
@@ -197,41 +232,6 @@ class TranscriptionRequestDetailsValidatorTest {
         mediaEntity.setEnd(endTime);
 
         return mediaEntity;
-    }
-
-    private static TranscriptionRequestDetails createRequestDetails(OffsetDateTime startTime,
-                                                                    OffsetDateTime endTime) {
-        var requestDetails = new TranscriptionRequestDetails();
-        requestDetails.setStartDateTime(startTime);
-        requestDetails.setEndDateTime(endTime);
-
-        requestDetails.setHearingId(DUMMY_HEARING_ID);
-
-        return requestDetails;
-    }
-
-    private static TranscriptionRequestDetails createRequestDetails(TranscriptionTypeEnum transcriptionTypeEnum) {
-        var requestDetails = new TranscriptionRequestDetails();
-        requestDetails.setTranscriptionTypeId(transcriptionTypeEnum.getId());
-
-        requestDetails.setCaseId(DUMMY_CASE_ID);
-        requestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.STANDARD.getId());
-
-        return requestDetails;
-    }
-
-    private static TranscriptionRequestDetails createRequestDetails(OffsetDateTime startTime,
-                                                                    OffsetDateTime endTime,
-                                                                    TranscriptionTypeEnum transcriptionTypeEnum) {
-        var requestDetails = new TranscriptionRequestDetails();
-        requestDetails.setStartDateTime(startTime);
-        requestDetails.setEndDateTime(endTime);
-        requestDetails.setTranscriptionTypeId(transcriptionTypeEnum.getId());
-        requestDetails.setCaseId(DUMMY_CASE_ID);
-
-        requestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.STANDARD.getId());
-
-        return requestDetails;
     }
 
 }

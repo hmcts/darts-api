@@ -9,9 +9,10 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
 @Service
 public class InboundExternalObjectDirectoryDeletedFinder extends ExternalObjectDirectoryDeletedFinder {
+
     public InboundExternalObjectDirectoryDeletedFinder(ExternalLocationTypeRepository externalLocationTypeRepository,
-                                                       ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                                       ObjectRecordStatusRepository objectRecordStatusRepository) {
+          ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+          ObjectRecordStatusRepository objectRecordStatusRepository) {
         super(externalLocationTypeRepository, externalObjectDirectoryRepository, objectRecordStatusRepository, ExternalLocationTypeEnum.INBOUND);
     }
 }

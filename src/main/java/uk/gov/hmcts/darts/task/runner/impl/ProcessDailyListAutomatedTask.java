@@ -16,18 +16,17 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIS
 @SuppressWarnings({"squid:S1135"})
 public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask {
 
+    private final List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
     protected String taskName = PROCESS_DAILY_LIST_TASK_NAME.getTaskName();
     private DailyListProcessor dailyListProcessor;
 
-    private List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
-
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
     }
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, DailyListProcessor processor) {
+          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, DailyListProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.dailyListProcessor = processor;
     }

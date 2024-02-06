@@ -40,18 +40,16 @@ import java.util.Map;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
+    private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
+          NotificationStatus.OPEN,
+          NotificationStatus.PROCESSING
+    );
     private final NotificationRepository notificationRepo;
-
     private final CaseRepository caseRepository;
     private final GovNotifyService govNotifyService;
     private final TemplateIdHelper templateIdHelper;
     private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
-    private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
-        NotificationStatus.OPEN,
-        NotificationStatus.PROCESSING
-    );
-
     @Value("${darts.notification.max_retry_attempts}")
     private int maxRetry;
 
@@ -62,10 +60,10 @@ public class NotificationServiceImpl implements NotificationService {
         String templateParamsString = getTemplateParamsString(request);
         for (String emailAddress : emailAddresses) {
             saveNotificationToDb(
-                request.getEventId(),
-                request.getCaseId(),
-                StringUtils.trim(emailAddress),
-                templateParamsString
+                  request.getEventId(),
+                  request.getCaseId(),
+                  StringUtils.trim(emailAddress),
+                  templateParamsString
             );
         }
     }
@@ -83,9 +81,9 @@ public class NotificationServiceImpl implements NotificationService {
             return objectWriter.writeValueAsString(templateValues);
         } catch (JsonProcessingException e) {
             log.error(
-                "Serialisation of request params for event {} with params {} has failed with error :- {}",
-                request.getEventId(), request.getTemplateValues(),
-                e.getMessage()
+                  "Serialisation of request params for event {} with params {} has failed with error :- {}",
+                  request.getEventId(), request.getTemplateValues(),
+                  e.getMessage()
             );
         }
         return null;
@@ -99,11 +97,11 @@ public class NotificationServiceImpl implements NotificationService {
         }
         if (request.getUserAccountsToEmail() != null) {
             CollectionUtils.addAll(
-                emailAddressList,
-                request.getUserAccountsToEmail().stream()
-                    .map(UserAccountEntity::getEmailAddress)
-                    .filter(emailAddress -> EmailValidator.getInstance().isValid(emailAddress))
-                    .toList()
+                  emailAddressList,
+                  request.getUserAccountsToEmail().stream()
+                        .map(UserAccountEntity::getEmailAddress)
+                        .filter(emailAddress -> EmailValidator.getInstance().isValid(emailAddress))
+                        .toList()
             );
         }
 
@@ -128,7 +126,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @SchedulerLock(name = "NotificationService_sendNotificationToGovNotify",
-        lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
+          lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
         sendNotificationToGovNotifyNow();
@@ -142,10 +140,10 @@ public class NotificationServiceImpl implements NotificationService {
         int notificationCounter = 0;
         for (NotificationEntity notification : notificationEntries) {
             log.trace(
-                "Processing {} of {}, Id {}.",
-                ++notificationCounter,
-                notificationEntries.size(),
-                notification.getId()
+                  "Processing {} of {}, Id {}.",
+                  ++notificationCounter,
+                  notificationEntries.size(),
+                  notification.getId()
             );
             String templateId;
             try {
@@ -164,10 +162,10 @@ public class NotificationServiceImpl implements NotificationService {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
                 log.error(
-                    "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
-                    notification.getId(),
-                    govNotifyRequest,
-                    e.getMessage()
+                      "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
+                      notification.getId(),
+                      govNotifyRequest,
+                      e.getMessage()
                 );
                 incrementNotificationFailureCount(notification);
             }

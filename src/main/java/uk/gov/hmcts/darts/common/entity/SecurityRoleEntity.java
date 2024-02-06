@@ -41,8 +41,8 @@ public class SecurityRoleEntity {
 
     @ManyToMany
     @JoinTable(name = "security_role_permission_ae",
-        joinColumns = {@JoinColumn(name = "rol_id")},
-        inverseJoinColumns = {@JoinColumn(name = "per_id")})
+          joinColumns = {@JoinColumn(name = "rol_id")},
+          inverseJoinColumns = {@JoinColumn(name = "per_id")})
     private Set<SecurityPermissionEntity> securityPermissionEntities = new LinkedHashSet<>();
 
 }

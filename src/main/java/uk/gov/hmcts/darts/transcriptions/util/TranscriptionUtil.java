@@ -19,7 +19,7 @@ public class TranscriptionUtil {
      */
     public String getTranscriptionCommentAtStatus(TranscriptionEntity transcriptionEntity, TranscriptionStatusEnum status) {
         Optional<TranscriptionWorkflowEntity> foundWorkflowEntityOpt = transcriptionEntity.getTranscriptionWorkflowEntities().stream()
-            .filter(workflow -> workflow.getTranscriptionStatus().getId().equals(status.getId())).findAny();
+              .filter(workflow -> workflow.getTranscriptionStatus().getId().equals(status.getId())).findAny();
         if (foundWorkflowEntityOpt.isEmpty()) {
             return null;
         }

@@ -23,17 +23,17 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("node_type", "DAR")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("courtroom", courtroomName)
-            .queryParam("host_name", "XXXXX.MMM.net")
-            .queryParam("mac_address", "6A-5F-90-A4-2C-12")
-            .queryParam("ip_address", ipAddress)
-            .when()
-            .baseUri(getUri(POST_REGISTER_DEVICE))
-            .redirects().follow(false)
-            .post().then().extract().response();
+              .contentType(ContentType.JSON)
+              .queryParam("node_type", "DAR")
+              .queryParam("courthouse", courthouseName)
+              .queryParam("courtroom", courtroomName)
+              .queryParam("host_name", "XXXXX.MMM.net")
+              .queryParam("mac_address", "6A-5F-90-A4-2C-12")
+              .queryParam("ip_address", ipAddress)
+              .when()
+              .baseUri(getUri(POST_REGISTER_DEVICE))
+              .redirects().follow(false)
+              .post().then().extract().response();
 
         assertEquals(200, response.getStatusCode());
     }
@@ -41,8 +41,8 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
     @AfterEach
     void cleanUp() {
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/clean"))
-            .redirects().follow(false)
-            .delete();
+              .baseUri(getUri("/functional-tests/clean"))
+              .redirects().follow(false)
+              .delete();
     }
 }

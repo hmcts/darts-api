@@ -47,9 +47,9 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
 
     @Override
     public Path generateAndWriteXmlFile(Object data, Path outboundFilePath)
-        throws ParserConfigurationException, IOException, TransformerException {
+          throws ParserConfigurationException, IOException, TransformerException {
 
-        if (!(data instanceof ViqAnnotationData)) {
+        if (!(data instanceof ViqAnnotationData annotationData)) {
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
         }
 
@@ -57,7 +57,6 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         setDocumentBuilder(documentFactory.newDocumentBuilder());
         Document document = getDocumentBuilder().newDocument();
 
-        ViqAnnotationData annotationData = (ViqAnnotationData) data;
         int eventCounter = 0;
 
         // Root element
@@ -75,39 +74,39 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
             ZonedDateTime localEventTimestamp = DateConverterUtil.toZonedDateTime(event.getTimestamp());
 
             Element eventElement = document.createElement(String.format(
-                "%s%d",
-                ANNOTATION_EVENT_ELEMENT_NAME,
-                eventCounter
+                  "%s%d",
+                  ANNOTATION_EVENT_ELEMENT_NAME,
+                  eventCounter
             ));
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_LABEL, ANNOTATION_EVENT_DEFAULT_LABEL);
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_TEXT, event.getEventText());
             eventElement.setAttribute(
-                ANNOTATION_EVENT_ATTRIBUTE_START_TIME_MILLIS,
-                String.valueOf(localEventTimestamp.toInstant().toEpochMilli())
+                  ANNOTATION_EVENT_ATTRIBUTE_START_TIME_MILLIS,
+                  String.valueOf(localEventTimestamp.toInstant().toEpochMilli())
             );
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_YEAR, String.valueOf(localEventTimestamp.getYear()));
             eventElement.setAttribute(
-                ANNOTATION_EVENT_ATTRIBUTE_MONTH,
-                String.valueOf(localEventTimestamp.getMonthValue())
+                  ANNOTATION_EVENT_ATTRIBUTE_MONTH,
+                  String.valueOf(localEventTimestamp.getMonthValue())
             );
             eventElement.setAttribute(
-                ANNOTATION_EVENT_ATTRIBUTE_DAY,
-                String.valueOf(localEventTimestamp.getDayOfMonth())
+                  ANNOTATION_EVENT_ATTRIBUTE_DAY,
+                  String.valueOf(localEventTimestamp.getDayOfMonth())
             );
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_HOUR, String.valueOf(localEventTimestamp.getHour()));
             eventElement.setAttribute(
-                ANNOTATION_EVENT_ATTRIBUTE_MINUTES,
-                String.valueOf(localEventTimestamp.getMinute())
+                  ANNOTATION_EVENT_ATTRIBUTE_MINUTES,
+                  String.valueOf(localEventTimestamp.getMinute())
             );
             eventElement.setAttribute(
-                ANNOTATION_EVENT_ATTRIBUTE_SECONDS,
-                String.valueOf(localEventTimestamp.getSecond())
+                  ANNOTATION_EVENT_ATTRIBUTE_SECONDS,
+                  String.valueOf(localEventTimestamp.getSecond())
             );
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_RESTRICTED, ANNOTATION_EVENT_DEFAULT_RESTRICTION);
             eventElement.setAttribute(
-                ANNOTATION_EVENT_ATTRIBUTE_LAPSED,
-                String.valueOf(Duration.between(annotationData.getAnnotationsStartTime(), localEventTimestamp)
-                                   .getSeconds())
+                  ANNOTATION_EVENT_ATTRIBUTE_LAPSED,
+                  String.valueOf(Duration.between(annotationData.getAnnotationsStartTime(), localEventTimestamp)
+                        .getSeconds())
             );
 
             eventElement.appendChild(document.createTextNode(event.getEventName()));

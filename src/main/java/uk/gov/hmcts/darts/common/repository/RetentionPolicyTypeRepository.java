@@ -12,12 +12,12 @@ import java.util.Optional;
 public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPolicyTypeEntity, Integer> {
 
     @Query("""
-        SELECT r
-        FROM RetentionPolicyTypeEntity r
-        WHERE fixedPolicyKey = :fixedPolicyKey
-        and policyStart <= :currentTime
-        and (policyEnd is null or policyEnd > :currentTime)
-        """
+          SELECT r
+          FROM RetentionPolicyTypeEntity r
+          WHERE fixedPolicyKey = :fixedPolicyKey
+          and policyStart <= :currentTime
+          and (policyEnd is null or policyEnd > :currentTime)
+          """
     )
     Optional<RetentionPolicyTypeEntity> findCurrentWithFixedPolicyKey(String fixedPolicyKey, OffsetDateTime currentTime);
 

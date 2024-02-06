@@ -43,8 +43,8 @@ public class TranscriptionNotifications {
 
     @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
     public void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
-                                            TranscriptionEntity transcriptionEntity,
-                                            TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
+          TranscriptionEntity transcriptionEntity,
+          TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
         final var courtCaseEntity = transcriptionEntity.getCourtCase();
@@ -53,9 +53,9 @@ public class TranscriptionNotifications {
                 notifyTranscriptionCompanyForCourthouse(courtCaseEntity);
                 notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED.toString());
                 auditApi.recordAudit(
-                    AUTHORISE_TRANSCRIPTION,
-                    userAccountEntity,
-                    courtCaseEntity
+                      AUTHORISE_TRANSCRIPTION,
+                      userAccountEntity,
+                      courtCaseEntity
                 );
             }
             case REJECTED -> {
@@ -78,11 +78,11 @@ public class TranscriptionNotifications {
 
     public void notifyRequestor(TranscriptionEntity transcription, String templateName, Map<String, String> templateParams) {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(templateName)
-            .userAccountsToEmail(List.of(transcription.getCreatedBy()))
-            .caseId(transcription.getCourtCase().getId())
-            .templateValues(templateParams)
-            .build();
+              .eventId(templateName)
+              .userAccountsToEmail(List.of(transcription.getCreatedBy()))
+              .caseId(transcription.getCourtCase().getId())
+              .templateValues(templateParams)
+              .build();
         notificationApi.scheduleNotification(request);
     }
 
@@ -92,37 +92,37 @@ public class TranscriptionNotifications {
 
     public void notifyApprovers(TranscriptionEntity transcription) {
         List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
-            SecurityRoleEnum.APPROVER,
-            transcription.getCourtCase().getCourthouse()
+              SecurityRoleEnum.APPROVER,
+              transcription.getCourtCase().getCourthouse()
         );
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())
-            .userAccountsToEmail(usersToNotify)
-            .caseId(transcription.getCourtCase().getId())
-            .build();
+              .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())
+              .userAccountsToEmail(usersToNotify)
+              .caseId(transcription.getCourtCase().getId())
+              .build();
         notificationApi.scheduleNotification(request);
     }
 
     public void notifyTranscriptionCompanyForCourthouse(CourtCaseEntity courtCase) {
         //find users to notify
         List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
-            TRANSCRIBER,
-            courtCase.getCourthouse()
+              TRANSCRIBER,
+              courtCase.getCourthouse()
         );
         if (usersToNotify.isEmpty()) {
             log.error(
-                "No Transcription company users could be found for courthouse {}",
-                courtCase.getCourthouse().getCourthouseName()
+                  "No Transcription company users could be found for courthouse {}",
+                  courtCase.getCourthouse().getCourthouseName()
             );
             return;
         }
 
         //schedule notification
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER.toString())
-            .userAccountsToEmail(usersToNotify)
-            .caseId(courtCase.getId())
-            .build();
+              .eventId(REQUEST_TO_TRANSCRIBER.toString())
+              .userAccountsToEmail(usersToNotify)
+              .caseId(courtCase.getId())
+              .build();
         notificationApi.scheduleNotification(request);
     }
 

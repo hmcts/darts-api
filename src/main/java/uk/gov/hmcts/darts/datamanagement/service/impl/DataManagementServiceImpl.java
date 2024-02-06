@@ -81,10 +81,10 @@ public class DataManagementServiceImpl implements DataManagementService {
             BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
             Response<Void> response = blobClient.deleteWithResponse(DeleteSnapshotsOptionType.INCLUDE, null,
-                                                                    Duration.of(
-                                                                        dataManagementConfiguration.getDeleteTimeout(),
-                                                                        ChronoUnit.SECONDS
-                                                                    ), null
+                  Duration.of(
+                        dataManagementConfiguration.getDeleteTimeout(),
+                        ChronoUnit.SECONDS
+                  ), null
             );
 
             if (202 != response.getStatusCode()) {
@@ -93,8 +93,8 @@ public class DataManagementServiceImpl implements DataManagementService {
             return response;
         } catch (RuntimeException e) {
             throw new AzureDeleteBlobException(
-                "Could not delete from container: " + containerName + " uuid: " + blobId + " connection-string: " +
-                    dataManagementConfiguration.getBlobStorageAccountConnectionString(), e
+                  "Could not delete from container: " + containerName + " uuid: " + blobId + " connection-string: " +
+                        dataManagementConfiguration.getBlobStorageAccountConnectionString(), e
             );
         }
     }

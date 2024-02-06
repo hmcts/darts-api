@@ -28,12 +28,12 @@ public class MediaRequestStub {
         HearingEntity hearing = hearingStub.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         return mediaRequestRepository.save(
-            AudioTestData.createCurrentMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                audioRequestType, status
-            ));
+              AudioTestData.createCurrentMediaRequest(
+                    hearing,
+                    requestor,
+                    OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                    audioRequestType, status
+              ));
     }
 }

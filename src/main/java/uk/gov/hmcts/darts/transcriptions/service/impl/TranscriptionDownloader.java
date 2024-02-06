@@ -40,24 +40,24 @@ public class TranscriptionDownloader {
         var transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()
-            .stream()
-            .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
-            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
+              .stream()
+              .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
+              .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
         var latestExternalObjectDirectory = latestTranscriptionDocument.getExternalObjectDirectoryEntities()
-            .stream()
-            .filter(dir -> nonNull(dir.getExternalLocation()))
-            .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
-            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
+              .stream()
+              .filter(dir -> nonNull(dir.getExternalLocation()))
+              .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
+              .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
         auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         return DownloadTranscriptResponse.builder()
-            .resource(getResourceStreamFor(latestExternalObjectDirectory))
-            .contentType(latestTranscriptionDocument.getFileType())
-            .fileName(latestTranscriptionDocument.getFileName())
-            .externalLocation(latestExternalObjectDirectory.getExternalLocation())
-            .transcriptionDocumentId(latestTranscriptionDocument.getId()).build();
+              .resource(getResourceStreamFor(latestExternalObjectDirectory))
+              .contentType(latestTranscriptionDocument.getFileType())
+              .fileName(latestTranscriptionDocument.getFileName())
+              .externalLocation(latestExternalObjectDirectory.getExternalLocation())
+              .transcriptionDocumentId(latestTranscriptionDocument.getId()).build();
     }
 
     private UserAccountEntity getUserAccount() {

@@ -30,16 +30,16 @@ public class ArmApiServiceImpl implements ArmApiService {
     public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
 
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
-            .itemId(externalRecordId)
-            .manifest(UpdateMetadataRequest.Manifest.builder()
-                          .eventDate(eventTimestamp)
-                          .build())
-            .useGuidsForFields(false)
-            .build();
+              .itemId(externalRecordId)
+              .manifest(UpdateMetadataRequest.Manifest.builder()
+                    .eventDate(eventTimestamp)
+                    .build())
+              .useGuidsForFields(false)
+              .build();
 
         return armApiClient.updateMetadata(
-            getArmBearerToken(),
-            armUpdateMetadataRequest
+              getArmBearerToken(),
+              armUpdateMetadataRequest
         );
     }
 
@@ -47,10 +47,10 @@ public class ArmApiServiceImpl implements ArmApiService {
     @SneakyThrows
     public InputStream downloadArmData(String externalRecordId, String externalFileId) {
         feign.Response response = armApiClient.downloadArmData(
-            getArmBearerToken(),
-            armApiConfigurationProperties.getCabinetId(),
-            externalRecordId,
-            externalFileId
+              getArmBearerToken(),
+              armApiConfigurationProperties.getCabinetId(),
+              externalRecordId,
+              externalFileId
         );
         log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
         return response.body().asInputStream();
@@ -58,9 +58,9 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     private String getArmBearerToken() {
         ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
-            armApiConfigurationProperties.getArmUsername(),
-            armApiConfigurationProperties.getArmPassword(),
-            GrantType.PASSWORD.getValue()
+              armApiConfigurationProperties.getArmUsername(),
+              armApiConfigurationProperties.getArmPassword(),
+              GrantType.PASSWORD.getValue()
         ));
         return String.format("Bearer %s", armTokenResponse.getAccessToken());
     }

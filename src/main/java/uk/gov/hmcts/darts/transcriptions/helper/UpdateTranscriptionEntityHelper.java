@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 public class UpdateTranscriptionEntityHelper {
 
     public TranscriptionEntity updateTranscriptionEntity(
-        TranscriptionEntity entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
+          TranscriptionEntity entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
 
         if (updateTranscriptionsItem.getHideRequestFromRequestor() != null) {
             entity.setHideRequestFromRequestor(updateTranscriptionsItem.getHideRequestFromRequestor());

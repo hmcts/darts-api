@@ -13,7 +13,7 @@ public class SecurityGroupUtil {
     public boolean matchesAtLeastOneSecurityGroup(Set<SecurityGroupEntity> securityGroupEntities, List<SecurityRoleEnum> securityRoles) {
         List<Integer> securityRoleIds = securityRoles.stream().map(SecurityRoleEnum::getId).toList();
         return securityGroupEntities.stream()
-            .anyMatch(securityGroup -> securityRoleIds.contains(securityGroup.getSecurityRoleEntity().getId()));
+              .anyMatch(securityGroup -> securityRoleIds.contains(securityGroup.getSecurityRoleEntity().getId()));
     }
 
 }

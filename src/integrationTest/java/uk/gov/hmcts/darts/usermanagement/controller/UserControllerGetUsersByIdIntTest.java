@@ -39,19 +39,19 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
-            .andExpect(status().isOk())
-            .andReturn();
+              .andExpect(status().isOk())
+              .andReturn();
 
         String expectedResponse = """
-            {"id":1,"full_name":"system_housekeeping",
-            "description":"Housekeeping job",
-            "active":true,
-            "security_group_ids":[]}
-            """;
+              {"id":1,"full_name":"system_housekeeping",
+              "description":"Housekeeping job",
+              "active":true,
+              "security_group_ids":[]}
+              """;
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
@@ -63,18 +63,18 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
-            .andExpect(status().isForbidden())
-            .andReturn();
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_109",
-            "title":"User is not authorised for this endpoint",
-            "status":403}
-            """;
+              {"type":"AUTHORISATION_109",
+              "title":"User is not authorised for this endpoint",
+              "status":403}
+              """;
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
@@ -86,19 +86,19 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "123456"))
-            .andExpect(status().isNotFound())
-            .andReturn();
+              .andExpect(status().isNotFound())
+              .andReturn();
 
         String expectedResponse = """
-            {"type":"USER_MANAGEMENT_100",
-            "title":"The provided user does not exist",
-            "status":404,
-            "detail":"User id 123456 not found"}
-            """;
+              {"type":"USER_MANAGEMENT_100",
+              "title":"The provided user does not exist",
+              "status":404,
+              "detail":"User id 123456 not found"}
+              """;
         JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
+              expectedResponse,
+              mvcResult.getResponse().getContentAsString(),
+              JSONCompareMode.NON_EXTENSIBLE
         );
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));

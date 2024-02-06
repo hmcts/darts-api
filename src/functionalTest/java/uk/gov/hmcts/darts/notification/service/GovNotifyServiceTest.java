@@ -40,24 +40,24 @@ class GovNotifyServiceTest {
     @Autowired
     TemplateIdHelper templateIdHelper;
 
+    private static void compare(String expected, SendEmailResponse emailResponse) {
+        String actualUnix = emailResponse.getBody().replace("\r\n", "\n");
+        assertEquals(expected, actualUnix);
+    }
+
     @Test
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
         assertEquals("A new transcript is ready for you to review", emailResponse.getSubject());
         compare("""
-                    There is a new transcript available for you to review.
+              There is a new transcript available for you to review.
 
-                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
-    }
-
-    private static void compare(String expected, SendEmailResponse emailResponse) {
-        String actualUnix = emailResponse.getBody().replace("\r\n", "\n");
-        assertEquals(expected, actualUnix);
+              [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
     private SendEmailResponse createAndSend(String templateName, Map<String, String> parameterMap)
-        throws TemplateNotFoundException, NotificationClientException {
+          throws TemplateNotFoundException, NotificationClientException {
         String templateId = templateIdHelper.findTemplateId(templateName);
         GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
         govNotifyRequest.setTemplateId(templateId);
@@ -71,7 +71,7 @@ class GovNotifyServiceTest {
     }
 
     private SendEmailResponse createAndSend(String templateName)
-        throws TemplateNotFoundException, NotificationClientException {
+          throws TemplateNotFoundException, NotificationClientException {
         return createAndSend(templateName, new ConcurrentHashMap<>());
     }
 
@@ -81,9 +81,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
         assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
-                    You have received a new transcription request from the DARTS Portal.
+              You have received a new transcription request from the DARTS Portal.
 
-                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
+              [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
 
@@ -92,13 +92,13 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
         assertEquals("Your requested audio is available", emailResponse.getSubject());
         compare(
-            """
-                The audio recording for case ID TheCaseId is ready.
+              """
+                    The audio recording for case ID TheCaseId is ready.
 
-                [Sign into the DARTS Portal](ThePortalURL) to access it.
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.
 
-                The recording will expire in 2 working days (this does not include Saturdays and Sundays) but you can extend it by opening the file.""",
-            emailResponse
+                    The recording will expire in 2 working days (this does not include Saturdays and Sundays) but you can extend it by opening the file.""",
+              emailResponse
         );
     }
 
@@ -107,9 +107,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE.toString());
         assertEquals("Your transcript is available", emailResponse.getSubject());
         compare("""
-                    Your transcript request for case ID TheCaseId has been completed and is available for download.
+              Your transcript request for case ID TheCaseId has been completed and is available for download.
 
-                    To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
+              To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
     }
 
     @Test
@@ -117,9 +117,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
         assertEquals("Your transcript request was approved", emailResponse.getSubject());
         compare("""
-                    Your transcript request for case ID TheCaseId has been approved.
+              Your transcript request for case ID TheCaseId has been approved.
 
-                    We’ll notify you when it’s available to download.""", emailResponse);
+              We’ll notify you when it’s available to download.""", emailResponse);
     }
 
 
@@ -128,16 +128,16 @@ class GovNotifyServiceTest {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
         parameterMap.put("rejection_reason", "TheRejectionReason");
         SendEmailResponse emailResponse = createAndSend(
-            NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED.toString(),
-            parameterMap
+              NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED.toString(),
+              parameterMap
         );
         assertEquals("Your transcript request was rejected", emailResponse.getSubject());
         compare(
-            """
-                Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
+              """
+                    Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
 
-                You can resubmit your request, but take into account the reason for the original request's rejection.""",
-            emailResponse
+                    You can resubmit your request, but take into account the reason for the original request's rejection.""",
+              emailResponse
         );
     }
 
@@ -146,11 +146,11 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString());
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-                    We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
+              We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
 
-                    We'll notify you when it's ready and available for use.
+              We'll notify you when it's ready and available for use.
 
-                    Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
+              Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
     }
 
     @Test
@@ -158,13 +158,13 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE.toString());
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-                    We have received your audio recording order for case Number TheCaseId.
+              We have received your audio recording order for case Number TheCaseId.
 
-                    Processing your order may take a little longer as it must be retrieved from the archives.
+              Processing your order may take a little longer as it must be retrieved from the archives.
 
-                    We'll notify you when it is ready and available for use.
+              We'll notify you when it is ready and available for use.
 
-                    Alternatively, you can visit the Your audio section of the DARTS Portal to check its progress.""", emailResponse);
+              Alternatively, you can visit the Your audio section of the DARTS Portal to check its progress.""", emailResponse);
     }
 
     @Test
@@ -177,32 +177,32 @@ class GovNotifyServiceTest {
         parameterMap.put(AUDIO_START_TIME, "TheStartTime");
         parameterMap.put(AUDIO_END_TIME, "TheEndTime");
         SendEmailResponse emailResponse = createAndSend(
-            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(),
-            parameterMap
+              NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(),
+              parameterMap
         );
         assertEquals("Your audio recording order has failed", emailResponse.getSubject());
         compare(
-            """
-                Your audio recording order for case ID TheCaseId has failed.
+              """
+                    Your audio recording order for case ID TheCaseId has failed.
 
-                Due to unforeseen errors, your audio recording order has failed.
+                    Due to unforeseen errors, your audio recording order has failed.
 
-                To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
+                    To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
 
-                ## Case details
+                    ## Case details
 
-                Case ID: TheCaseId
-                Courthouse: TheCourthouse
-                Defendants: Defendant1,Defendant2
+                    Case ID: TheCaseId
+                    Courthouse: TheCourthouse
+                    Defendants: Defendant1,Defendant2
 
-                ## Audio details
+                    ## Audio details
 
-                Hearing date: TheHearingDate
-                Requested start time: TheStartTime
-                Requested end time: TheEndTime
+                    Hearing date: TheHearingDate
+                    Requested start time: TheStartTime
+                    Requested end time: TheEndTime
 
-                They will raise a Service Now ticket to process this issue.""",
-            emailResponse
+                    They will raise a Service Now ticket to process this issue.""",
+              emailResponse
         );
     }
 }

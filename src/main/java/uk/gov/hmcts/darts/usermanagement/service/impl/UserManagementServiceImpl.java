@@ -82,7 +82,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userAccountExistsValidator.validate(userId);
 
         UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
-            .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
+              .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
 
         UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
         List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
@@ -96,11 +96,11 @@ public class UserManagementServiceImpl implements UserManagementService {
         List<UserWithIdAndTimestamps> userWithIdAndLastLoginList = new ArrayList<>();
 
         userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
-            .forEach(userAccountEntity -> {
-                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
-                userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
-            });
+              .forEach(userAccountEntity -> {
+                  UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+                  userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                  userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
+              });
 
         return userWithIdAndLastLoginList;
     }
@@ -110,11 +110,11 @@ public class UserManagementServiceImpl implements UserManagementService {
         List<UserWithIdAndTimestamps> userWithIdAndLastLoginList = new ArrayList<>();
 
         userManagementQuery.getUsers(emailAddress)
-            .forEach(userAccountEntity -> {
-                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
-                userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
-            });
+              .forEach(userAccountEntity -> {
+                  UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+                  userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                  userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
+              });
 
         return userWithIdAndLastLoginList;
     }
@@ -125,8 +125,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             return securityGroupIdMapper.mapToUserWithSecurityGroups(entity.get());
         }
         throw new DartsApiException(
-            UserManagementError.USER_NOT_FOUND,
-            String.format("User id %d not found", userId));
+              UserManagementError.USER_NOT_FOUND,
+              String.format("User id %d not found", userId));
     }
 
     private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
@@ -168,9 +168,9 @@ public class UserManagementServiceImpl implements UserManagementService {
     private void mapSecurityGroupsToUserEntity(List<Integer> securityGroups, UserAccountEntity userAccountEntity) {
         if (securityGroups != null) {
             Set<SecurityGroupEntity> securityGroupEntities = securityGroups.stream()
-                .map(securityGroupRepository::findById)
-                .map(Optional::orElseThrow)
-                .collect(Collectors.toSet());
+                  .map(securityGroupRepository::findById)
+                  .map(Optional::orElseThrow)
+                  .collect(Collectors.toSet());
             userAccountEntity.setSecurityGroupEntities(securityGroupEntities);
         }
     }

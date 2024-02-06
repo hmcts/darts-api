@@ -45,7 +45,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldSaveAudioRequestWithZuluTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -65,7 +64,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldSaveAudioRequestWithOffsetTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
@@ -85,7 +83,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
@@ -107,7 +104,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
@@ -128,7 +124,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldUpdateStatusToProcessing() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(1, PROCESSING);
 
@@ -136,7 +131,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldGetMediaRequestsByStatus() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -150,13 +144,11 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
         assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(-3));
     }
 
     @Test
-
     void shouldDeleteAudioRequestById() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -171,20 +163,18 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldSetDownloadFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
-                                                                                                AudioRequestOutputFormat.MP3
+              AudioRequestOutputFormat.MP3
         );
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
     }
 
     @Test
-
     void shouldSetPlaybackFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
-                                                                                                AudioRequestOutputFormat.ZIP
+              AudioRequestOutputFormat.ZIP
         );
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());

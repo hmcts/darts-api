@@ -23,42 +23,42 @@ public class AccessTokenClientConfiguration {
     @Bean
     public AccessTokenClient internalAccessTokenClient() {
         return new AccessTokenClient(adAuthenticationProperties.getTokenUri(),
-                              adAuthenticationProperties.getScope(),
-                              adAuthenticationProperties.getUsername(),
-                              adAuthenticationProperties.getPassword(),
-                              adAuthenticationProperties.getClientId(),
-                              adAuthenticationProperties.getClientSecret());
+              adAuthenticationProperties.getScope(),
+              adAuthenticationProperties.getUsername(),
+              adAuthenticationProperties.getPassword(),
+              adAuthenticationProperties.getClientId(),
+              adAuthenticationProperties.getClientSecret());
     }
 
     @Bean
     public AccessTokenClient externalAccessTokenClient() {
         return new AccessTokenClient(b2cAuthenticationProperties.getTokenUri(),
-                                     b2cAuthenticationProperties.getScope(),
-                                     b2cAuthenticationProperties.getUsername(),
-                                     b2cAuthenticationProperties.getPassword(),
-                                     b2cAuthenticationProperties.getClientId(),
-                                     b2cAuthenticationProperties.getClientSecret());
+              b2cAuthenticationProperties.getScope(),
+              b2cAuthenticationProperties.getUsername(),
+              b2cAuthenticationProperties.getPassword(),
+              b2cAuthenticationProperties.getClientId(),
+              b2cAuthenticationProperties.getClientSecret());
     }
 
     @Bean
     public AccessTokenClient externalGlobalAccessTokenClient() {
         return new AccessTokenClient(b2cGlobalAuthenticationProperties.getTokenUri(),
-                                     b2cGlobalAuthenticationProperties.getScope(),
-                                     b2cGlobalAuthenticationProperties.getUsername(),
-                                     b2cGlobalAuthenticationProperties.getPassword(),
-                                     b2cGlobalAuthenticationProperties.getClientId(),
-                                     b2cGlobalAuthenticationProperties.getClientSecret());
+              b2cGlobalAuthenticationProperties.getScope(),
+              b2cGlobalAuthenticationProperties.getUsername(),
+              b2cGlobalAuthenticationProperties.getPassword(),
+              b2cGlobalAuthenticationProperties.getClientId(),
+              b2cGlobalAuthenticationProperties.getClientSecret());
     }
 
     @Bean
     public AccessTokenClient externalDarPcMidTierGlobalAccessTokenClient() {
         return new AccessTokenClient(
-            b2cDarPcMidtierGlobalAuthenticationProperties.getTokenUri(),
-            b2cDarPcMidtierGlobalAuthenticationProperties.getScope(),
-            b2cDarPcMidtierGlobalAuthenticationProperties.getUsername(),
-            b2cDarPcMidtierGlobalAuthenticationProperties.getPassword(),
-            b2cDarPcMidtierGlobalAuthenticationProperties.getClientId(),
-            b2cDarPcMidtierGlobalAuthenticationProperties.getClientSecret());
+              b2cDarPcMidtierGlobalAuthenticationProperties.getTokenUri(),
+              b2cDarPcMidtierGlobalAuthenticationProperties.getScope(),
+              b2cDarPcMidtierGlobalAuthenticationProperties.getUsername(),
+              b2cDarPcMidtierGlobalAuthenticationProperties.getPassword(),
+              b2cDarPcMidtierGlobalAuthenticationProperties.getClientId(),
+              b2cDarPcMidtierGlobalAuthenticationProperties.getClientSecret());
     }
 
 }

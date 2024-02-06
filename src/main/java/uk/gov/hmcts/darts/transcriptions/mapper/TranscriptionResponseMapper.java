@@ -37,10 +37,28 @@ public class TranscriptionResponseMapper {
 
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
+    private static void populateReportingRestrictionField(CourtCaseEntity caseEntity, GetTranscriptionByIdResponse response) {
+        if (caseEntity.getReportingRestrictions() != null) {
+            response.setReportingRestriction(caseEntity.getReportingRestrictions().getEventName());
+        }
+    }
+
+    private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
+        return reportingRestrictions.stream()
+              .sorted(comparing(ReportingRestriction::getEventTs))
+              .collect(toList());
+    }
+
+    private static ReportingRestriction reportingRestrictionWithName(String name) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventName(name);
+        return reportingRestriction;
+    }
+
     public List<TranscriptionTypeResponse> mapToTranscriptionTypeResponses(List<TranscriptionTypeEntity> transcriptionTypeEntities) {
         return emptyIfNull(transcriptionTypeEntities).stream()
-            .map(this::mapToTranscriptionTypeResponse)
-            .collect(Collectors.toList());
+              .map(this::mapToTranscriptionTypeResponse)
+              .collect(Collectors.toList());
     }
 
     TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
@@ -51,10 +69,10 @@ public class TranscriptionResponseMapper {
     }
 
     public List<TranscriptionUrgencyResponse> mapToTranscriptionUrgencyResponses(
-        List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities) {
+          List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities) {
         return emptyIfNull(transcriptionUrgencyEntities).stream()
-            .map(this::mapToTranscriptionUrgencyResponse)
-            .collect(Collectors.toList());
+              .map(this::mapToTranscriptionUrgencyResponse)
+              .collect(Collectors.toList());
     }
 
     TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
@@ -88,16 +106,16 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setFrom(getRequestorName(transcriptionEntity));
         transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
         transcriptionResponse.setRequestorComments(TranscriptionUtil.getTranscriptionCommentAtStatus(
-            transcriptionEntity,
-            TranscriptionStatusEnum.REQUESTED
+              transcriptionEntity,
+              TranscriptionStatusEnum.REQUESTED
         ));
         transcriptionResponse.setRejectionReason(TranscriptionUtil.getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REJECTED));
 
         final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
-            .stream()
-            .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime));
+              .stream()
+              .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime));
         latestTranscriptionDocumentEntity.ifPresent(
-            transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
+              transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
         if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
             HearingEntity hearing = transcriptionEntity.getHearings().get(0);
@@ -127,36 +145,18 @@ public class TranscriptionResponseMapper {
 
     private void mapReportingRestrictions(CourtCaseEntity courtCase, GetTranscriptionByIdResponse transcriptionResponse) {
         var reportingRestrictions = hearingReportingRestrictionsRepository.findAllByCaseId(courtCase.getId()).stream()
-            .map(this::toReportingRestriction)
-            .collect(toList());
+              .map(this::toReportingRestriction)
+              .collect(toList());
 
         if (courtCase.getReportingRestrictions() != null && reportingRestrictions.isEmpty()) {
             reportingRestrictions.add(
-                reportingRestrictionWithName(courtCase.getReportingRestrictions().getEventName()));
+                  reportingRestrictionWithName(courtCase.getReportingRestrictions().getEventName()));
         }
 
         transcriptionResponse.setCaseReportingRestrictions(
-            sortedByTimestamp(reportingRestrictions));
+              sortedByTimestamp(reportingRestrictions));
 
         populateReportingRestrictionField(courtCase, transcriptionResponse);
-    }
-
-    private static void populateReportingRestrictionField(CourtCaseEntity caseEntity, GetTranscriptionByIdResponse response) {
-        if (caseEntity.getReportingRestrictions() != null) {
-            response.setReportingRestriction(caseEntity.getReportingRestrictions().getEventName());
-        }
-    }
-
-    private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
-        return reportingRestrictions.stream()
-            .sorted(comparing(ReportingRestriction::getEventTs))
-            .collect(toList());
-    }
-
-    private static ReportingRestriction reportingRestrictionWithName(String name) {
-        var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventName(name);
-        return reportingRestriction;
     }
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {

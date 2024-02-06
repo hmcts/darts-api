@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.dailylist.converter.DailyListJsonConverter;
 @Configuration
 @RequiredArgsConstructor
 public class ConverterConfig implements WebMvcConfigurer {
+
     private final DailyListJsonConverter dailyListJsonConverter;
 
     @Override

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BankHolidays {
+
     static final String ENGLAND_AND_WALES = "england-and-wales";
 
     @JsonProperty(ENGLAND_AND_WALES)

@@ -12,24 +12,24 @@ import java.util.List;
 public interface AnnotationRepository extends JpaRepository<AnnotationEntity, Integer> {
 
     @Query("""
-        SELECT ann
-        FROM AnnotationEntity ann
-         JOIN ann.annotationDocuments annDoc
-         JOIN ann.hearingList hearing
-        WHERE hearing.id = :hearingId
-        AND ann.deleted = false
-        """)
+          SELECT ann
+          FROM AnnotationEntity ann
+           JOIN ann.annotationDocuments annDoc
+           JOIN ann.hearingList hearing
+          WHERE hearing.id = :hearingId
+          AND ann.deleted = false
+          """)
     List<AnnotationEntity> findByHearingId(int hearingId);
 
     @Query("""
-        SELECT ann
-        FROM AnnotationEntity ann
-         JOIN ann.annotationDocuments annDoc
-         JOIN ann.hearingList hearing
-        WHERE hearing.id = :hearingId
-        AND ann.deleted = false
-        AND ann.currentOwner = :userAccount
-        """)
+          SELECT ann
+          FROM AnnotationEntity ann
+           JOIN ann.annotationDocuments annDoc
+           JOIN ann.hearingList hearing
+          WHERE hearing.id = :hearingId
+          AND ann.deleted = false
+          AND ann.currentOwner = :userAccount
+          """)
     List<AnnotationEntity> findByHearingIdAndUser(int hearingId, UserAccountEntity userAccount);
 
 

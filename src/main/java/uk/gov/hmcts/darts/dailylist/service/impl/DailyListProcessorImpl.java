@@ -28,9 +28,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     public void processAllDailyLists() {
         stream(SourceType.values()).forEach(sourceType -> {
             var dailyListsGroupedByCourthouse = dailyListRepository.findByStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                JobStatusType.NEW,
-                now(),
-                String.valueOf(sourceType)
+                  JobStatusType.NEW,
+                  now(),
+                  String.valueOf(sourceType)
             ).stream().collect(groupingBy(DailyListEntity::getListingCourthouse));
 
             dailyListsGroupedByCourthouse.forEach((listingCourthouse, dailyLists) -> processDailyListsForSourceType(dailyLists));
@@ -41,10 +41,10 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     public void processAllDailyListForListingCourthouse(String listingCourthouse) {
         stream(SourceType.values()).forEach(sourceType -> {
             var dailyLists = dailyListRepository.findByListingCourthouseAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                listingCourthouse,
-                JobStatusType.NEW,
-                now(),
-                String.valueOf(sourceType)
+                  listingCourthouse,
+                  JobStatusType.NEW,
+                  now(),
+                  String.valueOf(sourceType)
             );
             processDailyListsForSourceType(dailyLists);
         });
@@ -63,7 +63,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
             if (dailyLists.size() > 1) {
                 dailyLists.subList(1, dailyLists.size())
-                    .forEach(dl -> dl.setStatus(JobStatusType.IGNORED));
+                      .forEach(dl -> dl.setStatus(JobStatusType.IGNORED));
             }
             dailyListRepository.saveAll(dailyLists);
         }

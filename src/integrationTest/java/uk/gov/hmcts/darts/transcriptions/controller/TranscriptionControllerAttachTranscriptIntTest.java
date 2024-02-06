@@ -86,22 +86,22 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
-            transcriptionEntity.getCreatedDateTime().plusHours(1),
-            transcriptionStub.getTranscriptionStatusByEnum(APPROVED)
+              transcriptionEntity,
+              transcriptionEntity.getLastModifiedBy(),
+              transcriptionEntity.getCreatedDateTime().plusHours(1),
+              transcriptionStub.getTranscriptionStatusByEnum(APPROVED)
         );
 
         TranscriptionWorkflowEntity withTranscriberTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            transcriptionEntity.getLastModifiedBy(),
-            transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(15),
-            transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
+              transcriptionEntity,
+              transcriptionEntity.getLastModifiedBy(),
+              transcriptionEntity.getCreatedDateTime().plusHours(1).plusMinutes(15),
+              transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
         );
 
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         transcriptionEntity.getTranscriptionWorkflowEntities()
-            .addAll(List.of(approvedTranscriptionWorkflowEntity, withTranscriberTranscriptionWorkflowEntity));
+              .addAll(List.of(approvedTranscriptionWorkflowEntity, withTranscriberTranscriptionWorkflowEntity));
         transcriptionEntity.setTranscriptionStatus(withTranscriberTranscriptionWorkflowEntity.getTranscriptionStatus());
         dartsDatabase.getTranscriptionRepository().save(transcriptionEntity);
 
@@ -122,7 +122,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
 
         doNothing().when(mockAuditApi)
-            .recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+              .recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -131,25 +131,25 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockMultipartFile transcript = new MockMultipartFile(
-            "transcript",
-            "Test Document.doc",
-            "application/msword",
-            "Test Document (doc)".getBytes()
+              "transcript",
+              "Test Document.doc",
+              "application/msword",
+              "Test Document (doc)".getBytes()
         );
 
         final MvcResult mvcResult = mockMvc.perform(
-                multipart(
-                    URL_TEMPLATE,
-                    transcriptionId
-                ).file(transcript))
-            .andExpect(status().isForbidden())
-            .andReturn();
+                    multipart(
+                          URL_TEMPLATE,
+                          transcriptionId
+                    ).file(transcript))
+              .andExpect(status().isForbidden())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
-            """;
+              {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -160,25 +160,25 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
-            "transcript",
-            "Test Document.txt",
-            "text/plain",
-            "Test Document (txt)".getBytes()
+              "transcript",
+              "Test Document.txt",
+              "text/plain",
+              "Test Document (txt)".getBytes()
         );
 
         final MvcResult mvcResult = mockMvc.perform(
-                multipart(
-                    URL_TEMPLATE,
-                    transcriptionId
-                ).file(transcript))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                    multipart(
+                          URL_TEMPLATE,
+                          transcriptionId
+                    ).file(transcript))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
-            """;
+              {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -192,25 +192,25 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
-            "transcript",
-            "Test Document.doc",
-            "application/msword",
-            "Test Document (doc)".getBytes()
+              "transcript",
+              "Test Document.doc",
+              "application/msword",
+              "Test Document (doc)".getBytes()
         );
 
         final MvcResult mvcResult = mockMvc.perform(
-                multipart(
-                    URL_TEMPLATE,
-                    transcriptionId
-                ).file(transcript))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                    multipart(
+                          URL_TEMPLATE,
+                          transcriptionId
+                    ).file(transcript))
+              .andExpect(status().isBadRequest())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
-            """;
+              {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+              """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuditApi);
@@ -227,19 +227,19 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
-            "transcript",
-            "Test Document.docx",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "Test Document (docx)".getBytes()
+              "transcript",
+              "Test Document.docx",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "Test Document (docx)".getBytes()
         );
 
         final MvcResult mvcResult = mockMvc.perform(
-                multipart(
-                    URL_TEMPLATE,
-                    transcriptionId
-                ).file(transcript))
-            .andExpect(status().isOk())
-            .andReturn();
+                    multipart(
+                          URL_TEMPLATE,
+                          transcriptionId
+                    ).file(transcript))
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
@@ -250,15 +250,15 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(transcriptionWorkflowId);
 
         final TranscriptionEntity completeTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcriptionId).orElseThrow();
+              .findById(transcriptionId).orElseThrow();
         assertEquals(COMPLETE.getId(), completeTranscriptionEntity.getTranscriptionStatus().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = completeTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
-            .get(transcriptionWorkflowEntities.size() - 1);
+              .get(transcriptionWorkflowEntities.size() - 1);
         assertEquals(transcriptionWorkflowId, transcriptionWorkflowEntity.getId());
         assertEquals(
-            COMPLETE.getId(),
-            transcriptionWorkflowEntity.getTranscriptionStatus().getId()
+              COMPLETE.getId(),
+              transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
@@ -268,13 +268,13 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentEntities.get(0);
         assertEquals("Test Document.docx", transcriptionDocumentEntity.getFileName());
         assertEquals(
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            transcriptionDocumentEntity.getFileType()
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              transcriptionDocumentEntity.getFileType()
         );
         assertTrue(transcriptionDocumentEntity.getFileSize() > 0);
 
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
-            .getExternalObjectDirectoryEntities();
+              .getExternalObjectDirectoryEntities();
         assertEquals(1, externalObjectDirectoryEntities.size());
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
         assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
@@ -295,19 +295,19 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
-            "transcript",
-            "Test Document.doc",
-            "application/msword",
-            "Test Document (doc)".getBytes()
+              "transcript",
+              "Test Document.doc",
+              "application/msword",
+              "Test Document (doc)".getBytes()
         );
 
         final MvcResult mvcResult = mockMvc.perform(
-                multipart(
-                    URL_TEMPLATE,
-                    transcriptionId
-                ).file(transcript))
-            .andExpect(status().isOk())
-            .andReturn();
+                    multipart(
+                          URL_TEMPLATE,
+                          transcriptionId
+                    ).file(transcript))
+              .andExpect(status().isOk())
+              .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
@@ -318,15 +318,15 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(transcriptionWorkflowId);
 
         final TranscriptionEntity completeTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
-            .findById(transcriptionId).orElseThrow();
+              .findById(transcriptionId).orElseThrow();
         assertEquals(COMPLETE.getId(), completeTranscriptionEntity.getTranscriptionStatus().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = completeTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
-            .get(transcriptionWorkflowEntities.size() - 1);
+              .get(transcriptionWorkflowEntities.size() - 1);
         assertEquals(transcriptionWorkflowId, transcriptionWorkflowEntity.getId());
         assertEquals(
-            COMPLETE.getId(),
-            transcriptionWorkflowEntity.getTranscriptionStatus().getId()
+              COMPLETE.getId(),
+              transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
@@ -339,7 +339,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertTrue(transcriptionDocumentEntity.getFileSize() > 0);
 
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
-            .getExternalObjectDirectoryEntities();
+              .getExternalObjectDirectoryEntities();
         assertEquals(1, externalObjectDirectoryEntities.size());
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
         assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
