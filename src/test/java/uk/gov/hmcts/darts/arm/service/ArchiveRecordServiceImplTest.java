@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,6 +46,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
@@ -96,6 +98,9 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
+    @Mock
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+
     @TempDir
     private File tempDirectory;
 
@@ -120,7 +125,8 @@ class ArchiveRecordServiceImplTest {
                 mediaArchiveRecordMapper,
                 transcriptionArchiveRecordMapper,
                 annotationArchiveRecordMapper,
-                caseArchiveRecordMapper
+                caseArchiveRecordMapper,
+                externalObjectDirectoryRepository
         );
 
     }
@@ -158,13 +164,15 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -214,13 +222,15 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -237,8 +247,7 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() throws IOException {
-        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
     }
@@ -273,13 +282,15 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
         when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -327,13 +338,15 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
         when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn("yyyy-MM-dd");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -364,9 +377,11 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -395,9 +410,11 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
