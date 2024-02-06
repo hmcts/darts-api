@@ -96,7 +96,7 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
 
         assertThat(persistedCase.getClosed()).isTrue();
         assertThat(persistedCase.getCaseClosedTimestamp()
-              .isAfter(OffsetDateTime.parse("2023-08-08T00:00:00.000Z"))).isTrue();
+                         .isAfter(OffsetDateTime.parse("2023-08-08T00:00:00.000Z"))).isTrue();
 
         dartsGateway.verifyReceivedNotificationType(2);
     }

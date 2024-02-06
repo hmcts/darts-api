@@ -39,7 +39,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
     private MediaArchiveRecord createMediaArchiveRecord(MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation,
-          UploadNewFileRecord uploadNewFileRecord) {
+                                                        UploadNewFileRecord uploadNewFileRecord) {
         return MediaArchiveRecord.builder()
               .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
               .uploadNewFileRecord(uploadNewFileRecord)
@@ -47,7 +47,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
     private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-          Integer relationId) {
+                                                                           Integer relationId) {
         return MediaCreateArchiveRecordOperation.builder()
               .relationId(relationId.toString())
               .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))

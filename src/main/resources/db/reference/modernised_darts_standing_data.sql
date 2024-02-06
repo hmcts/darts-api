@@ -7,23 +7,36 @@ SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
 
 
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES (0, NULL, 'System User', 'dartssystemuser@hmcts.net', 'System User', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (-1, NULL, 'Event Processor', 'Event.Processor@example.com', 'Event Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (-2, NULL, 'DailyList Processor', 'DailyList.Processor@example.com', 'DailyList Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (-3, NULL, 'AddAudio Processor', 'AddAudio.Processor@example.com', 'AddAudio Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (-4, NULL, 'AddCase Processor', 'AddCase.Processor@example.com', 'AddCase Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (-1, NULL, 'Event Processor', 'Event.Processor@example.com', 'Event Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP,
+        0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (-2, NULL, 'DailyList Processor', 'DailyList.Processor@example.com', 'DailyList Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0,
+        CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (-3, NULL, 'AddAudio Processor', 'AddAudio.Processor@example.com', 'AddAudio Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0,
+        CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (-4, NULL, 'AddCase Processor', 'AddCase.Processor@example.com', 'AddCase Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0,
+        CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES (-40, NULL, 'Xhibit', 'xhibit@hmcts.net', 'Xhibit', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES (-41, NULL, 'Cpp', 'cpp@hmcts.net', 'Cpp', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES (-42, NULL, 'Dar Pc', 'dar.pc@hmcts.net', 'Dar Pc', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by)
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid,
+                          created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES (-43, NULL, 'Mid Tier', 'dar.midtier@hmcts.net', 'Mid Tier', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by)
@@ -170,7 +183,8 @@ VALUES (58, '2198', '3938', 'Judge directed Defence counsel to obtain a report',
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (59, '2198', '3940', 'Judges ruling', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (60, '2198', '3934', 'Judge passed sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (60, '2198', '3934', 'Judge passed sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (61, '2199', NULL, 'Prosecution application', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -226,23 +240,33 @@ VALUES (86, '20100', NULL, 'Bench Warrant Issued', 'StandardEventHandler', true,
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (87, '20101', NULL, 'Bench Warrant Executed', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (88, '20198', '13900', 'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, offered for the first time by the defence.', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (88, '20198', '13900',
+        'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, offered for the first time by the defence.',
+        'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (89, '20198', '13901', 'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, previously rejected by the prosecution.', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (89, '20198', '13901',
+        'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, previously rejected by the prosecution.',
+        'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (90, '20198', '13902', 'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), first offered by defence.', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (90, '20198', '13902', 'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), first offered by defence.',
+        'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (91, '20198', '13903', 'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), previously rejected by the prosecution.', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (91, '20198', '13903',
+        'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), previously rejected by the prosecution.',
+        'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (92, '20198', '13904', 'Defendant bound over, acceptable to prosecution - offered for the first by the defence.', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (92, '20198', '13904', 'Defendant bound over, acceptable to prosecution - offered for the first by the defence.', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (93, '20198', '13905', 'Effective Trial.', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (94, '20198', '13906', 'Defendant bound over, now acceptable to prosecution - previously rejected by the prosecution', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (94, '20198', '13906', 'Defendant bound over, now acceptable to prosecution - previously rejected by the prosecution', 'StandardEventHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (159, '20909', NULL, 'Defence closing speech', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (95, '20198', '13907', 'Unable to proceed with the trail because defendant incapable through alcohol/drugs', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (95, '20198', '13907', 'Unable to proceed with the trail because defendant incapable through alcohol/drugs', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (96, '20198', '13908', 'Defendant deceased', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -254,7 +278,8 @@ VALUES (99, '20198', '13911', 'Prosecution end case: public interest grounds', '
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (100, '20198', '13912', 'Prosecution end case: adjournment refused', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (101, '20198', '13913', 'Prosecution not ready: served late notice of additional evidence on defence', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (101, '20198', '13913', 'Prosecution not ready: served late notice of additional evidence on defence', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (102, '20198', '13914', 'Prosecution not ready: specify in comments', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -270,7 +295,8 @@ VALUES (107, '20198', '13919', 'Prosecution advocate engaged in another trial', 
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (108, '20198', '13920', 'Prosecution advocate failed to attend', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (109, '20198', '13921', 'Prosecution increased time estimate - insufficient time for trail to start', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (109, '20198', '13921', 'Prosecution increased time estimate - insufficient time for trail to start', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (110, '20198', '13922', 'Defence not ready: disclosure problems', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -280,15 +306,18 @@ VALUES (112, '20198', '13924', 'Defence asked for additional prosecution witness
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (113, '20198', '13925', 'Defence witness absent', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (114, '20198', '13926', 'Defendant absent - did not proceed in absence (judicial discretion)', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (114, '20198', '13926', 'Defendant absent - did not proceed in absence (judicial discretion)', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (115, '20198', '13927', 'Defendant ill or otherwise unfit to proceed', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (116, '20198', '13928', 'Defendant not produced by PECS', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (117, '20198', '13929', 'Defendant absent - unable to proceed as defendant not notified of place and time of hearing', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (117, '20198', '13929', 'Defendant absent - unable to proceed as defendant not notified of place and time of hearing', 'StandardEventHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (118, '20198', '13930', 'Defence increased time estimate - insufficient time to for trial to start', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (118, '20198', '13930', 'Defence increased time estimate - insufficient time to for trial to start', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (119, '20198', '13931', 'Defence advocate engaged in other trial', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -300,7 +329,8 @@ VALUES (122, '20198', '13934', 'Another case over-ran', 'StandardEventHandler', 
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (123, '20198', '13935', 'Judge / magistrate availability', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (124, '20198', '13936', 'Case not reached / insufficient cases drop out / floater not reached', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (124, '20198', '13936', 'Case not reached / insufficient cases drop out / floater not reached', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (125, '20198', '13937', 'Equipment / accomodation failure', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -420,27 +450,36 @@ VALUES (183, '21200', '11000', 'Section 4(2) of the Contempt of Court Act 1981',
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (184, '21200', '11001', 'Section 11 of the Contempt of Court Act 1981', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (185, '21200', '11002', 'Section 39 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (185, '21200', '11002', 'Section 39 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', true, true, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (186, '21200', '11003', 'Section 4 of the Sexual Offenders (Amendment) Act 1976', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (186, '21200', '11003', 'Section 4 of the Sexual Offenders (Amendment) Act 1976', 'SetReportingRestrictionEventHandler', true, true, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (187, '21200', '11004', 'Section 2 of the Sexual Offenders (Amendment) Act 1992', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (187, '21200', '11004', 'Section 2 of the Sexual Offenders (Amendment) Act 1992', 'SetReportingRestrictionEventHandler', true, true, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (188, '21200', '11006', 'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (188, '21200', '11006', 'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', true, true,
+        0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (189, '21200', '11007', 'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (189, '21200', '11007', 'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', true,
+        true, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (190, '21200', '11008', 'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (190, '21200', '11008', 'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', true, true,
+        0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (191, '21200', '11009', 'An order made under s49 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
+VALUES (191, '21200', '11009', 'An order made under s49 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', true, true, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (192, '21201', NULL, 'Restrictions lifted', 'SetReportingRestrictionEventHandler', true, true, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (193, '21300', NULL, 'Freetext', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (194, '21400', '12414', 'Defendant disqualified from working with children for life (Defendant under 18)', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (194, '21400', '12414', 'Defendant disqualified from working with children for life (Defendant under 18)', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (195, '21400', '12415', 'Defendant disqualified from working with children for life (Defendant over 18)', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (195, '21400', '12415', 'Defendant disqualified from working with children for life (Defendant over 18)', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (196, '21500', '13700', 'Defendant ordered to be electronically monitored', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -454,25 +493,35 @@ VALUES (200, '21500', '13704', 'Terms of electronically monitored curfew amended
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (201, '21500', '13705', 'Requirement for an electronically monitored curfew removed', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (202, '21600', '13600', 'Sex Offenders Register - victim under 18 years of age - for an indefinite period', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (202, '21600', '13600', 'Sex Offenders Register - victim under 18 years of age - for an indefinite period', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (203, '21600', '13601', 'Sex Offenders Register - victim under 18 years of age - for 10 years', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (203, '21600', '13601', 'Sex Offenders Register - victim under 18 years of age - for 10 years', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (204, '21600', '13602', 'Sex Offenders Register - victim under 18 years of age - for 3-7 years', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (204, '21600', '13602', 'Sex Offenders Register - victim under 18 years of age - for 3-7 years', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (205, '21600', '13603', 'Sex Offenders Register - victim under 18 years of age - period to be specified later', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (205, '21600', '13603', 'Sex Offenders Register - victim under 18 years of age - period to be specified later', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (206, '21600', '13604', 'Sex Offenders Register - victim under 18 years of age - for another period', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (206, '21600', '13604', 'Sex Offenders Register - victim under 18 years of age - for another period', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (207, '21600', '13605', 'Sex Offenders Register - victim over 18 years of age - for an indefinite period', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (207, '21600', '13605', 'Sex Offenders Register - victim over 18 years of age - for an indefinite period', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (208, '21600', '13606', 'Sex Offenders Register - victim over 18 years of age - for 10 years', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (208, '21600', '13606', 'Sex Offenders Register - victim over 18 years of age - for 10 years', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (209, '21600', '13607', 'Sex Offenders Register - victim over 18 years of age - for 3-7 years', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (209, '21600', '13607', 'Sex Offenders Register - victim over 18 years of age - for 3-7 years', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (210, '21600', '13608', 'Sex Offenders Register - victim over 18 years of age - for another period', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (210, '21600', '13608', 'Sex Offenders Register - victim over 18 years of age - for another period', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (211, '21600', '13609', 'Sex Offenders Register - victim over 18 years of age - period to be specified later', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (211, '21600', '13609', 'Sex Offenders Register - victim over 18 years of age - period to be specified later', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (212, '21800', '12310', 'Disqualification from driving removed (3076)', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -514,23 +563,29 @@ VALUES (230, '40727', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, c
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (231, '40730', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (232, '40730', '10808', 'Case Level Criminal Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (232, '40730', '10808', 'Case Level Criminal Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (233, '40731', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (234, '40731', '10808', 'Offence Level Criminal Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (234, '40731', '10808', 'Offence Level Criminal Appeal Result',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (235, '40732', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (236, '40732', '10808', 'Offence Level Criminal Appeal Result with alt offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (236, '40732', '10808', 'Offence Level Criminal Appeal Result with alt offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (237, '40733', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (238, '40733', '10808', 'Case Level Misc Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (238, '40733', '10808', 'Case Level Misc Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (239, '40735', '10808', 'Delete Offence Level Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (239, '40735', '10808', 'Delete Offence Level Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (240, '40735', NULL, 'Verdict', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (240, '40735', NULL, 'Verdict', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (241, '40736', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -538,233 +593,338 @@ VALUES (242, '40737', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, c
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (243, '40738', NULL, 'Verdict', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (244, '40750', '12309', 'Driving disqualification suspended pending appeal subsequent to imposition (3075)', 'StandardEventHandler', true, false, 0, current_timestamp);
+VALUES (244, '40750', '12309', 'Driving disqualification suspended pending appeal subsequent to imposition (3075)', 'StandardEventHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (245, '40750', NULL, 'Sentencing', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (246, '40750', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (246, '40750', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (247, '40750', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (247, '40750', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (248, '40750', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (248, '40750', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (249, '40750', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (249, '40750', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (376, 'UPDCASE', NULL, 'Update Case', 'com.synapps.moj.dfs.handler.DARTSXHIBITUpdateCaseHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (250, '40750', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (250, '40750', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (251, '40750', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (251, '40750', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (252, '40750', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (252, '40750', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (253, '40750', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (253, '40750', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (254, '40750', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (254, '40750', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (255, '40750', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (255, '40750', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (256, '40750', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (256, '40750', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (257, '40750', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (257, '40750', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (258, '40750', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (258, '40750', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (259, '40750', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (259, '40750', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (260, '40750', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (260, '40750', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (261, '40750', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (261, '40750', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (262, '40750', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (262, '40750', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (263, '40750', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (263, '40750', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (264, '40750', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (264, '40750', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (265, '40750', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (265, '40750', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (266, '40750', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (266, '40750', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (267, '40750', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (267, '40750', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (268, '40750', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (268, '40750', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (269, '40750', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (269, '40750', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (270, '40750', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (270, '40750', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (271, '40751', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (271, '40751', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (272, '40751', NULL, 'Sentencing', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (368, '407131', NULL, 'Case to be listed', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (273, '40751', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (273, '40751', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (274, '40751', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (274, '40751', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (275, '40751', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (275, '40751', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (276, '40751', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (276, '40751', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (277, '40751', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (277, '40751', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (278, '40751', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (278, '40751', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (279, '40751', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (279, '40751', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (280, '40751', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (280, '40751', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (281, '40751', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (281, '40751', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (282, '40751', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (282, '40751', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (283, '40751', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (283, '40751', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (284, '40751', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (284, '40751', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (285, '40751', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (285, '40751', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (286, '40751', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (286, '40751', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (287, '40751', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (287, '40751', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (377, 'LOG', NULL, 'LOG', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (288, '40751', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (288, '40751', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (289, '40751', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (289, '40751', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (290, '40751', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (290, '40751', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (291, '40751', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (291, '40751', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (292, '40751', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (292, '40751', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (293, '40751', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (293, '40751', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (294, '40751', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (294, '40751', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (295, '40751', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (295, '40751', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (296, '40751', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (296, '40751', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (297, '40752', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (297, '40752', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (298, '40752', NULL, 'Sentencing', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (299, '40752', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (299, '40752', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (300, '40752', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (300, '40752', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (301, '40752', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (301, '40752', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (302, '40752', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (302, '40752', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (303, '40752', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (303, '40752', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (304, '40752', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (304, '40752', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (305, '40752', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (305, '40752', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (306, '40752', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (306, '40752', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (307, '40752', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (307, '40752', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (308, '40752', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (308, '40752', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (309, '40752', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (309, '40752', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (310, '40752', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (310, '40752', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (311, '40752', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (311, '40752', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (312, '40752', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (312, '40752', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (313, '40752', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (313, '40752', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (314, '40752', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (314, '40752', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (315, '40752', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (315, '40752', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (316, '40752', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (316, '40752', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (369, '407132', NULL, 'Case to be listed', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (317, '40752', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (317, '40752', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (318, '40752', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (318, '40752', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (319, '40752', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (319, '40752', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (320, '40752', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (320, '40752', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (321, '40752', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (321, '40752', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (322, '40752', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (322, '40752', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (323, '40753', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (323, '40753', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (324, '40753', NULL, 'Sentencing', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (325, '40753', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (325, '40753', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (326, '40753', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (326, '40753', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (327, '40753', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (327, '40753', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (328, '40753', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (328, '40753', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (329, '40753', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (329, '40753', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (330, '40753', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (330, '40753', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (331, '40753', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (331, '40753', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (332, '40753', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (332, '40753', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (333, '40753', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (333, '40753', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (334, '40753', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (334, '40753', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (335, '40753', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (335, '40753', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (336, '40753', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (336, '40753', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (337, '40753', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (337, '40753', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (338, '40753', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (338, '40753', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (339, '40753', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (339, '40753', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (340, '40753', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (340, '40753', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (341, '40753', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (341, '40753', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (342, '40753', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (342, '40753', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (343, '40753', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (343, '40753', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (344, '40753', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
+VALUES (344, '40753', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (345, '40753', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (345, '40753', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (346, '40753', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (346, '40753', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (347, '40753', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (347, '40753', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (348, '40753', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (348, '40753', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (349, '40754', NULL, 'Sentencing', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (350, '40754', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (350, '40754', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (351, '40754', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (351, '40754', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (352, '40754', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (352, '40754', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true,
+        false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (353, '40754', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (353, '40754', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (354, '40755', NULL, 'Sentencing', 'StandardEventHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
@@ -794,15 +954,18 @@ VALUES (367, '302004', NULL, 'Case not reserved', 'StandardEventHandler', true, 
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (370, 'CPPDL', 'CPPDL', 'CPP Daily List', 'com.synapps.moj.dfs.handler.DARTSDailyListFromCPPHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (371, 'DETTO', '11531', 'Special Sentence of Detention for Terrorist Offenders of Particular Concern', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (371, 'DETTO', '11531', 'Special Sentence of Detention for Terrorist Offenders of Particular Concern',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (372, 'DL', NULL, 'Daily List', 'com.synapps.moj.dfs.handler.DARTSDailyListHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (373, 'NEWCASE', NULL, 'New Case', 'com.synapps.moj.dfs.handler.DARTSXHIBITNewCaseHandler', true, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (374, 'STS', '11530', 'Serious Terrorism Sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (374, 'STS', '11530', 'Serious Terrorism Sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0,
+        current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
-VALUES (375, 'STS1821', '11532', 'Serious Terrorism Sentence 18 to 21', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false, 0, current_timestamp);
+VALUES (375, 'STS1821', '11532', 'Serious Terrorism Sentence 18 to 21', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', true, false,
+        0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)
 VALUES (378, 'Event_Type_728', 'Event_Sub_Type_728', 'DMP-728 Test', 'StandardEventHandler', false, false, 0, current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active, is_reporting_restriction, created_by, created_ts)

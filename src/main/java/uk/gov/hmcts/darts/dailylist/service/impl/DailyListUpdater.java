@@ -86,7 +86,7 @@ class DailyListUpdater {
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
                 log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                      + dailyListEntity.getId() + " has not been processed");
+                                + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType);
@@ -107,7 +107,7 @@ class DailyListUpdater {
                 return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                      + timeMarkingNoteText, dateTimeException);
+                               + timeMarkingNoteText, dateTimeException);
             }
         }
 
@@ -116,7 +116,7 @@ class DailyListUpdater {
                 return getTimeFromSittingAt(sitting);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                      + sitting.getSittingAt(), dateTimeException);
+                               + sitting.getSittingAt(), dateTimeException);
             }
         }
         return null;
@@ -176,8 +176,8 @@ class DailyListUpdater {
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         advocates.forEach(advocate ->
-              courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                    buildFullName(advocate.getName()), courtCase)));
+                                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                                      buildFullName(advocate.getName()), courtCase)));
 
     }
 

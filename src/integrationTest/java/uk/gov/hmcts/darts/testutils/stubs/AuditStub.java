@@ -36,8 +36,8 @@ public class AuditStub {
     }
 
     public AuditEntity createAuditEntity(CourtCaseEntity courtCase, AuditActivityEntity auditActivity,
-          UserAccountEntity userAccount, String applicationServer,
-          String additionalData) {
+                                         UserAccountEntity userAccount, String applicationServer,
+                                         String additionalData) {
         AuditEntity auditEntity = new AuditEntity();
         auditEntity.setCourtCase(courtCase);
         auditEntity.setAuditActivity(auditActivity);

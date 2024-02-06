@@ -111,7 +111,8 @@ class AutomatedTaskServiceImplTest {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
               mockAutomatedTaskRepository,
               mockLockProvider,
-              mockAutomatedTaskConfigurationProperties) {
+              mockAutomatedTaskConfigurationProperties
+        ) {
             @Override
             protected void runTask() {
             }
@@ -159,7 +160,8 @@ class AutomatedTaskServiceImplTest {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
               mockAutomatedTaskRepository,
               mockLockProvider,
-              mockAutomatedTaskConfigurationProperties) {
+              mockAutomatedTaskConfigurationProperties
+        ) {
             @Override
             protected void runTask() {
             }
@@ -201,7 +203,8 @@ class AutomatedTaskServiceImplTest {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
               mockAutomatedTaskRepository,
               mockLockProvider,
-              mockAutomatedTaskConfigurationProperties) {
+              mockAutomatedTaskConfigurationProperties
+        ) {
             @Override
             public String getTaskName() {
                 return "Test";

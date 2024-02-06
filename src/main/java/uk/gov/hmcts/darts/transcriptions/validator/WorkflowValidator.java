@@ -45,27 +45,30 @@ public class WorkflowValidator {
     }
 
     public boolean validateChangeToWorkflowStatus(boolean isManual, TranscriptionTypeEnum transcriptionTypeEnum,
-          TranscriptionStatusEnum currentTranscriptionStatus,
-          TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
+                                                  TranscriptionStatusEnum currentTranscriptionStatus,
+                                                  TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
         if (isManual) {
             return isValid(manualWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
-                  isManual);
+                           isManual
+            );
         }
         return isValid(automaticWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
-              isManual);
+                       isManual
+        );
     }
 
     private boolean isValid(Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> transitionRules,
-          TranscriptionStatusEnum currentTranscriptionStatus,
-          TranscriptionStatusEnum desiredTargetTranscriptionStatus,
-          TranscriptionTypeEnum transcriptionTypeEnum, boolean isManual) {
+                            TranscriptionStatusEnum currentTranscriptionStatus,
+                            TranscriptionStatusEnum desiredTargetTranscriptionStatus,
+                            TranscriptionTypeEnum transcriptionTypeEnum, boolean isManual) {
         boolean isValid = transitionRules.get(currentTranscriptionStatus) != null
               && transitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus);
         if (!isValid) {
             log.warn("Unable to go from workflow state {} to {} for type {} for isManual {}",
-                  currentTranscriptionStatus,
-                  desiredTargetTranscriptionStatus,
-                  transcriptionTypeEnum, isManual);
+                     currentTranscriptionStatus,
+                     desiredTargetTranscriptionStatus,
+                     transcriptionTypeEnum, isManual
+            );
         }
         return isValid;
     }

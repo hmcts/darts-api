@@ -30,7 +30,7 @@ CREATE TABLE case_overflow
 CREATE SEQUENCE cad_seq CACHE 20;
 
 INSERT INTO darts.case_overflow(cas_id, retention_applies_from_ts, end_of_sentence_date_ts, retain_until_ts)
-    (select cas_id, retention_applies_from_ts, end_of_sentence_ts, retain_until_ts from darts.court_case);
+  (select cas_id, retention_applies_from_ts, end_of_sentence_ts, retain_until_ts from darts.court_case);
 
 ALTER TABLE court_case
   DROP COLUMN retention_applies_from_ts;

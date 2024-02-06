@@ -19,7 +19,7 @@ import java.util.Optional;
 public class AuthenticationExternalUserController extends AbstractUserController {
 
     public AuthenticationExternalUserController(AuthenticationService authenticationService, AuthorisationApi authorisationApi,
-          AuthStrategySelector locator) {
+                                                AuthStrategySelector locator) {
         super(locator, authenticationService, authorisationApi);
     }
 

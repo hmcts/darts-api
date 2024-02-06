@@ -79,7 +79,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
-          UpdateTranscription updateTranscription) {
+                                                                           UpdateTranscription updateTranscription) {
 
         return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription));
     }
@@ -88,7 +88,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {TRANSCRIBER})
     public ResponseEntity<AttachTranscriptResponse> attachTranscript(Integer transcriptionId,
-          MultipartFile transcript) {
+                                                                     MultipartFile transcript) {
         return ResponseEntity.ok(transcriptionService.attachTranscript(transcriptionId, transcript));
     }
 
@@ -172,7 +172,8 @@ public class TranscriptionController implements TranscriptionApi {
         };
 
         // we authorise the transcription ids
-        authorisation.authoriseWithIdsForTranscription(request,
+        authorisation.authoriseWithIdsForTranscription(
+              request,
               e -> e.getTranscriptionId().toString(),
               new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
               executeOnAuth

@@ -15,9 +15,9 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
     protected String taskName = UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName();
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-          LockProvider lockProvider,
-          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-          UnstructuredToArmProcessor processor) {
+                                          LockProvider lockProvider,
+                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                          UnstructuredToArmProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.unstructuredToArmProcessor = processor;
     }

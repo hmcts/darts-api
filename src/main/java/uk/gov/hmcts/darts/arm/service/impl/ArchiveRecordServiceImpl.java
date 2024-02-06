@@ -37,7 +37,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     private final AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
 
     public ArchiveRecordFileInfo generateArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-          Integer archiveRecordAttempt) {
+                                                       Integer archiveRecordAttempt) {
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
               .fileGenerationSuccessful(false)
               .build();
@@ -57,7 +57,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
 
     private void generateMediaArchiveRecordFile(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt,
-          ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
+                                                ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
 
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
@@ -75,7 +75,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     }
 
     private void generateTranscriptionArchiveRecordFile(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt,
-          ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
+                                                        ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
 
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE);
 
@@ -94,7 +94,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     }
 
     private void generateAnnotationArchiveRecordFile(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt,
-          ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
+                                                     ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
 
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
 

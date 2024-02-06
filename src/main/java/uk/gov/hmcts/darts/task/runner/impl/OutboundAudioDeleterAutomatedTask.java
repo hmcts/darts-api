@@ -15,8 +15,8 @@ public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomated
     protected String taskName = OUTBOUND_AUDIO_DELETER_TASK_NAME.getTaskName();
 
     public OutboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-          OutboundAudioDeleterProcessor processor) {
+                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                             OutboundAudioDeleterProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.outboundAudioDeleterProcessor = processor;
     }

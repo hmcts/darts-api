@@ -77,8 +77,8 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         mockMvc.perform(get(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .header(EMAIL_ADDRESS, "james.smith@hmcts.net"))
+                              .header("Content-Type", "application/json")
+                              .header(EMAIL_ADDRESS, "james.smith@hmcts.net"))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[0].id").isNumber())
               .andExpect(jsonPath("$[0].full_name").value(ORIGINAL_USERNAME))
@@ -100,8 +100,8 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                    .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
-                    .queryParam(COURTHOUSE_ID, "21"))
+                                                   .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
+                                                   .queryParam(COURTHOUSE_ID, "21"))
               .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.com"));
@@ -114,8 +114,8 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                    .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
-                    .queryParam(COURTHOUSE_ID, "21"))
+                                                   .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
+                                                   .queryParam(COURTHOUSE_ID, "21"))
               .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.net"));

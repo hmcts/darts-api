@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
 
     Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(String caseNumber,
-          String courthouseName);
+                                                                                               String courthouseName);
 
     @Query("""
           SELECT case.caseNumber

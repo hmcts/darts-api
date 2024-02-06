@@ -35,10 +35,10 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-              .caseNumbers(List.of(SOME_CASE_NUMBER))
-              .courthouse(SOME_COURTHOUSE)
-              .courtroom(SOME_ROOM)
-              .dateTime(today));
+                                      .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                      .courthouse(SOME_COURTHOUSE)
+                                      .courtroom(SOME_ROOM)
+                                      .dateTime(today));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
               SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
@@ -70,10 +70,10 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
         );
 
         eventDispatcher.receive(clearReportingRestrictionsDartsEvent()
-              .caseNumbers(List.of(SOME_CASE_NUMBER))
-              .courthouse(SOME_COURTHOUSE)
-              .courtroom(SOME_ROOM)
-              .dateTime(today));
+                                      .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                      .courthouse(SOME_COURTHOUSE)
+                                      .courtroom(SOME_ROOM)
+                                      .dateTime(today));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
               SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());

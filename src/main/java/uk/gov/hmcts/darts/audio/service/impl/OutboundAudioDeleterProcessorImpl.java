@@ -54,7 +54,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository
               .findByTransformedMediaIdIn(transformedMediaList.stream().map(TransformedMediaEntity::getId)
-                    .collect(Collectors.toList()));
+                                                .collect(Collectors.toList()));
 
         UserAccountEntity systemUser = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid(
               "housekeeping"));
@@ -82,7 +82,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     }
 
     private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
-          ObjectRecordStatusEntity deletionStatus) {
+                                                       ObjectRecordStatusEntity deletionStatus) {
         entity.setLastModifiedBy(systemUser);
         entity.setStatus(deletionStatus);
     }

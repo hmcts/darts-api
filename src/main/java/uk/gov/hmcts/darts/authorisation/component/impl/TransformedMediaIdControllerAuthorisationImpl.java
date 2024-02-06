@@ -67,7 +67,7 @@ public class TransformedMediaIdControllerAuthorisationImpl extends BaseControlle
     }
 
     void checkAuthorisationByTransformedMediaId(Optional<String> transformedMediaIdParamOptional,
-          Set<SecurityRoleEnum> roles) {
+                                                Set<SecurityRoleEnum> roles) {
         if (transformedMediaIdParamOptional.isPresent()) {
             try {
                 Integer transformedMedia = Integer.valueOf(transformedMediaIdParamOptional.get());

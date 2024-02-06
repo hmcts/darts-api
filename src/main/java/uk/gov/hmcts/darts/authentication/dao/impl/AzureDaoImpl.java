@@ -25,7 +25,7 @@ public class AzureDaoImpl implements AzureDao {
 
     @Override
     public OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig,
-          AuthConfigurationProperties configuration)
+                                                     AuthConfigurationProperties configuration)
           throws AzureDaoException {
         log.debug("Fetching access token(s) for authorization code: {}", code);
 
@@ -34,12 +34,14 @@ public class AzureDaoImpl implements AzureDao {
         }
 
         try {
-            HTTPResponse response = azureActiveDirectoryClient.fetchAccessToken(providerConfig,
+            HTTPResponse response = azureActiveDirectoryClient.fetchAccessToken(
+                  providerConfig,
                   configuration.getRedirectUri(),
                   code,
                   configuration.getClientId(),
                   configuration.getClientSecret(),
-                  configuration.getScope());
+                  configuration.getScope()
+            );
             String parsedResponse = response.getContent();
 
             if (HttpStatus.SC_OK != response.getStatusCode()) {

@@ -82,7 +82,7 @@ class TranscriptionRequestDetailsValidatorTest {
     }
 
     private static TranscriptionRequestDetails createRequestDetails(OffsetDateTime startTime,
-          OffsetDateTime endTime) {
+                                                                    OffsetDateTime endTime) {
         var requestDetails = new TranscriptionRequestDetails();
         requestDetails.setStartDateTime(startTime);
         requestDetails.setEndDateTime(endTime);
@@ -103,8 +103,8 @@ class TranscriptionRequestDetailsValidatorTest {
     }
 
     private static TranscriptionRequestDetails createRequestDetails(OffsetDateTime startTime,
-          OffsetDateTime endTime,
-          TranscriptionTypeEnum transcriptionTypeEnum) {
+                                                                    OffsetDateTime endTime,
+                                                                    TranscriptionTypeEnum transcriptionTypeEnum) {
         var requestDetails = new TranscriptionRequestDetails();
         requestDetails.setStartDateTime(startTime);
         requestDetails.setEndDateTime(endTime);

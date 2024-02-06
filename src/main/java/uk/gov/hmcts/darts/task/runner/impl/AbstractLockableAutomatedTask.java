@@ -36,7 +36,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     private Instant start = Instant.now();
 
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
+                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
         this.automatedTaskRepository = automatedTaskRepository;
         this.lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
@@ -70,7 +70,8 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 } else {
                     setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
                     log.warn("Not running task {} now as cron expression has been changed in the database from '{}' to '{}'",
-                          getTaskName(), getLastCronExpression(), dbCronExpression);
+                             getTaskName(), getLastCronExpression(), dbCronExpression
+                    );
                 }
             }
         } catch (Exception exception) {
@@ -97,7 +98,8 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
               Instant.now(),
               getTaskName(),
               getLockAtMostFor(),
-              getLockAtLeastFor());
+              getLockAtLeastFor()
+        );
     }
 
     @Override

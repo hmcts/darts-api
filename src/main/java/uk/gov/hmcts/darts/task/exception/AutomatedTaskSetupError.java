@@ -8,12 +8,16 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 @Getter
 @RequiredArgsConstructor
 public enum AutomatedTaskSetupError implements DartsApiError {
-    FAILED_TO_FIND_AUTOMATED_TASK("100",
+    FAILED_TO_FIND_AUTOMATED_TASK(
+          "100",
           null,
-          "Failed to find automated task"),
-    INVALID_CRON_EXPRESSION("101",
+          "Failed to find automated task"
+    ),
+    INVALID_CRON_EXPRESSION(
+          "101",
           null,
-          "Invalid cron expression");
+          "Invalid cron expression"
+    );
 
     private static final String ERROR_TYPE_PREFIX = "AUTOMATED_TASK";
 

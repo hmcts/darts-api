@@ -432,7 +432,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         // assert the failure response
         Assertions.assertNotNull(failureResponse);
         Assertions.assertFalse(JsonPath.parse(mvcResult.getResponse().getContentAsString())
-              .jsonString().contains("partial_failure"));
+                                     .jsonString().contains("partial_failure"));
         Assertions.assertFalse(existingTranscription1.getHideRequestFromRequestor());
     }
 

@@ -79,9 +79,9 @@ class DailyListServiceImpSaveDailyListTest {
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
-              "uniqueId",
-              OffsetDateTime.now(),
-              null
+                                                                "uniqueId",
+                                                                OffsetDateTime.now(),
+                                                                null
         );
         service.saveDailyListToDatabase(request);
 

@@ -48,7 +48,8 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-              courtroomEntity.getName(), "DAR");
+                                                                    courtroomEntity.getName(), "DAR"
+        );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("node_id"));
@@ -81,7 +82,8 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-              courtroomEntity.getName(), "UPLOADER");
+                                                                    courtroomEntity.getName(), "UPLOADER"
+        );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("node_id"));
@@ -95,7 +97,8 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-              courtroomEntity.getName(), "DAR");
+                                                                    courtroomEntity.getName(), "DAR"
+        );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
@@ -115,14 +118,15 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
-              courtroomEntity.getName(), "");
+                                                                    courtroomEntity.getName(), ""
+        );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("size must be between 1 and 2147483647"));
     }
 
     private MockHttpServletRequestBuilder buildRequest(String courthouseName, String courtroomName,
-          String nodeType) {
+                                                       String nodeType) {
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";
         return post("/register-devices")

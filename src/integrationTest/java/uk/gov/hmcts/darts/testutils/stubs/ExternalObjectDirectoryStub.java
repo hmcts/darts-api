@@ -18,9 +18,9 @@ public class ExternalObjectDirectoryStub {
     private final UserAccountStub userAccountStub;
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
-          ObjectRecordStatusEntity objectRecordStatusEntity,
-          ExternalLocationTypeEntity externalLocationTypeEntity,
-          UUID externalLocation) {
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       UUID externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
               objectRecordStatusEntity,
               externalLocationTypeEntity,
@@ -33,9 +33,9 @@ public class ExternalObjectDirectoryStub {
     }
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
-          ObjectRecordStatusEntity objectRecordStatusEntity,
-          ExternalLocationTypeEntity externalLocationTypeEntity,
-          UUID externalLocation) {
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       UUID externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
               objectRecordStatusEntity,
               externalLocationTypeEntity,
@@ -49,9 +49,9 @@ public class ExternalObjectDirectoryStub {
 
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
-          ObjectRecordStatusEntity objectRecordStatusEntity,
-          ExternalLocationTypeEntity externalLocationTypeEntity,
-          UUID externalLocation) {
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       UUID externalLocation) {
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
               objectRecordStatusEntity,
               externalLocationTypeEntity,
@@ -64,8 +64,8 @@ public class ExternalObjectDirectoryStub {
     }
 
     private ExternalObjectDirectoryEntity createMinimalExternalObjectDirectory(ObjectRecordStatusEntity objectRecordStatusEntity,
-          ExternalLocationTypeEntity externalLocationTypeEntity,
-          UUID externalLocation) {
+                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                               UUID externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setStatus(objectRecordStatusEntity);
         externalObjectDirectory.setExternalLocationType(externalLocationTypeEntity);

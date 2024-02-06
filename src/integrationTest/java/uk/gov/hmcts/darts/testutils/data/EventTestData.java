@@ -33,7 +33,7 @@ public class EventTestData {
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity, OffsetDateTime eventTime,
-          EventHandlerEntity eventHandlerEntity) {
+                                              EventHandlerEntity eventHandlerEntity) {
         EventEntity event = someMinimalEvent();
         event.setHearingEntities(List.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());

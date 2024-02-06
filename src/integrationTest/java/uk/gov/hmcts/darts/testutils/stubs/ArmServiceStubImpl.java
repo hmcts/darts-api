@@ -63,6 +63,6 @@ public class ArmServiceStubImpl implements ArmService {
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-              + " you should ask questions! ###");
+                       + " you should ask questions! ###");
     }
 }

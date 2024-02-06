@@ -45,7 +45,7 @@ public class NodeRegistrationController implements DevicesApi {
           @Valid @RequestParam(value = "mac_address") String macAddress
     ) {
         Integer nodeId = nodeRegistrationService.registerDevices(nodeType, courtHouse, courtRoom,
-              hostName, ipAddress, macAddress
+                                                                 hostName, ipAddress, macAddress
         );
 
         PostNodeRegistrationResponse postRegisterDeviceResponse = new PostNodeRegistrationResponse();

@@ -17,7 +17,7 @@ public class HearingStub {
 
 
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
-          LocalDate hearingDate) {
+                                       LocalDate hearingDate) {
         courthouseStub.createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearing(
               courthouseName,

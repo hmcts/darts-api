@@ -73,7 +73,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
               ? templateValues.replace("{\"", "").replace("\"}", "") : "";
 
         return Arrays.stream(templateValues
-                    .split("\",\""))
+                                   .split("\",\""))
               .map(kv -> kv.split("\":\""))
               .filter(kvArray -> kvArray.length == 2)
               .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));

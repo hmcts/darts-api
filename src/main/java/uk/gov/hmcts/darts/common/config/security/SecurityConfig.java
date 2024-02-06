@@ -100,16 +100,20 @@ public class SecurityConfig {
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
-              createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
-                    externalAuthProviderConfigurationProperties.getJwkSetUri()),
-              createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
-                    internalAuthProviderConfigurationProperties.getJwkSetUri())
+              createAuthenticationEntry(
+                    externalAuthConfigurationProperties.getIssuerUri(),
+                    externalAuthProviderConfigurationProperties.getJwkSetUri()
+              ),
+              createAuthenticationEntry(
+                    internalAuthConfigurationProperties.getIssuerUri(),
+                    internalAuthProviderConfigurationProperties.getJwkSetUri()
+              )
         );
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
-          String jwkSetUri) {
+                                                                               String jwkSetUri) {
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
               .jwsAlgorithm(SignatureAlgorithm.RS256)
               .build();

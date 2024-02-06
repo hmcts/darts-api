@@ -315,8 +315,8 @@ class AudioTransformationServiceImplTest {
     }
 
     private List<MediaEntity> createMediaEntities(OffsetDateTime startTime1, OffsetDateTime endTime1,
-          OffsetDateTime startTime2, OffsetDateTime endTime2,
-          OffsetDateTime startTime3, OffsetDateTime endTime3) {
+                                                  OffsetDateTime startTime2, OffsetDateTime endTime2,
+                                                  OffsetDateTime startTime3, OffsetDateTime endTime3) {
         List<MediaEntity> mediaEntities = new ArrayList<>();
         mediaEntities.add(createMediaEntity(startTime1, endTime1));
         mediaEntities.add(createMediaEntity(startTime2, endTime2));

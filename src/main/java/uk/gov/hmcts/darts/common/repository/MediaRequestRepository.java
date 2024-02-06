@@ -38,8 +38,8 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
           AND mr.status IN :requestStatuses
           """)
     Optional<MediaRequestEntity> findDuplicateUserMediaRequests(HearingEntity hearing, UserAccountEntity userAccount,
-          OffsetDateTime startTime, OffsetDateTime endTime,
-          AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
+                                                                OffsetDateTime startTime, OffsetDateTime endTime,
+                                                                AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
 
 
 }

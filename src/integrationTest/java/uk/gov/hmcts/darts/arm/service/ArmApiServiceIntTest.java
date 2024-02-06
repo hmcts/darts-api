@@ -50,10 +50,10 @@ class ArmApiServiceIntTest extends IntegrationBase {
         armTokenRequest = new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
         when(armTokenClient.getToken(armTokenRequest))
               .thenReturn(ArmTokenResponse.builder()
-                    .accessToken("some-token")
-                    .tokenType("Bearer")
-                    .expiresIn("3600")
-                    .build());
+                                .accessToken("some-token")
+                                .tokenType("Bearer")
+                                .expiresIn("3600")
+                                .build());
     }
 
     @Test
@@ -65,8 +65,8 @@ class ArmApiServiceIntTest extends IntegrationBase {
         var updateMetadataRequest = UpdateMetadataRequest.builder()
               .itemId(EXTERNAL_RECORD_ID)
               .manifest(UpdateMetadataRequest.Manifest.builder()
-                    .eventDate(eventTimestamp)
-                    .build())
+                              .eventDate(eventTimestamp)
+                              .build())
               .useGuidsForFields(false)
               .build();
         var updateMetadataResponse = UpdateMetadataResponse.builder()

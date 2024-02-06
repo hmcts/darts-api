@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationPropert
 public interface OAuthClient {
 
     HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
-          String redirectType, String authCode,
-          String clientId,
-          String authClientSecret, String scope);
+                                  String redirectType, String authCode,
+                                  String clientId,
+                                  String authClientSecret, String scope);
 }

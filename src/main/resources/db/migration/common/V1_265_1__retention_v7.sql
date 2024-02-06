@@ -39,16 +39,22 @@ set display_name = 'Default',
 WHERE fixed_policy_key = '5';
 
 INSERT INTO darts.retention_policy_type
-(rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (7, '0', 'DARTS Default Policy', 'Default', 'DARTS Default retention policy', '7Y0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0, current_timestamp, 0);
+(rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by,
+ last_modified_ts, last_modified_by)
+VALUES (7, '0', 'DARTS Default Policy', 'Default', 'DARTS Default retention policy', '7Y0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0,
+        current_timestamp, 0);
 
 INSERT INTO darts.retention_policy_type
-(rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (8, 'PERM', 'DARTS Permanent Policy', 'Permanent', 'DARTS Manually Applied Permanent retention policy', '99Y0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0, current_timestamp, 0);
+(rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by,
+ last_modified_ts, last_modified_by)
+VALUES (8, 'PERM', 'DARTS Permanent Policy', 'Permanent', 'DARTS Manually Applied Permanent retention policy', '99Y0M0D', '2024-01-01 00:00:00', '',
+        current_timestamp, 0, current_timestamp, 0);
 
 INSERT INTO darts.retention_policy_type
-(rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES (9, 'MANUAL', 'DARTS Manual Policy', 'Manual', 'DARTS Manually Applied retention policy', '0Y0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0, current_timestamp, 0);
+(rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by,
+ last_modified_ts, last_modified_by)
+VALUES (9, 'MANUAL', 'DARTS Manual Policy', 'Manual', 'DARTS Manually Applied retention policy', '0Y0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0,
+        current_timestamp, 0);
 
 ALTER TABLE retention_policy_type
   ALTER COLUMN fixed_policy_key SET NOT NULL;

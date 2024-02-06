@@ -69,7 +69,7 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
     }
 
     void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional,
-          Set<SecurityRoleEnum> roles) {
+                                             Set<SecurityRoleEnum> roles) {
         if (transcriptionIdParamOptional.isPresent()) {
             try {
                 Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());

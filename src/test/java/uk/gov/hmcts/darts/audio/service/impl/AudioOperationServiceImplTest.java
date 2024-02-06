@@ -76,7 +76,8 @@ class AudioOperationServiceImplTest {
                     1,
                     createFile(tempDirectory, "original1.mp3"),
                     false
-              ))
+              )
+        )
         );
 
         inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
@@ -93,7 +94,8 @@ class AudioOperationServiceImplTest {
                     1,
                     createFile(tempDirectory, "original3.mp3"),
                     false
-              ))
+              )
+        )
         );
 
         inputAudioFileInfosWithMillisecondGaps = new ArrayList<>(Arrays.asList(
@@ -110,7 +112,8 @@ class AudioOperationServiceImplTest {
                     1,
                     createFile(tempDirectory, "original5.mp3"),
                     false
-              ))
+              )
+        )
         );
     }
 

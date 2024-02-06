@@ -15,15 +15,15 @@ class UserStateTest {
     void builder() {
         Set<Role> newRoles = new HashSet<>();
         newRoles.add(Role.builder()
-              .roleId(APPROVER.getId())
-              .roleName(APPROVER.toString())
-              .permissions(new HashSet<>())
-              .build());
+                           .roleId(APPROVER.getId())
+                           .roleName(APPROVER.toString())
+                           .permissions(new HashSet<>())
+                           .build());
         newRoles.add(Role.builder()
-              .roleId(REQUESTER.getId())
-              .roleName(REQUESTER.toString())
-              .permissions(new HashSet<>())
-              .build());
+                           .roleId(REQUESTER.getId())
+                           .roleName(REQUESTER.toString())
+                           .permissions(new HashSet<>())
+                           .build());
 
         UserState userState = UserState.builder()
               .userId(123)

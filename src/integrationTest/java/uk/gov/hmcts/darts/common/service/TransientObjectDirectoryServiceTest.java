@@ -60,9 +60,9 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         assertEquals(blodId, transientObjectDirectoryEntity.getExternalLocation().toString());
         assertNull(transientObjectDirectoryEntity.getChecksum());
         assertTrue(transientObjectDirectoryEntity.getCreatedDateTime()
-              .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
+                         .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
         assertTrue(transientObjectDirectoryEntity.getLastModifiedDateTime()
-              .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
+                         .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
         assertNotNull(transientObjectDirectoryEntity.getLastModifiedBy());
     }
 

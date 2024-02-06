@@ -73,7 +73,7 @@ public class EventStub {
     public EventEntity createDefaultEvent() {
         CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists("testCourthouse", "testCourtroom");
         return createEvent(courtroom, 10, OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC),
-              "testEventName"
+                           "testEventName"
         );
     }
 

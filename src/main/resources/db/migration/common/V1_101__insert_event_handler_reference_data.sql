@@ -117,7 +117,8 @@ VALUES (58, '2198', '3938', 'Judge directed Defence counsel to obtain a report',
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (59, '2198', '3940', 'Judges ruling', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (60, '2198', '3934', 'Judge passed sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (60, '2198', '3934', 'Judge passed sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (61, '2199', NULL, 'Prosecution application', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -153,7 +154,8 @@ VALUES (76, '2934', '3983', 'Unspecified event', 'StandardEventHandler', current
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (77, '3000', NULL, 'Archive Case', 'StopAndCloseHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (78, '3010', NULL, 'Sentence Transcription Required', 'com.synapps.moj.dfs.handler.DARTSTranscriptionRequestHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (78, '3010', NULL, 'Sentence Transcription Required', 'com.synapps.moj.dfs.handler.DARTSTranscriptionRequestHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (79, '4101', NULL, 'Witness cross-examined by Defence', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -173,23 +175,33 @@ VALUES (86, '20100', NULL, 'Bench Warrant Issued', 'StandardEventHandler', curre
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (87, '20101', NULL, 'Bench Warrant Executed', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (88, '20198', '13900', 'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, offered for the first time by the defence.', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (88, '20198', '13900',
+        'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, offered for the first time by the defence.',
+        'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (89, '20198', '13901', 'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, previously rejected by the prosecution.', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (89, '20198', '13901',
+        'Acceptable guilty plea(s) entered late to some or all charges / counts on the charge sheet, previously rejected by the prosecution.',
+        'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (90, '20198', '13902', 'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), first offered by defence.', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (90, '20198', '13902', 'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), first offered by defence.',
+        'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (91, '20198', '13903', 'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), previously rejected by the prosecution.', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (91, '20198', '13903',
+        'Acceptable guilty plea(s) to alternative new charge (not previously on the charge sheet), previously rejected by the prosecution.',
+        'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (92, '20198', '13904', 'Defendant bound over, acceptable to prosecution - offered for the first by the defence.', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (92, '20198', '13904', 'Defendant bound over, acceptable to prosecution - offered for the first by the defence.', 'StandardEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (93, '20198', '13905', 'Effective Trial.', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (94, '20198', '13906', 'Defendant bound over, now acceptable to prosecution - previously rejected by the prosecution', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (94, '20198', '13906', 'Defendant bound over, now acceptable to prosecution - previously rejected by the prosecution', 'StandardEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (159, '20909', NULL, 'Defence closing speech', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (95, '20198', '13907', 'Unable to proceed with the trail because defendant incapable through alcohol/drugs', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (95, '20198', '13907', 'Unable to proceed with the trail because defendant incapable through alcohol/drugs', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (96, '20198', '13908', 'Defendant deceased', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -201,7 +213,8 @@ VALUES (99, '20198', '13911', 'Prosecution end case: public interest grounds', '
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (100, '20198', '13912', 'Prosecution end case: adjournment refused', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (101, '20198', '13913', 'Prosecution not ready: served late notice of additional evidence on defence', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (101, '20198', '13913', 'Prosecution not ready: served late notice of additional evidence on defence', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (102, '20198', '13914', 'Prosecution not ready: specify in comments', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -217,25 +230,31 @@ VALUES (107, '20198', '13919', 'Prosecution advocate engaged in another trial', 
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (108, '20198', '13920', 'Prosecution advocate failed to attend', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (109, '20198', '13921', 'Prosecution increased time estimate - insufficient time for trail to start', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (109, '20198', '13921', 'Prosecution increased time estimate - insufficient time for trail to start', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (110, '20198', '13922', 'Defence not ready: disclosure problems', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (111, '20198', '13923', 'Defence not ready: specify in comments (inc. no instructions)', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (111, '20198', '13923', 'Defence not ready: specify in comments (inc. no instructions)', 'StandardEventHandler', current_timestamp, current_timestamp, 0,
+        true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (112, '20198', '13924', 'Defence asked for additional prosecution witness toattend', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (112, '20198', '13924', 'Defence asked for additional prosecution witness toattend', 'StandardEventHandler', current_timestamp, current_timestamp, 0,
+        true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (113, '20198', '13925', 'Defence witness absent', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (114, '20198', '13926', 'Defendant absent - did not proceed in absence (judicial discretion)', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (114, '20198', '13926', 'Defendant absent - did not proceed in absence (judicial discretion)', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (115, '20198', '13927', 'Defendant ill or otherwise unfit to proceed', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (116, '20198', '13928', 'Defendant not produced by PECS', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (117, '20198', '13929', 'Defendant absent - unable to proceed as defendant not notified of place and time of hearing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (117, '20198', '13929', 'Defendant absent - unable to proceed as defendant not notified of place and time of hearing', 'StandardEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (118, '20198', '13930', 'Defence increased time estimate - insufficient time to for trial to start', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (118, '20198', '13930', 'Defence increased time estimate - insufficient time to for trial to start', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (119, '20198', '13931', 'Defence advocate engaged in other trial', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -247,7 +266,8 @@ VALUES (122, '20198', '13934', 'Another case over-ran', 'StandardEventHandler', 
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (123, '20198', '13935', 'Judge / magistrate availability', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (124, '20198', '13936', 'Case not reached / insufficient cases drop out / floater not reached', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (124, '20198', '13936', 'Case not reached / insufficient cases drop out / floater not reached', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (125, '20198', '13937', 'Equipment / accomodation failure', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -361,33 +381,45 @@ VALUES (180, '21200', '10311', 'Bail Conditions Ceased - sentence deferred', 'St
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (181, '21200', '10312', 'Bail Conditions Ceased - defendant deceased', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (182, '21200', '10313', 'Bail Conditions Ceased - non-custodial sentence imposed', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (182, '21200', '10313', 'Bail Conditions Ceased - non-custodial sentence imposed', 'StandardEventHandler', current_timestamp, current_timestamp, 0,
+        true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (183, '21200', '11000', 'Section 4(2) of the Contempt of Court Act 1981', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (183, '21200', '11000', 'Section 4(2) of the Contempt of Court Act 1981', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0,
+        true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (184, '21200', '11001', 'Section 11 of the Contempt of Court Act 1981', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (184, '21200', '11001', 'Section 11 of the Contempt of Court Act 1981', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0,
+        true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (185, '21200', '11002', 'Section 39 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (185, '21200', '11002', 'Section 39 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (186, '21200', '11003', 'Section 4 of the Sexual Offenders (Amendment) Act 1976', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (186, '21200', '11003', 'Section 4 of the Sexual Offenders (Amendment) Act 1976', 'SetReportingRestrictionEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (187, '21200', '11004', 'Section 2 of the Sexual Offenders (Amendment) Act 1992', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (187, '21200', '11004', 'Section 2 of the Sexual Offenders (Amendment) Act 1992', 'SetReportingRestrictionEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (188, '21200', '11006', 'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (188, '21200', '11006', 'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (189, '21200', '11007', 'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (189, '21200', '11007', 'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (190, '21200', '11008', 'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (190, '21200', '11008', 'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999', 'SetReportingRestrictionEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (191, '21200', '11009', 'An order made under s49 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (191, '21200', '11009', 'An order made under s49 of the Children and Young Persons Act 1933', 'SetReportingRestrictionEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (192, '21201', NULL, 'Restrictions lifted', 'SetReportingRestrictionEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (193, '21300', NULL, 'Freetext', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (194, '21400', '12414', 'Defendant disqualified from working with children for life (Defendant under 18)', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (194, '21400', '12414', 'Defendant disqualified from working with children for life (Defendant under 18)', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (195, '21400', '12415', 'Defendant disqualified from working with children for life (Defendant over 18)', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (195, '21400', '12415', 'Defendant disqualified from working with children for life (Defendant over 18)', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (196, '21500', '13700', 'Defendant ordered to be electronically monitored', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -399,27 +431,38 @@ VALUES (199, '21500', '13703', 'Defendant subject to a electronically monitored 
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (200, '21500', '13704', 'Terms of electronically monitored curfew amended', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (201, '21500', '13705', 'Requirement for an electronically monitored curfew removed', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (201, '21500', '13705', 'Requirement for an electronically monitored curfew removed', 'StandardEventHandler', current_timestamp, current_timestamp, 0,
+        true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (202, '21600', '13600', 'Sex Offenders Register - victim under 18 years of age - for an indefinite period', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (202, '21600', '13600', 'Sex Offenders Register - victim under 18 years of age - for an indefinite period', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (203, '21600', '13601', 'Sex Offenders Register - victim under 18 years of age - for 10 years', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (203, '21600', '13601', 'Sex Offenders Register - victim under 18 years of age - for 10 years', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (204, '21600', '13602', 'Sex Offenders Register - victim under 18 years of age - for 3-7 years', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (204, '21600', '13602', 'Sex Offenders Register - victim under 18 years of age - for 3-7 years', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (205, '21600', '13603', 'Sex Offenders Register - victim under 18 years of age - period to be specified later', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (205, '21600', '13603', 'Sex Offenders Register - victim under 18 years of age - period to be specified later', 'StandardEventHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (206, '21600', '13604', 'Sex Offenders Register - victim under 18 years of age - for another period', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (206, '21600', '13604', 'Sex Offenders Register - victim under 18 years of age - for another period', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (207, '21600', '13605', 'Sex Offenders Register - victim over 18 years of age - for an indefinite period', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (207, '21600', '13605', 'Sex Offenders Register - victim over 18 years of age - for an indefinite period', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (208, '21600', '13606', 'Sex Offenders Register - victim over 18 years of age - for 10 years', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (208, '21600', '13606', 'Sex Offenders Register - victim over 18 years of age - for 10 years', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (209, '21600', '13607', 'Sex Offenders Register - victim over 18 years of age - for 3-7 years', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (209, '21600', '13607', 'Sex Offenders Register - victim over 18 years of age - for 3-7 years', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (210, '21600', '13608', 'Sex Offenders Register - victim over 18 years of age - for another period', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (210, '21600', '13608', 'Sex Offenders Register - victim over 18 years of age - for another period', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (211, '21600', '13609', 'Sex Offenders Register - victim over 18 years of age - period to be specified later', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (211, '21600', '13609', 'Sex Offenders Register - victim over 18 years of age - period to be specified later', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (212, '21800', '12310', 'Disqualification from driving removed (3076)', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -461,23 +504,29 @@ VALUES (230, '40727', NULL, 'Verdict', 'StandardEventHandler', current_timestamp
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (231, '40730', NULL, 'Verdict', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (232, '40730', '10808', 'Case Level Criminal Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (232, '40730', '10808', 'Case Level Criminal Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (233, '40731', NULL, 'Verdict', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (234, '40731', '10808', 'Offence Level Criminal Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (234, '40731', '10808', 'Offence Level Criminal Appeal Result',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (235, '40732', NULL, 'Verdict', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (236, '40732', '10808', 'Offence Level Criminal Appeal Result with alt offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (236, '40732', '10808', 'Offence Level Criminal Appeal Result with alt offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (237, '40733', NULL, 'Verdict', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (238, '40733', '10808', 'Case Level Misc Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (238, '40733', '10808', 'Case Level Misc Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (239, '40735', '10808', 'Delete Offence Level Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (239, '40735', '10808', 'Delete Offence Level Appeal Result', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (240, '40735', NULL, 'Verdict', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (240, '40735', NULL, 'Verdict', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (241, '40736', NULL, 'Verdict', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -485,229 +534,334 @@ VALUES (242, '40737', NULL, 'Verdict', 'StandardEventHandler', current_timestamp
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (243, '40738', NULL, 'Verdict', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (244, '40750', '12309', 'Driving disqualification suspended pending appeal subsequent to imposition (3075)', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (244, '40750', '12309', 'Driving disqualification suspended pending appeal subsequent to imposition (3075)', 'StandardEventHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (245, '40750', NULL, 'Sentencing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (246, '40750', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (246, '40750', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (247, '40750', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (247, '40750', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (248, '40750', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (248, '40750', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (249, '40750', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (249, '40750', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (250, '40750', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (250, '40750', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (251, '40750', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (251, '40750', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (252, '40750', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (252, '40750', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (253, '40750', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (253, '40750', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (254, '40750', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (254, '40750', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (255, '40750', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (255, '40750', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (256, '40750', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (256, '40750', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (257, '40750', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (257, '40750', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (258, '40750', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (258, '40750', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (259, '40750', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (259, '40750', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (260, '40750', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (260, '40750', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (261, '40750', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (261, '40750', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (262, '40750', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (262, '40750', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (263, '40750', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (263, '40750', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (264, '40750', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (264, '40750', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (265, '40750', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (265, '40750', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (266, '40750', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (266, '40750', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (267, '40750', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (267, '40750', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (268, '40750', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (268, '40750', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (269, '40750', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (269, '40750', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (270, '40750', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (270, '40750', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (271, '40751', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (271, '40751', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (272, '40751', NULL, 'Sentencing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (368, '407131', NULL, 'Case to be listed', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (273, '40751', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (273, '40751', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (274, '40751', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (274, '40751', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (275, '40751', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (275, '40751', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (276, '40751', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (276, '40751', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (277, '40751', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (277, '40751', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (278, '40751', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (278, '40751', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (279, '40751', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (279, '40751', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (280, '40751', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (280, '40751', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (281, '40751', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (281, '40751', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (282, '40751', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (282, '40751', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (283, '40751', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (283, '40751', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (284, '40751', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (284, '40751', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (285, '40751', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (285, '40751', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (286, '40751', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (286, '40751', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (287, '40751', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (287, '40751', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (288, '40751', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (288, '40751', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (289, '40751', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (289, '40751', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (290, '40751', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (290, '40751', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (291, '40751', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (291, '40751', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (292, '40751', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (292, '40751', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (293, '40751', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (293, '40751', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (294, '40751', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (294, '40751', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (295, '40751', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (295, '40751', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (296, '40751', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (296, '40751', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (297, '40752', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (297, '40752', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (298, '40752', NULL, 'Sentencing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (299, '40752', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (299, '40752', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (300, '40752', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (300, '40752', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (301, '40752', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (301, '40752', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (302, '40752', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (302, '40752', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (303, '40752', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (303, '40752', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (304, '40752', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (304, '40752', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (305, '40752', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (305, '40752', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (306, '40752', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (306, '40752', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (307, '40752', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (307, '40752', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (308, '40752', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (308, '40752', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (309, '40752', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (309, '40752', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (310, '40752', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (310, '40752', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (311, '40752', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (311, '40752', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (312, '40752', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (312, '40752', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (313, '40752', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (313, '40752', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (314, '40752', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (314, '40752', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (315, '40752', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (315, '40752', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (316, '40752', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (316, '40752', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (369, '407132', NULL, 'Case to be listed', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (317, '40752', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (317, '40752', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (318, '40752', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (318, '40752', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (319, '40752', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (319, '40752', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (320, '40752', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (320, '40752', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (321, '40752', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (321, '40752', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (322, '40752', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (322, '40752', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (323, '40753', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (323, '40753', '11528', 'Detention in Y.O.I. - Extended under s235A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (324, '40753', NULL, 'Sentencing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (325, '40753', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (325, '40753', '11504', 'Life Imprisonment', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (326, '40753', '11505', 'Life Imprisonment (with minimum period)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (326, '40753', '11505', 'Life Imprisonment (with minimum period)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (327, '40753', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (327, '40753', '11506', 'Custody for Life', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (328, '40753', '11507', 'Mandatory Life Sentence for Second Serious Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (328, '40753', '11507', 'Mandatory Life Sentence for Second Serious Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (329, '40753', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (329, '40753', '11508', 'Mandatory Life Sentence for Second Serious Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (330, '40753', '11509', 'Detained During Her Majestys Pleasure', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (330, '40753', '11509', 'Detained During Her Majestys Pleasure',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (331, '40753', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (331, '40753', '11521', 'INIMP: Indeterminate Sentence of Imprisonment for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (332, '40753', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (332, '40753', '11522', 'INDET: Indeterminate Sentence of Detention for Public Protection',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (333, '40753', '11523', 'Mandatory Life Sentence for Second Listed Offence', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (333, '40753', '11523', 'Mandatory Life Sentence for Second Listed Offence',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (334, '40753', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (334, '40753', '11524', 'Mandatory Life Sentence for Second Listed Offence (Young Offender)',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (335, '40753', '12400', 'Disqualification Order (from working with children) - ADULTS', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (335, '40753', '12400', 'Disqualification Order (from working with children) - ADULTS',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (336, '40753', '12401', 'Disqualification Order (from working with children) - JUVENILES', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (336, '40753', '12401', 'Disqualification Order (from working with children) - JUVENILES',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (337, '40753', '13505', 'S226b Extended Discretional for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (337, '40753', '13505', 'S226b Extended Discretional for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (338, '40753', '13506', 'S226b Extended Automatic for under 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (338, '40753', '13506', 'S226b Extended Automatic for under 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (339, '40753', '13503', 'S226a Extended Discretional for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (339, '40753', '13503', 'S226a Extended Discretional for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (340, '40753', '13504', 'S226a Extended Automatic for over 18', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (340, '40753', '13504', 'S226a Extended Automatic for over 18',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (341, '40753', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (341, '40753', '11529', 'Detention for Life under s226 (u18)', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (342, '40753', '11525', 'Imprisonment - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (342, '40753', '11525', 'Imprisonment - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (343, '40753', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (343, '40753', '11526', 'Imprisonment - Minimum Imposed after 3 strikes (Young Offender) - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (344, '40753', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003', 'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (344, '40753', '11527', 'Imprisonment - Minimum Imposed after 3 strikes - Extended under s236A CJA2003',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SenencingRemarksAndRetentionPolicyHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (345, '40753', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (345, '40753', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (346, '40753', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (346, '40753', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (347, '40753', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (347, '40753', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (348, '40753', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (348, '40753', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (349, '40754', NULL, 'Sentencing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (350, '40754', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (350, '40754', '11533', 'Imprisonment for life (adult) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (351, '40754', '11534', 'Detention for life (youth) for manslaughter of an emergency worker', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (351, '40754', '11534', 'Detention for life (youth) for manslaughter of an emergency worker',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (352, '40754', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (352, '40754', '13507', '(Extended Discretional 18 to 20)   Section 266', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (353, '40754', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (353, '40754', '13508', '(Extended Discretional over 21)', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (354, '40755', NULL, 'Sentencing', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
@@ -739,15 +893,18 @@ VALUES (367, '302004', NULL, 'Case not reserved', 'StandardEventHandler', curren
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (370, 'CPPDL', 'CPPDL', 'CPP Daily List', 'com.synapps.moj.dfs.handler.DARTSDailyListFromCPPHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (371, 'DETTO', '11531', 'Special Sentence of Detention for Terrorist Offenders of Particular Concern', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (371, 'DETTO', '11531', 'Special Sentence of Detention for Terrorist Offenders of Particular Concern',
+        'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (372, 'DL', NULL, 'Daily List', 'com.synapps.moj.dfs.handler.DARTSDailyListHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (373, 'NEWCASE', NULL, 'New Case', 'com.synapps.moj.dfs.handler.DARTSXHIBITNewCaseHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (374, 'STS', '11530', 'Serious Terrorism Sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (374, 'STS', '11530', 'Serious Terrorism Sentence', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp,
+        current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
-VALUES (375, 'STS1821', '11532', 'Serious Terrorism Sentence 18 to 21', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler', current_timestamp, current_timestamp, 0, true);
+VALUES (375, 'STS1821', '11532', 'Serious Terrorism Sentence 18 to 21', 'com.synapps.moj.dfs.handler.eventtransrequest.SentencingRemarksHandler',
+        current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)
 VALUES (376, 'UPDCASE', NULL, 'Update Case', 'com.synapps.moj.dfs.handler.DARTSXHIBITUpdateCaseHandler', current_timestamp, current_timestamp, 0, true);
 INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active)

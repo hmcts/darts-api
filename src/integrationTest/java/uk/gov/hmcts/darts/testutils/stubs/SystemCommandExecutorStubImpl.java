@@ -27,7 +27,7 @@ public class SystemCommandExecutorStubImpl implements SystemCommandExecutor {
     @Override
     public Boolean execute(CommandLine command) {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-              + " you should ask questions! ###");
+                       + " you should ask questions! ###");
 
         String executable = command.getExecutable();
         List<String> arguments = Arrays.asList(command.getArguments());

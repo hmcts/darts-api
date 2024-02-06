@@ -34,7 +34,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private TranscriptionArchiveRecord createTranscriptionArchiveRecord(TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation,
-          UploadNewFileRecord uploadNewFileRecord) {
+                                                                        UploadNewFileRecord uploadNewFileRecord) {
         return TranscriptionArchiveRecord.builder()
               .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
               .uploadNewFileRecord(uploadNewFileRecord)
@@ -58,7 +58,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-          Integer relationId) {
+                                                                                   Integer relationId) {
         return TranscriptionCreateArchiveRecordOperation.builder()
               .relationId(relationId.toString())
               .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))

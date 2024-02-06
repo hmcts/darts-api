@@ -14,7 +14,7 @@ public interface OutboundFileZipGeneratorHelper {
     String generatePlaylist(Set<PlaylistInfo> playlistInfos, String outputFileLocation);
 
     String generateAnnotation(HearingEntity hearingEntity, ZonedDateTime startTime, ZonedDateTime endTime,
-          String annotationsOutputFile);
+                              String annotationsOutputFile);
 
     String generateReadme(ViqMetaData viqMetaData, String fileLocation);
 

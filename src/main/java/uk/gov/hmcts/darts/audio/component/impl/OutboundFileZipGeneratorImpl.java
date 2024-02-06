@@ -89,8 +89,8 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
     }
 
     private Map<Path, Path> generateZipStructure(List<List<AudioFileInfo>> audioSessions,
-          MediaRequestEntity mediaRequestEntity,
-          String mediaRequestDirString) {
+                                                 MediaRequestEntity mediaRequestEntity,
+                                                 String mediaRequestDirString) {
         Map<Path, Path> sourceToDestinationPaths = new HashMap<>();
 
         HearingEntity hearingEntity = mediaRequestEntity.getHearing();
@@ -122,10 +122,10 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
                 String parentPathString = path.getParent().toString();
                 playlistInfos.add(PlaylistInfo.builder()
-                      .caseNumber(caseNumber)
-                      .startTime(localStartTime)
-                      .fileLocation(parentPathString)
-                      .build());
+                                        .caseNumber(caseNumber)
+                                        .startTime(localStartTime)
+                                        .fileLocation(parentPathString)
+                                        .build());
 
                 Path annotationsOutputFile = Path.of(
                       mediaRequestDirString,

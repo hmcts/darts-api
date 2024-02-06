@@ -55,7 +55,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByCaseId(Integer caseId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = List.of(caseRepository.getReferenceById(caseId)
-                  .getCourthouse());
+                                                                     .getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
             log.error("Unable to find Case-Courthouse for checkAuthorisation", e);
@@ -67,7 +67,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByHearingId(Integer hearingId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = List.of(hearingRepository.getReferenceById(hearingId)
-                  .getCourtroom().getCourthouse());
+                                                                     .getCourtroom().getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
             log.error("Unable to find Hearing-Courtroom-Courthouse for checkAuthorisation", e);
@@ -79,7 +79,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByMediaRequestId(Integer mediaRequestId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = List.of(mediaRequestRepository.getReferenceById(mediaRequestId)
-                  .getHearing().getCourtroom().getCourthouse());
+                                                                     .getHearing().getCourtroom().getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
             log.error("Unable to find MediaRequest-Hearing-Courtroom-Courthouse for checkAuthorisation", e);
@@ -148,7 +148,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByTransformedMediaId(Integer transformedMediaId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = List.of(transformedMediaRepository.getReferenceById(transformedMediaId)
-                  .getMediaRequest().getHearing().getCourtroom().getCourthouse());
+                                                                     .getMediaRequest().getHearing().getCourtroom().getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
             log.error("Unable to find TransformedMedia-MediaRequest-Hearing-Courtroom-Courthouse for checkAuthorisation", e);

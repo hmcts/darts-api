@@ -126,7 +126,8 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
         throw new DartsApiException(
               UserManagementError.USER_NOT_FOUND,
-              String.format("User id %d not found", userId));
+              String.format("User id %d not found", userId)
+        );
     }
 
     private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {

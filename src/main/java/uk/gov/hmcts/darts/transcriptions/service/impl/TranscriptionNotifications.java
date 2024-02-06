@@ -43,8 +43,8 @@ public class TranscriptionNotifications {
 
     @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
     public void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
-          TranscriptionEntity transcriptionEntity,
-          TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
+                                            TranscriptionEntity transcriptionEntity,
+                                            TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
         final var courtCaseEntity = transcriptionEntity.getCourtCase();

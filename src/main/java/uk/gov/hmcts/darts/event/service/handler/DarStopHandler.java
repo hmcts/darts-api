@@ -18,10 +18,10 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 public class DarStopHandler extends EventHandlerBase {
 
     public DarStopHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-          EventRepository eventRepository,
-          HearingRepository hearingRepository,
-          CaseRepository caseRepository,
-          ApplicationEventPublisher eventPublisher) {
+                          EventRepository eventRepository,
+                          HearingRepository hearingRepository,
+                          CaseRepository caseRepository,
+                          ApplicationEventPublisher eventPublisher) {
         super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 

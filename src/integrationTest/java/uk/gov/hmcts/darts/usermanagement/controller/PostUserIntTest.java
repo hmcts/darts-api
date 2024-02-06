@@ -89,11 +89,11 @@ class PostUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "full_name": "James Smith",
-                      "email_address": "james.smith@hmcts.net"
-                    }
-                    """);
+                             {
+                               "full_name": "James Smith",
+                               "email_address": "james.smith@hmcts.net"
+                             }
+                             """);
 
         MvcResult result = mockMvc.perform(request)
               .andExpect(status().isCreated())
@@ -135,16 +135,16 @@ class PostUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "full_name": "James Smith",
-                      "email_address": "james.smith@hmcts.net",
-                      "description": "A test user",
-                      "active": true,
-                      "security_group_ids": [
-                        -1, -2
-                      ]
-                    }
-                    """);
+                             {
+                               "full_name": "James Smith",
+                               "email_address": "james.smith@hmcts.net",
+                               "description": "A test user",
+                               "active": true,
+                               "security_group_ids": [
+                                 -1, -2
+                               ]
+                             }
+                             """);
         MvcResult result = mockMvc.perform(request)
               .andExpect(status().isCreated())
               .andExpect(jsonPath("$.id").exists())
@@ -192,14 +192,14 @@ class PostUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest()
               .header("Content-Type", "application/json")
               .content("""
-                    {
-                      "description": "",
-                      "active": true,
-                      "security_group_ids": [
-                        1
-                      ]
-                    }
-                    """);
+                             {
+                               "description": "",
+                               "active": true,
+                               "security_group_ids": [
+                                 1
+                               ]
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isBadRequest());
     }
@@ -219,11 +219,11 @@ class PostUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "full_name": "James Smith",
-                      "email_address": "james.smith@hmcts.net"
-                    }
-                    """);
+                             {
+                               "full_name": "James Smith",
+                               "email_address": "james.smith@hmcts.net"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isCreated());
     }
@@ -234,14 +234,14 @@ class PostUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "full_name": "James Smith",
-                      "email_address": "james.smith@hmcts.net",
-                      "security_group_ids": [
-                        9999999
-                      ]
-                    }
-                    """);
+                             {
+                               "full_name": "James Smith",
+                               "email_address": "james.smith@hmcts.net",
+                               "security_group_ids": [
+                                 9999999
+                               ]
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isInternalServerError());
     }

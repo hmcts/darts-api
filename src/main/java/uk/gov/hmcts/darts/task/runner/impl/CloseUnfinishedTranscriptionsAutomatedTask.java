@@ -16,9 +16,9 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
     protected String taskName = CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName();
 
     public CloseUnfinishedTranscriptionsAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-          LockProvider lockProvider,
-          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-          TranscriptionsApi transcriptionsApi) {
+                                                      LockProvider lockProvider,
+                                                      AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                                      TranscriptionsApi transcriptionsApi) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.transcriptionsApi = transcriptionsApi;
     }

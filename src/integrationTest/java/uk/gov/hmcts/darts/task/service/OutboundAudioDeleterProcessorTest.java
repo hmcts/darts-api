@@ -467,7 +467,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     private TransientObjectDirectoryEntity createTransientDirectoryWithTransformedMediaNullLastAccessedDate(MediaRequestEntity mediaRequestEntity,
-          OffsetDateTime createdAt) {
+                                                                                                            OffsetDateTime createdAt) {
         var objectDirectoryStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         TransformedMediaEntity transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(
               mediaRequestEntity,

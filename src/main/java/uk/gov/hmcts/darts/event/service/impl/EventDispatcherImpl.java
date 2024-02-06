@@ -39,7 +39,8 @@ public class EventDispatcherImpl implements EventDispatcher {
               "Executing event handler: {} for event: {} and case number(s): {}",
               foundHandler.getClass().getName(),
               requireNonNullElse(event.getEventId(), "non provided"),
-              caseNumbers);
+              caseNumbers
+        );
     }
 
     @Override

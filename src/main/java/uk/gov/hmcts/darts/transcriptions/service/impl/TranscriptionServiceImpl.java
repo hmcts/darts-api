@@ -184,7 +184,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Transactional
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-          UpdateTranscription updateTranscription) {
+                                                           UpdateTranscription updateTranscription) {
         return updateTranscription(transcriptionId, updateTranscription, false);
     }
 
@@ -192,7 +192,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Transactional
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-          UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
+                                                           UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
               .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
@@ -217,7 +217,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void validateUpdateTranscription(TranscriptionEntity transcription,
-          UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
+                                             UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
@@ -242,10 +242,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private TranscriptionEntity saveTranscription(UserAccountEntity userAccount,
-          TranscriptionRequestDetails transcriptionRequestDetails,
-          TranscriptionStatusEntity transcriptionStatus,
-          TranscriptionTypeEntity transcriptionType,
-          TranscriptionUrgencyEntity transcriptionUrgency, boolean isManual) {
+                                                  TranscriptionRequestDetails transcriptionRequestDetails,
+                                                  TranscriptionStatusEntity transcriptionStatus,
+                                                  TranscriptionTypeEntity transcriptionType,
+                                                  TranscriptionUrgencyEntity transcriptionUrgency, boolean isManual) {
 
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
@@ -276,9 +276,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
-          TranscriptionEntity transcription,
-          TranscriptionStatusEntity transcriptionStatus,
-          String workflowComment) {
+                                                                  TranscriptionEntity transcription,
+                                                                  TranscriptionStatusEntity transcriptionStatus,
+                                                                  String workflowComment) {
 
         TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
         transcriptionWorkflow.setTranscription(transcription);
@@ -296,8 +296,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment,
-          TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
-          TranscriptionEntity transcription) {
+                                      TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
+                                      TranscriptionEntity transcription) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment(workflowComment);
         transcriptionCommentEntity.setTranscriptionWorkflow(savedTranscriptionWorkFlow);
@@ -373,7 +373,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
-          MultipartFile transcript) {
+                                                     MultipartFile transcript) {
 
         transcriptFileValidator.validate(transcript);
 
@@ -411,7 +411,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
         attachTranscriptResponse.setTranscriptionDocumentId(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()
-              .getId());
+                                                                  .getId());
         attachTranscriptResponse.setTranscriptionWorkflowId(updateTranscription.getTranscriptionWorkflowId());
 
         return attachTranscriptResponse;
@@ -457,9 +457,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
-          String checksum,
-          UserAccountEntity userAccountEntity,
-          TranscriptionDocumentEntity transcriptionDocumentEntity) {
+                                                                      String checksum,
+                                                                      UserAccountEntity userAccountEntity,
+                                                                      TranscriptionDocumentEntity transcriptionDocumentEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
@@ -554,8 +554,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private Optional<TranscriptionEntity> getTranscriptionEntityForId(Integer transcriptionId,
-          List<TranscriptionEntity> updateTranscriptions) {
+                                                                      List<TranscriptionEntity> updateTranscriptions) {
         return updateTranscriptions.stream().filter(e ->
-              e.getId().equals(transcriptionId)).findAny();
+                                                          e.getId().equals(transcriptionId)).findAny();
     }
 }

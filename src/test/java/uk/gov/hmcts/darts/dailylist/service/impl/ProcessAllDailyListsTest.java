@@ -50,7 +50,8 @@ class ProcessAllDailyListsTest {
     void setUp() {
         dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater);
         setCourthouseForStubs("Swansea", dailyListForSwansea);
-        setCourthouseForStubs("Leeds",
+        setCourthouseForStubs(
+              "Leeds",
               oldestDailyListForLeeds,
               oldDailyListForLeeds,
               latestDailyListForLeeds

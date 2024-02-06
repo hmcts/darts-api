@@ -134,10 +134,10 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
-              REQUESTED, testUser
+                                    REQUESTED, testUser
         );
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
-              AWAITING_AUTHORISATION, testUser
+                                    AWAITING_AUTHORISATION, testUser
         );
 
         assertThat(dartsDatabase.getTranscriptionCommentRepository().findAll())
@@ -153,8 +153,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
-          TranscriptionStatusEnum expectedTranscriptionStatus,
-          UserAccountEntity expectedWorkflowActor) {
+                                             TranscriptionStatusEnum expectedTranscriptionStatus,
+                                             UserAccountEntity expectedWorkflowActor) {
 
         assertEquals(
               expectedTranscriptionStatus.getId(),
@@ -672,12 +672,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
-          Integer caseId,
-          Integer urgencyId,
-          Integer transcriptionTypeId,
-          String comment,
-          OffsetDateTime startDateTime,
-          OffsetDateTime endDateTime
+                                                                          Integer caseId,
+                                                                          Integer urgencyId,
+                                                                          Integer transcriptionTypeId,
+                                                                          String comment,
+                                                                          OffsetDateTime startDateTime,
+                                                                          OffsetDateTime endDateTime
     ) {
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);

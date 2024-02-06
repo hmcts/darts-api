@@ -119,11 +119,11 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         HearingEntity hearing6c = createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
-              hearing2a, hearing2b, hearing2c,
-              hearing3a, hearing3b, hearing3c,
-              hearing4a, hearing4b, hearing4c,
-              hearing5a, hearing5b, hearing5c,
-              hearing6a, hearing6b, hearing6c
+                              hearing2a, hearing2b, hearing2c,
+                              hearing3a, hearing3b, hearing3c,
+                              hearing4a, hearing4b, hearing4c,
+                              hearing5a, hearing5b, hearing5c,
+                              hearing6a, hearing6b, hearing6c
 
         );
 

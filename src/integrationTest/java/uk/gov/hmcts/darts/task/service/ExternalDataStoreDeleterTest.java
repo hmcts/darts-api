@@ -126,10 +126,10 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
         externalOutboundDataStoreDeleter =
               new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectRecordStatusRepository(),
-                    dartsDatabase.getUserAccountRepository(),
-                    dartsDatabase.getTransientObjectDirectoryRepository(),
-                    outboundExternalObjectDirectoryDeletedFinder,
-                    outboundDataStoreDeleter, systemUserHelper
+                                                   dartsDatabase.getUserAccountRepository(),
+                                                   dartsDatabase.getTransientObjectDirectoryRepository(),
+                                                   outboundExternalObjectDirectoryDeletedFinder,
+                                                   outboundDataStoreDeleter, systemUserHelper
               );
 
     }
@@ -250,7 +250,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     }
 
     private void verifyEntitiesChanged(List<ExternalObjectDirectoryEntity> inboundUnstructuredList,
-          List<TransientObjectDirectoryEntity> outboundList) {
+                                       List<TransientObjectDirectoryEntity> outboundList) {
         assertExternalObjectDirectoryStateChanged(inboundUnstructuredList);
         assertTransientObjectDirectoryStateChanged(outboundList);
     }

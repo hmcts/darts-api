@@ -84,10 +84,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "full_name": "Jimmy Smith"
-                    }
-                    """);
+                             {
+                               "full_name": "Jimmy Smith"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
@@ -133,13 +133,13 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "full_name": "Jimmy Smith",
-                      "description": "An updated description",
-                      "active": false,
-                      "security_group_ids": [ ]
-                    }
-                    """);
+                             {
+                               "full_name": "Jimmy Smith",
+                               "description": "An updated description",
+                               "active": false,
+                               "security_group_ids": [ ]
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
@@ -180,11 +180,11 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "full_name": " ",
-                      "description": ""
-                    }
-                    """);
+                             {
+                               "full_name": " ",
+                               "description": ""
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isBadRequest())
               .andExpect(jsonPath("$.title").value("Constraint Violation"))
@@ -197,10 +197,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(818_231)
               .content("""
-                    {
-                      "full_name": "Jimmy Smith"
-                    }
-                    """);
+                             {
+                               "full_name": "Jimmy Smith"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isNotFound())
               .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_100"));
@@ -215,10 +215,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "active": false
-                    }
-                    """);
+                             {
+                               "active": false
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
@@ -249,10 +249,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "active": true
-                    }
-                    """);
+                             {
+                               "active": true
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
@@ -283,10 +283,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "security_group_ids": [ -3, -4 ]
-                    }
-                    """);
+                             {
+                               "security_group_ids": [ -3, -4 ]
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
@@ -327,10 +327,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "email_address": "jimmy.nail@hmcts.net"
-                    }
-                    """);
+                             {
+                               "email_address": "jimmy.nail@hmcts.net"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
@@ -348,10 +348,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "email_address": "james.smith@hmcts.net"
-                    }
-                    """);
+                             {
+                               "email_address": "james.smith@hmcts.net"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
@@ -368,10 +368,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "email_address": "james.smith@hmcts.net"
-                    }
-                    """);
+                             {
+                               "email_address": "james.smith@hmcts.net"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isConflict())
               .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_101"))
@@ -389,10 +389,10 @@ class PatchUserIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
               .content("""
-                    {
-                      "full_name": "Jimmy Smith"
-                    }
-                    """);
+                             {
+                               "full_name": "Jimmy Smith"
+                             }
+                             """);
         mockMvc.perform(request)
               .andExpect(status().isForbidden());
     }

@@ -170,7 +170,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void readInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename,
-          ObjectRecordStatusEntity armDropZoneStatus) {
+                                     ObjectRecordStatusEntity armDropZoneStatus) {
         try {
             InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
             String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
@@ -224,8 +224,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory,
-          BinaryData uploadFileBinary,
-          UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+                                BinaryData uploadFileBinary,
+                                UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         if (nonNull(uploadFileBinary)) {
             Path jsonPath = null;
             try {
@@ -259,8 +259,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processUploadFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
-          UploadFileFilenameProcessor uploadFileFilenameProcessor,
-          ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+                                         UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                         ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         if (nonNull(armResponseUploadFileRecord)) {
             //If the filename contains 1
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
@@ -294,7 +294,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processUploadFileDataSuccess(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-          ExternalObjectDirectoryEntity externalObjectDirectory) {
+                                              ExternalObjectDirectoryEntity externalObjectDirectory) {
         // Validate the checksum in external object directory table against the Media, TranscriptionDocument, or AnnotationDocument
         if (nonNull(externalObjectDirectory.getMedia())) {
             MediaEntity media = externalObjectDirectory.getMedia();
@@ -329,8 +329,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-          ExternalObjectDirectoryEntity externalObjectDirectory,
-          String objectChecksum) {
+                                               ExternalObjectDirectoryEntity externalObjectDirectory,
+                                               String objectChecksum) {
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
             UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
             if (nonNull(uploadNewFileRecord)) {
@@ -340,8 +340,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
-                  externalObjectDirectory.getId(),
-                  armResponseUploadFileRecord.getMd5(), objectChecksum
+                     externalObjectDirectory.getId(),
+                     armResponseUploadFileRecord.getMd5(), objectChecksum
             );
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, checksumFailedStatus);
@@ -370,7 +370,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
-          ObjectRecordStatusEntity objectRecordStatus) {
+                                                                           ObjectRecordStatusEntity objectRecordStatus) {
         if (externalObjectDirectory.getVerificationAttempts() < armDataManagementConfiguration.getMaxRetryAttempts()) {
             int verificationAttempts = externalObjectDirectory.getVerificationAttempts() + 1;
             externalObjectDirectory.setVerificationAttempts(verificationAttempts);

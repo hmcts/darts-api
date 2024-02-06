@@ -32,8 +32,8 @@ public class ArmApiServiceImpl implements ArmApiService {
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
               .itemId(externalRecordId)
               .manifest(UpdateMetadataRequest.Manifest.builder()
-                    .eventDate(eventTimestamp)
-                    .build())
+                              .eventDate(eventTimestamp)
+                              .build())
               .useGuidsForFields(false)
               .build();
 

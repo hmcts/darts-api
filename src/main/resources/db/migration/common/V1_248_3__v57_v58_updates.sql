@@ -1,4 +1,5 @@
-INSERT INTO darts.transformed_media(trm_id, mer_id, last_accessed_ts, expiry_ts, output_filename, output_filesize, output_format, checksum, start_ts, end_ts, created_ts, created_by, last_modified_ts, last_modified_by)
+INSERT INTO darts.transformed_media(trm_id, mer_id, last_accessed_ts, expiry_ts, output_filename, output_filesize, output_format, checksum, start_ts, end_ts,
+                                    created_ts, created_by, last_modified_ts, last_modified_by)
   (select nextval('trm_seq'),
           mr.mer_id,
           mr.last_accessed_ts,

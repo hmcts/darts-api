@@ -235,9 +235,11 @@ class TokenValidatorImplTest {
               .add("I AM A MANGLED SIGNATURE")
               .toString();
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwtWithMangledSignature,
+        JwtValidationResult validationResult = tokenValidator.validate(
+              jwtWithMangledSignature,
               authenticationProviderConfiguration,
-              authenticationConfiguration);
+              authenticationConfiguration
+        );
 
         assertFalse(validationResult.valid());
         assertEquals("Signed JWT rejected: Invalid signature", validationResult.reason());

@@ -32,11 +32,11 @@ public class AccessTokenClient {
     @SneakyThrows
     public String getAccessToken() {
         Map<String, String> params = Map.of("client_id", clientId,
-              "client_secret", clientSecret,
-              "scope", scope,
-              "grant_type", GrantType.PASSWORD.getValue(),
-              "username", username,
-              "password", password
+                                            "client_secret", clientSecret,
+                                            "scope", scope,
+                                            "grant_type", GrantType.PASSWORD.getValue(),
+                                            "username", username,
+                                            "password", password
         );
         HttpRequest request = HttpRequest.newBuilder(URI.create(tokenUri))
               .POST(encode(params))

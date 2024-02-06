@@ -57,11 +57,11 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "name": "ACME",
-                      "display_name": "ACME Transcription Services"
-                    }
-                      """);
+                             {
+                               "name": "ACME",
+                               "display_name": "ACME Transcription Services"
+                             }
+                               """);
 
         MvcResult result = mockMvc.perform(request)
               .andExpect(status().isCreated())
@@ -98,12 +98,12 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "name": "Scribe It",
-                      "display_name": "Scribe It Transcription Services",
-                      "description": "A test group"
-                    }
-                      """);
+                             {
+                               "name": "Scribe It",
+                               "display_name": "Scribe It Transcription Services",
+                               "description": "A test group"
+                             }
+                               """);
 
         MvcResult result = mockMvc.perform(request)
               .andExpect(status().isCreated())
@@ -140,10 +140,10 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "name": "ACME"
-                    }
-                      """);
+                             {
+                               "name": "ACME"
+                             }
+                               """);
 
         mockMvc.perform(request)
               .andExpect(status().isBadRequest());
@@ -155,24 +155,24 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestForInitialGroup = buildRequest()
               .content("""
-                    {
-                      "name": "Weyland",
-                      "display_name": "Weyland Transcription Services"
-                    }
-                      """);
+                             {
+                               "name": "Weyland",
+                               "display_name": "Weyland Transcription Services"
+                             }
+                               """);
         MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
               .andExpect(status().isCreated())
               .andReturn();
         JSONObject initialSecurityGroup = new JSONObject(initialResponse.getResponse()
-              .getContentAsString());
+                                                               .getContentAsString());
 
         MockHttpServletRequestBuilder requestForDuplicateGroup = buildRequest()
               .content("""
-                    {
-                      "name": "Weyland",
-                      "display_name": "Trying to create a group whose name already exists"
-                    }
-                      """);
+                             {
+                               "name": "Weyland",
+                               "display_name": "Trying to create a group whose name already exists"
+                             }
+                               """);
         mockMvc.perform(requestForDuplicateGroup)
               .andExpect(status().isConflict())
               .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"))
@@ -185,11 +185,11 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder request = buildRequest()
               .content("""
-                    {
-                      "name": "ACME",
-                      "display_name": "ACME Transcription Services"
-                    }
-                      """);
+                             {
+                               "name": "ACME",
+                               "display_name": "ACME Transcription Services"
+                             }
+                               """);
         mockMvc.perform(request)
               .andExpect(status().isForbidden());
     }

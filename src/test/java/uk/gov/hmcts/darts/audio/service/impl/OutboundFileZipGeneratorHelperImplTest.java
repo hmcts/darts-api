@@ -331,7 +331,7 @@ class OutboundFileZipGeneratorHelperImplTest {
         List<EventEntity> eventEntities = new ArrayList<>();
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
         EventEntity eventEntity = CommonTestDataUtil.createEventWith("LOG", "Start Recording", hearingEntity,
-              OffsetDateTime.parse("2023-07-01T10:00:00Z")
+                                                                     OffsetDateTime.parse("2023-07-01T10:00:00Z")
         );
 
         eventEntities.add(eventEntity);

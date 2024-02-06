@@ -57,7 +57,8 @@ public class RedisConnectionConfig {
               redisUri.getUsername(),
               decodedPasswordChars,
               redisUri.getHost(),
-              redisUri.getPort());
+              redisUri.getPort()
+        );
     }
 
     @Bean

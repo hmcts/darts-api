@@ -57,11 +57,11 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final UserIdentity userIdentity;
 
     public UnstructuredToArmProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-          ObjectRecordStatusRepository objectRecordStatusRepository,
-          ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
-          ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
-          ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
-          ArchiveRecordService archiveRecordService) {
+                                          ObjectRecordStatusRepository objectRecordStatusRepository,
+                                          ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
+                                          ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
+                                          ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
+                                          ArchiveRecordService archiveRecordService) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.externalLocationTypeRepository = externalLocationTypeRepository;
@@ -156,7 +156,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private void updateExternalObjectDirctoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEnum armStatus) {
         log.debug("Updating ARM status from {} to {} for ID {}", armExternalObjectDirectory.getStatus().getDescription(), armStatus.name(),
-              armExternalObjectDirectory.getId()
+                  armExternalObjectDirectory.getId()
         );
         armExternalObjectDirectory.setStatus(armStatuses.get(armStatus));
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
@@ -196,7 +196,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
-          ExternalLocationTypeEntity armLocation) {
+                                                                                      ExternalLocationTypeEntity armLocation) {
 
         List<ObjectRecordStatusEntity> failedArmStatuses = new ArrayList<>();
         failedArmStatuses.add(armStatuses.get(FAILURE_ARM_RAW_DATA_FAILED));
@@ -219,9 +219,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-          ExternalObjectDirectoryEntity armExternalObjectDirectory,
-          String filename,
-          ObjectRecordStatusEntity previousStatus) {
+                                     ExternalObjectDirectoryEntity armExternalObjectDirectory,
+                                     String filename,
+                                     ObjectRecordStatusEntity previousStatus) {
         try {
             if (previousStatus == null
                   || FAILURE_ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
@@ -241,7 +241,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 log.info("BLOB raw data already exists {}", e.getMessage());
             } else {
                 log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
-                      e.getMessage()
+                          e.getMessage()
                 );
                 updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
                 return false;
@@ -261,9 +261,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
-          ObjectRecordStatusEnum objectRecordStatusEnum) {
+                                                             ObjectRecordStatusEnum objectRecordStatusEnum) {
         log.debug("Updating ARM status from {} to {} for ID ", armExternalObjectDirectory.getStatus().getDescription(), objectRecordStatusEnum.name(),
-              armExternalObjectDirectory.getId()
+                  armExternalObjectDirectory.getId()
         );
         armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);

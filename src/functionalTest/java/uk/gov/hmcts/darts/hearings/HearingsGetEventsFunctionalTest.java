@@ -49,7 +49,8 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
                       "event_text": "%s",
                       "date_time": "2023-08-08T14:01:06.085Z"
                     }""",
-              COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
+              COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1
+        );
 
         buildRequestWithExternalGlobalAccessAuth()
               .contentType(ContentType.JSON)
@@ -75,7 +76,8 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
                       "event_text": "%s",
                       "date_time": "2023-08-08T14:01:06.085Z"
                     }""",
-              COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
+              COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2
+        );
 
         buildRequestWithExternalGlobalAccessAuth()
               .contentType(ContentType.JSON)

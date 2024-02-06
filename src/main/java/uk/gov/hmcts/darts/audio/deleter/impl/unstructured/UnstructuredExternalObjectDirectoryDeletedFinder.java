@@ -11,8 +11,8 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 public class UnstructuredExternalObjectDirectoryDeletedFinder extends ExternalObjectDirectoryDeletedFinder {
 
     public UnstructuredExternalObjectDirectoryDeletedFinder(ExternalLocationTypeRepository externalLocationTypeRepository,
-          ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-          ObjectRecordStatusRepository objectRecordStatusRepository) {
+                                                            ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                                            ObjectRecordStatusRepository objectRecordStatusRepository) {
         super(externalLocationTypeRepository, externalObjectDirectoryRepository, objectRecordStatusRepository, ExternalLocationTypeEnum.UNSTRUCTURED);
     }
 }

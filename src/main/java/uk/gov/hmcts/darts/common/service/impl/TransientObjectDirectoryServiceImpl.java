@@ -25,7 +25,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
 
     @Override
     public TransientObjectDirectoryEntity saveTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
-          BlobClient blobClient) {
+                                                                             BlobClient blobClient) {
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);

@@ -68,15 +68,15 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         Response response = buildRequestWithExternalGlobalAccessAuth()
               .contentType(ContentType.JSON)
               .body("""
-                    {
-                      "log_entry_date_time": "2023-05-23T09:15:25Z",
-                      "courthouse": "",
-                      "courtroom": "1",
-                      "case_numbers": [
-                        "func-CASE1001"
-                      ],
-                      "text": "System : Start Recording : Record: Case Code:0008, New Case"
-                    }""")
+                          {
+                            "log_entry_date_time": "2023-05-23T09:15:25Z",
+                            "courthouse": "",
+                            "courtroom": "1",
+                            "case_numbers": [
+                              "func-CASE1001"
+                            ],
+                            "text": "System : Start Recording : Record: Case Code:0008, New Case"
+                          }""")
               .when()
               .baseUri(getUri(ENDPOINT_URL))
               .redirects().follow(false)

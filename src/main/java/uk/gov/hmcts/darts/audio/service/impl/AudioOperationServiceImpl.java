@@ -34,7 +34,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     private final SystemCommandExecutor systemCommandExecutor;
 
     CommandLine generateConcatenateCommand(final List<AudioFileInfo> audioFileInfos,
-          final Path outputPath) {
+                                           final Path outputPath) {
         StringBuilder command = new StringBuilder(audioConfigurationProperties.getFfmpegExecutable());
 
         for (final AudioFileInfo audioFileInfo : audioFileInfos) {
@@ -255,8 +255,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     }
 
     private String generateOutputFilename(AudioConstants.AudioOperationTypes operationType,
-          Integer channel,
-          AudioConstants.AudioFileFormats outputFileFormat) {
+                                          Integer channel,
+                                          AudioConstants.AudioFileFormats outputFileFormat) {
         String currentTimeStamp = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH).format(new Date());
         return String.format(
               "C%s-%s-%s.%s",
@@ -268,9 +268,9 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     }
 
     private Path generateOutputPath(Path basePath,
-          AudioConstants.AudioOperationTypes operationType,
-          Integer channel,
-          AudioConstants.AudioFileFormats outputFileFormat) throws IOException {
+                                    AudioConstants.AudioOperationTypes operationType,
+                                    Integer channel,
+                                    AudioConstants.AudioFileFormats outputFileFormat) throws IOException {
         Files.createDirectories(basePath);
 
         String filename = generateOutputFilename(operationType, channel, outputFileFormat);
@@ -306,8 +306,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     }
 
     private boolean hasGapBetweenAudios(AudioFileInfo audioFileInfoFirst,
-          AudioFileInfo audioFileInfoNext,
-          Duration allowableAudioGap) {
+                                        AudioFileInfo audioFileInfoNext,
+                                        Duration allowableAudioGap) {
         if (audioFileInfoFirst == null || audioFileInfoNext == null) {
             return true;
         }

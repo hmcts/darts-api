@@ -207,7 +207,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
               .andExpect(jsonPath(
                     "detail",
                     is("caseId '" + courtCase.getId().toString()
-                          + "' must have a retention date after the last completed automated retention date '2024-01-01'.")
+                             + "' must have a retention date after the last completed automated retention date '2024-01-01'.")
               ))
               .andExpect(jsonPath(
                     "latest_automated_retention_date",
@@ -250,7 +250,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
               .andExpect(jsonPath(
                     "detail",
                     is("caseId '" + courtCase.getId().toString()
-                          + "' must have a retention date before the maximum retention date '2119-10-10'.")
+                             + "' must have a retention date before the maximum retention date '2119-10-10'.")
               ))
               .andExpect(jsonPath(
                     "max_duration",

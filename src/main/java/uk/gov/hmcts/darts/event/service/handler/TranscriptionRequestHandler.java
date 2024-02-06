@@ -28,11 +28,11 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
     private final TranscriptionsApi transcriptionsApi;
 
     public TranscriptionRequestHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-          EventRepository eventRepository,
-          HearingRepository hearingRepository,
-          CaseRepository caseRepository,
-          ApplicationEventPublisher eventPublisher,
-          TranscriptionsApi transcriptionsApi) {
+                                       EventRepository eventRepository,
+                                       HearingRepository hearingRepository,
+                                       CaseRepository caseRepository,
+                                       ApplicationEventPublisher eventPublisher,
+                                       TranscriptionsApi transcriptionsApi) {
         super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
         this.transcriptionsApi = transcriptionsApi;
     }

@@ -27,7 +27,7 @@ public class DartsGatewayStub {
 
     public void darNotificationReturnsSuccess() {
         stubFor(post(urlEqualTo(DAR_NOTIFY_PATH))
-              .willReturn(aResponse().withStatus(200).withBody("")));
+                      .willReturn(aResponse().withStatus(200).withBody("")));
     }
 
     public void verifyDoesntReceiveDarEvent() {

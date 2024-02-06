@@ -160,7 +160,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     }
 
     private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
-          LocalDate newRetentionDate) {
+                                                       LocalDate newRetentionDate) {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();

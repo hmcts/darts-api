@@ -106,7 +106,7 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
             eventElement.setAttribute(
                   ANNOTATION_EVENT_ATTRIBUTE_LAPSED,
                   String.valueOf(Duration.between(annotationData.getAnnotationsStartTime(), localEventTimestamp)
-                        .getSeconds())
+                                       .getSeconds())
             );
 
             eventElement.appendChild(document.createTextNode(event.getEventName()));

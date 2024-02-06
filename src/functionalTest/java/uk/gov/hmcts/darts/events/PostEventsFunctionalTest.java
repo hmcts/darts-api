@@ -64,19 +64,19 @@ class PostEventsFunctionalTest extends FunctionalTest {
         Response response = buildRequestWithExternalGlobalAccessAuth()
               .contentType(ContentType.JSON)
               .body("""
-                    {
-                      "message_id": "100",
-                      "type": "1000",
-                      "sub_type": "1002",
-                      "event_id": "12345",
-                      "courthouse": "",
-                      "courtroom": "1",
-                      "case_numbers": [
-                        "func-Swansea_case_1"
-                      ],
-                      "event_text": "some text for the event",
-                      "date_time": "2023-08-08T14:01:06.085Z"
-                    }""")
+                          {
+                            "message_id": "100",
+                            "type": "1000",
+                            "sub_type": "1002",
+                            "event_id": "12345",
+                            "courthouse": "",
+                            "courtroom": "1",
+                            "case_numbers": [
+                              "func-Swansea_case_1"
+                            ],
+                            "event_text": "some text for the event",
+                            "date_time": "2023-08-08T14:01:06.085Z"
+                          }""")
               .when()
               .baseUri(getUri(ENDPOINT_URL))
               .redirects().follow(false)

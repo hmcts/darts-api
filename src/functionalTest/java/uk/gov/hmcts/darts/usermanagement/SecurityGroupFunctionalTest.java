@@ -35,12 +35,12 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
               .baseUri(getUri("/admin/security-groups"))
               .contentType(ContentType.JSON)
               .body("""
-                    {
-                      "name": "ACME",
-                      "display_name": "ACME Transcription Services",
-                      "description": "A temporary group created by functional test"
-                    }
-                      """)
+                          {
+                            "name": "ACME",
+                            "display_name": "ACME Transcription Services",
+                            "description": "A temporary group created by functional test"
+                          }
+                            """)
               .post()
               .thenReturn();
 
@@ -75,9 +75,11 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
               .thenReturn();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(
+              response.asString(),
               new TypeReference<List<SecurityGroupWithIdAndRole>>() {
-              });
+              }
+        );
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
         List<SecurityGroupWithIdAndRole> staticGroups =
@@ -103,7 +105,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     private void checkGroup(SecurityGroupWithIdAndRole group, String name, boolean globalAccess, Integer roleId, boolean displayState,
-          Integer courtroomId) {
+                            Integer courtroomId) {
         assertEquals(name, group.getName());
         assertEquals(globalAccess, group.getGlobalAccess());
         assertEquals(roleId, group.getSecurityRoleId());

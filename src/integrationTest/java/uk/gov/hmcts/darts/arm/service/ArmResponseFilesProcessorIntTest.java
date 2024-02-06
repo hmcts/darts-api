@@ -655,7 +655,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final String checksum = "123";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
               .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                    testUser, uploadedDateTime, checksum
+                                                         testUser, uploadedDateTime, checksum
               );
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -833,7 +833,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
               .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                    testUser, uploadedDateTime, checksum
+                                                         testUser, uploadedDateTime, checksum
               );
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(

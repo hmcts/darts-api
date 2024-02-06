@@ -16,7 +16,7 @@ public class DartsEventMapperImpl implements DartsEventMapper {
     public DartsEvent toDartsEvent(CourtLogsPostRequestBody request) {
         var dartsEvent = new DartsEvent();
         dartsEvent.setMessageId(UUID.randomUUID()
-              .toString());
+                                      .toString());
 
         dartsEvent.setType(COURTLOG_MESSAGE_TYPE);
         dartsEvent.setSubType(null);

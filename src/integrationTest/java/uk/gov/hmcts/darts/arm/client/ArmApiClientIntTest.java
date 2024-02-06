@@ -62,25 +62,25 @@ class ArmApiClientIntTest extends IntegrationBase {
                           aResponse()
                                 .withHeader("Content-type", "application/json")
                                 .withBody("""
-                                      {
-                                          "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
-                                          "cabinetId": 101,
-                                          "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
-                                          "objectType": 1,
-                                          "fileName": "UpdateMetadata-20241801-122819.json",
-                                          "isError": false,
-                                          "responseStatus": 0,
-                                          "responseStatusMessages": null
-                                      }
-                                      """
+                                                {
+                                                    "itemId": "7683ee65-c7a7-7343-be80-018b8ac13602",
+                                                    "cabinetId": 101,
+                                                    "objectId": "4bfe4fc7-4e2f-4086-8a0e-146cc4556260",
+                                                    "objectType": 1,
+                                                    "fileName": "UpdateMetadata-20241801-122819.json",
+                                                    "isError": false,
+                                                    "responseStatus": 0,
+                                                    "responseStatusMessages": null
+                                                }
+                                                """
                                 )
                                 .withStatus(200)));
 
         var updateMetadataRequest = UpdateMetadataRequest.builder()
               .itemId(externalRecordId)
               .manifest(UpdateMetadataRequest.Manifest.builder()
-                    .eventDate(eventTimestamp)
-                    .build())
+                              .eventDate(eventTimestamp)
+                              .build())
               .useGuidsForFields(false)
               .build();
 
@@ -89,13 +89,13 @@ class ArmApiClientIntTest extends IntegrationBase {
 
         // Then
         wireMockServer.verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
-              .withHeader(AUTHORIZATION, equalTo(bearerAuth))
-              .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-              .withRequestBody(
-                    matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
-                          .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
-                          .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
-              ));
+                                    .withHeader(AUTHORIZATION, equalTo(bearerAuth))
+                                    .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                                    .withRequestBody(
+                                          matchingJsonPath("$.UseGuidsForFields", equalTo("false"))
+                                                .and(matchingJsonPath("$.manifest.event_date", equalTo(eventTimestamp.toString())))
+                                                .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
+                                    ));
 
         assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
     }

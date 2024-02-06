@@ -26,7 +26,7 @@ public class CaseRetentionStub {
 
     @Transactional
     public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
-          CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
+                                                         CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
         RetentionPolicyTypeEntity policy;
         if (isManual) {
             policy = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(

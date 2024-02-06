@@ -201,7 +201,8 @@ class TranscriptionServiceImplTest {
               transcriptionTypeEnum.getId(),
               TEST_COMMENT,
               startDateTime,
-              endDateTime);
+              endDateTime
+        );
 
         transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
 
@@ -284,7 +285,8 @@ class TranscriptionServiceImplTest {
               transcriptionTypeEnum.getId(),
               TEST_COMMENT,
               startDateTime,
-              endDateTime);
+              endDateTime
+        );
 
         transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
 
@@ -365,7 +367,8 @@ class TranscriptionServiceImplTest {
               transcriptionTypeEnum.getId(),
               TEST_COMMENT,
               startDateTime,
-              endDateTime);
+              endDateTime
+        );
 
         transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
 
@@ -538,12 +541,12 @@ class TranscriptionServiceImplTest {
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
-          Integer caseId,
-          Integer urgencyId,
-          Integer transcriptionTypeId,
-          String comment,
-          OffsetDateTime startDateTime,
-          OffsetDateTime endDateTime
+                                                                          Integer caseId,
+                                                                          Integer urgencyId,
+                                                                          Integer transcriptionTypeId,
+                                                                          String comment,
+                                                                          OffsetDateTime startDateTime,
+                                                                          OffsetDateTime endDateTime
     ) {
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);

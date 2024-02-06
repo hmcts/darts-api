@@ -112,9 +112,9 @@ class InboundToUnstructuredProcessorImplTest {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
-              objectRecordStatusRepository, externalLocationTypeRepository,
-              dataManagementService, dataManagementConfiguration, userAccountRepository,
-              transcriptionConfigurationProperties, audioConfigurationProperties
+                                                                                objectRecordStatusRepository, externalLocationTypeRepository,
+                                                                                dataManagementService, dataManagementConfiguration, userAccountRepository,
+                                                                                transcriptionConfigurationProperties, audioConfigurationProperties
         );
 
     }

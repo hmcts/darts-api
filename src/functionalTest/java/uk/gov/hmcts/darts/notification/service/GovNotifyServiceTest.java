@@ -51,9 +51,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
         assertEquals("A new transcript is ready for you to review", emailResponse.getSubject());
         compare("""
-              There is a new transcript available for you to review.
+                      There is a new transcript available for you to review.
 
-              [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
+                      [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
     private SendEmailResponse createAndSend(String templateName, Map<String, String> parameterMap)
@@ -81,9 +81,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
         assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
-              You have received a new transcription request from the DARTS Portal.
+                      You have received a new transcription request from the DARTS Portal.
 
-              [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
+                      [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
 
@@ -107,9 +107,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE.toString());
         assertEquals("Your transcript is available", emailResponse.getSubject());
         compare("""
-              Your transcript request for case ID TheCaseId has been completed and is available for download.
+                      Your transcript request for case ID TheCaseId has been completed and is available for download.
 
-              To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
+                      To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
     }
 
     @Test
@@ -117,9 +117,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
         assertEquals("Your transcript request was approved", emailResponse.getSubject());
         compare("""
-              Your transcript request for case ID TheCaseId has been approved.
+                      Your transcript request for case ID TheCaseId has been approved.
 
-              We’ll notify you when it’s available to download.""", emailResponse);
+                      We’ll notify you when it’s available to download.""", emailResponse);
     }
 
 
@@ -146,11 +146,11 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString());
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-              We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
+                      We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
 
-              We'll notify you when it's ready and available for use.
+                      We'll notify you when it's ready and available for use.
 
-              Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
+                      Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
     }
 
     @Test
@@ -158,13 +158,13 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE.toString());
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-              We have received your audio recording order for case Number TheCaseId.
+                      We have received your audio recording order for case Number TheCaseId.
 
-              Processing your order may take a little longer as it must be retrieved from the archives.
+                      Processing your order may take a little longer as it must be retrieved from the archives.
 
-              We'll notify you when it is ready and available for use.
+                      We'll notify you when it is ready and available for use.
 
-              Alternatively, you can visit the Your audio section of the DARTS Portal to check its progress.""", emailResponse);
+                      Alternatively, you can visit the Your audio section of the DARTS Portal to check its progress.""", emailResponse);
     }
 
     @Test

@@ -68,7 +68,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
 
         // Then
         wireMockServer.verify(getRequestedFor(urlEqualTo(TOKEN_PATH))
-              .withRequestBody(equalTo("grant_type=password&username=some-username&password=some-password")));
+                                    .withRequestBody(equalTo("grant_type=password&username=some-username&password=some-password")));
 
         assertEquals("some-token", token.getAccessToken());
         assertEquals("some-token-type", token.getTokenType());

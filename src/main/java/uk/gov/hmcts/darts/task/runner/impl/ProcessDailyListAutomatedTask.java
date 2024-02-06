@@ -21,12 +21,12 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     private DailyListProcessor dailyListProcessor;
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
     }
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, DailyListProcessor processor) {
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, DailyListProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.dailyListProcessor = processor;
     }

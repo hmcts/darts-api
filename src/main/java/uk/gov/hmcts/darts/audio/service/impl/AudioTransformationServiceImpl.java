@@ -277,7 +277,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             if (mediaRequestEntity != null && hearingEntity != null) {
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
-                      NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 
@@ -288,7 +288,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
-          MediaRequestEntity mediaRequestEntity) {
+                                                                                     MediaRequestEntity mediaRequestEntity) {
         return mediaEntitiesForRequest.stream()
               .filter(media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd()))
               .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
@@ -324,7 +324,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @SuppressWarnings("PMD.LawOfDemeter")
     private List<AudioFileInfo> generateFilesForRequestType(MediaRequestEntity mediaRequestEntity,
-          Map<MediaEntity, Path> downloadedMedias)
+                                                            Map<MediaEntity, Path> downloadedMedias)
           throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
@@ -370,10 +370,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
-          CourtCaseEntity courtCase,
-          String notificationTemplateName) {
+                           CourtCaseEntity courtCase,
+                           String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
-              courtCase.getId()
+                 courtCase.getId()
         );
 
         Optional<UserAccountEntity> userAccount = userAccountRepository.findById(mediaRequestEntity.getRequestor().getId());

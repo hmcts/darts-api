@@ -21,10 +21,10 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 public class InterpreterUsedHandler extends EventHandlerBase {
 
     public InterpreterUsedHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-          EventRepository eventRepository,
-          HearingRepository hearingRepository,
-          CaseRepository caseRepository,
-          ApplicationEventPublisher eventPublisher) {
+                                  EventRepository eventRepository,
+                                  HearingRepository hearingRepository,
+                                  CaseRepository caseRepository,
+                                  ApplicationEventPublisher eventPublisher) {
         super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 

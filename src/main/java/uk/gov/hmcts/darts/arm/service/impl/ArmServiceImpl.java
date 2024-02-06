@@ -98,8 +98,8 @@ public class ArmServiceImpl implements ArmService {
     }
 
     public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
-          String delimiter,
-          String prefix /* ="" */) {
+                                                                String delimiter,
+                                                                String prefix /* ="" */) {
 
         ListBlobsOptions options = new ListBlobsOptions().setPrefix(prefix);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);

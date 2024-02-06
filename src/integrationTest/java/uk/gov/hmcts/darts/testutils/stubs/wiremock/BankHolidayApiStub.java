@@ -12,9 +12,9 @@ public class BankHolidayApiStub {
 
     public void returns(String bankHolidaysJson) {
         stubFor(get(urlEqualTo(BANK_HOLIDAY_API_PATH))
-              .willReturn(aResponse()
-                    .withHeader("Content-type", "application/json")
-                    .withStatus(200)
-                    .withBody(bankHolidaysJson)));
+                      .willReturn(aResponse()
+                                        .withHeader("Content-type", "application/json")
+                                        .withStatus(200)
+                                        .withBody(bankHolidaysJson)));
     }
 }

@@ -220,8 +220,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     private MediaRequestEntity saveAudioRequestToDb(HearingEntity hearingEntity, UserAccountEntity requestor,
-          OffsetDateTime startTime, OffsetDateTime endTime,
-          AudioRequestType requestType) {
+                                                    OffsetDateTime startTime, OffsetDateTime endTime,
+                                                    AudioRequestType requestType) {
 
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
@@ -345,7 +345,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,
-          Root<MediaRequestEntity> mediaRequest) {
+                                       Root<MediaRequestEntity> mediaRequest) {
 
         final Predicate expiredPredicate;
         if (expired) {
@@ -407,7 +407,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName,
-          AudioRequestOutputFormat audioRequestOutputFormat) {
+                                                          AudioRequestOutputFormat audioRequestOutputFormat) {
 
         mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
         //todo update transformed media info

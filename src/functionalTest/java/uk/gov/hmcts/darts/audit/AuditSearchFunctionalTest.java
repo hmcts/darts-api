@@ -74,9 +74,9 @@ class AuditSearchFunctionalTest extends FunctionalTest {
         log.info(response.asPrettyString());
 
         assertEquals("""
-              [
-                 \s
-              ]""", response.asPrettyString());
+                           [
+                              \s
+                           ]""", response.asPrettyString());
         assertEquals(200, response.statusCode());
     }
 

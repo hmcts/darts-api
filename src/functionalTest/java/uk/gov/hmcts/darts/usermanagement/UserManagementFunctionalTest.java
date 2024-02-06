@@ -70,10 +70,10 @@ class UserManagementFunctionalTest extends FunctionalTest {
               .baseUri(getUri("/admin/users/" + userId))
               .contentType(ContentType.JSON)
               .body("""
-                    {
-                         "full_name": "Jimmy Smith"
-                    }
-                    """)
+                          {
+                               "full_name": "Jimmy Smith"
+                          }
+                          """)
               .patch()
               .thenReturn();
 
@@ -181,13 +181,13 @@ class UserManagementFunctionalTest extends FunctionalTest {
               .baseUri(getUri("/admin/users"))
               .contentType(ContentType.JSON)
               .body("""
-                    {
-                         "full_name": "James Smith",
-                         "email_address": "james.smith.get@hmcts.net",
-                         "description": "A temporary user created by functional test",
-                         "security_group_ids": [-1, -2, -3]
-                    }
-                    """)
+                          {
+                               "full_name": "James Smith",
+                               "email_address": "james.smith.get@hmcts.net",
+                               "description": "A temporary user created by functional test",
+                               "security_group_ids": [-1, -2, -3]
+                          }
+                          """)
               .post()
               .thenReturn();
 
@@ -201,12 +201,12 @@ class UserManagementFunctionalTest extends FunctionalTest {
               .baseUri(getUri(ADMIN_USERS))
               .contentType(ContentType.JSON)
               .body("""
-                    {
-                         "full_name": "James Smith",
-                         "email_address": "james.smith@hmcts.net",
-                         "description": "A temporary user created by functional test"
-                    }
-                    """)
+                          {
+                               "full_name": "James Smith",
+                               "email_address": "james.smith@hmcts.net",
+                               "description": "A temporary user created by functional test"
+                          }
+                          """)
               .post()
               .thenReturn();
 
@@ -233,9 +233,11 @@ class UserManagementFunctionalTest extends FunctionalTest {
               .thenReturn();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(
+              response.asString(),
               new TypeReference<List<SecurityGroupWithIdAndRole>>() {
-              });
+              }
+        );
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
     }
 }

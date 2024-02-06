@@ -157,7 +157,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
               .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                    testUser, uploadedDateTime, checksum
+                                                         testUser, uploadedDateTime, checksum
               );
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(

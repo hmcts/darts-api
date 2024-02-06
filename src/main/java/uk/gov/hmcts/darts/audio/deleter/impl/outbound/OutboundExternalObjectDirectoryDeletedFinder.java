@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 public class OutboundExternalObjectDirectoryDeletedFinder extends TransientObjectDirectoryDeletedFinder {
 
     public OutboundExternalObjectDirectoryDeletedFinder(TransientObjectDirectoryRepository transientObjectDirectoryRepository,
-          ObjectRecordStatusRepository objectRecordStatusRepository) {
+                                                        ObjectRecordStatusRepository objectRecordStatusRepository) {
         super(transientObjectDirectoryRepository, objectRecordStatusRepository);
     }
 }

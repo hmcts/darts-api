@@ -55,26 +55,26 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         for (int channelNumber = 1; channelNumber <= 4; channelNumber++) {
 
             var mediaEntity = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                  TIME_12_01,
-                  TIME_12_20,
-                  channelNumber
+                                                                  TIME_12_01,
+                                                                  TIME_12_20,
+                                                                  channelNumber
             );
             var mediaEntity2 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                  TIME_12_20,
-                  TIME_12_40,
-                  channelNumber
+                                                                   TIME_12_20,
+                                                                   TIME_12_40,
+                                                                   channelNumber
             );
 
             var mediaEntity3 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                  TIME_12_40,
-                  TIME_13_01,
-                  channelNumber
+                                                                   TIME_12_40,
+                                                                   TIME_13_01,
+                                                                   channelNumber
             );
 
             var mediaEntity4 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
-                  TIME_13_30,
-                  TIME_14_00,
-                  channelNumber
+                                                                   TIME_13_30,
+                                                                   TIME_14_00,
+                                                                   channelNumber
             );
 
             hearingEntity.addMedia(mediaEntity);
@@ -143,7 +143,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     }
 
     public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType,
-          UserAccountEntity userAccountEntity) {
+                                                             UserAccountEntity userAccountEntity) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
         mediaRequestEntity.setStatus(OPEN);
@@ -160,7 +160,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     }
 
     public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType,
-          UserAccountEntity userAccountEntity, OffsetDateTime start, OffsetDateTime end) {
+                                                             UserAccountEntity userAccountEntity, OffsetDateTime start, OffsetDateTime end) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
         mediaRequestEntity.setStatus(OPEN);

@@ -108,8 +108,10 @@ class AuthenticationServiceImplTest {
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
               .thenReturn(new JwtValidationResult(true, null));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
-              new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
-                    new ExternalAuthProviderConfigurationProperties()));
+              new ExternalAuthConfigurationPropertiesStrategy(
+                    externalAuthConfigurationProperties,
+                    new ExternalAuthProviderConfigurationProperties()
+              ));
 
         String token = authenticationService.handleOauthCode(DUMMY_CODE);
 

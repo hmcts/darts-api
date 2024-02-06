@@ -50,9 +50,9 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
               .contentType(MediaType.APPLICATION_JSON_VALUE)
               .content("""
-                    {
-                      "retain_until": "2023-09-06T16:16:57.331Z"
-                    }""");
+                             {
+                               "retain_until": "2023-09-06T16:16:57.331Z"
+                             }""");
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
@@ -68,9 +68,9 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
               .contentType(MediaType.APPLICATION_JSON_VALUE)
               .content("""
-                    {
-                      "retain_until": "2023-09-06T16:16:57.331Z"
-                    }""");
+                             {
+                               "retain_until": "2023-09-06T16:16:57.331Z"
+                             }""");
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
@@ -96,9 +96,9 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
               .contentType(MediaType.APPLICATION_JSON_VALUE)
               .content("""
-                    {
-                      "retain_until": ""
-                    }""");
+                             {
+                               "retain_until": ""
+                             }""");
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
@@ -113,10 +113,10 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
               .contentType(MediaType.APPLICATION_JSON_VALUE)
               .content("""
-                    {
-                      "courthouse": "swansea",
-                      "retain_until": "2023-09-06T16:16:57.331Z"
-                    }""");
+                             {
+                               "courthouse": "swansea",
+                               "retain_until": "2023-09-06T16:16:57.331Z"
+                             }""");
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();

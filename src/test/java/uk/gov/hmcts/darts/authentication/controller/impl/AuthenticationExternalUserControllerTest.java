@@ -86,14 +86,14 @@ class AuthenticationExternalUserControllerTest {
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
               Optional.ofNullable(UserState.builder()
-                    .userId(-1)
-                    .userName("Test User")
-                    .roles(Set.of(Role.builder()
-                          .roleId(TRANSCRIBER.getId())
-                          .roleName(TRANSCRIBER.toString())
-                          .permissions(new HashSet<>())
-                          .build()))
-                    .build())
+                                        .userId(-1)
+                                        .userName("Test User")
+                                        .roles(Set.of(Role.builder()
+                                                            .roleId(TRANSCRIBER.getId())
+                                                            .roleName(TRANSCRIBER.toString())
+                                                            .permissions(new HashSet<>())
+                                                            .build()))
+                                        .build())
         );
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);

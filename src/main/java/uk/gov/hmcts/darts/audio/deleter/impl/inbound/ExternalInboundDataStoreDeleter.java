@@ -13,9 +13,9 @@ public class ExternalInboundDataStoreDeleter extends ExternalDataStoreDeleterImp
 
 
     public ExternalInboundDataStoreDeleter(ObjectRecordStatusRepository objectRecordStatusRepository, UserAccountRepository userAccountRepository,
-          JpaRepository<ExternalObjectDirectoryEntity, Integer> repository,
-          InboundExternalObjectDirectoryDeletedFinder finder, InboundDataStoreDeleter deleter,
-          SystemUserHelper systemUserHelper) {
+                                           JpaRepository<ExternalObjectDirectoryEntity, Integer> repository,
+                                           InboundExternalObjectDirectoryDeletedFinder finder, InboundDataStoreDeleter deleter,
+                                           SystemUserHelper systemUserHelper) {
         super(objectRecordStatusRepository, userAccountRepository, repository, finder, deleter, systemUserHelper);
     }
 }

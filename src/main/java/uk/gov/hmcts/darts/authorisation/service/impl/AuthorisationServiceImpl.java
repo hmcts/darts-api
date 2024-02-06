@@ -71,14 +71,14 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         );
 
         criteriaQuery.select(criteriaBuilder.construct(
-                    GetAuthorisationResult.class,
-                    root.get(UserAccountEntity_.id),
-                    root.get(UserAccountEntity_.userName),
-                    securityRole.get(SecurityRoleEntity_.id),
-                    securityRole.get(SecurityRoleEntity_.roleName),
-                    securityPermission.get(SecurityPermissionEntity_.id),
-                    securityPermission.get(SecurityPermissionEntity_.permissionName)
-              )
+                                   GetAuthorisationResult.class,
+                                   root.get(UserAccountEntity_.id),
+                                   root.get(UserAccountEntity_.userName),
+                                   securityRole.get(SecurityRoleEntity_.id),
+                                   securityRole.get(SecurityRoleEntity_.roleName),
+                                   securityPermission.get(SecurityPermissionEntity_.id),
+                                   securityPermission.get(SecurityPermissionEntity_.permissionName)
+                             )
         );
 
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
@@ -117,10 +117,10 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             if (roleId != null && !tmpRoleId.equals(roleId)) {
                 permissions = new LinkedHashSet<>();
                 roles.add(Role.builder()
-                      .roleId(roleId)
-                      .roleName(result.roleName())
-                      .permissions(permissions)
-                      .build());
+                                .roleId(roleId)
+                                .roleName(result.roleName())
+                                .permissions(permissions)
+                                .build());
 
                 tmpRoleId = roleId;
             }
@@ -128,9 +128,9 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             Integer permissionId = result.permissionId();
             if (permissionId != null) {
                 permissions.add(Permission.builder()
-                      .permissionId(permissionId)
-                      .permissionName(result.permissionName())
-                      .build());
+                                      .permissionId(permissionId)
+                                      .permissionName(result.permissionName())
+                                      .build());
             }
         }
 
@@ -152,8 +152,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                 return;
             }
             log.debug("User {} is not authorised for courthouses {}, securityRoles {}", emailAddress,
-                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList(),
-                  securityRoles
+                      courthouses.stream().map(CourthouseEntity::getCourthouseName).toList(),
+                      securityRoles
             );
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
@@ -162,7 +162,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
     @Override
     public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole,
-          CourthouseEntity courthouse) {
+                                                                CourthouseEntity courthouse) {
         return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse);
     }
 

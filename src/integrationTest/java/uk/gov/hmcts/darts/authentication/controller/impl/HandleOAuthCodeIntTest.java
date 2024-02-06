@@ -76,14 +76,14 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
         when(mockAuthorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
               .thenReturn(Optional.ofNullable(UserState.builder()
-                    .userId(-1)
-                    .userName("Test User")
-                    .roles(Set.of(Role.builder()
-                          .roleId(TRANSCRIBER.getId())
-                          .roleName(TRANSCRIBER.toString())
-                          .permissions(new HashSet<>())
-                          .build()))
-                    .build())
+                                                    .userId(-1)
+                                                    .userName("Test User")
+                                                    .roles(Set.of(Role.builder()
+                                                                        .roleId(TRANSCRIBER.getId())
+                                                                        .roleName(TRANSCRIBER.toString())
+                                                                        .permissions(new HashSet<>())
+                                                                        .build()))
+                                                    .build())
               );
 
         KeyPair keyPair = setTokenStub(List.of(VALID_EMAIL_VALUE));

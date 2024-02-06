@@ -51,7 +51,7 @@ public class TranscriptionStub {
     private final HearingStub hearingStub;
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
-          int fileSize, UserAccountEntity testUser, String checksum) {
+                                                                                int fileSize, UserAccountEntity testUser, String checksum) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(fileName);
@@ -74,7 +74,7 @@ public class TranscriptionStub {
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
         UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(hearing.getCourtCase()
-              .getCourthouse());
+                                                                                                                    .getCourthouse());
         return createAndSaveTranscriptionEntity(
               hearing,
               transcriptionType,
@@ -91,7 +91,7 @@ public class TranscriptionStub {
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
         UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(courtCase
-              .getCourthouse());
+                                                                                                                    .getCourthouse());
         return createAndSaveTranscriptionEntity(
               courtCase,
               transcriptionType,
@@ -124,10 +124,10 @@ public class TranscriptionStub {
     }
 
     public TranscriptionEntity createAndSaveTranscriptionEntity(HearingEntity hearing,
-          TranscriptionTypeEntity transcriptionType,
-          TranscriptionStatusEntity transcriptionStatus,
-          TranscriptionUrgencyEntity transcriptionUrgency,
-          UserAccountEntity testUser) {
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtroom(hearing.getCourtroom());
         transcription.addHearing(hearing);
@@ -142,10 +142,10 @@ public class TranscriptionStub {
     }
 
     public TranscriptionEntity createAndSaveTranscriptionEntity(CourtCaseEntity courtCase,
-          TranscriptionTypeEntity transcriptionType,
-          TranscriptionStatusEntity transcriptionStatus,
-          TranscriptionUrgencyEntity transcriptionUrgency,
-          UserAccountEntity testUser) {
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.addCase(courtCase);
         transcription.setTranscriptionType(transcriptionType);
@@ -160,9 +160,9 @@ public class TranscriptionStub {
 
     @Transactional
     public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
-          CourtCaseEntity courtCaseEntity,
-          HearingEntity hearingEntity,
-          OffsetDateTime workflowTimestamp) {
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               OffsetDateTime workflowTimestamp) {
         var transcriptionEntity = this.createTranscriptionWithStatus(
               userAccountEntity,
               courtCaseEntity,
@@ -175,10 +175,10 @@ public class TranscriptionStub {
 
     @Transactional
     public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
-          CourtCaseEntity courtCaseEntity,
-          HearingEntity hearingEntity,
-          OffsetDateTime workflowTimestamp,
-          Boolean hideRequestFromRequester) {
+                                                                   CourtCaseEntity courtCaseEntity,
+                                                                   HearingEntity hearingEntity,
+                                                                   OffsetDateTime workflowTimestamp,
+                                                                   Boolean hideRequestFromRequester) {
         var transcriptionEntity = this.createTranscriptionWithStatus(
               userAccountEntity,
               courtCaseEntity,
@@ -191,9 +191,9 @@ public class TranscriptionStub {
     }
 
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
-          UserAccountEntity user,
-          OffsetDateTime timestamp,
-          TranscriptionStatusEntity transcriptionStatus) {
+                                                                         UserAccountEntity user,
+                                                                         OffsetDateTime timestamp,
+                                                                         TranscriptionStatusEntity transcriptionStatus) {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
         transcriptionWorkflowEntity.setTranscriptionStatus(transcriptionStatus);
@@ -204,18 +204,18 @@ public class TranscriptionStub {
 
     @Transactional
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
-          String fileName,
-          String fileType,
-          int fileSize,
-          UserAccountEntity testUser,
-          ObjectRecordStatusEntity objectRecordStatusEntity,
-          ExternalLocationTypeEntity externalLocationTypeEntity,
-          UUID externalLocation,
-          String checksum) {
+                                                               String fileName,
+                                                               String fileType,
+                                                               int fileSize,
+                                                               UserAccountEntity testUser,
+                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                               UUID externalLocation,
+                                                               String checksum) {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
-              fileType, fileSize, testUser,
-              checksum
+                                                                                                    fileType, fileSize, testUser,
+                                                                                                    checksum
         );
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
@@ -249,10 +249,10 @@ public class TranscriptionStub {
     }
 
     private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
-          CourtCaseEntity courtCaseEntity,
-          HearingEntity hearingEntity,
-          OffsetDateTime workflowTimestamp,
-          TranscriptionStatusEntity status) {
+                                                              CourtCaseEntity courtCaseEntity,
+                                                              HearingEntity hearingEntity,
+                                                              OffsetDateTime workflowTimestamp,
+                                                              TranscriptionStatusEntity status) {
         final var transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
@@ -263,7 +263,7 @@ public class TranscriptionStub {
         OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         transcriptionEntity.setStartTime(yesterday);
         transcriptionEntity.setEndTime(yesterday.plusHours(now.getHour()).plusMinutes(now.getMinute())
-              .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
+                                             .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
         transcriptionEntity.setCreatedBy(userAccountEntity);
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
         transcriptionEntity.setIsManualTranscription(true);

@@ -19,10 +19,10 @@ import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 public class DartsEventNullHandler extends EventHandlerBase {
 
     public DartsEventNullHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-          EventRepository eventRepository,
-          HearingRepository hearingRepository,
-          CaseRepository caseRepository,
-          ApplicationEventPublisher eventPublisher) {
+                                 EventRepository eventRepository,
+                                 HearingRepository hearingRepository,
+                                 CaseRepository caseRepository,
+                                 ApplicationEventPublisher eventPublisher) {
         super(eventRepository, hearingRepository, caseRepository, eventPublisher, retrieveCoreObjectService);
     }
 

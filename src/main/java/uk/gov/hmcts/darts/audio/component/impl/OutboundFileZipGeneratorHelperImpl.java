@@ -62,7 +62,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     private final EventRepository eventRepository;
 
     public OutboundFileZipGeneratorHelperImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
-          EventRepository eventRepository) {
+                                              EventRepository eventRepository) {
         this.annotationXmlGenerator = annotationXmlGenerator;
         this.eventRepository = eventRepository;
     }
@@ -120,7 +120,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
 
     @Override
     public String generateAnnotation(HearingEntity hearingEntity, ZonedDateTime startTime, ZonedDateTime endTime,
-          String annotationsOutputFile) {
+                                     String annotationsOutputFile) {
         List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntity, startTime, endTime);
 
         ViqAnnotationData annotationData = ViqAnnotationData.builder()

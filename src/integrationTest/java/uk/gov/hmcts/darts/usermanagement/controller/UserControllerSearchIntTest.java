@@ -60,8 +60,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("@example");
 
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                                                    .header("Content-Type", "application/json")
+                                                    .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isForbidden())
               .andReturn();
 
@@ -86,8 +86,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("");
 
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                                                    .header("Content-Type", "application/json")
+                                                    .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isBadRequest())
               .andReturn();
 
@@ -121,8 +121,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("@test");
 
         MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                                                    .header("Content-Type", "application/json")
+                                                    .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andReturn();
 
@@ -145,8 +145,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setEmailAddress("adminUserAccount");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                              .header("Content-Type", "application/json")
+                              .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[0].id").isNumber())
               .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
@@ -168,8 +168,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setFullName("adminUserAccount");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                              .header("Content-Type", "application/json")
+                              .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[0].id").isNumber())
               .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
@@ -192,8 +192,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setFullName("adminUserAccountUsername");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                              .header("Content-Type", "application/json")
+                              .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[0].id").isNumber())
               .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
@@ -223,8 +223,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setFullName(randomStr + "-user");
 
         mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                              .header("Content-Type", "application/json")
+                              .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
               .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
@@ -252,8 +252,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setActive(false);
 
         mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                              .header("Content-Type", "application/json")
+                              .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[*].full_name").value(hasItems(inactiveUser.getUserName())))
               .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
@@ -282,8 +282,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
         userSearch.setActive(true);
 
         mockMvc.perform(post(ENDPOINT_URL)
-                    .header("Content-Type", "application/json")
-                    .content(objectMapper.writeValueAsString(userSearch)))
+                              .header("Content-Type", "application/json")
+                              .content(objectMapper.writeValueAsString(userSearch)))
               .andExpect(status().isOk())
               .andExpect(jsonPath("$[*].full_name").value(hasItems(activeUser.getUserName())))
               .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))

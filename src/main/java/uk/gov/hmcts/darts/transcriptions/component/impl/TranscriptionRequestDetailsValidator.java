@@ -54,9 +54,11 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
                 if (requestStartDateTime != null && requestEndDateTime != null) {
                     boolean validTimes = hearing.getMediaList().stream().anyMatch(
                           m -> checkStartTime(m.getStart().truncatedTo(ChronoUnit.SECONDS),
-                                requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS))
+                                              requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)
+                          )
                                 && checkEndTime(m.getEnd().truncatedTo(ChronoUnit.SECONDS),
-                                requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)));
+                                                requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)
+                          ));
                     if (!validTimes) {
                         log.error(
                               "Transcription could not be requested. Times were outside of hearing times for hearing id {}",

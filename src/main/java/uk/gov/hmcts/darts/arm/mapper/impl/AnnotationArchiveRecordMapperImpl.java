@@ -34,7 +34,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     }
 
     private AnnotationArchiveRecord createAnnotationArchiveRecord(AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation,
-          UploadNewFileRecord uploadNewFileRecord) {
+                                                                  UploadNewFileRecord uploadNewFileRecord) {
         return AnnotationArchiveRecord.builder()
               .annotationCreateArchiveRecordOperation(annotationCreateArchiveRecordOperation)
               .uploadNewFileRecord(uploadNewFileRecord)
@@ -58,7 +58,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     }
 
     private AnnotationCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-          Integer relationId) {
+                                                                                Integer relationId) {
         return AnnotationCreateArchiveRecordOperation.builder()
               .relationId(relationId.toString())
               .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))

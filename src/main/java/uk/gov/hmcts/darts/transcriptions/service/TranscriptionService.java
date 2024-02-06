@@ -21,14 +21,14 @@ import java.util.List;
 public interface TranscriptionService {
 
     RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails,
-          boolean isManual);
+                                                          boolean isManual);
 
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription);
 
     @Transactional
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-          UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection);
+                                                    UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection);
 
     void closeTranscriptions();
 

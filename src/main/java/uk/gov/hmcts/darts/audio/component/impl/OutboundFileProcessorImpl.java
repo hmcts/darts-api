@@ -85,8 +85,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
      */
     @Override
     public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-          OffsetDateTime overallStartTime,
-          OffsetDateTime overallEndTime)
+                                                             OffsetDateTime overallStartTime,
+                                                             OffsetDateTime overallEndTime)
           throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
@@ -110,8 +110,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     @Override
     public List<AudioFileInfo> processAudioForPlaybacks(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-          OffsetDateTime mediaRequestStartTime,
-          OffsetDateTime mediaRequestEndTime)
+                                                        OffsetDateTime mediaRequestStartTime,
+                                                        OffsetDateTime mediaRequestEndTime)
           throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
@@ -242,12 +242,12 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     private AudioFileInfo trimToPeriod(AudioFileInfo audioFileInfo, OffsetDateTime trimPeriodStart,
-          OffsetDateTime trimPeriodEnd)
+                                       OffsetDateTime trimPeriodEnd)
           throws ExecutionException, InterruptedException, IOException {
         var audioFileStartTime = audioFileInfo.getStartTime();
 
         log.info("Trimming dates for ATS. Audio file start time is: " + audioFileStartTime.toString() + ", trim period start is: "
-              + trimPeriodStart.toString() + ", trim period end is: " + trimPeriodEnd.toString());
+                       + trimPeriodStart.toString() + ", trim period end is: " + trimPeriodEnd.toString());
 
         var trimStartDuration = Duration.between(audioFileStartTime, trimPeriodStart);
         var trimEndDuration = Duration.between(audioFileStartTime, trimPeriodEnd);
@@ -261,7 +261,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,
-          OffsetDateTime end)
+                                                OffsetDateTime end)
           throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> processedAudios = new ArrayList<>();
         for (AudioFileInfo audioFileInfo : audioFileInfos) {

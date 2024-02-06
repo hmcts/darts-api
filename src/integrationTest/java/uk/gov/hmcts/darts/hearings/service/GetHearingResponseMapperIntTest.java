@@ -95,7 +95,7 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
         var caseWithReportingRestrictions = dartsDatabase.addHandlerToCase(createSomeMinimalCase(), someReportingRestrictionId());
 
         var hearing = dartsDatabase.createHearing("some-courthouse", "some-courtroom",
-              caseWithReportingRestrictions.getCaseNumber(), LocalDate.now()
+                                                  caseWithReportingRestrictions.getCaseNumber(), LocalDate.now()
         );
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearing);

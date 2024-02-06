@@ -29,7 +29,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media, ObjectRecordStatusEntity status,
-          ExternalLocationTypeEntity externalLocationType);
+                                                                 ExternalLocationTypeEntity externalLocationType);
 
     @Query(
           """
@@ -50,8 +50,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
-          ExternalLocationTypeEntity location1,
-          ExternalLocationTypeEntity location2);
+                                                                                  ExternalLocationTypeEntity location1,
+                                                                                  ExternalLocationTypeEntity location2);
 
 
     @Query(
@@ -66,11 +66,11 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectRecordStatusEntity status,
-          ExternalLocationTypeEntity location,
-          MediaEntity media,
-          TranscriptionDocumentEntity transcription,
-          AnnotationDocumentEntity annotation,
-          CaseDocumentEntity caseDocument);
+                                                                                                ExternalLocationTypeEntity location,
+                                                                                                MediaEntity media,
+                                                                                                TranscriptionDocumentEntity transcription,
+                                                                                                AnnotationDocumentEntity annotation,
+                                                                                                CaseDocumentEntity caseDocument);
 
     @Query(
           """
@@ -81,8 +81,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
-          ExternalLocationTypeEntity type,
-          Integer transferAttempts);
+                                                                                            ExternalLocationTypeEntity type,
+                                                                                            Integer transferAttempts);
 
 
     @Query(
@@ -101,7 +101,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     List<ExternalObjectDirectoryEntity> findByStatusIdInAndType(List<Integer> statusList,
-          ExternalLocationTypeEntity type);
+                                                                ExternalLocationTypeEntity type);
 
     @Query(
           """
@@ -111,10 +111,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndObjectStatus(ExternalLocationTypeEntity externalLocationTypeEntity,
-          ObjectRecordStatusEntity status);
+                                                                                  ObjectRecordStatusEntity status);
 
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
-          ExternalLocationTypeEntity externalLocationType);
+                                                                           ExternalLocationTypeEntity externalLocationType);
 
     @Query(
           """
@@ -129,10 +129,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 """
     )
     List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
-          ObjectRecordStatusEntity status2,
-          ExternalLocationTypeEntity location1,
-          ExternalLocationTypeEntity location2,
-          OffsetDateTime lastModifiedBefore);
+                                                                ObjectRecordStatusEntity status2,
+                                                                ExternalLocationTypeEntity location1,
+                                                                ExternalLocationTypeEntity location2,
+                                                                OffsetDateTime lastModifiedBefore);
 
     @Modifying(clearAutomatically = true)
     @Query(

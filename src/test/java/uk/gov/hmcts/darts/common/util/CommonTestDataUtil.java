@@ -45,12 +45,12 @@ public class CommonTestDataUtil {
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
         return createEventWith(eventName, eventText,
-              hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
+                               hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
     public static EventEntity createEventWith(String eventName, String eventText,
-          HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
+                                              HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
@@ -64,16 +64,16 @@ public class CommonTestDataUtil {
     }
 
     public static EventEntity createEventWith(String eventName, String eventText,
-          HearingEntity hearingEntity,
-          EventHandlerEntity eventHandlerEntity) {
+                                              HearingEntity hearingEntity,
+                                              EventHandlerEntity eventHandlerEntity) {
 
         return createEventWith(eventName, eventText, hearingEntity,
-              eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00")
+                               eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity,
-          EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
+                                              EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));

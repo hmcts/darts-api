@@ -194,7 +194,7 @@ public class DartsDatabaseStub {
     }
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
-          String someCourthouse) {
+                                                                             String someCourthouse) {
         return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
               someCaseNumber,
               someCourthouse
@@ -202,7 +202,7 @@ public class DartsDatabaseStub {
     }
 
     public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom,
-          LocalDate toLocalDate) {
+                                                                LocalDate toLocalDate) {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
     }
 
@@ -247,8 +247,8 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber,
-          String courthouseName,
-          String courtroomName) {
+                                                                                  String courthouseName,
+                                                                                  String courtroomName) {
         givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
         return retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
     }
@@ -285,7 +285,7 @@ public class DartsDatabaseStub {
     }
 
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
-          LocalDate hearingDate) {
+                                       LocalDate hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearing(
               courthouseName,
@@ -373,7 +373,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
-          AudioRequestType audioRequestType) {
+                                                                                AudioRequestType audioRequestType) {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
@@ -393,8 +393,8 @@ public class DartsDatabaseStub {
     }
 
     public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
-          UserAccountEntity requestor,
-          AudioRequestType audioRequestType) {
+                                                                     UserAccountEntity requestor,
+                                                                     AudioRequestType audioRequestType) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
         return save(
               AudioTestData.createExpiredMediaRequest(
@@ -407,8 +407,8 @@ public class DartsDatabaseStub {
     }
 
     public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
-          UserAccountEntity requestor,
-          AudioRequestType audioRequestType) {
+                                                                       UserAccountEntity requestor,
+                                                                       AudioRequestType audioRequestType) {
         MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
               hearing,
               requestor,
@@ -614,7 +614,7 @@ public class DartsDatabaseStub {
     }
 
     private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
-          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
+                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setId(id);
@@ -633,7 +633,7 @@ public class DartsDatabaseStub {
     }
 
     public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
-          CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
+                                                         CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
         return caseRetentionStub.createCaseRetentionObject(courtCase, retentionStatus, retainUntilDate, isManual);
     }
 

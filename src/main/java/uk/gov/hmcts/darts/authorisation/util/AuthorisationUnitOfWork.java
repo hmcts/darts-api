@@ -26,7 +26,7 @@ public class AuthorisationUnitOfWork {
     private final List<ControllerAuthorisation> authorisation;
 
     public <T> void authoriseWithIdsForTranscription(List<T> idTypes, Function<T, String> getId,
-          SecurityRoleEnum[] roles, Runnable runnableOnAuth) {
+                                                     SecurityRoleEnum[] roles, Runnable runnableOnAuth) {
         authoriseWithIds(idTypes, getId, ContextIdEnum.TRANSCRIPTION_ID, roles, runnableOnAuth, true);
     }
 
@@ -43,9 +43,9 @@ public class AuthorisationUnitOfWork {
      * @param <T>                    - response
      */
     public <T> void authoriseWithIds(List<T> objectList, Function<T, String> gatherIdFunction,
-          ContextIdEnum contextIdEnum,
-          SecurityRoleEnum[] rolesToValidate, Runnable runnable,
-          boolean suppressDataValidation) {
+                                     ContextIdEnum contextIdEnum,
+                                     SecurityRoleEnum[] rolesToValidate, Runnable runnable,
+                                     boolean suppressDataValidation) {
         authorisation.forEach(auth -> {
             if (auth.getContextId() == contextIdEnum) {
                 objectList.forEach(idType -> {

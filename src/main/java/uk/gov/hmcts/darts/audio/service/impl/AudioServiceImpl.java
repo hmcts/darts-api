@@ -200,9 +200,9 @@ public class AudioServiceImpl implements AudioService {
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
-          String checksum,
-          UserAccountEntity userAccountEntity,
-          MediaEntity mediaEntity) {
+                                                                      String checksum,
+                                                                      UserAccountEntity userAccountEntity,
+                                                                      MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(

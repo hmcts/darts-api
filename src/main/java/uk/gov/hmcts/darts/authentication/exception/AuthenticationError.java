@@ -27,9 +27,11 @@ public enum AuthenticationError implements DartsApiError {
           "Failed to parse access token"
     ),
 
-    FAILED_TO_OBTAIN_AUTHENTICATION_CONFIG("103",
+    FAILED_TO_OBTAIN_AUTHENTICATION_CONFIG(
+          "103",
           HttpStatus.INTERNAL_SERVER_ERROR,
-          "Failed to find authentication configuration");
+          "Failed to find authentication configuration"
+    );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHENTICATION";
 

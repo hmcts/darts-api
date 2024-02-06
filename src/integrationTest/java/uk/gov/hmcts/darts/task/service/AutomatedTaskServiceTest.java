@@ -97,19 +97,19 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                   Task task = scheduledTask.getTask();
                   if (task instanceof CronTask cronTask) {
                       log.info("CronTask expression: {} Runnable: {}",
-                            cronTask.getExpression(), cronTask.getRunnable()
+                               cronTask.getExpression(), cronTask.getRunnable()
                       );
                   } else if (task instanceof TriggerTask triggerTask) {
                       log.info("TriggerTask trigger: {} Runnable: {}",
-                            triggerTask.getTrigger(), triggerTask.getRunnable()
+                               triggerTask.getTrigger(), triggerTask.getRunnable()
                       );
                   } else if (task instanceof FixedRateTask fixedRateTask) {
                       log.info("FixedRateTask initial delay duration: {} Interval duration: {} ",
-                            fixedRateTask.getInitialDelayDuration(), fixedRateTask.getIntervalDuration()
+                               fixedRateTask.getInitialDelayDuration(), fixedRateTask.getIntervalDuration()
                       );
                   } else if (task instanceof FixedDelayTask fixedDelayTask) {
                       log.info("FixedDelayTask initial delay duration: {} Interval duration: {}",
-                            fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration()
+                               fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration()
                       );
                   } else {
                       log.info("Unknown task type: " + task);
@@ -121,13 +121,13 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-              automatedTaskConfigurationProperties
+                                                                                        automatedTaskConfigurationProperties
         );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         // this may have transitioned to complete. Let's check the history to ensure that
@@ -154,7 +154,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTaskCancelProcessDailyList() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-              automatedTaskConfigurationProperties
+                                                                        automatedTaskConfigurationProperties
         );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -172,12 +172,12 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTasksUpdateCronExpressionAndResetCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-              automatedTaskConfigurationProperties
+                                                                        automatedTaskConfigurationProperties
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -185,7 +185,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
@@ -197,12 +197,12 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void cancelAutomatedTaskAndUpdateCronExpression() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-              automatedTaskConfigurationProperties
+                                                                        automatedTaskConfigurationProperties
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         boolean mayInterruptIfRunning = false;
@@ -233,7 +233,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @SuppressWarnings("PMD.LawOfDemeter")
     void givenExistingAutomatedTaskNameAndInvalidCronExpressionThrowsDartsApiException() {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-              automatedTaskConfigurationProperties
+                                                                        automatedTaskConfigurationProperties
         );
 
         var exception = assertThrows(
@@ -250,12 +250,12 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void updateCronExpressionWithoutRescheduleForcingTaskToSkipRunning() throws InterruptedException {
         AutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-              automatedTaskConfigurationProperties
+                                                                        automatedTaskConfigurationProperties
         );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), false, "*/5 * * * * *");
@@ -263,7 +263,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
@@ -275,7 +275,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         automatedTaskRepository.saveAndFlush(automatedTaskEntity2);
 
         log.info("TEST - Updated task {} cron expression {}  via database directly", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity2.get().getCronExpression()
+                 updatedAutomatedTaskEntity2.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity2.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity2.get().getCronExpression());
@@ -301,7 +301,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -312,7 +312,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
@@ -355,7 +355,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -366,7 +366,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
@@ -379,8 +379,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelOutboundAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
               new OutboundAudioDeleterAutomatedTask(automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties, outboundAudioDeleterProcessor
+                                                    lockProvider,
+                                                    automatedTaskConfigurationProperties, outboundAudioDeleterProcessor
               );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -399,8 +399,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelInboundAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
               new InboundAudioDeleterAutomatedTask(automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties, inboundAudioDeleterProcessor
+                                                   lockProvider,
+                                                   automatedTaskConfigurationProperties, inboundAudioDeleterProcessor
               );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -430,7 +430,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -441,7 +441,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
@@ -478,8 +478,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     void givenConfiguredTaskCancelInboundToUnstructuredAutomatedTask() {
         AutomatedTask automatedTask =
               new InboundToUnstructuredAutomatedTask(automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties, inboundToUnstructuredProcessor
+                                                     lockProvider,
+                                                     automatedTaskConfigurationProperties, inboundToUnstructuredProcessor
               );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -500,7 +500,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenConfiguredTaskCancelUnstructuredAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
-              new UnstructuredAudioDeleterAutomatedTask(automatedTaskRepository,
+              new UnstructuredAudioDeleterAutomatedTask(
+                    automatedTaskRepository,
                     lockProvider,
                     automatedTaskConfigurationProperties,
                     unstructuredAudioDeleterProcessor
@@ -534,7 +535,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -545,7 +546,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
@@ -593,7 +594,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
-              originalAutomatedTaskEntity.get().getCronExpression()
+                 originalAutomatedTaskEntity.get().getCronExpression()
         );
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -604,7 +605,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
               automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-              updatedAutomatedTaskEntity.get().getCronExpression()
+                 updatedAutomatedTaskEntity.get().getCronExpression()
         );
         assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
         assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());

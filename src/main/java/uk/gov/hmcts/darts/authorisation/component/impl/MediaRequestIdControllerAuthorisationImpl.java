@@ -72,7 +72,7 @@ class MediaRequestIdControllerAuthorisationImpl extends BaseControllerAuthorisat
     }
 
     void checkAuthorisationByMediaRequestId(Optional<String> mediaRequestIdParamOptional,
-          Set<SecurityRoleEnum> roles) {
+                                            Set<SecurityRoleEnum> roles) {
         if (mediaRequestIdParamOptional.isPresent()) {
             try {
                 Integer mediaRequestId = Integer.valueOf(mediaRequestIdParamOptional.get());

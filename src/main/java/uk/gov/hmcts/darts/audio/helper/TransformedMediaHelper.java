@@ -58,8 +58,8 @@ public class TransformedMediaHelper {
 
     @Transactional
     public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename,
-          OffsetDateTime startTime, OffsetDateTime endTime,
-          Long fileSize) {
+                                                               OffsetDateTime startTime, OffsetDateTime endTime,
+                                                               Long fileSize) {
         AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
         if (mediaRequest.getRequestType().equals(DOWNLOAD)) {
             audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
