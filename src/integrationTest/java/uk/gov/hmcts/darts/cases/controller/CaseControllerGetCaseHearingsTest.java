@@ -35,7 +35,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
-    private static final String endpointUrl = "/cases/{case_id}/hearings";
+    private static final String ENDPOINT_URL = "/cases/{case_id}/hearings";
     @Autowired
     private transient MockMvc mockMvc;
     @MockBean
@@ -64,7 +64,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     void casesSearchGetEndpointShouldReturnForbidden() throws Exception {
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getCourtCase().getId());
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
 
@@ -79,7 +79,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpoint() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, "25");
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
 
@@ -90,7 +90,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
               .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
@@ -116,7 +116,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"));
         hearingEntity2.addJudge(dartsDatabase.createSimpleJudge("hearing2Judge"));
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
               .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
@@ -131,7 +131,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpointNoObjectsReturned() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, "25");
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andExpect(
               MockMvcResultMatchers.jsonPath(
@@ -149,7 +149,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         CourtCaseEntity courtCase = dartsDatabase.createCase(courthouseName, "Test");
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, courtCase.getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
               .andExpect(MockMvcResultMatchers.jsonPath(

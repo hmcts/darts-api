@@ -27,7 +27,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
-    private static final String endpointUrl = "/cases/{case_id}";
+    private static final String ENDPOINT_URL = "/cases/{case_id}";
     @Autowired
     private transient MockMvc mockMvc;
     @MockBean
@@ -57,7 +57,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isForbidden());
     }
@@ -65,7 +65,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpoint() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -75,7 +75,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     void casesSearchGetEndpointCheckListsAreCorrectSize() throws Exception {
 
         final Integer caseId = getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE);
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, caseId);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, caseId);
 
         mockMvc.perform(requestBuilder)
               .andExpect(MockMvcResultMatchers.status().isOk())
@@ -94,7 +94,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpointCaseNotFound() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, 25);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, 25);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
 
