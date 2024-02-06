@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.arm.util;
 
 /**
- * Contains a list of the internal keys to be mapped against ARMS expected keys
+ * Contains a list of the internal keys to be mapped against ARMS expected keys.
  */
 public final class PropertyConstants {
 

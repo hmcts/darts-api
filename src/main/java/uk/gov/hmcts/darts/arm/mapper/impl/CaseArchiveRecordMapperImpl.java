@@ -6,13 +6,16 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.CaseArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
-import uk.gov.hmcts.darts.arm.model.record.metadata.CaseCreateArchiveRecordMetadata;
+import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.CaseCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
 import java.io.File;
+import java.time.format.DateTimeFormatter;
+import java.util.Properties;
 
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 
@@ -21,6 +24,13 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    private final CurrentTimeHelper currentTimeHelper;
+    private Properties annotationRecordProperties;
+
+    private DateTimeFormatter dateTimeFormatter;
+    private DateTimeFormatter dateFormatter;
+
 
     @Override
     public CaseArchiveRecord mapToCaseArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
@@ -65,8 +75,8 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             .build();
     }
 
-    private CaseCreateArchiveRecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return CaseCreateArchiveRecordMetadata.builder()
+    private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        return RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .build();
     }

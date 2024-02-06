@@ -9,10 +9,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CLIENT_IDENTIFIER_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.EVENT_DATE_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.RECORD_DATE_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.RELATION_ID_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.CLIENT_IDENTIFIER_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.EVENT_DATE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.RECORD_DATE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.RELATION_ID_KEY;
 
 @AllArgsConstructor
 public class BaseTemplate {

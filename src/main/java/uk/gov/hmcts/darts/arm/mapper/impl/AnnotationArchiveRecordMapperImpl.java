@@ -6,13 +6,16 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
-import uk.gov.hmcts.darts.arm.model.record.metadata.AnnotationCreateArchiveRecordMetadata;
+import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.AnnotationCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
 import java.io.File;
+import java.time.format.DateTimeFormatter;
+import java.util.Properties;
 
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 
@@ -21,6 +24,12 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final CurrentTimeHelper currentTimeHelper;
+    private Properties annotationRecordProperties;
+
+    private DateTimeFormatter dateTimeFormatter;
+    private DateTimeFormatter dateFormatter;
+
 
     @Override
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
@@ -65,8 +74,8 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             .build();
     }
 
-    private AnnotationCreateArchiveRecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return AnnotationCreateArchiveRecordMetadata.builder()
+    private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        return RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .build();
     }

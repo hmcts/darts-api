@@ -90,6 +90,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     @Override
+    @Transactional
     public void processUnstructuredToArm() {
         preloadObjectRecordStatuses(objectRecordStatusRepository);
 
@@ -118,7 +119,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 } else {
                     log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
                     updateTransferAttempts(armExternalObjectDirectory);
-                    updateExternalObjectDirctoryStatus(armExternalObjectDirectory, failedArmRawDataStatus);
+                    updateExternalObjectDirectoryStatus(armExternalObjectDirectory, failedArmRawDataStatus);
                     continue;
                 }
             } else {
@@ -126,7 +127,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory);
             }
 
-            updateExternalObjectDirctoryStatus(armExternalObjectDirectory, armIngestionStatus);
+            updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
 
             String filename = generateFilename(armExternalObjectDirectory);
 
@@ -137,12 +138,12 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 previousStatus
             );
             if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
-                updateExternalObjectDirctoryStatus(armExternalObjectDirectory, armDropZoneStatus);
+                updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
             }
         }
     }
 
-    private void updateExternalObjectDirctoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
+    private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
         log.debug(
             "Updating ARM status from {} to {} for ID {}",
             armExternalObjectDirectory.getStatus().getDescription(),

@@ -45,19 +45,29 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_018_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_019_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTHOUSE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTROOM_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CREATED_DATE_TIME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.END_DATE_TIME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.FILE_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.HEARING_DATE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.START_DATE_TIME_KEY;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implements MediaArchiveRecordMapper {
+public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     public static final String CASE_LIST_DELIMITER = "|";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
     private Properties mediaRecordProperties;
 
-    DateTimeFormatter dateTimeFormatter;
-    DateTimeFormatter dateFormatter;
+    private DateTimeFormatter dateTimeFormatter;
+    private DateTimeFormatter dateFormatter;
 
 
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
@@ -166,29 +176,24 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
 
     private String mapToString(String key, MediaEntity media) {
         return switch (key) {
-            case "OBJECT_TYPE" -> ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription();
-            case "CASE_NUMBERS" -> {
+            case OBJECT_TYPE_KEY -> ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription();
+            case CASE_NUMBERS_KEY -> {
                 String cases = null;
                 if (nonNull(media.getCaseNumberList())) {
                     cases = caseListToString(media.getCaseNumberList());
                 }
                 yield cases;
             }
-            case "FILE_TYPE" -> media.getMediaFormat();
-            case "HEARING_DATE" -> {
+            case FILE_TYPE_KEY -> media.getMediaFormat();
+            case HEARING_DATE_KEY -> {
                 String hearingDate = null;
                 if (CollectionUtils.isNotEmpty(media.getHearingList())) {
                     hearingDate = media.getHearingList().get(0).getHearingDate().format(dateFormatter);
                 }
                 yield hearingDate;
             }
-            case "CHECKSUM" -> media.getChecksum();
-//            case "TRANSCRIPT_REQUEST" -> ;
-//            case "TRANSCRIPT_TYPE" -> ;
-//            case "TRANSCRIPT_URGENCY" -> ;
-//            case "COMMENTS" -> ;
-//            case "PLACEHOLDER_DATE" -> ;
-            case "CREATED_DATE_TIME" -> {
+            case CHECKSUM_KEY -> media.getChecksum();
+            case CREATED_DATE_TIME_KEY -> {
                 String createdDateTime = null;
                 if (nonNull(media.getCreatedDateTime())) {
                     createdDateTime = media.getCreatedDateTime().format(dateTimeFormatter);
@@ -197,10 +202,10 @@ public class MediaArchiveRecordMapperImpl extends BaseArchiveRecordMapper implem
             }
 
 //            case "UPLOADED_BY" -> ;
-            case "START_DATE_TIME" -> media.getStart().format(dateTimeFormatter);
-            case "END_DATE_TIME" -> media.getEnd().format(dateTimeFormatter);
-            case "COURTHOUSE" -> media.getCourtroom().getCourthouse().getCourthouseName();
-            case "COURTROOM" -> media.getCourtroom().getName();
+            case START_DATE_TIME_KEY -> media.getStart().format(dateTimeFormatter);
+            case END_DATE_TIME_KEY -> media.getEnd().format(dateTimeFormatter);
+            case COURTHOUSE_KEY -> media.getCourtroom().getCourthouse().getCourthouseName();
+            case COURTROOM_KEY -> media.getCourtroom().getName();
             default -> null;
         };
     }
