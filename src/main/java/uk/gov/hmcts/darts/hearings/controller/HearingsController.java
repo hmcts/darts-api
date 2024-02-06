@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.hearings.http.api.HearingsApi;
+import uk.gov.hmcts.darts.hearings.model.Annotation;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
@@ -54,5 +56,14 @@ public class HearingsController implements HearingsApi {
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<Transcript>> hearingsHearingIdTranscriptsGet(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getTranscriptsByHearingId(hearingId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = HEARING_ID,
+        securityRoles = {JUDGE, ADMIN},
+        globalAccessSecurityRoles = {JUDGE, ADMIN})
+    public ResponseEntity<List<Annotation>> getHearingAnnotations(Integer hearingId) {
+        return new ResponseEntity<>(hearingsService.getAnnotationsByHearingId(hearingId), HttpStatus.OK);
     }
 }

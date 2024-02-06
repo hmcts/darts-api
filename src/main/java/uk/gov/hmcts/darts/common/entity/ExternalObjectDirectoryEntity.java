@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -74,11 +75,20 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
 
+    @Column(name = "verification_attempts")
+    private Integer verificationAttempts;
+
     @Column(name = "manifest_file")
     private String manifestFile;
 
     @Column(name = "event_date_ts")
     private LocalDateTime eventDateTs;
+
+    @Column(name = "error_code")
+    private String errorCode;
+
+    @Column(name = "is_response_cleaned")
+    private boolean responseCleaned;
 
     @Override
     public int getStatusId() {
@@ -88,5 +98,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Override
     public UUID getLocation() {
         return externalLocation;
+    }
+
+    public boolean isForLocationType(ExternalLocationTypeEnum type) {
+        return getExternalLocationType().getId().equals(type.getId());
     }
 }

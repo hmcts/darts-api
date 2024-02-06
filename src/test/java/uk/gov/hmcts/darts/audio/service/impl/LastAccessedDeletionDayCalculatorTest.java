@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,8 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-@SpringBootTest
+@SpringBootTest(classes = LastAccessedDeletionDayCalculator.class)
 @ActiveProfiles({"dev", "h2db"})
 class LastAccessedDeletionDayCalculatorTest {
     @MockBean
@@ -33,7 +30,7 @@ class LastAccessedDeletionDayCalculatorTest {
     private CurrentTimeHelper currentTimeHelper;
 
     @Autowired
-    LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
+    private LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +44,7 @@ class LastAccessedDeletionDayCalculatorTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(Collections.emptyList());
 
+        //2023-10-19 is a Thursday
         assertEquals(
             OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
             lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)

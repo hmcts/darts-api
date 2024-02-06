@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.retention.enums.CaseStatus;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 
 import java.util.List;
 import java.util.Objects;
@@ -104,9 +104,10 @@ public class CasesMapper {
         SingleCase singleCase = new SingleCase();
 
         Optional<CaseRetentionEntity> caseRetentionOptional = caseRetentionRepository
-                                                                    .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
-                                                                        caseEntity,
-                                                                        String.valueOf(CaseStatus.COMPLETE));
+            .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
+                caseEntity,
+                String.valueOf(CaseRetentionStatus.COMPLETE)
+            );
 
         if (!caseRetentionOptional.isEmpty()) {
             CaseRetentionEntity caseRetention = caseRetentionOptional.get();
@@ -138,9 +139,6 @@ public class CasesMapper {
 
         singleCase.setReportingRestrictions(sortedByTimestamp(reportingRestrictions));
 
-        //Will be removed when FE up to date
-        populateReportingRestrictionField(caseEntity, singleCase);
-
         return singleCase;
     }
 
@@ -154,12 +152,6 @@ public class CasesMapper {
         var reportingRestriction = new ReportingRestriction();
         reportingRestriction.setEventName(name);
         return reportingRestriction;
-    }
-
-    private static void populateReportingRestrictionField(CourtCaseEntity caseEntity, SingleCase singleCase) {
-        if (caseEntity.getReportingRestrictions() != null) {
-            singleCase.setReportingRestriction(caseEntity.getReportingRestrictions().getEventName());
-        }
     }
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {

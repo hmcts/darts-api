@@ -78,7 +78,7 @@ paths:
         - Audio
       summary: Preview audio
       operationId: preview
-      description: Preview audio
+      description: Preview audio. Use text/event-stream accept type to use send server events.
       parameters:
         - in: path
           name: media_id

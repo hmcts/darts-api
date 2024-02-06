@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 
 import java.io.File;
 
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
+
 @Component
 @RequiredArgsConstructor
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
@@ -23,8 +25,10 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     @Override
     public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
-        TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory,
-                                                                                                                           externalObjectDirectory.getId());
+        TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(
+            externalObjectDirectory,
+            externalObjectDirectory.getId()
+        );
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId());
         return createTranscriptionArchiveRecord(transcriptionCreateArchiveRecordOperation, uploadNewFileRecord);
     }
@@ -38,18 +42,19 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId) {
-        return UploadNewFileRecord.builder()
-            .relationId(relationId.toString())
-            .fileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument))
-            .build();
+        UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
+        uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
+        uploadNewFileRecord.setRelationId(relationId.toString());
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument));
+        return uploadNewFileRecord;
     }
 
     private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(TranscriptionDocumentEntity transcriptionDocument) {
-        return UploadNewFileRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .dzFilename(transcriptionDocument.getFileName())
-            .fileTag(transcriptionDocument.getFileType())
-            .build();
+        UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
+        uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
+        uploadNewFileRecordMetadata.setDzFilename(transcriptionDocument.getFileName());
+        uploadNewFileRecordMetadata.setFileTag(transcriptionDocument.getFileType());
+        return uploadNewFileRecordMetadata;
     }
 
     private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,

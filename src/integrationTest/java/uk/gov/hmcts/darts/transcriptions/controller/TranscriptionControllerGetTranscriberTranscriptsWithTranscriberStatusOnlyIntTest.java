@@ -1,9 +1,8 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,19 +11,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
 
 import static java.lang.Boolean.TRUE;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Transactional
-@TestInstance(PER_CLASS)
 class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/transcriber-view");
@@ -37,9 +32,9 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @BeforeAll
+    @BeforeEach
     @SuppressWarnings({"checkstyle.LineLengthCheck"})
-    void beforeAll() {
+    void beforeEach() {
         jdbcTemplate.update("""
                                 INSERT INTO darts.courthouse (cth_id, courthouse_code, courthouse_name, created_ts, last_modified_ts, created_by,
                                 last_modified_by, display_name)
@@ -63,11 +58,13 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 VALUES (-4, -1);
 
                                 -- Transcript Requests: Approved
-                                INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
-                                VALUES (41, -1, NULL, 9, -1, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
+                                VALUES (41, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
                                 '2023-11-23 16:26:20.451054+00', -10, NULL, -10, 1, 3, NULL, true, false);
+                                INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (41,-1);
+                                INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (41,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (41, 41, 1, -10, '2023-11-23 16:25:55.304517+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -76,11 +73,13 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 VALUES (43, 41, 3, -10, '2023-11-23 16:26:20.441633+00');
 
                                 -- Your work > To do: With Transcriber
-                                INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
-                                VALUES (81, -1, NULL, 9, -1, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
+                                VALUES (81, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
                                 '2023-11-23 17:45:51.1549+00', -10, NULL, -10, 1, 5, NULL, true, false);
+                                INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (81,-1);
+                                INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (81,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (81, 81, 1, -10, '2023-11-23 17:45:14.940936+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -91,11 +90,13 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
 
                                 -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
-                                INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts,
+                                INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
                                 created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
-                                VALUES (101, -1, NULL, 9, -1, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00',
+                                VALUES (101, NULL, 9, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00',
                                 '2023-11-24 12:53:42.870475+00', -10, NULL, -10, 1, 6, NULL, true, false);
+                                INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (101,-1);
+                                INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (101,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (121, 101, 1, -10, '2023-11-24 12:37:00.812692+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -109,9 +110,12 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 """);
     }
 
-    @AfterAll
-    void afterAll() {
+    @AfterEach
+    void afterEach() {
         jdbcTemplate.update("""
+                                DELETE FROM darts.case_transcription_ae WHERE tra_id IN (41, 81, 101);
+                                DELETE FROM darts.hearing_transcription_ae WHERE tra_id IN (41, 81, 101);
+
                                 DELETE FROM darts.transcription_workflow WHERE tra_id IN (41, 81, 101);
                                 DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101);
 

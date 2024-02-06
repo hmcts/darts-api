@@ -24,12 +24,13 @@ public class TranscriptionMapper {
     private Transcript map(TranscriptionEntity transcriptionEntity) {
         Transcript transcript = new Transcript();
         transcript.setTranscriptionId(transcriptionEntity.getId());
-        HearingEntity hearing = transcriptionEntity.getHearing();
-        if (hearing == null) {
+        List<HearingEntity> hearings = transcriptionEntity.getHearings();
+        if (hearings.isEmpty()) {
             if (transcriptionEntity.getHearingDate() != null) {
                 transcript.setHearingDate(transcriptionEntity.getHearingDate());
             }
         } else {
+            HearingEntity hearing = hearings.get(0);
             transcript.setHearingId(hearing.getId());
             transcript.setHearingDate(hearing.getHearingDate());
         }

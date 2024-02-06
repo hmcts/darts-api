@@ -111,7 +111,7 @@ paths:
                       - type
                     properties:
                       type:
-                        $ref: '#/components/schemas/UserAuthorisation403ErrorCode'
+                        $ref: '#/components/schemas/UserAuthorisation403_107ErrorCode'
               example:
                 type: AUTHORISATION_107
                 title: Failed to check authorisation
@@ -150,6 +150,23 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/RoleArraySuccessResponse'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -299,7 +316,6 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
-      pattern: ^\S$|^\S[a-zA-Z '-]*\S$
       type: string
     UserEmailAddress:
       minLength: 1
@@ -409,11 +425,17 @@ components:
           format: date-time
       allOf:
         - $ref: '#/components/schemas/User'
-    UserAuthorisation403ErrorCode:
+    UserAuthorisation403_107ErrorCode:
       type: string
       enum:
         - "AUTHORISATION_107"
       x-enum-varnames: [ BAD_REQUEST_ANY_ID ]
+
+    UserAuthorisation403_109ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_109"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_ENDPOINT ]
 
     SecurityGroupWithIdAndRole:
       type: object

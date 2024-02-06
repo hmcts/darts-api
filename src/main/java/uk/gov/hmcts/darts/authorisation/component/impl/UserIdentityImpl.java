@@ -102,7 +102,8 @@ public class UserIdentityImpl implements UserIdentity {
         try {
             emailAddress = getEmailAddressFromToken();
         } catch (IllegalStateException e) {
-            log.debug("Unable to get email address from token: {}", e.getMessage());
+
+            log.debug("Unable to get email address from token ending ''.....{}'': {}", StringUtils.right(guid, 5), e.getMessage());
         }
 
         if (nonNull(guid) || nonNull(emailAddress)) {

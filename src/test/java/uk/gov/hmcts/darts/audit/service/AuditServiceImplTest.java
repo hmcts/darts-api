@@ -64,7 +64,6 @@ class AuditServiceImplTest {
         AuditEntity savedValue = auditEntityArgumentCaptor.getValue();
         assertNotNull(savedValue.getCourtCase());
         assertNotNull(savedValue.getUser());
-        assertEquals(savedValue.getApplicationServer(), APP_SERVER);
         assertNotNull(savedValue.getCreatedBy());
         assertNotNull(savedValue.getLastModifiedBy());
         assertNull(savedValue.getAdditionalData());

@@ -28,8 +28,9 @@ public class AnnotationDocumentEntity {
     @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "ann_id", nullable = false)
-    private Integer annotationId;
+    @ManyToOne
+    @JoinColumn(name = "ann_id", nullable = false)
+    private AnnotationEntity annotation;
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
@@ -53,6 +54,9 @@ public class AnnotationDocumentEntity {
 
     @Column(name = "content_object_id")
     private String contentObjectId;
+
+    @Column(name = "clip_id")
+    private String clipId;
 
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;

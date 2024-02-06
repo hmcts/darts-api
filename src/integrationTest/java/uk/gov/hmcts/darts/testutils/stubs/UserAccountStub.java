@@ -6,10 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
-import java.util.Collections;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +19,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Component
 @RequiredArgsConstructor
@@ -26,10 +27,14 @@ public class UserAccountStub {
     private static final int SYSTEM_USER_ID = 0;
     private static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";
     private static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
+    private static final OffsetDateTime LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final CourthouseStub courthouseStub;
+    private final CourthouseRepository courthouseRepository;
 
     public UserAccountEntity getSystemUserAccountEntity() {
 
@@ -56,6 +61,21 @@ public class UserAccountStub {
         return userAccounts.get(0);
     }
 
+    /**
+     * If we want to create a different user for judge, than for admin, we pass in a unique identifier, otherwise it will change the user.
+     *
+     * @param identifier unique reference
+     * @return the user account
+     */
+    public UserAccountEntity getIntegrationTestUserAccountEntity(String identifier) {
+        String emailAddress = identifier + "@example.com";
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
+        if (userAccounts.isEmpty()) {
+            return createIntegrationUser(UUID.randomUUID().toString(), identifier, emailAddress);
+        }
+        return userAccounts.get(0);
+    }
+
     public UserAccountEntity getSeparateIntegrationTestUserAccountEntity() {
         List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(SEPARATE_TEST_USER_EMAIL);
         if (userAccounts.isEmpty()) {
@@ -66,16 +86,27 @@ public class UserAccountStub {
 
 
     private UserAccountEntity createIntegrationUser(String guid) {
+        return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL);
+    }
+
+    private UserAccountEntity createIntegrationUser(String guid, String emailAddress) {
+        return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL, emailAddress);
+    }
+
+    private UserAccountEntity createIntegrationUser(String guid, String fullName, String emailAddress) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
-        newUser.setUserName("IntegrationTest User");
-        newUser.setUserFullName("IntegrationTest User");
-        newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
+        newUser.setUserName(fullName + "Username");
+        newUser.setUserFullName(fullName + "FullName");
+        newUser.setEmailAddress(emailAddress);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
         newUser.setActive(true);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
+        newUser.setCreatedDateTime(CREATED_DATE_TIME);
+        newUser.setLastModifiedDateTime(LAST_MODIFIED_DATE_TIME);
+        newUser.setLastLoginTime(LAST_LOGIN_TIME);
         return userAccountRepository.saveAndFlush(newUser);
     }
 
@@ -139,25 +170,45 @@ public class UserAccountStub {
         return testUser;
     }
 
+    @Transactional
     public UserAccountEntity createTranscriptionCompanyUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
-        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-4).get();
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
     }
 
+    @Transactional
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
-        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createJudgeUser() {
+        return createJudgeUser("default");
+    }
+
+    @Transactional
+    public UserAccountEntity createJudgeUser(String identifier) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-3).get();
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity("Judge" + identifier);
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
@@ -213,12 +264,18 @@ public class UserAccountStub {
         return testUser;
     }
 
+    @Transactional
     public UserAccountEntity createAdminUser() {
         var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
             .orElseThrow();
+        adminGroup.setGlobalAccess(true);
+        adminGroup.getCourthouseEntities().clear();
+        adminGroup.getCourthouseEntities().addAll(courthouseRepository.findAll());
+        adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
 
-        var user = getIntegrationTestUserAccountEntity();
-        user.setSecurityGroupEntities(Collections.singleton(adminGroup));
+        var user = getIntegrationTestUserAccountEntity("adminUserAccount");
+        user.getSecurityGroupEntities().clear();
+        user.getSecurityGroupEntities().add(adminGroup);
 
         return userAccountRepository.saveAndFlush(user);
     }

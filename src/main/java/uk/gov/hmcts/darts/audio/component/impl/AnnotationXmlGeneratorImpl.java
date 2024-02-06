@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.util.DateConverters;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,11 +41,8 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
     private static final String ANNOTATION_EVENT_ATTRIBUTE_RESTRICTED = "R";
     private static final String ANNOTATION_EVENT_ATTRIBUTE_LAPSED = "P";
 
-    private final DateConverters dateConverters;
-
-    public AnnotationXmlGeneratorImpl(DateConverters dateConverters) throws ParserConfigurationException {
+    public AnnotationXmlGeneratorImpl() throws ParserConfigurationException {
         super();
-        this.dateConverters = dateConverters;
     }
 
     @Override
@@ -75,7 +72,7 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         // Events
         for (EventEntity event : annotationData.getEvents()) {
 
-            ZonedDateTime localEventTimestamp = dateConverters.offsetDateTimeToLegacyDateTime(event.getTimestamp());
+            ZonedDateTime localEventTimestamp = DateConverterUtil.toZonedDateTime(event.getTimestamp());
 
             Element eventElement = document.createElement(String.format(
                 "%s%d",

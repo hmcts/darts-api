@@ -157,6 +157,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void updateExternalObjectDirctoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEnum armStatus) {
+        log.debug("Updating ARM status from {} to {} for ID {}", armExternalObjectDirectory.getStatus().getDescription(), armStatus.name(),
+                  armExternalObjectDirectory.getId()
+        );
         armExternalObjectDirectory.setStatus(armStatuses.get(armStatus));
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
@@ -171,7 +174,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
             try {
-                BinaryData metadataFileBinary = fileOperationService.saveFileToBinaryData(archiveRecordFile.getAbsolutePath());
+                BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(archiveRecordFile.getAbsolutePath());
                 armDataManagementApi.saveBlobDataToArm(archiveRecordFileInfo.getArchiveRecordFile().getName(), metadataFileBinary);
             } catch (BlobStorageException e) {
                 if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
@@ -227,8 +230,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
-
+                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
+                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
@@ -236,7 +240,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             }
         } catch (BlobStorageException e) {
             if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("BLOB already exists {}", e.getMessage());
+                log.info("BLOB raw data already exists {}", e.getMessage());
             } else {
                 log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
                           e.getMessage()
@@ -260,9 +264,13 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                                              ObjectRecordStatusEnum objectRecordStatusEnum) {
+        log.debug("Updating ARM status from {} to {} for ID ", armExternalObjectDirectory.getStatus().getDescription(), objectRecordStatusEnum.name(),
+                  armExternalObjectDirectory.getId()
+        );
         armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
+        armExternalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
@@ -284,6 +292,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));
         armExternalObjectDirectoryEntity.setStatus(armStatuses.get(ARM_INGESTION));
         armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
+        armExternalObjectDirectoryEntity.setVerificationAttempts(1);
+
 
         if (nonNull(externalObjectDirectory.getMedia())) {
             armExternalObjectDirectoryEntity.setMedia(externalObjectDirectory.getMedia());

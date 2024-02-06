@@ -30,7 +30,7 @@ public class UserController implements UserApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
     public ResponseEntity<List<UserWithIdAndTimestamps>> getUsers(Integer courthouseId, String emailAddress) {
-        return UserApi.super.getUsers(courthouseId, emailAddress);
+        return ResponseEntity.ok(userManagementService.getUsers(emailAddress));
     }
 
     @Override
@@ -57,6 +57,13 @@ public class UserController implements UserApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
     public ResponseEntity<List<UserWithIdAndTimestamps>> search(UserSearch userSearch) {
         return ResponseEntity.ok(userManagementService.search(userSearch));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<UserWithIdAndTimestamps> getUsersById(Integer userId) {
+        return ResponseEntity.ok(userManagementService.getUserById(userId));
     }
 
 }

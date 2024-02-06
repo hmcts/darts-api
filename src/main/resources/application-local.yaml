@@ -25,6 +25,9 @@ darts:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:true}
   redis:
     ssl-enabled: false
+  storage:
+    arm-api:
+      url: ${ARM_URL:http://localhost:4551}
 
 logging:
   level:

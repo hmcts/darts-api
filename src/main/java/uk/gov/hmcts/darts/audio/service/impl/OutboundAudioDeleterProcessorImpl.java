@@ -66,7 +66,9 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
-            entity.getTransformedMedia().setExpiryTime(OffsetDateTime.now());
+            TransformedMediaEntity transformedMedia = entity.getTransformedMedia();
+            transformedMedia.setExpiryTime(OffsetDateTime.now());
+            transformedMedia.setLastModifiedBy(systemUser);
             markTransientObjectDirectoryAsDeleted(entity, systemUser, deletionStatus);
             deletedValues.add(entity);
         }

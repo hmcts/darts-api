@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
 
 @Component
@@ -41,15 +41,14 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
      *
      * @param mediaEntityToDownloadLocation Map relating each mediaEntity to the local filepath of its associated
      *                                      downloaded audio file.
-     * @param overallStartTime              The time at which the audio start should be trimmed to.
-     * @param overallEndTime                The time at which the audio end should be trimmed to.
-     * @return A grouping of trimmed and concatenated multichannel audio files, whereby each group is a collection of audio files
-     *     that belong to a continuous recording session.
+     * @param mediaRequestStartTime         The time at which the first media/audio session should be trimmed to.
+     * @param mediaRequestEndTime           The time at which the last media/audio session should be trimmed to.
+     * @return A grouping of multichannel audio files for a recording session, trimmed to the request times.
      */
     @Override
     public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-                                                             OffsetDateTime overallStartTime,
-                                                             OffsetDateTime overallEndTime)
+                                                             OffsetDateTime mediaRequestStartTime,
+                                                             OffsetDateTime mediaRequestEndTime)
         throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
@@ -59,13 +58,26 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         }
 
         List<List<AudioFileInfo>> finalisedAudioSessions = new ArrayList<>();
-        for (List<AudioFileInfo> audioSession : groupedAudioSessions) {
-            List<AudioFileInfo> trimmedAudios = trimAllToPeriod(
-                audioSession,
-                overallStartTime,
-                overallEndTime
-            );
-            finalisedAudioSessions.add(trimmedAudios);
+
+        final int numberOfSessions = groupedAudioSessions.size();
+        if (numberOfSessions >= 1) {
+            finalisedAudioSessions.add(trimAll(
+                groupedAudioSessions.get(0), // trim start of session
+                mediaRequestStartTime,
+                mediaRequestEndTime
+            ));
+        }
+
+        if (numberOfSessions > 2) {
+            finalisedAudioSessions.addAll(groupedAudioSessions.subList(1, numberOfSessions - 1)); // no need to trim mid session
+        }
+
+        if (numberOfSessions > 1) {
+            finalisedAudioSessions.add(trimAll(
+                groupedAudioSessions.get(numberOfSessions - 1), // trim end of session
+                mediaRequestStartTime,
+                mediaRequestEndTime
+            ));
         }
 
         return finalisedAudioSessions;
@@ -88,11 +100,11 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         }
 
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
-        for (ChannelAudio audioFileInfoList :  concatenationsList) {
+        for (ChannelAudio audioFileInfoList : concatenationsList) {
             AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
-            OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(ZoneOffset.UTC);
-            OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(ZoneOffset.UTC);
-            AudioFileInfo trimmedAudio = trimToPeriod(
+            OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(UTC);
+            OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(UTC);
+            AudioFileInfo trimmedAudio = trim(
                 mergedAudio,
                 mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
                 mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
@@ -112,7 +124,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         if (audioFileInfosByChannel.values().size() > 1) {
             // collect number in each channel group
             List<Integer> numberOfChannelsList = new ArrayList<>();
-            audioFileInfosByChannel.forEach((channelNumber,audioFileInfoList) -> numberOfChannelsList.add(audioFileInfoList.size()));
+            audioFileInfosByChannel.forEach((channelNumber, audioFileInfoList) -> numberOfChannelsList.add(audioFileInfoList.size()));
 
             // group by start time
             Map<Instant, List<AudioFileInfo>> audioFileInfosByStartTime = audioFileInfos.stream()
@@ -120,7 +132,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
             // collect number in each start time group
             List<Integer> numberOfStartTimesList = new ArrayList<>();
-            audioFileInfosByStartTime.forEach((startTime,audioFileInfoList) -> numberOfStartTimesList.add(audioFileInfoList.size()));
+            audioFileInfosByStartTime.forEach((startTime, audioFileInfoList) -> numberOfStartTimesList.add(audioFileInfoList.size()));
 
             boolean numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.get(0)::equals);
             boolean startTimesMatch = numberOfStartTimesList.stream().allMatch(numberOfStartTimesList.get(0)::equals) && !numberOfStartTimesList.contains(1);
@@ -142,12 +154,13 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         MediaEntity mediaEntity = mediaEntityPathEntry.getKey();
         Path path = mediaEntityPathEntry.getValue();
 
-        return new AudioFileInfo(
-            mediaEntity.getStart().toInstant(),
-            mediaEntity.getEnd().toInstant(),
-            mediaEntity.getChannel(),
-            path
-        );
+        return AudioFileInfo.builder()
+            .startTime(mediaEntity.getStart().toInstant())
+            .endTime(mediaEntity.getEnd().toInstant())
+            .channel(mediaEntity.getChannel())
+            .mediaFile(mediaEntity.getMediaFile())
+            .path(path)
+            .build();
     }
 
     private void groupBySession(AudioFileInfo ungroupedAudioFileInfo, List<List<AudioFileInfo>> groupings) {
@@ -204,33 +217,41 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.merge(audioFileInfos, StringUtils.EMPTY);
     }
 
-    private AudioFileInfo trimToPeriod(AudioFileInfo audioFileInfo, OffsetDateTime trimPeriodStart,
-                                       OffsetDateTime trimPeriodEnd)
+    private AudioFileInfo trim(AudioFileInfo audioFileInfo,
+                               OffsetDateTime trimStartTime,
+                               OffsetDateTime trimEndTime)
         throws ExecutionException, InterruptedException, IOException {
+        log.info("Trimming audioFileInfo [{}] from trimStartTime [{}] to trimEndTime [{}]",
+                 audioFileInfo, trimStartTime, trimEndTime
+        );
+
         var audioFileStartTime = audioFileInfo.getStartTime();
-
-        log.info("Trimming dates for ATS. Audio file start time is: " + audioFileStartTime.toString() + ", trim period start is: "
-                     + trimPeriodStart.toString() + ", trim period end is: " + trimPeriodEnd.toString());
-
-        var trimStartDuration = Duration.between(audioFileStartTime, trimPeriodStart);
-        var trimEndDuration = Duration.between(audioFileStartTime, trimPeriodEnd);
-
         return audioOperationService.trim(
             StringUtils.EMPTY,
             audioFileInfo,
-            trimStartDuration,
-            trimEndDuration
+            Duration.between(audioFileStartTime, trimStartTime),
+            Duration.between(audioFileStartTime, trimEndTime)
         );
     }
 
 
-    private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,
-                                                OffsetDateTime end)
+    private List<AudioFileInfo> trimAll(List<AudioFileInfo> audioFileInfos,
+                                        OffsetDateTime mediaRequestStartTime,
+                                        OffsetDateTime mediaRequestEndTime)
         throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> processedAudios = new ArrayList<>();
         for (AudioFileInfo audioFileInfo : audioFileInfos) {
-            AudioFileInfo trimmedAudio = trimToPeriod(audioFileInfo, start, end);
-            processedAudios.add(trimmedAudio);
+            final boolean audioStartsBeforeRequest = audioFileInfo.getStartTime().isBefore(mediaRequestStartTime.toInstant());
+            final boolean audioEndsAfterRequest = audioFileInfo.getEndTime().isAfter(mediaRequestEndTime.toInstant());
+            if (audioStartsBeforeRequest || audioEndsAfterRequest) {
+                processedAudios.add(trim(
+                    audioFileInfo,
+                    audioStartsBeforeRequest ? mediaRequestStartTime : audioFileInfo.getStartTime().atOffset(UTC),
+                    audioEndsAfterRequest ? mediaRequestEndTime : audioFileInfo.getEndTime().atOffset(UTC)
+                ));
+            } else {
+                processedAudios.add(audioFileInfo);
+            }
         }
 
         return processedAudios;
@@ -243,12 +264,11 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
         List<ChannelAudio> concatenationsList = new ArrayList<>();
-        int numChannels = channelsList.size();
         int numConcatenations = channelsList.get(0).getAudioFiles().size();
         for (int i = 0; i < numConcatenations; i++) {
             List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
-            for (int j = 0; j < numChannels; j++) {
-                audioFileInfoList.add(channelsList.get(j).getAudioFiles().get(i));
+            for (ChannelAudio channelAudio : channelsList) {
+                audioFileInfoList.add(channelAudio.getAudioFiles().get(i));
             }
             concatenationsList.add(new ChannelAudio(audioFileInfoList));
         }

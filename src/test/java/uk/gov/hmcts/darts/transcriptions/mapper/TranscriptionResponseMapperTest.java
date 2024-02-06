@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -121,7 +122,7 @@ class TranscriptionResponseMapperTest {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
-        transcriptionEntity.setHearing(null);
+        transcriptionEntity.setHearings(new ArrayList<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
 
         GetTranscriptionByIdResponse transcriptionResponse =
@@ -182,9 +183,10 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponseInternalServerError() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        hearing1.setCourtCase(null);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
-        transcriptionEntity.setCourtCase(null);
+
 
         var exception = assertThrows(
             DartsApiException.class,

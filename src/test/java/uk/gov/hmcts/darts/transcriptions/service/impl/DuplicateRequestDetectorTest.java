@@ -44,7 +44,7 @@ class DuplicateRequestDetectorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans =  {true, false})
+    @ValueSource(booleans = {true, false})
     void doesntThrowWhenNoMatchingTranscriptions(boolean isManual) {
         when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(1, transcriptionType, START_TIME, END_TIME, isManual))
             .thenReturn(emptyList());
@@ -126,7 +126,7 @@ class DuplicateRequestDetectorTest {
         transcription.setId(id);
         transcription.setStartTime(requestDetails.getStartDateTime());
         transcription.setEndTime(requestDetails.getEndDateTime());
-        transcription.setHearing(hearingWithId(requestDetails.getHearingId()));
+        transcription.addHearing(hearingWithId(requestDetails.getHearingId()));
         return transcription;
     }
 

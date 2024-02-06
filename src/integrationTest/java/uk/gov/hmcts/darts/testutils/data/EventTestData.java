@@ -28,6 +28,7 @@ public class EventTestData {
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
         event.setIsLogEntry(false);
+        event.setEventType(createTestEventHandlerEntity());
         return event;
     }
 
@@ -43,16 +44,17 @@ public class EventTestData {
         return event;
     }
 
-    public static EventEntity createEventWithDefaults() {
-        var event = someMinimalEvent();
-        event.setEventName("some-event-name");
-        event.setEventText("some-event-text");
-        event.setMessageId("some-message-id");
-        return event;
-    }
-
     public static int someReportingRestrictionId() {
         return REPORTING_RESTRICTIONS_DB_IDS.get(
             new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));
     }
+
+    private EventHandlerEntity createTestEventHandlerEntity() {
+        EventHandlerEntity entity = new EventHandlerEntity();
+        entity.setId(1);
+        entity.setEventName("Eventname");
+        entity.setType("Eventtype");
+        return entity;
+    }
+
 }

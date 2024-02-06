@@ -27,12 +27,14 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -71,6 +73,9 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private CourthouseEntity courthouseEntity;
 
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
+
     @TempDir
     private File tempDirectory;
 
@@ -81,7 +86,7 @@ class ArchiveRecordServiceImplTest {
     void setUp() {
         ArchiveRecordFileGenerator archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
 
-        MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration);
+        MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
         TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration);
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
@@ -97,6 +102,9 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void givenMedia_WhenGenerateArchiveRecord_ReturnFileSuccess() throws IOException {
+
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
@@ -108,8 +116,8 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
 
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
+        OffsetDateTime startedAt = testTime.minusHours(1);
+        OffsetDateTime endedAt = testTime;
 
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);

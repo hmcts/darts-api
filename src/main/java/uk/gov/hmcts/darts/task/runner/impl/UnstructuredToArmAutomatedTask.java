@@ -15,9 +15,9 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
     private final UnstructuredToArmProcessor unstructuredToArmProcessor;
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                              LockProvider lockProvider,
-                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                              UnstructuredToArmProcessor processor) {
+                                          LockProvider lockProvider,
+                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                          UnstructuredToArmProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.unstructuredToArmProcessor = processor;
     }
@@ -36,9 +36,9 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
     @Override
     protected void handleException(Exception exception) {
         if (exception instanceof NullPointerException npe) {
-            log.error("Exception with null: {}", npe.getMessage());
-            npe.printStackTrace();
+            log.error("Exception with null: {}", npe.getMessage(), npe);
+        } else {
+            log.error("Exception: {}", exception.getMessage());
         }
-        log.error("Exception: {}", exception.getMessage());
     }
 }

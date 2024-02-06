@@ -51,6 +51,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 public class InboundToUnstructuredProcessorImpl implements InboundToUnstructuredProcessor {
 
+    private static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
+    private static final int INITIAL_TRANSFER_ATTEMPTS = 1;
+
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
@@ -59,6 +62,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final UserAccountRepository userAccountRepository;
     private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
     private final AudioConfigurationProperties audioConfigurationProperties;
+    
     private final List<Integer> failureStatesList =
         new ArrayList<>(Arrays.asList(
             FAILURE.getId(),
@@ -275,9 +279,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private void setNumTransferAttempts(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
         if (failureStatesList.contains(unstructuredExternalObjectDirectoryEntity.getStatus().getId())) {
-            int numAttempts = 1;
+            int numAttempts = INITIAL_TRANSFER_ATTEMPTS;
             if (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null) {
-                numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts() + 1;
+                numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts() + INITIAL_TRANSFER_ATTEMPTS;
             }
             unstructuredExternalObjectDirectoryEntity.setTransferAttempts(numAttempts);
         }
@@ -289,6 +293,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         unstructuredExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()));
         unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
         unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
+        unstructuredExternalObjectDirectoryEntity.setVerificationAttempts(INITIAL_VERIFICATION_ATTEMPTS);
         MediaEntity mediaEntity = externalObjectDirectory.getMedia();
         if (mediaEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setMedia(mediaEntity);

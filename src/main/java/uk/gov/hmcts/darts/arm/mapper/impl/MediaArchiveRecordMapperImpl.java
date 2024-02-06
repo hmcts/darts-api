@@ -12,19 +12,21 @@ import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
 import java.io.File;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 
 @Component
 @RequiredArgsConstructor
 public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final CurrentTimeHelper currentTimeHelper;
 
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         MediaEntity media = externalObjectDirectory.getMedia();
@@ -59,7 +61,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         MediaCreateArchiveRecordMetadata metadata = MediaCreateArchiveRecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getMediaRecordClass())
-            .recordDate(OffsetDateTime.now().format(formatter))
+            .recordDate(currentTimeHelper.currentOffsetDateTime().format(formatter))
             .region(armDataManagementConfiguration.getRegion())
             .id(media.getId().toString())
             .type(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription())
@@ -87,17 +89,18 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
-        return UploadNewFileRecord.builder()
-            .relationId(relationId.toString())
-            .fileMetadata(createUploadNewFileRecordMetadata(media))
-            .build();
+        UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
+        uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
+        uploadNewFileRecord.setRelationId(relationId.toString());
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(media));
+        return uploadNewFileRecord;
     }
 
     private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media) {
-        return UploadNewFileRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .dzFilename(media.getMediaFile()) //"<EOD>_<MEDID>_<ATTEMPT>.mp2"
-            .fileTag(media.getMediaFormat())
-            .build();
+        UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
+        uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
+        uploadNewFileRecordMetadata.setDzFilename(media.getMediaFile());
+        uploadNewFileRecordMetadata.setFileTag(media.getMediaFormat());
+        return uploadNewFileRecordMetadata;
     }
 }

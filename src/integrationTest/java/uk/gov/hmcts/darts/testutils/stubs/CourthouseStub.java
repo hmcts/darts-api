@@ -27,4 +27,8 @@ public class CourthouseStub {
         return newCourthouse;
     }
 
+    public CourthouseEntity createMinimalCourthouse() {
+        return createCourthouseUnlessExists("minimalCourthouse");
+    }
+
 }

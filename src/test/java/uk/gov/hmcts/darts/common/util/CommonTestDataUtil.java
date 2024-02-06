@@ -194,10 +194,18 @@ public class CommonTestDataUtil {
     }
 
     public HearingEntity createHearing(String caseNumber, LocalTime time) {
+        return createHearing(caseNumber, LocalDate.of(2023, 6, 20), time);
+    }
+
+    public HearingEntity createHearing(String caseNumber, LocalDate date) {
+        return createHearing(caseNumber, date, LocalTime.NOON);
+    }
+
+    public HearingEntity createHearing(String caseNumber, LocalDate date, LocalTime time) {
         HearingEntity hearing1 = new HearingEntity();
         hearing1.setCourtCase(createCase(caseNumber));
         hearing1.setCourtroom(createCourtroom("1"));
-        hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
+        hearing1.setHearingDate(date);
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
         hearing1.setTranscriptions(createTranscriptionList(hearing1));
@@ -215,10 +223,9 @@ public class CommonTestDataUtil {
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCourtCase(hearing.getCourtCase());
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
         transcription.setCourtroom(hearing.getCourtroom());
-        transcription.setHearing(hearing);
+        transcription.addHearing(hearing);
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
         transcription.setCreatedBy(createUserAccount());
@@ -399,17 +406,23 @@ public class CommonTestDataUtil {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = new ArrayList<>();
         for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
             switch (transcriptionUrgencyEnum.getId()) {
-                case 2: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 1));
+                case 2:
+                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 1));
                     break;
-                case 3: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 6));
+                case 3:
+                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 6));
                     break;
-                case 4: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 3));
+                case 4:
+                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 3));
                     break;
-                case 5: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 4));
+                case 5:
+                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 4));
                     break;
-                case 6: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 5));
+                case 6:
+                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 5));
                     break;
-                case 7: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 2));
+                case 7:
+                    transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 2));
                     break;
                 default:
             }

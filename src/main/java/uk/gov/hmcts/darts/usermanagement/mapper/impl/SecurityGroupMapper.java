@@ -15,15 +15,16 @@ public interface SecurityGroupMapper {
 
     @Mappings({
         @Mapping(source = "name", target = "groupName"),
-        @Mapping(source = "displayName", target = "groupDisplayName"),
-        @Mapping(source = "description", target = "description")
+        @Mapping(source = "displayName", target = "displayName"),
+        @Mapping(source = "description", target = "description"),
+        @Mapping(target = "useInterpreter", constant = "false")
     })
     SecurityGroupEntity mapToSecurityGroupEntity(SecurityGroup securityGroup);
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
         @Mapping(source = "groupName", target = "name"),
-        @Mapping(source = "groupDisplayName", target = "displayName"),
+        @Mapping(source = "displayName", target = "displayName"),
         @Mapping(source = "description", target = "description"),
         @Mapping(source = "globalAccess", target = "globalAccess"),
         @Mapping(source = "displayState", target = "displayState")

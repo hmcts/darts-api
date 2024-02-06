@@ -16,6 +16,9 @@ public class SecurityGroupTestData {
         securityGroup.setGroupName("some-group-name");
         securityGroup.setGlobalAccess(false);
         securityGroup.setDisplayState(true);
+        securityGroup.setUseInterpreter(false);
+        securityGroup.setDisplayName("Some Group Name");
+        securityGroup.setDescription("a-test-security-group");
         return securityGroup;
     }
 

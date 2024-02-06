@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -58,6 +59,7 @@ class DartsEventMapperImplTest {
         assertEquals(SOME_TEXT, dartsEvent.getEventText());
         assertEquals(SOME_DATE_TIME, dartsEvent.getDateTime());
         assertNull(dartsEvent.getRetentionPolicy());
+        assertThat(dartsEvent.getIsMidTier(), is(true));
     }
 
 }

@@ -107,6 +107,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertEquals(SOME_DATE_TIME, persistedEvent.getTimestamp());
         Assertions.assertEquals(SOME_COURTROOM, persistedEvent.getCourtroom().getName());
         Assertions.assertEquals(SOME_COURTHOUSE, persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
+        Assertions.assertEquals(true, persistedEvent.getIsLogEntry());
         Assertions.assertDoesNotThrow(() -> UUID.fromString(persistedEvent.getMessageId()));
 
         Assertions.assertNull(persistedEvent.getLegacyEventId());
@@ -289,7 +290,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_107","title":"Failed to check authorisation","status":403}
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

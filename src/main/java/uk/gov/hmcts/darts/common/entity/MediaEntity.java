@@ -36,7 +36,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"))
+    @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"), nullable = false)
     private CourtroomEntity courtroom;
 
     @Column(name = "media_object_id", length = 16)
@@ -80,6 +80,15 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "content_object_id", length = 16)
     private String contentObjectId;
+
+    @Column(name = "clip_id")
+    private String clipId;
+
+    @Column(name = "chronicle_id")
+    private String chronicleId;
+
+    @Column(name = "antecedent_id")
+    private String antecedentId;
 
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;

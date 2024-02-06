@@ -323,95 +323,6 @@ paths:
                 $ref: './problem.yaml'
 
   /cases/search:
-    get:
-      tags:
-        - Cases
-      summary: Advanced Search
-      description: |-
-        Allows cases to be searched for using partial case numbers, defendant names, etc.
-        All string can be partial matches, and case insensitive.
-      parameters:
-        - in: query
-          name: case_number
-          schema:
-            type: string
-            maxLength: 20
-          description: "Full or partial Case Number"
-          example: "C202305"
-        - in: query
-          name: courthouse
-          schema:
-            type: string
-            maxLength: 30
-          description: "Full or partial Courthouse name. If this is used, then at least 1 more criteria should be added."
-          example: "Swansea"
-        - in: query
-          name: courtroom
-          schema:
-            type: string
-            maxLength: 30
-          description: "Full or partial Courtroom name. If this is used, then at least 1 more criteria should be added."
-          example: "1"
-        - in: query
-          name: judge_name
-          schema:
-            type: string
-            maxLength: 30
-          description: "Full or partial Judge name"
-          example: "Judy"
-        - in: query
-          name: defendant_name
-          schema:
-            type: string
-            maxLength: 30
-          description: "Full or partial Defendant name"
-          example: "bloggs"
-        - in: query
-          name: date_from
-          schema:
-            type: string
-            format: date
-          description: "DateFrom to search for the hearings in."
-          example: 2023-01-22
-        - in: query
-          name: date_to
-          schema:
-            type: string
-            format: date
-          description: "DateTo to search for the hearings in. This should be on or after the date_from if both have been provided."
-          example: 2023-06-22
-        - in: query
-          name: event_text_contains
-          schema:
-            type: string
-            maxLength: 100
-          description: "Full or partial event_text"
-          example: ""
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/advancedSearchResult'
-        '400':
-          description: A required parameter is missing or an invalid.
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "CASE_100"
-                title: "Too many results have been returned. Please change search criteria."
-                status: 400
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
     post:
       tags:
         - Cases
@@ -575,10 +486,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defence'
-        reporting_restriction:
-          type: string
-          example: "Section 4(2) of the Contempt of Court Act 1981"
-          description: 'Any reporting restrictions associated with the case.'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         retain_until_date_time:

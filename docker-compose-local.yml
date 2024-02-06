@@ -41,6 +41,9 @@ services:
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
       - ARM_SAS_ENDPOINT
+      - ARM_USERNAME
+      - ARM_PASSWORD
+      - ARM_URL=http://darts-stub-services:4551
     build:
       context: .
       dockerfile: Dockerfile
@@ -76,7 +79,7 @@ services:
       - POSTGRES_USER=darts
       - POSTGRES_PASSWORD=darts
       - POSTGRES_DB=darts
-    command: ["postgres", "-c", "log_statement=all"]
+    command: [ "postgres", "-c", "log_statement=all" ]
     ports:
       - "5432:5432"
     volumes:
