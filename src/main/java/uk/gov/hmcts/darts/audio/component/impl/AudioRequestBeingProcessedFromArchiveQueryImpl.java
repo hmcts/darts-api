@@ -23,7 +23,7 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
     @Override
     public List<AudioRequestBeingProcessedFromArchiveQueryResult> getResults(Integer mediaRequestId) {
         return jdbcTemplate.query(
-                """
+            """
                 SELECT
                     med.med_id,
                     eod_unstructured.eod_id AS unstructured_eod_id,

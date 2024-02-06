@@ -25,9 +25,6 @@ class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
-
-    @Autowired
     private AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
 
     @BeforeAll

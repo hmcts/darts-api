@@ -27,9 +27,6 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
     @Autowired
     private AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
 
-    @Autowired
-    private AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
-
     @BeforeAll
     @SuppressWarnings("checkstyle:linelength")
     void beforeAll() {
