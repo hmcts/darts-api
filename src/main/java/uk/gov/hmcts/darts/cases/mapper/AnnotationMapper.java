@@ -1,7 +1,9 @@
-package uk.gov.hmcts.darts.annotation.mapper;
+package uk.gov.hmcts.darts.cases.mapper;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.cases.model.Annotation;
+import uk.gov.hmcts.darts.cases.model.AnnotationDocument;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
@@ -9,8 +11,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class AnnotationMapper {
-
-    AnnotationDocumentMapper annotationDocumentMapper;
 
     public Annotation map(HearingEntity hearingEntity, AnnotationEntity annotationEntity) {
         Annotation annotation = new Annotation();
@@ -22,10 +22,20 @@ public class AnnotationMapper {
         annotation.setAnnotationDocuments(
                 annotationEntity.getAnnotationDocuments()
                 .stream()
-                .map(AnnotationDocumentMapper::map)
+                .map(this::map)
                 .collect(Collectors.toList()));
 
-
         return annotation;
+    }
+
+    private AnnotationDocument map(AnnotationDocumentEntity annotationDocumentEntity) {
+        AnnotationDocument annotationDocument = new AnnotationDocument();
+        annotationDocument.setAnnotationDocumentId(annotationDocumentEntity.getId());
+        annotationDocument.setFileName(annotationDocumentEntity.getFileName());
+        annotationDocument.setFileType(annotationDocumentEntity.getFileType());
+        annotationDocument.setUploadedBy(annotationDocumentEntity.getUploadedBy().getUserFullName());
+        annotationDocument.setUploadedTs(annotationDocumentEntity.getUploadedDateTime());
+
+        return annotationDocument;
     }
 }

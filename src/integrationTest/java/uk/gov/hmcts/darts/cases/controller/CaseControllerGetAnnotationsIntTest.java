@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.annotation.controller;
+package uk.gov.hmcts.darts.cases.controller;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -9,8 +9,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Slf4j
 @AutoConfigureMockMvc
-class AnnotationControllerIntTest extends IntegrationBase {
+class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     private static final OffsetDateTime CREATED_DATE = OffsetDateTime.parse("2023-07-31T12:00Z");
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-09-01T12:00Z");
