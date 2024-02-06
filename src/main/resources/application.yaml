@@ -178,10 +178,10 @@ darts:
       file-extension: a360
       list-blobs-timeout-duration: 60s
 
-      media-record-properties-file: properties/arm/live/media-record.properties
-      transcription-record-properties-file: :templates/arm/live/transcription-record.properties
-      annotation-record-properties-file: templates/arm/live/annotation-record.properties
-      case-record-properties-file: templates/arm/live/case-record.properties
+      media-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
+      transcription-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
+      annotation-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
+      case-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
 
     arm-api:
       arm-username: ${ARM_USERNAME:}

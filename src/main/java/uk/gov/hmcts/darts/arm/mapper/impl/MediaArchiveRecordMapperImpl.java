@@ -46,6 +46,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_019_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHANNEL_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTHOUSE_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTROOM_KEY;
@@ -53,7 +54,10 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.END_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.FILE_TYPE_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.HEARING_DATE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.MAX_CHANNELS_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_ID_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.PARENT_ID_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.START_DATE_TIME_KEY;
 
 @Component
@@ -71,10 +75,9 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
 
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
+        dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
+        dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
         try {
-            dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
-            dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
-
             mediaRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getMediaRecordPropertiesFile());
             MediaEntity media = externalObjectDirectory.getMedia();
             MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
@@ -89,27 +92,27 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private MediaArchiveRecord createMediaArchiveRecord(MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation,
                                                         UploadNewFileRecord uploadNewFileRecord) {
         return MediaArchiveRecord.builder()
-            .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+                .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
+                .uploadNewFileRecord(uploadNewFileRecord)
+                .build();
     }
 
     private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return MediaCreateArchiveRecordOperation.builder()
-            .relationId(String.valueOf(externalObjectDirectory.getId()))
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+                .relationId(String.valueOf(externalObjectDirectory.getId()))
+                .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+                .build();
     }
 
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         MediaEntity media = externalObjectDirectory.getMedia();
 
         RecordMetadata metadata = RecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .recordClass(armDataManagementConfiguration.getMediaRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
-            .region(armDataManagementConfiguration.getRegion())
-            .build();
+                .publisher(armDataManagementConfiguration.getPublisher())
+                .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+                .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+                .region(armDataManagementConfiguration.getRegion())
+                .build();
 
         if (mediaRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(mediaRecordProperties.getProperty(BF_001_KEY), media));
@@ -200,8 +203,6 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
                 }
                 yield createdDateTime;
             }
-
-//            case "UPLOADED_BY" -> ;
             case START_DATE_TIME_KEY -> media.getStart().format(dateTimeFormatter);
             case END_DATE_TIME_KEY -> media.getEnd().format(dateTimeFormatter);
             case COURTHOUSE_KEY -> media.getCourtroom().getCourthouse().getCourthouseName();
@@ -212,14 +213,13 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private Integer mapToInt(String key, MediaEntity media) {
         return switch (key) {
-            case "OBJECT_ID" -> media.getId();
-            case "PARENT_ID" -> media.getId();
-            case "CHANNEL" -> media.getChannel();
-            case "MAX_CHANNELS" -> media.getTotalChannels();
+            case OBJECT_ID_KEY -> media.getId();
+            case PARENT_ID_KEY -> media.getId();
+            case CHANNEL_KEY -> media.getChannel();
+            case MAX_CHANNELS_KEY -> media.getTotalChannels();
             default -> null;
         };
     }
-
 
     private String caseListToString(List<String> caseIdList) {
         return String.join(CASE_LIST_DELIMITER, caseIdList);

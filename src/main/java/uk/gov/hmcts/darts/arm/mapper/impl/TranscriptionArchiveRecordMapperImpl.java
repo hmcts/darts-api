@@ -54,7 +54,9 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CREATED_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.END_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.FILE_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_ID_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.PARENT_ID_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.START_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.TRANSCRIPT_REQUEST_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.TRANSCRIPT_TYPE_KEY;
@@ -66,6 +68,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Slf4j
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
 
+    public static final String COMMENTS_DELIMITER = ",";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
     private Properties transcriptionRecordProperties;
@@ -83,16 +86,16 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             transcriptionRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
             TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(
-                externalObjectDirectory,
-                externalObjectDirectory.getId()
+                    externalObjectDirectory,
+                    externalObjectDirectory.getId()
             );
             UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId());
             return createTranscriptionArchiveRecord(transcriptionCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
-                "Unable to read transcription property file {} - {}",
-                armDataManagementConfiguration.getTranscriptionRecordPropertiesFile(),
-                e.getMessage()
+                    "Unable to read transcription property file {} - {}",
+                    armDataManagementConfiguration.getTranscriptionRecordPropertiesFile(),
+                    e.getMessage()
             );
         }
         return null;
@@ -101,9 +104,9 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private TranscriptionArchiveRecord createTranscriptionArchiveRecord(TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation,
                                                                         UploadNewFileRecord uploadNewFileRecord) {
         return TranscriptionArchiveRecord.builder()
-            .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+                .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
+                .uploadNewFileRecord(uploadNewFileRecord)
+                .build();
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId) {
@@ -125,20 +128,20 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                                                    Integer relationId) {
         return TranscriptionCreateArchiveRecordOperation.builder()
-            .relationId(relationId.toString())
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+                .relationId(relationId.toString())
+                .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+                .build();
     }
 
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
 
         RecordMetadata metadata = RecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
-            .region(armDataManagementConfiguration.getRegion())
-            .build();
+                .publisher(armDataManagementConfiguration.getPublisher())
+                .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
+                .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+                .region(armDataManagementConfiguration.getRegion())
+                .build();
 
         if (transcriptionRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(transcriptionRecordProperties.getProperty(BF_001_KEY), transcriptionDocument));
@@ -206,21 +209,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private String mapToString(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE.getArchiveTypeDescription();
-            /*case "CASE_NUMBERS" -> {
-                String cases = null;
-                if (nonNull(transcriptionDocument.getTranscription().getCaseNumberList())) {
-                    cases = caseListToString(transcriptionDocument.getTranscription().getCaseNumberList());
-                }
-                yield cases;
-            }*/
             case FILE_TYPE_KEY -> transcriptionDocument.getFileType();
-            /*case HEARING_DATE_KEY -> {
-                String hearingDate = null;
-                if (CollectionUtils.isNotEmpty(transcriptionDocument.getHearingList())) {
-                    hearingDate = transcriptionDocument.getHearingList().get(0).getHearingDate().format(dateFormatter);
-                }
-                yield hearingDate;
-            }*/
             case CHECKSUM_KEY -> transcriptionDocument.getChecksum();
             case TRANSCRIPT_REQUEST_KEY -> transcriptionDocument.getTranscription().getRequestor();
             case TRANSCRIPT_TYPE_KEY -> transcriptionDocument.getFileType();
@@ -232,7 +221,6 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 }
                 yield comments;
             }
-//            case PLACEHOLDER_DATE_KEY -> ;
             case CREATED_DATE_TIME_KEY -> {
                 String createdDateTime = null;
                 if (nonNull(transcriptionDocument.getUploadedDateTime())) {
@@ -252,17 +240,15 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String commentListToString(List<TranscriptionCommentEntity> commentEntities) {
         List<String> comments = commentEntities.stream()
-            .map(TranscriptionCommentEntity::getComment)
-            .collect(Collectors.toList());
-        return String.join("|", comments);
+                .map(TranscriptionCommentEntity::getComment)
+                .collect(Collectors.toList());
+        return String.join(COMMENTS_DELIMITER, comments);
     }
 
     private Integer mapToInt(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
-            case "OBJECT_ID" -> transcriptionDocument.getId();
-            case "PARENT_ID" -> transcriptionDocument.getId();
-//            case "CHANNEL" -> transcriptionDocument.getChannel();
-//            case "MAX_CHANNELS" -> transcriptionDocument.getTotalChannels();
+            case OBJECT_ID_KEY -> transcriptionDocument.getId();
+            case PARENT_ID_KEY -> transcriptionDocument.getId();
             default -> null;
         };
     }
