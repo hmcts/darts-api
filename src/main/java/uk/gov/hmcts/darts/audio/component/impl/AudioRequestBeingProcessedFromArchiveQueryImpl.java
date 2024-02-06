@@ -17,6 +17,41 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Component
 @RequiredArgsConstructor
 public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequestBeingProcessedFromArchiveQuery {
+    private static final String AUDIO_REQUEST_QUERY = """
+        SELECT
+            med.med_id,
+            eod_unstructured.eod_id AS unstructured_eod_id,
+            eod_arm.eod_id          AS arm_eod_id
+        FROM
+            darts.media_request mer
+        JOIN
+            darts.hearing hea
+        ON
+            mer.hea_id = hea.hea_id
+        JOIN
+            darts.hearing_media_ae hem
+        ON
+            hea.hea_id = hem.hea_id
+        JOIN
+            darts.media med
+        ON
+            med.med_id = hem.med_id
+        AND
+            (mer.start_ts >= med.start_ts
+            AND med.end_ts <= mer.end_ts)
+        JOIN
+            darts.external_object_directory eod_unstructured
+        ON
+            med.med_id = eod_unstructured.med_id
+        AND eod_unstructured.elt_id = :unstructured_elt_id
+        AND eod_unstructured.ors_id = :unstructured_ors_id
+        JOIN
+            darts.external_object_directory eod_arm
+        ON
+            med.med_id = eod_arm.med_id
+        AND eod_arm.elt_id = :arm_elt_id
+        AND eod_arm.ors_id = :arm_ors_id
+        """;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final AudioRequestBeingProcessedFromArchiveQueryResultRowMapper rowMapper;
@@ -24,40 +59,8 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
     @Override
     public List<AudioRequestBeingProcessedFromArchiveQueryResult> getResults(Integer mediaRequestId) {
         return jdbcTemplate.query(
-            """
-                SELECT
-                    med.med_id,
-                    eod_unstructured.eod_id AS unstructured_eod_id,
-                    eod_arm.eod_id          AS arm_eod_id
-                FROM
-                    darts.media_request mer
-                JOIN
-                    darts.hearing hea
-                ON
-                    mer.hea_id = hea.hea_id
-                JOIN
-                    darts.hearing_media_ae hem
-                ON
-                    hea.hea_id = hem.hea_id
-                JOIN
-                    darts.media med
-                ON
-                    med.med_id = hem.med_id
-                AND
-                    (mer.start_ts >= med.start_ts
-                    AND med.end_ts <= mer.end_ts)
-                JOIN
-                    darts.external_object_directory eod_unstructured
-                ON
-                    med.med_id = eod_unstructured.med_id
-                AND eod_unstructured.elt_id = :unstructured_elt_id
-                AND eod_unstructured.ors_id = :unstructured_ors_id
-                JOIN
-                    darts.external_object_directory eod_arm
-                ON
-                    med.med_id = eod_arm.med_id
-                AND eod_arm.elt_id = :arm_elt_id
-                AND eod_arm.ors_id = :arm_ors_id
+            AUDIO_REQUEST_QUERY +
+                """
                 WHERE
                     mer.mer_id = :mer_id
                 ORDER BY
@@ -65,6 +68,26 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
                 """,
             new MapSqlParameterSource()
                 .addValue("mer_id", mediaRequestId)
+                .addValue("unstructured_elt_id", UNSTRUCTURED.getId())
+                .addValue("unstructured_ors_id", DELETED.getId())
+                .addValue("arm_elt_id", ARM.getId())
+                .addValue("arm_ors_id", STORED.getId()),
+            rowMapper
+        );
+    }
+
+    @Override
+    public List<AudioRequestBeingProcessedFromArchiveQueryResult> getResultsByMediaIds(List<Integer> mediaIds) {
+        return jdbcTemplate.query(
+            AUDIO_REQUEST_QUERY +
+                """
+                WHERE
+                    med.med_id IN (:media_ids)
+                ORDER BY
+                    med.med_id ASC
+                """,
+            new MapSqlParameterSource()
+                .addValue("media_ids", mediaIds)
                 .addValue("unstructured_elt_id", UNSTRUCTURED.getId())
                 .addValue("unstructured_ors_id", DELETED.getId())
                 .addValue("arm_elt_id", ARM.getId())

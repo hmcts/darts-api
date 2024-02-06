@@ -8,4 +8,5 @@ public interface AudioRequestBeingProcessedFromArchiveQuery {
 
     List<AudioRequestBeingProcessedFromArchiveQueryResult> getResults(Integer mediaRequestId);
 
+    List<AudioRequestBeingProcessedFromArchiveQueryResult> getResultsByMediaIds(List<Integer> mediaIds);
 }

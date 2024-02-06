@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQ
 import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -105,7 +106,10 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 (2750, 184, NULL, NULL, 2, 3, '8b7dff0f-a2e7-4210-8a5e-f216d8c874eb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:17.427415+00', '2024-01-22 16:10:17.681265+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
                 (2759, 181, NULL, NULL, 2, 3, '71c3e02b-b7d2-4603-be74-e8c39faaf285', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:19.834748+00', '2024-01-22 16:10:20.093688+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
                 (2763, 182, NULL, NULL, 2, 3, '0dde5ec4-d16d-4940-a923-a73bacd969bb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:20.882012+00', '2024-01-22 16:10:21.144768+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
-                (2766, 183, NULL, NULL, 2, 3, '2ba50586-e892-4ff9-a11a-67c38d23837a', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:21.677894+00', '2024-01-22 16:10:21.933572+00', 0, 0, NULL, NULL, NULL, NULL, NULL);
+                (2766, 183, NULL, NULL, 2, 3, '2ba50586-e892-4ff9-a11a-67c38d23837a', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:21.677894+00', '2024-01-22 16:10:21.933572+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
+
+                (2770, 185, NULL, NULL, 2, 1, '8b7dff0f-a2e7-4210-8a5e-f216d8c874eb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:17.427415+00', '2024-01-22 16:10:17.681265+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
+                (2771, 186, NULL, NULL, 2, 1, '71c3e02b-b7d2-4603-be74-e8c39faaf285', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:19.834748+00', '2024-01-22 16:10:20.093688+00', 0, 0, NULL, NULL, NULL, NULL, NULL);
 
                 INSERT INTO darts.media_request (mer_id, hea_id, requestor, request_status, request_type, req_proc_attempts, start_ts, end_ts, created_ts, last_modified_ts, created_by, last_modified_by, current_owner)
                 VALUES
@@ -150,4 +154,18 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
         assertEquals(expected, results);
     }
 
+    @Test
+    void givenAudioRequestBeingProcessedFromArchiveByMediaId_thenReturnResults() {
+        // from a list of 4, only 2 meet the query criteria
+        List<Integer> mediaIds = Arrays.asList(181, 182, 185, 186);
+        final List<AudioRequestBeingProcessedFromArchiveQueryResult> results = audioRequestBeingProcessedFromArchiveQuery.getResultsByMediaIds(
+            mediaIds);
+
+        List<AudioRequestBeingProcessedFromArchiveQueryResult> expected = List.of(
+            new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
+            new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763)
+        );
+        assertEquals(expected.size(), results.size());
+        assertEquals(expected, results);
+    }
 }

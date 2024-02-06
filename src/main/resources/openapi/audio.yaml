@@ -187,6 +187,8 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
+        is_archived:
+          type: boolean
     AddAudioMetadataRequest:
       type: object
       required:

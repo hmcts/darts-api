@@ -12,11 +12,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.AudioMetadata;
+import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -108,6 +111,8 @@ class AudioServiceImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private DataManagementApi dataManagementApi;
+    @Mock
+    AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
     private AudioService audioService;
 
     @BeforeEach
@@ -129,7 +134,9 @@ class AudioServiceImplTest {
             userIdentity,
             fileContentChecksum,
             courtLogEventRepository,
-            audioConfigurationProperties, heartBeatEmitter
+            audioConfigurationProperties,
+            heartBeatEmitter,
+            audioRequestBeingProcessedFromArchiveQuery
         );
     }
 
@@ -382,5 +389,22 @@ class AudioServiceImplTest {
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
+    }
+
+    @Test
+    void whenAudioMetadataListContainsMediaIdsReturnedByQuery_thenIsArchivedWillBeTrue() {
+        int mediaId = 1;
+        AudioMetadata audioMetadata = new AudioMetadata();
+        audioMetadata.setId(mediaId);
+        List<AudioMetadata> audioMetadataList = Arrays.asList(audioMetadata);
+        AudioRequestBeingProcessedFromArchiveQueryResult audioRequest = new AudioRequestBeingProcessedFromArchiveQueryResult(mediaId,2,3);
+        List<AudioRequestBeingProcessedFromArchiveQueryResult> archivedArmRecords = Arrays.asList(audioRequest);
+
+        when(audioRequestBeingProcessedFromArchiveQuery.getResultsByMediaIds(any())).thenReturn(archivedArmRecords);
+
+        audioService.setIsArchived(audioMetadataList);
+
+        assertEquals(true, audioMetadataList.get(0).getIsArchived());
+
     }
 }
