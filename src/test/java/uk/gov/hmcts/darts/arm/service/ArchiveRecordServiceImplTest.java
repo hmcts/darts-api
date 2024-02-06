@@ -113,7 +113,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenMedia_WhenGenerateArchiveRecord_ReturnFileSuccess() throws IOException {
+    void generateArchiveRecord_WithLiveProperties_ReturnFileSuccess() throws IOException {
 
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -166,7 +166,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecord_ReturnFileSuccess() throws IOException {
+    void generateArchiveRecord_WithNleProperties_ReturnFileSuccess() throws IOException {
 
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
