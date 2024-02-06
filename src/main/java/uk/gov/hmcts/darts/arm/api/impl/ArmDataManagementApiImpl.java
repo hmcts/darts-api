@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -50,6 +51,11 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
         return armApiService.updateMetadata(externalRecordId, eventTimestamp);
+    }
+
+    @Override
+    public InputStream downloadArmData(String externalRecordId, String externalFileId) {
+        return armApiService.downloadArmData(externalRecordId, externalFileId);
     }
 
     private String getArmContainerName() {

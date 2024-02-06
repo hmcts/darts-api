@@ -23,7 +23,7 @@ paths:
           name: hearing_id
           schema:
             type: integer
-          description: "Internal hea_id of the case."
+          description: "Internal hea_id of the hearing."
           required: true
       responses:
         '200':
@@ -32,6 +32,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/get_hearing_response'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/HearingAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+  /hearings/{hearing_id}/annotations:
+    get:
+      tags:
+        - Hearings
+      summary: Allows the retrieval of annotations for a hearing.
+      operationId: getHearingAnnotations
+      parameters:
+        - in: path
+          name: hearing_id
+          schema:
+            type: integer
+          description: "Internal hea_id of the hearing."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/annotation'
         '401':
           description: Unauthorised Error
         '403':
@@ -239,6 +286,49 @@ components:
         status:
           type: string
           example: "Available"
+    annotation:
+      type: object
+      properties:
+        annotation_id:
+          type: integer
+          example: 1
+        hearing_id:
+          type: integer
+          example: 2
+        hearing_date:
+          type: string
+          format: date
+          example: 2022-05-20
+        annotation_ts:
+          type: string
+          format: date-time
+          example: 2023-06-20T10:00:00Z
+        annotation_text:
+          type: string
+          example: "A summary notes of this annotation..."
+        annotation_documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/annotation_document'
+    annotation_document:
+      type: object
+      properties:
+        annotation_document_id:
+          type: integer
+          example: 1
+        file_name:
+          type: string
+          example: "Annotation.doc"
+        file_type:
+          type: string
+          example: "DOC"
+        uploaded_by:
+          type: string
+          example: "Mr User McUserFace"
+        uploaded_ts:
+          type: string
+          format: date-time
+          example: 2023-06-20T10:00:00Z
     HearingsAuthorisation403ErrorCode:
       type: string
       enum:

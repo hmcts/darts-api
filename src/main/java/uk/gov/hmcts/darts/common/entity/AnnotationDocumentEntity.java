@@ -28,8 +28,9 @@ public class AnnotationDocumentEntity {
     @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "ann_id", nullable = false)
-    private Integer annotationId;
+    @ManyToOne
+    @JoinColumn(name = "ann_id", nullable = false)
+    private AnnotationEntity annotation;
 
     @Column(name = "file_name", nullable = false)
     private String fileName;

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -95,11 +96,13 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
 
+    private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
@@ -108,35 +111,35 @@ public class DartsDatabaseStub {
     private final DailyListRepository dailyListRepository;
     private final DefenceRepository defenceRepository;
     private final DefendantRepository defendantRepository;
-    private final EventRepository eventRepository;
     private final EventHandlerRepository eventHandlerRepository;
+    private final EventRepository eventRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final HearingRepository hearingRepository;
     private final JudgeRepository judgeRepository;
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
+    private final NodeRegistrationRepository nodeRegistrationRepository;
     private final NotificationRepository notificationRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ProsecutorRepository prosecutorRepository;
+    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
-    private final TranscriptionRepository transcriptionRepository;
-    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
+    private final SecurityGroupRepository securityGroupRepository;
+    private final SecurityRoleRepository securityRoleRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
+    private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionStatusRepository transcriptionStatusRepository;
+    private final TranscriptionTypeRepository transcriptionTypeRepository;
+    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
-    private final SecurityGroupRepository securityGroupRepository;
-    private final SecurityRoleRepository securityRoleRepository;
-    private final NodeRegistrationRepository nodeRegistrationRepository;
-    private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
-    private final AnnotationDocumentRepository annotationDocumentRepository;
-    private final AnnotationRepository annotationRepository;
-    private final TranscriptionTypeRepository transcriptionTypeRepository;
-    private final TranscriptionStatusRepository transcriptionStatusRepository;
-    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
 
+    private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
+    private final CaseRetentionStub caseRetentionStub;
     private final CourthouseStub courthouseStub;
     private final EventStub eventStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
@@ -145,8 +148,6 @@ public class DartsDatabaseStub {
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
-    private final AnnotationStub annotationStub;
-    private final CaseRetentionStub caseRetentionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
@@ -435,6 +436,10 @@ public class DartsDatabaseStub {
         HearingEntity hearingEntity = hearingRepository.save(hearing);
         eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
         return hearingEntity;
+    }
+
+    public AnnotationEntity save(AnnotationEntity annotationEntity) {
+        return annotationRepository.save(annotationEntity);
     }
 
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {

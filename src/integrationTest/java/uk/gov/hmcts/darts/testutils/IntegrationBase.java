@@ -8,7 +8,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
-@AutoConfigureWireMock
+@AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {

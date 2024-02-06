@@ -194,10 +194,18 @@ public class CommonTestDataUtil {
     }
 
     public HearingEntity createHearing(String caseNumber, LocalTime time) {
+        return createHearing(caseNumber, LocalDate.of(2023, 6, 20), time);
+    }
+
+    public HearingEntity createHearing(String caseNumber, LocalDate date) {
+        return createHearing(caseNumber, date, LocalTime.NOON);
+    }
+
+    public HearingEntity createHearing(String caseNumber, LocalDate date, LocalTime time) {
         HearingEntity hearing1 = new HearingEntity();
         hearing1.setCourtCase(createCase(caseNumber));
         hearing1.setCourtroom(createCourtroom("1"));
-        hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
+        hearing1.setHearingDate(date);
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
         hearing1.setTranscriptions(createTranscriptionList(hearing1));

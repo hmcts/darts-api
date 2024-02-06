@@ -383,7 +383,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.2.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.3.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832
@@ -397,7 +397,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.1'
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.2'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility

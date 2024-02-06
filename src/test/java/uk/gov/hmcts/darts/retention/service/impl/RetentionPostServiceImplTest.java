@@ -23,7 +23,9 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -36,6 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +62,9 @@ class RetentionPostServiceImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private AuditApi auditApi;
+
+    @Mock
+    private RetentionDateHelper retentionDateHelper;
 
     @Captor
     ArgumentCaptor<CaseRetentionEntity> caseRetentionEntityArgumentCaptor;
@@ -90,16 +96,16 @@ class RetentionPostServiceImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
 
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
-            Optional.of(retentionPolicyTypeManual));
+                Optional.of(retentionPolicyTypeManual));
 
         RetentionPolicyTypeEntity retentionPolicyTypePermanent = new RetentionPolicyTypeEntity();
         retentionPolicyTypePermanent.setId(2);
         retentionPolicyTypePermanent.setFixedPolicyKey("PERM");
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-            eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
-            any(OffsetDateTime.class)
+                eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
+                any(OffsetDateTime.class)
         )).thenReturn(
-            Optional.of(retentionPolicyTypePermanent));
+                Optional.of(retentionPolicyTypePermanent));
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
@@ -108,6 +114,8 @@ class RetentionPostServiceImplTest {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setId(1);
         when(retentionPolicyTypeRepository.getReferenceById(anyInt())).thenReturn(retentionPolicyType);
+
+        when(retentionDateHelper.getRetentionDateForPolicy(any(), any())).thenReturn(LocalDate.of(2123, 10, 1));
     }
 
     @Test
@@ -121,8 +129,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> retentionPostService.postRetention(postRetentionRequest)
+                DartsApiException.class,
+                () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
@@ -143,8 +151,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> retentionPostService.postRetention(postRetentionRequest)
+                DartsApiException.class,
+                () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("caseId '101' must be closed before the retention period can be amended.", exception.getDetail());
@@ -163,8 +171,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> retentionPostService.postRetention(postRetentionRequest)
+                DartsApiException.class,
+                () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("caseId '101' must have a retention policy applied before being changed.", exception.getDetail());
@@ -177,18 +185,18 @@ class RetentionPostServiceImplTest {
         setupStubs();
 
         when(authorisationApi.userHasOneOfRoles(anyList())).thenReturn(true);
-        
+
         PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setRetentionDate(LocalDate.of(2024, 1, 1));
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> retentionPostService.postRetention(postRetentionRequest)
+                DartsApiException.class,
+                () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
-        assertEquals("caseId '101' must have a retention date after the last completed automated retention date '2025-10-01T10:00Z'.", exception.getDetail());
+        assertEquals("caseId '101' must have a retention date after the last completed automated retention date '2025-10-01'.", exception.getDetail());
         assertEquals("RETENTION_101", exception.getError().getType().toString());
         assertEquals(422, exception.getError().getHttpStatus().value());
     }
@@ -205,8 +213,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-            DartsApiException.class,
-            () -> retentionPostService.postRetention(postRetentionRequest)
+                DartsApiException.class,
+                () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
         assertEquals("You do not have permission to reduce the retention period.", exception.getDetail());
@@ -225,7 +233,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setRetentionDate(LocalDate.of(2026, 1, 1));
         postRetentionRequest.setComments("TheComments");
 
-        retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2026-01-01", response.getRetentionDate().toString());
         verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
 
         CaseRetentionEntity savedRetention = caseRetentionEntityArgumentCaptor.getValue();
@@ -245,7 +254,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setRetentionDate(LocalDate.of(2027, 1, 1));
         postRetentionRequest.setComments("TheComments");
-        retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2027-01-01", response.getRetentionDate().toString());
 
         verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
 
@@ -258,6 +268,44 @@ class RetentionPostServiceImplTest {
     }
 
     @Test
+    void happy_path_sameDateAsLastAutomated() {
+        setupStubs();
+        when(authorisationApi.userHasOneOfRoles(anyList())).thenReturn(true);
+
+        PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
+        postRetentionRequest.setCaseId(1);
+        postRetentionRequest.setRetentionDate(LocalDate.of(2025, 10, 1));
+        postRetentionRequest.setComments("TheComments");
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2025-10-01", response.getRetentionDate().toString());
+
+        verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
+
+        CaseRetentionEntity savedRetention = caseRetentionEntityArgumentCaptor.getValue();
+        assertEquals("COMPLETE", savedRetention.getCurrentState());
+        assertEquals("TheComments", savedRetention.getComments());
+        assertEquals("2025-10-01T00:00Z", savedRetention.getRetainUntil().toString());
+        assertEquals(10, savedRetention.getCreatedBy().getId());
+        assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
+    }
+
+    @Test
+    void happy_path_increaseTime_validateOnly() {
+        setupStubs();
+
+        PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
+        postRetentionRequest.setCaseId(1);
+        postRetentionRequest.setRetentionDate(LocalDate.of(2027, 1, 1));
+        postRetentionRequest.setComments("TheComments");
+        postRetentionRequest.setValidateOnly(true);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2027-01-01", response.getRetentionDate().toString());
+
+
+        verify(caseRetentionRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void happy_path_permanent() {
         setupStubs();
 
@@ -265,14 +313,15 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setIsPermanentRetention(true);
         postRetentionRequest.setComments("TheComments");
-        retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2123-10-01", response.getRetentionDate().toString());
 
         verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
 
         CaseRetentionEntity savedRetention = caseRetentionEntityArgumentCaptor.getValue();
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
-        assertEquals("2123-10-01T10:00Z", savedRetention.getRetainUntil().toString());
+        assertEquals("2123-10-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
         assertEquals(RetentionPolicyEnum.PERMANENT.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
     }

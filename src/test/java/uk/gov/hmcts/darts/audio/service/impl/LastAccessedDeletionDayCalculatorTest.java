@@ -44,6 +44,7 @@ class LastAccessedDeletionDayCalculatorTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(Collections.emptyList());
 
+        //2023-10-19 is a Thursday
         assertEquals(
             OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
             lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)

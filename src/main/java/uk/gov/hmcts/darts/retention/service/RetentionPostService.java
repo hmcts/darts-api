@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.retention.service;
 
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 public interface RetentionPostService {
 
-    void postRetention(PostRetentionRequest postRetentionRequest);
+    PostRetentionResponse postRetention(PostRetentionRequest postRetentionRequest);
 }

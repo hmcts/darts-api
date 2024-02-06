@@ -142,15 +142,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("integrationtest.user@");
+        userSearch.setEmailAddress("adminUserAccount");
 
         mockMvc.perform(post(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
-            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+            .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
@@ -165,15 +165,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setFullName("IntegrationTest");
+        userSearch.setFullName("adminUserAccount");
 
         mockMvc.perform(post(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
-            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+            .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
@@ -188,16 +188,16 @@ class UserControllerSearchIntTest extends IntegrationBase {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("integrationtest.user@");
-        userSearch.setFullName("IntegrationTest");
+        userSearch.setEmailAddress("adminUserAccount");
+        userSearch.setFullName("adminUserAccountUsername");
 
         mockMvc.perform(post(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
-            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+            .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))

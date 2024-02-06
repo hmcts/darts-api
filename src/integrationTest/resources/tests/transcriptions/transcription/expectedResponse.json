@@ -2,7 +2,7 @@
   "case_number": "1",
   "courthouse": "some-courthouse",
   "status": "Approved",
-  "from": "IntegrationTest User",
+  "from": "integrationtest.user@example.comUsername",
   "received": "2023-06-20T10:00:00Z",
   "requestor_comments": "comment1",
   "defendants": [],
