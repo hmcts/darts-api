@@ -438,7 +438,9 @@ public class DartsDatabaseStub {
         return hearingEntity;
     }
 
+    @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
+        entityManager.merge(annotationEntity.getCurrentOwner());
         return annotationRepository.save(annotationEntity);
     }
 
@@ -488,7 +490,9 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
-        return hearingRepository.saveAndFlush(hearingEntity);
+        courthouseRepository.save(hearingEntity.getCourtroom().getCourthouse());
+        courtroomRepository.save(hearingEntity.getCourtroom());
+        return hearingRepository.save(hearingEntity);
     }
 
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
@@ -584,21 +588,6 @@ public class DartsDatabaseStub {
         var handler = eventHandlerRepository.findById(handlerId).orElseThrow();
         caseEntity.setReportingRestrictions(handler);
         return caseRepository.save(caseEntity);
-    }
-
-    @Transactional
-    public TranscriptionEntity saveWithType(TranscriptionEntity transcriptionEntity) {
-        var typeRef = transcriptionTypeRepository.getReferenceById(transcriptionEntity.getTranscriptionType().getId());
-        transcriptionEntity.setTranscriptionType(typeRef);
-
-        var statusRef = transcriptionStatusRepository.getReferenceById(transcriptionEntity.getTranscriptionStatus().getId());
-        transcriptionEntity.setTranscriptionStatus(statusRef);
-
-        var systemUserRef = userAccountRepository.getReferenceById(0);
-        transcriptionEntity.setLastModifiedBy(systemUserRef);
-        transcriptionEntity.setCreatedBy(systemUserRef);
-
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
     @Transactional

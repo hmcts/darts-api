@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 @RequiredArgsConstructor
 @Component
-public class AnnotationValidator implements Validator<Annotation> {
+public class AnnotationUploadValidator implements Validator<Annotation> {
 
     private final HearingRepository hearingRepository;
 

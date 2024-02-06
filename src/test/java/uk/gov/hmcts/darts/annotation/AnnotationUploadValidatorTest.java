@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.annotation.component.AnnotationValidator;
+import uk.gov.hmcts.darts.annotation.component.AnnotationUploadValidator;
 import uk.gov.hmcts.darts.annotation.errors.AnnotationApiError;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -16,23 +16,23 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AnnotationValidatorTest {
+class AnnotationUploadValidatorTest {
 
     @Mock
     private HearingRepository hearingRepository;
 
-    private AnnotationValidator annotationValidator;
+    private AnnotationUploadValidator annotationUploadValidator;
 
     @BeforeEach
     void setUp() {
-        annotationValidator = new AnnotationValidator(hearingRepository);
+        annotationUploadValidator = new AnnotationUploadValidator(hearingRepository);
     }
 
     @Test
     void throwsIfHearingNotFound() {
         when(hearingRepository.existsById(1)).thenReturn(false);
 
-        assertThatThrownBy(() -> annotationValidator.validate(someAnnotationForHearingId(1)))
+        assertThatThrownBy(() -> annotationUploadValidator.validate(someAnnotationForHearingId(1)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", AnnotationApiError.HEARING_NOT_FOUND);
     }
@@ -41,7 +41,7 @@ class AnnotationValidatorTest {
     void doesntThrowIfHearingFound() {
         when(hearingRepository.existsById(1)).thenReturn(true);
 
-        assertThatNoException().isThrownBy(() -> annotationValidator.validate(someAnnotationForHearingId(1)));
+        assertThatNoException().isThrownBy(() -> annotationUploadValidator.validate(someAnnotationForHearingId(1)));
     }
 
     private Annotation someAnnotationForHearingId(int hearingId) {

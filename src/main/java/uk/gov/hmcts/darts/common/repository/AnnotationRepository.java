@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -53,4 +55,7 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         """)
     List<AnnotationEntity> findByListOfHearingIdsAndUser(List<Integer> hearingIds, UserAccountEntity userAccount);
 
+    @Modifying
+    @Query("update AnnotationEntity ann set ann.deleted = true where ann.id = :id")
+    void markForDeletion(@Param("id") Integer id);
 }
