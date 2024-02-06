@@ -55,7 +55,8 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 @Slf4j
 public class AudioServiceImpl implements AudioService {
 
-    public static final String AUDIO_RESPONSE_EVENT_NAME = "audio response";
+    private static final String AUDIO_RESPONSE_EVENT_NAME = "audio response";
+
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -73,14 +74,14 @@ public class AudioServiceImpl implements AudioService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
 
-    private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
-        return new AudioFileInfo(
-            mediaEntity.getStart().toInstant(),
-            mediaEntity.getEnd().toInstant(),
-            mediaEntity.getChannel(),
-            downloadPath,
-            false
-        );
+    private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
+        return AudioFileInfo.builder()
+                .startTime(mediaEntity.getStart().toInstant())
+                .endTime(mediaEntity.getEnd().toInstant())
+                .channel(mediaEntity.getChannel())
+                .mediaFile(mediaEntity.getMediaFile())
+                .path(downloadPath)
+                .build();
     }
 
     private static SseEmitter.SseEventBuilder createPreviewSse(String range, InputStream audioMediaFile) throws IOException {
@@ -88,8 +89,8 @@ public class AudioServiceImpl implements AudioService {
         response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
 
         return SseEmitter.event()
-            .data(response)
-            .name(AUDIO_RESPONSE_EVENT_NAME);
+                .data(response)
+                .name(AUDIO_RESPONSE_EVENT_NAME);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public InputStream preview(Integer mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
-            () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+                () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
         try {
             Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
@@ -144,10 +145,10 @@ public class AudioServiceImpl implements AudioService {
         linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
 
         saveExternalObjectDirectory(
-            externalLocation,
-            checksum,
-            userIdentity.getUserAccount(),
-            savedMedia
+                externalLocation,
+                checksum,
+                userIdentity.getUserAccount(),
+                savedMedia
         );
     }
 
@@ -155,10 +156,10 @@ public class AudioServiceImpl implements AudioService {
     public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
         for (String caseNumber : addAudioMetadataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                addAudioMetadataRequest.getCourthouse(),
-                addAudioMetadataRequest.getCourtroom(),
-                caseNumber,
-                addAudioMetadataRequest.getStartedAt().toLocalDate()
+                    addAudioMetadataRequest.getCourthouse(),
+                    addAudioMetadataRequest.getCourtroom(),
+                    caseNumber,
+                    addAudioMetadataRequest.getStartedAt().toLocalDate()
             );
             hearing.addMedia(savedMedia);
             hearingRepository.saveAndFlush(hearing);
@@ -170,7 +171,7 @@ public class AudioServiceImpl implements AudioService {
 
         if (addAudioMetadataRequest.getTotalChannels() == 1) {
             if (audioConfigurationProperties.getHandheldAudioCourtroomNumbers()
-                .contains(addAudioMetadataRequest.getCourtroom())) {
+                    .contains(addAudioMetadataRequest.getCourtroom())) {
                 return;
             }
         }
@@ -180,16 +181,16 @@ public class AudioServiceImpl implements AudioService {
         OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration());
         OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration());
         var courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-            courthouse,
-            courtroom,
-            start,
-            end
+                courthouse,
+                courtroom,
+                start,
+                end
         );
 
         var associatedHearings = courtLogs.stream()
-            .flatMap(h -> h.getHearingEntities().stream())
-            .distinct()
-            .collect(Collectors.toList());
+                .flatMap(h -> h.getHearingEntities().stream())
+                .distinct()
+                .collect(Collectors.toList());
 
         for (var hearing : associatedHearings) {
             if (!hearing.getMediaList().contains(savedMedia)) {
@@ -206,7 +207,7 @@ public class AudioServiceImpl implements AudioService {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.STORED.getId()));
+                ObjectRecordStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);

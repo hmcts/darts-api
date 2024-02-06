@@ -328,15 +328,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity.getEndTime()
         );
 
-        AudioFileInfo zipAudioFileInfo = new AudioFileInfo(
-            mediaRequestEntity.getStartTime().toInstant(),
-            mediaRequestEntity.getEndTime().toInstant(),
-            0,
-            outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity),
-            false
+        var downloadZip = outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
+        return Collections.singletonList(
+            AudioFileInfo.builder()
+                .startTime(mediaRequestEntity.getStartTime().toInstant())
+                .endTime(mediaRequestEntity.getEndTime().toInstant())
+                .channel(0)
+                .path(downloadZip)
+                .build()
         );
-
-        return Collections.singletonList(zipAudioFileInfo);
     }
 
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
