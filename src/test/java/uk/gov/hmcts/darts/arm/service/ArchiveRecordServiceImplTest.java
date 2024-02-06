@@ -246,7 +246,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() throws IOException {
+    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
         assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
