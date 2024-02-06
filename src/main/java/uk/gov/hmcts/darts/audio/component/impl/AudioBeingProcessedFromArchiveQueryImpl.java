@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
-import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @RequiredArgsConstructor
 public class AudioBeingProcessedFromArchiveQueryImpl implements AudioBeingProcessedFromArchiveQuery {
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final AudioRequestBeingProcessedFromArchiveQueryResultRowMapper rowMapper;
+    private final AudioBeingProcessedFromArchiveQueryResultRowMapper rowMapper;
 
     @Override
-    public List<AudioRequestBeingProcessedFromArchiveQueryResult> getResults(Integer hearingId) {
+    public List<AudioBeingProcessedFromArchiveQueryResult> getResults(Integer hearingId) {
         return jdbcTemplate.query(
             """
                 SELECT

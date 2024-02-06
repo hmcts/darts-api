@@ -13,9 +13,9 @@ import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
-import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -233,7 +233,7 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId) {
-        List<AudioRequestBeingProcessedFromArchiveQueryResult> archivedArmRecords =
+        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords =
             audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
         for (AudioMetadata audioMetadataItem : audioMetadata) {

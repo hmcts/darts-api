@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
@@ -408,8 +409,8 @@ class AudioServiceImplTest {
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
-        AudioRequestBeingProcessedFromArchiveQueryResult audioRequest = new AudioRequestBeingProcessedFromArchiveQueryResult(mediaId,2,3);
-        List<AudioRequestBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2, 3);
+        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
         when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
 

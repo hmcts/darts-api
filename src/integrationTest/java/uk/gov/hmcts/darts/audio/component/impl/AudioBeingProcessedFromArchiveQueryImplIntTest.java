@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
-import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @Transactional
 @TestInstance(PER_CLASS)
-class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
+class AudioBeingProcessedFromArchiveQueryImplIntTest extends IntegrationBase {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -109,7 +109,10 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
                 (2750, 184, NULL, NULL, 2, 3, '8b7dff0f-a2e7-4210-8a5e-f216d8c874eb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:17.427415+00', '2024-01-22 16:10:17.681265+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
                 (2759, 181, NULL, NULL, 2, 3, '71c3e02b-b7d2-4603-be74-e8c39faaf285', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:19.834748+00', '2024-01-22 16:10:20.093688+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
                 (2763, 182, NULL, NULL, 2, 3, '0dde5ec4-d16d-4940-a923-a73bacd969bb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:20.882012+00', '2024-01-22 16:10:21.144768+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
-                (2766, 183, NULL, NULL, 2, 3, '2ba50586-e892-4ff9-a11a-67c38d23837a', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:21.677894+00', '2024-01-22 16:10:21.933572+00', 0, 0, NULL, NULL, NULL, NULL, NULL);
+                (2766, 183, NULL, NULL, 2, 3, '2ba50586-e892-4ff9-a11a-67c38d23837a', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:21.677894+00', '2024-01-22 16:10:21.933572+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
+
+                (2770, 185, NULL, NULL, 11, 2, '8b7dff0f-a2e7-4210-8a5e-f216d8c874eb', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:17.427415+00', '2024-01-22 16:10:17.681265+00', 0, 0, NULL, NULL, NULL, NULL, NULL),
+                (2771, 185, NULL, NULL, 2,  3, '71c3e02b-b7d2-4603-be74-e8c39faaf285', 'wysXTgRikGN6nMB8AJ0JrQ==', 1, '2024-01-22 16:10:19.834748+00', '2024-01-22 16:10:20.093688+00', 0, 0, NULL, NULL, NULL, NULL, NULL);
 
                 INSERT INTO darts.media_request (mer_id, hea_id, requestor, request_status, request_type, req_proc_attempts, start_ts, end_ts, created_ts, last_modified_ts, created_by, last_modified_by, current_owner)
                 VALUES
@@ -139,19 +142,19 @@ class AudioRequestBeingProcessedFromArchiveQueryImplIntTest extends IntegrationB
     }
 
     @Test
-    void givenAudioRequestBeingProcessedFromArchive_thenReturnResults() throws Exception {
-        Integer mediaRequestId = 421;
-        final List<AudioRequestBeingProcessedFromArchiveQueryResult> results = audioRequestBeingProcessedFromArchiveQuery.getResults(
-            mediaRequestId);
+    void givenAudioBeingProcessedFromArchiveByMediaId_thenReturnResults() {
+        // 5 sets of eod's meet the query criteria
+        Integer hearingId = 101;
+        final List<AudioBeingProcessedFromArchiveQueryResult> results = audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
-        List expected = List.of(
-            new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
-            new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+        List<AudioBeingProcessedFromArchiveQueryResult> expected = List.of(
+            new AudioBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
+            new AudioBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
+            new AudioBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
+            new AudioBeingProcessedFromArchiveQueryResult(184, 2547, 2750),
+            new AudioBeingProcessedFromArchiveQueryResult(185, 2770, 2771)
         );
         assertEquals(expected.size(), results.size());
         assertEquals(expected, results);
     }
-
 }
