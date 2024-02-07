@@ -32,5 +32,25 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
         """)
     List<AnnotationEntity> findByHearingIdAndUser(int hearingId, UserAccountEntity userAccount);
 
+    @Query("""
+        SELECT ann
+        FROM AnnotationEntity ann
+         JOIN ann.annotationDocuments annDoc
+         JOIN ann.hearingList hearing
+        WHERE hearing.id in :hearingIds
+        AND ann.deleted = false
+        """)
+    List<AnnotationEntity> findByListOfHearingIds(List<Integer> hearingIds);
+
+    @Query("""
+        SELECT ann
+        FROM AnnotationEntity ann
+         JOIN ann.annotationDocuments annDoc
+         JOIN ann.hearingList hearing
+        WHERE hearing.id in :hearingIds
+        AND ann.deleted = false
+        AND ann.currentOwner = :userAccount
+        """)
+    List<AnnotationEntity> findByListOfHearingIdsAndUser(List<Integer> hearingIds, UserAccountEntity userAccount);
 
 }

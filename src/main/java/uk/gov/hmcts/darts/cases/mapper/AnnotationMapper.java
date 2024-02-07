@@ -28,6 +28,8 @@ public class AnnotationMapper {
         return annotation;
     }
 
+
+
     private AnnotationDocument map(AnnotationDocumentEntity annotationDocumentEntity) {
         AnnotationDocument annotationDocument = new AnnotationDocument();
         annotationDocument.setAnnotationDocumentId(annotationDocumentEntity.getId());

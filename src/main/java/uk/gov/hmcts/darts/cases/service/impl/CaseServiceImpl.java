@@ -42,6 +42,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -173,24 +174,35 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearingEntitys = courtCaseEntity.get().getHearings();
 
-        List<Annotation> annotations = new ArrayList<>();
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.ADMIN))) {
-            for (HearingEntity hearingEntity : hearingEntitys) {
-                List<AnnotationEntity> annotationEntityList = annotationRepository.findByHearingId(hearingEntity.getId());
-                annotations.addAll(annotationEntityList
-                                           .stream()
-                                           .map(annotationEntity -> annotationMapper
-                                                   .map(hearingEntity, annotationEntity)).toList());
+            List<AnnotationEntity> annotationsEntities =
+                    annotationRepository.findByListOfHearingIds(
+                            hearingEntitys
+                            .stream()
+                            .map(HearingEntity::getId)
+                            .collect(Collectors.toList()));
+
+            List<Annotation> annotations = new ArrayList<>();
+            for (AnnotationEntity annotationEntity: annotationsEntities) {
+                for (HearingEntity hearingEntity: annotationEntity.getHearingList()) {
+                    annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
+                }
             }
+
             return annotations;
         } else {
-            for (HearingEntity hearingEntity : hearingEntitys) {
-                annotations.addAll(hearingEntity.getAnnotations()
-                                           .stream()
-                                           .filter(annotationEntity -> annotationEntity.getCurrentOwner().getId().equals(userId)
-                                                   && !annotationEntity.isDeleted())
-                                           .map(annotationEntity -> annotationMapper
-                                                   .map(hearingEntity, annotationEntity)).toList());
+            List<AnnotationEntity> annotationsEntities =
+                    annotationRepository.findByListOfHearingIdsAndUser(
+                            hearingEntitys
+                                    .stream()
+                                    .map(HearingEntity::getId)
+                                    .collect(Collectors.toList()), authorisationApi.getCurrentUser());
+
+            List<Annotation> annotations = new ArrayList<>();
+            for (AnnotationEntity annotationEntity: annotationsEntities) {
+                for (HearingEntity hearingEntity: annotationEntity.getHearingList()) {
+                    annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
+                }
             }
             return annotations;
         }
