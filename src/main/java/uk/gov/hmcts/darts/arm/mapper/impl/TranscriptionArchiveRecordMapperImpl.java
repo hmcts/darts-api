@@ -70,7 +70,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Slf4j
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
 
-    private static final String COMMENTS_DELIMITER = ",";
+    private static final String COMMENTS_DELIMITER = "|";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
@@ -297,7 +297,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static String getTranscriptionRequest(TranscriptionDocumentEntity transcriptionDocument) {
         String transcriptRquest = null;
         if (nonNull(transcriptionDocument.getTranscription())) {
-            transcriptRquest = transcriptionDocument.getTranscription().getIsManualTranscription()
+            transcriptRquest = transcriptionDocument.getTranscription().getIsManualTranscription() == Boolean.TRUE
                     ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
         }
         return transcriptRquest;
@@ -338,8 +338,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private Integer mapToInt(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY -> transcriptionDocument.getId();
-            case PARENT_ID_KEY -> transcriptionDocument.getId();
+            case OBJECT_ID_KEY, PARENT_ID_KEY -> transcriptionDocument.getId();
             default -> null;
         };
     }

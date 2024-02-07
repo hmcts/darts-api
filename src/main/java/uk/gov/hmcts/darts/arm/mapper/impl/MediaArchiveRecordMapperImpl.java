@@ -244,8 +244,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private Integer mapToInt(String key, MediaEntity media) {
         return switch (key) {
-            case OBJECT_ID_KEY -> media.getId();
-            case PARENT_ID_KEY -> media.getId();
+            case OBJECT_ID_KEY, PARENT_ID_KEY -> media.getId();
             case CHANNEL_KEY -> media.getChannel();
             case MAX_CHANNELS_KEY -> media.getTotalChannels();
             default -> null;
