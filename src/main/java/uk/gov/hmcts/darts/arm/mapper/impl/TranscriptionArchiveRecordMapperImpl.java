@@ -145,7 +145,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
                 .region(armDataManagementConfiguration.getRegion())
                 .title(transcriptionDocument.getFileName())
-                .clientId(String.valueOf(transcriptionDocument.getId()))
+                .clientId(String.valueOf(externalObjectDirectory.getId()))
                 .build();
 
         String courthouse = getCourthouse(transcriptionDocument);

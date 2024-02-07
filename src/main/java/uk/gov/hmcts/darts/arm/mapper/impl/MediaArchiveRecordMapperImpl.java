@@ -114,7 +114,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
                 .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
                 .region(armDataManagementConfiguration.getRegion())
                 .title(media.getMediaFile())
-                .clientId(String.valueOf(media.getId()))
+                .clientId(String.valueOf(externalObjectDirectory.getId()))
                 .build();
 
         String courthouse = getCourthouse(media);
