@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -73,9 +71,6 @@ class ArmResponseFilesProcessorImplTest {
 
     @BeforeEach
     void setupData() {
-
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
                 externalObjectDirectoryRepository,

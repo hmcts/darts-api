@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -87,9 +85,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
-
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
                 externalObjectDirectoryRepository,
