@@ -247,10 +247,60 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
+    void generateArchiveRecord_WithAllMediaProperties_ReturnFileSuccess() throws IOException {
+
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+
+        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
+        when(courtroomEntity.getName()).thenReturn("Room1");
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+
+        OffsetDateTime startedAt = testTime.minusHours(1);
+        OffsetDateTime endedAt = testTime;
+
+        when(mediaEntity.getId()).thenReturn(1);
+        when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
+        when(mediaEntity.getChannel()).thenReturn(1);
+        when(mediaEntity.getTotalChannels()).thenReturn(4);
+        when(mediaEntity.getMediaFile()).thenReturn(TEST_MEDIA_ARCHIVE_A_360);
+        when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
+        when(mediaEntity.getEnd()).thenReturn(endedAt);
+        when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
+        when(mediaEntity.getCaseNumberList()).thenReturn(List.of("Case1", "Case2", "Case3"));
+
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
+        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
+                "Tests/arm/properties/all_properties/media-record.properties");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
 
-        assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("actual Response {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateMediaArchiveRecord/all_properties/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("expect Response {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -367,7 +417,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecord_WithAllPropertiesTranscriptionProperties_ReturnFileSuccess() throws IOException {
+    void generateArchiveRecord_WithAllPropertiesTranscription_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
@@ -512,6 +562,14 @@ class ArchiveRecordServiceImplTest {
         log.info("eResponse {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
+
+    @Test
+    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
+
+        assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
+    }
+
 
     private static String getFileContents(File archiveFile) throws IOException {
         StringBuilder fileContents = new StringBuilder();

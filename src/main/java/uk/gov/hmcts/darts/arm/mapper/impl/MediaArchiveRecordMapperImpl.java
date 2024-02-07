@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
@@ -193,21 +194,21 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             case FILE_TYPE_KEY -> media.getMediaFormat();
             case HEARING_DATE_KEY -> getHearingDate(media);
             case CHECKSUM_KEY -> media.getChecksum();
-            case CREATED_DATE_TIME_KEY -> getCreatedDateTime(media);
-            case START_DATE_TIME_KEY -> media.getStart().format(dateTimeFormatter);
-            case END_DATE_TIME_KEY -> media.getEnd().format(dateTimeFormatter);
+            case CREATED_DATE_TIME_KEY -> formatDateTime(media.getCreatedDateTime());
+            case START_DATE_TIME_KEY -> formatDateTime(media.getStart());
+            case END_DATE_TIME_KEY -> formatDateTime(media.getEnd());
             case COURTHOUSE_KEY -> getCourthouse(media);
             case COURTROOM_KEY -> getCourtroom(media);
             default -> null;
         };
     }
 
-    private String getCreatedDateTime(MediaEntity media) {
-        String createdDateTime = null;
-        if (nonNull(media.getCreatedDateTime())) {
-            createdDateTime = media.getCreatedDateTime().format(dateTimeFormatter);
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        String dateTime = null;
+        if (nonNull(offsetDateTime)) {
+            dateTime = offsetDateTime.format(dateTimeFormatter);
         }
-        return createdDateTime;
+        return dateTime;
     }
 
     private String getHearingDate(MediaEntity media) {
