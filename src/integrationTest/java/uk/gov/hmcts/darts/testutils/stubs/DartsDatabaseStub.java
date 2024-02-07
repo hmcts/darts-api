@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -453,6 +454,10 @@ public class DartsDatabaseStub {
 
     public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {
         return caseRepository.save(courtCaseEntity);
+    }
+
+    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
+        return caseManagementRetentionRepository.save(caseManagementRetentionEntity);
     }
 
     public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
