@@ -80,6 +80,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     @Override
+    @Transactional
     public void processUnstructuredToArm() {
         preloadObjectRecordStatuses();
 
@@ -180,7 +181,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         return true;
     }
 
-    @Transactional
+
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
                                                                                       ExternalLocationTypeEntity armLocation) {
 
