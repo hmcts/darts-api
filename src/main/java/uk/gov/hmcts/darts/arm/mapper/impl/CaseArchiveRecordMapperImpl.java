@@ -88,8 +88,14 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     }
 
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
         return RecordMetadata.builder()
                 .publisher(armDataManagementConfiguration.getPublisher())
+                .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+                .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+                .region(armDataManagementConfiguration.getRegion())
+                .title(caseDocument.getFileName())
+                .clientId(String.valueOf(externalObjectDirectory.getId()))
                 .build();
     }
 }

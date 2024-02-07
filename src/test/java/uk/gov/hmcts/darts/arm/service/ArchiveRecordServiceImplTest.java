@@ -435,6 +435,8 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void generateArchiveRecord_WithNleAnnotationProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -473,6 +475,9 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void generateArchiveRecord_WithLiveAnnotationProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
 

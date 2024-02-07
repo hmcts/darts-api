@@ -88,8 +88,14 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     }
 
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
         return RecordMetadata.builder()
                 .publisher(armDataManagementConfiguration.getPublisher())
+                .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+                .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+                .region(armDataManagementConfiguration.getRegion())
+                .title(annotationDocument.getFileName())
+                .clientId(String.valueOf(externalObjectDirectory.getId()))
                 .build();
     }
 }
