@@ -47,7 +47,7 @@ public class RetentionDateHelper {
     }
 
     public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {
-        if (!policyFormat.matcher(policyString).matches()) {
+        if (StringUtils.isBlank(policyString) || !policyFormat.matcher(policyString).matches()) {
             throw new DartsApiException(
                     RetentionApiError.INTERNAL_SERVER_ERROR,
                     MessageFormat.format("PolicyString ''{0}'', is not in the required format.", policyString)
