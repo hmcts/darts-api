@@ -64,7 +64,7 @@ class ArchiveRecordServiceImplTest {
     public static final String DARTS = "DARTS";
     public static final String REGION = "GBR";
     public static final int EODID = 1234;
-    public static final String File_EXTENTION = "a360";
+    public static final String FILE_EXTENTION = "a360";
     public static final String DATE_FORMAT = "yyyy-MM-dd";
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
@@ -167,7 +167,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -226,7 +226,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -286,7 +286,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -342,7 +342,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -411,7 +411,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
                 "Tests/arm/properties/all_properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
@@ -447,7 +447,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -484,7 +484,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(File_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
