@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.arm.util;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class ArchiveConstants {
-    private ArchiveConstants() {
-    }
 
     public static class ArchiveRecordOperationValues {
         public static final String CREATE_RECORD = "create_record";

@@ -1,12 +1,13 @@
 package uk.gov.hmcts.darts.arm.util;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * Contains a list of the internal keys to be mapped against ARMS expected keys.
  */
+@UtilityClass
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public final class PropertyConstants {
-
-    private PropertyConstants() {
-    }
 
     public static class ArchiveRecordCoreProperties {
         public static final String CREATE_RECORD_OPERATION_KEY = "CREATE_RECORD_OPERATION";
