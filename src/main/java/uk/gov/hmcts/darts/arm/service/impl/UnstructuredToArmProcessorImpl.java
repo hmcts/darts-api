@@ -130,6 +130,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         }
     }
 
+    @SuppressWarnings("java:S3655")
     private void preloadObjectRecordStatuses() {
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
         failedArmRawDataStatus = objectRecordStatusRepository.findById(FAILURE_ARM_RAW_DATA_FAILED.getId()).get();
