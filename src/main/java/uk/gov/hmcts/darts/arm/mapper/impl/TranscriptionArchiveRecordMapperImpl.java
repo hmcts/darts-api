@@ -221,77 +221,94 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE.getArchiveTypeDescription();
             case FILE_TYPE_KEY -> transcriptionDocument.getFileType();
-            case HEARING_DATE_KEY -> {
-                String hearingDate = null;
-                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
-                    hearingDate = transcriptionDocument.getTranscription().getHearingDate().format(dateFormatter);
-                }
-                yield hearingDate;
-            }
+            case HEARING_DATE_KEY -> getHearingDate(transcriptionDocument);
             case CHECKSUM_KEY -> transcriptionDocument.getChecksum();
-            case TRANSCRIPT_REQUEST_KEY -> {
-                String transcriptRquest = null;
-                if (nonNull(transcriptionDocument.getTranscription())) {
-                    transcriptRquest = transcriptionDocument.getTranscription().getIsManualTranscription()
-                            ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
-                }
-                yield transcriptRquest;
-            }
-            case TRANSCRIPT_TYPE_KEY -> {
-                String transcriptionType = null;
-                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionType())) {
-                    transcriptionType = transcriptionDocument.getTranscription().getTranscriptionType().getDescription();
-                }
-                yield transcriptionType;
-            }
-            case TRANSCRIPT_URGENCY_KEY -> {
-                String transcriptionUrgency = null;
-                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionUrgency())) {
-                    transcriptionUrgency = transcriptionDocument.getTranscription().getTranscriptionUrgency().getDescription();
-                }
-                yield transcriptionUrgency;
-            }
-            case COMMENTS_KEY -> {
-                String comments = null;
-                if (nonNull(transcriptionDocument.getTranscription())
-                        && CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
-                    comments = commentListToString(transcriptionDocument.getTranscription().getTranscriptionCommentEntities());
-                }
-                yield comments;
-            }
-            case CREATED_DATE_TIME_KEY -> {
-                String createdDateTime = null;
-                if (nonNull(transcriptionDocument.getUploadedDateTime())) {
-                    createdDateTime = transcriptionDocument.getUploadedDateTime().format(dateTimeFormatter);
-                }
-                yield createdDateTime;
-            }
-
-            case UPLOADED_BY_KEY -> {
-                String uploadedBy = null;
-                if (nonNull(transcriptionDocument.getUploadedBy())) {
-                    uploadedBy = transcriptionDocument.getUploadedBy().getUserFullName();
-                }
-                yield uploadedBy;
-            }
-            case START_DATE_TIME_KEY -> {
-                String startDateTime = null;
-                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getStartTime())) {
-                    startDateTime = transcriptionDocument.getTranscription().getStartTime().format(dateTimeFormatter);
-                }
-                yield startDateTime;
-            }
-            case END_DATE_TIME_KEY -> {
-                String endDateTime = null;
-                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getEndTime())) {
-                    endDateTime = transcriptionDocument.getTranscription().getEndTime().format(dateTimeFormatter);
-                }
-                yield endDateTime;
-            }
+            case TRANSCRIPT_REQUEST_KEY -> getTranscriptionRequest(transcriptionDocument);
+            case TRANSCRIPT_TYPE_KEY -> getTranscriptionType(transcriptionDocument);
+            case TRANSCRIPT_URGENCY_KEY -> getTranscriptionUrgency(transcriptionDocument);
+            case COMMENTS_KEY -> getTranscriptionComments(transcriptionDocument);
+            case CREATED_DATE_TIME_KEY -> getCreatedDateTime(transcriptionDocument);
+            case UPLOADED_BY_KEY -> getUploadedBy(transcriptionDocument);
+            case START_DATE_TIME_KEY -> getStartDateTime(transcriptionDocument);
+            case END_DATE_TIME_KEY -> getEndDateTime(transcriptionDocument);
             case COURTHOUSE_KEY -> getCourthouse(transcriptionDocument);
             case COURTROOM_KEY -> getCourtroom(transcriptionDocument);
             default -> null;
         };
+    }
+
+    private String getEndDateTime(TranscriptionDocumentEntity transcriptionDocument) {
+        String endDateTime = null;
+        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getEndTime())) {
+            endDateTime = transcriptionDocument.getTranscription().getEndTime().format(dateTimeFormatter);
+        }
+        return endDateTime;
+    }
+
+    private String getStartDateTime(TranscriptionDocumentEntity transcriptionDocument) {
+        String startDateTime = null;
+        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getStartTime())) {
+            startDateTime = transcriptionDocument.getTranscription().getStartTime().format(dateTimeFormatter);
+        }
+        return startDateTime;
+    }
+
+    private static String getUploadedBy(TranscriptionDocumentEntity transcriptionDocument) {
+        String uploadedBy = null;
+        if (nonNull(transcriptionDocument.getUploadedBy())) {
+            uploadedBy = transcriptionDocument.getUploadedBy().getUserFullName();
+        }
+        return uploadedBy;
+    }
+
+    private String getCreatedDateTime(TranscriptionDocumentEntity transcriptionDocument) {
+        String createdDateTime = null;
+        if (nonNull(transcriptionDocument.getUploadedDateTime())) {
+            createdDateTime = transcriptionDocument.getUploadedDateTime().format(dateTimeFormatter);
+        }
+        return createdDateTime;
+    }
+
+    private String getTranscriptionComments(TranscriptionDocumentEntity transcriptionDocument) {
+        String comments = null;
+        if (nonNull(transcriptionDocument.getTranscription())
+                && CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
+            comments = commentListToString(transcriptionDocument.getTranscription().getTranscriptionCommentEntities());
+        }
+        return comments;
+    }
+
+    private static String getTranscriptionUrgency(TranscriptionDocumentEntity transcriptionDocument) {
+        String transcriptionUrgency = null;
+        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionUrgency())) {
+            transcriptionUrgency = transcriptionDocument.getTranscription().getTranscriptionUrgency().getDescription();
+        }
+        return transcriptionUrgency;
+    }
+
+    private static String getTranscriptionType(TranscriptionDocumentEntity transcriptionDocument) {
+        String transcriptionType = null;
+        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionType())) {
+            transcriptionType = transcriptionDocument.getTranscription().getTranscriptionType().getDescription();
+        }
+        return transcriptionType;
+    }
+
+    private static String getTranscriptionRequest(TranscriptionDocumentEntity transcriptionDocument) {
+        String transcriptRquest = null;
+        if (nonNull(transcriptionDocument.getTranscription())) {
+            transcriptRquest = transcriptionDocument.getTranscription().getIsManualTranscription()
+                    ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
+        }
+        return transcriptRquest;
+    }
+
+    private String getHearingDate(TranscriptionDocumentEntity transcriptionDocument) {
+        String hearingDate = null;
+        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
+            hearingDate = transcriptionDocument.getTranscription().getHearingDate().format(dateFormatter);
+        }
+        return hearingDate;
     }
 
     private static String getCourtroom(TranscriptionDocumentEntity transcriptionDocument) {

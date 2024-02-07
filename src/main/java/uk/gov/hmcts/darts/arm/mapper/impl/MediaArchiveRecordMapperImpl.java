@@ -189,35 +189,41 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private String mapToString(String key, MediaEntity media) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription();
-            case CASE_NUMBERS_KEY -> {
-                String cases = null;
-                if (nonNull(media.getCaseNumberList())) {
-                    cases = caseListToString(media.getCaseNumberList());
-                }
-                yield cases;
-            }
+            case CASE_NUMBERS_KEY -> getCaseNumbers(media);
             case FILE_TYPE_KEY -> media.getMediaFormat();
-            case HEARING_DATE_KEY -> {
-                String hearingDate = null;
-                if (CollectionUtils.isNotEmpty(media.getHearingList())) {
-                    hearingDate = media.getHearingList().get(0).getHearingDate().format(dateFormatter);
-                }
-                yield hearingDate;
-            }
+            case HEARING_DATE_KEY -> getHearingDate(media);
             case CHECKSUM_KEY -> media.getChecksum();
-            case CREATED_DATE_TIME_KEY -> {
-                String createdDateTime = null;
-                if (nonNull(media.getCreatedDateTime())) {
-                    createdDateTime = media.getCreatedDateTime().format(dateTimeFormatter);
-                }
-                yield createdDateTime;
-            }
+            case CREATED_DATE_TIME_KEY -> getCreatedDateTime(media);
             case START_DATE_TIME_KEY -> media.getStart().format(dateTimeFormatter);
             case END_DATE_TIME_KEY -> media.getEnd().format(dateTimeFormatter);
             case COURTHOUSE_KEY -> getCourthouse(media);
             case COURTROOM_KEY -> getCourtroom(media);
             default -> null;
         };
+    }
+
+    private String getCreatedDateTime(MediaEntity media) {
+        String createdDateTime = null;
+        if (nonNull(media.getCreatedDateTime())) {
+            createdDateTime = media.getCreatedDateTime().format(dateTimeFormatter);
+        }
+        return createdDateTime;
+    }
+
+    private String getHearingDate(MediaEntity media) {
+        String hearingDate = null;
+        if (CollectionUtils.isNotEmpty(media.getHearingList())) {
+            hearingDate = media.getHearingList().get(0).getHearingDate().format(dateFormatter);
+        }
+        return hearingDate;
+    }
+
+    private String getCaseNumbers(MediaEntity media) {
+        String cases = null;
+        if (nonNull(media.getCaseNumberList())) {
+            cases = caseListToString(media.getCaseNumberList());
+        }
+        return cases;
     }
 
     private static String getCourthouse(MediaEntity media) {
