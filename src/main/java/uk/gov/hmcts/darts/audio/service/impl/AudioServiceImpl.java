@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -73,6 +76,7 @@ public class AudioServiceImpl implements AudioService {
     private final CourtLogEventRepository courtLogEventRepository;
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
+    private final AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
 
     private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return AudioFileInfo.builder()
@@ -225,6 +229,18 @@ public class AudioServiceImpl implements AudioService {
         previewExecutor.execute(() -> this.sendPreview(emitter, mediaId, range));
 
         return emitter;
+    }
+
+    @Override
+    public void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId) {
+        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords =
+            audioBeingProcessedFromArchiveQuery.getResults(hearingId);
+
+        for (AudioMetadata audioMetadataItem : audioMetadata) {
+            if (archivedArmRecords.stream().anyMatch(archived -> audioMetadataItem.getId().equals(archived.mediaId()))) {
+                audioMetadataItem.setIsArchived(true);
+            }
+        }
     }
 
     private void sendPreview(SseEmitter emitter, Integer mediaId, String range) {

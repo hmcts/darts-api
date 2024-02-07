@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
@@ -23,4 +24,5 @@ public interface AudioService {
 
     SseEmitter startStreamingPreview(Integer mediaId, String range, SseEmitter emitter);
 
+    void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId);
 }

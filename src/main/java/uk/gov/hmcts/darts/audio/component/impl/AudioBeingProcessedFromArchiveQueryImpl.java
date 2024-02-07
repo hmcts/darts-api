@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
-import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
+import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 
 import java.util.List;
 
@@ -16,12 +16,12 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Component
 @RequiredArgsConstructor
-public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequestBeingProcessedFromArchiveQuery {
+public class AudioBeingProcessedFromArchiveQueryImpl implements AudioBeingProcessedFromArchiveQuery {
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final AudioRequestBeingProcessedFromArchiveQueryResultRowMapper rowMapper;
+    private final AudioBeingProcessedFromArchiveQueryResultRowMapper rowMapper;
 
     @Override
-    public List<AudioRequestBeingProcessedFromArchiveQueryResult> getResults(Integer mediaRequestId) {
+    public List<AudioBeingProcessedFromArchiveQueryResult> getResults(Integer hearingId) {
         return jdbcTemplate.query(
             """
                 SELECT
@@ -29,11 +29,7 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
                     eod_unstructured.eod_id AS unstructured_eod_id,
                     eod_arm.eod_id          AS arm_eod_id
                 FROM
-                    darts.media_request mer
-                JOIN
                     darts.hearing hea
-                ON
-                    mer.hea_id = hea.hea_id
                 JOIN
                     darts.hearing_media_ae hem
                 ON
@@ -42,9 +38,6 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
                     darts.media med
                 ON
                     med.med_id = hem.med_id
-                AND
-                    (mer.start_ts >= med.start_ts
-                    AND med.end_ts <= mer.end_ts)
                 JOIN
                     darts.external_object_directory eod_unstructured
                 ON
@@ -58,12 +51,12 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
                 AND eod_arm.elt_id = :arm_elt_id
                 AND eod_arm.ors_id = :arm_ors_id
                 WHERE
-                    mer.mer_id = :mer_id
+                    hea.hea_id = :hea_id
                 ORDER BY
                     med.med_id ASC
                 """,
             new MapSqlParameterSource()
-                .addValue("mer_id", mediaRequestId)
+                .addValue("hea_id", hearingId)
                 .addValue("unstructured_elt_id", UNSTRUCTURED.getId())
                 .addValue("unstructured_ors_id", DELETED.getId())
                 .addValue("arm_elt_id", ARM.getId())
