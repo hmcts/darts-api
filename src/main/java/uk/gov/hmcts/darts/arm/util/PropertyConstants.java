@@ -5,6 +5,9 @@ package uk.gov.hmcts.darts.arm.util;
  */
 public final class PropertyConstants {
 
+    private PropertyConstants() {
+    }
+
     public static class ArchiveRecordCoreProperties {
         public static final String CREATE_RECORD_OPERATION_KEY = "CREATE_RECORD_OPERATION";
         public static final String RELATION_ID_KEY = "RELATION_ID";
