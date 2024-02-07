@@ -140,7 +140,7 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = CASE_ID,
             securityRoles = {JUDGE, ADMIN},
             globalAccessSecurityRoles = {JUDGE, ADMIN})
-    public ResponseEntity<List<Annotation>> getYourAnnotationsByCaseId(Integer caseId, Integer userId) {
-        return new ResponseEntity<>(caseService.getAnnotations(caseId, userId), HttpStatus.OK);
+    public ResponseEntity<List<Annotation>> getYourAnnotationsByCaseId(Integer caseId) {
+        return new ResponseEntity<>(caseService.getAnnotations(caseId), HttpStatus.OK);
     }
 }

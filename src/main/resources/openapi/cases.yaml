@@ -362,12 +362,6 @@ paths:
           schema:
             type: integer
           required: true
-        - in: header
-          name: user_id
-          schema:
-            type: integer
-          description: The user_account primary key
-          required: true
       responses:
         '200':
           description: OK

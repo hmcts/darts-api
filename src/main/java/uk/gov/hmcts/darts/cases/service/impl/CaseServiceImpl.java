@@ -167,7 +167,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
-    public List<Annotation> getAnnotations(Integer caseId, Integer userId) {
+    public List<Annotation> getAnnotations(Integer caseId) {
         Optional<CourtCaseEntity> courtCaseEntity = caseRepository.findById(caseId);
         if (courtCaseEntity.isEmpty()) {
             throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
