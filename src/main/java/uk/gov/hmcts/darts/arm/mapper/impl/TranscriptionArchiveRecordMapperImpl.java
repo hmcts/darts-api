@@ -297,7 +297,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static String getTranscriptionRequest(TranscriptionDocumentEntity transcriptionDocument) {
         String transcriptRquest = null;
         if (nonNull(transcriptionDocument.getTranscription())) {
-            transcriptRquest = transcriptionDocument.getTranscription().getIsManualTranscription() == Boolean.TRUE
+            transcriptRquest = Boolean.TRUE.equals(transcriptionDocument.getTranscription().getIsManualTranscription())
                     ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
         }
         return transcriptRquest;
