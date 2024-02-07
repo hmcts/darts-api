@@ -120,8 +120,7 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
         assertThat(persistedCase.getClosed()).isTrue();
-        assertEquals(testTime
-                , persistedCase.getCaseClosedTimestamp());
+        assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
 
         dartsGateway.verifyReceivedNotificationType(2);
     }
