@@ -32,7 +32,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
-    public static final String FILENAME_SEPERATOR = "_";
+    public static final String FILENAME_SEPARATOR = "_";
     public static final String FILE_EXTENSION_PERIOD = ".";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -155,9 +155,9 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
     private String generateArchiveFilename(Integer externalObjectDirectoryId, Integer id, Integer archiveRecordAttempt) {
         return new StringBuilder(externalObjectDirectoryId.toString())
-                .append(FILENAME_SEPERATOR)
+                .append(FILENAME_SEPARATOR)
                 .append(id.toString())
-                .append(FILENAME_SEPERATOR)
+                .append(FILENAME_SEPARATOR)
                 .append(archiveRecordAttempt)
                 .append(FILE_EXTENSION_PERIOD)
                 .append(armDataManagementConfiguration.getFileExtension())
