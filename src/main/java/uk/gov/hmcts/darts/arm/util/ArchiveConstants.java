@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.arm.util;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor", "java:S1118"})
 public class ArchiveConstants {
 
     public static class ArchiveRecordOperationValues {

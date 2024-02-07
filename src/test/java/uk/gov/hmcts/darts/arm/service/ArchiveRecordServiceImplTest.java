@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -82,6 +83,8 @@ class ArchiveRecordServiceImplTest {
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
     @Mock
     private AnnotationDocumentEntity annotationDocumentEntity;
+    @Mock
+    private CaseDocumentEntity caseDocumentEntity;
     @Mock
     private CourtroomEntity courtroomEntity;
     @Mock
@@ -557,6 +560,86 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime endedAt = OffsetDateTime.now();
 
         String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateAnnotationArchiveRecord/nle/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithNleCaseProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        when(caseDocumentEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
+        when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+                "Tests/arm/properties/nle/annotation-record.properties");
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithLiveCaseProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        when(caseDocumentEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
+        when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+                "Tests/arm/properties/live/case-record.properties");
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);

@@ -80,7 +80,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
                                                ArchiveRecordFileInfo archiveRecordFileInfo) throws IOException {
         archiveRecordFileInfo.setArchiveRecordType(ArchiveRecordType.CASE_ARCHIVE_TYPE);
 
-        String fullFilename = generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getMedia().getId(), archiveRecordAttempt);
+        String fullFilename = generateArchiveFilename(externalObjectDirectory.getId(), externalObjectDirectory.getCaseDocument().getId(), archiveRecordAttempt);
 
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);

@@ -1,2 +1,1 @@
-{"operation":"create_record","relation_id":"1234","record_metadata":{}}
-{"operation":"upload_new_file","relation_id":"1234","file_metadata":{}}
+{"operation":"create_record","relation_id":"1234","record_metadata":{"recordDate":"2023-01-01T10:00:00","client_identifier":"1234"}}{"operation":"upload_new_file","relation_id":"1234","file_metadata":{}}
