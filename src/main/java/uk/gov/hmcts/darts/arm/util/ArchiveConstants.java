@@ -7,5 +7,9 @@ public class ArchiveConstants {
         public static final String ARM_FILENAME_SEPARATOR = "_";
     }
 
+    public static class ArchiveMapperValues {
+        public static final String TRANSCRIPTION_REQUEST_MANUAL = "Manual";
+        public static final String TRANSCRIPTION_REQUEST_AUTOMATIC = "Automatic";
+    }
 
 }

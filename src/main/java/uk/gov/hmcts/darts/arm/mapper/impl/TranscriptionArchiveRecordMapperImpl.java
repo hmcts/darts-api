@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Properties;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveMapperValues.TRANSCRIPTION_REQUEST_AUTOMATIC;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveMapperValues.TRANSCRIPTION_REQUEST_MANUAL;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_001_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_002_KEY;
@@ -53,6 +55,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CREATED_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.END_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.FILE_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.HEARING_DATE_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_ID_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_TYPE_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.PARENT_ID_KEY;
@@ -67,7 +70,8 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Slf4j
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
 
-    public static final String COMMENTS_DELIMITER = ",";
+    private static final String COMMENTS_DELIMITER = ",";
+
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
     private Properties transcriptionRecordProperties;
@@ -140,7 +144,15 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
                 .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
                 .region(armDataManagementConfiguration.getRegion())
+                .title(transcriptionDocument.getFileName())
+                .clientId(String.valueOf(transcriptionDocument.getId()))
                 .build();
+
+        String courthouse = getCourthouse(transcriptionDocument);
+        String courtroom = getCourtroom(transcriptionDocument);
+        if (nonNull(courthouse) && nonNull(courtroom)) {
+            metadata.setContributor(courthouse + " & " + courtroom);
+        }
 
         if (transcriptionRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(transcriptionRecordProperties.getProperty(BF_001_KEY), transcriptionDocument));
@@ -209,13 +221,40 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE.getArchiveTypeDescription();
             case FILE_TYPE_KEY -> transcriptionDocument.getFileType();
+            case HEARING_DATE_KEY -> {
+                String hearingDate = null;
+                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
+                    hearingDate = transcriptionDocument.getTranscription().getHearingDate().format(dateFormatter);
+                }
+                yield hearingDate;
+            }
             case CHECKSUM_KEY -> transcriptionDocument.getChecksum();
-            case TRANSCRIPT_REQUEST_KEY -> transcriptionDocument.getTranscription().getRequestor();
-            case TRANSCRIPT_TYPE_KEY -> transcriptionDocument.getFileType();
-            case TRANSCRIPT_URGENCY_KEY -> transcriptionDocument.getTranscription().getTranscriptionUrgency().getDescription();
+            case TRANSCRIPT_REQUEST_KEY -> {
+                String transcriptRquest = null;
+                if (nonNull(transcriptionDocument.getTranscription())) {
+                    transcriptRquest = transcriptionDocument.getTranscription().getIsManualTranscription()
+                            ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
+                }
+                yield transcriptRquest;
+            }
+            case TRANSCRIPT_TYPE_KEY -> {
+                String transcriptionType = null;
+                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionType())) {
+                    transcriptionType = transcriptionDocument.getTranscription().getTranscriptionType().getDescription();
+                }
+                yield transcriptionType;
+            }
+            case TRANSCRIPT_URGENCY_KEY -> {
+                String transcriptionUrgency = null;
+                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionUrgency())) {
+                    transcriptionUrgency = transcriptionDocument.getTranscription().getTranscriptionUrgency().getDescription();
+                }
+                yield transcriptionUrgency;
+            }
             case COMMENTS_KEY -> {
                 String comments = null;
-                if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
+                if (nonNull(transcriptionDocument.getTranscription())
+                        && CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
                     comments = commentListToString(transcriptionDocument.getTranscription().getTranscriptionCommentEntities());
                 }
                 yield comments;
@@ -228,13 +267,49 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 yield createdDateTime;
             }
 
-            case UPLOADED_BY_KEY -> transcriptionDocument.getUploadedBy().getUserFullName();
-            case START_DATE_TIME_KEY -> transcriptionDocument.getTranscription().getStartTime().format(dateTimeFormatter);
-            case END_DATE_TIME_KEY -> transcriptionDocument.getTranscription().getEndTime().format(dateTimeFormatter);
-            case COURTHOUSE_KEY -> transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getCourthouseName();
-            case COURTROOM_KEY -> transcriptionDocument.getTranscription().getCourtroom().getName();
+            case UPLOADED_BY_KEY -> {
+                String uploadedBy = null;
+                if (nonNull(transcriptionDocument.getUploadedBy())) {
+                    uploadedBy = transcriptionDocument.getUploadedBy().getUserFullName();
+                }
+                yield uploadedBy;
+            }
+            case START_DATE_TIME_KEY -> {
+                String startDateTime = null;
+                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getStartTime())) {
+                    startDateTime = transcriptionDocument.getTranscription().getStartTime().format(dateTimeFormatter);
+                }
+                yield startDateTime;
+            }
+            case END_DATE_TIME_KEY -> {
+                String endDateTime = null;
+                if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getEndTime())) {
+                    endDateTime = transcriptionDocument.getTranscription().getEndTime().format(dateTimeFormatter);
+                }
+                yield endDateTime;
+            }
+            case COURTHOUSE_KEY -> getCourthouse(transcriptionDocument);
+            case COURTROOM_KEY -> getCourtroom(transcriptionDocument);
             default -> null;
         };
+    }
+
+    private static String getCourtroom(TranscriptionDocumentEntity transcriptionDocument) {
+        String courtroom = null;
+        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getCourtroom())) {
+            courtroom = transcriptionDocument.getTranscription().getCourtroom().getName();
+        }
+        return courtroom;
+    }
+
+    private static String getCourthouse(TranscriptionDocumentEntity transcriptionDocument) {
+        String courthouse = null;
+        if (nonNull(transcriptionDocument.getTranscription())
+                && nonNull(transcriptionDocument.getTranscription().getCourtroom())
+                && nonNull(transcriptionDocument.getTranscription().getCourtroom().getCourthouse())) {
+            courthouse = transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getCourthouseName();
+        }
+        return courthouse;
     }
 
     private String commentListToString(List<TranscriptionCommentEntity> commentEntities) {

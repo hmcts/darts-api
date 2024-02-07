@@ -113,7 +113,15 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
                 .recordClass(armDataManagementConfiguration.getMediaRecordClass())
                 .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
                 .region(armDataManagementConfiguration.getRegion())
+                .title(media.getMediaFile())
+                .clientId(String.valueOf(media.getId()))
                 .build();
+
+        String courthouse = getCourthouse(media);
+        String courtroom = getCourtroom(media);
+        if (nonNull(courthouse) && nonNull(courtroom)) {
+            metadata.setContributor(courthouse + " & " + courtroom);
+        }
 
         if (mediaRecordProperties.containsKey(BF_001_KEY)) {
             metadata.setBf001(mapToString(mediaRecordProperties.getProperty(BF_001_KEY), media));
@@ -206,10 +214,26 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             }
             case START_DATE_TIME_KEY -> media.getStart().format(dateTimeFormatter);
             case END_DATE_TIME_KEY -> media.getEnd().format(dateTimeFormatter);
-            case COURTHOUSE_KEY -> media.getCourtroom().getCourthouse().getCourthouseName();
-            case COURTROOM_KEY -> media.getCourtroom().getName();
+            case COURTHOUSE_KEY -> getCourthouse(media);
+            case COURTROOM_KEY -> getCourtroom(media);
             default -> null;
         };
+    }
+
+    private static String getCourthouse(MediaEntity media) {
+        String courthouse = null;
+        if (nonNull(media.getCourtroom()) && nonNull(media.getCourtroom().getCourthouse())) {
+            courthouse = media.getCourtroom().getCourthouse().getCourthouseName();
+        }
+        return courthouse;
+    }
+
+    private static String getCourtroom(MediaEntity media) {
+        String courtroom = null;
+        if (nonNull(media.getCourtroom())) {
+            courtroom = media.getCourtroom().getName();
+        }
+        return courtroom;
     }
 
     private Integer mapToInt(String key, MediaEntity media) {

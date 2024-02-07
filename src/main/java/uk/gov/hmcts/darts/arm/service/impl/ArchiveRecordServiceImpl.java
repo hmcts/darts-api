@@ -68,7 +68,6 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
                     generateAnnotationArchiveRecordFile(externalObjectDirectory, archiveRecordAttempt, archiveRecordFileInfo);
                 } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
                     generateCaseArchiveRecordFile(externalObjectDirectory, archiveRecordAttempt, archiveRecordFileInfo);
-
                 }
             }
         } catch (IOException e) {

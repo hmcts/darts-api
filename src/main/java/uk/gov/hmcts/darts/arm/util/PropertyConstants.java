@@ -31,7 +31,6 @@ public final class PropertyConstants {
         public static final String TRANSCRIPT_TYPE_KEY = "TRANSCRIPT_TYPE";
         public static final String TRANSCRIPT_URGENCY_KEY = "TRANSCRIPT_URGENCY";
         public static final String COMMENTS_KEY = "COMMENTS";
-        public static final String PLACEHOLDER_DATE_KEY = "PLACEHOLDER_DATE";
         public static final String CREATED_DATE_TIME_KEY = "CREATED_DATE_TIME";
         public static final String OBJECT_ID_KEY = "OBJECT_ID";
         public static final String PARENT_ID_KEY = "PARENT_ID";
