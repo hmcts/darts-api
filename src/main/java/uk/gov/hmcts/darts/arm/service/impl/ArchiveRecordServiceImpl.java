@@ -2,11 +2,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
@@ -49,8 +44,6 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @Autowired
-    private ResourceLoader resourceLoader;
 
     @Transactional
     public ArchiveRecordFileInfo generateArchiveRecord(Integer externalObjectDirectoryId) {
@@ -160,26 +153,6 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         );
     }
 
-    private String getContentsFromFile(String filelocation) throws IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        File file = new File(classLoader.getResource(filelocation).getFile());
-        return FileUtils.readFileToString(file, "UTF-8");
-    }
-
-    private String readTemplateFile(String templateFile) throws IOException {
-        File file = new File(getClass().getResource(templateFile).getFile());
-        return new String(Files.readAllBytes(file.toPath()));
-    }
-
-    private String readTemplateFileToString(String templateFile) throws IOException {
-        //File resource = loadTemplateWithResourceLoader(templateFile).getFile();
-        File resource = new ClassPathResource(templateFile).getFile();
-        return new String(Files.readAllBytes(resource.toPath()));
-    }
-
-    private Resource loadTemplateWithResourceLoader(String templateFile) {
-        return resourceLoader.getResource(templateFile);
-    }
 
     private String generateArchiveFilename(Integer externalObjectDirectoryId, Integer id, Integer archiveRecordAttempt) {
         return new StringBuilder(externalObjectDirectoryId.toString())

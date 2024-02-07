@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.mapper.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.CaseArchiveRecordMapper;
@@ -12,8 +13,10 @@ import uk.gov.hmcts.darts.arm.model.record.operation.CaseCreateArchiveRecordOper
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
@@ -21,6 +24,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -34,21 +38,30 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     @Override
     public CaseArchiveRecord mapToCaseArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
-        CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
-        CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation = createArchiveRecordOperation(
-            externalObjectDirectory,
-            externalObjectDirectory.getId()
-        );
-        UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(caseDocument, externalObjectDirectory.getId());
-        return createCaseArchiveRecord(caseCreateArchiveRecordOperation, uploadNewFileRecord);
+        dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
+        dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
+
+        try {
+            annotationRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
+            CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
+            CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(caseDocument, externalObjectDirectory.getId());
+            return createCaseArchiveRecord(caseCreateArchiveRecordOperation, uploadNewFileRecord);
+        } catch (IOException e) {
+            log.error(
+                    "Unable to read annotation property file {} - {}",
+                    armDataManagementConfiguration.getAnnotationRecordPropertiesFile(),
+                    e.getMessage());
+        }
+        return null;
     }
 
     private CaseArchiveRecord createCaseArchiveRecord(CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation,
                                                       UploadNewFileRecord uploadNewFileRecord) {
         return CaseArchiveRecord.builder()
-            .caseCreateArchiveRecordOperation(caseCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+                .caseCreateArchiveRecordOperation(caseCreateArchiveRecordOperation)
+                .uploadNewFileRecord(uploadNewFileRecord)
+                .build();
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(CaseDocumentEntity caseDocument, Integer relationId) {
@@ -67,17 +80,16 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         return uploadNewFileRecordMetadata;
     }
 
-    private CaseCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                          Integer relationId) {
+    private CaseCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return CaseCreateArchiveRecordOperation.builder()
-            .relationId(relationId.toString())
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+                .relationId(String.valueOf(externalObjectDirectory.getId()))
+                .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+                .build();
     }
 
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return RecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .build();
+                .publisher(armDataManagementConfiguration.getPublisher())
+                .build();
     }
 }

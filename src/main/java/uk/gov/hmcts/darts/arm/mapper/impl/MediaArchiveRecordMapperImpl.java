@@ -104,6 +104,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
                 .build();
     }
 
+    @SuppressWarnings("java:S3776")
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         MediaEntity media = externalObjectDirectory.getMedia();
 

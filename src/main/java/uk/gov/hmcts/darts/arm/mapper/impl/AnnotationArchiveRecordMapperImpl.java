@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.mapper.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
@@ -12,8 +13,10 @@ import uk.gov.hmcts.darts.arm.model.record.operation.AnnotationCreateArchiveReco
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
@@ -21,6 +24,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -33,21 +37,31 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     @Override
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
-        AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
-        AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(
-            externalObjectDirectory,
-            externalObjectDirectory.getId()
-        );
-        UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId());
-        return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
+        dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
+        dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
+
+        try {
+            annotationRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
+
+            AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
+            AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId());
+            return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
+        } catch (IOException e) {
+            log.error(
+                    "Unable to read annotation property file {} - {}",
+                    armDataManagementConfiguration.getAnnotationRecordPropertiesFile(),
+                    e.getMessage());
+        }
+        return null;
     }
 
     private AnnotationArchiveRecord createAnnotationArchiveRecord(AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation,
                                                                   UploadNewFileRecord uploadNewFileRecord) {
         return AnnotationArchiveRecord.builder()
-            .annotationCreateArchiveRecordOperation(annotationCreateArchiveRecordOperation)
-            .uploadNewFileRecord(uploadNewFileRecord)
-            .build();
+                .annotationCreateArchiveRecordOperation(annotationCreateArchiveRecordOperation)
+                .uploadNewFileRecord(uploadNewFileRecord)
+                .build();
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Integer relationId) {
@@ -66,17 +80,16 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         return uploadNewFileRecordMetadata;
     }
 
-    private AnnotationCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                                Integer relationId) {
+    private AnnotationCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return AnnotationCreateArchiveRecordOperation.builder()
-            .relationId(relationId.toString())
-            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-            .build();
+                .relationId(String.valueOf(externalObjectDirectory.getId()))
+                .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+                .build();
     }
 
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return RecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .build();
+                .publisher(armDataManagementConfiguration.getPublisher())
+                .build();
     }
 }

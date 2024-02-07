@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
@@ -95,8 +94,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             log.error(
                     "Unable to read transcription property file {} - {}",
                     armDataManagementConfiguration.getTranscriptionRecordPropertiesFile(),
-                    e.getMessage()
-            );
+                    e.getMessage());
         }
         return null;
     }
@@ -133,6 +131,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 .build();
     }
 
+    @SuppressWarnings("java:S3776")
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
 
@@ -241,7 +240,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private String commentListToString(List<TranscriptionCommentEntity> commentEntities) {
         List<String> comments = commentEntities.stream()
                 .map(TranscriptionCommentEntity::getComment)
-                .collect(Collectors.toList());
+                .toList();
         return String.join(COMMENTS_DELIMITER, comments);
     }
 

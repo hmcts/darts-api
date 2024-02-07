@@ -24,8 +24,6 @@ import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -76,10 +74,6 @@ class ArchiveRecordServiceImplTest {
     private MediaEntity mediaEntity;
     @Mock
     private TranscriptionEntity transcriptionEntity;
-    @Mock
-    private AnnotationEntity annotationEntity;
-    @Mock
-    private CourtCaseEntity courtCaseEntity;
     @Mock
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
     @Mock
