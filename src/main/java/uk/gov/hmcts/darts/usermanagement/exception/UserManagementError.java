@@ -18,7 +18,7 @@ public enum UserManagementError implements DartsApiError {
     ),
     DUPLICATE_EMAIL(
         UserManagementErrorCode.DUPLICATE_EMAIL.getValue(),
-            HttpStatus.UNPROCESSABLE_ENTITY,
+            HttpStatus.CONFLICT,
         UserManagementTitleErrors.DUPLICATE_EMAIL.toString()),
     DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED(
         UserManagementErrorCode.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED.getValue(),

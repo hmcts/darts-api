@@ -471,7 +471,7 @@ components:
       type: string
       enum:
         - "USER_MANAGEMENT_100"
-        - "USER_NOT_TRANSCRIBER_101"
+        - "USER_MANAGEMENT_101"
         - "USER_NOT_TRANSCRIBER_110"
       x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 

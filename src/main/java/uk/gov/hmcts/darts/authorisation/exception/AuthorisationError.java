@@ -12,9 +12,9 @@ import uk.gov.hmcts.darts.common.model.AuthorisationTitleErrors;
 public enum AuthorisationError implements DartsApiError {
 
     USER_NOT_AUTHORISED_FOR_COURTHOUSE(
-        AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_COURTHOUSE.getValue(),
-        HttpStatus.FORBIDDEN,
-        AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_COURTHOUSE.toString()
+            AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_COURTHOUSE.getValue(),
+            HttpStatus.FORBIDDEN,
+            AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_COURTHOUSE.toString()
     ),
     BAD_REQUEST_CASE_ID(
         AuthorisationErrorCode.BAD_REQUEST_CASE_ID.getValue(),
@@ -55,6 +55,11 @@ public enum AuthorisationError implements DartsApiError {
         AuthorisationErrorCode.BAD_REQUEST_TRANSFORMED_MEDIA_ID.getValue(),
         HttpStatus.BAD_REQUEST,
         AuthorisationTitleErrors.BAD_REQUEST_TRANSFORMED_MEDIA_ID.toString()
+    ),
+    USER_NOT_AUTHORISED_FOR_ENDPOINT(
+            AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_ENDPOINT.getValue(),
+            HttpStatus.FORBIDDEN,
+            AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_ENDPOINT.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";
