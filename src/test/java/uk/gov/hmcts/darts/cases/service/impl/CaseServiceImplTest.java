@@ -12,7 +12,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
+import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
@@ -71,6 +74,8 @@ class CaseServiceImplTest {
 
     CasesMapper mapper;
 
+    CasesAnnotationMapper annotationMapper;
+
     @Mock
     RetrieveCoreObjectService retrieveCoreObjectService;
 
@@ -83,6 +88,12 @@ class CaseServiceImplTest {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
 
+    @Mock
+    private AnnotationRepository annotationRepository;
+
+    @Mock
+    private AuthorisationApi authorisationApi;
+
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -93,11 +104,14 @@ class CaseServiceImplTest {
         mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
         service = new CaseServiceImpl(
             mapper,
+            annotationMapper,
             hearingRepository,
             caseRepository,
+            annotationRepository,
             retrieveCoreObjectService,
             advancedSearchRequestHelper,
-            transcriptionRepository
+            transcriptionRepository,
+            authorisationApi
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }

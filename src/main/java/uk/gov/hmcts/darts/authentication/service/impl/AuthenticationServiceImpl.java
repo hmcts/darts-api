@@ -23,7 +23,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final TokenValidator tokenValidator;
     private final AzureDao azureDao;
-
     private final AuthStrategySelector locator;
 
     @Override
@@ -58,7 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         var accessToken = Objects.nonNull(tokenResponse.getIdToken()) ? tokenResponse.getIdToken() : tokenResponse.getAccessToken();
 
-        var validationResult = tokenValidator.validate(accessToken,  configStrategy.getProviderConfiguration(), configStrategy.getConfiguration());
+        var validationResult = tokenValidator.validate(accessToken, configStrategy.getProviderConfiguration(), configStrategy.getConfiguration());
         if (!validationResult.valid()) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_VALIDATE_ACCESS_TOKEN);
         }

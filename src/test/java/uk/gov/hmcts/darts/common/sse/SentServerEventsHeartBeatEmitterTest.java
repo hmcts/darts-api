@@ -29,9 +29,9 @@ class SentServerEventsHeartBeatEmitterTest {
     @Test
     void shouldCreateHeartBeat() throws IOException {
         SentServerEventsHeartBeatEmitter heartbeatEmitter = new SentServerEventsHeartBeatEmitter();
-        heartbeatEmitter.setWaitBetweenHeartBeats(Duration.ofSeconds(2).toMillis());
+        heartbeatEmitter.setWaitBetweenHeartBeats(2);
         heartbeatEmitter.startHeartBeat(emitter);
-        Mockito.verify(emitter, Mockito.timeout(5000).times(1)).send(any(SseEmitter.SseEventBuilder.class));
+        Mockito.verify(emitter, Mockito.timeout(5000).times(2)).send(any(SseEmitter.SseEventBuilder.class));
 
     }
 

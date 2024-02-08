@@ -73,26 +73,26 @@ class UnstructuredToArmProcessorImplTest {
     @Mock
     private AnnotationDocumentEntity annotationDocumentEntity;
     @Mock
-    ExternalObjectDirectoryEntity externalObjectDirectoryEntityUnstructured;
+    private ExternalObjectDirectoryEntity externalObjectDirectoryEntityUnstructured;
     @Mock
-    ExternalObjectDirectoryEntity externalObjectDirectoryEntityArm;
+    private ExternalObjectDirectoryEntity externalObjectDirectoryEntityArm;
     @Mock
-    ExternalLocationTypeEntity externalLocationTypeUnstructured;
+    private ExternalLocationTypeEntity externalLocationTypeUnstructured;
     @Mock
-    ExternalLocationTypeEntity externalLocationTypeArm;
+    private ExternalLocationTypeEntity externalLocationTypeArm;
     @Mock
-    FileOperationService fileOperationService;
+    private FileOperationService fileOperationService;
     @Mock
-    ArchiveRecordService archiveRecordService;
+    private ArchiveRecordService archiveRecordService;
 
     private UnstructuredToArmProcessor unstructuredToArmProcessor;
 
     @Mock
-    ObjectRecordStatusEntity objectRecordStatusEntityStored;
+    private ObjectRecordStatusEntity objectRecordStatusEntityStored;
     @Mock
-    ObjectRecordStatusEntity objectRecordStatusEntityArmIngestion;
+    private ObjectRecordStatusEntity objectRecordStatusEntityArmIngestion;
     @Mock
-    ObjectRecordStatusEntity objectRecordStatusEntityRawDataFailed;
+    private ObjectRecordStatusEntity objectRecordStatusEntityRawDataFailed;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusEntityManifestFailed;
     @Mock

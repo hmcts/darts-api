@@ -43,4 +43,6 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         """
     )
     Optional<HearingEntity> findHearing(String courthouse, String courtroom, String caseNumber, LocalDate date);
+
+    boolean existsById(Integer id);
 }
