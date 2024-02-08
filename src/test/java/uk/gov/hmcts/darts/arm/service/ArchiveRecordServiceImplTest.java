@@ -320,7 +320,7 @@ class ArchiveRecordServiceImplTest {
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
 
-        when(userAccountEntity.getUserFullName()).thenReturn("Test User");
+        when(userAccountEntity.getId()).thenReturn(0);
 
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
 
@@ -376,7 +376,7 @@ class ArchiveRecordServiceImplTest {
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
 
-        when(userAccountEntity.getUserFullName()).thenReturn("Test User");
+        when(userAccountEntity.getId()).thenReturn(0);
 
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
 
@@ -432,7 +432,7 @@ class ArchiveRecordServiceImplTest {
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
 
-        when(userAccountEntity.getUserFullName()).thenReturn("Test User");
+        when(userAccountEntity.getId()).thenReturn(0);
 
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
         when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
