@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_001_KEY;
@@ -79,7 +80,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
         try {
-            mediaRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getMediaRecordPropertiesFile());
+            loadMediaProperties();
             MediaEntity media = externalObjectDirectory.getMedia();
             MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
             UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId());
@@ -88,6 +89,12 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             log.error("Unable to read media property file {} - {}", armDataManagementConfiguration.getMediaRecordPropertiesFile(), e.getMessage());
         }
         return null;
+    }
+
+    private void loadMediaProperties() throws IOException {
+        if (isNull(mediaRecordProperties) || mediaRecordProperties.isEmpty()) {
+            mediaRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getMediaRecordPropertiesFile());
+        }
     }
 
     private MediaArchiveRecord createMediaArchiveRecord(MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation,
@@ -221,26 +228,18 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private String getCaseNumbers(MediaEntity media) {
         String cases = null;
-        if (nonNull(media.getCaseNumberList())) {
+        if (nonNull(media.getHearingList())) {
             cases = caseListToString(media.getCaseNumberList());
         }
         return cases;
     }
 
     private static String getCourthouse(MediaEntity media) {
-        String courthouse = null;
-        if (nonNull(media.getCourtroom()) && nonNull(media.getCourtroom().getCourthouse())) {
-            courthouse = media.getCourtroom().getCourthouse().getCourthouseName();
-        }
-        return courthouse;
+        return media.getCourtroom().getCourthouse().getCourthouseName();
     }
 
     private static String getCourtroom(MediaEntity media) {
-        String courtroom = null;
-        if (nonNull(media.getCourtroom())) {
-            courtroom = media.getCourtroom().getName();
-        }
-        return courtroom;
+        return media.getCourtroom().getName();
     }
 
     private Integer mapToInt(String key, MediaEntity media) {

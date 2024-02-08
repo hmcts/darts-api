@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 
 @Component
@@ -41,8 +42,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
         try {
-            annotationRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
-
+            loadAnnotationProperties();
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
             AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
             UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId());
@@ -54,6 +54,12 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
                     e.getMessage());
         }
         return null;
+    }
+
+    private void loadAnnotationProperties() throws IOException {
+        if (isNull(annotationRecordProperties) || annotationRecordProperties.isEmpty()) {
+            annotationRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
+        }
     }
 
     private AnnotationArchiveRecord createAnnotationArchiveRecord(AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation,

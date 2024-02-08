@@ -8,5 +8,4 @@ import java.io.File;
 public interface ArchiveRecordFileGenerator {
     boolean generateArchiveRecord(ArchiveRecord archiveRecord, File archiveRecordFile, ArchiveRecordType archiveRecordType);
 
-    boolean generateArchiveRecord(String archiveRecordContents, File archiveRecordFile, ArchiveRecordType archiveRecordType);
 }

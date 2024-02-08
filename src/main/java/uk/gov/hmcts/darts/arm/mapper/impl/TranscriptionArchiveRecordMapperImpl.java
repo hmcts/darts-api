@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveMapperValues.TRANSCRIPTION_REQUEST_AUTOMATIC;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveMapperValues.TRANSCRIPTION_REQUEST_MANUAL;
@@ -86,7 +87,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
         try {
-            transcriptionRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
+            loadTranscriptionProperties();
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
             TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(
                     externalObjectDirectory,
@@ -101,6 +102,13 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                     e.getMessage());
         }
         return null;
+    }
+
+    private void loadTranscriptionProperties() throws IOException {
+        if (isNull(transcriptionRecordProperties) || transcriptionRecordProperties.isEmpty()) {
+            transcriptionRecordProperties =
+                    PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
+        }
     }
 
     private TranscriptionArchiveRecord createTranscriptionArchiveRecord(TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation,
@@ -256,7 +264,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static String getUploadedBy(TranscriptionDocumentEntity transcriptionDocument) {
         String uploadedBy = null;
         if (nonNull(transcriptionDocument.getUploadedBy())) {
-            uploadedBy = transcriptionDocument.getUploadedBy().getUserFullName();
+            uploadedBy = String.valueOf(transcriptionDocument.getUploadedBy().getId());
         }
         return uploadedBy;
     }

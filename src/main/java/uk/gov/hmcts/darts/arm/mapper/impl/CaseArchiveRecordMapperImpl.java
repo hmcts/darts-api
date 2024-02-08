@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 
 @Component
@@ -30,7 +31,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private final CurrentTimeHelper currentTimeHelper;
-    private Properties annotationRecordProperties;
+    private Properties caseRecordProperties;
 
     private DateTimeFormatter dateTimeFormatter;
     private DateTimeFormatter dateFormatter;
@@ -42,7 +43,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
         try {
-            annotationRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
+            loadCaseProperties();
             CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
             CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
             UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(caseDocument, externalObjectDirectory.getId());
@@ -54,6 +55,12 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
                     e.getMessage());
         }
         return null;
+    }
+
+    private void loadCaseProperties() throws IOException {
+        if (isNull(caseRecordProperties) || caseRecordProperties.isEmpty()) {
+            caseRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
+        }
     }
 
     private CaseArchiveRecord createCaseArchiveRecord(CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation,
