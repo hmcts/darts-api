@@ -45,4 +45,8 @@ public class AnnotationStub {
         annotationDocumentRepository.save(annotationDocument);
         return annotationDocument;
     }
+
+    public void saveAnnotation(AnnotationEntity annotationEntity) {
+        annotationRepository.saveAndFlush(annotationEntity);
+    }
 }
