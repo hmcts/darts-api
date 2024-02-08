@@ -1002,4 +1002,71 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals("152821", foundAnnotationEod.getExternalRecordId());
     }
 
+
+    @Test
+    void givenProcessResponseFilesFailsMediaChecksumNull() throws IOException {
+        HearingEntity hearing = dartsDatabase.createHearing(
+                "NEWCASTLE",
+                "Int Test Courtroom 2",
+                "2",
+                HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+                MediaTestData.createMediaWith(
+                        hearing.getCourtroom(),
+                        OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                        OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                        1
+                ));
+        savedMedia.setChecksum(null);
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+                savedMedia,
+                dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+                dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+                UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        String uploadFileTestFilename = "tests/arm/service/ArmResponseFilesProcessorTest/uploadFile/" +
+                "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
+        BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        armResponseFilesProcessor.processResponseFiles();
+
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+                .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
+        assertEquals(1, foundMedia.getVerificationAttempts());
+    }
+
 }
