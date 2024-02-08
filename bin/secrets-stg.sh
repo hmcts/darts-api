@@ -33,3 +33,4 @@ export ARM_SAS_ENDPOINT="$(az keyvault secret show --vault-name darts-stg --name
 export ARM_URL="$(az keyvault secret show --vault-name darts-stg --name ArmUrl | jq .value -r)"
 export ARM_USERNAME="$(az keyvault secret show --vault-name darts-stg --name ArmUsername | jq .value -r)"
 export ARM_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name ArmPassword | jq .value -r)"
+export DETS_SAS_ENDPOINT="$(az keyvault secret show --vault-name darts-stg --name DETSSasEndpoint | jq .value -r)"

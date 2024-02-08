@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.datamanagement.component.MediaDownloadMetaData;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.util.Map;
@@ -69,4 +70,8 @@ public class DataManagementServiceStubImpl implements DataManagementService {
                      + " you should ask questions! ###");
     }
 
+    @Override
+    public boolean downloadData(String containerName, UUID blobId, MediaDownloadMetaData report) {
+        return false;
+    }
 }

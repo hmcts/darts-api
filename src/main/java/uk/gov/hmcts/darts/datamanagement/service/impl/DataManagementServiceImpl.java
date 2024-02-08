@@ -4,16 +4,20 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
+import uk.gov.hmcts.darts.common.datamanagement.component.MediaDownloadMetaData;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.OutputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -26,15 +30,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DataManagementServiceImpl implements DataManagementService {
 
-    private final DataManagementDao dataManagementDao;
-
     private final DataManagementConfiguration dataManagementConfiguration;
+
+    private final DataManagementAzureClientFactory blobServiceFactory;
+
 
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
-
-        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
-        BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
         if (!blobClient.exists()) {
             log.error("Blob {} does not exist in {} container", blobId, containerName);
         }
@@ -51,8 +56,10 @@ public class DataManagementServiceImpl implements DataManagementService {
     public UUID saveBlobData(String containerName, BinaryData binaryData) {
 
         UUID uniqueBlobId = UUID.randomUUID();
-        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
-        BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+
+        BlobClient client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
         client.upload(binaryData);
 
         return uniqueBlobId;
@@ -61,8 +68,10 @@ public class DataManagementServiceImpl implements DataManagementService {
     @Override
     public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
         UUID uniqueBlobId = UUID.randomUUID();
-        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
-        BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+
+        BlobClient client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
         client.upload(binaryData);
         client.setMetadata(metadata);
         return client;
@@ -76,11 +85,38 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
+    @SneakyThrows
+    public boolean downloadData(String containerName, UUID blobId, MediaDownloadMetaData report) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+
+        if (!blobClient.exists()) {
+            log.error("Blob {} does not exist in {} container", blobId, containerName);
+        }
+
+        try (OutputStream downloadOS = report.getOutputStream()) {
+            Date downloadStartDate = new Date();
+            blobClient.downloadStream(downloadOS);
+
+            Date downloadEndDate = new Date();
+            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+
+            report.markProcessed();
+            report.markSuccess(null);
+
+        }
+
+        return blobClient.exists();
+    }
+
+    @Override
     public Response<Void> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException {
         try {
-            BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
-            BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
-            Response<Void> response = blobClient.deleteWithResponse(DeleteSnapshotsOptionType.INCLUDE, null,
+            BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+            BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+            BlobClient client = blobServiceFactory.getBlobClient(containerClient, blobId);
+            Response<Void> response = client.deleteWithResponse(DeleteSnapshotsOptionType.INCLUDE, null,
                                                                     Duration.of(
                                                                         dataManagementConfiguration.getDeleteTimeout(),
                                                                         ChronoUnit.SECONDS

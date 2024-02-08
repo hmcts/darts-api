@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.UnstructuredExternalOb
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -30,7 +32,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -44,6 +45,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -62,8 +64,10 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private BlobClient blobClient;
     @Mock
     private BlobContainerClient blobContainerClient;
+    @Mock
+    private BlobServiceClient blobServiceClient;
     @MockBean
-    private DataManagementDao dataManagementDao;
+    private DataManagementAzureClientFactory dataManagementFactory;
 
     @Autowired
     private InboundExternalObjectDirectoryDeletedFinder inboundExternalObjectDirectoryDeletedFinder;
@@ -137,8 +141,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
     void deleteMarkedForDeletionDataFromDataStores() {
-        Mockito.when(dataManagementDao.getBlobContainerClient(anyString())).thenReturn(blobContainerClient);
-        Mockito.when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
+        Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
+        Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
         MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
             hearing,
@@ -177,8 +182,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
     void dontDeleteWhenStatusIsNotMarkedForDeletionDataFromDataStores() {
-        Mockito.when(dataManagementDao.getBlobContainerClient(anyString())).thenReturn(blobContainerClient);
-        Mockito.when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        Mockito.when(dataManagementFactory.getBlobServiceClient(anyString())).thenReturn(blobServiceClient);
+        Mockito.when(dataManagementFactory.getBlobContainerClient(anyString(), eq(blobServiceClient))).thenReturn(blobContainerClient);
+        Mockito.when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
         MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
             hearing,

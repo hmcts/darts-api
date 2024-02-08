@@ -4,14 +4,16 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.datamanagement.component.MediaDownloadMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,8 +45,9 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     @Override
     public BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata) {
-        String containerName = getContainerName(container);
-        return dataManagementService.saveBlobData(containerName, binaryData, metadata);
+        Optional<String> containerName = getContainerName(container);
+        return containerName.map(s -> dataManagementService.saveBlobData(s, binaryData, metadata)).orElse(null);
+
     }
 
     @Override
@@ -91,19 +94,26 @@ public class DataManagementApiImpl implements DataManagementApi {
         return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
-    private String getContainerName(DatastoreContainerType datastoreContainerType) {
+    @Override
+    public boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, MediaDownloadMetaData report) {
+        Optional<String> containerName = getContainerName(container);
+        containerName.ifPresent(s -> dataManagementService.downloadData(s, blobId, report));
+        return report.isSuccessfullyDownloaded();
+    }
+
+    public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
         switch (datastoreContainerType) {
             case INBOUND -> {
-                return getInboundContainerName();
+                return Optional.of(getInboundContainerName());
             }
             case OUTBOUND -> {
-                return getOutboundContainerName();
+                return Optional.of(getOutboundContainerName());
             }
             case UNSTRUCTURED -> {
-                return getUnstructuredContainerName();
+                return Optional.of(getUnstructuredContainerName());
             }
             default -> {
-                return null;
+                return Optional.empty();
             }
         }
     }

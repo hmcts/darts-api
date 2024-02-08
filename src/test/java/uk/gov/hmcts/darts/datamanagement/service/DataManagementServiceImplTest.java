@@ -4,15 +4,17 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
 import java.util.UUID;
@@ -36,7 +38,7 @@ class DataManagementServiceImplTest {
     @Mock
     public Response<Void> responseMock;
     @Mock
-    private DataManagementDao dataManagementDao;
+    private DataManagementAzureClientFactory dataManagementFactory;
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
     @InjectMocks
@@ -44,16 +46,21 @@ class DataManagementServiceImplTest {
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
 
+    private BlobServiceClient serviceClient;
+
     @BeforeEach
     void beforeEach() {
         blobContainerClient = mock(BlobContainerClient.class);
         blobClient = mock(BlobClient.class);
+        serviceClient = mock(BlobServiceClient.class);
+        when(dataManagementFactory.getBlobServiceClient(Mockito.notNull())).thenReturn(serviceClient);
+        when(dataManagementConfiguration.getBlobStorageAccountConnectionString()).thenReturn("connection");
     }
 
     @Test
     void testGetBlobData() {
-        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
         when(blobClient.downloadContent()).thenReturn(BINARY_DATA);
         BinaryData blobData = dataManagementService.getBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
         assertNotNull(blobData);
@@ -62,8 +69,8 @@ class DataManagementServiceImplTest {
 
     @Test
     void testSaveBlobData() {
-        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         UUID blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
         assertNotNull(blobId);
     }
@@ -71,8 +78,8 @@ class DataManagementServiceImplTest {
     @Test
     void testDeleteBlobData() throws AzureDeleteBlobException {
         when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(20);
-        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(responseMock.getStatusCode()).thenReturn(202);
         when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
 
@@ -84,8 +91,8 @@ class DataManagementServiceImplTest {
     @Test
     void testDeleteBlobDataWithFailure() {
         when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(20);
-        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(responseMock.getStatusCode()).thenReturn(400);
         when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
 
@@ -95,8 +102,8 @@ class DataManagementServiceImplTest {
     @Test
     void testDeleteBlobDataWithTimeout() {
         when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(0);
-        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenThrow(new RuntimeException("timeout"));
 
         assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));

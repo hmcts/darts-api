@@ -1,28 +1,27 @@
-package uk.gov.hmcts.darts.datamanagement.dao;
+package uk.gov.hmcts.darts.common.datamanagement.component;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.dao.impl.DataManagementDaoImpl;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DataManagementAzureClientFactoryImpl;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DataManagementDaoImplTest {
+class DataManagementAzureClientFactoryImplTest {
 
     @InjectMocks
-    private DataManagementDaoImpl dataManagementDaoImpl;
-    @Mock
-    private DataManagementConfiguration dataManagementConfiguration;
+    private DataManagementAzureClientFactoryImpl dataManagementFactoryImpl;
 
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
     public static final UUID BLOB_ID = UUID.randomUUID();
@@ -30,6 +29,8 @@ class DataManagementDaoImplTest {
         "AccountKey=KBHBeksoGMGw;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
+
+    private BlobServiceClient blobServiceClient;
 
     @BeforeEach
     void beforeEach() {
@@ -39,15 +40,19 @@ class DataManagementDaoImplTest {
 
     @Test
     void testGetBlobContainerClient() {
-        Mockito.when(dataManagementConfiguration.getBlobStorageAccountConnectionString()).thenReturn(CONNECTION_STRING);
-        BlobContainerClient blobContainerClient = dataManagementDaoImpl.getBlobContainerClient(BLOB_CONTAINER_NAME);
+        BlobContainerClient blobContainerClient = dataManagementFactoryImpl.getBlobContainerClient(
+                BLOB_CONTAINER_NAME, dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING));
         assertNotNull(blobContainerClient);
+
+        Assertions.assertSame(blobContainerClient,
+                              dataManagementFactoryImpl.getBlobContainerClient(BLOB_CONTAINER_NAME,
+                                                                               dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING)));
     }
 
     @Test
     void testGetBlobClient() {
-        Mockito.when(blobContainerClient.getBlobClient(String.valueOf(BLOB_ID))).thenReturn(blobClient);
-        BlobClient blobClient = dataManagementDaoImpl.getBlobClient(blobContainerClient, BLOB_ID);
+        when(blobContainerClient.getBlobClient(String.valueOf(BLOB_ID))).thenReturn(blobClient);
+        BlobClient blobClient = dataManagementFactoryImpl.getBlobClient(blobContainerClient, BLOB_ID);
         assertNotNull(blobClient);
     }
 }
