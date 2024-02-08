@@ -25,6 +25,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @RequiredArgsConstructor
 public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
+    public static final String CASE_LIST_DELIMITER = "|";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
 
@@ -85,7 +86,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
     private String caseListToString(List<String> caseIdList) {
-        return String.join("|", caseIdList);
+        return String.join(CASE_LIST_DELIMITER, caseIdList);
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {

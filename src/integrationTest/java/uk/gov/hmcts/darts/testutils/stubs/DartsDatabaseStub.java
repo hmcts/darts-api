@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -160,7 +160,6 @@ public class DartsDatabaseStub {
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         annotationDocumentRepository.deleteAll();
-        annotationRepository.deleteAll();
         caseRetentionRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
@@ -170,6 +169,7 @@ public class DartsDatabaseStub {
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
+        annotationRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
         nodeRegistrationRepository.deleteAll();
@@ -182,11 +182,13 @@ public class DartsDatabaseStub {
         dailyListRepository.deleteAll();
         userAccountRepository.deleteAll(userAccountBin);
         userAccountBin.clear();
-        securityGroupRepository.deleteAll(securityGroupBin);
-        securityGroupBin.clear();
+        // Look at why this doesn't work
+        // securityGroupRepository.deleteAll(securityGroupBin);
+        // securityGroupBin.clear();
         courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
+        annotationRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -646,5 +648,39 @@ public class DartsDatabaseStub {
         return notificationRepository.findAll().stream()
             .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
             .toList();
+    }
+
+    public AnnotationEntity findAnnotationById(Integer annotationId) {
+        return annotationRepository.findById(annotationId).orElseThrow();
+    }
+
+    public AnnotationDocumentEntity findAnnotationDocumentFor(Integer annotationId) {
+        return annotationDocumentRepository.findAll().stream()
+            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+    }
+
+    public ExternalObjectDirectoryEntity findExternalObjectDirectoryFor(Integer annotationId) {
+        var annotationDocumentEntity = annotationDocumentRepository.findAll().stream()
+            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+
+        return externalObjectDirectoryRepository.findAll().stream()
+            .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
+            .findFirst().orElseThrow(() -> new RuntimeException("No external object directory found for annotation id: " + annotationId));
+    }
+
+    @Transactional
+    public List<AnnotationEntity> findAnnotationsFor(Integer hearingId) {
+        var hearingEntity = hearingRepository.findById(hearingId).orElseThrow();
+        return hearingEntity.getAnnotations().stream().toList();
+    }
+
+    @Transactional
+    public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
+        securityGroup.getUsers().add(userAccount);
+        userAccount.getSecurityGroupEntities().add(securityGroup);
+        securityGroupRepository.save(securityGroup);
+        userAccountRepository.save(userAccount);
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -25,6 +26,7 @@ public class AnnotationStub {
         return annotationRepository.save(annotationEntity);
     }
 
+    @Transactional
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
                                                                               String fileName,
                                                                               String fileType,
@@ -33,7 +35,7 @@ public class AnnotationStub {
                                                                               OffsetDateTime uploadedDateTime,
                                                                               String checksum) {
         AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
-        annotationDocument.setAnnotation(annotationEntity);
+        annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
         annotationDocument.setFileName(fileName);
         annotationDocument.setFileType(fileType);
         annotationDocument.setFileSize(fileSize);
@@ -42,5 +44,9 @@ public class AnnotationStub {
         annotationDocument.setChecksum(checksum);
         annotationDocumentRepository.save(annotationDocument);
         return annotationDocument;
+    }
+
+    public void saveAnnotation(AnnotationEntity annotationEntity) {
+        annotationRepository.saveAndFlush(annotationEntity);
     }
 }
