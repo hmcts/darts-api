@@ -56,7 +56,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             int row = 1;
             for (Integer eodId : externalObjects) {
                 log.info("ARM Response process about to process {} of {} rows", row++, externalObjects.size());
-
                 armResponseFilesProcessSingleElement.processResponseFilesFor(eodId);
             }
         } else {
