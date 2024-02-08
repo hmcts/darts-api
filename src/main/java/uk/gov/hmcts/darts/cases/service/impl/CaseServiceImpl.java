@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
-import uk.gov.hmcts.darts.cases.mapper.AnnotationMapper;
+import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.mapper.TranscriptionMapper;
@@ -52,7 +52,7 @@ public class CaseServiceImpl implements CaseService {
 
     private static final int MAX_RESULTS = 500;
     private final CasesMapper casesMapper;
-    private final AnnotationMapper annotationMapper;
+    private final CasesAnnotationMapper annotationMapper;
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;

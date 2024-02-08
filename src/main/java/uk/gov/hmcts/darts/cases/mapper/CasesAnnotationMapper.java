@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import java.util.stream.Collectors;
 
 @Component
-public class AnnotationMapper {
+public class CasesAnnotationMapper {
 
     public Annotation map(HearingEntity hearingEntity, AnnotationEntity annotationEntity) {
         Annotation annotation = new Annotation();

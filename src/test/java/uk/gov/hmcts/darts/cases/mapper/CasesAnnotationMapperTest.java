@@ -10,14 +10,14 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class AnnotationMapperTest {
+class CasesAnnotationMapperTest {
 
     @Test
     void testMapperEntityToModel() {
         AnnotationEntity annotationEntity = CommonTestDataUtil.createAnnotationEntity(1);
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("1234", LocalDate.now());
 
-        AnnotationMapper annotationMapper = new AnnotationMapper();
+        CasesAnnotationMapper annotationMapper = new CasesAnnotationMapper();
 
         Annotation annotation = annotationMapper.map(hearingEntity, annotationEntity);
         assertEquals(1, annotation.getAnnotationId());

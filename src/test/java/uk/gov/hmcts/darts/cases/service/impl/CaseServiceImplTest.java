@@ -14,7 +14,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
-import uk.gov.hmcts.darts.cases.mapper.AnnotationMapper;
+import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -74,7 +74,7 @@ class CaseServiceImplTest {
 
     CasesMapper mapper;
 
-    AnnotationMapper annotationMapper;
+    CasesAnnotationMapper annotationMapper;
 
     @Mock
     RetrieveCoreObjectService retrieveCoreObjectService;
