@@ -106,6 +106,209 @@ paths:
         '500':
           description: Internal Server Error
 
+  /admin/courthouses:
+    get:
+      tags:
+        - Courthouses
+      operationId: adminGetCourthouses
+      summary: Get courthouses exactly matching provided query criteria
+      parameters:
+        - in: query
+          name: name
+          schema:
+            $ref: '#/components/schemas/CourthouseName'
+          required: false
+        - in: query
+          name: display_name
+          schema:
+            $ref: '#/components/schemas/CourthouseDisplayName'
+          required: false
+      responses:
+        '200':
+          description: 'A response has been obtained containing courthouses matching the supplied parameters, or an empty array otherwise'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminCourthouse'
+
+    post:
+      tags:
+        - Courthouses
+      operationId: adminCreateCourthouse
+      summary: Create a new courthouse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - display_name
+              properties:
+                name:
+                  $ref: '#/components/schemas/CourthouseName'
+                display_name:
+                  $ref: '#/components/schemas/CourthouseDisplayName'
+                region_id:
+                  $ref: '#/components/schemas/RegionId'
+                security_group_ids:
+                  $ref: '#/components/schemas/SecurityGroupIds'
+      responses:
+        '201':
+          description: 'A courthouse has been created based on the provided attributes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCourthouse'
+        '400':
+          description: 'Bad Request (various)'
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              examples:
+                ConstraintViolation:
+                  value:
+                    type: https://zalando.github.io/problem/constraint-violation
+                    status: 400
+                    title: Constraint Violation
+                NotPermitted:
+                  value:
+                    type: "COURTHOUSE_103"
+                    title: "Courthouse is not permitted to be created with the provided security groups"
+                    status: 400
+        '409':
+          description: 'Courthouse creation failed due to violation of uniqueness constraints'
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "COURTHOUSE_104"
+                title: "Courthouse creation failed due to violation of uniqueness constraints"
+                status: 409
+
+  /admin/courthouses/{courthouse-id}:
+    get:
+      tags:
+        - Courthouses
+      operationId: adminGetCourthouseById
+      summary: Get courthouse by courthouse id
+      parameters:
+        - $ref: '#/components/parameters/CourthouseId'
+      responses:
+        '200':
+          description: 'A courthouse corresponding to the provided id has been located and returned in the response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCourthouse'
+        '404':
+          $ref: '#/components/responses/CourthouseNotFoundError'
+
+    patch:
+      tags:
+        - Courthouses
+      operationId: adminPatchCourthouse
+      summary: Edit courthouse
+      parameters:
+        - $ref: '#/components/parameters/CourthouseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/CourthouseName'
+                display_name:
+                  $ref: '#/components/schemas/CourthouseDisplayName'
+                region_id:
+                  $ref: '#/components/schemas/RegionId'
+                security_group_ids:
+                  $ref: '#/components/schemas/SecurityGroupIds'
+      responses:
+        '200':
+          description: 'A courthouse corresponding to the provided id has been modified based on the provided attributes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCourthouse'
+        '400':
+          $ref: '#/components/responses/ConstraintViolationError'
+        '404':
+          $ref: '#/components/responses/CourthouseNotFoundError'
+
+  /admin/courthouses/search:
+    post:
+      summary: Get courthouses by search criteria
+      tags:
+        - Courthouses
+      operationId: adminSearchCourthouses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/CourthouseName'
+                display_name:
+                  $ref: '#/components/schemas/CourthouseDisplayName'
+                region_name:
+                  $ref: '#/components/schemas/RegionName'
+      responses:
+        '200':
+          description: 'A response has been obtained containing courthouses matching the supplied parameters, or an empty array otherwise'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    name:
+                      $ref: '#/components/schemas/CourthouseName'
+                    display_name:
+                      $ref: '#/components/schemas/CourthouseDisplayName'
+                    region_id:
+                      $ref: '#/components/schemas/RegionId'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                violations:
+                  - field: name
+                    message: size must be between 1 and 255
+                type: https://zalando.github.io/problem/constraint-violation
+                status: 400
+                title: Constraint Violation
+
+
+
+  /admin/regions:
+    get:
+      tags:
+        - Courthouses
+      operationId: adminGetRegions
+      summary: Get all regions
+      responses:
+        '200':
+          description: 'A response has been obtained containing all regions'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+
 components:
   requestBodies:
     CourthousePost:
@@ -114,6 +317,38 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Courthouse'
+
+  responses:
+    ConstraintViolationError:
+      description: Constraint violation
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            type: https://zalando.github.io/problem/constraint-violation
+            status: 400
+            title: Constraint Violation
+
+    CourthouseNotFoundError:
+      description: 'A courthouse corresponding to the provided id could not be found'
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            type: "COURTHOUSE_102"
+            title: "Courthouse not found"
+            status: 404
+
+  parameters:
+    CourthouseId:
+      in: path
+      name: courthouse-id
+      schema:
+        $ref: '#/components/schemas/CourthouseId'
+      required: true
+
   schemas:
     Courthouse:
       type: object
@@ -140,7 +375,67 @@ components:
             last_modified_date_time:
               type: string
               format: date-time
+
+    AdminCourthouse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CourthouseId'
+        name:
+          $ref: '#/components/schemas/CourthouseName'
+        display_name:
+          $ref: '#/components/schemas/CourthouseDisplayName'
+        region_id:
+          $ref: '#/components/schemas/RegionId'
+        security_group_ids:
+          $ref: '#/components/schemas/SecurityGroupIds'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        last_modified_at:
+          $ref: '#/components/schemas/Timestamp'
+
     CourtList:
       type: array
       items:
         $ref: '#/components/schemas/ExtendedCourthouse'
+
+    Region:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/RegionId'
+        name:
+          $ref: '#/components/schemas/RegionName'
+
+    CourthouseId:
+      type: integer
+
+    CourthouseName:
+      type: string
+      minLength: 1
+      maxLength: 255
+
+    CourthouseDisplayName:
+      type: string
+      minLength: 1
+      maxLength: 255
+
+    RegionId:
+      type: integer
+
+    RegionName:
+      type: string
+      minLength: 1
+      maxLength: 255
+
+    SecurityGroupIds:
+      type: array
+      items:
+        type: integer
+
+    Timestamp:
+      type: string
+      format: date-time
+
+    Count:
+      type: integer
