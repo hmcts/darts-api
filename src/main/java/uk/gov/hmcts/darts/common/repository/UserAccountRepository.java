@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -17,7 +18,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
 
     Optional<UserAccountEntity> findByAccountGuidAndActive(String guid, Boolean active);
 
-    //todo find out what user states are Active
     @Query("""
         SELECT DISTINCT userAccount
         FROM UserAccountEntity userAccount
@@ -62,5 +62,13 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
     Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
 
     List<UserAccountEntity> findByEmailAddressIgnoreCaseAndActive(String emailAddress, Boolean active);
+
+    @Modifying
+    @Query("""
+        UPDATE UserAccountEntity
+        SET lastLoginTime = CURRENT_TIMESTAMP
+        WHERE id = :userId
+        """)
+    void updateLastLoginTime(Integer userId);
 
 }

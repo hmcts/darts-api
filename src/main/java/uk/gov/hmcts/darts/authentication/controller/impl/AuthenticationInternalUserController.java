@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.config.AuthenticationConfigurationPropertiesStrategy;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.common.service.UserAccountService;
 
 import java.text.ParseException;
 import java.util.Optional;
@@ -16,9 +17,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/internal-user")
 public class AuthenticationInternalUserController extends AbstractUserController {
+
     public AuthenticationInternalUserController(AuthenticationService authenticationService, AuthorisationApi authorisationApi,
-                                                AuthStrategySelector locator) {
-        super(authenticationService, authorisationApi, locator);
+                                                AuthStrategySelector locator, UserAccountService userAccountService) {
+        super(authenticationService, authorisationApi, locator, userAccountService);
     }
 
     @Override
