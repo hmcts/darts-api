@@ -1,0 +1,68 @@
+openapi: 3.0.1
+
+info:
+
+  version: ${version}
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+paths:
+  /annotations:
+    post:
+      tags:
+        - Annotations
+      summary: Create an annotation with file upload.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                annotation:
+                  $ref: '#/components/schemas/annotation'
+      responses:
+        201:
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post_annotation_response'
+
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+components:
+  schemas:
+    annotation:
+      type: object
+      required:
+        - hearing_id
+      properties:
+        hearing_id:
+          type: integer
+        comment:
+          type: string
+    post_annotation_response:
+      type: object
+      required:
+        - annotation_id
+      properties:
+        annotation_id:
+          type: integer
