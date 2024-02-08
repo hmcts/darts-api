@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.enums.EventSource;
 
@@ -44,11 +43,7 @@ class EventLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        eventLoggerService = new EventLoggerServiceImpl();
-        ReflectionTestUtils.setField(eventLoggerService, "xhbDailyTestEventText", "Xhibit Daily Test");
-        ReflectionTestUtils.setField(eventLoggerService, "cppDailyTestEventText", "CPP Daily Test");
-        ReflectionTestUtils.setField(eventLoggerService, "xhbEventTypeLength", 5);
-        ReflectionTestUtils.setField(eventLoggerService, "cppEventTypeLength", 4);
+        eventLoggerService = new EventLoggerServiceImpl(5, 4, "Xhibit Daily Test", "CPP Daily Test");
     }
 
     @Test
@@ -133,6 +128,24 @@ class EventLoggerServiceImplTest {
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
+    }
+
+    @Test
+    void handlesNullXhbEventTypeLengthConfig() {
+        var event = createDartsEvent("1000", "1002", "Some event text");
+        eventLoggerService = new EventLoggerServiceImpl(null, 4, "Xhibit Daily Test", "CPP Daily Test");
+        eventLoggerService.eventReceived(event);
+        List<String> infoLogs = logCaptor.getInfoLogs();
+        assertEquals(1, infoLogs.size());
+    }
+
+    @Test
+    void handlesNullCppEventTypeLengthConfig() {
+        var event = createDartsEvent("1000", "1002", "Some event text");
+        eventLoggerService = new EventLoggerServiceImpl(5, null, "Xhibit Daily Test", "CPP Daily Test");
+        eventLoggerService.eventReceived(event);
+        List<String> infoLogs = logCaptor.getInfoLogs();
+        assertEquals(1, infoLogs.size());
     }
 
     private DartsEvent createDartsEvent(String eventType, String eventSubType, String eventText) {

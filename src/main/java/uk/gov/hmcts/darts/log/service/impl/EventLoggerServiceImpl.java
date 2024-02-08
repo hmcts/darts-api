@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.log.service.impl;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -10,14 +13,16 @@ import uk.gov.hmcts.darts.log.service.EventLoggerService;
 import java.time.OffsetDateTime;
 
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 @Slf4j
 public class EventLoggerServiceImpl implements EventLoggerService {
 
     @Value("${darts.log.events.event-type-length.xhb}")
-    private int xhbEventTypeLength;
+    private Integer xhbEventTypeLength;
 
     @Value("${darts.log.events.event-type-length.cpp}")
-    private int cppEventTypeLength;
+    private Integer cppEventTypeLength;
 
     @Value("${darts.log.events.daily-test-event-text.xhb}")
     private String xhbDailyTestEventText;
@@ -29,21 +34,19 @@ public class EventLoggerServiceImpl implements EventLoggerService {
     public void eventReceived(DartsEvent event) {
         var isPollCheck = false;
         EventSource source = EventSource.UNKNOWN;
-        if (event.getEventText() != null && event.getEventText().equals(xhbDailyTestEventText)) {
+        if (StringUtils.equals(event.getEventText(), xhbDailyTestEventText)) {
             isPollCheck = true;
             source = EventSource.XHB;
-        }
-        if (event.getEventText() != null && event.getEventText().equals(cppDailyTestEventText)) {
+        } else if (StringUtils.equals(event.getEventText(), cppDailyTestEventText)) {
             isPollCheck = true;
             source = EventSource.CPP;
         }
         if (isPollCheck) {
             logPollCheck(event.getMessageId(), event.getEventId(), source, event.getDateTime());
         } else {
-            if (event.getType() != null && event.getType().length() == xhbEventTypeLength) {
+            if (event.getType() != null && xhbEventTypeLength != null && event.getType().length() == xhbEventTypeLength) {
                 source = EventSource.XHB;
-            }
-            if (event.getType() != null && event.getType().length() == cppEventTypeLength) {
+            } else if (event.getType() != null && cppEventTypeLength != null && event.getType().length() == cppEventTypeLength) {
                 source = EventSource.CPP;
             }
             logEvent(event.getMessageId(), event.getEventId(), event.getCourthouse(),
