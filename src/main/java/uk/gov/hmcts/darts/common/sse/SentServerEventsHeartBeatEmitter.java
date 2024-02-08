@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 public class SentServerEventsHeartBeatEmitter {
 
     public static final String HEARTBEAT_EVENT_NAME = "heartbeat";
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private CountDownLatch latch = new CountDownLatch(1);
 
     @Setter
     @Getter
@@ -32,6 +32,7 @@ public class SentServerEventsHeartBeatEmitter {
     private void heartBeat(SseEmitter emitter) throws InterruptedException {
         int counter = 0;
         emitter.onCompletion(latch::countDown);
+        emitter.onError(e -> latch.countDown());
         try {
             do {
                 SseEmitter.SseEventBuilder event = SseEmitter.event()
@@ -49,6 +50,7 @@ public class SentServerEventsHeartBeatEmitter {
     }
 
     public void startHeartBeat(SseEmitter emitter) {
+        latch = new CountDownLatch(1);
         ExecutorService emitterExecutor = Executors.newSingleThreadExecutor();
         emitterExecutor.execute(() -> {
             try {
