@@ -134,6 +134,39 @@ class AutomatedTaskServiceImplTest {
         verify(taskScheduler).schedule(automatedTask, trigger);
     }
 
+    @Test
+    void reloadByTaskNameApplyRetention() {
+        ScheduledTask scheduledTask = mock(ScheduledTask.class);
+        Set<ScheduledTask> scheduledTaskList = new HashSet<>();
+        scheduledTaskList.add(scheduledTask);
+
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+                mockAutomatedTaskRepository,
+                mockLockProvider,
+                mockAutomatedTaskConfigurationProperties) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public String getTaskName() {
+                return "ApplyRetention";
+            }
+        };
+        Trigger trigger = triggerContext -> null;
+        TriggerTask task = new TriggerTask(automatedTask, trigger);
+        when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
+        when(scheduledTask.getTask()).thenReturn(task);
+
+        automatedTaskService.reloadTaskByName("ApplyRetention");
+
+        verify(taskScheduler).schedule(automatedTask, trigger);
+    }
+
 
     @Test
     void reloadNonExistingTask() {
