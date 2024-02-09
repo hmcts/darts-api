@@ -90,3 +90,16 @@ components:
           description: ID of the registered device.
           type: integer
           example: 42
+
+    NoDeregistrationErrorCode:
+      type: string
+      enum:
+        - "INVALID_COURTROOM_100"
+      x-enum-varnames: [INVALID_COURTROOM]
+
+    NoDeregistrationTitleErrors:
+      type: string
+      enum:
+        - "Could not find the courtroom."
+      x-enum-varnames: [INVALID_COURTROOM]
+

@@ -467,6 +467,23 @@ components:
         - name
         - display_name
 
+    UserManagementErrorCode:
+      type: string
+      enum:
+        - "USER_MANAGEMENT_100"
+        - "USER_MANAGEMENT_101"
+        - "USER_NOT_TRANSCRIBER_110"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+
+    UserManagementTitleErrors:
+      type: string
+      enum:
+        - "The provided user does not exist"
+        - "The provided email already exists"
+        - "Duplicate security group names are not permitted"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+
+
     Role:
       type: object
       properties:
@@ -476,3 +493,19 @@ components:
           $ref: '#/components/schemas/RoleDisplayName'
         display_state:
           $ref: '#/components/schemas/RoleDisplayState'
+
+        UserManagementsErrorCode:
+            type: string
+            enum:
+              - "USER_100"
+              - "USER_101"
+              - "USER_110"
+            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+
+        UserManagementsTitleErrors:
+            type: string
+            enum:
+              - "The provided user does not exist"
+              - "The provided email already exists"
+              - "Duplicate security group names are not permitted"
+            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]

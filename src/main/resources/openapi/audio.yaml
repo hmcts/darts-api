@@ -254,9 +254,23 @@ components:
           description: 'List of associated case numbers'
           minItems: 1
           maxLength: 255
+
     AddAudioErrorCode:
       type: string
       enum:
-        - "COMMON_100"
-      x-enum-varnames: [ ADD_AUDIO_COURT_HOUSE_NOT_FOUND ]
+        - "AUDIO_100"
+        - "AUDIO_101"
+        - "AUDIO_102"
+        - "AUDIO_103"
+        - "AUDIO_104"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]
 
+    AddAudioTitleErrors:
+      type: string
+      enum:
+        - "Failed to process audio request"
+        - "The requested data cannot be located"
+        - "The requested media cannot be found"
+        - "Failed to store uploaded audio file"
+        - "Failed to mark audio(s) for deletion as system user was not found"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]
