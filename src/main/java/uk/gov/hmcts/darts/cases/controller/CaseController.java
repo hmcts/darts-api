@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchDetails;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
+import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -30,6 +31,7 @@ import java.util.Locale;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
@@ -131,5 +133,14 @@ public class CaseController implements CasesApi {
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getTranscriptsByCaseId(caseId), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = CASE_ID,
+            securityRoles = {JUDGE, ADMIN},
+            globalAccessSecurityRoles = {JUDGE, ADMIN})
+    public ResponseEntity<List<Annotation>> getYourAnnotationsByCaseId(Integer caseId) {
+        return new ResponseEntity<>(caseService.getAnnotations(caseId), HttpStatus.OK);
     }
 }

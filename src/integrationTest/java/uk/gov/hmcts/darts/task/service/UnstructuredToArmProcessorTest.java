@@ -143,8 +143,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
 
         hearing.addAnnotation(annotation);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
