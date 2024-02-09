@@ -233,6 +233,11 @@ darts:
   sse:
     heartbeat: 5 # in seconds
     sse-preview-timeout: 120 # in seconds
+  log:
+    events:
+      daily-test-event-text:
+        xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
+        cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

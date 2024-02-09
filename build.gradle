@@ -405,6 +405,7 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
+  testImplementation 'io.github.hakky54:logcaptor:2.9.2'
 
   compileJava.dependsOn = openApiGenerateTaskList
 }
