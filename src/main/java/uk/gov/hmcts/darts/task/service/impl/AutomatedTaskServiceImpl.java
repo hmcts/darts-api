@@ -27,11 +27,13 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
@@ -54,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
@@ -110,6 +113,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final ArmResponseFilesProcessor armResponseFilesProcessor;
 
+    private final ApplyRetentionProcessor applyRetentionProcessor;
+
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
     @Override
@@ -123,6 +128,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
         addUnstructuredToArmTaskRegistrar(taskRegistrar);
         addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
+        addApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
     }
 
@@ -196,7 +202,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case INBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleInboundAudioDeleterAutomatedTask();
             case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
             case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
-            case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcessArmResponseFilesAutomatedTask();
+            case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcesArmResponseFilesAutomatedTask();
+            case APPLY_RETENTION -> rescheduleApplyRetentionAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
@@ -375,6 +382,18 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(processArmResponseFilesTask, trigger);
     }
 
+    private void addApplyRetentionToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        ApplyRetentionAutomatedTask applyRetentionAutomatedTask = new ApplyRetentionAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                applyRetentionProcessor
+        );
+        applyRetentionAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(applyRetentionAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(applyRetentionAutomatedTask);
+        taskRegistrar.addTriggerTask(applyRetentionAutomatedTask, trigger);
+    }
+
     private void addCleanupArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CleanupArmResponseFilesAutomatedTask cleanupArmResponseFilesAutomatedTask = new CleanupArmResponseFilesAutomatedTask(
                 automatedTaskRepository,
@@ -534,6 +553,22 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
             taskScheduler.schedule(processArmResponseFilesTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleApplyRetentionAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(APPLY_RETENTION.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            ApplyRetentionAutomatedTask applyRetentionAutomatedTask = new ApplyRetentionAutomatedTask(
+                    automatedTaskRepository,
+                    lockProvider,
+                    automatedTaskConfigurationProperties,
+                    applyRetentionProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(applyRetentionAutomatedTask);
+            taskScheduler.schedule(applyRetentionAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
