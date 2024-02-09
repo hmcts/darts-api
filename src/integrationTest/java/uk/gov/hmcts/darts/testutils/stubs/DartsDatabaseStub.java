@@ -202,8 +202,8 @@ public class DartsDatabaseStub {
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
                                                                              String someCourthouse) {
         return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-                someCaseNumber,
-                someCourthouse
+            someCaseNumber,
+            someCourthouse
         );
     }
 
@@ -238,13 +238,13 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+        String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                courthouseName,
-                courtroomName,
-                caseNumber,
-                hearingDate
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
@@ -294,10 +294,10 @@ public class DartsDatabaseStub {
                                        LocalDate hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearing(
-                courthouseName,
-                courtroomName,
-                caseNumber,
-                hearingDate
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
         );
     }
 
@@ -324,17 +324,17 @@ public class DartsDatabaseStub {
     @Transactional
     public void createDailyLists(String listingCourthouse) throws IOException {
         DailyListEntity xhbDailyList = DailyListTestData.createDailyList(
-                LocalTime.of(13, 0),
-                String.valueOf(SourceType.XHB),
-                listingCourthouse,
-                "tests/dailyListProcessorTest/dailyListXHB.json"
+            LocalTime.of(13, 0),
+            String.valueOf(SourceType.XHB),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListXHB.json"
         );
 
         DailyListEntity cppDailyList = DailyListTestData.createDailyList(
-                LocalTime.of(13, 0),
-                String.valueOf(SourceType.CPP),
-                listingCourthouse,
-                "tests/dailyListProcessorTest/dailyListCPP.json"
+            LocalTime.of(13, 0),
+            String.valueOf(SourceType.CPP),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
         dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
@@ -358,7 +358,7 @@ public class DartsDatabaseStub {
     }
 
     public ObjectRecordStatusEntity getObjectRecordStatusEntity(
-            ObjectRecordStatusEnum objectRecordStatusEnum) {
+        ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 
@@ -368,13 +368,13 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         return save(
-                AudioTestData.createCurrentMediaRequest(
-                        hearing,
-                        requestor,
-                        OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                        OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                        audioRequestType, OPEN
-                ));
+            AudioTestData.createCurrentMediaRequest(
+                hearing,
+                requestor,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                audioRequestType, OPEN
+            ));
     }
 
     @Transactional
@@ -384,10 +384,10 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
         );
         save(completedMediaRequest);
 
@@ -403,24 +403,24 @@ public class DartsDatabaseStub {
                                                                      AudioRequestType audioRequestType) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
         return save(
-                AudioTestData.createExpiredMediaRequest(
-                        hearing,
-                        requestor,
-                        now.minusDays(5),
-                        now.minusDays(4),
-                        audioRequestType
-                ));
+            AudioTestData.createExpiredMediaRequest(
+                hearing,
+                requestor,
+                now.minusDays(5),
+                now.minusDays(4),
+                audioRequestType
+            ));
     }
 
     public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
                                                                        UserAccountEntity requestor,
                                                                        AudioRequestType audioRequestType) {
         MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                audioRequestType
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            audioRequestType
         );
         return save(completedMediaRequest);
     }
@@ -556,8 +556,8 @@ public class DartsDatabaseStub {
 
     public void addToUserAccountTrash(String... emailAddresses) {
         stream(emailAddresses)
-                .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
-                .forEach(userAccountBin::add);
+            .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
+            .forEach(userAccountBin::add);
     }
 
     public void createTestUserAccount() {
@@ -610,8 +610,8 @@ public class DartsDatabaseStub {
     @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                RetentionPolicyEnum.MANUAL.getPolicyKey(),
-                currentTimeHelper.currentOffsetDateTime()
+            RetentionPolicyEnum.MANUAL.getPolicyKey(),
+            currentTimeHelper.currentOffsetDateTime()
         ).get();
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
@@ -654,8 +654,8 @@ public class DartsDatabaseStub {
 
     public List<NotificationEntity> getNotificationFor(String someCaseNumber) {
         return notificationRepository.findAll().stream()
-                .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
-                .toList();
+            .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
+            .toList();
     }
 
     public AnnotationEntity findAnnotationById(Integer annotationId) {
