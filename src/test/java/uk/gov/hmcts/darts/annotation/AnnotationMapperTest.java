@@ -47,7 +47,9 @@ class AnnotationMapperTest {
             .hasFieldOrPropertyWithValue("deleted", false)
             .hasFieldOrPropertyWithValue("timestamp", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("createdDateTime", SOME_OFFSET_DATE_TIME)
-            .hasFieldOrPropertyWithValue("currentOwner", USER_ACCOUNT_ENTITY);
+            .hasFieldOrPropertyWithValue("currentOwner", USER_ACCOUNT_ENTITY)
+            .hasFieldOrPropertyWithValue("lastModifiedBy", USER_ACCOUNT_ENTITY)
+            .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
     }
 
     private Annotation someAnnotation() {
