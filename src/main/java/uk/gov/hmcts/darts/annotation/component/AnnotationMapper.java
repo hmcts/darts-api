@@ -22,6 +22,7 @@ public class AnnotationMapper {
         annotationEntity.setCurrentOwner(authorisationApi.getCurrentUser());
         annotationEntity.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
         annotationEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
+        annotationEntity.setCreatedBy(authorisationApi.getCurrentUser());
 
         return annotationEntity;
     }
