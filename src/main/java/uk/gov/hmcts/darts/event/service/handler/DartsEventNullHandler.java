@@ -31,10 +31,10 @@ public class DartsEventNullHandler extends EventHandlerBase {
     @Override
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         log.debug(
-                "Null handler selected for message: {} type: {} and subtype: {}. ",
-                dartsEvent.getMessageId(),
-                dartsEvent.getType(),
-                dartsEvent.getSubType()
+            "Null handler selected for message: {} type: {} and subtype: {}. ",
+            dartsEvent.getMessageId(),
+            dartsEvent.getType(),
+            dartsEvent.getSubType()
         );
     }
 }

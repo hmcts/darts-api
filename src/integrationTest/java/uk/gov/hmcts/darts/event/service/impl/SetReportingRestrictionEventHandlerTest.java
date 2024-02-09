@@ -42,25 +42,25 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
     void handleSetReportingRestrictionEventHandler() {
 
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-                SOME_CASE_NUMBER,
-                SOME_COURTHOUSE,
-                SOME_ROOM,
-                today.toLocalDate()
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM,
+            today.toLocalDate()
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                        .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                        .courthouse(SOME_COURTHOUSE)
-                                        .courtroom(SOME_ROOM)
-                                        .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-                SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-                SOME_CASE_NUMBER,
-                SOME_COURTHOUSE
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
         ).get();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
@@ -68,8 +68,8 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
         assertEquals(
-                "Judge directed on reporting restrictions",
-                persistedCase.getReportingRestrictions().getEventName()
+            "Judge directed on reporting restrictions",
+            persistedCase.getReportingRestrictions().getEventName()
         );
     }
 
@@ -77,25 +77,25 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
     void handleSetReportingRestrictionEventHandlerForClearRestrictionsEvent() {
 
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-                SOME_CASE_NUMBER,
-                SOME_COURTHOUSE,
-                SOME_ROOM,
-                today.toLocalDate()
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM,
+            today.toLocalDate()
         );
 
         eventDispatcher.receive(clearReportingRestrictionsDartsEvent()
-                                        .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                        .courthouse(SOME_COURTHOUSE)
-                                        .courtroom(SOME_ROOM)
-                                        .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-                SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-                SOME_CASE_NUMBER,
-                SOME_COURTHOUSE
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
         ).get();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
@@ -107,23 +107,23 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
 
     private DartsEvent someMinimalDartsEvent() {
         return new DartsEvent()
-                .type("2198")
-                .subType("3933")
-                .courtroom("known-room")
-                .courthouse("known-courthouse")
-                .eventId("1")
-                .eventText(TEST_REPORTING_RESTRICTION)
-                .messageId("some-message-id");
+            .type("2198")
+            .subType("3933")
+            .courtroom("known-room")
+            .courthouse("known-courthouse")
+            .eventId("1")
+            .eventText(TEST_REPORTING_RESTRICTION)
+            .messageId("some-message-id");
     }
 
     private DartsEvent clearReportingRestrictionsDartsEvent() {
         return new DartsEvent()
-                .type("21201")
-                .subType(null)
-                .courtroom("known-room")
-                .courthouse("known-courthouse")
-                .eventId("1")
-                .eventText(TEST_REPORTING_RESTRICTION)
-                .messageId("some-message-id");
+            .type("21201")
+            .subType(null)
+            .courtroom("known-room")
+            .courthouse("known-courthouse")
+            .eventId("1")
+            .eventText(TEST_REPORTING_RESTRICTION)
+            .messageId("some-message-id");
     }
 }

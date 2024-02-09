@@ -42,8 +42,8 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
     @Transactional
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var transcriptionRequestDetails = transcriptionRequestDetailsFrom(
-                dartsEvent,
-                createHearingAndSaveEvent(dartsEvent, eventHandler).getHearingEntity());
+            dartsEvent,
+            createHearingAndSaveEvent(dartsEvent, eventHandler).getHearingEntity());
 
         transcriptionRequestDetails.setTranscriptionTypeId(SENTENCING_REMARKS.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(STANDARD.getId());

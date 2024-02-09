@@ -50,7 +50,7 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
         transcriptionRequestDetails.setTranscriptionTypeId(TranscriptionTypeEnum.OTHER.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.OVERNIGHT.getId());
         RequestTranscriptionResponse transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(
-                transcriptionRequestDetails, false);
+            transcriptionRequestDetails, false);
 
         //automatically approve the transcription request
         UpdateTranscription updateTranscription = new UpdateTranscription();

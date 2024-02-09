@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
 @Slf4j
 public class RetentionDateHelper {
 
+    private static final int POLICY_STRING_YEAR_LOCATION = 0;
+    private static final int POLICY_STRING_MONTH_LOCATION = 2;
+    private static final int POLICY_STRING_DAY_LOCATION = 4;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private Pattern policyFormat = Pattern.compile("^\\d+Y\\d+M\\d+D$");
@@ -56,9 +59,9 @@ public class RetentionDateHelper {
 
         String[] policyArray = StringUtils.splitByCharacterType(StringUtils.trimToEmpty(policyString));
 
-        LocalDate newDate = dateToAppend.plusYears(NumberUtils.toInt(policyArray[0]));
-        newDate = newDate.plusMonths(NumberUtils.toInt(policyArray[2]));
-        newDate = newDate.plusDays(NumberUtils.toInt(policyArray[4]));
+        LocalDate newDate = dateToAppend.plusYears(NumberUtils.toInt(policyArray[POLICY_STRING_YEAR_LOCATION]));
+        newDate = newDate.plusMonths(NumberUtils.toInt(policyArray[POLICY_STRING_MONTH_LOCATION]));
+        newDate = newDate.plusDays(NumberUtils.toInt(policyArray[POLICY_STRING_DAY_LOCATION]));
         return newDate;
     }
 
@@ -74,10 +77,6 @@ public class RetentionDateHelper {
     }
 
     private LocalDate latestDate(LocalDate date1, LocalDate date2) {
-        if (date1.isAfter(date2)) {
-            return date1;
-        } else {
-            return date2;
-        }
+        return date1.isAfter(date2) ? date1 : date2;
     }
 }

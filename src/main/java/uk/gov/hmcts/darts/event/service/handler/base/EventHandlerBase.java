@@ -64,21 +64,21 @@ public abstract class EventHandlerBase implements EventHandler {
 
         String caseNumber = caseNumbers.get(0);
         HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
-                dartsEvent.getCourthouse(),
-                dartsEvent.getCourtroom(),
-                caseNumber,
-                dartsEvent.getDateTime().toLocalDate()
+            dartsEvent.getCourthouse(),
+            dartsEvent.getCourtroom(),
+            caseNumber,
+            dartsEvent.getDateTime().toLocalDate()
         );
 
         EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
         setHearingToActive(hearingEntity);
 
         return CreatedHearingAndEvent.builder()
-                .hearingEntity(hearingEntity)
-                .isHearingNew(hearingEntity.isNew())
-                .isCourtroomDifferentFromHearing(false)//for now always creating a new one
-                .eventEntity(eventEntity)
-                .build();
+            .hearingEntity(hearingEntity)
+            .isHearingNew(hearingEntity.isNew())
+            .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+            .eventEntity(eventEntity)
+            .build();
     }
 
     private void setHearingToActive(HearingEntity hearingEntity) {

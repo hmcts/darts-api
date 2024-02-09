@@ -35,8 +35,8 @@ public class StandardEventHandler extends EventHandlerBase {
         CreatedHearingAndEvent createdHearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
         if (isTheHearingNewOrTheCourtroomIsDifferent(
-                createdHearingAndEvent.isHearingNew(),
-                createdHearingAndEvent.isCourtroomDifferentFromHearing()
+            createdHearingAndEvent.isHearingNew(),
+            createdHearingAndEvent.isCourtroomDifferentFromHearing()
         )) {
             var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE);
             eventPublisher.publishEvent(notifyEvent);
