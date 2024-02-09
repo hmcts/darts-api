@@ -109,7 +109,7 @@ class CaseServiceImplTest {
                 retrieveCoreObjectService,
                 advancedSearchRequestHelper,
                 transcriptionRepository,
-                authorisationApi, userIdentity
+                userIdentity, authorisationApi
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }

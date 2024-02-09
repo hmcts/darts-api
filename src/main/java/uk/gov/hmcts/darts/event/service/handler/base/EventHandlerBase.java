@@ -76,6 +76,8 @@ public abstract class EventHandlerBase implements EventHandler {
             );
 
             UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+            hearingEntity.getCourtCase().setCreatedBy(currentUser);
+            hearingEntity.getCourtCase().setLastModifiedBy(currentUser);
             hearingEntity.setCreatedBy(currentUser);
             hearingEntity.setLastModifiedBy(currentUser);
 
