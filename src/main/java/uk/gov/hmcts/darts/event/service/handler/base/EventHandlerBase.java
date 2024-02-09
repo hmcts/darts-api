@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -63,22 +65,33 @@ public abstract class EventHandlerBase implements EventHandler {
         }
 
         String caseNumber = caseNumbers.get(0);
-        HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
-            dartsEvent.getCourthouse(),
-            dartsEvent.getCourtroom(),
-            caseNumber,
-            dartsEvent.getDateTime().toLocalDate()
-        );
+        try {
+            HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
+                    dartsEvent.getCourthouse(),
+                    dartsEvent.getCourtroom(),
+                    caseNumber,
+                    dartsEvent.getDateTime().toLocalDate()
+            );
+            saveEvent(dartsEvent, hearingEntity, eventHandler);
+            setHearingToActive(hearingEntity);
 
-        EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
-        setHearingToActive(hearingEntity);
+            return CreatedHearing.builder()
+                    .hearingEntity(hearingEntity)
+                    .isHearingNew(hearingEntity.isNew())
+                    .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+                    .build();
+        } catch (DartsApiException dartsException) {
+            if (dartsException.getError() == CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST) {
+                log.error("Courthouse not found: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
+                          dartsEvent.getMessageId(),
+                          dartsEvent.getEventId(),
+                          dartsEvent.getCourthouse(),
+                          dartsEvent.getCourtroom(),
+                          dartsEvent.getDateTime());
+            }
+            throw dartsException;
+        }
 
-        return CreatedHearingAndEvent.builder()
-            .hearingEntity(hearingEntity)
-            .isHearingNew(hearingEntity.isNew())
-            .isCourtroomDifferentFromHearing(false)//for now always creating a new one
-            .eventEntity(eventEntity)
-            .build();
     }
 
     private void setHearingToActive(HearingEntity hearingEntity) {

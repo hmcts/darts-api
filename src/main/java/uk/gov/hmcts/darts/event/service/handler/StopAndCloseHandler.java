@@ -80,7 +80,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
         var courtCase = hearingAndEvent.getHearingEntity().getCourtCase();
 
-        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING);
+        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearing.getHearingEntity().getCourtroom().getId());
         darNotifyService.notifyDarPc(notifyEvent);
 
         CaseManagementRetentionEntity caseManagementRetentionEntity = createCaseManagementRetentionEntity(hearingAndEvent.getEventEntity(),

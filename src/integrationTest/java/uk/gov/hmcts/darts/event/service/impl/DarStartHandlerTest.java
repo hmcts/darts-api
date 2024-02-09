@@ -1,17 +1,15 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.List;
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
@@ -37,6 +34,9 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
     @Autowired
     private EventDispatcher eventDispatcher;
 
+    @Autowired
+    NodeRegisterStub nodeRegisterStub;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -53,38 +53,39 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
         assertThatThrownBy(() -> eventDispatcher.receive(event))
-            .isInstanceOf(DartsApiException.class);
+                .isInstanceOf(DartsApiException.class);
     }
 
     @Test
     void shouldNotifyDarStartRecordingForHearingStarted() {
-        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroom);
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
+                DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
 
         EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+                .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+                .findFirst()
+                .orElseThrow();
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(today);
+                .type(hearingStartedEventHandler.getType())
+                .subType(hearingStartedEventHandler.getSubType())
+                .caseNumbers(List.of(SOME_CASE_NUMBER))
+                .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
         ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+                SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -97,6 +98,7 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(persistedCase.getCaseClosedTimestamp()).isNull();
 
         dartsGateway.verifyReceivedNotificationType(1);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx");
     }
 
     @Test
@@ -108,23 +110,23 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
+                DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
 
         EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+                .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+                .findFirst()
+                .orElseThrow();
 
         CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
         createdCase.setClosed(true);
         dartsDatabase.getCaseRepository().saveAndFlush(createdCase);
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
-            .dateTime(today);
+                .type(hearingStartedEventHandler.getType())
+                .subType(hearingStartedEventHandler.getSubType())
+                .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
+                .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
@@ -140,7 +142,7 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            DAR_START_HANDLER);
+                DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
 
 
@@ -152,15 +154,15 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
 
         EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
+                .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+                .findFirst()
+                .orElseThrow();
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingStartedEventHandler.getType())
-            .subType(hearingStartedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
-            .dateTime(today);
+                .type(hearingStartedEventHandler.getType())
+                .subType(hearingStartedEventHandler.getSubType())
+                .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
+                .dateTime(today);
 
         eventDispatcher.receive(dartsEvent);
 
@@ -169,13 +171,13 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
 
     private static DartsEvent someMinimalDartsEvent() {
         return new DartsEvent()
-            .messageId("some-message-id")
-            .type(HEARING_STARTED_EVENT_TYPE)
-            .subType(null)
-            .eventId("1")
-            .courthouse(SOME_COURTHOUSE)
-            .courtroom(SOME_ROOM)
-            .eventText("some-text");
+                .messageId("some-message-id")
+                .type(HEARING_STARTED_EVENT_TYPE)
+                .subType(null)
+                .eventId("1")
+                .courthouse(SOME_COURTHOUSE)
+                .courtroom(SOME_ROOM)
+                .eventText("some-text");
     }
 
 }
