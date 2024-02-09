@@ -10,9 +10,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
-import uk.gov.hmcts.darts.arm.model.record.metadata.MediaCreateArchiveRecordMetadata;
+import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
@@ -21,6 +22,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
@@ -51,10 +55,12 @@ class ArchiveRecordFileGeneratorImplTest {
         File archiveFile = new File(fileLocation, "1234-1-1.a360");
         archiveRecordFileGenerator.generateArchiveRecord(createMediaArchiveRecord(relationId), archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
-        log.info("Reading file " + archiveFile.getAbsolutePath());
+        log.info("Reading file {}", archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
+        log.info("actual Response {}", actualResponse);
+        log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -62,7 +68,8 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordWithNullArchiveRecord() {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveFile = new File(fileLocation, "test-media-arm.a360");
-        boolean result = archiveRecordFileGenerator.generateArchiveRecord(null, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
+        ArchiveRecord archiveRecord = null;
+        boolean result = archiveRecordFileGenerator.generateArchiveRecord(archiveRecord, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
         assertFalse(result);
     }
 
@@ -91,27 +98,35 @@ class ArchiveRecordFileGeneratorImplTest {
             .build();
     }
 
-    private MediaCreateArchiveRecordMetadata createMediaArchiveRecordMetadata() {
-        return MediaCreateArchiveRecordMetadata.builder()
-            .publisher("DARTS")
+
+    private RecordMetadata createMediaArchiveRecordMetadata() {
+        OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        return RecordMetadata.builder()
             .recordClass("DARTSMedia")
-            .recordDate("2023-07-19T11:39:30Z")
+            .publisher("DARTS")
             .region("GBR")
-            .id("12345")
-            .type("Media")
-            .channel("1")
-            .maxChannels("4")
-            .courthouse("Swansea")
-            .courtroom("1234")
-            .fileName("media_filename")
-            .fileFormat("mp2")
-            .startDateTime("2023-07-18T11:39:30Z")
-            .endDateTime("2023-07-18T12:39:30Z")
-            .createdDateTime("2023-07-14T12:39:30Z")
-            .caseNumbers("Case_1|Case_2|Case_3")
+            .recordDate(recordTime.format(formatter))
+            .eventDate("2024-01-23T11:40:00Z")
+            .title("Filename")
+            .clientId("1234")
+            .contributor("Swansea & Courtroom 1")
+            .bf001("Media")
+            .bf002("Case_1|Case_2|Case_3")
+            .bf003("mp2")
+            .bf004("2024-01-23")
+            .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
+            .bf011("2024-01-23T11:39:30Z")
+            .bf012(1)
+            .bf013(1)
+            .bf014(3)
+            .bf015(4)
+            .bf017("2024-01-23T11:40:00Z")
+            .bf018("2024-01-23T13:40:00Z")
+            .bf019("Swansea")
+            .bf020("Courtroom 1")
             .build();
     }
-
 
     private UploadNewFileRecord createMediaUploadNewFileRecord(String relationId) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();

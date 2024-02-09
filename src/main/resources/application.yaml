@@ -169,13 +169,20 @@ darts:
       max-blobs-per-page: 3
       publisher: DARTS
       region: GBR
-      media_record_class: DARTSMedia
-      transcription_record_class: DARTSTranscription
-      annotation_record_class: DARTSAnnotation
+      media-record-class: DARTSMedia
+      transcription-record-class: DARTSTranscription
+      annotation-record-class: DARTSAnnotation
       temp-blob-workspace: ${user.home}/arm/tempworkspace
-      date_time_format: yyyy-MM-dd'T'HH:mm:ss
-      file_extension: a360
+      date-time-format: yyyy-MM-dd'T'HH:mm:ss
+      date-format: yyyy-MM-dd
+      file-extension: a360
       list-blobs-timeout-duration: 60s
+
+      media-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
+      transcription-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
+      annotation-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
+      case-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
@@ -184,6 +191,7 @@ darts:
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

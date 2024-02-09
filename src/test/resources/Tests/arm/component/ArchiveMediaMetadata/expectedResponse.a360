@@ -2,30 +2,27 @@
   "operation": "create_record",
   "relation_id": "1234",
   "record_metadata": {
-    "publisher": "DARTS",
     "record_class": "DARTSMedia",
-    "recordDate": "2023-07-19T11:39:30Z",
-    "region": "GBR",
-    "Id": "12345",
-    "Type": "Media",
-    "Channel": "1",
-    "MaxChannels": "4",
-    "Courthouse": "Swansea",
-    "Courtroom": "1234",
-    "FileName": "media_filename",
-    "FileFormat": "mp2",
-    "StartDateTime": "2023-07-18T11:39:30Z",
-    "EndDateTime": "2023-07-18T12:39:30Z",
-    "CreatedDateTime": "2023-07-14T12:39:30Z",
-    "CaseNumbers": "Case_1|Case_2|Case_3"
-  }
-}
-{
-  "operation": "upload_new_file",
-  "relation_id": "<EODID>",
-  "file_metadata": {
     "publisher": "DARTS",
-    "dz_file_name": "<EODID>_<MEDID>_<ATTEMPT>.mp2",
-    "file_tag": "mp2"
+    "region": "GBR",
+    "recordDate": "2024-01-23T10:00:00",
+    "event_date": "2024-01-23T11:40:00Z",
+    "title": "Filename",
+    "client_identifier": "1234",
+    "contributor": "Swansea & Courtroom 1",
+    "bf_001": "Media",
+    "bf_002": "Case_1|Case_2|Case_3",
+    "bf_003": "mp2",
+    "bf_004": "2024-01-23",
+    "bf_005": "xi/XkzD2HuqTUzDafW8Cgw==",
+    "bf_011": "2024-01-23T11:39:30Z",
+    "bf_012": 1,
+    "bf_013": 1,
+    "bf_014": 3,
+    "bf_015": 4,
+    "bf_017": "2024-01-23T11:40:00Z",
+    "bf_018": "2024-01-23T13:40:00Z",
+    "bf_019": "Swansea",
+    "bf_020": "Courtroom 1"
   }
 }

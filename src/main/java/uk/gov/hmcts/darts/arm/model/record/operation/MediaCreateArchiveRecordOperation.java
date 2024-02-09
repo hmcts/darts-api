@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecordOperation;
-import uk.gov.hmcts.darts.arm.model.record.metadata.MediaCreateArchiveRecordMetadata;
+import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.CREATE_RECORD;
 
@@ -19,6 +19,6 @@ public class MediaCreateArchiveRecordOperation implements ArchiveRecordOperation
     @JsonProperty("relation_id")
     private String relationId;
     @JsonProperty("record_metadata")
-    private MediaCreateArchiveRecordMetadata recordMetadata;
+    private RecordMetadata recordMetadata;
 
 }
