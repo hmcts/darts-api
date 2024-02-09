@@ -18,12 +18,6 @@ import java.time.OffsetDateTime;
 @Slf4j
 public class EventLoggerServiceImpl implements EventLoggerService {
 
-    @Value("${darts.log.events.event-type-length.xhb}")
-    private Integer xhbEventTypeLength;
-
-    @Value("${darts.log.events.event-type-length.cpp}")
-    private Integer cppEventTypeLength;
-
     @Value("${darts.log.events.daily-test-event-text.xhb}")
     private String xhbDailyTestEventText;
 
@@ -44,10 +38,15 @@ public class EventLoggerServiceImpl implements EventLoggerService {
         if (isPollCheck) {
             logPollCheck(event.getMessageId(), event.getEventId(), source, event.getDateTime());
         } else {
-            if (event.getType() != null && xhbEventTypeLength != null && event.getType().length() == xhbEventTypeLength) {
-                source = EventSource.XHB;
-            } else if (event.getType() != null && cppEventTypeLength != null && event.getType().length() == cppEventTypeLength) {
-                source = EventSource.CPP;
+            try {
+                // Xhibit sends event positive IDs, CPP send negative event IDs
+                if (Integer.parseInt(event.getEventId()) >= 0) {
+                    source = EventSource.XHB;
+                } else {
+                    source = EventSource.CPP;
+                }
+            } catch (NumberFormatException e) {
+                // continue with source UNKNOWN
             }
             logEvent(event.getMessageId(), event.getEventId(), event.getCourthouse(),
                      event.getCourtroom(), source, event.getDateTime());

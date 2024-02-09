@@ -235,9 +235,6 @@ darts:
     sse-preview-timeout: 120 # in seconds
   log:
     events:
-      event-type-length:
-        xhb: ${EVENT_LOG_XHB_TYPE_LENGTH:5}
-        cpp: ${EVENT_LOG_CPP_TYPE_LENGTH:4}
       daily-test-event-text:
         xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}

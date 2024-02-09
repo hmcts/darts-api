@@ -43,12 +43,12 @@ class EventLoggerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        eventLoggerService = new EventLoggerServiceImpl(5, 4, "Xhibit Daily Test", "CPP Daily Test");
+        eventLoggerService = new EventLoggerServiceImpl("Xhibit Daily Test", "CPP Daily Test");
     }
 
     @Test
     void testLogsXhbPollCheck() {
-        var event = createDartsEvent("20705", "10703", "Xhibit Daily Test");
+        var event = createDartsEvent(123, "Xhibit Daily Test");
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, source=%s, poll_check=true, date_time=%s",
                                      event.getMessageId(), event.getEventId(), EventSource.XHB, event.getDateTime());
@@ -59,7 +59,7 @@ class EventLoggerServiceImplTest {
 
     @Test
     void testLogsCppPollCheck() {
-        var event = createDartsEvent("20705", "10703", "CPP Daily Test");
+        var event = createDartsEvent(-123, "CPP Daily Test");
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, source=%s, poll_check=true, date_time=%s",
                                      event.getMessageId(), event.getEventId(), EventSource.CPP, event.getDateTime());
@@ -70,7 +70,7 @@ class EventLoggerServiceImplTest {
 
     @Test
     void testLogsXhbEvent() {
-        var event = createDartsEvent("10200", "1002", "Some event text");
+        var event = createDartsEvent(123, "Some event text");
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
                                      event.getMessageId(), event.getEventId(), event.getCourthouse(),
@@ -82,7 +82,7 @@ class EventLoggerServiceImplTest {
 
     @Test
     void testLogsCppEvent() {
-        var event = createDartsEvent("1000", "1002", "Some event text");
+        var event = createDartsEvent(-123, "Some event text");
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
                                      event.getMessageId(), event.getEventId(), event.getCourthouse(),
@@ -94,7 +94,7 @@ class EventLoggerServiceImplTest {
 
     @Test
     void testHandlesEmptyEventText() {
-        var event = createDartsEvent("1000", "1002", null);
+        var event = createDartsEvent(-123, null);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
                                      event.getMessageId(), event.getEventId(), event.getCourthouse(),
@@ -105,8 +105,9 @@ class EventLoggerServiceImplTest {
     }
 
     @Test
-    void testHandlesEmptyEventType() {
-        var event = createDartsEvent(null, "1002", "Some event text");
+    void testHandlesNotIntegerEventType() {
+        var event = createDartsEvent(0, "Some event text");
+        event.setEventId("WRONG");
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
                                      event.getMessageId(), event.getEventId(), event.getCourthouse(),
@@ -118,42 +119,24 @@ class EventLoggerServiceImplTest {
 
     @Test
     void testHandlesNullCourthouseCourtroom() {
-        var event = createDartsEvent("1000", "1002", "Some event text");
+        var event = createDartsEvent(0, "Some event text");
         event.setCourthouse(null);
         event.setCourtroom(null);
         eventLoggerService.eventReceived(event);
         var logEntry = String.format("Event received: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, source=%s, date_time=%s",
                                      event.getMessageId(), event.getEventId(), event.getCourthouse(),
-                                     event.getCourtroom(), EventSource.CPP, event.getDateTime());
+                                     event.getCourtroom(), EventSource.XHB, event.getDateTime());
         List<String> infoLogs = logCaptor.getInfoLogs();
         assertEquals(1, infoLogs.size());
         assertEquals(logEntry, infoLogs.get(0));
     }
 
-    @Test
-    void handlesNullXhbEventTypeLengthConfig() {
-        var event = createDartsEvent("1000", "1002", "Some event text");
-        eventLoggerService = new EventLoggerServiceImpl(null, 4, "Xhibit Daily Test", "CPP Daily Test");
-        eventLoggerService.eventReceived(event);
-        List<String> infoLogs = logCaptor.getInfoLogs();
-        assertEquals(1, infoLogs.size());
-    }
-
-    @Test
-    void handlesNullCppEventTypeLengthConfig() {
-        var event = createDartsEvent("1000", "1002", "Some event text");
-        eventLoggerService = new EventLoggerServiceImpl(5, null, "Xhibit Daily Test", "CPP Daily Test");
-        eventLoggerService.eventReceived(event);
-        List<String> infoLogs = logCaptor.getInfoLogs();
-        assertEquals(1, infoLogs.size());
-    }
-
-    private DartsEvent createDartsEvent(String eventType, String eventSubType, String eventText) {
+    private DartsEvent createDartsEvent(int eventId, String eventText) {
         var eventDate = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
         DartsEvent event = new DartsEvent();
-        event.setType(eventType);
-        event.setSubType(eventSubType);
-        event.setEventId("4354");
+        event.setType("1000");
+        event.setSubType("1002");
+        event.setEventId(String.valueOf(eventId));
         event.setCourthouse("SWANSEA");
         event.setCourtroom("1");
         event.setMessageId("test-message-id");
