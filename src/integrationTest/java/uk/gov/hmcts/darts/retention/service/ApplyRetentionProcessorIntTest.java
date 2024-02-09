@@ -31,7 +31,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
     ApplyRetentionProcessorImpl applyRetentionProcessor;
     DartsDatabaseStub dartsDatabaseStub;
     CourtCaseEntity courtCase;
-    
+
     @BeforeEach
     void setUp() {
         courtCase = dartsDatabase.createCase(
