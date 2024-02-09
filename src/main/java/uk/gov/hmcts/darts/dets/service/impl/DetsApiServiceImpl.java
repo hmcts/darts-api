@@ -29,7 +29,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     @Override
     @SneakyThrows
     public void downloadData(UUID blobId, ResponseMetaData report) {
-        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(configuration.getConnectionString());
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(configuration.getConnectionString(), configuration.getSasToken());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
 

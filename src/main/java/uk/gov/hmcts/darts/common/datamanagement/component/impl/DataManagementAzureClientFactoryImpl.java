@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,18 +18,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DataManagementAzureClientFactoryImpl implements DataManagementAzureClientFactory {
 
-    private final DataManagementConfiguration dataManagementConfiguration;
-    private Map<String, BlobContainerClient> blobServiceClientMap =  new HashMap<>();
-
-    private BlobServiceClient blobServiceClient;
+    private Map<String, BlobContainerClient> blobContainerClientMap =  new HashMap<>();
+    private Map<String, BlobServiceClient> blobServiceClientMap =  new HashMap<>();
 
     @Override
     public BlobContainerClient getBlobContainerClient(String containerName, BlobServiceClient serviceClient) {
         String id = serviceClient.getAccountUrl() + ":" + containerName;
-        if (!blobServiceClientMap.containsKey(id)) {
-            blobServiceClientMap.put(id, serviceClient.getBlobContainerClient(containerName));
+        if (!blobContainerClientMap.containsKey(id)) {
+            blobContainerClientMap.put(id, serviceClient.getBlobContainerClient(containerName));
         }
-        return blobServiceClientMap.get(id);
+        return blobContainerClientMap.get(id);
     }
 
     @Override
@@ -39,14 +36,25 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
     }
 
     public BlobServiceClient getBlobServiceClient(String containerString) {
-        if (blobServiceClient == null) {
-            blobServiceClient = new BlobServiceClientBuilder()
-                    .connectionString(containerString)
-                    .buildClient();
-        }
-
-        return blobServiceClient;
+        return getBlobServiceClient(containerString, "");
     }
 
+    public BlobServiceClient getBlobServiceClient(String containerString, String sasToken) {
+        String id = containerString + sasToken;
+        if (!blobServiceClientMap.containsKey(id)) {
+            BlobServiceClient blobServiceClient;
+            if (!sasToken.isEmpty()) {
+                 blobServiceClient = new BlobServiceClientBuilder()
+                        .connectionString(containerString)
+                        .sasToken(sasToken)
+                        .buildClient();
+            } else {
+                 blobServiceClient = new BlobServiceClientBuilder()
+                        .connectionString(containerString).buildClient();
+            }
+            blobServiceClientMap.put(id, blobServiceClient);
+        }
 
+        return blobServiceClientMap.get(id);
+    }
 }

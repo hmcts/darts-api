@@ -27,6 +27,9 @@ class DataManagementAzureClientFactoryImplTest {
     public static final UUID BLOB_ID = UUID.randomUUID();
     private static final String CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
         "AccountKey=KBHBeksoGMGw;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
+
+    private static final String ALTERNATE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount2;" +
+            "AccountKey=KBHBeksoGMGw;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
 
@@ -47,6 +50,26 @@ class DataManagementAzureClientFactoryImplTest {
         Assertions.assertSame(blobContainerClient,
                               dataManagementFactoryImpl.getBlobContainerClient(BLOB_CONTAINER_NAME,
                                                                                dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING)));
+    }
+
+    @Test
+    void testGetServiceClientCaching() {
+        BlobServiceClient serviceClient = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING);
+        BlobServiceClient serviceClient1 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING);
+        BlobServiceClient serviceClient2 = dataManagementFactoryImpl.getBlobServiceClient(ALTERNATE_CONNECTION_STRING);
+
+        Assertions.assertSame(serviceClient, serviceClient1);
+        Assertions.assertNotSame(serviceClient, serviceClient2);
+    }
+
+    @Test
+    void testGetServiceClientSasCaching() {
+        BlobServiceClient serviceClient = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING, "sas");
+        BlobServiceClient serviceClient1 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING, "sas");
+        BlobServiceClient serviceClient2 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING, "other sas");
+
+        Assertions.assertSame(serviceClient, serviceClient1);
+        Assertions.assertNotSame(serviceClient, serviceClient2);
     }
 
     @Test
