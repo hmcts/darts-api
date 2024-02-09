@@ -8,10 +8,14 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,29 +27,29 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     @Override
     public String saveBlobDataToArm(String filename, BinaryData binaryData) {
-        return armService.saveBlobData(getArmContainerName(), filename, binaryData);
+        return armService.saveBlobData(armDataManagementConfiguration.getContainerName(), filename, binaryData);
     }
 
     @Override
     public List<String> listCollectedBlobs(String prefix) {
-        return armService.listCollectedBlobs(getArmContainerName(), prefix);
+        return armService.listCollectedBlobs(armDataManagementConfiguration.getContainerName(), prefix);
     }
 
     @Override
     public List<String> listResponseBlobs(String prefix) {
-        return armService.listResponseBlobs(getArmContainerName(), prefix);
+        return armService.listResponseBlobs(armDataManagementConfiguration.getContainerName(), prefix);
     }
 
     public BinaryData getBlobData(String blobPathAndName) {
         return armService.getBlobData(
-            getArmContainerName(),
+                armDataManagementConfiguration.getContainerName(),
             blobPathAndName
         );
     }
 
     @Override
     public void deleteResponseBlob(String blobName) {
-        armService.deleteResponseBlob(getArmContainerName(), blobName);
+        armService.deleteResponseBlob(armDataManagementConfiguration.getContainerName(), blobName);
     }
 
     @Override
@@ -54,11 +58,24 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public InputStream downloadArmData(String externalRecordId, String externalFileId) {
-        return armApiService.downloadArmData(externalRecordId, externalFileId);
+    public boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, ResponseMetaData response) {
+        Optional<String> containerName = getContainerName(container);
+        if (containerName.isPresent()) {
+            InputStream stream = armApiService.downloadArmData(blobId.getExternalRecordId(), blobId.getExternalFileId());
+            response.markInputStream(stream);
+            response.markSuccess();
+        }
+        return response.isSuccessfullyDownloaded();
     }
 
-    private String getArmContainerName() {
-        return armDataManagementConfiguration.getContainerName();
+    public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
+        switch (datastoreContainerType) {
+            case ARM -> {
+                return Optional.of(armDataManagementConfiguration.getContainerName());
+            }
+            default -> {
+                return Optional.empty();
+            }
+        }
     }
 }

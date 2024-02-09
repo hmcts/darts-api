@@ -18,4 +18,5 @@ public class DetsDataManagementConfiguration {
     private String sasToken;
     private String containerName;
     private String connectionString;
+    private boolean isFetchFromDets;
 }

@@ -7,13 +7,10 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.common.datamanagement.api.BlobContainerDownloadable;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectory;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,35 +26,25 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
     private final ArmDataManagementApi armDataManagementApi;
 
+    private final DetsDataManagementConfiguration configuration;
+
     // The order to process the download data containers
     private static final List<DatastoreContainerType> CONTAINER_PROCESSING_ORDER = new ArrayList<>();
 
     {
         CONTAINER_PROCESSING_ORDER.add(DatastoreContainerType.UNSTRUCTURED);
         CONTAINER_PROCESSING_ORDER.add(DatastoreContainerType.DETS);
-    }
-
-    @Override
-    public void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> dataToDownloadList,
-                                                       Function<DownloadableExternalObjectDirectory, Boolean> processed) {
-
-        getDataFromUnstructuredArmAndDetsBlobs(dataToDownloadList, true, processed);
+        CONTAINER_PROCESSING_ORDER.add(DatastoreContainerType.ARM);
     }
 
     @Override
     public void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> dataToDownloadList) {
 
-        getDataFromUnstructuredArmAndDetsBlobs(dataToDownloadList, true, (downloadData) -> true);
-    }
-
-    @Override
-    public void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> dataToDownloadList, boolean isFetchfromDets) {
-        getDataFromUnstructuredArmAndDetsBlobs(dataToDownloadList, isFetchfromDets, (downloadData) -> true);
+        getDataFromUnstructuredArmAndDetsBlobs(dataToDownloadList, (downloadData) -> true);
     }
 
     @Override
     public void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> dataToDownloadList,
-                                                       boolean isFetchfromDets,
                                                        Function<DownloadableExternalObjectDirectory, Boolean> processed) {
 
         // process for all standard blob stores
@@ -68,16 +55,15 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                     Optional<String> containerName = container.get().getContainerName(type);
                     if (containerName.isPresent() &&
                             dataToDownload.getDirectory().isForLocationType(getForDatastoreContainerType(type))
-                            && processObjectDirectoryForContainerType(dataToDownload, type, isFetchfromDets)) {
+                            && processObjectDirectoryForContainerType(dataToDownload, type, configuration.isFetchFromDets())) {
                             log.info("Downloading blob id {} from container {}", dataToDownload.getDirectory().getExternalLocationType(), type.name());
 
                             if (!dataToDownload.getResponse().isSuccessfullyDownloaded()) {
                                 boolean success = false;
                                 try {
                                     success = container.get().downloadBlobFromContainer(type,
-                                                                                                           dataToDownload.getDirectory().getExternalLocation(),
+                                                                                                           dataToDownload.getDirectory(),
                                                                                                            dataToDownload.getResponse());
-
                                 }
                                 catch (Exception e) {
                                     log.error("Error occured working out wether to continue", e);
@@ -97,45 +83,14 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                     }
                 }
 
-                // process for arm
-                if (dataToDownload.getDirectory().isForLocationType(ExternalLocationTypeEnum.ARM)) {
-                    // if all download blob implementations
-                    if (!processArm(dataToDownload, processed)) {
-                        log.info("Forcibly ending the download process by client");
-                        return;
-                    }
-                }
-
                 // now fallback as we have not found any way of processing the download
                 processFallback(dataToDownload, processed);
             });
         });
     }
 
-    private boolean processArm(DownloadableExternalObjectDirectory dataToDownload, Function<DownloadableExternalObjectDirectory, Boolean> processed) {
-        try {
-            log.info("Attempting download using ARM to download blob id {} from container {}, " +
-                             "continuing to process...", dataToDownload.getDirectory().getExternalLocationType(), DatastoreContainerType.ARM);
-
-            InputStream stream = armDataManagementApi.downloadArmData(dataToDownload.getDirectory().getExternalFileId(),
-
-                                                                      dataToDownload.getDirectory().getExternalRecordId());
-
-            // pass back the input stream
-            dataToDownload.getResponse().markInputStream(stream);
-
-            log.info("Successful download using ARM to download blob id {} from container {}, " +
-                             "continuing to process...", dataToDownload.getDirectory().getExternalLocationType(), DatastoreContainerType.ARM);
-
-            return processResponse(dataToDownload, true, processed, DatastoreContainerType.ARM);
-        } catch (Exception e) {
-            log.error("Download failed from arm fallback. Giving up", e);
-            return processResponse(dataToDownload, false, processed, DatastoreContainerType.ARM);
-        }
-    }
-
     /**
-     * TODO: Implement this method to do something
+     * TODO: Implement this method to do something as a fallback
      */
     private void processFallback(DownloadableExternalObjectDirectory dataToDownload,
                                  Function<DownloadableExternalObjectDirectory, Boolean> processed) {

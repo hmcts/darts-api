@@ -188,6 +188,7 @@ darts:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name: darts-dets
       sasToken: ${DETS_SAS_ENDPOINT:}
+      is-fetch-from-dets: true
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

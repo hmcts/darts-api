@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.dets.api.impl;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.dets.api.DetsDataManagementApi;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
@@ -18,10 +19,10 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
     private final DetsDataManagementConfiguration detsManagementConfiguration;
 
     @Override
-    public boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, ResponseMetaData request) {
+    public boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, ResponseMetaData request) {
         Optional<String> containerName = getContainerName(container);
         if (containerName.isPresent()) {
-            service.downloadData(blobId, request);
+            service.downloadData(blobId.getExternalLocation(), request);
         }
 
         return request.isSuccessfullyDownloaded();

@@ -2,12 +2,13 @@ package uk.gov.hmcts.darts.arm.api;
 
 import com.azure.core.util.BinaryData;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.common.datamanagement.api.BlobContainerDownloadable;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public interface ArmDataManagementApi {
+public interface ArmDataManagementApi extends BlobContainerDownloadable {
 
     String saveBlobDataToArm(String filename, BinaryData binaryData);
 
@@ -20,6 +21,4 @@ public interface ArmDataManagementApi {
     void deleteResponseBlob(String blobName);
 
     UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp);
-
-    InputStream downloadArmData(String externalRecordId, String externalFileId);
 }

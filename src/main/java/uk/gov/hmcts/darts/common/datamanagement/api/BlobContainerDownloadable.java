@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.datamanagement.api;
 
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -14,7 +15,7 @@ public interface BlobContainerDownloadable {
      * @param response The response to download to
      * @return true or false signifying a failure
      */
-    boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, ResponseMetaData response);
+    boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, ResponseMetaData response);
 
     /**
      * gets the supported container types.
