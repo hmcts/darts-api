@@ -6,16 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import uk.gov.hmcts.darts.audio.deleter.DataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
-import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectory;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +22,6 @@ import java.util.UUID;
 public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements ExternalDataStoreDeleter<T> {
 
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final UserAccountRepository userAccountRepository;
     private final JpaRepository<T, Integer> repository;
     private final ObjectDirectoryDeletedFinder<T> finder;
     private final DataStoreDeleter deleter;
@@ -36,8 +32,7 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     public List<T> delete() {
         List<T> toBeDeleted = finder.findMarkedForDeletion();
 
-
-        UserAccountEntity systemUser = getSystemUser();
+        UserAccountEntity systemUser = systemUserHelper.getSystemUser();
         ObjectRecordStatusEntity deletedStatus = getDeletedStatus();
 
         for (T entityToBeDeleted : toBeDeleted) {
@@ -60,15 +55,6 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
         }
         return toBeDeleted;
     }
-
-    private UserAccountEntity getSystemUser() {
-        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
-        if (user == null) {
-            throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
-        }
-        return user;
-    }
-
 
     private ObjectRecordStatusEntity getDeletedStatus() {
         return objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId());

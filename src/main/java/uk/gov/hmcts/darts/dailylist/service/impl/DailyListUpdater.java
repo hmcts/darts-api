@@ -12,8 +12,10 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
@@ -45,6 +47,8 @@ class DailyListUpdater {
     private final CourthouseRepository courthouseRepository;
     private final HearingRepository hearingRepository;
     private final ObjectMapper objectMapper;
+    private final UserAccountRepository userAccountRepository;
+    private final SystemUserHelper systemUserHelper;
 
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
@@ -71,8 +75,12 @@ class DailyListUpdater {
                             courtHouseName, sitting.getCourtRoomNumber(),
                             caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
+                        hearing.setCreatedBy(systemUserHelper.getSystemUser());
+                        hearing.setLastModifiedBy(systemUserHelper.getSystemUser());
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
+                        courtCase.setCreatedBy(systemUserHelper.getSystemUser());
+                        courtCase.setLastModifiedBy(systemUserHelper.getSystemUser());
                         updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());

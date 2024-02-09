@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -51,24 +52,25 @@ class ExternalInboundDataStoreDeleterImplTest {
     @Mock
     private InboundDataStoreDeleter inboundDataStoreDeleter;
 
-    @Mock
-    private SystemUserHelper systemUserHelper;
 
     @BeforeEach
     public void setUp() {
+        SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository);
+        HashMap<String, String> systemUserGuidMap = new HashMap<>();
+        systemUserGuidMap.put("housekeeping", "123");
+        systemUserHelper.setSystemUserGuidMap(systemUserGuidMap);
+
         this.deleter = new ExternalInboundDataStoreDeleter(
-            objectRecordStatusRepository,
-            userAccountRepository,
-            externalObjectDirectoryRepository,
-            finder,
-            inboundDataStoreDeleter, systemUserHelper
+                objectRecordStatusRepository,
+                externalObjectDirectoryRepository,
+                finder,
+                inboundDataStoreDeleter, systemUserHelper
         );
 
 
     }
 
     private void mockSystemUser() {
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("");
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(new UserAccountEntity());
     }
 
@@ -77,7 +79,7 @@ class ExternalInboundDataStoreDeleterImplTest {
         this.deletedStatus = new ObjectRecordStatusEntity();
         deletedStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
         when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
-            deletedStatus);
+                deletedStatus);
     }
 
     @Test
@@ -95,15 +97,15 @@ class ExternalInboundDataStoreDeleterImplTest {
         List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete();
 
         assertThat(
-            deletedItems,
-            containsInAnyOrder(
-                allOf(
-                    Matchers.hasProperty("id", is(1))
-                ),
-                allOf(
-                    Matchers.hasProperty("id", is(2))
+                deletedItems,
+                containsInAnyOrder(
+                        allOf(
+                                Matchers.hasProperty("id", is(1))
+                        ),
+                        allOf(
+                                Matchers.hasProperty("id", is(2))
+                        )
                 )
-            )
         );
         assertEquals(2, deletedItems.size());
 
@@ -113,7 +115,6 @@ class ExternalInboundDataStoreDeleterImplTest {
 
     @Test
     void testDeleteWhenSystemUserDoesNotExist() {
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("");
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () -> deleter.delete());
     }

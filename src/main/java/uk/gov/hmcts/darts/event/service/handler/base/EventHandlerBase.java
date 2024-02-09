@@ -74,6 +74,11 @@ public abstract class EventHandlerBase implements EventHandler {
                 caseNumber,
                 dartsEvent.getDateTime().toLocalDate()
             );
+
+            UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+            hearingEntity.setCreatedBy(currentUser);
+            hearingEntity.setLastModifiedBy(currentUser);
+
             EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
             setHearingToActive(hearingEntity);
 
