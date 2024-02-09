@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
-import uk.gov.hmcts.darts.common.datamanagement.component.MediaDownloadMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 
@@ -28,7 +28,7 @@ public class DetsApiServiceImpl implements DetsApiService {
 
     @Override
     @SneakyThrows
-    public void downloadData(UUID blobId, MediaDownloadMetaData report) {
+    public void downloadData(UUID blobId, ResponseMetaData report) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(configuration.getConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);

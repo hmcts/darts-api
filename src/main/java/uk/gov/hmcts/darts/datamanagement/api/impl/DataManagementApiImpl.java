@@ -4,7 +4,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.datamanagement.component.MediaDownloadMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -95,10 +95,10 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
-    public boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, MediaDownloadMetaData report) {
+    public boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, ResponseMetaData response) {
         Optional<String> containerName = getContainerName(container);
-        containerName.ifPresent(s -> dataManagementService.downloadData(s, blobId, report));
-        return report.isSuccessfullyDownloaded();
+        containerName.ifPresent(s -> dataManagementService.downloadData(s, blobId, response));
+        return response.isSuccessfullyDownloaded();
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {

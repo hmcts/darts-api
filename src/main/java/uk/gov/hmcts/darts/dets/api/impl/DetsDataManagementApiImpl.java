@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.dets.api.impl;
 
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.darts.common.datamanagement.component.MediaDownloadMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.dets.api.DetsDataManagementApi;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
@@ -18,13 +18,13 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
     private final DetsDataManagementConfiguration detsManagementConfiguration;
 
     @Override
-    public boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, MediaDownloadMetaData report) {
+    public boolean downloadBlobFromContainer(DatastoreContainerType container, UUID blobId, ResponseMetaData request) {
         Optional<String> containerName = getContainerName(container);
         if (containerName.isPresent()) {
-            service.downloadData(blobId, report);
+            service.downloadData(blobId, request);
         }
 
-        return report.isSuccessfullyDownloaded();
+        return request.isSuccessfullyDownloaded();
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
