@@ -25,9 +25,11 @@ import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -96,6 +98,18 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private TranscriptionTypeEntity transcriptionTypeEntity;
     @Mock
+    private HearingEntity hearingEntity1;
+    @Mock
+    private HearingEntity hearingEntity2;
+    @Mock
+    private HearingEntity hearingEntity3;
+    @Mock
+    private CourtCaseEntity courtCaseEntity1;
+    @Mock
+    private CourtCaseEntity courtCaseEntity2;
+    @Mock
+    private CourtCaseEntity courtCaseEntity3;
+    @Mock
     private UserAccountEntity userAccountEntity;
 
     @Mock
@@ -153,6 +167,14 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = testTime.minusHours(1);
         OffsetDateTime endedAt = testTime;
 
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
+        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
+        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getChannel()).thenReturn(1);
@@ -161,7 +183,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
-        when(mediaEntity.getCaseNumberList()).thenReturn(List.of("Case1", "Case2", "Case3"));
+        when(mediaEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
@@ -207,6 +229,14 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
 
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
+        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
+        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
         OffsetDateTime startedAt = testTime.minusHours(1);
         OffsetDateTime endedAt = testTime;
 
@@ -220,7 +250,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getStart()).thenReturn(startedAt);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
-        when(mediaEntity.getCaseNumberList()).thenReturn(List.of("Case1", "Case2", "Case3"));
+        when(mediaEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
@@ -268,6 +298,14 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = testTime.minusHours(1);
         OffsetDateTime endedAt = testTime;
 
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
+        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
+        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getChannel()).thenReturn(1);
@@ -276,7 +314,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
-        when(mediaEntity.getCaseNumberList()).thenReturn(List.of("Case1", "Case2", "Case3"));
+        when(mediaEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);

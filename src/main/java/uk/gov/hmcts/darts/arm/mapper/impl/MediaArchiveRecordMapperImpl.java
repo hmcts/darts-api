@@ -12,7 +12,9 @@ import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
@@ -229,7 +231,13 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private String getCaseNumbers(MediaEntity media) {
         String cases = null;
         if (nonNull(media.getHearingList())) {
-            cases = caseListToString(media.getCaseNumberList());
+            List<HearingEntity> hearings = media.getHearingList();
+            List<String> caseNumbers = hearings
+                    .stream()
+                    .map(HearingEntity::getCourtCase)
+                    .map(CourtCaseEntity::getCaseNumber)
+                    .toList();
+            cases = caseListToString(caseNumbers);
         }
         return cases;
     }
@@ -251,8 +259,8 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         };
     }
 
-    private String caseListToString(List<String> caseIdList) {
-        return String.join(CASE_LIST_DELIMITER, caseIdList);
+    private String caseListToString(List<String> caseNumberList) {
+        return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
