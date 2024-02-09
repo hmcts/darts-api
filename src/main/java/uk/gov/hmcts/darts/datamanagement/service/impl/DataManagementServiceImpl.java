@@ -102,8 +102,8 @@ public class DataManagementServiceImpl implements DataManagementService {
             Date downloadEndDate = new Date();
             log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
-            report.markProcessed();
-            report.markSuccess(null);
+            report.markProcessed(null);
+            report.markSuccess();
 
         }
 

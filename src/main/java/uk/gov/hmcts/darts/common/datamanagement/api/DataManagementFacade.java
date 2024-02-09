@@ -14,7 +14,7 @@ import java.util.function.Function;
 public interface DataManagementFacade {
 
     /**
-     * process a collection of downloads in the order of unstructured, dets (if boolean set) and arm as a fallback.
+     * process a collection of downloads in the order of unstructured, dets (if boolean set) and arm .
      * @param directories The external directories to be processed that are passed by reference i.e. the
      *                    object responses are updated with the outcome of the processing state.
      * @param isFetchfromDets Determine if we need to reach out to dets.
@@ -24,6 +24,24 @@ public interface DataManagementFacade {
     void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> directories,
                                                 boolean isFetchfromDets,
                                                 Function<DownloadableExternalObjectDirectory, Boolean> handlePostDownload);
+
+    /**
+     * process a collection of downloads in the order of unstructured, dets (if boolean set) and arm. All downloads are attempted
+     * even if one fails
+     * @param directories The external directories to be processed that are passed by reference i.e. the
+     *                    object responses are updated with the outcome of the processing state.
+     * @param isFetchfromDets Determine if we need to reach out to dets.
+     */
+    void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> directories,
+                                                boolean isFetchfromDets);
+
+    /**
+     * process a collection of downloads in the order of unstructured, dets (if boolean set) and arm. All downloads are attempted
+     * even if one fails
+     * @param directories The external directories to be processed that are passed by reference i.e. the
+     *                    object responses are updated with the outcome of the processing state.
+     */
+    void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> directories);
 
     /**
      * Returns the input streams representing the data for the directories. DETS communication is enabled by default.

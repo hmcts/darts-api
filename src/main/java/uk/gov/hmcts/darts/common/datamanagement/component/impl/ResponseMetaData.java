@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -12,7 +14,7 @@ import java.io.OutputStream;
 public class ResponseMetaData {
     private InputStream is;
 
-    protected OutputStream outputStream;
+    private final OutputStream outputStream;
 
     @Getter
     private boolean processed;
@@ -22,20 +24,20 @@ public class ResponseMetaData {
     @Getter
     private DatastoreContainerType containerType;
 
-    public void markProcessed() {
+    public void markProcessed(DatastoreContainerType type) {
         processed = true;
+        this.containerType = type;
     }
 
 
-    public void markSuccess(DatastoreContainerType type) {
+    public void markSuccess() {
         successfulDownload = true;
-        this.containerType = type;
     }
 
     /**
      ** override as appropriate to return your custom input stream null by default.
      */
-    public InputStream getInputStream() {
+    public InputStream getInputStream()  throws IOException {
         return is;
     }
 
