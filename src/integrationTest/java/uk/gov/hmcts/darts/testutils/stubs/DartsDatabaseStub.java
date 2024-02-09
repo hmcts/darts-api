@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -104,6 +106,7 @@ public class DartsDatabaseStub {
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
+    private final CaseManagementRetentionRepository caseManagementRetentionRepository;
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
     private final CourthouseRepository courthouseRepository;
@@ -161,6 +164,7 @@ public class DartsDatabaseStub {
         externalObjectDirectoryRepository.deleteAll();
         annotationDocumentRepository.deleteAll();
         caseRetentionRepository.deleteAll();
+        caseManagementRetentionRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
         transcriptionRepository.deleteAll();
@@ -450,6 +454,10 @@ public class DartsDatabaseStub {
 
     public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {
         return caseRepository.save(courtCaseEntity);
+    }
+
+    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
+        return caseManagementRetentionRepository.save(caseManagementRetentionEntity);
     }
 
     public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.service.handler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -21,8 +22,9 @@ public class DarStartHandler extends EventHandlerBase {
                            EventRepository eventRepository,
                            HearingRepository hearingRepository,
                            CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+                           ApplicationEventPublisher eventPublisher,
+                           AuthorisationApi authorisationApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
     }
 
     @Override
