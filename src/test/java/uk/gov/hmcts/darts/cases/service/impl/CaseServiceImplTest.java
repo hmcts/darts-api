@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -87,8 +86,7 @@ class CaseServiceImplTest {
     TranscriptionRepository transcriptionRepository;
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
-    @Mock
-    UserIdentity userIdentity;
+
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
     @Mock
