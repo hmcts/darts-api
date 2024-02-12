@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
@@ -42,7 +41,7 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Autowired
     NodeRegisterStub nodeRegisterStub;
-    
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -50,11 +49,13 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
     public void setupStubs() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroom);
     }
 
     @Test
     void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
@@ -64,8 +65,6 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Test
     void handlesScenarioWhereCourtCaseAndHearingDontExist() {
-        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
-        nodeRegisterStub.setupNodeRegistry(courtroom);
         dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
         dartsGateway.darNotificationReturnsSuccess();
 
@@ -88,8 +87,6 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Test
     void handlesScenarioWhereHearingDoesntExist() {
-        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
-        nodeRegisterStub.setupNodeRegistry(courtroom);
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
@@ -125,8 +122,6 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Test
     void handlesScenarioWhereCaseAndHearingExistsButRoomNumberHasChanged() {
-        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
-        nodeRegisterStub.setupNodeRegistry(courtroom);
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
