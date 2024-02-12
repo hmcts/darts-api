@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -43,7 +42,7 @@ class AnnotationControllerTest extends IntegrationBase {
     void returnsAnnotationId() throws Exception {
         createAuthenticatedJudgeWithGlobalAccessAndEmail("judge@global.com");
 
-        MvcResult mvcResult = mockMvc.perform(
+        var mvcResult = mockMvc.perform(
                 multipart(ENDPOINT)
                     .file(someAnnotationPostDocument())
                     .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
@@ -79,14 +78,38 @@ class AnnotationControllerTest extends IntegrationBase {
             .andReturn();
     }
 
+    @Test
+    void returns400IfAnnotationDocumentMissing() throws Exception {
+        createAuthenticatedJudgeWithGlobalAccessAndEmail("judge@global.com");
 
-    private static MockMultipartFile someAnnotationPostDocument() {
-        return new MockMultipartFile(
-            "file",
-            "some-filename.txt",
-            "some-content-type",
-            "some-content".getBytes()
-        );
+        mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+    }
+
+    @Test
+    void returns400IfPostBodyMissing() throws Exception {
+        createAuthenticatedJudgeWithGlobalAccessAndEmail("judge@global.com");
+
+        mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(someAnnotationPostDocument()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+    }
+
+    @Test
+    void returns400WhenHearingIdIsNull() throws Exception {
+        createAuthenticatedJudgeWithGlobalAccessAndEmail("judge@global.com");
+
+        mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(someAnnotationPostBodyNullHearingId())
+                    .file(someAnnotationPostDocument()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
     }
 
     private MockMultipartFile someAnnotationPostBodyFor(HearingEntity hearingEntity) throws JsonProcessingException {
@@ -102,13 +125,18 @@ class AnnotationControllerTest extends IntegrationBase {
         );
     }
 
+    private MockMultipartFile someAnnotationPostBodyNullHearingId() throws JsonProcessingException {
+        var annotation = new Annotation(null);
+        return new MockMultipartFile(
+            "annotation",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(annotation).getBytes()
+        );
+    }
+
     private void createAuthenticatedJudgeWithGlobalAccessAndEmail(String email) {
-        Jwt jwt = Jwt.withTokenValue("some-token")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(email))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        authenticateUserWithEmail(email);
 
         var securityGroup = buildGroupForRole(JUDGE);
         securityGroup.setGlobalAccess(true);
@@ -122,12 +150,7 @@ class AnnotationControllerTest extends IntegrationBase {
     }
 
     private void createAuthenticatedJudgeAuthorizedForCourthouse(String email, CourthouseEntity courthouse) {
-        Jwt jwt = Jwt.withTokenValue("some-token")
-            .header("alg", "RS256")
-            .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of(email))
-            .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        authenticateUserWithEmail(email);
 
         var securityGroup = buildGroupForRoleAndCourthouse(JUDGE, courthouse);
         dartsDatabase.addToTrash(securityGroup);
@@ -137,5 +160,23 @@ class AnnotationControllerTest extends IntegrationBase {
         dartsDatabase.addToUserAccountTrash(email);
 
         dartsDatabase.addUserToGroup(judge, securityGroup);
+    }
+
+    private static void authenticateUserWithEmail(String email) {
+        var jwt = Jwt.withTokenValue("some-token")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of(email))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
+
+    private static MockMultipartFile someAnnotationPostDocument() {
+        return new MockMultipartFile(
+            "file",
+            "some-filename.txt",
+            "some-content-type",
+            "some-content".getBytes()
+        );
     }
 }
