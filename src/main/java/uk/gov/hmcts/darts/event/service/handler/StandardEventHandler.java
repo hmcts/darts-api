@@ -38,7 +38,7 @@ public class StandardEventHandler extends EventHandlerBase {
             createdHearingAndEvent.isHearingNew(),
             createdHearingAndEvent.isCourtroomDifferentFromHearing()
         )) {
-            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE, createdHearing.getHearingEntity().getCourtroom().getId());
+            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE, createdHearingAndEvent.getHearingEntity().getCourtroom().getId());
             eventPublisher.publishEvent(notifyEvent);
         }
     }

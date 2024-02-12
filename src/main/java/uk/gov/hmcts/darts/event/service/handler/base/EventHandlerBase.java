@@ -9,9 +9,9 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -72,13 +72,14 @@ public abstract class EventHandlerBase implements EventHandler {
                     caseNumber,
                     dartsEvent.getDateTime().toLocalDate()
             );
-            saveEvent(dartsEvent, hearingEntity, eventHandler);
+            EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
             setHearingToActive(hearingEntity);
 
-            return CreatedHearing.builder()
+            return CreatedHearingAndEvent.builder()
                     .hearingEntity(hearingEntity)
                     .isHearingNew(hearingEntity.isNew())
                     .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+                    .eventEntity(eventEntity)
                     .build();
         } catch (DartsApiException dartsException) {
             if (dartsException.getError() == CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST) {
