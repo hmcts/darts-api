@@ -9,8 +9,7 @@ import java.util.List;
 
 public interface OutboundAudioDeleterProcessorSingleElement {
 
-    List<TransientObjectDirectoryEntity> markForDeletion(UserAccountEntity userAccount,
-                                                            TransformedMediaEntity transformedMedia);
+    List<TransientObjectDirectoryEntity> markForDeletion(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia);
 
     void markMediaRequestAsExpired(MediaRequestEntity mediaRequest, UserAccountEntity userAccount);
 }

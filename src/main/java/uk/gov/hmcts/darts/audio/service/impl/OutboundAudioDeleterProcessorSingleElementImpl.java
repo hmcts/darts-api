@@ -34,8 +34,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
 
     @Override
     @Transactional
-    public List<TransientObjectDirectoryEntity> markForDeletion(UserAccountEntity userAccount,
-                                                          TransformedMediaEntity transformedMedia) {
+    public List<TransientObjectDirectoryEntity> markForDeletion(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
 
         markTransformedMediaAsExpired(userAccount, transformedMedia);
 
@@ -58,6 +57,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
     @Override
     @Transactional
     public void markMediaRequestAsExpired(MediaRequestEntity mediaRequest, UserAccountEntity userAccount) {
+
         List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequest.getId());
         boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
         if (areAllTransformedMediasExpired) {
@@ -68,6 +68,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
     }
 
     private void markTransformedMediaAsExpired(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
+
         transformedMedia.setExpiryTime(OffsetDateTime.now());
         transformedMedia.setLastModifiedBy(userAccount);
         transformedMediaRepository.saveAndFlush(transformedMedia);
@@ -75,6 +76,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
 
     private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
                                                        ObjectRecordStatusEntity deletionStatus) {
+
         entity.setLastModifiedBy(systemUser);
         entity.setStatus(deletionStatus);
     }

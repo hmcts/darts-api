@@ -64,16 +64,19 @@ class OutboundAudioDeleterProcessorImplTest {
 
     @Test
     void testContinuesProcessingNextIterationOnException() {
+        // given
         List<TransformedMediaEntity> transformedMediaEntities = List.of(new TransformedMediaEntity(), new TransformedMediaEntity());
         when(transformedMediaRepository.findAllDeletableTransformedMedia(any())).thenReturn(transformedMediaEntities);
 
         var deletedValues = List.of(new TransientObjectDirectoryEntity());
         when(singleElementProcessor.markForDeletion(any(), any()))
-                .thenThrow(new RuntimeException("Some error!"))
+                .thenThrow(new RuntimeException("Some error"))
                 .thenReturn(deletedValues);
 
+        // when
         List<TransientObjectDirectoryEntity> result = outboundAudioDeleterProcessorImpl.markForDeletion();
 
+        // then
         assertThat(result).isEqualTo(deletedValues);
     }
 }
