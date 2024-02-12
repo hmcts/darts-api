@@ -32,7 +32,7 @@ public class DarStartHandler extends EventHandlerBase {
     @Transactional
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         CreatedHearingAndEvent hearingAndSaveEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);// saveEvent
-        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING, hearingAndSaveEvent.getHearingEntity().getCourtroom().getId());
+        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING, hearingAndSaveEvent.getCourtroomId());
         eventPublisher.publishEvent(notifyEvent);
     }
 

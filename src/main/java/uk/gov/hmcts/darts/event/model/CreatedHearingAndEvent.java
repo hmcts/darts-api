@@ -14,4 +14,8 @@ public class CreatedHearingAndEvent {
     private boolean isHearingNew;
     private boolean isCourtroomDifferentFromHearing;
     private EventEntity eventEntity;
+
+    public Integer getCourtroomId() {
+        return hearingEntity.getCourtroom().getId();
+    }
 }
