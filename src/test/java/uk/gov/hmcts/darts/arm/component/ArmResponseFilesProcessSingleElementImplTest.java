@@ -28,10 +28,14 @@ import uk.gov.hmcts.darts.common.util.TestUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,6 +71,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
     private ObjectRecordStatusEntity objectRecordStatusArmProcessingFiles;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed;
+    @Mock
+    private ObjectRecordStatusEntity objectRecordStatusManifestFiledFailed;
     @Mock
     private UserAccountEntity userAccountEntity;
     @Mock
@@ -110,6 +116,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
+        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 
@@ -144,6 +151,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
+        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 
@@ -178,6 +186,148 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+    }
+
+    @Test
+    void processResponseFilesFor_WithInvalidInvalidLineFilename() {
+
+        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
+        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
+        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
+        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
+        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
+        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+
+        when(mediaEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryArmResponseProcessing.getId()).thenReturn(1);
+        when(externalObjectDirectoryArmResponseProcessing.getStatus()).thenReturn(objectRecordStatusArmProcessingFiles);
+        when(externalObjectDirectoryArmResponseProcessing.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryArmResponseProcessing.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+    }
+
+    @Test
+    void processResponseFilesFor_WithInvalidInvalidLineFileJson() throws IOException {
+        when(objectRecordStatusArmProcessingFiles.getDescription()).thenReturn(ARM_PROCESSING_RESPONSE_FILES.name());
+        when(objectRecordStatusArmResponseProcessingFailed.getDescription()).thenReturn(FAILURE_ARM_RESPONSE_PROCESSING.name());
+
+        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
+        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
+        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
+        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
+        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
+        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+
+        when(mediaEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryArmResponseProcessing.getId()).thenReturn(1);
+        when(externalObjectDirectoryArmResponseProcessing.getStatus()).thenReturn(objectRecordStatusArmProcessingFiles);
+        when(externalObjectDirectoryArmResponseProcessing.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryArmResponseProcessing.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        String uploadFileTestFilename = "Tests/arm/component/ArmResponseFilesProcessSingleElement/testInvalidInputFileJson/" +
+            "InvalidInputFile.json";
+        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
+        BinaryData invalidLineFileBinaryData = BinaryData.fromString(uploadFileJson);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+    }
+
+    @Test
+    void processResponseFilesFor_WithValidInvalidLineFileJson() throws IOException {
+        when(objectRecordStatusArmProcessingFiles.getDescription()).thenReturn(ARM_PROCESSING_RESPONSE_FILES.name());
+        when(objectRecordStatusArmResponseProcessingFailed.getDescription()).thenReturn(FAILURE_ARM_RESPONSE_PROCESSING.name());
+
+        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
+        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
+        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
+        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
+        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
+        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+
+        when(mediaEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryArmResponseProcessing.getId()).thenReturn(1);
+        when(externalObjectDirectoryArmResponseProcessing.getStatus()).thenReturn(objectRecordStatusArmProcessingFiles);
+        when(externalObjectDirectoryArmResponseProcessing.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryArmResponseProcessing.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        String uploadFileTestFilename = "Tests/arm/component/ArmResponseFilesProcessSingleElement/testInvalidInputFileJson/" +
+            "InvalidLineFile.json";
+        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
+        BinaryData invalidLineFileBinaryData = BinaryData.fromString(uploadFileJson);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        Path path = Path.of(uploadFileTestFilename);
+        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class),anyString(), anyString(), anyBoolean())).thenReturn(path);
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
