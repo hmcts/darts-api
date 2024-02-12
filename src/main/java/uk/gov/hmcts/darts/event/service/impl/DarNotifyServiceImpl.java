@@ -41,7 +41,7 @@ public class DarNotifyServiceImpl {
 
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (!openCaseNumbers.isEmpty()) {
-            Optional<NodeRegisterEntity> courtroomOpt = nodeRegisterRepository.findByCourtroomId(event.getCourtroomId());
+            Optional<NodeRegisterEntity> courtroomOpt = nodeRegisterRepository.findDarPcByCourtroomId(event.getCourtRoomId());
             if (courtroomOpt.isEmpty()) {
                 log.error("Unregistered Room: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
                           dartsEvent.getMessageId(),
@@ -53,13 +53,13 @@ public class DarNotifyServiceImpl {
             }
             String notificationUrl = MessageFormat.format(notificationUrlFormat, courtroomOpt.get().getIpAddress());
             DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
-                    .notificationUrl(notificationUrl)
-                    .notificationType(darNotifyType.getNotificationType())
-                    .timestamp(dartsEvent.getDateTime())
-                    .courthouse(dartsEvent.getCourthouse())
-                    .courtroom(dartsEvent.getCourtroom())
-                    .caseNumbers(openCaseNumbers)
-                    .build();
+                .notificationUrl(notificationUrl)
+                .notificationType(darNotifyType.getNotificationType())
+                .timestamp(dartsEvent.getDateTime())
+                .courthouse(dartsEvent.getCourthouse())
+                .courtroom(dartsEvent.getCourtroom())
+                .caseNumbers(openCaseNumbers)
+                .build();
 
 
             dartsGatewayClient.darNotify(darNotifyEvent);

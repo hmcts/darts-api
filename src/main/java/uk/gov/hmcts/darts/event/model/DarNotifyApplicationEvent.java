@@ -8,12 +8,12 @@ import uk.gov.hmcts.darts.event.enums.DarNotifyType;
 public class DarNotifyApplicationEvent extends ApplicationEvent {
     private final DartsEvent dartsEvent;
     private final DarNotifyType darNotifyType;
-    private final Integer courtroomId;
+    private final Integer courtRoomId;
 
-    public DarNotifyApplicationEvent(Object source, DartsEvent dartsEvent, DarNotifyType darNotifyType, Integer courtroomId) {
+    public DarNotifyApplicationEvent(Object source, DartsEvent dartsEvent, DarNotifyType darNotifyType, Integer courtRoomId) {
         super(source);
         this.dartsEvent = dartsEvent;
         this.darNotifyType = darNotifyType;
-        this.courtroomId = courtroomId;
+        this.courtRoomId = courtRoomId;
     }
 }

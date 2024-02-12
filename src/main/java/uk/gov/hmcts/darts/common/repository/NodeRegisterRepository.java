@@ -11,11 +11,11 @@ import java.util.Optional;
 public interface NodeRegisterRepository extends JpaRepository<NodeRegisterEntity, Integer> {
 
     @Query("""
-            SELECT nr FROM NodeRegisterEntity nr 
-            WHERE nr.courtroom.id = :courtroomId
-            AND nr.nodeType = 'DAR'
-            ORDER BY nodeId desc
-            LIMIT 1
-            """)
-    Optional<NodeRegisterEntity> findByCourtroomId(Integer courtroomId);
+        SELECT nr FROM NodeRegisterEntity nr 
+        WHERE nr.courtroom.id = :courtroomId
+        AND nr.nodeType = 'DAR'
+        ORDER BY nodeId desc
+        LIMIT 1
+        """)
+    Optional<NodeRegisterEntity> findDarPcByCourtroomId(Integer courtroomId);
 }
