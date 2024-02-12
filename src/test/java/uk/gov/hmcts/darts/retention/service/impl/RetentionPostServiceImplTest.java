@@ -130,7 +130,7 @@ class RetentionPostServiceImplTest {
 
         var exception = assertThrows(
                 DartsApiException.class,
-                () -> retentionPostService.postRetention(false, postRetentionRequest)
+                () -> retentionPostService.postRetention(null, postRetentionRequest)
         );
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
