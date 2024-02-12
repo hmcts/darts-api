@@ -1071,7 +1071,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void givenProcessResponseFilesSuccessfullyCompletesForInvalidLines() throws IOException {
+    void givenProcessResponseFilesFailsWithInvalidLines() throws IOException {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -1134,7 +1134,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void givenProcessResponseFilesSuccessfullyCompletesForInvalidLinesWithInvalidName() throws IOException {
+    void givenProcessResponseFilesFailsForInvalidLinesWithInvalidName() throws IOException {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
