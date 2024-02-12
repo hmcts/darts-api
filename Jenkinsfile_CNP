@@ -126,3 +126,4 @@ withPipeline(type, product, component) {
   before('dbmigrate:demo') {
     sh("./gradlew --no-daemon --init-script init.gradle assemble")
   }
+}
