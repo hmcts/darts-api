@@ -43,7 +43,7 @@ public class TransientObjectDirectoryStub {
         transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.now());
-        transientObjectDirectoryRepository.save(transientObjectDirectoryEntity);
+        transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
         return transientObjectDirectoryEntity;
     }
 

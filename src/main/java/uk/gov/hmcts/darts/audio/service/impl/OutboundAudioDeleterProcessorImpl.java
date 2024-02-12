@@ -20,7 +20,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 
 @Service
@@ -52,13 +53,14 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
         for (TransformedMediaEntity transformedMedia: transformedMediaList) {
             try {
-                deletedValues.addAll(singleElementProcessor.markForDeletion(systemUser, transformedMedia));
+                List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
+                deletedValues.addAll(deleted);
             } catch (Exception exception) {
-                log.error("Unable to mark for deletion transformed media with id: {}", transformedMedia.getId(), exception);
+                log.error("Unable to mark for deletion transformed media {}", transformedMedia.getId(), exception);
             }
         }
 
-        Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(Collectors.toSet());
+        Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(toSet());
         mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
 
         return deletedValues;

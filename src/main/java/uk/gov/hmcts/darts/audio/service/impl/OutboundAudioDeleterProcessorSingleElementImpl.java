@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -29,32 +30,24 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    private final MediaRequestRepository mediaRequestRepository;
 
     @Override
     @Transactional
     public List<TransientObjectDirectoryEntity> markForDeletion(UserAccountEntity userAccount,
                                                           TransformedMediaEntity transformedMedia) {
 
-        ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId());
-        //TODO verify these changes are propagated to DB if integration test is not transactional. Are these detached at this point?
-        transformedMedia.setExpiryTime(OffsetDateTime.now());
-        transformedMedia.setLastModifiedBy(userAccount);
+        markTransformedMediaAsExpired(userAccount, transformedMedia);
 
+        ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId());
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByTransformedMediaId(
             transformedMedia.getId()
         );
-
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
             markTransientObjectDirectoryAsDeleted(entity, userAccount, deletionStatus);
         }
 
         return transientObjectDirectoryEntities;
-    }
-
-    private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
-                                                       ObjectRecordStatusEntity deletionStatus) {
-        entity.setLastModifiedBy(systemUser);
-        entity.setStatus(deletionStatus);
     }
 
     /**
@@ -70,6 +63,19 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
         if (areAllTransformedMediasExpired) {
             mediaRequest.setLastModifiedBy(userAccount);
             mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
+            mediaRequestRepository.saveAndFlush(mediaRequest);
         }
+    }
+
+    private void markTransformedMediaAsExpired(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
+        transformedMedia.setExpiryTime(OffsetDateTime.now());
+        transformedMedia.setLastModifiedBy(userAccount);
+        transformedMediaRepository.saveAndFlush(transformedMedia);
+    }
+
+    private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
+                                                       ObjectRecordStatusEntity deletionStatus) {
+        entity.setLastModifiedBy(systemUser);
+        entity.setStatus(deletionStatus);
     }
 }

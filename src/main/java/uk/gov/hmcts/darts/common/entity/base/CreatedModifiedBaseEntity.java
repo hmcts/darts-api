@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
@@ -21,7 +20,7 @@ public class CreatedModifiedBaseEntity extends CreatedBaseEntity {
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "last_modified_by")
     private UserAccountEntity lastModifiedBy;
 }
