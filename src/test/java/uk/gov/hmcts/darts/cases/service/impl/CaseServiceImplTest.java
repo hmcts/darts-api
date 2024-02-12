@@ -101,15 +101,14 @@ class CaseServiceImplTest {
     void setUp() {
         mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
         service = new CaseServiceImpl(
-                mapper,
-                annotationMapper,
-                hearingRepository,
-                caseRepository,
-                annotationRepository,
-                retrieveCoreObjectService,
-                advancedSearchRequestHelper,
-                transcriptionRepository,
-                userIdentity, authorisationApi
+            mapper,
+            annotationMapper,
+            hearingRepository,
+            caseRepository,
+            annotationRepository,
+            retrieveCoreObjectService,
+            advancedSearchRequestHelper,
+            transcriptionRepository, authorisationApi
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }
@@ -125,7 +124,7 @@ class CaseServiceImplTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-                "Tests/cases/CaseServiceTest/testGetCasesById/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/testGetCasesById/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -135,9 +134,9 @@ class CaseServiceImplTest {
 
         List<HearingEntity> hearingEntities = CommonTestDataUtil.createHearings(8);
         Mockito.when(hearingRepository.findByCourthouseCourtroomAndDate(
-                any(),
-                any(),
-                any()
+            any(),
+            any(),
+            any()
         )).thenReturn(hearingEntities);
 
         GetCasesRequest request = new GetCasesRequest();
@@ -148,7 +147,7 @@ class CaseServiceImplTest {
         List<ScheduledCase> resultList = service.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
         String expectedResponse = getContentsFromFile(
-                "Tests/cases/CaseServiceTest/testGetCasesWithMultipleHearing/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/testGetCasesWithMultipleHearing/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -156,9 +155,9 @@ class CaseServiceImplTest {
     void testGetCasesWithSingleHearingAndDifferentCourtroom() throws IOException {
         HearingEntity hearingEntity = createHearingEntity();
         Mockito.when(hearingRepository.findByCourthouseCourtroomAndDate(
-                any(),
-                any(),
-                any()
+            any(),
+            any(),
+            any()
         )).thenReturn(Collections.singletonList(hearingEntity));
 
         GetCasesRequest request = new GetCasesRequest();
@@ -169,7 +168,7 @@ class CaseServiceImplTest {
         List<ScheduledCase> resultList = service.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
         String expectedResponse = getContentsFromFile(
-                "Tests/cases/CaseServiceTest/testGetCasesWithSingleHearingAndDifferentCourtroom/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/testGetCasesWithSingleHearingAndDifferentCourtroom/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -179,9 +178,9 @@ class CaseServiceImplTest {
         String courtroomName = "99";
 
         Mockito.when(hearingRepository.findByCourthouseCourtroomAndDate(
-                any(),
-                any(),
-                any()
+            any(),
+            any(),
+            any()
         )).thenReturn(Collections.emptyList());
 
         GetCasesRequest request = new GetCasesRequest();
@@ -210,7 +209,7 @@ class CaseServiceImplTest {
 
         String actualResponse = TestUtils.removeTags(List.of("case_id"), objectMapper.writeValueAsString(result));
         String expectedResponse = getContentsFromFile(
-                "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
+            "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         Mockito.verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
@@ -231,14 +230,14 @@ class CaseServiceImplTest {
 
         AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(
-                anyString(),
-                anyString()
+            anyString(),
+            anyString()
         )).thenThrow(new DartsApiException(
-                CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST));
+            CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST));
 
         DartsApiException thrownException = assertThrows(
-                DartsApiException.class,
-                () -> service.addCaseOrUpdate(request)
+            DartsApiException.class,
+            () -> service.addCaseOrUpdate(request)
         );
 
         assertEquals("Provided courthouse does not exist", thrownException.getMessage());
@@ -252,9 +251,9 @@ class CaseServiceImplTest {
         existingCaseEntity.setId(1);
 
         List<HearingEntity> existingHearings = Lists.newArrayList(CommonTestDataUtil.createHearing(
-                existingCaseEntity,
-                courtroomEntity,
-                LocalDate.now()
+            existingCaseEntity,
+            courtroomEntity,
+            LocalDate.now()
         ));
 
         Mockito.when(hearingRepository.findByCaseIds(List.of(existingCaseEntity.getId()))).thenReturn(existingHearings);
@@ -274,7 +273,7 @@ class CaseServiceImplTest {
         existingCaseEntity.setId(1);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-                existingCaseEntity);
+            existingCaseEntity);
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
@@ -305,7 +304,7 @@ class CaseServiceImplTest {
         existingCaseEntity.setId(1);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-                existingCaseEntity);
+            existingCaseEntity);
 
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
@@ -335,7 +334,7 @@ class CaseServiceImplTest {
         existingCaseEntity.setId(1);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-                existingCaseEntity);
+            existingCaseEntity);
 
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
@@ -364,7 +363,7 @@ class CaseServiceImplTest {
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-                existingCaseEntity);
+            existingCaseEntity);
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {

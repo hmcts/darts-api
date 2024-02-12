@@ -8,7 +8,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
@@ -61,7 +60,6 @@ public class CaseServiceImpl implements CaseService {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
-    private final UserIdentity userIdentity;
     private final AuthorisationApi authorisationApi;
 
     @Override
@@ -69,9 +67,9 @@ public class CaseServiceImpl implements CaseService {
     public List<ScheduledCase> getHearings(GetCasesRequest request) {
 
         List<HearingEntity> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
-                request.getCourthouse(),
-                request.getCourtroom(),
-                request.getDate()
+            request.getCourthouse(),
+            request.getCourtroom(),
+            request.getDate()
         );
         createCourtroomIfMissing(hearings, request);
         return casesMapper.mapToScheduledCases(hearings);
@@ -118,19 +116,22 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public PostCaseResponse addCaseOrUpdate(AddCaseRequest addCaseRequest) {
         CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
-                addCaseRequest.getCourthouse(),
-                addCaseRequest.getCaseNumber()
+            addCaseRequest.getCourthouse(),
+            addCaseRequest.getCaseNumber()
         );
         return updateCase(addCaseRequest, courtCase);
     }
 
     private PostCaseResponse updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
         CourtCaseEntity updatedCaseEntity = casesMapper.addDefendantProsecutorDefenderJudge(
-                existingCase,
-                addCaseRequest
+            existingCase,
+            addCaseRequest
         );
-        updatedCaseEntity.setCreatedBy(userIdentity.getUserAccount());
-        updatedCaseEntity.setLastModifiedBy(userIdentity.getUserAccount());
+        if (updatedCaseEntity.getCreatedBy() == null) {
+            updatedCaseEntity.setCreatedBy(authorisationApi.getCurrentUser());
+        }
+
+        updatedCaseEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }
@@ -165,9 +166,9 @@ public class CaseServiceImpl implements CaseService {
     private List<TranscriptionEntity> findNonAutomaticTranscripts(List<TranscriptionEntity> transcriptionEntities) {
         //only show manual transcriptions or ones that came from legacy. Do not show Modernised automatic transcriptions.
         return transcriptionEntities.stream()
-                .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                        || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
-                .toList();
+            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
+                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
+            .toList();
     }
 
     @Override
@@ -180,11 +181,11 @@ public class CaseServiceImpl implements CaseService {
 
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.ADMIN))) {
             List<AnnotationEntity> annotationsEntities =
-                    annotationRepository.findByListOfHearingIds(
-                            hearingEntitys
-                                    .stream()
-                                    .map(HearingEntity::getId)
-                                    .collect(Collectors.toList()));
+                annotationRepository.findByListOfHearingIds(
+                    hearingEntitys
+                        .stream()
+                        .map(HearingEntity::getId)
+                        .collect(Collectors.toList()));
 
             List<Annotation> annotations = new ArrayList<>();
             for (AnnotationEntity annotationEntity : annotationsEntities) {
@@ -196,11 +197,11 @@ public class CaseServiceImpl implements CaseService {
             return annotations;
         } else {
             List<AnnotationEntity> annotationsEntities =
-                    annotationRepository.findByListOfHearingIdsAndUser(
-                            hearingEntitys
-                                    .stream()
-                                    .map(HearingEntity::getId)
-                                    .collect(Collectors.toList()), authorisationApi.getCurrentUser());
+                annotationRepository.findByListOfHearingIdsAndUser(
+                    hearingEntitys
+                        .stream()
+                        .map(HearingEntity::getId)
+                        .collect(Collectors.toList()), authorisationApi.getCurrentUser());
 
             List<Annotation> annotations = new ArrayList<>();
             for (AnnotationEntity annotationEntity : annotationsEntities) {

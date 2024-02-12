@@ -76,9 +76,16 @@ public abstract class EventHandlerBase implements EventHandler {
             );
 
             UserAccountEntity currentUser = authorisationApi.getCurrentUser();
-            hearingEntity.getCourtCase().setCreatedBy(currentUser);
-            hearingEntity.getCourtCase().setLastModifiedBy(currentUser);
-            hearingEntity.setCreatedBy(currentUser);
+
+            if (hearingEntity.getCourtCase().getCreatedBy() == null) {
+                hearingEntity.getCourtCase().setCreatedBy(currentUser);
+            }
+            if (hearingEntity.getCourtCase().getLastModifiedBy() == null) {
+                hearingEntity.getCourtCase().setLastModifiedBy(currentUser);
+            }
+            if (hearingEntity.getCreatedBy() == null) {
+                hearingEntity.setCreatedBy(currentUser);
+            }
             hearingEntity.setLastModifiedBy(currentUser);
 
             EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
