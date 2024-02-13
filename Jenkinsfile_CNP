@@ -61,11 +61,6 @@ withPipeline(type, product, component) {
   syncBranchesWithMaster(branchesToSync)
   disableCleanupOfHelmReleaseOnFailure()
 
-  before('test') {
-    echo 'BEFORE TEST'
-    sh("./gradlew --no-daemon --init-script init.gradle assemble")
-  }
-
   afterAlways('test') {
     builder.gradle('jacocoTestReport')
 
