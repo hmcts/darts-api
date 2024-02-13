@@ -109,8 +109,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
@@ -122,6 +122,82 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(createRecordFilename);
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles();
+
+        Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
+        assertTrue(foundMediaEod.isPresent());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
+        assertTrue(foundMedia.isResponseCleaned());
+    }
+
+    @Test
+    void cleanupResponseFilesSuccessWithFiles_IU_CR_UF_ForMultipleAttempts() {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "Bristol",
+            "Int Test Courtroom 1",
+            "1",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        armEod.setLastModifiedDateTime(latestDateTime);
+        armEod.setTransferAttempts(1);
+        armEod.setResponseCleaned(false);
+        armEod = dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
+
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
+        String inputUploadBlobFilename2 = prefix + "2_7a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename1);
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename2);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        List<String> hashcodeResponseBlobs1 = new ArrayList<>();
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_0_cr.rsp";
+        String uploadFileFilename1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp";
+        hashcodeResponseBlobs1.add(createRecordFilename1);
+        hashcodeResponseBlobs1.add(uploadFileFilename1);
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponseBlobs1);
+
+        List<String> hashcodeResponseBlobs2 = new ArrayList<>();
+        String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_0_cr.rsp";
+        String uploadFileFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp";
+        hashcodeResponseBlobs2.add(createRecordFilename2);
+        hashcodeResponseBlobs2.add(uploadFileFilename2);
+        when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(hashcodeResponseBlobs2);
+
 
         when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
 
@@ -174,8 +250,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
@@ -205,7 +281,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesFailsToDeleteWithOnlyResponseFileIU() {
+    void cleanupResponseFilesWithOnlyResponseFileIU() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -239,8 +315,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
@@ -258,11 +334,70 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
-        assertFalse(foundMedia.isResponseCleaned());
+        assertTrue(foundMedia.isResponseCleaned());
     }
 
     @Test
-    void cleanupResponseFilesFailesToDeleteResponseFiles() {
+    void cleanupResponseFilesWith2InputUploadResponseFilesWithDifferentTransferAttempts() {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "Bristol",
+            "Int Test Courtroom 1",
+            "1",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        armEod.setLastModifiedDateTime(latestDateTime);
+        armEod.setTransferAttempts(2);
+        armEod.setResponseCleaned(false);
+        armEod = dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
+
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilenameTransferAttempt1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadBlobFilenameTransferAttempt2 = prefix + "2_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilenameTransferAttempt1);
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilenameTransferAttempt2);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles();
+
+        Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
+        assertTrue(foundMediaEod.isPresent());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
+        assertTrue(foundMedia.isResponseCleaned());
+    }
+
+    @Test
+    void cleanupResponseFilesFailsToDeleteResponseFiles() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -296,8 +431,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
@@ -315,6 +450,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        when(armDataManagementApi.deleteBlobData(any())).thenReturn(false);
 
         cleanupArmResponseFilesService.cleanupResponseFiles();
 

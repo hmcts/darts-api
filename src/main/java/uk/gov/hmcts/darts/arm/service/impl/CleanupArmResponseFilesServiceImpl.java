@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INPUT_UPLOAD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_FILE_FILENAME_KEY;
@@ -83,16 +84,16 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             int row = 1;
             for (ExternalObjectDirectoryEntity externalObjectDirectory : objectDirectoryDataToBeDeleted) {
                 log.info("Cleanup ARM Response Files about to process {} of {} rows", row++, objectDirectoryDataToBeDeleted.size());
-                cleanupResponseFilesFor(externalObjectDirectory);
+                cleanupResponseFilesForExternalObjectDirectory(externalObjectDirectory);
             }
         } else {
             log.info("No ARM responses found to be deleted}");
         }
     }
 
-    private void cleanupResponseFilesFor(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void cleanupResponseFilesForExternalObjectDirectory(ExternalObjectDirectoryEntity externalObjectDirectory) {
         armResponseFilesToBeDeleted.clear();
-        String prefix = ArmResponseFilesHelper.getPrefix(externalObjectDirectory);
+        String prefix = getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
         try {
             log.info("About to look for files to cleanup starting with prefix: {}", prefix);
@@ -105,13 +106,13 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 log.debug("Found ARM input upload file {} for cleanup", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
                     readInputUploadFile(externalObjectDirectory, armInputUploadFilename);
-                    break;
                 } else {
                     log.warn("ARM cleanup file {} not input upload file for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
                 }
             }
         } else {
-            log.info("Unable to find cleanup input upload file with prefix {}", prefix);
+            //Assume if no IU file found then it has already been cleaned up
+            log.info("Unable to find input upload file with prefix {} for cleanup", prefix);
             externalObjectDirectory.setResponseCleaned(true);
             updateExternalObjectDirectory(externalObjectDirectory);
         }
@@ -127,6 +128,9 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 processResponseBlobs(responseBlobs, externalObjectDirectory, armInputUploadFilename);
             } else {
                 log.warn("Unable to find input upload response file {} for {}", armInputUploadFilename, externalObjectDirectory.getId());
+                //Assume if no other response files found then they have already been cleaned up
+                externalObjectDirectory.setResponseCleaned(true);
+                updateExternalObjectDirectory(externalObjectDirectory);
             }
         } catch (IllegalArgumentException e) {
             // This occurs when the filename is not parsable
@@ -162,35 +166,47 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             if (nonNull(invalidFileFilename)) {
                 armResponseFilesToBeDeleted.add(invalidFileFilename);
             }
-            // Make sure to only add the Input Upload filename last as once this is deleted you cannot find the other response files
-            armResponseFilesToBeDeleted.add(armInputUploadFilename);
-            deleteResponseFiles(externalObjectDirectory);
+            deleteResponseFiles(externalObjectDirectory, armInputUploadFilename);
 
         } catch (Exception e) {
             log.error("Failure to cleanup response files {}", e.getMessage(), e);
         }
     }
 
-    private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename) {
+        List<Boolean> deletedFileStatuses = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(armResponseFilesToBeDeleted)) {
-            List<Boolean> deletedFileStatuses = new ArrayList<>();
             for (String responseFile : armResponseFilesToBeDeleted) {
                 try {
-                    log.info("Deleting {} for EOD {}", responseFile, externalObjectDirectory.getId());
+                    log.info("About to delete {} for EOD {}", responseFile, externalObjectDirectory.getId());
                     deletedFileStatuses.add(armDataManagementApi.deleteBlobData(responseFile));
                 } catch (Exception e) {
                     log.error("Failure to delete response file {} - {}", responseFile, e.getMessage(), e);
+                    deletedFileStatuses.add(false);
                 }
             }
-            if (deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
+
+        }
+        if (deletedFileStatuses.isEmpty() || deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
+            log.info("About to delete {} for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
+            // Make sure to only delete the Input Upload filename last as once this is deleted you cannot find the other response files
+            boolean deletedInputUploadFile = deletedFileStatuses.add(armDataManagementApi.deleteBlobData(armInputUploadFilename));
+            if (deletedInputUploadFile) {
                 externalObjectDirectory.setResponseCleaned(true);
                 updateExternalObjectDirectory(externalObjectDirectory);
-                log.info("Successfully cleaned up {}", externalObjectDirectory.getId());
+                log.info("Successfully cleaned up response files for EOD {}", externalObjectDirectory.getId());
             } else {
-                log.warn("Unable to delete all response files for {}", externalObjectDirectory.getId());
+                log.warn("Unable to delete input upload response file for EOD {}", externalObjectDirectory.getId());
+                externalObjectDirectory.setResponseCleaned(true);
                 updateExternalObjectDirectory(externalObjectDirectory);
             }
+        } else {
+            log.warn("Unable to delete all response files for EOD {}", externalObjectDirectory.getId());
+            externalObjectDirectory.setResponseCleaned(false);
+            updateExternalObjectDirectory(externalObjectDirectory);
         }
+        armResponseFilesToBeDeleted.clear();
+
     }
 
     private void updateExternalObjectDirectory(ExternalObjectDirectoryEntity externalObjectDirectory) {
@@ -208,5 +224,12 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         failedArmResponseChecksum = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED.getId()).get();
 
         userAccount = userIdentity.getUserAccount();
+    }
+
+    public static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        return new StringBuilder(externalObjectDirectory.getId().toString())
+            .append(ARM_FILENAME_SEPARATOR)
+            .append(ArmResponseFilesHelper.getObjectTypeId(externalObjectDirectory))
+            .append(ARM_FILENAME_SEPARATOR).toString();
     }
 }

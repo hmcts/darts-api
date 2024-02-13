@@ -24,7 +24,7 @@ public class ArmResponseFilesHelper {
             .append(externalObjectDirectory.getTransferAttempts()).toString();
     }
 
-    private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    public static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
         String objectTypeId = "";
         if (nonNull(externalObjectDirectory.getMedia())) {
             objectTypeId = externalObjectDirectory.getMedia().getId().toString();
