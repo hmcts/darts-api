@@ -47,6 +47,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
+
         if (CollectionUtils.isNotEmpty(dataSentToArm)) {
             List<Integer> externalObjects = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
             log.info("ARM Response process found : {} records to be processed", externalObjects.size());

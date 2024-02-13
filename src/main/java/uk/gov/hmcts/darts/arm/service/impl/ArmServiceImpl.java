@@ -118,9 +118,8 @@ public class ArmServiceImpl implements ArmService {
     }
 
     @Override
-    public boolean deleteResponseBlob(String containerName, String filename) {
-        String blobname = armDataManagementConfiguration.getFolders().getSubmission() + filename;
-        return deleteBlobData(containerName, blobname);
+    public boolean deleteResponseBlob(String containerName, String blobPathAndName) {
+        return deleteBlobData(containerName, blobPathAndName);
     }
 
     public boolean deleteBlobData(String containerName, String blobPathAndName) {
