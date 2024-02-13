@@ -107,7 +107,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                     readInputUploadFile(externalObjectDirectory, armInputUploadFilename);
                     break;
                 } else {
-                    log.warn("ARM cleanup file {} not input upload file", armInputUploadFilename);
+                    log.warn("ARM cleanup file {} not input upload file for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
                 }
             }
         } else {
@@ -163,10 +163,8 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 armResponseFilesToBeDeleted.add(invalidFileFilename);
             }
             // Make sure to only add the Input Upload filename last as once this is deleted you cannot find the other response files
-            if (nonNull(createRecordFilename) || nonNull(uploadFilename) || nonNull(invalidFileFilename)) {
-                armResponseFilesToBeDeleted.add(armInputUploadFilename);
-                deleteResponseFiles(externalObjectDirectory);
-            }
+            armResponseFilesToBeDeleted.add(armInputUploadFilename);
+            deleteResponseFiles(externalObjectDirectory);
 
         } catch (Exception e) {
             log.error("Failure to cleanup response files {}", e.getMessage(), e);
