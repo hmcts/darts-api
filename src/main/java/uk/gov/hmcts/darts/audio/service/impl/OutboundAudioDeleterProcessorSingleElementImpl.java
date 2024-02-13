@@ -11,12 +11,12 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -31,6 +31,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final MediaRequestRepository mediaRequestRepository;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     @Transactional
@@ -69,7 +70,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
 
     private void markTransformedMediaAsExpired(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
 
-        transformedMedia.setExpiryTime(OffsetDateTime.now());
+        transformedMedia.setExpiryTime(currentTimeHelper.currentOffsetDateTime());
         transformedMedia.setLastModifiedBy(userAccount);
         transformedMediaRepository.saveAndFlush(transformedMedia);
     }
