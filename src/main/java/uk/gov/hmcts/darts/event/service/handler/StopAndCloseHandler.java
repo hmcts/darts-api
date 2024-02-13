@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.event.service.impl.DarNotifyServiceImpl;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -83,6 +84,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndEvent.getCourtroomId());
         darNotifyService.notifyDarPc(notifyEvent);
 
+        setDefaultPolicyIfNotDefined(dartsEvent);
+
         CaseManagementRetentionEntity caseManagementRetentionEntity = createCaseManagementRetentionEntity(hearingAndEvent.getEventEntity(),
                                                                                                           hearingAndEvent.getHearingEntity().getCourtCase(),
                                                                                                           dartsEvent.getRetentionPolicy());
@@ -109,6 +112,14 @@ public class StopAndCloseHandler extends EventHandlerBase {
         }
     }
 
+    private void setDefaultPolicyIfNotDefined(DartsEvent dartsEvent) {
+        if (dartsEvent.getRetentionPolicy() == null) {
+            DartsEventRetentionPolicy defaultRetentionPolicy = new DartsEventRetentionPolicy();
+            defaultRetentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.DEFAULT.getPolicyKey());
+            dartsEvent.setRetentionPolicy(defaultRetentionPolicy);
+        }
+    }
+
     private static void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
         //setting the case to closed after notifying DAR Pc to ensure notification is sent.
         courtCase.setClosed(TRUE);
@@ -121,9 +132,9 @@ public class StopAndCloseHandler extends EventHandlerBase {
         existingCaseRetention.setRetentionPolicyType(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
         existingCaseRetention.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
 
-        OffsetDateTime currentTimestamp = currentTimeHelper.currentOffsetDateTime();
-        LocalDate currentDate = currentTimestamp.toLocalDate();
-        LocalDate retentionDate = retentionApi.applyPolicyStringToDate(currentDate,
+        OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
+        LocalDate eventDate = eventTimestamp.toLocalDate();
+        LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
                                                                        dartsEventRetentionPolicy.getCaseTotalSentence(),
                                                                        caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
 
@@ -145,9 +156,9 @@ public class StopAndCloseHandler extends EventHandlerBase {
         caseRetentionEntity.setRetentionPolicyType(caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
         caseRetentionEntity.setCaseManagementRetention(caseManagementRetentionEntity);
         caseRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
-        OffsetDateTime currentTimestamp = currentTimeHelper.currentOffsetDateTime();
-        LocalDate currentDate = currentTimestamp.toLocalDate();
-        LocalDate retentionDate = retentionApi.applyPolicyStringToDate(currentDate,
+        OffsetDateTime eventTimestamp = dartsEvent.getDateTime();
+        LocalDate eventDate = eventTimestamp.toLocalDate();
+        LocalDate retentionDate = retentionApi.applyPolicyStringToDate(eventDate,
                                                                        dartsEventRetentionPolicy.getCaseTotalSentence(),
                                                                        caseManagementRetentionEntity.getRetentionPolicyTypeEntity());
 
