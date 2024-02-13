@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -31,8 +32,9 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
                                                       HearingRepository hearingRepository,
                                                       CaseRepository caseRepository,
                                                       ApplicationEventPublisher eventPublisher,
-                                                      TranscriptionsApi transcriptionsApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+                                                      TranscriptionsApi transcriptionsApi,
+                                                      AuthorisationApi authorisationApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
         this.transcriptionsApi = transcriptionsApi;
     }
 

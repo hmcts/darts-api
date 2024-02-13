@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.cases.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.cases.model.CaseErrorCode;
+import uk.gov.hmcts.darts.cases.model.CaseTitleErrors;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
@@ -10,34 +12,35 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum CaseApiError implements DartsApiError {
 
     TOO_MANY_RESULTS(
-        "100",
+        CaseErrorCode.TOO_MANY_RESULTS.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Too many results have been returned. Please change search criteria."
+        CaseTitleErrors.TOO_MANY_RESULTS.toString()
+
     ),
     NO_CRITERIA_SPECIFIED(
-        "101",
+        CaseErrorCode.NO_CRITERIA_SPECIFIED.getValue(),
         HttpStatus.BAD_REQUEST,
-        "No search criteria has been specified, please add at least 1 criteria to search for."
+        CaseTitleErrors.NO_CRITERIA_SPECIFIED.toString()
     ),
     CRITERIA_TOO_BROAD(
-        "102",
+        CaseErrorCode.CRITERIA_TOO_BROAD.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Search criteria is too broad, please add at least 1 more criteria to search for."
+        CaseTitleErrors.CRITERIA_TOO_BROAD.toString()
     ),
     INVALID_REQUEST(
-        "103",
+        CaseErrorCode.INVALID_REQUEST.getValue(),
         HttpStatus.BAD_REQUEST,
-        "The request is not valid.."
+        CaseTitleErrors.INVALID_REQUEST.toString()
     ),
     CASE_NOT_FOUND(
-        "104",
+        CaseErrorCode.CASE_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested case cannot be found"
+        CaseTitleErrors.CASE_NOT_FOUND.toString()
     ),
     PATCH_CRITERIA_NOT_MET(
-        "106",
+        CaseErrorCode.PATCH_CRITERIA_NOT_MET.getValue(),
         HttpStatus.BAD_REQUEST,
-        "The request does not contain any values that are supported by the PATCH operation."
+        CaseTitleErrors.PATCH_CRITERIA_NOT_MET.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";

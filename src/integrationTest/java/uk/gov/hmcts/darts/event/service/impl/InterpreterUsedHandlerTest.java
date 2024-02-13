@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -15,6 +19,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
@@ -32,6 +37,16 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Autowired
     private CaseRepository caseRepository;
+
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    public void setupStubs() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
 
     @Test
     void throwsOnUnknownCourthouse() {

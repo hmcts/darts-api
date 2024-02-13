@@ -97,8 +97,7 @@ class AutomatedTaskServiceImplTest {
             DartsApiException.class,
             () -> automatedTaskService.getAutomatedTaskCronExpression(createAutomatedTask("ProcessDailyList"))
         );
-
-        assertEquals("Invalid cron expression", exception.getMessage());
+        assertEquals("Invalid cron expression", exception.getError().getTitle());
 
     }
 

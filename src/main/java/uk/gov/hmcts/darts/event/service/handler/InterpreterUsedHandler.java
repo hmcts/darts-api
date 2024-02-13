@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -21,11 +22,12 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 public class InterpreterUsedHandler extends EventHandlerBase {
 
     public InterpreterUsedHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+                                  EventRepository eventRepository,
+                                  HearingRepository hearingRepository,
+                                  CaseRepository caseRepository,
+                                  ApplicationEventPublisher eventPublisher,
+                                  AuthorisationApi authorisationApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
     }
 
     @Override

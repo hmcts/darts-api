@@ -1,2 +1,0 @@
-{"operation":"create_record","relation_id":"1234","record_metadata":{"publisher":"DARTS","record_class":"DARTSMedia","recordDate":"<END_DATE>","region":"GBR","Id":"1","Type":"Media","Channel":"1","MaxChannels":"4","Courthouse":"Swansea","Courtroom":"Room1","FileName":"1234-1-1.a360","FileFormat":"mp2","StartDateTime":"<START_DATE>","EndDateTime":"<END_DATE>","CreatedDateTime":"<START_DATE>","CaseNumbers":"Case1|Case2|Case3"}}
-{"operation":"upload_new_file","relation_id":"1234","file_metadata":{"publisher":"DARTS","dz_file_name":"test-media-arm.a360","file_tag":"mp2"}}

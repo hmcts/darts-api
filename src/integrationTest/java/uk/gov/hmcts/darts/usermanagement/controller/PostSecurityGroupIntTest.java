@@ -175,7 +175,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            """);
         mockMvc.perform(requestForDuplicateGroup)
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"))
+            .andExpect(jsonPath("$.type").value("USER_NOT_TRANSCRIBER_110"))
             .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 

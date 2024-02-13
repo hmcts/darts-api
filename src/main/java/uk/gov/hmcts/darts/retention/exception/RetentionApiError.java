@@ -4,43 +4,45 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
+import uk.gov.hmcts.darts.retentions.model.RetentionErrorCode;
+import uk.gov.hmcts.darts.retentions.model.RetentionTitleErrors;
 
 @Getter
 @RequiredArgsConstructor
 public enum RetentionApiError implements DartsApiError {
 
     NO_PERMISSION_REDUCE_RETENTION(
-            "100",
+            RetentionErrorCode.NO_PERMISSION_REDUCE_RETENTION.getValue(),
             HttpStatus.FORBIDDEN,
-            "You do not have permission to reduce the retention period."
+            RetentionTitleErrors.NO_PERMISSION_REDUCE_RETENTION.toString()
     ), RETENTION_DATE_TOO_EARLY(
-            "101",
+            RetentionErrorCode.RETENTION_DATE_TOO_EARLY.getValue(),
             HttpStatus.UNPROCESSABLE_ENTITY,
-            "The retention date being applied is too early."
+            RetentionTitleErrors.RETENTION_DATE_TOO_EARLY.toString()
     ), INVALID_REQUEST(
-            "102",
+            RetentionErrorCode.INVALID_REQUEST.getValue(),
             HttpStatus.BAD_REQUEST,
-            "The request is invalid."
+            RetentionTitleErrors.INVALID_REQUEST.toString()
     ), CASE_NOT_FOUND(
-            "103",
+            RetentionErrorCode.CASE_NOT_FOUND.getValue(),
             HttpStatus.BAD_REQUEST,
-            "The requested caseId cannot be found."
+            RetentionTitleErrors.CASE_NOT_FOUND.toString()
     ), CASE_NOT_CLOSED(
-            "104",
+            RetentionErrorCode.CASE_NOT_CLOSED.getValue(),
             HttpStatus.BAD_REQUEST,
-            "The case must be closed before the retention period can be amended."
+            RetentionTitleErrors.CASE_NOT_CLOSED.toString()
     ), NO_RETENTION_POLICIES_APPLIED(
-            "105",
+            RetentionErrorCode.NO_RETENTION_POLICIES_APPLIED.getValue(),
             HttpStatus.BAD_REQUEST,
-            "The case must have a retention policy applied before being changed."
+            RetentionTitleErrors.NO_RETENTION_POLICIES_APPLIED.toString()
     ), INTERNAL_SERVER_ERROR(
-            "106",
+            RetentionErrorCode.INTERNAL_SERVER_ERROR.getValue(),
             HttpStatus.INTERNAL_SERVER_ERROR,
-            "An Internal server error has occurred."
+            RetentionTitleErrors.INTERNAL_SERVER_ERROR.toString()
     ), RETENTION_DATE_TOO_LATE(
-            "107",
+            RetentionErrorCode.RETENTION_DATE_TOO_LATE.getValue(),
             HttpStatus.UNPROCESSABLE_ENTITY,
-            "The retention date being applied is too late."
+            RetentionTitleErrors.RETENTION_DATE_TOO_LATE.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";

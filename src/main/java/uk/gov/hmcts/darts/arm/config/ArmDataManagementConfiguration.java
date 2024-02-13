@@ -24,8 +24,13 @@ public class ArmDataManagementConfiguration {
     private String annotationRecordClass;
     private String tempBlobWorkspace;
     private String dateTimeFormat;
+    private String dateFormat;
     private String fileExtension;
     private String listBlobsTimeoutDuration;
+    private String mediaRecordPropertiesFile;
+    private String transcriptionRecordPropertiesFile;
+    private String annotationRecordPropertiesFile;
+    private String caseRecordPropertiesFile;
 
     @Getter
     @Setter
