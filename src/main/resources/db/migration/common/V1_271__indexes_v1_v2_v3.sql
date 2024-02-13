@@ -1,3 +1,5 @@
+SET SEARCH_PATH TO darts;
+
 CREATE INDEX ann_cur_own_fk     ON ANNOTATION(current_owner);
 CREATE INDEX ann_cre_by_fk      ON ANNOTATION(created_by);
 CREATE INDEX ann_lst_mod_by_fk  ON ANNOTATION(last_modified_by);
