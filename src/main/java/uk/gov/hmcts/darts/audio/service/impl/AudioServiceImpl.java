@@ -239,6 +239,8 @@ public class AudioServiceImpl implements AudioService {
         for (AudioMetadata audioMetadataItem : audioMetadata) {
             if (archivedArmRecords.stream().anyMatch(archived -> audioMetadataItem.getId().equals(archived.mediaId()))) {
                 audioMetadataItem.setIsArchived(true);
+            } else {
+                audioMetadataItem.setIsArchived(false);
             }
         }
     }
