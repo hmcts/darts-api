@@ -109,7 +109,6 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                   "case_id": <<caseId>>,
                   "retention_date": "2024-05-20",
                   "is_permanent_retention": false,
-                  "validate_only": true,
                   "comments": "string"
                 }""";
 
@@ -117,6 +116,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .queryParam("validate_only", "true")
                 .content(requestBody);
         String actualResponse = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
