@@ -37,7 +37,7 @@ public class InterpreterUsedHandler extends EventHandlerBase {
         var courtCase = hearing.getHearingEntity().getCourtCase();
 
         if (hearing.isHearingNew() || hearing.isCourtroomDifferentFromHearing()) {
-            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE);
+            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE, hearing.getCourtroomId());
             eventPublisher.publishEvent(notifyEvent);
         }
         courtCase.setInterpreterUsed(true);
