@@ -4,60 +4,62 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
+import uk.gov.hmcts.darts.common.model.AuthorisationErrorCode;
+import uk.gov.hmcts.darts.common.model.AuthorisationTitleErrors;
 
 @Getter
 @RequiredArgsConstructor
 public enum AuthorisationError implements DartsApiError {
 
     USER_NOT_AUTHORISED_FOR_COURTHOUSE(
-        "100",
-        HttpStatus.FORBIDDEN,
-        "User is not authorised for the associated courthouse"
+            AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_COURTHOUSE.getValue(),
+            HttpStatus.FORBIDDEN,
+            AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_COURTHOUSE.toString()
     ),
     BAD_REQUEST_CASE_ID(
-        "101",
+        AuthorisationErrorCode.BAD_REQUEST_CASE_ID.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the case"
+        AuthorisationTitleErrors.BAD_REQUEST_CASE_ID.toString()
     ),
     BAD_REQUEST_HEARING_ID(
-        "102",
+        AuthorisationErrorCode.BAD_REQUEST_HEARING_ID.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the hearing"
+        AuthorisationTitleErrors.BAD_REQUEST_HEARING_ID.toString()
     ),
     BAD_REQUEST_MEDIA_REQUEST_ID(
-        "103",
+        AuthorisationErrorCode.BAD_REQUEST_MEDIA_REQUEST_ID.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the media request"
+        AuthorisationTitleErrors.BAD_REQUEST_MEDIA_REQUEST_ID.toString()
     ),
     BAD_REQUEST_MEDIA_ID(
-        "104",
+        AuthorisationErrorCode.BAD_REQUEST_MEDIA_ID.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the media"
+        AuthorisationTitleErrors.BAD_REQUEST_MEDIA_ID.toString()
     ),
     BAD_REQUEST_TRANSCRIPTION_ID(
-        "105",
+        AuthorisationErrorCode.BAD_REQUEST_TRANSCRIPTION_ID.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the transcription"
+        AuthorisationTitleErrors.BAD_REQUEST_TRANSCRIPTION_ID.toString()
     ),
     USER_DETAILS_INVALID(
-        "106",
+        AuthorisationErrorCode.USER_DETAILS_INVALID.getValue(),
         HttpStatus.FORBIDDEN,
-        "Could not obtain user details"
+        AuthorisationTitleErrors.USER_DETAILS_INVALID.toString()
     ),
     BAD_REQUEST_ANY_ID(
-        "107",
+        AuthorisationErrorCode.BAD_REQUEST_ANY_ID.getValue(),
         HttpStatus.FORBIDDEN,
-        "Failed to check authorisation"
+        AuthorisationTitleErrors.BAD_REQUEST_ANY_ID.toString()
     ),
     BAD_REQUEST_TRANSFORMED_MEDIA_ID(
-        "108",
+        AuthorisationErrorCode.BAD_REQUEST_TRANSFORMED_MEDIA_ID.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the transformed media"
+        AuthorisationTitleErrors.BAD_REQUEST_TRANSFORMED_MEDIA_ID.toString()
     ),
     USER_NOT_AUTHORISED_FOR_ENDPOINT(
-        "109",
-        HttpStatus.FORBIDDEN,
-        "User is not authorised for this endpoint"
+            AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_ENDPOINT.getValue(),
+            HttpStatus.FORBIDDEN,
+            AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_ENDPOINT.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

@@ -687,3 +687,24 @@ components:
         - "AUTHORISATION_100"
         - "AUDIO_REQUESTS_101"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE, MEDIA_REQUEST_NOT_VALID_FOR_USER ]
+
+    AudioRequestsErrorCode:
+        type: string
+        enum:
+          - "AUDIO_REQUESTS_100"
+          - "AUDIO_REQUESTS_101"
+          - "AUDIO_REQUESTS_102"
+          - "AUDIO_REQUESTS_103"
+          - "AUDIO_REQUESTS_104"
+        x-enum-varnames: [ MEDIA_REQUEST_NOT_FOUND, MEDIA_REQUEST_NOT_VALID_FOR_USER,  MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, TRANSFORMED_MEDIA_NOT_FOUND, DUPLICATE_MEDIA_REQUEST ]
+
+    AudioRequestsTitleErrors:
+        type: string
+        enum:
+          - "The requested audio request cannot be found"
+          - "The audio request is not valid for this user"
+          - "The audio request is not valid for this action"
+          - "The requested transformed media cannot be found"
+          - "An audio request already exists with these properties"
+        x-enum-varnames: [ MEDIA_REQUEST_NOT_FOUND, MEDIA_REQUEST_NOT_VALID_FOR_USER,  MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, TRANSFORMED_MEDIA_NOT_FOUND, DUPLICATE_MEDIA_REQUEST ]
+

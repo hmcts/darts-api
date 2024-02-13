@@ -114,17 +114,19 @@ class DataManagementServiceImplTest {
     }
 
     @Test
-    void testDownloadData() {
-        OutputStream stream = Mockito.mock(OutputStream.class);
+    void testDownloadData() throws Exception {
+        try (OutputStream stream = mock(OutputStream.class)) {
 
-        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
-        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+            when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+            when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-        DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream);
+            try (DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream)) {
 
-        dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
+                dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
 
-        Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
-        verify(blobClient, times(1)).downloadStream(any());
+                Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
+                verify(blobClient, times(1)).downloadStream(any());
+            }
+        }
     }
 }

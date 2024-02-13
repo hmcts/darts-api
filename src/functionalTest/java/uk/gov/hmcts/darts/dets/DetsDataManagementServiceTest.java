@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -39,13 +38,12 @@ class DetsDataManagementServiceTest {
         var uuid = dataManagementService.saveBlobData(data);
 
         File fileToDownloadTo = File.createTempFile("tmp", "download");
-        DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData(fileToDownloadTo);
-
-        dataManagementService.downloadData(
-                uuid,
-                responseMetaData
-        );
-
-        assertEquals(TEST_BINARY_STRING, new String(responseMetaData.getInputStream().readAllBytes()));
+        try (DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData(fileToDownloadTo)) {
+            dataManagementService.downloadData(
+                    uuid,
+                    responseMetaData
+            );
+            assertEquals(TEST_BINARY_STRING, new String(responseMetaData.getInputStream().readAllBytes()));
+        }
     }
 }

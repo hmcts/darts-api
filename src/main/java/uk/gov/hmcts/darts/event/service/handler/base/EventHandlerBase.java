@@ -5,16 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.ApplicationEventPublisher;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.event.model.CreatedHearing;
+import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -31,6 +36,8 @@ public abstract class EventHandlerBase implements EventHandler {
     protected HearingRepository hearingRepository;
     protected CaseRepository caseRepository;
     protected ApplicationEventPublisher eventPublisher;
+    protected AuthorisationApi authorisationApi;
+    private LogApi logApi;
 
     @Override
     public boolean isHandlerFor(String handlerName) {
@@ -38,6 +45,7 @@ public abstract class EventHandlerBase implements EventHandler {
     }
 
     protected EventEntity eventEntityFrom(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         var event = new EventEntity();
         event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
@@ -46,10 +54,12 @@ public abstract class EventHandlerBase implements EventHandler {
         event.setEventType(eventHandler);
         event.setMessageId(dartsEvent.getMessageId());
         event.setIsLogEntry(dartsEvent.getIsMidTier());
+        event.setCreatedBy(currentUser);
+        event.setLastModifiedBy(currentUser);
         return event;
     }
 
-    protected CreatedHearing createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+    protected CreatedHearingAndEvent createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
@@ -57,21 +67,29 @@ public abstract class EventHandlerBase implements EventHandler {
         }
 
         String caseNumber = caseNumbers.get(0);
-        HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
-            dartsEvent.getCourthouse(),
-            dartsEvent.getCourtroom(),
-            caseNumber,
-            dartsEvent.getDateTime().toLocalDate()
-        );
+        try {
+            HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
+                dartsEvent.getCourthouse(),
+                dartsEvent.getCourtroom(),
+                caseNumber,
+                dartsEvent.getDateTime().toLocalDate()
+            );
+            EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
+            setHearingToActive(hearingEntity);
 
-        saveEvent(dartsEvent, hearingEntity, eventHandler);
-        setHearingToActive(hearingEntity);
+            return CreatedHearingAndEvent.builder()
+                .hearingEntity(hearingEntity)
+                .isHearingNew(hearingEntity.isNew())
+                .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+                .eventEntity(eventEntity)
+                .build();
+        } catch (DartsApiException dartsException) {
+            if (dartsException.getError() == CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST) {
+                logApi.missingCourthouse(dartsEvent);
+            }
+            throw dartsException;
+        }
 
-        return CreatedHearing.builder()
-            .hearingEntity(hearingEntity)
-            .isHearingNew(hearingEntity.isNew())
-            .isCourtroomDifferentFromHearing(false)//for now always creating a new one
-            .build();
     }
 
     private void setHearingToActive(HearingEntity hearingEntity) {

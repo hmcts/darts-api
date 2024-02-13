@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * A general download response that can be extended. Always use in combination with a try resources to ensure the file resources are cleaned up
+ */
 @RequiredArgsConstructor
 @Getter
 public class DownloadResponseMetaData implements Closeable {
@@ -38,11 +41,11 @@ public class DownloadResponseMetaData implements Closeable {
      ** override as appropriate to return your custom input stream null by default.
      */
     public InputStream getInputStream()  throws IOException {
-        return is;
+        return inputStream;
     }
 
     public void markInputStream(InputStream is) {
-        this.is = is;
+        this.inputStream = is;
     }
 
 

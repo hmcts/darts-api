@@ -1,11 +1,18 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings({"PMD.DoNotUseThreads"})
@@ -34,6 +42,18 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
     @Autowired
     EventDispatcher eventDispatcher;
 
+    @Autowired
+    NodeRegisterStub nodeRegisterStub;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    public void setupStubs() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
     @Test
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
@@ -46,10 +66,11 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Test
     void handlesScenarioWhereCourtCaseAndHearingDontExist() {
-        dartsDatabase.givenTheDatabaseContainsCourthouseWithRoom(
+        CourtroomEntity courtroomEntity = dartsDatabase.givenTheDatabaseContainsCourthouseWithRoom(
             SOME_COURTHOUSE,
             SOME_ROOM
         );
+        nodeRegisterStub.setupNodeRegistry(courtroomEntity);
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
@@ -82,11 +103,12 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Test
     void handlesScenarioWhereHearingDoesntExist() {
-        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+        CourtCaseEntity courtCaseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
+        nodeRegisterStub.setupNodeRegistry(dartsDatabase.getRetrieveCoreObjectService().retrieveOrCreateCourtroom(courtCaseEntity.getCourthouse(), SOME_ROOM));
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
@@ -122,7 +144,8 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
             SOME_ROOM
         );
 
-        dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
+        CourtroomEntity courtroomEntity = dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroomEntity);
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()

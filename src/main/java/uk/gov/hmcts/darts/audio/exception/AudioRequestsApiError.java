@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.audio.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestsErrorCode;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestsTitleErrors;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
@@ -10,29 +12,29 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum AudioRequestsApiError implements DartsApiError {
 
     MEDIA_REQUEST_NOT_FOUND(
-        "100",
+        AudioRequestsErrorCode.MEDIA_REQUEST_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested audio request cannot be found"
+        AudioRequestsTitleErrors.MEDIA_REQUEST_NOT_FOUND.toString()
     ),
     MEDIA_REQUEST_NOT_VALID_FOR_USER(
-        "101",
+        AudioRequestsErrorCode.MEDIA_REQUEST_NOT_VALID_FOR_USER.getValue(),
         HttpStatus.FORBIDDEN,
-        "The audio request is not valid for this user"
+        AudioRequestsTitleErrors.MEDIA_REQUEST_NOT_VALID_FOR_USER.toString()
     ),
     MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT(
-        "102",
+        AudioRequestsErrorCode.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.getValue(),
         HttpStatus.BAD_REQUEST,
-        "The audio request is not valid for this action"
+        AudioRequestsErrorCode.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT.toString()
     ),
     TRANSFORMED_MEDIA_NOT_FOUND(
-        "103",
+        AudioRequestsErrorCode.TRANSFORMED_MEDIA_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested transformed media cannot be found"
+        AudioRequestsTitleErrors.TRANSFORMED_MEDIA_NOT_FOUND.toString()
     ),
     DUPLICATE_MEDIA_REQUEST(
-        "104",
+        AudioRequestsErrorCode.DUPLICATE_MEDIA_REQUEST.getValue(),
         HttpStatus.CONFLICT,
-        "An audio request already exists with these properties"
+        AudioRequestsTitleErrors.DUPLICATE_MEDIA_REQUEST.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";

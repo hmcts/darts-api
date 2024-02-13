@@ -10,10 +10,10 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.util.Arrays;
 
-public class DownloadableExternalObjectDirectoriesTest {
+class DownloadableExternalObjectDirectoriesTest {
 
     @Test
-    public void testGetDownloadableExternalObjectDirectories() throws Exception {
+    void testGetDownloadableExternalObjectDirectories() throws Exception {
         ExternalObjectDirectoryEntity entity = Mockito.mock(ExternalObjectDirectoryEntity.class);
         DownloadableExternalObjectDirectories download =  DownloadableExternalObjectDirectories.getFileBasedDownload(Arrays.asList(entity));
 

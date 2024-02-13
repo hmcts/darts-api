@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
@@ -21,11 +23,13 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 public class InterpreterUsedHandler extends EventHandlerBase {
 
     public InterpreterUsedHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+                                  EventRepository eventRepository,
+                                  HearingRepository hearingRepository,
+                                  CaseRepository caseRepository,
+                                  ApplicationEventPublisher eventPublisher,
+                                  AuthorisationApi authorisationApi,
+                                  LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
     }
 
     @Override
@@ -35,7 +39,7 @@ public class InterpreterUsedHandler extends EventHandlerBase {
         var courtCase = hearing.getHearingEntity().getCourtCase();
 
         if (hearing.isHearingNew() || hearing.isCourtroomDifferentFromHearing()) {
-            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE);
+            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE, hearing.getCourtroomId());
             eventPublisher.publishEvent(notifyEvent);
         }
         courtCase.setInterpreterUsed(true);

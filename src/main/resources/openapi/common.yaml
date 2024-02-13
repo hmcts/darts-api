@@ -29,3 +29,77 @@ components:
           type: string
           format: date-time
           example: "2023-08-21T09:00:00Z"
+
+    AuthenticationErrorCode:
+            type: string
+            enum:
+              - "AUTHENTICATION_100"
+              - "AUTHENTICATION_101"
+              - "AUTHENTICATION_102"
+              - "AUTHENTICATION_103"
+            x-enum-varnames: [ FAILED_TO_OBTAIN_ACCESS_TOKEN, FAILED_TO_VALIDATE_ACCESS_TOKEN, FAILED_TO_PARSE_ACCESS_TOKEN, FAILED_TO_OBTAIN_AUTHENTICATION_CONFIG ]
+
+    AuthenticationTitleErrors:
+              type: string
+              enum:
+                - "Failed to obtain access token"
+                - "Failed to validate access token"
+                - "Failed to parse access token"
+                - "Failed to find authentication configuration"
+              x-enum-varnames: [ FAILED_TO_OBTAIN_ACCESS_TOKEN, FAILED_TO_VALIDATE_ACCESS_TOKEN, FAILED_TO_PARSE_ACCESS_TOKEN, FAILED_TO_OBTAIN_AUTHENTICATION_CONFIG ]
+
+    AuthorisationErrorCode:
+      type: string
+      enum:
+       - "AUTHORISATION_100"
+       - "AUTHORISATION_101"
+       - "AUTHORISATION_102"
+       - "AUTHORISATION_103"
+       - "AUTHORISATION_104"
+       - "AUTHORISATION_105"
+       - "AUTHORISATION_106"
+       - "AUTHORISATION_107"
+       - "AUTHORISATION_108"
+       - "AUTHORISATION_109"
+      x-enum-varnames: [USER_NOT_AUTHORISED_FOR_COURTHOUSE,  BAD_REQUEST_CASE_ID, BAD_REQUEST_HEARING_ID, BAD_REQUEST_MEDIA_REQUEST_ID, BAD_REQUEST_MEDIA_ID, BAD_REQUEST_TRANSCRIPTION_ID, USER_DETAILS_INVALID, BAD_REQUEST_ANY_ID,  BAD_REQUEST_TRANSFORMED_MEDIA_ID, USER_NOT_AUTHORISED_FOR_ENDPOINT]
+
+    AuthorisationTitleErrors:
+      type: string
+      enum:
+        - "User is not authorised for the associated courthouse"
+        - "Failed to check authorisation for the case"
+        - "Failed to check authorisation for the hearing"
+        - "Failed to check authorisation for the media request"
+        - "Failed to check authorisation for the media"
+        - "Failed to check authorisation for the transcription"
+        - "Could not obtain user details"
+        - "Failed to check authorisation"
+        - "Failed to check authorisation for the transformed media"
+        - "User is not authorised for this endpoint"
+      x-enum-varnames: [USER_NOT_AUTHORISED_FOR_COURTHOUSE,  BAD_REQUEST_CASE_ID, BAD_REQUEST_HEARING_ID, BAD_REQUEST_MEDIA_REQUEST_ID, BAD_REQUEST_MEDIA_ID, BAD_REQUEST_TRANSCRIPTION_ID, USER_DETAILS_INVALID, BAD_REQUEST_ANY_ID, BAD_REQUEST_TRANSFORMED_MEDIA_ID, USER_NOT_AUTHORISED_FOR_ENDPOINT]
+
+    AutomatedTaskErrorCode:
+        type: string
+        enum:
+          - "AUTOMATED_TASK_100"
+          - "AUTOMATED_TASK_101"
+        x-enum-varnames: [ FAILED_TO_FIND_AUTOMATED_TASK, INVALID_CRON_EXPRESSION ]
+
+    AutomatedTaskTitleErrors:
+        type: string
+        enum:
+          - "Failed to find automated task"
+          - "Invalid cron expression"
+        x-enum-varnames: [ FAILED_TO_FIND_AUTOMATED_TASK, INVALID_CRON_EXPRESSION ]
+
+    CommonErrorCode:
+      type: string
+      enum:
+        - "COMMON_100"
+      x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ]
+
+    CommonTitleErrors:
+      type: string
+      enum:
+        - "Provided courthouse does not exist"
+      x-enum-varnames: [ COURTHOUSE_PROVIDED_DOES_NOT_EXIST ]

@@ -138,6 +138,8 @@ darts:
       enabled: true
       cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
+  dar-pc-notification:
+    url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
@@ -169,13 +171,20 @@ darts:
       max-blobs-per-page: 3
       publisher: DARTS
       region: GBR
-      media_record_class: DARTSMedia
-      transcription_record_class: DARTSTranscription
-      annotation_record_class: DARTSAnnotation
+      media-record-class: DARTSMedia
+      transcription-record-class: DARTSTranscription
+      annotation-record-class: DARTSAnnotation
       temp-blob-workspace: ${user.home}/arm/tempworkspace
-      date_time_format: yyyy-MM-dd'T'HH:mm:ss
-      file_extension: a360
+      date-time-format: yyyy-MM-dd'T'HH:mm:ss
+      date-format: yyyy-MM-dd
+      file-extension: a360
       list-blobs-timeout-duration: 60s
+
+      media-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
+      transcription-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
+      annotation-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
+      case-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
@@ -229,6 +238,11 @@ darts:
   sse:
     heartbeat: 5 # in seconds
     sse-preview-timeout: 120 # in seconds
+  log:
+    events:
+      daily-test-event-text:
+        xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
+        cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

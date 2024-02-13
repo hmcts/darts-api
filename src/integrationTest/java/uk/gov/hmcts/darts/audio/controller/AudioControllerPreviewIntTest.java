@@ -77,6 +77,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.type").value("AUDIO_101"));
+
     }
 
     @Test

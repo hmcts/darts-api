@@ -5,5 +5,5 @@ import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 public interface RetentionPostService {
 
-    PostRetentionResponse postRetention(PostRetentionRequest postRetentionRequest);
+    PostRetentionResponse postRetention(Boolean validateOnly, PostRetentionRequest postRetentionRequest);
 }

@@ -54,25 +54,25 @@ class DetsManagementServiceImplTest {
         blobClient = mock(BlobClient.class);
         serviceClient = mock(BlobServiceClient.class);
 
-
-        when(dataManagementFactory.getBlobServiceClient(Mockito.notNull())).thenReturn(serviceClient);
-
+        String connectionString = "test connection string";
+        when(dataManagementConfiguration.getConnectionString()).thenReturn(connectionString);
+        when(dataManagementFactory.getBlobServiceClient(Mockito.eq(connectionString))).thenReturn(serviceClient);
         when(dataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
     }
 
     @Test
-    void testDownloadData() {
-        OutputStream stream = Mockito.mock(OutputStream.class);
+    void testDownloadData() throws Exception {
+        try (OutputStream stream = mock(OutputStream.class)) {
+            when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+            when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
-        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+            try (DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream)) {
+                dataManagementService.downloadData(BLOB_ID, downloadResponseMetaData);
 
-        DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream);
-
-        dataManagementService.downloadData(BLOB_ID, downloadResponseMetaData);
-
-        Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
-        Assertions.assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
-        verify(blobClient, times(1)).downloadStream(any());
+                Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
+                Assertions.assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
+                verify(blobClient, times(1)).downloadStream(any());
+            }
+        }
     }
 }

@@ -43,6 +43,13 @@ paths:
       tags:
         - Retention
       summary: allow case retention changes to be applied.
+      parameters:
+        - in: query
+          name: validate_only
+          description: Optional - If set to true, will not apply retention to database, but still do all the validation on the date provided.
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           application/json:
@@ -145,10 +152,6 @@ components:
           description: Conditional Mandatory. If is_permanent_retention is false, then this must be provided. Date must not be less that the current retention period of the last automated sentencing type.
         is_permanent_retention:
           type: boolean
-        validate_only:
-          type: boolean
-          default: false
-          description: Optional - If set to true, will not apply retention to database, but still do all the validation on the date provided.
         comments:
           type: string
 
@@ -164,3 +167,29 @@ components:
       enum:
         - "RETENTION_100"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION_ERROR ]
+
+    RetentionErrorCode:
+        type: string
+        enum:
+          - "RETENTION_100"
+          - "RETENTION_101"
+          - "RETENTION_102"
+          - "RETENTION_103"
+          - "RETENTION_104"
+          - "RETENTION_105"
+          - "RETENTION_106"
+          - "RETENTION_107"
+        x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE]
+
+    RetentionTitleErrors:
+        type: string
+        enum:
+          - "You do not have permission to reduce the retention period."
+          - "The retention date being applied is too early."
+          - "The request is invalid."
+          - "The requested caseId cannot be found."
+          - "The case must be closed before the retention period can be amended."
+          - "The case must have a retention policy applied before being changed."
+          - "An Internal server error has occurred."
+          - "The retention date being applied is too late."
+        x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE]

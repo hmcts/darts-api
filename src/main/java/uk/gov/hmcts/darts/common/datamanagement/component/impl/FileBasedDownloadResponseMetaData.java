@@ -7,6 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+/**
+ *The response download data. Always use in combination with a try resources to ensure the file resources are cleaned up
+ */
 public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData {
     private File fileToBeDownloadedTo;
 
@@ -20,11 +23,11 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     }
 
     public InputStream getInputStream()  throws IOException {
-        if (is == null) {
-            is = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
+        if (inputStream == null) {
+            inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
         }
 
-        return is;
+        return inputStream;
     }
 
     @Override

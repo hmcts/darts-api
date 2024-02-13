@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,11 +30,14 @@ class EventDispatcherImplTest {
     @Mock
     EventHandlerRepository eventHandlerRepository;
 
+    @Mock
+    LogApi logApi;
+
     @Test
     void receiveWithNoHandlers() {
         List<EventHandler> eventHandlers = new ArrayList<>();
         when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(Collections.emptyList());
-        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository);
+        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository, logApi);
 
 
         DartsEvent event = new DartsEvent();
@@ -44,6 +50,7 @@ class EventDispatcherImplTest {
             "No event handler could be found in the database for messageId: 1 type: TestType and subtype: TestSubType.",
             exception.getDetail()
         );
+        verify(logApi, times(1)).eventReceived(event);
     }
 
     @Test
@@ -62,10 +69,11 @@ class EventDispatcherImplTest {
         event.setSubType("TestSubType");
         event.setMessageId("1");
 
-        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository);
+        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository, logApi);
         eventDispatcher.receive(event);
 
-        Mockito.verify(mockEventHandler).handle(any(), any());
+        verify(mockEventHandler).handle(any(), any());
+        verify(logApi, times(1)).eventReceived(event);
     }
 
 

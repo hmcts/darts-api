@@ -19,11 +19,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public class DataManagementFacadeImplTest {
+class DataManagementFacadeImplTest {
     @Test
-    public void testDownloadOfFacadeWithArm() throws Exception {
+     void testDownloadOfFacadeWithArm() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<BlobContainerDownloadable>();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
         blobContainerDownloadables.add(downloadable);
@@ -51,9 +51,9 @@ public class DataManagementFacadeImplTest {
     }
 
     @Test
-    public void testDownloadOfFacadeWithUnstructured() throws Exception {
+    void testDownloadOfFacadeWithUnstructured() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<BlobContainerDownloadable>();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
         blobContainerDownloadables.add(downloadable);
@@ -81,9 +81,9 @@ public class DataManagementFacadeImplTest {
     }
 
     @Test
-    public void testDownloadOfFacadeWithDetsEnabled() throws Exception {
+    void testDownloadOfFacadeWithDetsEnabled() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<BlobContainerDownloadable>();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
         blobContainerDownloadables.add(downloadable);
@@ -111,9 +111,9 @@ public class DataManagementFacadeImplTest {
     }
 
     @Test
-    public void testDownloadOfFacadeWithDetsDisabled() throws Exception {
+    void testDownloadOfFacadeWithDetsDisabled() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<BlobContainerDownloadable>();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
         blobContainerDownloadables.add(downloadable);
@@ -141,9 +141,9 @@ public class DataManagementFacadeImplTest {
     }
 
     @Test
-    public void testDownloadOfFacadeWithNoneProcessed() throws Exception {
+    void testDownloadOfFacadeWithNoneProcessed() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<BlobContainerDownloadable>();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.INBOUND, false));
 
@@ -177,9 +177,9 @@ public class DataManagementFacadeImplTest {
     }
 
     @Test
-    public void testDownloadOfFacadeWithUnstructuredAndArmProcessedInPriorityOrder() throws Exception {
+    void testDownloadOfFacadeWithUnstructuredAndArmProcessedInPriorityOrder() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<BlobContainerDownloadable>();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         // setup the containers to use
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.UNSTRUCTURED, true));
@@ -213,15 +213,15 @@ public class DataManagementFacadeImplTest {
             boolean processedByContainer = responseMetaDataToAssert.isProcessedByContainer();
             boolean successDownload = responseMetaDataToAssert.isSuccessfullyDownloaded();
 
-            InputStream streamOfDownloadedData = responseMetaDataToAssert.getInputStream();
-            Assertions.assertEquals(processed, processedByContainer);
-            Assertions.assertEquals(success, successDownload);
-            Assertions.assertNotNull(streamOfDownloadedData);
-
-            if (content != null) {
-                Assertions.assertEquals(content, new String(responseMetaDataToAssert.getInputStream().readAllBytes()));
+            try (InputStream streamOfDownloadedData = responseMetaDataToAssert.getInputStream()) {
+                if (content != null) {
+                    Assertions.assertEquals(content, new String(streamOfDownloadedData.readAllBytes()));
+                    Assertions.assertNotNull(streamOfDownloadedData);
+                }
             }
 
+            Assertions.assertEquals(processed, processedByContainer);
+            Assertions.assertEquals(success, successDownload);
             Assertions.assertNotNull(responseMetaDataToAssert.getOutputStream());
 
             if (containerType != null) {
