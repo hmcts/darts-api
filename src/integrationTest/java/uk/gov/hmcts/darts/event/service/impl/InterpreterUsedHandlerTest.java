@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -20,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
@@ -38,6 +39,8 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
     @Autowired
     private CaseRepository caseRepository;
 
+    @Autowired
+    NodeRegisterStub nodeRegisterStub;
 
     @MockBean
     private UserIdentity mockUserIdentity;
@@ -46,11 +49,13 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
     public void setupStubs() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroom);
     }
 
     @Test
     void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
@@ -123,7 +128,8 @@ class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
             SOME_ROOM
         );
 
-        dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
+        CourtroomEntity otherCourtroom = dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
+        nodeRegisterStub.setupNodeRegistry(otherCourtroom);
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()

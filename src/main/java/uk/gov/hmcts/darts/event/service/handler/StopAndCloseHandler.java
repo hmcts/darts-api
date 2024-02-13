@@ -80,7 +80,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
         var courtCase = hearingAndEvent.getHearingEntity().getCourtCase();
 
-        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING);
+        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING, hearingAndEvent.getCourtroomId());
         darNotifyService.notifyDarPc(notifyEvent);
 
         CaseManagementRetentionEntity caseManagementRetentionEntity = createCaseManagementRetentionEntity(hearingAndEvent.getEventEntity(),
@@ -175,7 +175,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
     private RetentionPolicyTypeEntity getRetentionPolicy(String fixedPolicyKey) {
         Optional<RetentionPolicyTypeEntity> retentionPolicyOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                fixedPolicyKey, currentTimeHelper.currentOffsetDateTime());
+            fixedPolicyKey, currentTimeHelper.currentOffsetDateTime());
         if (retentionPolicyOpt.isEmpty()) {
             throw new DartsApiException(EVENT_DATA_NOT_FOUND,
                                         MessageFormat.format("Could not find a retention policy for fixedPolicyKey ''{0}''", fixedPolicyKey));
