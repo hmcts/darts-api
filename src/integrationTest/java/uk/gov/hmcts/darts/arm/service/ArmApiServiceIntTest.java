@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.ByteArrayInputStream;
@@ -108,7 +109,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
         when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(response);
 
         // When
-        InputStream inputStreamResult = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        InputStream inputStreamResult = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, new DownloadResponseMetaData(null));
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);

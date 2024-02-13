@@ -5,6 +5,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,10 +14,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
+import java.io.OutputStream;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,5 +111,20 @@ class DataManagementServiceImplTest {
         when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenThrow(new RuntimeException("timeout"));
 
         assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
+    }
+
+    @Test
+    void testDownloadData() {
+        OutputStream stream = Mockito.mock(OutputStream.class);
+
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+
+        DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream);
+
+        dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
+
+        Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
+        verify(blobClient, times(1)).downloadStream(any());
     }
 }

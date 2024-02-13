@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.util.Map;
@@ -71,7 +72,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public boolean downloadData(String containerName, UUID blobId, ResponseMetaData request) {
-        return false;
+    public void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report) {
+
     }
 }

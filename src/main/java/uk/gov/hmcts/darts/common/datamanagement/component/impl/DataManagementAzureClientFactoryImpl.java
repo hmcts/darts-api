@@ -36,22 +36,12 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
     }
 
     public BlobServiceClient getBlobServiceClient(String containerString) {
-        return getBlobServiceClient(containerString, "");
-    }
-
-    public BlobServiceClient getBlobServiceClient(String containerString, String sasToken) {
-        String id = containerString + sasToken;
+        String id = containerString;
         if (!blobServiceClientMap.containsKey(id)) {
             BlobServiceClient blobServiceClient;
-            if (!sasToken.isEmpty()) {
-                 blobServiceClient = new BlobServiceClientBuilder()
-                        .connectionString(containerString)
-                        .sasToken(sasToken)
-                        .buildClient();
-            } else {
-                 blobServiceClient = new BlobServiceClientBuilder()
-                        .connectionString(containerString).buildClient();
-            }
+            blobServiceClient = new BlobServiceClientBuilder()
+                    .connectionString(containerString).buildClient();
+
             blobServiceClientMap.put(id, blobServiceClient);
         }
 

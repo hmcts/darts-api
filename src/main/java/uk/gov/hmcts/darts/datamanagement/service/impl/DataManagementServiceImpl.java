@@ -12,7 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -86,7 +87,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     @Override
     @SneakyThrows
-    public boolean downloadData(String containerName, UUID blobId, ResponseMetaData report) {
+    public void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
@@ -102,12 +103,8 @@ public class DataManagementServiceImpl implements DataManagementService {
             Date downloadEndDate = new Date();
             log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
-            report.markProcessed(null);
-            report.markSuccess();
-
+            report.markSuccess(type);
         }
-
-        return blobClient.exists();
     }
 
     @Override

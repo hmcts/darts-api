@@ -10,22 +10,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -115,16 +112,15 @@ class ArmDataManagementApiImplTest {
     void downloadArmData() throws IOException {
 
         var inputStream = new ByteArrayInputStream("some file binary content".getBytes());
-        when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)).thenReturn(inputStream);
+        DownloadResponseMetaData metaData = new DownloadResponseMetaData(null);
+        when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, metaData)).thenReturn(inputStream);
 
         ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
         entity.setExternalFileId(EXTERNAL_FILE_ID);
         entity.setExternalRecordId(EXTERNAL_RECORD_ID);
 
-        ResponseMetaData metaData = new ResponseMetaData(null);
         boolean result = armDataManagementApi.downloadBlobFromContainer(DatastoreContainerType.ARM, entity, metaData);
 
         assertTrue(result);
-        assertThat(metaData.getInputStream()).isEqualTo(inputStream);
     }
 }

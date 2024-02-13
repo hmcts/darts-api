@@ -8,11 +8,10 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.ResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -58,14 +57,12 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, ResponseMetaData response) {
+    public boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, DownloadResponseMetaData response) {
         Optional<String> containerName = getContainerName(container);
         if (containerName.isPresent()) {
-            InputStream stream = armApiService.downloadArmData(blobId.getExternalRecordId(), blobId.getExternalFileId());
-            response.markInputStream(stream);
-            response.markSuccess();
+            armApiService.downloadArmData(blobId.getExternalRecordId(), blobId.getExternalFileId(), response);
         }
-        return response.isSuccessfullyDownloaded();
+        return containerName.isPresent();
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {

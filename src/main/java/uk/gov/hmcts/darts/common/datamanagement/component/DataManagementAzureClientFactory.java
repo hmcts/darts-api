@@ -12,6 +12,4 @@ public interface DataManagementAzureClientFactory {
     BlobClient getBlobClient(BlobContainerClient containerClient, UUID blobName);
 
     BlobServiceClient getBlobServiceClient(String containerString);
-
-    BlobServiceClient getBlobServiceClient(String containerString, String sasToken);
 }

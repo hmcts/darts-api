@@ -185,10 +185,9 @@ darts:
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
     dets:
-      connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      connection-string: ${DETS_SAS_ENDPOINT:${AZURE_STORAGE_CONNECTION_STRING}}
       container-name: darts-dets
-      sasToken: ${DETS_SAS_ENDPOINT:}
-      is-fetch-from-dets: true
+      fetch-from-dets-enabled: true
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

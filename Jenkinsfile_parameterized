@@ -37,6 +37,7 @@ def secrets = [
     secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
     secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
     secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
+    secret('DETSSasEndpoint', 'DETS_SAS_ENDPOINT')
   ],
 ]
 

@@ -1,9 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectory;
-
-import java.util.Collection;
-import java.util.function.Function;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 
 /**
  * An interface that mediates between the three data management APIs.
@@ -19,15 +16,6 @@ public interface DataManagementFacade {
      * @param directories The external directories to be processed that are passed by reference i.e. the
      *                    object responses are updated with the outcome of the processing state.
      */
-    void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> directories);
+    void getDataFromUnstructuredArmAndDetsBlobs(DownloadableExternalObjectDirectories directories);
 
-    /**
-     * Returns the input streams representing the data for the directories. DETS communication is enabled by default.
-     * @param directories The external directories to be processed that are passed by reference i.e. these
-     *                    object responses are updated with the processing state
-     * @param handlePostDownload The processing as it occurs. This gets called regardless of whether the download was successful.
-     *                           Allows the caller to terminate downloads at any point by returning a boolean
-     */
-    void getDataFromUnstructuredArmAndDetsBlobs(Collection<DownloadableExternalObjectDirectory> directories,
-                                                Function<DownloadableExternalObjectDirectory, Boolean> handlePostDownload);
 }

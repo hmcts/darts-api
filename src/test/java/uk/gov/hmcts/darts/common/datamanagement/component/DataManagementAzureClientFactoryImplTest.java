@@ -64,9 +64,9 @@ class DataManagementAzureClientFactoryImplTest {
 
     @Test
     void testGetServiceClientSasCaching() {
-        BlobServiceClient serviceClient = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING, "sas");
-        BlobServiceClient serviceClient1 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING, "sas");
-        BlobServiceClient serviceClient2 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING, "other sas");
+        BlobServiceClient serviceClient = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING);
+        BlobServiceClient serviceClient1 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING);
+        BlobServiceClient serviceClient2 = dataManagementFactoryImpl.getBlobServiceClient(CONNECTION_STRING);
 
         Assertions.assertSame(serviceClient, serviceClient1);
         Assertions.assertNotSame(serviceClient, serviceClient2);
