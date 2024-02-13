@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
@@ -30,8 +31,8 @@ public class DarStartHandler extends EventHandlerBase {
     @Override
     @Transactional
     public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
-        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING);
+        CreatedHearingAndEvent hearingAndSaveEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);// saveEvent
+        var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING, hearingAndSaveEvent.getCourtroomId());
         eventPublisher.publishEvent(notifyEvent);
     }
 

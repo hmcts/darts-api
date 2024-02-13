@@ -138,6 +138,8 @@ darts:
       enabled: true
       cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
+  dar-pc-notification:
+    url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
