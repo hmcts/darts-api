@@ -46,8 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -1130,7 +1130,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
     }
 
     @Test

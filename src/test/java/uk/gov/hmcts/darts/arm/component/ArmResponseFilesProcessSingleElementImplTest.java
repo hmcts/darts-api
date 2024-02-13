@@ -72,7 +72,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed;
     @Mock
-    private ObjectRecordStatusEntity objectRecordStatusManifestFiledFailed;
+    private ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFileFailed;
     @Mock
     private UserAccountEntity userAccountEntity;
     @Mock
@@ -116,7 +116,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 
@@ -151,7 +151,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 
@@ -201,7 +201,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 
@@ -242,7 +242,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 
@@ -292,7 +292,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
         when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.of(objectRecordStatusManifestFiledFailed));
+        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
 

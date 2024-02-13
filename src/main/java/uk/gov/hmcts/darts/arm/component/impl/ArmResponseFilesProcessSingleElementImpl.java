@@ -42,8 +42,8 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -93,7 +93,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
         armResponseProcessingFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
-        armResponseManifestFileFailed = objectRecordStatusRepository.findById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId()).get();
+        armResponseManifestFileFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED.getId()).get();
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
         checksumFailedStatus = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED.getId()).get();
 
