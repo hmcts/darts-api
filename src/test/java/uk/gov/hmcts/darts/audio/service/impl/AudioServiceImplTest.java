@@ -416,6 +416,17 @@ class AudioServiceImplTest {
         audioService.setIsArchived(audioMetadataList, 1);
 
         assertEquals(true, audioMetadataList.get(0).getIsArchived());
+    }
 
+    @Test
+    void whenAudioMetadataListOmitsMediaIdsReturnedByQuery_thenIsArchivedWillBeFalse() {
+        int mediaId = 1;
+        AudioMetadata audioMetadata = new AudioMetadata();
+        audioMetadata.setId(mediaId);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
+
+        audioService.setIsArchived(audioMetadataList, 1);
+
+        assertEquals(false, audioMetadataList.get(0).getIsArchived());
     }
 }
