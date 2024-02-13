@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -25,6 +26,7 @@ public class DarNotifyServiceImpl {
     private final DartsGatewayClient dartsGatewayClient;
     private final CaseRepository caseRepository;
     private final NodeRegisterRepository nodeRegisterRepository;
+    private final LogApi logApi;
 
     @Value("${darts.dar-pc-notification.url-format}")
     private String notificationUrlFormat;
@@ -43,12 +45,7 @@ public class DarNotifyServiceImpl {
         if (!openCaseNumbers.isEmpty()) {
             Optional<NodeRegisterEntity> courtroomOpt = nodeRegisterRepository.findDarPcByCourtroomId(event.getCourtRoomId());
             if (courtroomOpt.isEmpty()) {
-                log.error("Unregistered Room: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
-                          dartsEvent.getMessageId(),
-                          dartsEvent.getEventId(),
-                          dartsEvent.getCourthouse(),
-                          dartsEvent.getCourtroom(),
-                          dartsEvent.getDateTime());
+                logApi.missingNodeRegistry(dartsEvent);
                 return;
             }
             String notificationUrl = MessageFormat.format(notificationUrlFormat, courtroomOpt.get().getIpAddress());

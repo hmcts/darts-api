@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @Service
 @Slf4j
@@ -24,8 +25,9 @@ public class DartsEventNullHandler extends EventHandlerBase {
                                  HearingRepository hearingRepository,
                                  CaseRepository caseRepository,
                                  ApplicationEventPublisher eventPublisher,
-                                 AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
+                                 AuthorisationApi authorisationApi,
+                                 LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
     }
 
     @Override

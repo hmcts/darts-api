@@ -131,6 +131,31 @@ class EventLoggerServiceImplTest {
         assertEquals(logEntry, infoLogs.get(0));
     }
 
+    @Test
+    void testLogsMissingCourthouse() {
+        var event = createDartsEvent(123, "Some event text");
+        event.setCourthouse("NOT_EXIST");
+        eventLoggerService.missingCourthouse(event);
+        var logEntry = String.format("Courthouse not found: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, event_timestamp=%s",
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
+                                     event.getCourtroom(), event.getDateTime());
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertEquals(1, errorLogs.size());
+        assertEquals(logEntry, errorLogs.get(0));
+    }
+
+    @Test
+    void testLogsMissingNodeRegistry() {
+        var event = createDartsEvent(123, "Some event text");
+        eventLoggerService.missingNodeRegistry(event);
+        var logEntry = String.format("Unregistered Room: message_id=%s, event_id=%s, courthouse=%s, courtroom=%s, event_timestamp=%s",
+                                     event.getMessageId(), event.getEventId(), event.getCourthouse(),
+                                     event.getCourtroom(), event.getDateTime());
+        List<String> errorLogs = logCaptor.getErrorLogs();
+        assertEquals(1, errorLogs.size());
+        assertEquals(logEntry, errorLogs.get(0));
+    }
+
     private DartsEvent createDartsEvent(int eventId, String eventText) {
         var eventDate = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
         DartsEvent event = new DartsEvent();

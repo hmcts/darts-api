@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -34,8 +35,9 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
                                        CaseRepository caseRepository,
                                        ApplicationEventPublisher eventPublisher,
                                        TranscriptionsApi transcriptionsApi,
-                                       AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
+                                       AuthorisationApi authorisationApi,
+                                       LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
         this.transcriptionsApi = transcriptionsApi;
     }
 

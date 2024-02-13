@@ -16,4 +16,14 @@ public class LogApiImpl implements LogApi {
     public void eventReceived(DartsEvent event) {
         eventLoggerService.eventReceived(event);
     }
+
+    @Override
+    public void missingCourthouse(DartsEvent event) {
+        eventLoggerService.missingCourthouse(event);
+    }
+
+    @Override
+    public void missingNodeRegistry(DartsEvent event) {
+        eventLoggerService.missingNodeRegistry(event);
+    }
 }

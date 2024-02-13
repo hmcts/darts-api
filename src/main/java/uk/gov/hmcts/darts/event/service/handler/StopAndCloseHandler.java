@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.model.stopandclosehandler.PendingRetention;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.event.service.impl.DarNotifyServiceImpl;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
@@ -64,8 +65,9 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                RetentionPolicyTypeRepository retentionPolicyTypeRepository,
                                CurrentTimeHelper currentTimeHelper,
                                RetentionApi retentionApi,
-                               AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
+                               AuthorisationApi authorisationApi,
+                               LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
         this.darNotifyService = darNotifyService;
         this.caseRetentionRepository = caseRetentionRepository;
         this.caseManagementRetentionRepository = caseManagementRetentionRepository;

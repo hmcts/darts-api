@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @Slf4j
 @Service
@@ -24,8 +25,9 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
                                                HearingRepository hearingRepository,
                                                CaseRepository caseRepository,
                                                ApplicationEventPublisher eventPublisher,
-                                               AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
+                                               AuthorisationApi authorisationApi,
+                                               LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
     }
 
     @Transactional
