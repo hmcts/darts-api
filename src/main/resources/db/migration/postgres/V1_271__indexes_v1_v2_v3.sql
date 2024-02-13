@@ -20,7 +20,6 @@ CREATE INDEX aut_lst_mod_by_fk  ON AUTOMATED_TASK(last_modified_by);
 
 CREATE INDEX cad_cas_fk         ON CASE_DOCUMENT(cas_id);
 
---CREATE INDEX caj_cas_fk         ON CASE_JUDGE_AE(cas_id);
 CREATE INDEX caj_jud_fk         ON CASE_JUDGE_AE(jud_id);
 
 CREATE INDEX cas_evh_fk         ON COURT_CASE(evh_id);
@@ -31,7 +30,6 @@ CREATE INDEX cas_lst_mod_by_fk  ON COURT_CASE(last_modified_by);
 CREATE INDEX cth_cre_by_fk      ON COURTHOUSE(created_by);
 CREATE INDEX cth_lst_mod_by_fk  ON COURTHOUSE(last_modified_by);
 
---CREATE INDEX cra_cth_fk         ON COURTHOUSE_REGION_AE(cth_id);
 CREATE INDEX cra_reg_fk         ON COURTHOUSE_REGION_AE(reg_id);
 
 CREATE INDEX ctr_cth_fk         ON COURTROOM(cth_id);
@@ -72,16 +70,12 @@ CREATE INDEX hea_ctr_fk         ON HEARING(ctr_id);
 CREATE INDEX hea_cre_by_fk      ON HEARING(created_by);
 CREATE INDEX hea_lst_mod_by_fk  ON HEARING(last_modified_by);
 
---CREATE INDEX haa_hea_fk         ON HEARING_ANNOTATION_AE(hea_id);
 CREATE INDEX haa_ann_fk         ON HEARING_ANNOTATION_AE(ann_id);
 
---CREATE INDEX hee_hea_fk         ON HEARING_EVENT_AE(hea_id);
 CREATE INDEX hee_eve_fk         ON HEARING_EVENT_AE(eve_id);
 
---CREATE INDEX hej_hea_fk         ON HEARING_JUDGE_AE(hea_id);
 CREATE INDEX hej_jud_fk         ON HEARING_JUDGE_AE(jud_id);
 
---CREATE INDEX hem_hea_fk         ON HEARING_MEDIA_AE(hea_id);
 CREATE INDEX hem_med_fk         ON HEARING_MEDIA_AE(med_id);
 
 CREATE INDEX jud_cre_by_fk      ON JUDGE(created_by);
@@ -111,11 +105,9 @@ CREATE INDEX prn_lst_mod_by_fk  ON PROSECUTOR(last_modified_by);
 CREATE INDEX rep_cre_by_fk      ON REPORT(created_by);
 CREATE INDEX rep_lst_mod_by_fk  ON REPORT(last_modified_by);
 
---CREATE INDEX tra_cas_fk         ON TRANSCRIPTION(cas_id);
 CREATE INDEX tra_ctr_fk         ON TRANSCRIPTION(ctr_id);
 CREATE INDEX tra_trs_fk         ON TRANSCRIPTION(trs_id);
 CREATE INDEX tra_tru_fk         ON TRANSCRIPTION(tru_id);
---CREATE INDEX tra_hea_fk         ON TRANSCRIPTION(hea_id);
 CREATE INDEX tra_cre_by_fk      ON TRANSCRIPTION(created_by);
 CREATE INDEX tra_lst_mod_by_fk  ON TRANSCRIPTION(last_modified_by);
 CREATE INDEX tra_trt_fk         ON TRANSCRIPTION(trt_id);
@@ -144,13 +136,10 @@ CREATE INDEX grp_rol_fk         ON SECURITY_GROUP(rol_id);
 CREATE INDEX grp_cre_by_fk      ON SECURITY_GROUP(created_by);
 CREATE INDEX grp_lst_mod_by_fk  ON SECURITY_GROUP(last_modified_by);
 
---CREATE INDEX grc_grp_fk         ON SECURITY_GROUP_COURTHOUSE_AE(grp_id);
 CREATE INDEX grc_cth_fk         ON SECURITY_GROUP_COURTHOUSE_AE(cth_id);
 
 CREATE INDEX gua_grp_fk         ON SECURITY_GROUP_USER_ACCOUNT_AE(grp_id);
---CREATE INDEX gua_usr_fk         ON SECURITY_GROUP_USER_ACCOUNT_AE(usr_id);
 
---CREATE INDEX rop_rol_fk         ON SECURITY_ROLE_PERMISSION_AE(rol_id);
 CREATE INDEX rop_per_fk         ON SECURITY_ROLE_PERMISSION_AE(per_id);
 
 --v6 retention
