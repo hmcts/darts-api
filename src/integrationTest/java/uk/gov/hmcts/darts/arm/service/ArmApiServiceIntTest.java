@@ -18,7 +18,9 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.UUID;
@@ -109,7 +111,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
         when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(response);
 
         // When
-        InputStream inputStreamResult = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, new DownloadResponseMetaData(null));
+        InputStream inputStreamResult = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, new CustomDownloadResponseMetaData(null));
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
@@ -117,4 +119,15 @@ class ArmApiServiceIntTest extends IntegrationBase {
         assertThat(inputStreamResult.readAllBytes()).isEqualTo(binaryData);
     }
 
+    class CustomDownloadResponseMetaData extends DownloadResponseMetaData {
+
+        public CustomDownloadResponseMetaData(OutputStream outputStream) {
+            super(outputStream);
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return null;
+        }
+    }
 }
