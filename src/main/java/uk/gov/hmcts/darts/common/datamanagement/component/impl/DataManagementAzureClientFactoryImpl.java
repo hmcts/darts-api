@@ -24,10 +24,7 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
     @Override
     public BlobContainerClient getBlobContainerClient(String containerName, BlobServiceClient serviceClient) {
         String id = serviceClient.getAccountUrl() + ":" + containerName;
-        if (!blobContainerClientMap.containsKey(id)) {
-            blobContainerClientMap.put(id, serviceClient.getBlobContainerClient(containerName));
-        }
-        return blobContainerClientMap.get(id);
+        return blobContainerClientMap.computeIfAbsent(id, k -> serviceClient.getBlobContainerClient(containerName));
     }
 
     @Override
@@ -36,15 +33,7 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
     }
 
     public BlobServiceClient getBlobServiceClient(String containerString) {
-        String id = containerString;
-        if (!blobServiceClientMap.containsKey(id)) {
-            BlobServiceClient blobServiceClient;
-            blobServiceClient = new BlobServiceClientBuilder()
-                    .connectionString(containerString).buildClient();
-
-            blobServiceClientMap.put(id, blobServiceClient);
-        }
-
-        return blobServiceClientMap.get(id);
+        return blobServiceClientMap.computeIfAbsent(containerString, k -> new BlobServiceClientBuilder()
+            .connectionString(containerString).buildClient());
     }
 }

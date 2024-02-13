@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -19,6 +18,8 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -56,7 +57,7 @@ class DetsManagementServiceImplTest {
 
         String connectionString = "test connection string";
         when(dataManagementConfiguration.getConnectionString()).thenReturn(connectionString);
-        when(dataManagementFactory.getBlobServiceClient(Mockito.eq(connectionString))).thenReturn(serviceClient);
+        when(dataManagementFactory.getBlobServiceClient(connectionString)).thenReturn(serviceClient);
         when(dataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
     }
 
@@ -66,13 +67,25 @@ class DetsManagementServiceImplTest {
             when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
             when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-            try (DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream)) {
+            try (DownloadResponseMetaData downloadResponseMetaData = new CustomDownloadResponseMetaData(stream)) {
                 dataManagementService.downloadData(BLOB_ID, downloadResponseMetaData);
 
                 Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
                 Assertions.assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
                 verify(blobClient, times(1)).downloadStream(any());
             }
+        }
+    }
+
+    class CustomDownloadResponseMetaData extends DownloadResponseMetaData {
+
+        public CustomDownloadResponseMetaData(OutputStream outputStream) {
+            super(outputStream);
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return null;
         }
     }
 }

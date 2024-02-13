@@ -22,6 +22,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
         this(File.createTempFile("transfer-", ".transfer"));
     }
 
+    @Override
     public InputStream getInputStream()  throws IOException {
         if (inputStream == null) {
             inputStream = Files.newInputStream(Path.of(fileToBeDownloadedTo.toURI()), StandardOpenOption.READ);
@@ -33,6 +34,6 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     @Override
     public void close() throws IOException {
         super.close();
-        fileToBeDownloadedTo.delete();
+        Files.delete(Path.of(fileToBeDownloadedTo.toURI()));
     }
 }

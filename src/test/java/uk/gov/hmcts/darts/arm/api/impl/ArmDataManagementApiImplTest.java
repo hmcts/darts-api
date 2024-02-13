@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +114,7 @@ class ArmDataManagementApiImplTest {
     void downloadArmData() throws IOException {
 
         var inputStream = new ByteArrayInputStream("some file binary content".getBytes());
-        DownloadResponseMetaData metaData = new DownloadResponseMetaData(null);
+        DownloadResponseMetaData metaData = new CustomDownloadResponseMetaData(null);
         when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, metaData)).thenReturn(inputStream);
 
         ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
@@ -122,5 +124,17 @@ class ArmDataManagementApiImplTest {
         boolean result = armDataManagementApi.downloadBlobFromContainer(DatastoreContainerType.ARM, entity, metaData);
 
         assertTrue(result);
+    }
+
+    class CustomDownloadResponseMetaData extends DownloadResponseMetaData {
+
+        public CustomDownloadResponseMetaData(OutputStream outputStream) {
+            super(outputStream);
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return null;
+        }
     }
 }

@@ -14,7 +14,7 @@ import java.io.OutputStream;
  */
 @RequiredArgsConstructor
 @Getter
-public class DownloadResponseMetaData implements Closeable {
+public abstract class DownloadResponseMetaData implements Closeable {
     protected InputStream inputStream;
 
     private final OutputStream outputStream;
@@ -37,12 +37,7 @@ public class DownloadResponseMetaData implements Closeable {
         this.containerTypeUsedToDownload = containerType;
     }
 
-    /**
-     ** override as appropriate to return your custom input stream null by default.
-     */
-    public InputStream getInputStream()  throws IOException {
-        return inputStream;
-    }
+    public abstract InputStream getInputStream()  throws IOException;
 
     public void markInputStream(InputStream is) {
         this.inputStream = is;

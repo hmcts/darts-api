@@ -20,6 +20,8 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -120,13 +122,25 @@ class DataManagementServiceImplTest {
             when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
             when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-            try (DownloadResponseMetaData downloadResponseMetaData = new DownloadResponseMetaData(stream)) {
+            try (DownloadResponseMetaData downloadResponseMetaData = new CustomDownloadResponseMetaData(stream)) {
 
                 dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
 
                 Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
                 verify(blobClient, times(1)).downloadStream(any());
             }
+        }
+    }
+
+    class CustomDownloadResponseMetaData extends DownloadResponseMetaData {
+
+        public CustomDownloadResponseMetaData(OutputStream outputStream) {
+            super(outputStream);
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return null;
         }
     }
 }

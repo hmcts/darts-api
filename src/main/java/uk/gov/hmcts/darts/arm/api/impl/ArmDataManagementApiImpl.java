@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -66,13 +67,9 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
-        switch (datastoreContainerType) {
-            case ARM -> {
-                return Optional.of(armDataManagementConfiguration.getContainerName());
-            }
-            default -> {
-                return Optional.empty();
-            }
+        if (Objects.requireNonNull(datastoreContainerType) == DatastoreContainerType.ARM) {
+            return Optional.of(armDataManagementConfiguration.getContainerName());
         }
+        return Optional.empty();
     }
 }
