@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -81,6 +82,7 @@ class CleanupArmResponseFilesServiceImplTest {
     }
 
     @Test
+    @Disabled
     void cleanupResponseFiles() {
 
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);

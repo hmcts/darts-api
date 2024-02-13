@@ -113,8 +113,6 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         } else {
             //Assume if no IU file found then it has already been cleaned up
             log.info("Unable to find input upload file with prefix {} for cleanup", prefix);
-            externalObjectDirectory.setResponseCleaned(true);
-            updateExternalObjectDirectory(externalObjectDirectory);
         }
     }
 
