@@ -61,4 +61,24 @@ public class EventLoggerServiceImpl implements EventLoggerService {
         log.info("Event received: message_id={}, event_id={}, courthouse={}, courtroom={}, source={}, date_time={}",
                  messageId, eventId, courthouse, courtroom, source, dateTime);
     }
+
+    @Override
+    public void missingCourthouse(DartsEvent event) {
+        log.error("Courthouse not found: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
+                  event.getMessageId(),
+                  event.getEventId(),
+                  event.getCourthouse(),
+                  event.getCourtroom(),
+                  event.getDateTime());
+    }
+
+    @Override
+    public void missingNodeRegistry(DartsEvent event) {
+        log.error("Unregistered Room: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
+                  event.getMessageId(),
+                  event.getEventId(),
+                  event.getCourthouse(),
+                  event.getCourtroom(),
+                  event.getDateTime());
+    }
 }

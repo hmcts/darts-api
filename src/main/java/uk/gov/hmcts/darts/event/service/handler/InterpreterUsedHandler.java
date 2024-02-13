@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
@@ -26,8 +27,9 @@ public class InterpreterUsedHandler extends EventHandlerBase {
                                   HearingRepository hearingRepository,
                                   CaseRepository caseRepository,
                                   ApplicationEventPublisher eventPublisher,
-                                  AuthorisationApi authorisationApi) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi);
+                                  AuthorisationApi authorisationApi,
+                                  LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
     }
 
     @Override

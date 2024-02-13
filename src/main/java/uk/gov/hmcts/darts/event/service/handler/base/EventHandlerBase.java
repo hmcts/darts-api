@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -36,6 +37,7 @@ public abstract class EventHandlerBase implements EventHandler {
     protected CaseRepository caseRepository;
     protected ApplicationEventPublisher eventPublisher;
     protected AuthorisationApi authorisationApi;
+    private LogApi logApi;
 
     @Override
     public boolean isHandlerFor(String handlerName) {
@@ -67,28 +69,23 @@ public abstract class EventHandlerBase implements EventHandler {
         String caseNumber = caseNumbers.get(0);
         try {
             HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
-                    dartsEvent.getCourthouse(),
-                    dartsEvent.getCourtroom(),
-                    caseNumber,
-                    dartsEvent.getDateTime().toLocalDate()
+                dartsEvent.getCourthouse(),
+                dartsEvent.getCourtroom(),
+                caseNumber,
+                dartsEvent.getDateTime().toLocalDate()
             );
             EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
             setHearingToActive(hearingEntity);
 
             return CreatedHearingAndEvent.builder()
-                    .hearingEntity(hearingEntity)
-                    .isHearingNew(hearingEntity.isNew())
-                    .isCourtroomDifferentFromHearing(false)//for now always creating a new one
-                    .eventEntity(eventEntity)
-                    .build();
+                .hearingEntity(hearingEntity)
+                .isHearingNew(hearingEntity.isNew())
+                .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+                .eventEntity(eventEntity)
+                .build();
         } catch (DartsApiException dartsException) {
             if (dartsException.getError() == CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST) {
-                log.error("Courthouse not found: message_id={}, event_id={}, courthouse={}, courtroom={}, event_timestamp={}",
-                          dartsEvent.getMessageId(),
-                          dartsEvent.getEventId(),
-                          dartsEvent.getCourthouse(),
-                          dartsEvent.getCourtroom(),
-                          dartsEvent.getDateTime());
+                logApi.missingCourthouse(dartsEvent);
             }
             throw dartsException;
         }
