@@ -69,9 +69,6 @@ class AnnotationControllerTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
-    private UserIdentity userIdentity;
-
     @BeforeEach
     public void beforeEach() {
         createAuthenticatedJudgeWithGlobalAccessAndEmail("judge@global.com");

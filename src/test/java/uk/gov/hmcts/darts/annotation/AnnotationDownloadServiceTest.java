@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -55,14 +54,7 @@ class AnnotationDownloadServiceTest {
     @Mock
     private Validator<Annotation> annotationValidator;
 
-    private final AnnotationEntity annotationEntity = someAnnotationEntity();
-    private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
-
-    @Mock
-    private final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = someExternalObjectDirectoryEntity();
     private AnnotationService annotationService;
-    @Mock
-    private AnnotationRepository annotationRepository;
 
     @Mock
     private AuthorisationApi authorisationApi;
