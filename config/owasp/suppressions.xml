@@ -11,7 +11,7 @@
     <cve>CVE-2023-4586</cve>
   </suppress>
 
-  <suppress until="2024-02-14">
+  <suppress until="2024-03-14">
     <notes>Suppression for azure deps. Pulled in by azure-bom latest version</notes>
     <cve>CVE-2023-36052</cve>
   </suppress>
@@ -19,11 +19,6 @@
   <suppress until="2024-01-14">
     <notes>Need a Spring boot update to fix</notes>
     <cve>CVE-2023-6378</cve>
-  </suppress>
-
-  <suppress until="2024-03-14">
-    <notes>Need Azure-core update to fix </notes>
-    <cve>CVE-2023-36052</cve>
   </suppress>
 
 
