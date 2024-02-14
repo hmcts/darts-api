@@ -193,9 +193,14 @@ darts:
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-
+    dets:
+      connection-string: ${DETS_SAS_ENDPOINT:${AZURE_STORAGE_CONNECTION_STRING}}
+      container-name: darts-dets
+      fetch-from-dets-enabled: true
+      temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      temp-blob-workspace: ${user.home}/blob/tempworkspace
       container-name:
         unstructured: darts-unstructured
         inbound: darts-inbound-container

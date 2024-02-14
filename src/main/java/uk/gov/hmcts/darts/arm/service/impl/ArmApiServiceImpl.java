@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
@@ -45,13 +47,17 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     @Override
     @SneakyThrows
-    public InputStream downloadArmData(String externalRecordId, String externalFileId) {
+    public InputStream downloadArmData(String externalRecordId, String externalFileId, DownloadResponseMetaData responseMetaData) {
         feign.Response response = armApiClient.downloadArmData(
             getArmBearerToken(),
             armApiConfigurationProperties.getCabinetId(),
             externalRecordId,
             externalFileId
         );
+
+        responseMetaData.markSuccess(DatastoreContainerType.ARM);
+        responseMetaData.markInputStream(response.body().asInputStream());
+
         log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
         return response.body().asInputStream();
     }
