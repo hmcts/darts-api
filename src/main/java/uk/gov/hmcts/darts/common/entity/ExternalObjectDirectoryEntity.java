@@ -17,7 +17,7 @@ import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static jakarta.persistence.CascadeType.MERGE;
@@ -82,7 +82,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private String manifestFile;
 
     @Column(name = "event_date_ts")
-    private LocalDateTime eventDateTs;
+    private OffsetDateTime eventDateTs;
 
     @Column(name = "error_code")
     private String errorCode;
