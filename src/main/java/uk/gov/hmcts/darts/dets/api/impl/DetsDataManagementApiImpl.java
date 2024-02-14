@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.dets.api.DetsDataManagementApi;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.dets.service.DetsApiService;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -28,13 +29,9 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
-        switch (datastoreContainerType) {
-            case DETS -> {
-                return Optional.of(detsManagementConfiguration.getContainerName());
-            }
-            default -> {
-                return Optional.empty();
-            }
+        if (Objects.requireNonNull(datastoreContainerType) == DatastoreContainerType.DETS) {
+            return Optional.of(detsManagementConfiguration.getContainerName());
         }
+        return Optional.empty();
     }
 }

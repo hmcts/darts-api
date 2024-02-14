@@ -91,8 +91,9 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+        boolean exists = blobClient.exists() != null ? blobClient.exists() : false;
 
-        if (!blobClient.exists()) {
+        if (!exists) {
             log.error("Blob {} does not exist in {} container", blobId, containerName);
         }
 
