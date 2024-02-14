@@ -110,12 +110,6 @@ class AnnotationDownloadServiceTest {
                 .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
     }
 
-    private AnnotationEntity someAnnotationEntity() {
-        AnnotationEntity annotationEntity = new AnnotationEntity();
-        annotationEntity.setId(1);
-        return annotationEntity;
-    }
-
     private AnnotationDocumentEntity someAnnotationDocument() {
         AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
         annotationDocumentEntity.setId(1);
