@@ -86,6 +86,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         FROM CaseRetentionEntity c
         WHERE currentState='PENDING'
         AND createdDateTime  <= :pendingCutoff
+        ORDER BY createdDateTime DESC
         """
     )
     List<CaseRetentionEntity> findPendingRetention(OffsetDateTime pendingCutoff);
