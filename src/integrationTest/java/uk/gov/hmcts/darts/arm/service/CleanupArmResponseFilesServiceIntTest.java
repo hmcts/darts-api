@@ -35,6 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
@@ -75,7 +78,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_UF() {
+    void cleanupResponseFilesSuccessWithFiles_IU_CR_UF_AndStateStored() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -97,6 +100,201 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             dartsDatabase.getObjectRecordStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        armEod.setLastModifiedDateTime(latestDateTime);
+        armEod.setTransferAttempts(1);
+        armEod.setResponseCleaned(false);
+        armEod = dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
+
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles();
+
+        Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
+        assertTrue(foundMediaEod.isPresent());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
+        assertTrue(foundMedia.isResponseCleaned());
+    }
+
+    @Test
+    void cleanupResponseFilesSuccessWithFiles_IU_CR_UFAndStateManifestFailed() {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "Bristol",
+            "Int Test Courtroom 1",
+            "1",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        armEod.setLastModifiedDateTime(latestDateTime);
+        armEod.setTransferAttempts(1);
+        armEod.setResponseCleaned(false);
+        armEod = dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
+
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles();
+
+        Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
+        assertTrue(foundMediaEod.isPresent());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
+        assertTrue(foundMedia.isResponseCleaned());
+    }
+
+    @Test
+    void cleanupResponseFilesSuccessWithFiles_IU_CR_UFAndStateArmResponseProcessingFailed() {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "Bristol",
+            "Int Test Courtroom 1",
+            "1",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RESPONSE_PROCESSING),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
+        armEod.setLastModifiedDateTime(latestDateTime);
+        armEod.setTransferAttempts(1);
+        armEod.setResponseCleaned(false);
+        armEod = dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
+
+        String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
+        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles();
+
+        Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
+        assertTrue(foundMediaEod.isPresent());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
+        assertTrue(foundMedia.isResponseCleaned());
+    }
+
+    @Test
+    void cleanupResponseFilesSuccessWithFiles_IU_CR_UFAndStateArmResponseChecksumFailed() {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "Bristol",
+            "Int Test Courtroom 1",
+            "1",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
