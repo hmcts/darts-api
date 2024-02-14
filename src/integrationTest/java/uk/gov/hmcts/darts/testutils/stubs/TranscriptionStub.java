@@ -178,6 +178,50 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
+    @Transactional
+    public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
+                                                                   CourtCaseEntity courtCaseEntity,
+                                                                   HearingEntity hearingEntity,
+                                                                   OffsetDateTime startDate,
+                                                                   OffsetDateTime endDate,
+                                                                   OffsetDateTime workflowTimestamp,
+                                                                   Boolean hideRequestFromRequester) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(COMPLETE)
+        );
+        transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
+        transcriptionEntity.setStartTime(startDate);
+        transcriptionEntity.setEndTime(endDate);
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    @Transactional
+    public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
+                                                                   CourtCaseEntity courtCaseEntity,
+                                                                   HearingEntity hearingEntity,
+                                                                   OffsetDateTime startDate,
+                                                                   OffsetDateTime endDate,
+                                                                   TranscriptionTypeEntity transcriptionType,
+                                                                   OffsetDateTime workflowTimestamp,
+                                                                   Boolean hideRequestFromRequester) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(COMPLETE)
+        );
+        transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
+        transcriptionEntity.setStartTime(startDate);
+        transcriptionEntity.setEndTime(endDate);
+        transcriptionEntity.setTranscriptionType(transcriptionType);
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
                                                                          UserAccountEntity user,
                                                                          OffsetDateTime timestamp,

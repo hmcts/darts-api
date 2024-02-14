@@ -5,13 +5,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "transcription_status")
 @Getter
+@NoArgsConstructor
 @Setter
 public class TranscriptionStatusEntity {
+
+    public TranscriptionStatusEntity(Integer id) {
+        this.setId(id);
+    }
 
     @Id
     @Column(name = "trs_id", nullable = false)
