@@ -134,6 +134,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                 ExternalLocationTypeEntity location2,
                                                                 OffsetDateTime lastModifiedBefore);
 
+    @Query(
+            """
+                SELECT eod FROM ExternalObjectDirectoryEntity eod
+                JOIN eod.annotationDocumentEntity ade
+                JOIN ade.annotation ann
+                JOIN ann.annotationDocuments annD
+                WHERE ann.id = :annotationId
+                AND annD.id = :annotationDocumentId
+                """
+    )
+    Optional<ExternalObjectDirectoryEntity> findAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
+
     @Modifying(clearAutomatically = true)
     @Query(
         """
@@ -144,5 +156,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             where eod.id in :idsToDelete
             """)
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
+
+
 
 }

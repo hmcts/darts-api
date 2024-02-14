@@ -3,24 +3,35 @@ package uk.gov.hmcts.darts.annotation.service.impl;
 import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.annotation.component.AnnotationDocumentBuilder;
 import uk.gov.hmcts.darts.annotation.component.AnnotationMapper;
 import uk.gov.hmcts.darts.annotation.component.ExternalObjectDirectoryBuilder;
+import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDTO;
 import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +45,8 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final FileContentChecksum fileContentChecksum;
     private final AnnotationPersistenceService annotationPersistenceService;
     private final Validator<Annotation> annotationValidator;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     public Integer process(MultipartFile document, Annotation annotation) {
@@ -52,9 +65,9 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         var annotationEntity = annotationMapper.mapFrom(annotation);
         var annotationDocumentEntity = annotationDocumentBuilder.buildFrom(
-            document,
-            annotationEntity,
-            fileContentChecksum.calculate(binaryData.toBytes()));
+                document,
+                annotationEntity,
+                fileContentChecksum.calculate(binaryData.toBytes()));
         var externalObjectDirectoryEntity = externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalLocation);
 
         try {
@@ -65,6 +78,47 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         return annotationEntity.getId();
     }
+
+    @Override
+    public AnnotationResponseDTO downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
+
+        final Optional<ExternalObjectDirectoryEntity> directoryEntity = externalObjectDirectoryRepository.findAnnotationIdAndAnnotationDocumentId(annotationId,
+                                                                                                                                                  annotationDocumentId);
+        final InputStreamResource stream;
+
+        final ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
+
+        if (directoryEntity.isEmpty()) {
+
+            if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))) {
+                throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE);
+            } else {
+                throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
+            }
+
+        }
+
+        externalObjectDirectoryEntity = directoryEntity.get();
+
+        try {
+
+            stream = new InputStreamResource(dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
+
+        } catch (RuntimeException e) {
+            log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getExternalFileId(), e);
+            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, e);
+        }
+
+        return AnnotationResponseDTO.builder()
+                .resource(stream)
+                .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
+                .externalLocation(externalObjectDirectoryEntity.getExternalLocation())
+                .annotationDocumentId(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId()).build();
+
+
+
+    }
+
 
     private void attemptToDeleteDocument(UUID externalLocation) {
         try {
