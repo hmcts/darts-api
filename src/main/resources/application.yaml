@@ -197,8 +197,10 @@ darts:
       connection-string: ${DETS_SAS_ENDPOINT:${AZURE_STORAGE_CONNECTION_STRING}}
       container-name: darts-dets
       fetch-from-dets-enabled: true
+      temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      temp-blob-workspace: ${user.home}/blob/tempworkspace
       container-name:
         unstructured: darts-unstructured
         inbound: darts-inbound-container

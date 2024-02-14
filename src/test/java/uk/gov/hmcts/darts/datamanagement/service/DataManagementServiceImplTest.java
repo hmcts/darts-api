@@ -5,7 +5,6 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +19,6 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -122,25 +119,17 @@ class DataManagementServiceImplTest {
             when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
             when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
 
-            try (DownloadResponseMetaData downloadResponseMetaData = new CustomDownloadResponseMetaData(stream)) {
+            try (DownloadResponseMetaData metaData = mock(DownloadResponseMetaData.class)) {
+                when(metaData.getOutputStream(Mockito.notNull())).thenReturn(stream);
 
-                dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
+                try (DownloadResponseMetaData downloadResponseMetaData = metaData) {
 
-                Assertions.assertTrue(downloadResponseMetaData.isSuccessfulDownload());
-                verify(blobClient, times(1)).downloadStream(any());
+                    dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
+
+                    verify(blobClient, times(1)).downloadStream(any());
+                    verify(downloadResponseMetaData, times(1)).markSuccess(DatastoreContainerType.UNSTRUCTURED);
+                }
             }
-        }
-    }
-
-    class CustomDownloadResponseMetaData extends DownloadResponseMetaData {
-
-        public CustomDownloadResponseMetaData(OutputStream outputStream) {
-            super(outputStream);
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return null;
         }
     }
 }

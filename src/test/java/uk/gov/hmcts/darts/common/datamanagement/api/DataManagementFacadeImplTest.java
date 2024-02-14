@@ -11,8 +11,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,17 +35,13 @@ class DataManagementFacadeImplTest {
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
                 = DownloadableExternalObjectDirectories.getFileBasedDownload(entitiesToDownload);
 
-        try (OutputStream osFile = downloadForExternalObjectDirectories.getResponse().getOutputStream()) {
-            osFile.write("test".getBytes());
-        }
-
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, configuration);
 
         // make the assertion on the response
         dmFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadForExternalObjectDirectories);
         assertResponse(downloadForExternalObjectDirectories.getResponse(), true, true,
-                       "test", DatastoreContainerType.ARM);
+                       DatastoreContainerType.ARM);
     }
 
     @Test
@@ -67,17 +61,13 @@ class DataManagementFacadeImplTest {
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
                 = DownloadableExternalObjectDirectories.getFileBasedDownload(entitiesToDownload);
 
-        try (OutputStream osFile = downloadForExternalObjectDirectories.getResponse().getOutputStream()) {
-            osFile.write("test".getBytes());
-        }
-
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, configuration);
 
         // make the assertion on the response
         dmFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadForExternalObjectDirectories);
         assertResponse(downloadForExternalObjectDirectories.getResponse(), true, true,
-                       "test", DatastoreContainerType.UNSTRUCTURED);
+                        DatastoreContainerType.UNSTRUCTURED);
     }
 
     @Test
@@ -97,17 +87,13 @@ class DataManagementFacadeImplTest {
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
                 = DownloadableExternalObjectDirectories.getFileBasedDownload(entitiesToDownload);
 
-        try (OutputStream osFile = downloadForExternalObjectDirectories.getResponse().getOutputStream()) {
-            osFile.write("test".getBytes());
-        }
-
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, configuration);
 
         // make the assertion on the response
         dmFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadForExternalObjectDirectories);
         assertResponse(downloadForExternalObjectDirectories.getResponse(), true, true,
-                       "test", DatastoreContainerType.DETS);
+                        DatastoreContainerType.DETS);
     }
 
     @Test
@@ -127,16 +113,12 @@ class DataManagementFacadeImplTest {
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
                 = DownloadableExternalObjectDirectories.getFileBasedDownload(entitiesToDownload);
 
-        try (OutputStream osFile = downloadForExternalObjectDirectories.getResponse().getOutputStream()) {
-            osFile.write("test".getBytes());
-        }
-
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, configuration);
 
         // make the assertion on the response
         dmFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadForExternalObjectDirectories);
-        assertResponse(downloadForExternalObjectDirectories.getResponse(), false, false, null,
+        assertResponse(downloadForExternalObjectDirectories.getResponse(), false, false,
                        null);
     }
 
@@ -163,16 +145,12 @@ class DataManagementFacadeImplTest {
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
                 = DownloadableExternalObjectDirectories.getFileBasedDownload(entitiesToDownload);
 
-        try (OutputStream osFile = downloadForExternalObjectDirectories.getResponse().getOutputStream()) {
-            osFile.write("test".getBytes());
-        }
-
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, configuration);
 
         // make the assertion on the response
         dmFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadForExternalObjectDirectories);
-        assertResponse(downloadForExternalObjectDirectories.getResponse(), false, false, null,
+        assertResponse(downloadForExternalObjectDirectories.getResponse(), false, false,
                       null);
     }
 
@@ -193,36 +171,23 @@ class DataManagementFacadeImplTest {
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
                 = DownloadableExternalObjectDirectories.getFileBasedDownload(entitiesToDownload);
 
-        String outputString = "test";
-        try (OutputStream osFile = downloadForExternalObjectDirectories.getResponse().getOutputStream()) {
-            osFile.write(outputString.getBytes());
-        }
-
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, configuration);
 
         // make the assertion on the response
         dmFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadForExternalObjectDirectories);
-        assertResponse(downloadForExternalObjectDirectories.getResponse(), false, true, outputString,
+        assertResponse(downloadForExternalObjectDirectories.getResponse(), false, true,
                        DatastoreContainerType.ARM);
     }
 
     private void assertResponse(DownloadResponseMetaData responseMetaData, boolean success, boolean processed,
-                                String content, DatastoreContainerType containerType) throws Exception {
+                                DatastoreContainerType containerType) throws Exception {
         try (DownloadResponseMetaData responseMetaDataToAssert = responseMetaData) {
             boolean processedByContainer = responseMetaDataToAssert.isProcessedByContainer();
-            boolean successDownload = responseMetaDataToAssert.isSuccessfullyDownloaded();
-
-            try (InputStream streamOfDownloadedData = responseMetaDataToAssert.getInputStream()) {
-                if (content != null) {
-                    Assertions.assertEquals(content, new String(streamOfDownloadedData.readAllBytes()));
-                    Assertions.assertNotNull(streamOfDownloadedData);
-                }
-            }
+            boolean successDownload = responseMetaDataToAssert.isSuccessfulDownload();
 
             Assertions.assertEquals(processed, processedByContainer);
             Assertions.assertEquals(success, successDownload);
-            Assertions.assertNotNull(responseMetaDataToAssert.getOutputStream());
 
             if (containerType != null) {
                 Assertions.assertEquals(containerType, responseMetaDataToAssert.getContainerTypeUsedToDownload());

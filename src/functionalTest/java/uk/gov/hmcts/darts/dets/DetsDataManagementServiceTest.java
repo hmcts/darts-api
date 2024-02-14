@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -25,8 +24,6 @@ class DetsDataManagementServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 
-    private static final String TEST_BLOB_ID = "b0f23c62-8dd3-4e4e-ae6a-321ff6eb61d8";
-
     @Autowired
     private DetsApiServiceImpl dataManagementService;
 
@@ -37,8 +34,7 @@ class DetsDataManagementServiceTest {
 
         var uuid = dataManagementService.saveBlobData(data);
 
-        File fileToDownloadTo = File.createTempFile("tmp", "download");
-        try (DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData(fileToDownloadTo)) {
+        try (DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData()) {
             dataManagementService.downloadData(
                     uuid,
                     responseMetaData

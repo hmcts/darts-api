@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -117,5 +118,10 @@ public class DataManagementApiImpl implements DataManagementApi {
                 return Optional.empty();
             }
         }
+    }
+
+    @Override
+    public StorageConfiguration getConfiguration() {
+        return dataManagementConfiguration;
     }
 }

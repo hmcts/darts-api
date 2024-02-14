@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.dets.api.impl;
 
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -33,5 +34,10 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
             return Optional.of(detsManagementConfiguration.getContainerName());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public StorageConfiguration getConfiguration() {
+        return detsManagementConfiguration;
     }
 }

@@ -97,7 +97,7 @@ public class DataManagementServiceImpl implements DataManagementService {
             log.error("Blob {} does not exist in {} container", blobId, containerName);
         }
 
-        try (OutputStream downloadOS = report.getOutputStream()) {
+        try (OutputStream downloadOS = report.getOutputStream(dataManagementConfiguration)) {
             Date downloadStartDate = new Date();
             blobClient.downloadStream(downloadOS);
 

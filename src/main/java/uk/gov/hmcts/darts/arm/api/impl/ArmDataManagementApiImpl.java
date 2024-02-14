@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -71,5 +72,10 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
             return Optional.of(armDataManagementConfiguration.getContainerName());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public StorageConfiguration getConfiguration() {
+        return armDataManagementConfiguration;
     }
 }

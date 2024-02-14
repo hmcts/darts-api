@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 
 import java.io.Closeable;
@@ -12,17 +12,18 @@ import java.io.OutputStream;
 /**
  * A general download response that can be extended. Always use in combination with a try resources to ensure the file resources are cleaned up
  */
-@RequiredArgsConstructor
-@Getter
 public abstract class DownloadResponseMetaData implements Closeable {
     protected InputStream inputStream;
 
-    private final OutputStream outputStream;
+    protected OutputStream outputStream;
 
+    @Getter
     private boolean processedByContainer;
 
+    @Getter
     private boolean successfulDownload;
 
+    @Getter
     private DatastoreContainerType containerTypeUsedToDownload;
 
     public void markSuccess(DatastoreContainerType containerType) {
@@ -37,15 +38,14 @@ public abstract class DownloadResponseMetaData implements Closeable {
         this.containerTypeUsedToDownload = containerType;
     }
 
-    public abstract InputStream getInputStream()  throws IOException;
+    public InputStream getInputStream()  throws IOException {
+        return inputStream;
+    }
+
+    public abstract OutputStream getOutputStream(StorageConfiguration configuration) throws IOException;
 
     public void markInputStream(InputStream is) {
         this.inputStream = is;
-    }
-
-
-    public boolean isSuccessfullyDownloaded() {
-        return successfulDownload;
     }
 
     @Override
@@ -59,4 +59,5 @@ public abstract class DownloadResponseMetaData implements Closeable {
             outputStream.close();
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -21,4 +22,10 @@ public interface BlobContainerDownloadable {
      * @return The option name, empty if not supported
      */
     Optional<String> getContainerName(DatastoreContainerType datastoreContainerType);
+
+    /**
+     * gets the configuration for the implementation.
+     * @return the temo storage location
+     */
+    StorageConfiguration getConfiguration();
 }

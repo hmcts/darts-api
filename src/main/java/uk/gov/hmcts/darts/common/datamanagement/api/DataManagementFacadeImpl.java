@@ -64,7 +64,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private void processDownloadResponse(DatastoreContainerType type, ExternalObjectDirectoryEntity processing,
                                         DownloadableExternalObjectDirectories downloadableExternalObjectDirectories,
                                         BlobContainerDownloadable container) {
-        if (!downloadableExternalObjectDirectories.getResponse().isSuccessfullyDownloaded()) {
+        if (!downloadableExternalObjectDirectories.getResponse().isSuccessfulDownload()) {
             boolean success = false;
             try {
                 success = container.downloadBlobFromContainer(type,

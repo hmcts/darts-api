@@ -10,8 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,5 +89,20 @@ class DataManagementServiceTest {
         assertTrue(blobClient.getProperties().getMetadata().containsKey("TestKey"));
     }
 
+    @Test
+    void fetchDownloadBinaryDataFromBlobStorage() throws IOException {
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
+        var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
+
+        try (DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData()) {
+            dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED,
+                                               unstructuredStorageContainerName,
+                                               uniqueBlobName,
+                                               responseMetaData);
+
+            assertEquals(TEST_BINARY_STRING, new String(responseMetaData.getInputStream().readAllBytes()));
+        }
+    }
 }
