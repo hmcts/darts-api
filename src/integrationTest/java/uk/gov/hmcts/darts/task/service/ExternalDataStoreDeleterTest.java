@@ -99,7 +99,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             LocalDate.now()
         );
 
-        SystemUserHelper systemUserHelper = new SystemUserHelper();
+        SystemUserHelper systemUserHelper = new SystemUserHelper(dartsDatabase.getUserAccountRepository());
         systemUserHelper.setSystemUserGuidMap(Collections.singletonMap(
             "housekeeping",
             SystemUsersAccountUUIDEnum.HOUSE_KEEPING.getUuid()
@@ -108,7 +108,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
         externalInboundDataStoreDeleter = new ExternalInboundDataStoreDeleter(
             dartsDatabase.getObjectRecordStatusRepository(),
-            dartsDatabase.getUserAccountRepository(),
             dartsDatabase.getExternalObjectDirectoryRepository(),
             inboundExternalObjectDirectoryDeletedFinder,
             inboundDataStoreDeleter,
@@ -117,7 +116,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
             dartsDatabase.getObjectRecordStatusRepository(),
-            dartsDatabase.getUserAccountRepository(),
             dartsDatabase.getExternalObjectDirectoryRepository(),
             unstructuredExternalObjectDirectoryDeletedFinder,
             unstructuredDataStoreDeleter,
@@ -126,7 +124,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
         externalOutboundDataStoreDeleter =
             new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectRecordStatusRepository(),
-                                                 dartsDatabase.getUserAccountRepository(),
                                                  dartsDatabase.getTransientObjectDirectoryRepository(),
                                                  outboundExternalObjectDirectoryDeletedFinder,
                                                  outboundDataStoreDeleter, systemUserHelper

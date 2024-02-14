@@ -127,6 +127,11 @@ public class CaseServiceImpl implements CaseService {
             existingCase,
             addCaseRequest
         );
+        if (updatedCaseEntity.getCreatedBy() == null) {
+            updatedCaseEntity.setCreatedBy(authorisationApi.getCurrentUser());
+        }
+
+        updatedCaseEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }
@@ -176,15 +181,15 @@ public class CaseServiceImpl implements CaseService {
 
         if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.ADMIN))) {
             List<AnnotationEntity> annotationsEntities =
-                    annotationRepository.findByListOfHearingIds(
-                            hearingEntitys
-                            .stream()
-                            .map(HearingEntity::getId)
-                            .collect(Collectors.toList()));
+                annotationRepository.findByListOfHearingIds(
+                    hearingEntitys
+                        .stream()
+                        .map(HearingEntity::getId)
+                        .collect(Collectors.toList()));
 
             List<Annotation> annotations = new ArrayList<>();
-            for (AnnotationEntity annotationEntity: annotationsEntities) {
-                for (HearingEntity hearingEntity: annotationEntity.getHearingList()) {
+            for (AnnotationEntity annotationEntity : annotationsEntities) {
+                for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
                     annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
                 }
             }
@@ -192,15 +197,15 @@ public class CaseServiceImpl implements CaseService {
             return annotations;
         } else {
             List<AnnotationEntity> annotationsEntities =
-                    annotationRepository.findByListOfHearingIdsAndUser(
-                            hearingEntitys
-                                    .stream()
-                                    .map(HearingEntity::getId)
-                                    .collect(Collectors.toList()), authorisationApi.getCurrentUser());
+                annotationRepository.findByListOfHearingIdsAndUser(
+                    hearingEntitys
+                        .stream()
+                        .map(HearingEntity::getId)
+                        .collect(Collectors.toList()), authorisationApi.getCurrentUser());
 
             List<Annotation> annotations = new ArrayList<>();
-            for (AnnotationEntity annotationEntity: annotationsEntities) {
-                for (HearingEntity hearingEntity: annotationEntity.getHearingList()) {
+            for (AnnotationEntity annotationEntity : annotationsEntities) {
+                for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
                     annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
                 }
             }
