@@ -143,7 +143,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_UFAndStateManifestFailed() {
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFileAndStateManifestFailed() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -208,7 +208,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_UFAndStateArmResponseProcessingFailed() {
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateArmResponseProcessingFailed() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -273,7 +273,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_UFAndStateArmResponseChecksumFailed() {
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateArmResponseChecksumFailed() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -338,7 +338,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_UF_ForMultipleAttempts() {
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_ForMultipleAttempts() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -414,7 +414,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_IL() {
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_InvalidLine() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -479,7 +479,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesWithOnlyResponseFileIU() {
+    void cleanupResponseFilesWithOnlyResponseFileInputUpload() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
