@@ -1,0 +1,2 @@
+-- give the dailylist processor user a guid so we can get it in the code as currently all system users have the same username.
+UPDATE user_account SET account_guid = 'f6f71122-ff85-4ebe-93d9-1706460dbea5' where usr_id = -2;
