@@ -35,7 +35,7 @@ public class DetsApiServiceImpl implements DetsApiService {
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
 
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
-        boolean exists = blobClient.exists() != null ? blobClient.exists() : false;
+        boolean exists = blobClient.exists() != null && blobClient.exists();
 
         if (!exists) {
             log.error("Blob {} does not exist in {} container", blobId, configuration.getContainerName());
