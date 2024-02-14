@@ -45,8 +45,8 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             loadAnnotationProperties();
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
             AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId());
-            return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord, archiveRecordFile);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId(), archiveRecordFile);
+            return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
                 "Unable to read annotation property file {} - {}",
