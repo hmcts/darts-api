@@ -78,7 +78,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesSuccessWithFiles_IU_CR_UF_AndStateStored() {
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateStored() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
