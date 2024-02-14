@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = CaseDocumentEntity.TABLE_NAME)
@@ -54,6 +54,6 @@ public class CaseDocumentEntity {
     private UserAccountEntity uploadedBy;
 
     @Column(name = "uploaded_ts", nullable = false)
-    private LocalDateTime uploadedTs;
+    private OffsetDateTime uploadedTs;
 
 }
