@@ -208,6 +208,11 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        verify(armDataManagementApi).deleteResponseBlob(responseBlobFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -304,6 +309,10 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         assertEquals(objectRecordStatusArmResponseManifestFileFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verify(armDataManagementApi).deleteResponseBlob(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteResponseBlob(responseBlobFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -365,5 +374,9 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
         assertEquals(objectRecordStatusArmResponseManifestFileFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verify(armDataManagementApi).deleteResponseBlob(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteResponseBlob(responseBlobFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 }
