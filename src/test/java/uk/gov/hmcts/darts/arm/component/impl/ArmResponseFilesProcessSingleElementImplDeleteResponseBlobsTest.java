@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ArmResponseFilesProcessSingleElementImpl_deleteResponseBlobsTest {
+class ArmResponseFilesProcessSingleElementImplDeleteResponseBlobsTest {
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
