@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZO
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
