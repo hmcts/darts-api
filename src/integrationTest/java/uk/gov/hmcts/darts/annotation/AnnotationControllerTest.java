@@ -180,6 +180,7 @@ class AnnotationControllerTest extends IntegrationBase {
                 ));
 
     }
+
     @Test
     void returns400IfAnnotationDocumentMissing() throws Exception {
 
