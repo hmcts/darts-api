@@ -83,7 +83,9 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
 
     @Override
-    public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
+    public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                      File archiveRecordFile,
+                                                                      String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
@@ -91,7 +93,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             loadTranscriptionProperties();
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
             TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId(), archiveRecordFile);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId(), rawFilename);
             return createTranscriptionArchiveRecord(transcriptionCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
@@ -117,18 +119,18 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             .build();
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId, File archiveRecordFile) {
+    private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(relationId.toString());
-        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument, archiveRecordFile));
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument, rawFilename));
         return uploadNewFileRecord;
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(TranscriptionDocumentEntity transcriptionDocument, File archiveRecordFile) {
+    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(TranscriptionDocumentEntity transcriptionDocument, String rawFilename) {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
-        uploadNewFileRecordMetadata.setDzFilename(archiveRecordFile.getName());
+        uploadNewFileRecordMetadata.setDzFilename(rawFilename);
         uploadNewFileRecordMetadata.setFileTag(transcriptionDocument.getFileType());
         return uploadNewFileRecordMetadata;
     }

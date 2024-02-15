@@ -76,7 +76,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
 
     @Override
-    public CaseArchiveRecord mapToCaseArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
+    public CaseArchiveRecord mapToCaseArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile, String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
@@ -84,7 +84,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             loadCaseProperties();
             CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
             CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(caseDocument, externalObjectDirectory.getId(), archiveRecordFile);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(caseDocument, externalObjectDirectory.getId(), rawFilename);
             return createCaseArchiveRecord(caseCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
@@ -109,18 +109,18 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             .build();
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(CaseDocumentEntity caseDocument, Integer relationId, File archiveRecordFile) {
+    private UploadNewFileRecord createUploadNewFileRecord(CaseDocumentEntity caseDocument, Integer relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));
-        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(caseDocument, archiveRecordFile));
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(caseDocument, rawFilename));
         return uploadNewFileRecord;
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(CaseDocumentEntity caseDocument, File archiveRecordFile) {
+    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(CaseDocumentEntity caseDocument, String rawFilename) {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
-        uploadNewFileRecordMetadata.setDzFilename(archiveRecordFile.getName());
+        uploadNewFileRecordMetadata.setDzFilename(rawFilename);
         uploadNewFileRecordMetadata.setFileTag(caseDocument.getFileType());
         return uploadNewFileRecordMetadata;
     }

@@ -76,7 +76,9 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
 
     @Override
-    public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
+    public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                File archiveRecordFile,
+                                                                String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
 
@@ -84,7 +86,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             loadAnnotationProperties();
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
             AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId(), archiveRecordFile);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId(), rawFilename);
             return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
@@ -276,18 +278,18 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Integer relationId, File archiveRecordFile) {
+    private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Integer relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));
-        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(annotationDocument, archiveRecordFile));
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(annotationDocument, rawFilename));
         return uploadNewFileRecord;
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(AnnotationDocumentEntity annotationDocument, File archiveRecordFile) {
+    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(AnnotationDocumentEntity annotationDocument, String rawFilename) {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
-        uploadNewFileRecordMetadata.setDzFilename(archiveRecordFile.getName());
+        uploadNewFileRecordMetadata.setDzFilename(rawFilename);
         uploadNewFileRecordMetadata.setFileTag(annotationDocument.getFileType());
         return uploadNewFileRecordMetadata;
     }

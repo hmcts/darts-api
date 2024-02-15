@@ -4,5 +4,5 @@ import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 
 public interface ArchiveRecordService {
 
-    ArchiveRecordFileInfo generateArchiveRecord(Integer externalObjectDirectoryId);
+    ArchiveRecordFileInfo generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename);
 }

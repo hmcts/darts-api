@@ -78,14 +78,16 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private DateTimeFormatter dateFormatter;
 
 
-    public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
+    public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                      File archiveRecordFile,
+                                                      String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
         try {
             loadMediaProperties();
             MediaEntity media = externalObjectDirectory.getMedia();
             MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId(), archiveRecordFile);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId(), rawFilename);
             return createMediaArchiveRecord(mediaCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error("Unable to read media property file {} - {}", armDataManagementConfiguration.getMediaRecordPropertiesFile(), e.getMessage());
@@ -263,18 +265,18 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId, File archiveRecordFile) {
+    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId, String rawFilename) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(String.valueOf(relationId));
-        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(media, archiveRecordFile));
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(media, rawFilename));
         return uploadNewFileRecord;
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media, File archiveRecordFile) {
+    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media, String rawFilename) {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
-        uploadNewFileRecordMetadata.setDzFilename(archiveRecordFile.getName());
+        uploadNewFileRecordMetadata.setDzFilename(rawFilename);
         uploadNewFileRecordMetadata.setFileTag(media.getMediaFormat());
         return uploadNewFileRecordMetadata;
     }

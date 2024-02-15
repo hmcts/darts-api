@@ -23,6 +23,9 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,17 +119,18 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
 
-            String filename = generateFilename(armExternalObjectDirectory);
-
+            String rawFilename = generateFilename(armExternalObjectDirectory);
+            log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), LocalDateTime.now());
             boolean copyRawDataToArmSuccessful = copyRawDataToArm(
                 unstructuredExternalObjectDirectory,
                 armExternalObjectDirectory,
-                filename,
+                rawFilename,
                 previousStatus
             );
-            if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
+            if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
                 updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
             }
+            log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), LocalDateTime.now());
         }
     }
 
@@ -153,8 +157,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
-    private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armExternalObjectDirectory.getId());
+    private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory, String rawFilename) {
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armExternalObjectDirectory.getId(), rawFilename);
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
@@ -214,11 +218,20 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             if (previousStatus == null
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
+                Instant start = Instant.now();
+                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+
+                Instant finish = Instant.now();
+                long timeElapsed = Duration.between(start, finish).toMillis();
+                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
+                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {}", armExternalObjectDirectory.getId(), timeElapsed);
+
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
