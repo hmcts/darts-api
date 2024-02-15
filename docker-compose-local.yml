@@ -41,6 +41,7 @@ services:
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
       - ARM_SAS_ENDPOINT
+      - DETS_SAS_ENDPOINT
       - ARM_USERNAME
       - ARM_PASSWORD
       - ARM_URL=http://darts-stub-services:4551

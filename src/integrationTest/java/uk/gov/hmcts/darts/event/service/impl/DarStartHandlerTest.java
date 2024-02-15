@@ -1,13 +1,19 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
+import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -15,6 +21,7 @@ import java.util.List;
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
@@ -32,6 +39,18 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
     @Autowired
     private EventDispatcher eventDispatcher;
 
+    @Autowired
+    NodeRegisterStub nodeRegisterStub;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    public void setupStubs() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
     @Test
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
@@ -44,7 +63,8 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
 
     @Test
     void shouldNotifyDarStartRecordingForHearingStarted() {
-        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroom);
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
@@ -83,6 +103,7 @@ class DarStartHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(persistedCase.getCaseClosedTimestamp()).isNull();
 
         dartsGateway.verifyReceivedNotificationType(1);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx");
     }
 
     @Test

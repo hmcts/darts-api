@@ -48,7 +48,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     private final RetentionDateHelper retentionDateHelper;
 
     @Override
-    public PostRetentionResponse postRetention(PostRetentionRequest postRetentionRequest) {
+    public PostRetentionResponse postRetention(Boolean validateOnly, PostRetentionRequest postRetentionRequest) {
 
         Optional<CourtCaseEntity> caseOpt = caseRepository.findById(postRetentionRequest.getCaseId());
         if (caseOpt.isEmpty()) {
@@ -68,7 +68,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             newRetentionDate = postRetentionRequest.getRetentionDate();
         }
 
-        if (BooleanUtils.isNotTrue(postRetentionRequest.getValidateOnly())) {
+        if (BooleanUtils.isNotTrue(validateOnly)) {
             createNewCaseRetention(postRetentionRequest, courtCase, newRetentionDate);
         }
 

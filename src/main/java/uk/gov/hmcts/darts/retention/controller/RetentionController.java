@@ -43,9 +43,10 @@ public class RetentionController implements RetentionApi {
             securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
             globalAccessSecurityRoles = {JUDGE, ADMIN})
     @Override
-    public ResponseEntity<PostRetentionResponse> retentionsPost(PostRetentionRequest postRetentionRequest) {
+    public ResponseEntity<PostRetentionResponse> retentionsPost(Boolean validateOnly,
+                                                                PostRetentionRequest postRetentionRequest) {
         RetentionsPostRequestValidator.validate(postRetentionRequest);
-        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(validateOnly, postRetentionRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

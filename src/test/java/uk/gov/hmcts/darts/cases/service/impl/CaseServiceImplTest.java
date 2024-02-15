@@ -84,19 +84,15 @@ class CaseServiceImplTest {
 
     @Mock
     TranscriptionRepository transcriptionRepository;
-
-    @Mock
-    private CaseRetentionRepository caseRetentionRepository;
-
-    @Mock
-    private AnnotationRepository annotationRepository;
-
-    @Mock
-    private AuthorisationApi authorisationApi;
-
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
+    @Mock
+    private CaseRetentionRepository caseRetentionRepository;
+    @Mock
+    private AnnotationRepository annotationRepository;
+    @Mock
+    private AuthorisationApi authorisationApi;
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -110,8 +106,7 @@ class CaseServiceImplTest {
             annotationRepository,
             retrieveCoreObjectService,
             advancedSearchRequestHelper,
-            transcriptionRepository,
-            authorisationApi
+            transcriptionRepository, authorisationApi
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }

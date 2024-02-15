@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -25,6 +27,9 @@ class DartsEventNullHandlerTest extends IntegrationBase {
 
     @SpyBean
     DartsEventNullHandler nullEventHandler;
+
+    @Mock
+    LogApi logApi;
 
     @Autowired
     EventHandlerRepository eventHandlerRepository;
@@ -47,7 +52,7 @@ class DartsEventNullHandlerTest extends IntegrationBase {
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
 
-        EventDispatcher eventDispatcher = new EventDispatcherImpl(List.of(nullEventHandler), eventHandlerRepository);
+        EventDispatcher eventDispatcher = new EventDispatcherImpl(List.of(nullEventHandler), eventHandlerRepository, logApi);
         eventDispatcher.receive(event);
 
         Mockito.verify(nullEventHandler, Mockito.times(1)).handle(any(), any());

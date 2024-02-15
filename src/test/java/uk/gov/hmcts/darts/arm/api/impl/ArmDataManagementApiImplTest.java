@@ -6,19 +6,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -106,13 +110,18 @@ class ArmDataManagementApiImplTest {
     }
 
     @Test
-    void downloadArmData() {
+    void downloadArmData() throws IOException {
 
         var inputStream = new ByteArrayInputStream("some file binary content".getBytes());
-        when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)).thenReturn(inputStream);
+        DownloadResponseMetaData metaData = Mockito.mock(DownloadResponseMetaData.class);
+        when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, metaData)).thenReturn(inputStream);
 
-        InputStream result = armDataManagementApi.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
+        entity.setExternalFileId(EXTERNAL_FILE_ID);
+        entity.setExternalRecordId(EXTERNAL_RECORD_ID);
 
-        assertThat(result).isEqualTo(inputStream);
+        boolean result = armDataManagementApi.downloadBlobFromContainer(DatastoreContainerType.ARM, entity, metaData);
+
+        assertTrue(result);
     }
 }

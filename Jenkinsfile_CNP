@@ -39,7 +39,8 @@ def secrets = [
     secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
     secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
     secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
-    secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT')
+    secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
+    secret('DETSSasEndpoint', 'DETS_SAS_ENDPOINT')
   ],
 ]
 
@@ -121,5 +122,9 @@ withPipeline(type, product, component) {
 
   afterFailure('test') {
     junit '**/test-results/integration/*.xml'
+  }
+
+  before('dbmigrate:demo') {
+    sh("./gradlew --no-daemon --init-script init.gradle assemble")
   }
 }

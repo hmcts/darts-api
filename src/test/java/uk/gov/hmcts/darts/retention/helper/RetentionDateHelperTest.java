@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
@@ -16,6 +17,7 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -83,9 +85,12 @@ class RetentionDateHelperTest {
                 .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
-        LocalDate response = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
+        var exception = assertThrows(
+                DartsApiException.class,
+                () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+        );
 
-        assertEquals(LocalDate.of(2021, 7, 10), response);
+        assertEquals("PolicyString '9M', is not in the required format.", exception.getDetail());
 
     }
 
@@ -103,9 +108,12 @@ class RetentionDateHelperTest {
                 .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
-        LocalDate response = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
+        var exception = assertThrows(
+                DartsApiException.class,
+                () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+        );
 
-        assertEquals(LocalDate.of(2020, 10, 10), response);
+        assertEquals("PolicyString '', is not in the required format.", exception.getDetail());
 
     }
 
@@ -122,10 +130,13 @@ class RetentionDateHelperTest {
                 .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
-        LocalDate response = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
 
-        assertEquals(LocalDate.of(2020, 10, 10), response);
+        var exception = assertThrows(
+                DartsApiException.class,
+                () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+        );
 
+        assertEquals("PolicyString 'null', is not in the required format.", exception.getDetail());
     }
 
 }

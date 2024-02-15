@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -39,30 +40,25 @@ class ExternalOutboundDataStoreDeleterImplTest {
     UserAccountRepository userAccountRepository;
     @Mock
     TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-
     ExternalOutboundDataStoreDeleter deleter;
-
     private ObjectRecordStatusEntity markedForDeletionStatus;
-
-
     @Mock
     private OutboundExternalObjectDirectoryDeletedFinder finder;
-
     @Mock
     private OutboundDataStoreDeleter outboundDataStoreDeleter;
 
-    @Mock
-    private SystemUserHelper systemUserHelper;
-
-
     @BeforeEach
     void setUp() {
+        SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository);
+        HashMap<String, String> systemUserGuidMap = new HashMap<>();
+        systemUserGuidMap.put("housekeeping", "123");
+        systemUserHelper.setSystemUserGuidMap(systemUserGuidMap);
+
         this.deleter = new ExternalOutboundDataStoreDeleter(
-            objectRecordStatusRepository,
-            userAccountRepository,
-            transientObjectDirectoryRepository,
-            finder,
-            outboundDataStoreDeleter, systemUserHelper
+                objectRecordStatusRepository,
+                transientObjectDirectoryRepository,
+                finder,
+                outboundDataStoreDeleter, systemUserHelper
         );
     }
 
@@ -70,11 +66,10 @@ class ExternalOutboundDataStoreDeleterImplTest {
         this.markedForDeletionStatus = new ObjectRecordStatusEntity();
         markedForDeletionStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
         when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
-            markedForDeletionStatus);
+                markedForDeletionStatus);
     }
 
     private void mockSystemUser() {
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("");
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(new UserAccountEntity());
     }
 
@@ -107,8 +102,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
         List<TransientObjectDirectoryEntity> deletedItems = deleter.delete();
 
         assertThat(deletedItems, containsInAnyOrder(
-            hasProperty("id", is(1)),
-            hasProperty("id", is(21))
+                hasProperty("id", is(1)),
+                hasProperty("id", is(21))
         ));
         assertEquals(2, deletedItems.size());
 
@@ -117,7 +112,6 @@ class ExternalOutboundDataStoreDeleterImplTest {
 
     @Test
     void testDeleteWhenSystemUserDoesNotExist() {
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("");
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () -> deleter.delete());
     }

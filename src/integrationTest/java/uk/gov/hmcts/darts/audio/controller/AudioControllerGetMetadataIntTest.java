@@ -68,7 +68,8 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
               {
                 "id": 1,
                 "media_start_timestamp": "2023-01-01T12:00:00Z",
-                "media_end_timestamp": "2023-01-01T13:00:00Z"
+                "media_end_timestamp": "2023-01-01T13:00:00Z",
+                "is_archived": false
               }
             ]
             """;
