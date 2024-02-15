@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.hearings.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -67,17 +65,8 @@ public class HearingsServiceImpl implements HearingsService {
 
     @Override
     public List<Transcript> getTranscriptsByHearingId(Integer hearingId) {
-        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingId(hearingId);
-        List<TranscriptionEntity> filteredTranscriptionEntities = findNonAutomaticTranscripts(transcriptionEntities);
-        return TranscriptionMapper.mapResponse(filteredTranscriptionEntities);
-    }
-
-    private List<TranscriptionEntity> findNonAutomaticTranscripts(List<TranscriptionEntity> transcriptionEntities) {
-        //only show manual transcriptions or ones that came from legacy. Do not show Modernised automatic transcriptions.
-        return transcriptionEntities.stream()
-            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
-            .toList();
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingIdManualOrLegacy(hearingId);
+        return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
     @Override
