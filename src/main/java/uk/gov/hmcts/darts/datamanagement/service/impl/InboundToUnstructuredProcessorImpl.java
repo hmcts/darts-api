@@ -27,8 +27,6 @@ import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,14 +62,14 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final AudioConfigurationProperties audioConfigurationProperties;
     
     private final List<Integer> failureStatesList =
-        new ArrayList<>(Arrays.asList(
+        List.of(
             FAILURE.getId(),
             FAILURE_FILE_NOT_FOUND.getId(),
             FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
             FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
             FAILURE_CHECKSUM_FAILED.getId(),
             FAILURE_ARM_INGESTION_FAILED.getId()
-        ));
+        );
     private List<ExternalObjectDirectoryEntity> unstructuredStoredList;
     private List<ExternalObjectDirectoryEntity> unstructuredFailedList;
 
@@ -86,6 +84,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private void processAllStoredInboundExternalObjects() {
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(
             STORED), getType(INBOUND));
+
+        log.info("Found {} EODs in inbound with state STORED", inboundList.size());
+
         unstructuredStoredList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
         unstructuredFailedList = externalObjectDirectoryRepository.findByStatusIdInAndType(
             failureStatesList,
@@ -93,7 +94,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         );
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
-            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
+            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity =
+                getNewOrExistingInUnstructuredStoredOrFailed(inboundExternalObjectDirectory);
             ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
             if (unstructuredStatus == null
                 || unstructuredStatus.getId().equals(STORED.getId())
@@ -117,6 +119,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                     unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                     unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                     unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+                    log.debug("Saving unstructured stored EOD for media ID: {}", unstructuredExternalObjectDirectoryEntity.getId());
                     externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
                     log.info("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
                 }
@@ -127,7 +130,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             } catch (Exception e) {
-                log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}",
+                log.error("Failed to move from inboundExternalObjectDirectory to unstructuredExternalObjectDirectoryEntity for EOD ID: {}, with error: {}",
                           inboundExternalObjectDirectory.getId(), e.getMessage(), e
                 );
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
@@ -146,13 +149,13 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         return false;
     }
 
-    private ExternalObjectDirectoryEntity getNewOrExistingExternalObjectDirectory(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
+    private ExternalObjectDirectoryEntity getNewOrExistingInUnstructuredStoredOrFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getUnstructuredStored(inboundExternalObjectDirectory);
         if (unstructuredExternalObjectDirectoryEntity == null) {
             unstructuredExternalObjectDirectoryEntity = getUnstructuredFailed(inboundExternalObjectDirectory);
             if (unstructuredExternalObjectDirectoryEntity == null) {
-                unstructuredExternalObjectDirectoryEntity = createUnstructuredExternalObjectDirectoryEntity(
+                unstructuredExternalObjectDirectoryEntity = createUnstructuredAwaitingVerificationExternalObjectDirectoryEntity(
                     inboundExternalObjectDirectory);
             }
         }
@@ -287,7 +290,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    private ExternalObjectDirectoryEntity createUnstructuredExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private ExternalObjectDirectoryEntity createUnstructuredAwaitingVerificationExternalObjectDirectoryEntity(
+        ExternalObjectDirectoryEntity externalObjectDirectory) {
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         unstructuredExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()));
