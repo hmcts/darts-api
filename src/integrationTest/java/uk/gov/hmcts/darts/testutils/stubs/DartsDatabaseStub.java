@@ -601,7 +601,7 @@ public class DartsDatabaseStub {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
             RetentionPolicyEnum.MANUAL.getPolicyKey(),
             currentTimeHelper.currentOffsetDateTime()
-        ).get();
+        ).get(0);
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
         caseRetentionRepository.save(caseRetentionEntity1);

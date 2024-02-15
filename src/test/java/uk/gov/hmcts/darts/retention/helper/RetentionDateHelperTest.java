@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,10 +39,10 @@ class RetentionDateHelperTest {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setDuration("99Y0M0D");
 
-        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(Optional.of(retentionPolicyType));
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(List.of(retentionPolicyType));
 
         when(currentTimeHelper.currentOffsetDateTime())
-                .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
         LocalDate response = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
@@ -59,10 +59,10 @@ class RetentionDateHelperTest {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setDuration("99Y9M9D");
 
-        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(Optional.of(retentionPolicyType));
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(List.of(retentionPolicyType));
 
         when(currentTimeHelper.currentOffsetDateTime())
-                .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
         LocalDate response = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
@@ -79,15 +79,15 @@ class RetentionDateHelperTest {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setDuration("9M");
 
-        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(Optional.of(retentionPolicyType));
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(List.of(retentionPolicyType));
 
         when(currentTimeHelper.currentOffsetDateTime())
-                .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+            DartsApiException.class,
+            () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
         );
 
         assertEquals("PolicyString '9M', is not in the required format.", exception.getDetail());
@@ -102,15 +102,15 @@ class RetentionDateHelperTest {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setDuration("");
 
-        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(Optional.of(retentionPolicyType));
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(List.of(retentionPolicyType));
 
         when(currentTimeHelper.currentOffsetDateTime())
-                .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+            DartsApiException.class,
+            () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
         );
 
         assertEquals("PolicyString '', is not in the required format.", exception.getDetail());
@@ -124,16 +124,16 @@ class RetentionDateHelperTest {
 
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
 
-        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(Optional.of(retentionPolicyType));
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(List.of(retentionPolicyType));
 
         when(currentTimeHelper.currentOffsetDateTime())
-                .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
 
         RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+            DartsApiException.class,
+            () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
         );
 
         assertEquals("PolicyString 'null', is not in the required format.", exception.getDetail());
