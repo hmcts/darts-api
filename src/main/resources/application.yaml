@@ -159,6 +159,8 @@ darts:
         transcription_available: b3378991-ad90-4430-8005-45dcb35741b8
         transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
+  retention:
+    overridable-fixed-policy-keys: 3
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
