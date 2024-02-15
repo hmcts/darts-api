@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -93,6 +94,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final UserAccountRepository userAccountRepository;
 
     private final TransformedMediaHelper transformedMediaHelper;
+    private final LogApi logApi;
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
@@ -185,6 +187,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
             hearingEntity = mediaRequestEntity.getHearing();
 
+            logApi.atsProcessingUpdate(mediaRequestEntity);
+
             AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
             if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
                 audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
@@ -245,6 +249,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
             }
 
+            logApi.atsProcessingUpdate(mediaRequestEntity);
+
             log.debug("Completed processing for requestId {}.", requestId);
 
         } catch (Exception e) {
@@ -259,6 +265,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
                            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
+
+                logApi.atsProcessingUpdate(mediaRequestEntity);
             }
 
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
