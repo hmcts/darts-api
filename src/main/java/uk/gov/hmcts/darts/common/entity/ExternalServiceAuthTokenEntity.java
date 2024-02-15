@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "external_service_auth_token")
@@ -35,6 +35,6 @@ public class ExternalServiceAuthTokenEntity extends CreatedModifiedBaseEntity {
     private String token;
 
     @Column(name = "expiry_ts")
-    private LocalDateTime expiryTimestamp;
+    private OffsetDateTime expiryTimestamp;
 
 }

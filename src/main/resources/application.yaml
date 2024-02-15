@@ -138,6 +138,8 @@ darts:
       enabled: true
       cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
+  dar-pc-notification:
+    url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
@@ -191,9 +193,14 @@ darts:
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-
+    dets:
+      connection-string: ${DETS_SAS_ENDPOINT:${AZURE_STORAGE_CONNECTION_STRING}}
+      container-name: darts-dets
+      fetch-from-dets-enabled: true
+      temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      temp-blob-workspace: ${user.home}/blob/tempworkspace
       container-name:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
@@ -217,6 +224,7 @@ darts:
       system-user-email: ${SYSTEM_USER_EMAIL:}
       system-user-guid-map:
         housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
+        dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
   bank-holidays:
@@ -233,6 +241,11 @@ darts:
   sse:
     heartbeat: 5 # in seconds
     sse-preview-timeout: 120 # in seconds
+  log:
+    events:
+      daily-test-event-text:
+        xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
+        cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

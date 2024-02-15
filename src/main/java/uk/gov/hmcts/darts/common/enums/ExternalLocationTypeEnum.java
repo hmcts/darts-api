@@ -14,5 +14,4 @@ public enum ExternalLocationTypeEnum {
     VODAFONE(5);
 
     private final Integer id;
-
 }

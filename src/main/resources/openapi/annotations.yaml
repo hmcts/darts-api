@@ -21,6 +21,9 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - file
+                - annotation
               properties:
                 file:
                   type: string

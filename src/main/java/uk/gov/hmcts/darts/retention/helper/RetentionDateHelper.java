@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.retention.helper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -17,14 +16,19 @@ import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RetentionDateHelper {
 
+    private static final int POLICY_STRING_YEAR_LOCATION = 0;
+    private static final int POLICY_STRING_MONTH_LOCATION = 2;
+    private static final int POLICY_STRING_DAY_LOCATION = 4;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private Pattern policyFormat = Pattern.compile("^\\d+Y\\d+M\\d+D$");
 
     public LocalDate getRetentionDateForPolicy(CourtCaseEntity courtCase, RetentionPolicyEnum policy) {
         RetentionPolicyTypeEntity retentionPolicy = getRetentionPolicy(policy);
@@ -45,25 +49,34 @@ public class RetentionDateHelper {
         return manualPolicyEntityOpt.get();
     }
 
-    private LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {
+    public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {
+        if (StringUtils.isBlank(policyString) || !policyFormat.matcher(policyString).matches()) {
+            throw new DartsApiException(
+                    RetentionApiError.INTERNAL_SERVER_ERROR,
+                    MessageFormat.format("PolicyString ''{0}'', is not in the required format.", policyString)
+            );
+        }
+
         String[] policyArray = StringUtils.splitByCharacterType(StringUtils.trimToEmpty(policyString));
 
-        int years = getValueFromPolicyArray(policyArray, "Y");
-        int months = getValueFromPolicyArray(policyArray, "M");
-        int days = getValueFromPolicyArray(policyArray, "D");
-
-        LocalDate newDate = dateToAppend.plusYears(years);
-        newDate = newDate.plusMonths(months);
-        newDate = newDate.plusDays(days);
+        LocalDate newDate = dateToAppend.plusYears(NumberUtils.toInt(policyArray[POLICY_STRING_YEAR_LOCATION]));
+        newDate = newDate.plusMonths(NumberUtils.toInt(policyArray[POLICY_STRING_MONTH_LOCATION]));
+        newDate = newDate.plusDays(NumberUtils.toInt(policyArray[POLICY_STRING_DAY_LOCATION]));
         return newDate;
     }
 
-    private int getValueFromPolicyArray(String[] policyArray, String searchString) {
-        for (int counter = 0; counter < policyArray.length; counter++) {
-            if (policyArray[counter].equals(searchString)) {
-                return NumberUtils.toInt(ArrayUtils.get(policyArray, counter - 1));
-            }
+    public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString, RetentionPolicyTypeEntity retentionPolicyType) {
+        if (RetentionPolicyEnum.CUSTODIAL.getPolicyKey().equals(retentionPolicyType.getFixedPolicyKey())) {
+            //take max of policy/totalSentence
+            LocalDate policyDate = applyPolicyString(dateToAppend, retentionPolicyType.getDuration());
+            LocalDate termInRequest = applyPolicyString(dateToAppend, policyString);
+            return latestDate(policyDate, termInRequest);
         }
-        return 0;
+
+        return applyPolicyString(dateToAppend, retentionPolicyType.getDuration());
+    }
+
+    private LocalDate latestDate(LocalDate date1, LocalDate date2) {
+        return date1.isAfter(date2) ? date1 : date2;
     }
 }

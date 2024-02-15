@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @Service
 @Slf4j
@@ -19,11 +21,13 @@ import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 public class DartsEventNullHandler extends EventHandlerBase {
 
     public DartsEventNullHandler(RetrieveCoreObjectService retrieveCoreObjectService,
-                           EventRepository eventRepository,
-                           HearingRepository hearingRepository,
-                           CaseRepository caseRepository,
-                           ApplicationEventPublisher eventPublisher) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+                                 EventRepository eventRepository,
+                                 HearingRepository hearingRepository,
+                                 CaseRepository caseRepository,
+                                 ApplicationEventPublisher eventPublisher,
+                                 AuthorisationApi authorisationApi,
+                                 LogApi logApi) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
     }
 
     @Override

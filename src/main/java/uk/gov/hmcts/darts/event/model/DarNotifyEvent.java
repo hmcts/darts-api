@@ -13,6 +13,8 @@ import java.util.List;
 @Jacksonized
 public class DarNotifyEvent {
 
+    @JsonProperty("notification_url")
+    private String notificationUrl;
     @JsonProperty("notification_type")
     private String notificationType;
     @JsonProperty("timestamp")
