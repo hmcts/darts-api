@@ -243,7 +243,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     private static String getCourthouse(AnnotationDocumentEntity annotationDocument) {
         String courthouse = null;
-        if (nonNull(annotationDocument.getAnnotation().getHearingList())) {
+        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
             courthouse = annotationDocument.getAnnotation().getHearingList().get(0).getCourtCase().getCourthouse().getCourthouseName();
         }
         return courthouse;
@@ -251,7 +251,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     private static String getCourtroom(AnnotationDocumentEntity annotationDocument) {
         String courtroom = null;
-        if (nonNull(annotationDocument.getAnnotation().getHearingList())) {
+        if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
             courtroom = annotationDocument.getAnnotation().getHearingList().get(0).getCourtroom().getName();
         }
         return courtroom;

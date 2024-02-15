@@ -242,7 +242,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private String getCaseNumbers(CaseDocumentEntity caseDocument) {
         String cases = null;
-        if (nonNull(caseDocument.getCourtCase())) {
+        if (CollectionUtils.isNotEmpty(caseDocument.getCourtCase().getHearings())) {
             List<HearingEntity> hearings = caseDocument.getCourtCase().getHearings();
             List<String> caseNumbers = hearings
                 .stream()

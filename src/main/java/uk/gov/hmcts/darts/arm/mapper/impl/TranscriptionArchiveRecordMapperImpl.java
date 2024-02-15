@@ -244,7 +244,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String getEndDateTime(TranscriptionDocumentEntity transcriptionDocument) {
         String endDateTime = null;
-        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getEndTime())) {
+        if (nonNull(transcriptionDocument.getTranscription().getEndTime())) {
             endDateTime = transcriptionDocument.getTranscription().getEndTime().format(dateTimeFormatter);
         }
         return endDateTime;
@@ -252,7 +252,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String getStartDateTime(TranscriptionDocumentEntity transcriptionDocument) {
         String startDateTime = null;
-        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getStartTime())) {
+        if (nonNull(transcriptionDocument.getTranscription().getStartTime())) {
             startDateTime = transcriptionDocument.getTranscription().getStartTime().format(dateTimeFormatter);
         }
         return startDateTime;
@@ -276,8 +276,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String getTranscriptionComments(TranscriptionDocumentEntity transcriptionDocument) {
         String comments = null;
-        if (nonNull(transcriptionDocument.getTranscription())
-            && CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
+        if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
             comments = commentListToString(transcriptionDocument.getTranscription().getTranscriptionCommentEntities());
         }
         return comments;
@@ -285,7 +284,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private static String getTranscriptionUrgency(TranscriptionDocumentEntity transcriptionDocument) {
         String transcriptionUrgency = null;
-        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getTranscriptionUrgency())) {
+        if (nonNull(transcriptionDocument.getTranscription().getTranscriptionUrgency())) {
             transcriptionUrgency = transcriptionDocument.getTranscription().getTranscriptionUrgency().getDescription();
         }
         return transcriptionUrgency;

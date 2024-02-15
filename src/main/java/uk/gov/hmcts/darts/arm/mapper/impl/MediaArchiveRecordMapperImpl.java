@@ -230,7 +230,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private String getCaseNumbers(MediaEntity media) {
         String cases = null;
-        if (nonNull(media.getHearingList())) {
+        if (CollectionUtils.isNotEmpty(media.getHearingList())) {
             List<HearingEntity> hearings = media.getHearingList();
             List<String> caseNumbers = hearings
                 .stream()
