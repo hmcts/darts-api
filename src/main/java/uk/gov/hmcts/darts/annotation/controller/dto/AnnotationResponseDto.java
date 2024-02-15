@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Builder
 @Value
-public class AnnotationResponseDTO {
+public class AnnotationResponseDto {
 
     Resource resource;
     String fileName;

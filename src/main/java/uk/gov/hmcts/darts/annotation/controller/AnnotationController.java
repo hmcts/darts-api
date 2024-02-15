@@ -6,7 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDTO;
+import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotations.http.api.AnnotationsApi;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
@@ -45,21 +45,21 @@ public class AnnotationController implements AnnotationsApi {
     @Override
     public ResponseEntity<Resource> downloadAnnotation(Integer annotationId, Integer annotationDocumentId) {
 
-        final AnnotationResponseDTO annotationResponseDTO = annotationService.downloadAnnotationDoc(1, 1);
+        final AnnotationResponseDto annotationResponseDto = annotationService.downloadAnnotationDoc(1, 1);
 
         return ResponseEntity.ok()
                 .header(
                         CONTENT_DISPOSITION,
-                        String.format("attachment; filename=\"%s\"", annotationResponseDTO.getFileName())
+                        String.format("attachment; filename=\"%s\"", annotationResponseDto.getFileName())
                 )
                 .header(
                         "external_location",
-                        String.valueOf(annotationResponseDTO.getExternalLocation())
+                        String.valueOf(annotationResponseDto.getExternalLocation())
                 )
                 .header(
                         "annotation_document_id",
-                        String.valueOf(annotationResponseDTO.getAnnotationDocumentId())
+                        String.valueOf(annotationResponseDto.getAnnotationDocumentId())
                 )
-                .body(annotationResponseDTO.getResource());
+                .body(annotationResponseDto.getResource());
     }
 }

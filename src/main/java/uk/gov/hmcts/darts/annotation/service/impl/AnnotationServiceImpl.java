@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.annotation.component.AnnotationDocumentBuilder;
 import uk.gov.hmcts.darts.annotation.component.AnnotationMapper;
 import uk.gov.hmcts.darts.annotation.component.ExternalObjectDirectoryBuilder;
-import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDTO;
+import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
 import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
@@ -45,7 +45,7 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final FileContentChecksum fileContentChecksum;
     private final AnnotationPersistenceService annotationPersistenceService;
     private final Validator<Annotation> annotationValidator;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ExternalObjectDirectoryRepository eodRepository;
     private final AuthorisationApi authorisationApi;
 
     @Override
@@ -80,15 +80,14 @@ public class AnnotationServiceImpl implements AnnotationService {
     }
 
     @Override
-    public AnnotationResponseDTO downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
+    public AnnotationResponseDto downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
 
-        final Optional<ExternalObjectDirectoryEntity> directoryEntity = externalObjectDirectoryRepository.findAnnotationIdAndAnnotationDocumentId(annotationId,
-                                                                                                                                                  annotationDocumentId);
+        final Optional<ExternalObjectDirectoryEntity> dirEntity = eodRepository.findAnnotationIdAndAnnotationDocumentId(annotationId, annotationDocumentId);
         final InputStreamResource stream;
 
         final ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
-        if (directoryEntity.isEmpty()) {
+        if (dirEntity.isEmpty()) {
 
             if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))) {
                 throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE);
@@ -98,7 +97,7 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         }
 
-        externalObjectDirectoryEntity = directoryEntity.get();
+        externalObjectDirectoryEntity = dirEntity.get();
 
         try {
 
@@ -109,7 +108,7 @@ public class AnnotationServiceImpl implements AnnotationService {
             throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, e);
         }
 
-        return AnnotationResponseDTO.builder()
+        return AnnotationResponseDto.builder()
                 .resource(stream)
                 .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
                 .externalLocation(externalObjectDirectoryEntity.getExternalLocation())

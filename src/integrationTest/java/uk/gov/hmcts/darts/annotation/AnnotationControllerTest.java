@@ -113,8 +113,6 @@ class AnnotationControllerTest extends IntegrationBase {
     @Test
     void shouldThrowHttp404ForValidJudgeAndInvalidAnnotationDocumentEntity() throws Exception {
 
-        // createAuthenticatedJudgeWithGlobalAccessAndEmail("judge@global.com");
-
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
 
         mockMvc.perform(
