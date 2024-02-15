@@ -223,7 +223,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         }
     }
 
-    private void deleteResponseBlobs(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) {
+    void deleteResponseBlobs(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) {
         List<Boolean> deletedResponseBlobStatuses;
         deletedResponseBlobStatuses = responseBlobs.stream()
             .map(armDataManagementApi::deleteBlobData)

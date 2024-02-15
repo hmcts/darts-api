@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.component;
+package uk.gov.hmcts.darts.arm.component.impl;
 
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +12,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.impl.ArmResponseFilesProcessSingleElementImpl;
+import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
@@ -384,4 +384,5 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
+
 }
