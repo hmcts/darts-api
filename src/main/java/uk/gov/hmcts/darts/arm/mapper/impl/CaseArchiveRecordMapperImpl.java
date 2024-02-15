@@ -242,7 +242,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private String getCaseNumbers(CaseDocumentEntity caseDocument) {
         String cases = null;
-        if (nonNull(caseDocument.getCourtCase().getHearings())) {
+        if (nonNull(caseDocument.getCourtCase())) {
             List<HearingEntity> hearings = caseDocument.getCourtCase().getHearings();
             List<String> caseNumbers = hearings
                 .stream()
@@ -255,7 +255,11 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     }
 
     private static String getCourthouse(CaseDocumentEntity caseDocument) {
-        return caseDocument.getCourtCase().getCourthouse().getCourthouseName();
+        String courthouse = null;
+        if (nonNull(caseDocument.getCourtCase())) {
+            courthouse = caseDocument.getCourtCase().getCourthouse().getCourthouseName();
+        }
+        return courthouse;
     }
 
     private Integer mapToInt(String key, CaseDocumentEntity caseDocument) {
