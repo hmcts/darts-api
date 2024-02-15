@@ -656,6 +656,70 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
+    void generateArchiveRecord_WithAllAnnotationProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+
+        when(courtroomEntity.getName()).thenReturn("Room1");
+
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
+        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
+        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
+        when(hearingEntity1.getCourtroom()).thenReturn(courtroomEntity);
+
+        when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+
+        OffsetDateTime uploadedDateTime = testTime.minusHours(1);
+
+        when(annotationDocumentEntity.getId()).thenReturn(1);
+        when(annotationDocumentEntity.getAnnotation()).thenReturn(annotationEntity);
+        when(annotationDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
+        when(annotationDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
+        when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
+
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
+        when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "Tests/arm/properties/all_properties/annotation-record.properties");
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateAnnotationArchiveRecord/all_properties/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
     void generateArchiveRecord_WithNleCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -755,6 +819,59 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime endedAt = OffsetDateTime.now();
 
         String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithAllCaseProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
+        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
+        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
+        when(courtCaseEntity1.getHearings()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+
+        when(caseDocumentEntity.getId()).thenReturn(1);
+        when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
+
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
+        when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/all_properties/case-record.properties");
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/all_properties/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
