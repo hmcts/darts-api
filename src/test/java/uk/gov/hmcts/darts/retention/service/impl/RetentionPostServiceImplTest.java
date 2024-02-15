@@ -224,6 +224,39 @@ class RetentionPostServiceImplTest {
     }
 
     @Test
+    void fail_multiplePolicies() {
+        setupStubs();
+
+        RetentionPolicyTypeEntity retentionPolicyTypeManual = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeManual.setId(1);
+        retentionPolicyTypeManual.setFixedPolicyKey("MANUAL");
+
+        RetentionPolicyTypeEntity retentionPolicyTypeManual2 = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeManual.setId(2);
+        retentionPolicyTypeManual.setFixedPolicyKey("MANUAL");
+
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
+            List.of(retentionPolicyTypeManual, retentionPolicyTypeManual2));
+
+
+        when(authorisationApi.userHasOneOfRoles(anyList())).thenReturn(true);
+
+        PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
+        postRetentionRequest.setCaseId(1);
+        postRetentionRequest.setRetentionDate(LocalDate.of(2026, 1, 1));
+        postRetentionRequest.setComments("TheComments");
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
+        );
+
+        assertEquals("More than 1 retention policy found for fixedPolicyKey 'MANUAL'", exception.getDetail());
+        assertEquals("RETENTION_106", exception.getError().getType().toString());
+        assertEquals(500, exception.getError().getHttpStatus().value());
+    }
+
+    @Test
     void ok_BeforeCurrentRetentionDate_Judge() {
         setupStubs();
 
