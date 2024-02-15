@@ -45,19 +45,21 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
     @Query("""
         SELECT t
         FROM TranscriptionEntity t
-        join t.hearings hearing
+        JOIN t.hearings hearing
         WHERE hearing.id = :hearingId
         AND t.transcriptionType = :transcriptionType
-        AND t.startTime = :startTime
-        AND t.endTime = :endTime
+        AND (t.startTime IS NULL OR t.startTime = :startTime)
+        AND (t.endTime IS NULL OR t.endTime = :endTime)
         AND t.isManualTranscription = :isManual
+        AND t.transcriptionStatus NOT IN (:ignoreStatuses)
         """)
-    List<TranscriptionEntity> findByHearingIdTypeStartAndEndAndIsManual(
+    List<TranscriptionEntity> findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
         Integer hearingId,
         TranscriptionTypeEntity transcriptionType,
         OffsetDateTime startTime,
         OffsetDateTime endTime,
-        Boolean isManual
+        Boolean isManual,
+        List<TranscriptionStatusEntity> ignoreStatuses
     );
 
     List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
