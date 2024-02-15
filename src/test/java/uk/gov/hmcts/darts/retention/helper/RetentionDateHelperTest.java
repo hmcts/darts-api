@@ -139,4 +139,52 @@ class RetentionDateHelperTest {
         assertEquals("PolicyString 'null', is not in the required format.", exception.getDetail());
     }
 
+    @Test
+    void fail_multiplePolicies() {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        RetentionPolicyTypeEntity retentionPolicyType1 = new RetentionPolicyTypeEntity();
+        retentionPolicyType1.setDuration("99Y9M9D");
+
+        RetentionPolicyTypeEntity retentionPolicyType2 = new RetentionPolicyTypeEntity();
+        retentionPolicyType2.setDuration("7Y0M0D");
+
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(
+            List.of(retentionPolicyType1, retentionPolicyType2));
+
+        when(currentTimeHelper.currentOffsetDateTime())
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+        );
+
+        assertEquals("More than 1 retention policy found for fixedPolicyKey 'PERM'", exception.getDetail());
+    }
+
+    @Test
+    void fail_NoPolicies() {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(anyString(), any(OffsetDateTime.class))).thenReturn(
+            List.of());
+
+        when(currentTimeHelper.currentOffsetDateTime())
+            .thenReturn(OffsetDateTime.of(2024, 2, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        RetentionDateHelper retentionDateHelper = new RetentionDateHelper(retentionPolicyTypeRepository, currentTimeHelper);
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT)
+        );
+
+        assertEquals("Cannot find Policy with FixedPolicyKey 'PERM'", exception.getDetail());
+    }
+
 }
