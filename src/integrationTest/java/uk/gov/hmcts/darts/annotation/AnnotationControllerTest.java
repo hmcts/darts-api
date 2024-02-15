@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
@@ -103,6 +102,7 @@ class AnnotationControllerTest extends IntegrationBase {
     @Test
     void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
         var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        createAuthenticatedJudgeAuthorizedForCourthouse("judge@global.com", hearing.getCourtroom().getCourthouse());
 
         mockMvc.perform(
                 multipart(ENDPOINT)
@@ -180,7 +180,7 @@ class AnnotationControllerTest extends IntegrationBase {
                 ));
 
     }
-
+    @Test
     void returns400IfAnnotationDocumentMissing() throws Exception {
 
         mockMvc.perform(
