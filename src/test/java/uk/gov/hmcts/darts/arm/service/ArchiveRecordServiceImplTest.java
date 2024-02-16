@@ -169,7 +169,6 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
 
         OffsetDateTime startedAt = testTime.minusHours(1);
-        OffsetDateTime endedAt = testTime;
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
@@ -178,6 +177,8 @@ class ArchiveRecordServiceImplTest {
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
+        OffsetDateTime endedAt = testTime;
 
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
@@ -299,8 +300,6 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
 
-        OffsetDateTime startedAt = testTime.minusHours(1);
-        OffsetDateTime endedAt = testTime;
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
@@ -309,6 +308,9 @@ class ArchiveRecordServiceImplTest {
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
+
+        OffsetDateTime startedAt = testTime.minusHours(1);
+        OffsetDateTime endedAt = testTime;
 
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
