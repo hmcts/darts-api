@@ -77,6 +77,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
+    private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmResponseProcessing;
 
@@ -90,7 +91,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         objectRecordStatusStored.setId(STORED.getId());
         objectRecordStatusStored.setDescription("Stored");
 
-        ObjectRecordStatusEntity objectRecordStatusArmDropZone = new ObjectRecordStatusEntity();
+        objectRecordStatusArmDropZone = new ObjectRecordStatusEntity();
         objectRecordStatusArmDropZone.setId(ARM_DROP_ZONE.getId());
         objectRecordStatusArmDropZone.setDescription("Arm Drop Zone");
 
@@ -160,6 +161,30 @@ class ArmResponseFilesProcessSingleElementImplTest {
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verifyNoMoreInteractions(armDataManagementApi);
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+    }
+
+    @Test
+    void processResponseFilesFor_WithInvalidInputUploadFilenameExtention() {
+
+        when(mediaEntity.getId()).thenReturn(1);
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_abc.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        assertEquals(objectRecordStatusArmDropZone, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
