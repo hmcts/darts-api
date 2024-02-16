@@ -49,8 +49,8 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public void deleteResponseBlob(String blobName) {
-        armService.deleteResponseBlob(armDataManagementConfiguration.getContainerName(), blobName);
+    public boolean deleteResponseBlob(String blobName) {
+        armService.deleteResponseBlob(getArmContainerName(), blobName);
     }
 
     @Override
