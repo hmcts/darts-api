@@ -295,6 +295,38 @@ class ArmResponseFilesProcessSingleElementImplTest {
     }
 
     @Test
+    void processResponseFilesFor_WithInvalidUploadFileThrowsException() {
+
+        when(mediaEntity.getId()).thenReturn(1);
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmResponseProcessing);
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs).thenThrow(new AzureException());
+        
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+    }
+
+    @Test
     void processResponseFilesFor_WithInvalidUploadFileJson() throws IOException {
 
         when(mediaEntity.getId()).thenReturn(1);
