@@ -48,7 +48,7 @@ class InboundToUnstructuredProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void testHappyPath() {
+    void testInboundToUnstructured() {
         // given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         var media1 = medias.get(0);
