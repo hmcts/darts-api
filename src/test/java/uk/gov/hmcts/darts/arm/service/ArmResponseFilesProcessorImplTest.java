@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -23,14 +22,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 
 @ExtendWith(MockitoExtension.class)
 class ArmResponseFilesProcessorImplTest {
-
-    private ArmResponseFilesProcessor armResponseFilesProcessor;
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -38,70 +39,91 @@ class ArmResponseFilesProcessorImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
+
     @Mock
     private UserIdentity userIdentity;
 
     @Mock
-    private ExternalLocationTypeEntity externalLocationTypeArm;
-    @Mock
-    private ObjectRecordStatusEntity objectRecordStatusStored;
-    @Mock
-    private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
-    @Mock
-    private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
-    @Mock
-    private ObjectRecordStatusEntity objectRecordStatusArmProcessingFiles;
-    @Mock
-    private ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed;
-    @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
-    @Mock
-    private ExternalObjectDirectoryEntity externalObjectDirectoryArmResponseProcessing;
 
     @Mock
     private ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
 
-    @Mock
-    private MediaEntity mediaEntity;
-
-
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
+    private ExternalLocationTypeEntity externalLocationTypeArm;
+    private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
+    private ObjectRecordStatusEntity objectRecordStatusArmProcessingFiles;
+    private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
+
+    private ArmResponseFilesProcessor armResponseFilesProcessor;
 
     @BeforeEach
     void setupData() {
 
+        externalLocationTypeArm = new ExternalLocationTypeEntity();
+        externalLocationTypeArm.setId(ARM.getId());
+
+        objectRecordStatusArmDropZone = new ObjectRecordStatusEntity();
+        objectRecordStatusArmDropZone.setId(ARM_DROP_ZONE.getId());
+        objectRecordStatusArmDropZone.setDescription("Arm Drop Zone");
+
+        objectRecordStatusArmProcessingFiles = new ObjectRecordStatusEntity();
+        objectRecordStatusArmProcessingFiles.setId(ARM_PROCESSING_RESPONSE_FILES.getId());
+        objectRecordStatusArmProcessingFiles.setDescription("Arm Processing Response Files");
+
+        objectRecordStatusArmResponseProcessingFailed = new ObjectRecordStatusEntity();
+        objectRecordStatusArmResponseProcessingFailed.setId(ARM_RESPONSE_PROCESSING_FAILED.getId());
+        objectRecordStatusArmResponseProcessingFailed.setDescription("Arm Response Process Failed");
+
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
-                externalObjectDirectoryRepository,
-                objectRecordStatusRepository,
-                externalLocationTypeRepository,
-                userIdentity,
-                armResponseFilesProcessSingleElement
+            externalObjectDirectoryRepository,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            userIdentity,
+            armResponseFilesProcessSingleElement
         );
     }
 
     @Test
     void processResponseFilesUnableToFindInputUploadFile() {
 
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+        when(externalLocationTypeRepository.getReferenceById(ARM.getId()))
+            .thenReturn(externalLocationTypeArm);
 
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
-        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
-        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
+        when(objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()))
+            .thenReturn(Optional.of(objectRecordStatusArmDropZone));
+        when(objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()))
+            .thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
+        when(objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()))
+            .thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
 
-        when(externalObjectDirectoryArmDropZone.getId()).thenReturn(1);
-        when(externalObjectDirectoryArmDropZone.getStatus()).thenReturn(objectRecordStatusArmDropZone);
+        when(externalObjectDirectoryArmDropZone.getId())
+            .thenReturn(1);
+        when(externalObjectDirectoryArmDropZone.getStatus())
+            .thenReturn(objectRecordStatusArmDropZone);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
         when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(externalLocationTypeArm, objectRecordStatusArmDropZone))
-                .thenReturn(inboundList);
-
+            .thenReturn(inboundList);
 
         armResponseFilesProcessor.processResponseFiles();
 
-        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(objectRecordStatusRepository).findById(ARM_DROP_ZONE.getId());
+        verify(objectRecordStatusRepository).findById(ARM_PROCESSING_RESPONSE_FILES.getId());
+        verify(objectRecordStatusRepository).findById(ARM_RESPONSE_PROCESSING_FAILED.getId());
+        verify(externalLocationTypeRepository).getReferenceById(ARM.getId());
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(externalLocationTypeArm, objectRecordStatusArmDropZone);
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(armResponseFilesProcessSingleElement).processResponseFilesFor(1);
 
+        verifyNoMoreInteractions(
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            externalObjectDirectoryRepository,
+            armResponseFilesProcessSingleElement
+        );
     }
 
 }

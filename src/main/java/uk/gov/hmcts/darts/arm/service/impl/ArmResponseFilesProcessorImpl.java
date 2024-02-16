@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -19,9 +18,10 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +42,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     @Override
     public void processResponseFiles() {
         initialisePreloadedObjects();
-        // Fetch All records from external Object Directory table with external_location_type as 'ARM' and status with 'ARM dropzone'.
-        ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
+        // Fetch All records from external_object_directory table with external_location_type as 'ARM' and object_record_status with 'Arm Drop Zone'.
+        ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ARM.getId());
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
-                externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
+            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
         if (CollectionUtils.isNotEmpty(dataSentToArm)) {
             List<Integer> externalObjects = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
             log.info("ARM Response process found : {} records to be processed", externalObjects.size());
@@ -67,7 +67,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private void initialisePreloadedObjects() {
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
-        armResponseProcessingFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
+        armResponseProcessingFailed = objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).get();
 
         userAccount = userIdentity.getUserAccount();
     }
@@ -75,10 +75,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                      ObjectRecordStatusEntity objectRecordStatus) {
         log.info(
-                "ARM Push updating ARM status from {} to {} for ID {}",
-                externalObjectDirectory.getStatus().getDescription(),
-                objectRecordStatus.getDescription(),
-                externalObjectDirectory.getId()
+            "ARM Push updating ARM status from {} to {} for ID {}",
+            externalObjectDirectory.getStatus().getDescription(),
+            objectRecordStatus.getDescription(),
+            externalObjectDirectory.getId()
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userAccount);
