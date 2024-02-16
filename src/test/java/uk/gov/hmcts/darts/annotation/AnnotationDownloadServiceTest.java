@@ -80,7 +80,7 @@ class AnnotationDownloadServiceTest {
 
     @Test
     void throwsIfDownloadAnnotationDocumentFails() {
-        when(externalObjectDirectoryRepository.findAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(
+        when(externalObjectDirectoryRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(
                 Optional.of(someExternalObjectDirectoryEntity()));
         when(dataManagementApi.getBlobDataFromInboundContainer(any())).thenThrow(new RuntimeException());
 
@@ -91,7 +91,7 @@ class AnnotationDownloadServiceTest {
 
     @Test
     void throwsIfJudgeAndNoAnnotationDocumentFound() {
-        when(externalObjectDirectoryRepository.findAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(Optional.empty());
+        when(externalObjectDirectoryRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(Optional.empty());
         when(authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))).thenReturn(true);
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
@@ -101,7 +101,7 @@ class AnnotationDownloadServiceTest {
 
     @Test
     void throwsIfNotJudgeAndNoAnnotationDocumentFound() {
-        when(externalObjectDirectoryRepository.findAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(Optional.empty());
+        when(externalObjectDirectoryRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(Optional.empty());
         when(authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))).thenReturn(false);
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))

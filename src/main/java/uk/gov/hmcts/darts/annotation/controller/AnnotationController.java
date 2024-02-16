@@ -45,7 +45,7 @@ public class AnnotationController implements AnnotationsApi {
     @Override
     public ResponseEntity<Resource> downloadAnnotation(Integer annotationId, Integer annotationDocumentId) {
 
-        final AnnotationResponseDto annotationResponseDto = annotationService.downloadAnnotationDoc(1, 1);
+        final AnnotationResponseDto annotationResponseDto = annotationService.downloadAnnotationDoc(annotationId, annotationDocumentId);
 
         return ResponseEntity.ok()
                 .header(

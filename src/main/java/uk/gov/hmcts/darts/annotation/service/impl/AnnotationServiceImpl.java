@@ -82,12 +82,12 @@ public class AnnotationServiceImpl implements AnnotationService {
     @Override
     public AnnotationResponseDto downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
 
-        final Optional<ExternalObjectDirectoryEntity> dirEntity = eodRepository.findAnnotationIdAndAnnotationDocumentId(annotationId, annotationDocumentId);
-        final InputStreamResource stream;
+        final Optional<ExternalObjectDirectoryEntity> annotationDocEodEntityOpt = eodRepository.findByAnnotationIdAndAnnotationDocumentId(annotationId, annotationDocumentId);
+        final InputStreamResource blobStream;
 
         final ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
-        if (dirEntity.isEmpty()) {
+        if (annotationDocEodEntityOpt.isEmpty()) {
 
             if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))) {
                 throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE);
@@ -97,22 +97,22 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         }
 
-        externalObjectDirectoryEntity = dirEntity.get();
+        externalObjectDirectoryEntity = annotationDocEodEntityOpt.get();
 
         try {
 
-            stream = new InputStreamResource(dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
+            blobStream = new InputStreamResource(dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
 
         } catch (RuntimeException e) {
-            log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getExternalFileId(), e);
+            log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getId(), e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, e);
         }
 
         return AnnotationResponseDto.builder()
-                .resource(stream)
+                .resource(blobStream)
                 .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
                 .externalLocation(externalObjectDirectoryEntity.getExternalLocation())
-                .annotationDocumentId(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId()).build();
+                .annotationDocumentId(annotationDocumentId).build();
 
 
 

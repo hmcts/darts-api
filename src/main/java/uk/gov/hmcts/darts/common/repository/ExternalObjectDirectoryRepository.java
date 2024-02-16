@@ -144,7 +144,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                 AND annD.id = :annotationDocumentId
                 """
     )
-    Optional<ExternalObjectDirectoryEntity> findAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
+    Optional<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
 
     @Modifying(clearAutomatically = true)
     @Query(
