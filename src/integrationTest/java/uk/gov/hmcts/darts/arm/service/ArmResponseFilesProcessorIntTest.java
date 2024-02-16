@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
@@ -43,7 +42,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
@@ -68,8 +70,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
-    @Autowired
-    private FileOperationService fileOperationService;
     @MockBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @MockBean
@@ -139,7 +139,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
-
+        assertFalse(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -186,7 +186,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(2, foundMedia.getVerificationAttempts());
-
+        assertFalse(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -236,7 +236,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
+        assertFalse(foundMedia.isResponseCleaned());
 
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -287,7 +290,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(3, foundMedia.getVerificationAttempts());
+        assertFalse(foundMedia.isResponseCleaned());
 
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -337,7 +343,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
-
+        assertFalse(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -384,7 +390,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(2, foundMedia.getVerificationAttempts());
-
+        assertFalse(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -436,7 +442,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
-
+        assertFalse(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -491,6 +497,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -503,7 +513,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
-
+        assertTrue(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -558,6 +568,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -570,6 +584,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
+        assertTrue(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -624,6 +639,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -636,6 +655,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
+        assertTrue(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -690,6 +710,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -702,6 +726,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
+        assertTrue(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -753,10 +778,15 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         armResponseFilesProcessor.processResponseFiles();
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundAnnotationEod.getStatus().getId());
+        assertTrue(foundAnnotationEod.isResponseCleaned());
     }
 
     @Test
@@ -796,9 +826,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
-        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -811,8 +841,17 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor.processResponseFiles();
 
-        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
-        assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundAnnotationEod.getStatus().getId());
+        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundTranscriptionEod.getStatus().getId());
+        assertTrue(foundTranscriptionEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -867,6 +906,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -880,6 +923,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(STORED.getId(), foundMedia.getStatus().getId());
         assertEquals("A360230516_TestIngestion_1.docx", foundMedia.getExternalFileId());
         assertEquals("152821", foundMedia.getExternalRecordId());
+        assertTrue(foundMedia.isResponseCleaned());
+
     }
 
     @Test
@@ -931,9 +976,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
 
         armResponseFilesProcessor.processResponseFiles();
 
@@ -941,6 +986,15 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
         assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
         assertEquals("152821", foundAnnotationEod.getExternalRecordId());
+        assertTrue(foundAnnotationEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -980,9 +1034,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
-        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -995,10 +1049,19 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor.processResponseFiles();
 
-        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
-        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
-        assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
-        assertEquals("152821", foundAnnotationEod.getExternalRecordId());
+        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        assertEquals(STORED.getId(), foundTranscriptionEod.getStatus().getId());
+        assertEquals("A360230516_TestIngestion_1.docx", foundTranscriptionEod.getExternalFileId());
+        assertEquals("152821", foundTranscriptionEod.getExternalRecordId());
+        assertTrue(foundTranscriptionEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
 
@@ -1054,6 +1117,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -1066,6 +1133,15 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
+        assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -1118,6 +1194,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(invalidLinesFilename)).thenReturn(uploadFileBinaryData);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(invalidLinesFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(uploadFileTestFilename)).thenReturn(true);
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -1129,10 +1209,11 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
+        assertTrue(foundMedia.isResponseCleaned());
     }
 
     @Test
-    void givenProcessResponseFilesFailsForInvalidLinesWithInvalidName() throws IOException {
+    void givenProcessResponseFilesFailsForInvalidLinesWithInvalidName() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -1172,14 +1253,11 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(invalidLinesFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
+        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteResponseBlob(invalidLinesFilename)).thenReturn(true);
+
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-
-        String uploadFileTestFilename = "tests/arm/service/ArmResponseFilesProcessorTest/uploadFile/" +
-            "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
-        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
-        BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getBlobData(invalidLinesFilename)).thenReturn(uploadFileBinaryData);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -1192,5 +1270,13 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
+        assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(invalidLinesFilename);
+        verify(armDataManagementApi).deleteResponseBlob(invalidLinesFilename);
+        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 }

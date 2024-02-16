@@ -170,14 +170,15 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             }
         }
 
-        List<Boolean> deletedResponseBlobStatuses;
         if (nonNull(invalidLineFilename)) {
             try {
                 BinaryData invalidLineFileBinary = armDataManagementApi.getBlobData(invalidLineFilename);
 
                 InvalidLineFileFilenameProcessor invalidLinesFilenameProcessor = new InvalidLineFileFilenameProcessor(invalidLineFilename);
                 readInvalidLineFile(externalObjectDirectory, invalidLineFileBinary, invalidLinesFilenameProcessor);
-                if (ARM_RESPONSE_MANIFEST_FILE_FAILED.equals(status)) {
+                if (ARM_RESPONSE_MANIFEST_FILE_FAILED.equals(status) || ARM_RESPONSE_PROCESSING_FAILED.equals(status)) {
+                    || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                    || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                     armDataManagementApi.deleteResponseBlob(invalidLineFilename);
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
@@ -193,7 +194,9 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
 
                 BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFilename);
                 ObjectRecordStatusEnum status = readUploadFile(externalObjectDirectory, uploadFileBinary, uploadFileFilenameProcessor);
-                if (STORED.equals(status) || ARM_RESPONSE_PROCESSING_FAILED.equals(status)) {
+                if (STORED.equals(status)
+                    || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                    || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                     deleteResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
                 }
             } catch (IllegalArgumentException e) {
@@ -215,7 +218,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         deletedResponseBlobStatuses = responseBlobs.stream()
             .map(armDataManagementApi::deleteResponseBlob)
             .collect(toUnmodifiableList());
-        if (!deletedResponseBlobStatuses.contains(false)) {
+        if (deletedResponseBlobStatuses.isEmpty() || !deletedResponseBlobStatuses.contains(false)) {
             externalObjectDirectory.setResponseCleaned(
                 armDataManagementApi.deleteResponseBlob(armInputUploadFilename));
         }
@@ -368,8 +371,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             MediaEntity media = externalObjectDirectory.getMedia();
 
             if (nonNull(media.getChecksum())) {
-                String objectChecksum = media.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, media.getChecksum());
             } else {
                 log.warn("Unable to verify media checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
@@ -386,8 +388,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
             if (nonNull(annotationDocument.getChecksum())) {
-                String objectChecksum = annotationDocument.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocument.getChecksum());
             } else {
                 log.warn("Unable to verify annotation document checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
