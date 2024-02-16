@@ -51,28 +51,28 @@ class InboundToUnstructuredProcessorTest extends IntegrationBase {
     void processInboundMediasToUnstructured() {
         // given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        var media1 = medias.get(0);
-        var media2 = medias.get(1);
-        var media3 = medias.get(2);
-        var media4 = medias.get(3);
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryData());
         when(dataManagementService.saveBlobData(any(), any())).thenReturn(UUID.randomUUID());
 
         //matches because no corresponding unstructured
-        externalObjectDirectoryStub.createAndSaveEOD(media1, STORED, INBOUND);
+        var media1 = medias.get(0);
+        externalObjectDirectoryStub.createAndSaveEod(media1, STORED, INBOUND);
 
         //matches because unstructured failed with no max attempts reached
-        externalObjectDirectoryStub.createAndSaveEOD(media2, STORED, INBOUND);
-        externalObjectDirectoryStub.createAndSaveEOD(media2, FAILURE, UNSTRUCTURED);
+        var media2 = medias.get(1);
+        externalObjectDirectoryStub.createAndSaveEod(media2, STORED, INBOUND);
+        externalObjectDirectoryStub.createAndSaveEod(media2, FAILURE, UNSTRUCTURED);
 
         //does not match because corresponding unstructured is stored
-        externalObjectDirectoryStub.createAndSaveEOD(media3, STORED, INBOUND);
-        externalObjectDirectoryStub.createAndSaveEOD(media3, STORED, UNSTRUCTURED);
+        var media3 = medias.get(2);
+        externalObjectDirectoryStub.createAndSaveEod(media3, STORED, INBOUND);
+        externalObjectDirectoryStub.createAndSaveEod(media3, STORED, UNSTRUCTURED);
 
         //does not match because unstructured failed with max attempts reached
-        externalObjectDirectoryStub.createAndSaveEOD(media4, STORED, INBOUND);
-        var failed = externalObjectDirectoryStub.createAndSaveEOD(media4, FAILURE, UNSTRUCTURED);
+        var media4 = medias.get(3);
+        externalObjectDirectoryStub.createAndSaveEod(media4, STORED, INBOUND);
+        var failed = externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED);
         failed.setTransferAttempts(10);
         eodRepository.save(failed);
 

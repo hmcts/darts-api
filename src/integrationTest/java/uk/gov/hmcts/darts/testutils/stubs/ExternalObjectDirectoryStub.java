@@ -26,9 +26,18 @@ public class ExternalObjectDirectoryStub {
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository eodRepository;
 
+    public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
+                                                          ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                          ExternalLocationTypeEnum externalLocationTypeEnum) {
+        UUID uuid = UUID.randomUUID();
+        var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
+        return eodRepository.save(eod);
+    }
+
     /**
-     * @deprecated
-     * <p> Use {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, UUID)} instead.
+     * Creates an ExternalObjectDirectoryEntity.
+     * @deprecated Use
+     *      {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, UUID)} instead.
      */
     @Deprecated
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
@@ -44,14 +53,6 @@ public class ExternalObjectDirectoryStub {
         externalObjectDirectory.setMedia(mediaEntity);
 
         return externalObjectDirectory;
-    }
-
-    public ExternalObjectDirectoryEntity createAndSaveEOD(MediaEntity media,
-                                                          ObjectRecordStatusEnum objectRecordStatusEnum,
-                                                          ExternalLocationTypeEnum externalLocationTypeEnum) {
-        UUID uuid = UUID.randomUUID();
-        var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
-        return eodRepository.save(eod);
     }
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
