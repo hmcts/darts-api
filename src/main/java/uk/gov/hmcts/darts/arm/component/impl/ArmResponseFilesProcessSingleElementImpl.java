@@ -228,7 +228,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         deletedResponseBlobStatuses = responseBlobs.stream()
             .map(armDataManagementApi::deleteBlobData)
             .toList();
-        if (deletedResponseBlobStatuses.isEmpty() || !deletedResponseBlobStatuses.contains(false)) {
+        if (!deletedResponseBlobStatuses.isEmpty() && !deletedResponseBlobStatuses.contains(false)) {
             externalObjectDirectory.setResponseCleaned(
                 armDataManagementApi.deleteBlobData(armInputUploadFilename));
         }
@@ -393,8 +393,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
             if (nonNull(transcriptionDocument.getChecksum())) {
-                String objectChecksum = transcriptionDocument.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocument.getChecksum());
             } else {
                 log.warn("Unable to verify transcription document checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);

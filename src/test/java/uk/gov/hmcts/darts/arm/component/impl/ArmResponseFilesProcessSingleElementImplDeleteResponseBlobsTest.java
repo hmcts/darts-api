@@ -57,13 +57,11 @@ class ArmResponseFilesProcessSingleElementImplDeleteResponseBlobsTest {
     }
 
     @Test
-    void deleteResponseBlobsShouldDeleteInputUploadFileWhenResponseBlobsIsEmpty() {
+    void deleteResponseBlobsShouldNotDeleteInputUploadFileWhenResponseBlobsIsEmpty() {
         // Given
         String armInputUploadFilename = "dropzone/DARTS/response/2760_187_1_2d50a0bbde794e0ea9f4918aafeaccde_0_iu.rsp";
         List<String> responseBlobs = Collections.emptyList();
         ExternalObjectDirectoryEntity externalObjectDirectory = new ExternalObjectDirectoryEntity();
-
-        when(armDataManagementApi.deleteBlobData(armInputUploadFilename)).thenReturn(true);
 
         // When
         armResponseFilesProcessSingleElement.deleteResponseBlobs(
@@ -73,9 +71,8 @@ class ArmResponseFilesProcessSingleElementImplDeleteResponseBlobsTest {
         );
 
         // Then
-        verify(armDataManagementApi).deleteBlobData(armInputUploadFilename);
         verifyNoMoreInteractions(armDataManagementApi);
-        assertTrue(externalObjectDirectory.isResponseCleaned());
+        assertFalse(externalObjectDirectory.isResponseCleaned());
     }
 
     @Test
