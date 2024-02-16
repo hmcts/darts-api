@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -66,6 +67,8 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private BlobContainerClient blobContainerClient;
     @Mock
     private BlobServiceClient blobServiceClient;
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
     @MockBean
     private DataManagementAzureClientFactory dataManagementFactory;
 
@@ -115,7 +118,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             dartsDatabase.getExternalObjectDirectoryRepository(),
             inboundExternalObjectDirectoryDeletedFinder,
             inboundDataStoreDeleter,
-            systemUserHelper
+            systemUserHelper,
+            transformedMediaRepository
+
         );
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
@@ -123,14 +128,16 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             dartsDatabase.getExternalObjectDirectoryRepository(),
             unstructuredExternalObjectDirectoryDeletedFinder,
             unstructuredDataStoreDeleter,
-            systemUserHelper
+            systemUserHelper,
+            transformedMediaRepository
         );
 
         externalOutboundDataStoreDeleter =
             new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectRecordStatusRepository(),
                                                  dartsDatabase.getTransientObjectDirectoryRepository(),
                                                  outboundExternalObjectDirectoryDeletedFinder,
-                                                 outboundDataStoreDeleter, systemUserHelper
+                                                 outboundDataStoreDeleter, systemUserHelper,
+                                                 transformedMediaRepository
             );
 
     }
