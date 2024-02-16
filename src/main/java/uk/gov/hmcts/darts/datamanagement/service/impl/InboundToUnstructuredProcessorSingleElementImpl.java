@@ -47,7 +47,7 @@ import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructur
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class InboundToUnstructuredProcessorSingleProcessorImpl implements InboundToUnstructuredProcessorSingleElement {
+public class InboundToUnstructuredProcessorSingleElementImpl implements InboundToUnstructuredProcessorSingleElement {
 
     private static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
     private static final int INITIAL_TRANSFER_ATTEMPTS = 1;
@@ -199,8 +199,8 @@ public class InboundToUnstructuredProcessorSingleProcessorImpl implements Inboun
     private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
         MediaEntity mediaEntityLazy = inbound.getMedia();
         if (mediaEntityLazy != null) {
-            //TODO
-            MediaEntity mediaEntity = mediaRepository.findById(mediaEntityLazy.getId()).orElseThrow(() -> new RuntimeException(""));
+            MediaEntity mediaEntity = mediaRepository.findById(mediaEntityLazy.getId()).orElseThrow(
+                () -> new RuntimeException("Media not found: " + mediaEntityLazy.getId()));
             performValidation(
                 unstructured,
                 mediaEntity.getChecksum(),

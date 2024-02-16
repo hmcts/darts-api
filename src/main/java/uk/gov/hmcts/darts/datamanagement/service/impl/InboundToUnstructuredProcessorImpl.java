@@ -64,7 +64,11 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             FAILURE_STATES_LIST, getType(UNSTRUCTURED));
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
-            singleElementProcessor.processSingleElement(inboundExternalObjectDirectory, unstructuredStoredList, unstructuredFailedList);
+            try {
+                singleElementProcessor.processSingleElement(inboundExternalObjectDirectory, unstructuredStoredList, unstructuredFailedList);
+            } catch (Exception exception) {
+                log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundExternalObjectDirectory.getId(), exception);
+            }
         }
     }
 
