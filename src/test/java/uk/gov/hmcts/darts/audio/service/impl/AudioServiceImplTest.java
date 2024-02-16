@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -58,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -429,4 +431,36 @@ class AudioServiceImplTest {
 
         assertEquals(false, audioMetadataList.get(0).getIsArchived());
     }
+
+    @Test
+    void whenAudioMetadataListContainsMediaIdsStoredInUnstructured_thenIsAvailableWillBeTrue() {
+        AudioMetadata audioMetadata1 = new AudioMetadata();
+        audioMetadata1.setId(1);
+        AudioMetadata audioMetadata2 = new AudioMetadata();
+        audioMetadata2.setId(2);
+        AudioMetadata audioMetadata3 = new AudioMetadata();
+        audioMetadata3.setId(3);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
+
+        ExternalObjectDirectoryEntity eodEntity1 = createEodEntityWithMediaId(1);
+        ExternalObjectDirectoryEntity eodEntity3 = createEodEntityWithMediaId(3);
+
+        when(externalObjectDirectoryRepository.findByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(eodEntity1, eodEntity3));
+
+        audioService.setIsAvailable(audioMetadataList);
+
+        assertEquals(true, audioMetadataList.get(0).getIsAvailable());
+        assertEquals(false, audioMetadataList.get(1).getIsAvailable());
+        assertEquals(true, audioMetadataList.get(2).getIsAvailable());
+    }
+
+    private ExternalObjectDirectoryEntity createEodEntityWithMediaId(int mediaId) {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(mediaId);
+        ExternalObjectDirectoryEntity eodEntity = new ExternalObjectDirectoryEntity();
+        eodEntity.setMedia(mediaEntity);
+        return eodEntity;
+    }
+
+
 }
