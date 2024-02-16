@@ -47,8 +47,10 @@ class AnnotationDeleteTest extends IntegrationBase {
             .andExpect(status().isNoContent())
             .andReturn();
 
-        assertThat(dartsDatabase.findAnnotationById(annotation.getId()))
-            .hasFieldOrPropertyWithValue("deleted", true);
+        var annotationEntity = dartsDatabase.findAnnotationById(annotation.getId());
+        var lastModifiedByUserId = dartsDatabase.getLastModifiedByUserId(annotationEntity);
+        assertThat(annotationEntity).hasFieldOrPropertyWithValue("deleted", true);
+        assertThat(lastModifiedByUserId).isEqualTo(judge.getId());
     }
 
     @Test

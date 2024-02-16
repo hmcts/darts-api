@@ -56,6 +56,6 @@ public interface AnnotationRepository extends JpaRepository<AnnotationEntity, In
     List<AnnotationEntity> findByListOfHearingIdsAndUser(List<Integer> hearingIds, UserAccountEntity userAccount);
 
     @Modifying
-    @Query("update AnnotationEntity ann set ann.deleted = true where ann.id = :id")
-    void markForDeletion(@Param("id") Integer id);
+    @Query("update AnnotationEntity ann set ann.deleted = true, ann.lastModifiedBy = :userAccount where ann.id = :id")
+    void markForDeletion(@Param("id") Integer id, @Param("userAccount") UserAccountEntity userAccount);
 }

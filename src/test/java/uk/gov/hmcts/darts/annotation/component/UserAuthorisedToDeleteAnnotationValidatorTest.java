@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -27,19 +28,20 @@ class UserAuthorisedToDeleteAnnotationValidatorTest {
     private AnnotationRepository annotationRepository;
 
     @Mock
-    private UserIdentity userIdentity;
+    private AuthorisationApi authorisationApi;
 
     private UserAuthorisedToDeleteAnnotationValidator userAuthorisedToDeleteAnnotationValidator;
 
     @BeforeEach
     void setUp() {
-        userAuthorisedToDeleteAnnotationValidator = new UserAuthorisedToDeleteAnnotationValidator(annotationRepository, userIdentity);
+        userAuthorisedToDeleteAnnotationValidator = new UserAuthorisedToDeleteAnnotationValidator(annotationRepository, authorisationApi);
     }
 
     @Test
     void doesntThrowIfUserIsAdmin() {
         when(annotationRepository.findById(1)).thenReturn(Optional.of(new AnnotationEntity()));
-        when(userIdentity.getUserAccount()).thenReturn(userWithRole(ADMIN));
+        when(authorisationApi.getCurrentUser()).thenReturn(userWithRole(ADMIN));
+        when(authorisationApi.userHasOneOfRoles(List.of(ADMIN))).thenReturn(true);
 
         assertThatNoException().isThrownBy(() -> userAuthorisedToDeleteAnnotationValidator.validate(1));
     }
@@ -47,7 +49,7 @@ class UserAuthorisedToDeleteAnnotationValidatorTest {
     @Test
     void doesntThrowIfUserIsJudgeAndCreatedTheAnnotation() {
         var judge = userWithRole(JUDGE);
-        when(userIdentity.getUserAccount()).thenReturn(judge);
+        when(authorisationApi.getCurrentUser()).thenReturn(judge);
         when(annotationRepository.findById(1)).thenReturn(Optional.of(annotationCreatedBy(judge)));
 
         assertThatNoException().isThrownBy(() -> userAuthorisedToDeleteAnnotationValidator.validate(1));

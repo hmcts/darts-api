@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -98,7 +99,8 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({
+    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
@@ -641,6 +643,7 @@ public class DartsDatabaseStub {
                 .toList();
     }
 
+    @Transactional
     public AnnotationEntity findAnnotationById(Integer annotationId) {
         return annotationRepository.findById(annotationId).orElseThrow();
     }
@@ -673,5 +676,10 @@ public class DartsDatabaseStub {
         userAccount.getSecurityGroupEntities().add(securityGroup);
         securityGroupRepository.save(securityGroup);
         userAccountRepository.save(userAccount);
+    }
+
+    @Transactional
+    public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
+        return createdModifiedBaseEntity.getLastModifiedBy().getId();
     }
 }
