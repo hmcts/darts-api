@@ -24,7 +24,7 @@ paths:
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
-            description: Resource already exists.
+          description: Resource already exists.
         '500':
           description: Internal Server Error
     get:
@@ -41,7 +41,7 @@ paths:
         '500':
           description: Internal Server Error
 
-  /courthouses/{courthouse_id}:
+  /admin/courthouses/{courthouse_id}:
     get:
       tags:
         - Courthouses
@@ -58,13 +58,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtendedCourthouse'
+                $ref: '#/components/schemas/ExtendedAdminCourthouse'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
         '404':
           description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
+  /courthouses/{courthouse_id}:
     put:
       tags:
         - Courthouses
@@ -85,7 +103,7 @@ paths:
         '409':
           description: Returned in the case where courthouse name or code amended is not unique.
         '404':
-            description: Resource with the provided id does not exist.
+          description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
     delete:
@@ -127,6 +145,29 @@ components:
           type: integer
         display_name:
           type: string
+        region_id:
+          type: integer
+          example: 0
+    AdminCourthouse:
+      type: object
+      required:
+        - courthouse_name
+        - display_name
+      properties:
+        courthouse_name:
+          type: string
+        code:
+          type: integer
+        display_name:
+          type: string
+        region_id:
+          type: integer
+          example: 0
+        security_group_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
     ExtendedCourthouse:
       allOf:
         - $ref: '#/components/schemas/Courthouse'
@@ -137,24 +178,47 @@ components:
             created_date_time:
               type: string
               format: date-time
+              example: "2024-02-09T14:26:31.118Z"
             last_modified_date_time:
               type: string
               format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+    ExtendedAdminCourthouse:
+      allOf:
+        - $ref: '#/components/schemas/AdminCourthouse'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+            last_modified_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
     CourtList:
       type: array
       items:
         $ref: '#/components/schemas/ExtendedCourthouse'
 
     CourthouseErrorCode:
-     type: string
-     enum:
-      - "COURTHOUSE_100"
-      - "COURTHOUSE_101"
-     x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
+      type: string
+      enum:
+        - "COURTHOUSE_100"
+        - "COURTHOUSE_101"
+      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
 
     CourthouseTitleErrors:
-     type: string
-     enum:
-      - "Provided courthouse name already exists."
-      - "Provided courthouse code already exists."
-     x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
+      type: string
+      enum:
+        - "Provided courthouse name already exists."
+        - "Provided courthouse code already exists."
+      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
+
+    UserAuthorisation403_109ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_109"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_ENDPOINT ]

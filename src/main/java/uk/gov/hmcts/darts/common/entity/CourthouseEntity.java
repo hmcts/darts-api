@@ -49,6 +49,46 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "courthouse_region_ae",
+        joinColumns = {@JoinColumn(name = "cth_id")},
+        inverseJoinColumns = {@JoinColumn(name = "reg_id")})
+    private Set<RegionEntity> regions = new LinkedHashSet<>();
+
+    public Set<RegionEntity> getRegions() throws IllegalStateException {
+        try {
+            if (regions.isEmpty()) {
+                regions = null;
+            }
+
+            if (regions != null && regions.size() > 1) {
+                throw new IllegalStateException();
+            }
+
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(e);
+        }
+        return regions;
+    }
+
+    public void setRegions(Set<RegionEntity> regions) throws IllegalStateException {
+        try {
+            this.regions = regions;
+
+            if (regions == null) {
+                regions = new LinkedHashSet<>();
+            }
+
+            if (regions.size() > 1) {
+                throw new IllegalStateException();
+            }
+
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+
     @Column(name = "display_name")
     private String displayName;
 
