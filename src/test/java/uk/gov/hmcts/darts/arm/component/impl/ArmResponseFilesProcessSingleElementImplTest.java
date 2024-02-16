@@ -579,6 +579,87 @@ class ArmResponseFilesProcessSingleElementImplTest {
     }
 
     @Test
+    void processResponseFilesFor_WithInvalidLineFileIncorrectStatus() throws IOException {
+
+        when(mediaEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmResponseProcessing);
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        String uploadFileTestFilename = "Tests/arm/component/ArmResponseFilesProcessSingleElement/testInvalidLineFile/" +
+            "InvalidLineFile.json";
+        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
+        BinaryData invalidLineFileBinaryData = BinaryData.fromString(uploadFileJson);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
+        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
+            .thenReturn(Path.of(uploadFileTestFilename));
+
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
+    }
+
+    @Test
+    void processResponseFilesFor_WithValidInvalidLineFileGetBlobFails() throws IOException {
+
+        when(mediaEntity.getId()).thenReturn(1);
+
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmResponseProcessing);
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenThrow(new AzureException());
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+    }
+
+    @Test
     void processResponseFilesFor_WithValidInvalidLineFileJson() throws IOException {
 
         when(mediaEntity.getId()).thenReturn(1);
