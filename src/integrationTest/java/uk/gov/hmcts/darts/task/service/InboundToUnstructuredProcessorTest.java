@@ -29,7 +29,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.getBinaryData;
 
-@SuppressWarnings("PMD.ExcessiveImports")
 class InboundToUnstructuredProcessorTest extends IntegrationBase {
 
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
