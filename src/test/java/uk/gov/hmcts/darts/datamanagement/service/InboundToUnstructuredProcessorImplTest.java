@@ -21,15 +21,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class InboundToUnstructuredProcessorImplTest {
     @Mock
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
+    ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+    ExternalLocationTypeRepository externalLocationTypeRepository;
+    InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
     @Mock
     ExternalObjectDirectoryEntity externalObjectDirectoryEntityInbound;
     @Mock
