@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 
 @ExtendWith(MockitoExtension.class)
 class ArmResponseFilesProcessorImplTest {
@@ -55,7 +54,6 @@ class ArmResponseFilesProcessorImplTest {
     private ExternalLocationTypeEntity externalLocationTypeArm;
     private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
     private ObjectRecordStatusEntity objectRecordStatusArmProcessingFiles;
-    private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
 
     private ArmResponseFilesProcessor armResponseFilesProcessor;
 
@@ -72,10 +70,6 @@ class ArmResponseFilesProcessorImplTest {
         objectRecordStatusArmProcessingFiles = new ObjectRecordStatusEntity();
         objectRecordStatusArmProcessingFiles.setId(ARM_PROCESSING_RESPONSE_FILES.getId());
         objectRecordStatusArmProcessingFiles.setDescription("Arm Processing Response Files");
-
-        objectRecordStatusArmResponseProcessingFailed = new ObjectRecordStatusEntity();
-        objectRecordStatusArmResponseProcessingFailed.setId(ARM_RESPONSE_PROCESSING_FAILED.getId());
-        objectRecordStatusArmResponseProcessingFailed.setDescription("Arm Response Process Failed");
 
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
             externalObjectDirectoryRepository,
@@ -96,8 +90,6 @@ class ArmResponseFilesProcessorImplTest {
             .thenReturn(Optional.of(objectRecordStatusArmDropZone));
         when(objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()))
             .thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
-        when(objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()))
-            .thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
 
         when(externalObjectDirectoryArmDropZone.getId())
             .thenReturn(1);
@@ -112,7 +104,6 @@ class ArmResponseFilesProcessorImplTest {
 
         verify(objectRecordStatusRepository).findById(ARM_DROP_ZONE.getId());
         verify(objectRecordStatusRepository).findById(ARM_PROCESSING_RESPONSE_FILES.getId());
-        verify(objectRecordStatusRepository).findById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         verify(externalLocationTypeRepository).getReferenceById(ARM.getId());
         verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(externalLocationTypeArm, objectRecordStatusArmDropZone);
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());

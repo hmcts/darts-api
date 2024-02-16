@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -106,7 +107,9 @@ class ArmResponseFilesProcessSingleElementImplTest {
         ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed = new ObjectRecordStatusEntity();
         objectRecordStatusArmChecksumFailed.setId(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
         objectRecordStatusArmChecksumFailed.setDescription("Arm Response Checksum Verification Failed");
-        objectRecordStatusArmResponseManifestFileFailed = new ObjectRecordStatusEntity();
+        ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFileFailed = new ObjectRecordStatusEntity();
+        objectRecordStatusArmResponseManifestFileFailed.setId(ARM_RESPONSE_MANIFEST_FILE_FAILED.getId());
+        objectRecordStatusArmResponseManifestFileFailed.setDescription("Arm Response Manifest Failed");
 
         when(objectRecordStatusRepository.findById(STORED.getId()))
             .thenReturn(Optional.of(objectRecordStatusStored));
@@ -118,6 +121,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
             .thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()))
             .thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
+        when(objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FILE_FAILED.getId()))
+            .thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         externalObjectDirectoryArmResponseProcessing = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryArmResponseProcessing.setId(1);
