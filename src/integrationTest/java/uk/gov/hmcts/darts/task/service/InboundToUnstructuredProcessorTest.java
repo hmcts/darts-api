@@ -48,12 +48,13 @@ class InboundToUnstructuredProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void processInboundToUnstructuredMedia() {
+    void processInboundMediasToUnstructured() {
         // given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         var media1 = medias.get(0);
         var media2 = medias.get(1);
         var media3 = medias.get(2);
+        var media4 = medias.get(3);
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryData());
         when(dataManagementService.saveBlobData(any(), any())).thenReturn(UUID.randomUUID());
@@ -69,6 +70,12 @@ class InboundToUnstructuredProcessorTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEOD(media3, STORED, INBOUND);
         externalObjectDirectoryStub.createAndSaveEOD(media3, STORED, UNSTRUCTURED);
 
+        //does not match because unstructured failed with max attempts reached
+        externalObjectDirectoryStub.createAndSaveEOD(media4, STORED, INBOUND);
+        var failed = externalObjectDirectoryStub.createAndSaveEOD(media4, FAILURE, UNSTRUCTURED);
+        failed.setTransferAttempts(10);
+        eodRepository.save(failed);
+
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
@@ -81,36 +88,6 @@ class InboundToUnstructuredProcessorTest extends IntegrationBase {
         List<Integer> createdUnstructuredMediaIds = createdUnstructured.stream().map(eod -> eod.getMedia().getId()).collect(toList());
         assertThat(createdUnstructuredMediaIds).contains(media1.getId(), media2.getId());
         assertThat(createdUnstructuredMediaIds).doesNotContain(media3.getId());
+        assertThat(createdUnstructuredMediaIds).doesNotContain(media4.getId());
     }
-
-    @Test
-    //TODO
-    void testContinuesProcessingNextIterationOnException() {
-//        // given
-//        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-//        var media1 = medias.get(0);
-//        var media2 = medias.get(1);
-//
-//        when(eodRepository.saveAndFlush(any()))
-//            .thenThrow(new RuntimeException("some error"))
-//            .thenCallRealMethod();
-//
-//        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryData());
-//        when(dataManagementService.saveBlobData(any(), any())).thenReturn(UUID.randomUUID());
-//
-//        //matches because no corresponding unstructured
-//        externalObjectDirectoryStub.createAndSaveEOD(media1, STORED, INBOUND);
-//
-//        //matches because unstructured failed with no max attempts reached
-//        externalObjectDirectoryStub.createAndSaveEOD(media2, STORED, INBOUND);
-//        externalObjectDirectoryStub.createAndSaveEOD(media2, FAILURE, UNSTRUCTURED);
-//
-//        // when
-//        inboundToUnstructuredProcessor.processInboundToUnstructured();
-//
-//        // then
-//        assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media1, STORED, UNSTRUCTURED)).isEmpty();
-//        assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media2, STORED, UNSTRUCTURED)).hasSize(1);
-    }
-
 }
