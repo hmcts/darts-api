@@ -217,9 +217,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String responseBlobFilename = prefix + "_1_iu.rsp";
+        String responseFilename = prefix + "_1_iu.rsp";
         List<String> responseBlobs = new ArrayList<>();
-        responseBlobs.add(responseBlobFilename);
+        responseBlobs.add(responseFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -271,9 +271,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String responseBlobFilename = prefix + "_1_iu.rsp";
+        String responseFilename = prefix + "_1_iu.rsp";
         List<String> responseBlobs = new ArrayList<>();
-        responseBlobs.add(responseBlobFilename);
+        responseBlobs.add(responseFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -324,9 +324,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String responseFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> responseBlobs = new ArrayList<>();
-        responseBlobs.add(responseBlobFilename);
+        responseBlobs.add(responseFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -421,9 +421,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -475,9 +475,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -497,9 +497,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -546,9 +546,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -568,9 +568,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -617,9 +617,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -639,9 +639,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -688,9 +688,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -710,9 +710,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -756,9 +756,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -778,9 +778,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         armResponseFilesProcessor.processResponseFiles();
 
@@ -813,9 +813,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -826,9 +826,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -848,9 +848,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
-        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -884,9 +884,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -906,9 +906,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -954,9 +954,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -976,9 +976,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         armResponseFilesProcessor.processResponseFiles();
 
@@ -991,9 +991,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
-        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -1021,9 +1021,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -1034,9 +1034,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -1058,9 +1058,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
-        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -1095,9 +1095,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -1117,9 +1117,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -1138,9 +1138,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
-        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -1174,9 +1174,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -1194,9 +1194,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(invalidLinesFilename)).thenReturn(uploadFileBinaryData);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(invalidLinesFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(uploadFileTestFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLinesFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileTestFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -1242,9 +1242,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        inputUploadFilenameResponseBlobs.add(inputUploadFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
@@ -1253,8 +1253,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.add(invalidLinesFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
-        when(armDataManagementApi.deleteResponseBlob(inputUploadBlobFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(invalidLinesFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLinesFilename)).thenReturn(true);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -1275,8 +1275,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData(invalidLinesFilename);
-        verify(armDataManagementApi).deleteResponseBlob(invalidLinesFilename);
-        verify(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        verify(armDataManagementApi).deleteBlobData(invalidLinesFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 }

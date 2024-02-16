@@ -202,9 +202,9 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
             .thenReturn(Path.of(uploadFileTestFilename));
 
-        when(armDataManagementApi.deleteResponseBlob(uploadFileFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(createRecordFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(responseBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
 
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -214,9 +214,9 @@ class ArmResponseFilesProcessSingleElementImplTest {
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
-        verify(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
-        verify(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        verify(armDataManagementApi).deleteResponseBlob(responseBlobFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -305,8 +305,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean())).thenReturn(path);
             .thenReturn(Path.of(uploadFileTestFilename));
 
-        when(armDataManagementApi.deleteResponseBlob(invalidLineFileFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(responseBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
 
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -315,8 +315,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         assertEquals(objectRecordStatusArmResponseManifestFileFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
-        verify(armDataManagementApi).deleteResponseBlob(invalidLineFileFilename);
-        verify(armDataManagementApi).deleteResponseBlob(responseBlobFilename);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -366,8 +366,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean())).thenReturn(path);
             .thenReturn(Path.of(uploadFileTestFilename));
 
-        when(armDataManagementApi.deleteResponseBlob(invalidLineFileFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteResponseBlob(responseBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(responseBlobFilename)).thenReturn(true);
 
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
@@ -380,8 +380,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         assertEquals(objectRecordStatusArmResponseManifestFileFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
-        verify(armDataManagementApi).deleteResponseBlob(invalidLineFileFilename);
-        verify(armDataManagementApi).deleteResponseBlob(responseBlobFilename);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 }
