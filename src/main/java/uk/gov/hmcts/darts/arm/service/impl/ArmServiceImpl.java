@@ -74,6 +74,7 @@ public class ArmServiceImpl implements ArmService {
      * @param containerName name of container
      * @param filename      name of file to look for
      * @return list of the blobs in the response dropzone containing the specified filename with full path
+     *     e.g. returns: dropzone/DARTS/response/123_456_1_2d50a0bbde794e0ea9f4918aafeaccde_1_iu.rsp
      */
     public List<String> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -118,10 +119,6 @@ public class ArmServiceImpl implements ArmService {
     }
 
     @Override
-    public boolean deleteResponseBlob(String containerName, String blobPathAndName) {
-        return deleteBlobData(containerName, blobPathAndName);
-    }
-
     public boolean deleteBlobData(String containerName, String blobPathAndName) {
         try {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);

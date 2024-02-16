@@ -32,19 +32,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FILE_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -66,8 +66,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
     private UserIdentity userIdentity;
 
     @Mock
-    @Mock
-    private ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFileFailed;
     private UserAccountEntity userAccountEntity;
 
     @Mock
@@ -107,9 +105,10 @@ class ArmResponseFilesProcessSingleElementImplTest {
         ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed = new ObjectRecordStatusEntity();
         objectRecordStatusArmChecksumFailed.setId(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
         objectRecordStatusArmChecksumFailed.setDescription("Arm Response Checksum Verification Failed");
-        ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFileFailed = new ObjectRecordStatusEntity();
-        objectRecordStatusArmResponseManifestFileFailed.setId(ARM_RESPONSE_MANIFEST_FILE_FAILED.getId());
-        objectRecordStatusArmResponseManifestFileFailed.setDescription("Arm Response Manifest Failed");
+
+        ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFailed = new ObjectRecordStatusEntity();
+        objectRecordStatusArmResponseManifestFailed.setId(ARM_RESPONSE_MANIFEST_FAILED.getId());
+        objectRecordStatusArmResponseManifestFailed.setDescription("Arm Response Manifest Failed");
 
         when(objectRecordStatusRepository.findById(STORED.getId()))
             .thenReturn(Optional.of(objectRecordStatusStored));
@@ -121,14 +120,15 @@ class ArmResponseFilesProcessSingleElementImplTest {
             .thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
         when(objectRecordStatusRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()))
             .thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FILE_FAILED.getId()))
-            .thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
+        when(objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()))
+            .thenReturn(Optional.of(objectRecordStatusArmResponseManifestFailed));
 
         externalObjectDirectoryArmResponseProcessing = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryArmResponseProcessing.setId(1);
         externalObjectDirectoryArmResponseProcessing.setStatus(objectRecordStatusArmProcessingFiles);
         externalObjectDirectoryArmResponseProcessing.setMedia(mediaEntity);
         externalObjectDirectoryArmResponseProcessing.setTransferAttempts(1);
+        externalObjectDirectoryArmResponseProcessing.setVerificationAttempts(1);
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
@@ -146,7 +146,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
     @Test
     void processResponseFilesFor_WithInvalidInputUploadFilename() {
 
-        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
         when(mediaEntity.getId()).thenReturn(1);
         when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
 
@@ -235,7 +234,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
     @Test
     void processResponseFilesFor_WithInvalidUploadFileJson() throws IOException {
 
-        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
         when(mediaEntity.getId()).thenReturn(1);
         when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
         when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
@@ -287,19 +285,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
     @Test
     void processResponseFilesFor_WithInvalidInvalidLineFilename() {
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
-        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
-        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
-        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
-
         when(mediaEntity.getId()).thenReturn(1);
-
-        when(externalObjectDirectoryArmResponseProcessing.getId()).thenReturn(1);
-        when(externalObjectDirectoryArmResponseProcessing.getStatus()).thenReturn(objectRecordStatusArmProcessingFiles);
-        when(externalObjectDirectoryArmResponseProcessing.getMedia()).thenReturn(mediaEntity);
-        when(externalObjectDirectoryArmResponseProcessing.getTransferAttempts()).thenReturn(1);
 
         when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
 
@@ -319,28 +305,13 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
-        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
     }
 
     @Test
     void processResponseFilesFor_WithInvalidInvalidLineFileJson() throws IOException {
-        when(objectRecordStatusArmProcessingFiles.getDescription()).thenReturn(ARM_PROCESSING_RESPONSE_FILES.name());
-        when(objectRecordStatusArmResponseProcessingFailed.getDescription()).thenReturn(FAILURE_ARM_RESPONSE_PROCESSING.name());
-
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
-        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
-        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
-        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
-
-        when(externalObjectDirectoryArmResponseProcessing.getId()).thenReturn(1);
-        when(externalObjectDirectoryArmResponseProcessing.getStatus()).thenReturn(objectRecordStatusArmProcessingFiles);
-        when(externalObjectDirectoryArmResponseProcessing.getMedia()).thenReturn(mediaEntity);
-        when(externalObjectDirectoryArmResponseProcessing.getTransferAttempts()).thenReturn(1);
 
         when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
         when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
@@ -413,7 +384,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData invalidLineFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
-        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean())).thenReturn(path);
+        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
             .thenReturn(Path.of(uploadFileTestFilename));
 
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
@@ -423,7 +394,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
-        assertEquals(objectRecordStatusArmResponseManifestFileFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed.getId(), externalObjectDirectoryArmResponseProcessing.getStatus().getId());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed.getDescription(), externalObjectDirectoryArmResponseProcessing.getStatus().getDescription());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
@@ -433,22 +405,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
     @Test
     void processResponseFilesFor_WithValidInvalidLineFileJson() throws IOException {
-        when(objectRecordStatusArmProcessingFiles.getDescription()).thenReturn(ARM_PROCESSING_RESPONSE_FILES.name());
-        when(objectRecordStatusArmResponseProcessingFailed.getDescription()).thenReturn(FAILURE_ARM_RESPONSE_PROCESSING.name());
-
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.of(objectRecordStatusArmDropZone));
-        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
-        when(objectRecordStatusRepository.findById(16)).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
-        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmChecksumFailed));
-        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFileFailed));
 
         when(mediaEntity.getId()).thenReturn(1);
-
-        when(externalObjectDirectoryArmResponseProcessing.getId()).thenReturn(1);
-        when(externalObjectDirectoryArmResponseProcessing.getStatus()).thenReturn(objectRecordStatusArmProcessingFiles);
-        when(externalObjectDirectoryArmResponseProcessing.getMedia()).thenReturn(mediaEntity);
-        when(externalObjectDirectoryArmResponseProcessing.getTransferAttempts()).thenReturn(1);
 
         when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
         when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
@@ -474,7 +432,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData invalidLineFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineFileBinaryData);
-        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean())).thenReturn(path);
+        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
             .thenReturn(Path.of(uploadFileTestFilename));
 
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
@@ -482,13 +440,10 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
-        Path path = Path.of(uploadFileTestFilename);
-        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class),anyString(), anyString(), anyBoolean())).thenReturn(path);
-
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
-        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        assertEquals(objectRecordStatusArmResponseManifestFileFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertTrue(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
