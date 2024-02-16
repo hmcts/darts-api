@@ -106,6 +106,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         ObjectRecordStatusEntity objectRecordStatusArmChecksumFailed = new ObjectRecordStatusEntity();
         objectRecordStatusArmChecksumFailed.setId(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
         objectRecordStatusArmChecksumFailed.setDescription("Arm Response Checksum Verification Failed");
+        objectRecordStatusArmResponseManifestFileFailed = new ObjectRecordStatusEntity();
 
         when(objectRecordStatusRepository.findById(STORED.getId()))
             .thenReturn(Optional.of(objectRecordStatusStored));
