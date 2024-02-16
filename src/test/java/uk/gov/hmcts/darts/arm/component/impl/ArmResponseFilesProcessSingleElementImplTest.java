@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
+import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +82,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmResponseProcessing;
 
+    private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
+
     private ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
 
 
@@ -131,6 +134,10 @@ class ArmResponseFilesProcessSingleElementImplTest {
         externalObjectDirectoryArmResponseProcessing.setTransferAttempts(1);
         externalObjectDirectoryArmResponseProcessing.setVerificationAttempts(1);
 
+        externalObjectDirectoryArmDropZone = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryArmDropZone.setId(1);
+        externalObjectDirectoryArmDropZone.setStatus(objectRecordStatusArmDropZone);
+
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
         armResponseFilesProcessSingleElement = new ArmResponseFilesProcessSingleElementImpl(
@@ -161,6 +168,37 @@ class ArmResponseFilesProcessSingleElementImplTest {
         armResponseFilesProcessSingleElement.processResponseFilesFor(1);
 
         assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verifyNoMoreInteractions(armDataManagementApi);
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+    }
+
+    @Test
+    void processResponseFilesFor_WithInputUploadFilenameListResponsesThrowsAzureException() {
+
+        externalObjectDirectoryArmResponseProcessing.setTransferAttempts(1);
+        externalObjectDirectoryArmResponseProcessing.setVerificationAttempts(1);
+
+        when(mediaEntity.getId()).thenReturn(1);
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmDropZone);
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new AzureException());
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        assertEquals(objectRecordStatusArmDropZone, externalObjectDirectoryArmResponseProcessing.getStatus());
         assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
