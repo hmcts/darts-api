@@ -139,6 +139,9 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
     @Override
     public void checkCourthouseAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
+        if (courthouses.isEmpty()) {
+            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
+        }
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         if (nonNull(userAccount)) {
             String emailAddress = userAccount.getEmailAddress();

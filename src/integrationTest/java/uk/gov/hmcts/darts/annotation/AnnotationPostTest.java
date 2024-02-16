@@ -1,0 +1,142 @@
+package uk.gov.hmcts.darts.annotation;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.json.BasicJsonTester;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.net.URI;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
+
+@AutoConfigureMockMvc
+class AnnotationPostTest extends IntegrationBase {
+
+    private static final URI ENDPOINT = URI.create("/annotations");
+
+    private final BasicJsonTester json = new BasicJsonTester(getClass());
+
+    @Autowired
+    private AnnotationTestGivensBuilder given;
+
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void returnsAnnotationId() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+
+        var mvcResult = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(someAnnotationPostDocument())
+                    .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+            .andExpect(status().isOk())
+                .andReturn();
+
+        var response = mvcResult.getResponse().getContentAsString();
+        assertThat(json.from(response)).hasJsonPathNumberValue("annotation_id");
+    }
+
+    @Test
+    void allowsJudgeWithGlobalAccessToUploadAnnotations() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+
+        mockMvc.perform(
+                        multipart(ENDPOINT)
+                                .file(someAnnotationPostDocument())
+                                .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    void allowsJudgeAuthorisedForCourthouseAccessToUploadAnnotations() throws Exception {
+        var hearing = dartsDatabase.save(createSomeMinimalHearing());
+        given.anAuthenticatedUserAuthorizedForCourthouse(JUDGE, hearing.getCourtroom().getCourthouse());
+
+        mockMvc.perform(
+                        multipart(ENDPOINT)
+                                .file(someAnnotationPostDocument())
+                                .file(someAnnotationPostBodyFor(hearing)))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    void returns400IfAnnotationDocumentMissing() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+
+        mockMvc.perform(
+                        multipart(ENDPOINT)
+                                .file(someAnnotationPostBodyFor(createSomeMinimalHearing())))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void returns400IfPostBodyMissing() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+
+        mockMvc.perform(
+                        multipart(ENDPOINT)
+                                .file(someAnnotationPostDocument()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void returns400WhenHearingIdIsNull() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+
+        mockMvc.perform(
+                        multipart(ENDPOINT)
+                                .file(someAnnotationPostBodyNullHearingId())
+                                .file(someAnnotationPostDocument()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    private MockMultipartFile someAnnotationPostBodyFor(HearingEntity hearingEntity) throws JsonProcessingException {
+        dartsDatabase.save(hearingEntity);
+        var annotation = new Annotation(hearingEntity.getId());
+        annotation.setComment("some comment");
+
+        return new MockMultipartFile(
+                "annotation",
+                null,
+                "application/json",
+                objectMapper.writeValueAsString(annotation).getBytes()
+        );
+    }
+
+    private MockMultipartFile someAnnotationPostBodyNullHearingId() throws JsonProcessingException {
+        var annotation = new Annotation(null);
+        return new MockMultipartFile(
+                "annotation",
+                null,
+                "application/json",
+                objectMapper.writeValueAsString(annotation).getBytes()
+        );
+    }
+
+    private static MockMultipartFile someAnnotationPostDocument() {
+        return new MockMultipartFile(
+                "file",
+                "some-filename.txt",
+                "some-content-type",
+                "some-content".getBytes()
+        );
+    }
+
+}

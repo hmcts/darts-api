@@ -55,7 +55,11 @@ class AnnotationServiceTest {
     @Mock
     private AnnotationPersistenceService annotationPersistenceService;
     @Mock
-    private Validator<Annotation> annotationValidator;
+    private Validator<Annotation> annotationUploadValidator;
+    @Mock
+    private Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
+    @Mock
+    private Validator<Integer> annotationExistsValidator;
     @Mock
     private HearingEntity hearing;
 
@@ -74,11 +78,13 @@ class AnnotationServiceTest {
             dataManagementApi,
             fileContentChecksum,
             annotationPersistenceService,
-            annotationValidator
+            annotationUploadValidator,
+            annotationExistsValidator,
+            userAuthorisedToDeleteAnnotationValidator
         );
 
         when(hearing.getId()).thenReturn(1);
-        doNothing().when(annotationValidator).validate(any());
+        doNothing().when(annotationUploadValidator).validate(any());
     }
 
     @Test
