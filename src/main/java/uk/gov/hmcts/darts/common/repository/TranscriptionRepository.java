@@ -13,15 +13,26 @@ import java.util.List;
 @Repository
 public interface TranscriptionRepository extends JpaRepository<TranscriptionEntity, Integer> {
 
-    @Query("""
-        SELECT t
-        FROM TranscriptionEntity t
-        join t.courtCases case
-        WHERE case.id = :caseId
-        ORDER BY t.createdDateTime
-        """
+    @Query(value = """
+        SELECT *
+        FROM darts.transcription tr
+        WHERE tr.tra_id IN (
+            SELECT ht.tra_id
+            FROM darts.hearing h
+            JOIN darts.hearing_transcription_ae ht ON ht.hea_id = h.hea_id
+            WHERE h.cas_id = :caseId
+            UNION
+            SELECT ct.tra_id
+            FROM darts.court_case cc
+            JOIN darts.case_transcription_ae ct ON ct.cas_id = cc.cas_id
+            WHERE cc.cas_id = :caseId
+        )
+        AND (
+            tr.is_manual_transcription = true OR tr.transcription_object_id IS NOT NULL
+        )
+        """, nativeQuery = true
     )
-    List<TranscriptionEntity> findByCaseId(Integer caseId);
+    List<TranscriptionEntity> findByCaseIdManualOrLegacy(Integer caseId);
 
     @Query("""
            SELECT te
@@ -35,12 +46,13 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
     @Query("""
         SELECT t
         FROM TranscriptionEntity t
-        join t.hearings hearing
-        WHERE hearing.id = :hearingId
+        JOIN t.hearings h
+        WHERE h.id = :hearingId
+        AND (t.isManualTranscription = true OR t.legacyObjectId IS NOT NULL)
         ORDER BY t.createdDateTime
         """
     )
-    List<TranscriptionEntity> findByHearingId(Integer hearingId);
+    List<TranscriptionEntity> findByHearingIdManualOrLegacy(Integer hearingId);
 
     @Query("""
         SELECT t
