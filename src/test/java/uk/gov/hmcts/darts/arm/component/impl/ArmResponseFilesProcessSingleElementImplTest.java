@@ -17,9 +17,12 @@ import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -660,7 +663,80 @@ class ArmResponseFilesProcessSingleElementImplTest {
     }
 
     @Test
-    void processResponseFilesFor_WithValidInvalidLineFileJson() throws IOException {
+    void processResponseFilesFor_WithTranscriptionInvalidLineFileChecksum() {
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(1);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setId(1);
+
+        externalObjectDirectoryArmResponseProcessing.setMedia(null);
+        externalObjectDirectoryArmResponseProcessing.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmResponseProcessing);
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenThrow(new AzureException());
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+    }
+
+    @Test
+    void processResponseFilesFor_WithAnnotationInvalidLineFileChecksum() {
+        AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+        annotationDocumentEntity.setId(1);
+
+        externalObjectDirectoryArmResponseProcessing.setMedia(null);
+        externalObjectDirectoryArmResponseProcessing.setAnnotationDocumentEntity(annotationDocumentEntity);
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmResponseProcessing);
+
+        String prefix = "1_1_1";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenThrow(new AzureException());
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmResponseProcessingFailed, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+    }
+
+    @Test
+    void processResponseFilesFor_WithValidInvalidLineFileJsonSuccess() throws IOException {
 
         when(mediaEntity.getId()).thenReturn(1);
 
