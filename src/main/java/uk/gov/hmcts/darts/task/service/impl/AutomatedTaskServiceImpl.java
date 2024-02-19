@@ -42,7 +42,7 @@ import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
-import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -93,7 +93,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
 
-    private final TranscriptionsApi transcriptionsApi;
+    private final TranscriptionsProcessor transcriptionsProcessor;
 
     private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
 
@@ -328,7 +328,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            transcriptionsApi
+            transcriptionsProcessor
         );
         closeUnfinishedTranscriptionsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
             closeUnfinishedTranscriptionsAutomatedTask));
@@ -400,7 +400,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                transcriptionsApi
+                transcriptionsProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);

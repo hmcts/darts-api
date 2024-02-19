@@ -4,23 +4,23 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
-import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 
 @Slf4j
 public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockableAutomatedTask {
 
-    private final TranscriptionsApi transcriptionsApi;
+    private final TranscriptionsProcessor transcriptionsProcessor;
 
     protected String taskName = CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName();
 
     public CloseUnfinishedTranscriptionsAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                       LockProvider lockProvider,
                                                       AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                      TranscriptionsApi transcriptionsApi) {
+                                                      TranscriptionsProcessor transcriptionsProcessor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
-        this.transcriptionsApi = transcriptionsApi;
+        this.transcriptionsProcessor = transcriptionsProcessor;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CloseUnfinishedTranscriptionsAutomatedTask extends AbstractLockable
 
     @Override
     protected void runTask() {
-        transcriptionsApi.closeTranscriptions();
+        transcriptionsProcessor.closeTranscriptions();
     }
 
     @Override
