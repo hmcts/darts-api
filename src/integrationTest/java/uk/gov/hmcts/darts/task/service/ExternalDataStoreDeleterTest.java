@@ -1,26 +1,9 @@
 package uk.gov.hmcts.darts.task.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -52,6 +35,24 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
