@@ -60,6 +60,11 @@ public enum AuthorisationError implements DartsApiError {
             AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_ENDPOINT.getValue(),
             HttpStatus.FORBIDDEN,
             AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_ENDPOINT.toString()
+    ),
+    BAD_REQUEST_ANNOTATION_ID(
+            "109",
+            HttpStatus.BAD_REQUEST,
+            "Failed to check authorisation for the annotation"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

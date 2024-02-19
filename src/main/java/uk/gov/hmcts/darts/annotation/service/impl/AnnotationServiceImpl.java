@@ -33,11 +33,13 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final DataManagementApi dataManagementApi;
     private final FileContentChecksum fileContentChecksum;
     private final AnnotationPersistenceService annotationPersistenceService;
-    private final Validator<Annotation> annotationValidator;
+    private final Validator<Annotation> annotationUploadValidator;
+    private final Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
+    private final Validator<Integer> annotationExistsValidator;
 
     @Override
     public Integer process(MultipartFile document, Annotation annotation) {
-        annotationValidator.validate(annotation);
+        annotationUploadValidator.validate(annotation);
 
         UUID externalLocation;
         BinaryData binaryData;
@@ -64,6 +66,13 @@ public class AnnotationServiceImpl implements AnnotationService {
         }
 
         return annotationEntity.getId();
+    }
+
+    @Override
+    public void delete(Integer annotationId) {
+        annotationExistsValidator.validate(annotationId);
+        userAuthorisedToDeleteAnnotationValidator.validate(annotationId);
+        annotationPersistenceService.markForDeletion(annotationId);
     }
 
     private void attemptToDeleteDocument(UUID externalLocation) {
