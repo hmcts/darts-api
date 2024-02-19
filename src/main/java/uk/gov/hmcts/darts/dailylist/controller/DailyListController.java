@@ -107,7 +107,7 @@ public class DailyListController implements DailyListsApi {
         produces = {"application/json", "application/json+problem"}
     )
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
+    @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPost(
         @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY)
