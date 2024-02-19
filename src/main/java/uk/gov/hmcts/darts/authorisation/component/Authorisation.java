@@ -24,4 +24,6 @@ public interface Authorisation {
 
     void authoriseTransformedMediaAgainstUser(Integer transformedMediaId);
 
+    void authoriseByAnnotationId(Integer annotationId, Set<SecurityRoleEnum> securityRoles);
+
 }

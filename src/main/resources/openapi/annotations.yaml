@@ -16,6 +16,7 @@ paths:
       tags:
         - Annotations
       summary: Create an annotation with file upload.
+      operationId: postAnnotation
       requestBody:
         content:
           multipart/form-data:
@@ -37,7 +38,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/post_annotation_response'
-
         '400':
           description: Bad Request Error
           content:
@@ -46,6 +46,33 @@ paths:
                 $ref: './problem.yaml'
         '403':
           description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+  /annotations/{annotation_id}:
+    delete:
+      tags:
+        - Annotations
+      summary: Deletes an annotation.
+      operationId: deleteAnnotation
+      parameters:
+        - in: path
+          name: annotation_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: Annotation has been deleted
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Annotation does not exist
           content:
             application/json+problem:
               schema:

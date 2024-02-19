@@ -6,10 +6,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
@@ -21,6 +23,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,22 +51,23 @@ class DuplicateRequestDetectorTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void doesntThrowWhenNoMatchingTranscriptions(boolean isManual) {
-        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(1, transcriptionType, START_TIME, END_TIME, isManual))
-            .thenReturn(emptyList());
-
+    void doesNotThrowWhenNoMatchingTranscriptions(boolean isManual) {
         var requestDetails = someTranscriptionRequestDetails();
 
-        assertThatNoException().isThrownBy(
-            () -> duplicateRequestDetector.checkForDuplicate(requestDetails, isManual));
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(true), anyList()))
+            .thenReturn(emptyList());
+
+        assertThatNoException().isThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, isManual));
     }
 
     @Test
     void throwsWhenMatchingManuallyRequestedTranscriptionFound() {
         var requestDetails = someTranscriptionRequestDetails();
 
-        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(1, transcriptionType, START_TIME, END_TIME, true))
-            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, 1));
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(true), anyList()))
+            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 1));
 
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
             .isInstanceOf(DartsApiException.class)
@@ -69,11 +76,54 @@ class DuplicateRequestDetectorTest {
     }
 
     @Test
-    void throwsWhenMatchingAutomaticallyRequestedTranscriptionFound() {
+    void throwsWhenMatchingManuallyRequestedTranscriptionWithoutTimesFound() {
+        var requestDetails = someTranscriptionRequestDetailsWithoutTimes();
+
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(null), eq(null), eq(true), anyList()))
+            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 1));
+
+        assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+    }
+
+    @Test
+    void throwsWhenMultipleMatchingManuallyRequestedTranscriptionFound() {
         var requestDetails = someTranscriptionRequestDetails();
 
-        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(1, transcriptionType, START_TIME, END_TIME, false))
-            .thenReturn(someTranscriptionRequestedAutomaticallyThatMatches(requestDetails, 1));
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(true), anyList()))
+                .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 3));
+
+        assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
+                .isInstanceOf(DartsApiException.class)
+                .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
+                .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+    }
+
+    @Test
+    void throwsWhenMatchingAutomaticallyRequestedTranscriptionsFound() {
+        var requestDetails = someTranscriptionRequestDetails();
+
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(false), anyList()))
+                .thenReturn(someTranscriptionRequestedAutomaticallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 1));
+
+        assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
+                .isInstanceOf(DartsApiException.class)
+                .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
+                .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+    }
+
+    @Test
+    void throwsWhenMultipleMatchingAutomaticallyRequestedTranscriptionsFound() {
+        var requestDetails = someTranscriptionRequestDetails();
+
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(false), anyList()))
+            .thenReturn(someTranscriptionRequestedAutomaticallyThatMatches(requestDetails, TranscriptionStatusEnum.COMPLETE, 3));
 
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
             .isInstanceOf(DartsApiException.class)
@@ -82,31 +132,52 @@ class DuplicateRequestDetectorTest {
     }
 
     @Test
-    void throwsWhenMultipleMatchingAutomaticallyRequestedTranscriptionsFound() {
+    void throwsWhenMatchingNotCompletedRequestedTranscriptionFound() {
         var requestDetails = someTranscriptionRequestDetails();
 
-        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(1, transcriptionType, START_TIME, END_TIME, false))
-            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, 3));
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(false), anyList()))
+                .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.APPROVED, 1));
 
-        assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
-            .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
+        DartsApiException throwable = catchThrowableOfType(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false), DartsApiException.class);
+        assertEquals(throwable.getError(), TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
+        assertEquals(0, throwable.getCustomProperties().size());
     }
 
-    private List<TranscriptionEntity> someTranscriptionRequestedManuallyThatMatches(TranscriptionRequestDetails requestDetails, int count) {
+    @Test
+    void throwsWhenMatchingAutomatedNotCompletedRequestedTranscriptionFound() {
+        var requestDetails = someTranscriptionRequestDetails();
+
+        when(transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            eq(requestDetails.getHearingId()), eq(transcriptionType), eq(START_TIME), eq(END_TIME), eq(true), anyList()))
+            .thenReturn(someTranscriptionRequestedManuallyThatMatches(requestDetails, TranscriptionStatusEnum.WITH_TRANSCRIBER, 1));
+
+        DartsApiException throwable = catchThrowableOfType(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true), DartsApiException.class);
+        assertEquals(throwable.getError(), TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
+        assertEquals(0, throwable.getCustomProperties().size());
+    }
+
+    private List<TranscriptionEntity> someTranscriptionRequestedManuallyThatMatches(
+        TranscriptionRequestDetails requestDetails, TranscriptionStatusEnum status, int count) {
         return rangeClosed(1, count)
             .mapToObj(index -> {
                 var transcription = someTranscriptionThatMatches(requestDetails, index);
                 transcription.setIsManualTranscription(true);
+                var transcriptionStatusEntity = new TranscriptionStatusEntity();
+                transcriptionStatusEntity.setId(status.getId());
+                transcription.setTranscriptionStatus(transcriptionStatusEntity);
                 return transcription;
             }).collect(toList());
     }
 
-    private List<TranscriptionEntity> someTranscriptionRequestedAutomaticallyThatMatches(TranscriptionRequestDetails requestDetails, int count) {
+    private List<TranscriptionEntity> someTranscriptionRequestedAutomaticallyThatMatches(
+        TranscriptionRequestDetails requestDetails, TranscriptionStatusEnum status, int count) {
         return rangeClosed(1, count)
             .mapToObj(index -> {
                 var transcription = someTranscriptionThatMatches(requestDetails, index);
+                var transcriptionStatusEntity = new TranscriptionStatusEntity();
+                transcriptionStatusEntity.setId(status.getId());
+                transcription.setTranscriptionStatus(transcriptionStatusEntity);
                 transcription.setIsManualTranscription(false);
                 return transcription;
             }).collect(toList());
@@ -115,9 +186,16 @@ class DuplicateRequestDetectorTest {
     private static TranscriptionRequestDetails someTranscriptionRequestDetails() {
         var requestDetails = new TranscriptionRequestDetails();
         requestDetails.setHearingId(1);
-        requestDetails.setTranscriptionTypeId(1);
+        requestDetails.setTranscriptionTypeId(5);
         requestDetails.setStartDateTime(START_TIME);
         requestDetails.setEndDateTime(END_TIME);
+        return requestDetails;
+    }
+
+    private static TranscriptionRequestDetails someTranscriptionRequestDetailsWithoutTimes() {
+        var requestDetails = new TranscriptionRequestDetails();
+        requestDetails.setHearingId(1);
+        requestDetails.setTranscriptionTypeId(5);
         return requestDetails;
     }
 
@@ -139,7 +217,7 @@ class DuplicateRequestDetectorTest {
 
     private TranscriptionTypeEntity someTranscriptionType() {
         var transcriptionType = new TranscriptionTypeEntity();
-        transcriptionType.setId(1);
+        transcriptionType.setId(5);
         return transcriptionType;
     }
 

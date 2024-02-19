@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
@@ -21,21 +23,25 @@ public class DuplicateRequestDetector {
     private final TranscriptionTypeRepository transcriptionTypeRepository;
 
     public void checkForDuplicate(TranscriptionRequestDetails requestDetails, boolean isManual) {
-        if (requestDetails.getStartDateTime() != null && requestDetails.getEndDateTime() != null) {
-
-            List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManual(
-                requestDetails.getHearingId(),
-                getTranscriptionTypeById(requestDetails.getTranscriptionTypeId()),
-                requestDetails.getStartDateTime(),
-                requestDetails.getEndDateTime(),
-                isManual
-            );
-            if (!matchingTranscriptions.isEmpty()) {
-                var duplicateTranscriptionIds = matchingTranscriptions.get(0).getId();
+        var ignoreStatusList = List.of(new TranscriptionStatusEntity(TranscriptionStatusEnum.REJECTED.getId()),
+                                       new TranscriptionStatusEntity(TranscriptionStatusEnum.CLOSED.getId()));
+        List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEndAndIsManualAndNotStatus(
+            requestDetails.getHearingId(),
+            getTranscriptionTypeById(requestDetails.getTranscriptionTypeId()),
+            requestDetails.getStartDateTime(),
+            requestDetails.getEndDateTime(),
+            isManual,
+            ignoreStatusList
+        );
+        if (!matchingTranscriptions.isEmpty()) {
+            var duplicateTranscription = matchingTranscriptions.get(0);
+            if (duplicateTranscription.getTranscriptionStatus().getId().equals(TranscriptionStatusEnum.COMPLETE.getId())) {
                 throw new DartsApiException(
                     TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
-                    Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionIds)
+                    Collections.singletonMap("duplicate_transcription_id", duplicateTranscription.getId())
                 );
+            } else {
+                throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
             }
         }
     }

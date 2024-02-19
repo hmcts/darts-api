@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -167,6 +168,9 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
             SOME_COURTHOUSE
         ).get();
 
+        assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
+        assertTrue(persistedCase.getClosed());
+
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
 
@@ -223,6 +227,7 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
 
         DartsEventRetentionPolicy retentionPolicy2 = new DartsEventRetentionPolicy();
         retentionPolicy2.caseRetentionFixedPolicy("2");
+        retentionPolicy2.setCaseTotalSentence("20Y3M4D");//this should get ignored.
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())

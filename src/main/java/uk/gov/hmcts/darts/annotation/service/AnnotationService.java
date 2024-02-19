@@ -9,5 +9,5 @@ public interface AnnotationService {
 
     AnnotationResponseDto downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId);
 
-
+    void delete(Integer annotationId);
 }

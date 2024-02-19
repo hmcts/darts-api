@@ -22,12 +22,14 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -40,7 +42,6 @@ import java.util.List;
 
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -54,7 +55,6 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
-
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -76,6 +76,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Autowired
     private AuthorisationStub authorisationStub;
+
+    @Autowired
+    private TranscriptionStub transcriptionStub;
 
     @Autowired
     private AuditService auditService;
@@ -183,7 +186,10 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         OffsetDateTime endTime = now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SPECIFIED_TIMES;
+
+        var dupeTranscription = transcriptionStub.createAndSaveCompletedTranscription(
+            testUser, courtCase, hearing,startTime, endTime, now(), false);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -195,24 +201,21 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
-
-        MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
-        mockMvc.perform(requestBuilderDup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
-            .andReturn();
+            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId())));
     }
 
     @Test
     void transcriptionRequestWithDuplicateValuesWithNoTimes() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionTypeEntity transcriptionType = new TranscriptionTypeEntity();
+        transcriptionType.setId(TranscriptionTypeEnum.SENTENCING_REMARKS.getId());
+
+        TranscriptionEntity dupeTranscription = transcriptionStub.createAndSaveCompletedTranscription(
+            testUser, courtCase, hearing, null, null, transcriptionType, now(), false);
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -224,16 +227,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andReturn();
-
-        MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
-        mockMvc.perform(requestBuilderDup)
-            .andExpect(status().isOk())
-            .andReturn();
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
+            .andExpect(jsonPath("$.duplicate_transcription_id", is(dupeTranscription.getId())));
     }
 
 

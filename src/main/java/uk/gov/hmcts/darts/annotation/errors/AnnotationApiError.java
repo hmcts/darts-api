@@ -42,8 +42,18 @@ public enum AnnotationApiError implements DartsApiError {
             AnnotationErrorCode.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT.getValue(),
     HttpStatus.NOT_FOUND,
             AnnotationTitleErrors.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT.toString()
-            );
+            ),
+    ANNOTATION_NOT_FOUND(
+        "107",
+        HttpStatus.NOT_FOUND,
+        "The requested annotation cannot be found"
+    ),
 
+    NOT_AUTHORISED_TO_DELETE(
+            "108",
+            HttpStatus.FORBIDDEN,
+            "Not authorized to delete this annotation"
+    );
 
     private static final String ERROR_TYPE_PREFIX = "ANNOTATION";
 

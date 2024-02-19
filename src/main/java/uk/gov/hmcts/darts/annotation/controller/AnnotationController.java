@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.annotations.model.PostAnnotationResponse;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANNOTATION_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
@@ -32,14 +32,24 @@ public class AnnotationController implements AnnotationsApi {
         securityRoles = {JUDGE},
         globalAccessSecurityRoles = {JUDGE})
     @Override
-    public ResponseEntity<PostAnnotationResponse> annotationsPost(MultipartFile file, Annotation annotation) {
+    public ResponseEntity<PostAnnotationResponse> postAnnotation(MultipartFile file, Annotation annotation) {
         var annotationId = annotationService.process(file, annotation);
         return ResponseEntity.ok(new PostAnnotationResponse(annotationId));
     }
 
     @Authorisation(
+            contextId = ANNOTATION_ID,
+            securityRoles = {JUDGE},
+            globalAccessSecurityRoles = {JUDGE, ADMIN})
+    @Override
+    public ResponseEntity<Void> deleteAnnotation(Integer annotationId) {
+        annotationService.delete(annotationId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Authorisation(
             bodyAuthorisation = true,
-            contextId = ANY_ENTITY_ID,
+            contextId = ANNOTATION_ID,
             securityRoles = {JUDGE, ADMIN},
             globalAccessSecurityRoles = {JUDGE, ADMIN})
     @Override

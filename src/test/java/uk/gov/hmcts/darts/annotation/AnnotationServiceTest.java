@@ -57,13 +57,17 @@ class AnnotationServiceTest {
     @Mock
     private AnnotationPersistenceService annotationPersistenceService;
     @Mock
-    private Validator<Annotation> annotationValidator;
+    private Validator<Annotation> annotationUploadValidator;
+    @Mock
+    private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
+    @Mock
+    private Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
+    @Mock
+    private Validator<Integer> annotationExistsValidator;
     @Mock
     private HearingEntity hearing;
-
     @Mock
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
+    private ExternalObjectDirectoryRepository eodRepository;
     @Mock
     private AuthorisationApi authorisationApi;
 
@@ -75,19 +79,24 @@ class AnnotationServiceTest {
     @BeforeEach
     void setUp() {
         annotationService = new AnnotationServiceImpl(
-                annotationMapper,
-                annotationDocumentBuilder,
-                externalObjectDirectoryBuilder,
-                dataManagementApi,
-                fileContentChecksum,
-                annotationPersistenceService,
-                annotationValidator,
-                externalObjectDirectoryRepository,
-                authorisationApi
+        annotationMapper,
+        annotationDocumentBuilder,
+        externalObjectDirectoryBuilder,
+        dataManagementApi,
+        fileContentChecksum,
+        annotationPersistenceService,
+        eodRepository,
+        authorisationApi,
+        annotationUploadValidator,
+        userAuthorisedToDeleteAnnotationValidator,
+        userAuthorisedToDownloadAnnotationValidator,
+        annotationExistsValidator
         );
 
         when(hearing.getId()).thenReturn(1);
-        doNothing().when(annotationValidator).validate(any());
+
+        when(hearing.getId()).thenReturn(1);
+        doNothing().when(annotationUploadValidator).validate(any());
     }
 
     @Test

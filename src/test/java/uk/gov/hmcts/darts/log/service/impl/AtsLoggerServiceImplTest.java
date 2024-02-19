@@ -16,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 
 
@@ -94,6 +95,22 @@ class AtsLoggerServiceImplTest {
         List<String> errorLogs = logCaptor.getErrorLogs();
         assertEquals(1, errorLogs.size());
         assertEquals(logEntry, errorLogs.get(0));
+    }
+
+    @Test
+    void testLogsAudioRequest() {
+
+        var mediaRequestEntity = createMediaRequest();
+        mediaRequestEntity.setStatus(OPEN);
+
+        atsLoggerService.atsProcessingUpdate(mediaRequestEntity);
+
+        var logEntry = String.format("ATS request received: med_req_id=%s, hearing_id=%s",
+                                     mediaRequestEntity.getId(), mediaRequestEntity.getHearing().getId());
+
+        List<String> infoLogs = logCaptor.getInfoLogs();
+        assertEquals(1, infoLogs.size());
+        assertEquals(logEntry, infoLogs.get(0));
     }
 
     private MediaRequestEntity createMediaRequest() {

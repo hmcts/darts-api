@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.task.service;
 
-
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -32,6 +31,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -40,16 +40,17 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DELETED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -66,6 +67,8 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private BlobContainerClient blobContainerClient;
     @Mock
     private BlobServiceClient blobServiceClient;
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
     @MockBean
     private DataManagementAzureClientFactory dataManagementFactory;
 
@@ -115,7 +118,9 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             dartsDatabase.getExternalObjectDirectoryRepository(),
             inboundExternalObjectDirectoryDeletedFinder,
             inboundDataStoreDeleter,
-            systemUserHelper
+            systemUserHelper,
+            transformedMediaRepository
+
         );
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
@@ -123,14 +128,16 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             dartsDatabase.getExternalObjectDirectoryRepository(),
             unstructuredExternalObjectDirectoryDeletedFinder,
             unstructuredDataStoreDeleter,
-            systemUserHelper
+            systemUserHelper,
+            transformedMediaRepository
         );
 
         externalOutboundDataStoreDeleter =
             new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectRecordStatusRepository(),
                                                  dartsDatabase.getTransientObjectDirectoryRepository(),
                                                  outboundExternalObjectDirectoryDeletedFinder,
-                                                 outboundDataStoreDeleter, systemUserHelper
+                                                 outboundDataStoreDeleter, systemUserHelper,
+                                                 transformedMediaRepository
             );
 
     }
@@ -167,14 +174,12 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         TransientObjectDirectoryEntity outboundEntity = createTransientDirectoryAndObjectStatus(
             currentMediaRequest, MARKED_FOR_DELETION);
 
-
         externalInboundDataStoreDeleter.delete();
         externalUnstructuredDataStoreDeleter.delete();
         externalOutboundDataStoreDeleter.delete();
 
-        verifyEntitiesChanged(List.of(inboundEntity, unstructuredEntity), List.of(outboundEntity));
+        verifyEntitiesDeleted(List.of(inboundEntity, unstructuredEntity), List.of(outboundEntity));
     }
-
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Test
@@ -254,45 +259,27 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         }
     }
 
-    private void verifyEntitiesChanged(List<ExternalObjectDirectoryEntity> inboundUnstructuredList,
+    private void verifyEntitiesDeleted(List<ExternalObjectDirectoryEntity> inboundUnstructuredList,
                                        List<TransientObjectDirectoryEntity> outboundList) {
-        assertExternalObjectDirectoryStateChanged(inboundUnstructuredList);
-        assertTransientObjectDirectoryStateChanged(outboundList);
+        assertExternalObjectDirectoryDeleted(inboundUnstructuredList);
+        assertTransientObjectDirectoryDeleted(outboundList);
     }
 
 
-    private void assertExternalObjectDirectoryStateChanged(List<ExternalObjectDirectoryEntity> inboundUnstructuredList) {
+    private void assertExternalObjectDirectoryDeleted(List<ExternalObjectDirectoryEntity> inboundUnstructuredList) {
         for (ExternalObjectDirectoryEntity entity : inboundUnstructuredList) {
-            ExternalObjectDirectoryEntity savedEntity = dartsDatabase.getExternalObjectDirectoryRepository().findById(
-                entity.getId()).get();
-            assertEquals(
-                DELETED.getId(),
-                savedEntity.getStatus().getId()
-            );
-
-            assertEquals(
-                SystemUsersAccountUUIDEnum.HOUSE_KEEPING.getUuid(),
-                savedEntity.getLastModifiedBy().getAccountGuid()
-            );
+            Optional<ExternalObjectDirectoryEntity> savedEntity = dartsDatabase.getExternalObjectDirectoryRepository().findById(
+                entity.getId());
+            assertTrue(savedEntity.isEmpty());
         }
     }
 
-    private void assertTransientObjectDirectoryStateChanged(List<TransientObjectDirectoryEntity> outboundList) {
+    private void assertTransientObjectDirectoryDeleted(List<TransientObjectDirectoryEntity> outboundList) {
         for (TransientObjectDirectoryEntity entity : outboundList) {
-            TransientObjectDirectoryEntity savedEntity = dartsDatabase.getTransientObjectDirectoryRepository().findById(
-                entity.getId()).get();
-
-            assertEquals(
-                DELETED.getId(),
-                savedEntity.getStatus().getId()
-            );
-
-            assertEquals(
-                SystemUsersAccountUUIDEnum.HOUSE_KEEPING.getUuid(),
-                savedEntity.getLastModifiedBy().getAccountGuid()
-            );
+            Optional<TransientObjectDirectoryEntity> savedEntity = dartsDatabase.getTransientObjectDirectoryRepository().findById(
+                entity.getId());
+            assertTrue(savedEntity.isEmpty());
         }
-
     }
 
     private ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity, Integer dataStoreId, ObjectRecordStatusEnum status) {

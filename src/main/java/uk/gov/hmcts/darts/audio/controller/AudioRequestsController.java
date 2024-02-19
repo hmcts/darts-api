@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.InputStream;
 import java.util.List;
@@ -45,6 +46,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     private final MediaRequestService mediaRequestService;
 
     private final AudioRequestResponseMapper audioRequestResponseMapper;
+
+    private final LogApi logApi;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -99,6 +102,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
         addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);
         mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
+        logApi.atsProcessingUpdate(audioRequest);
         return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
     }
 

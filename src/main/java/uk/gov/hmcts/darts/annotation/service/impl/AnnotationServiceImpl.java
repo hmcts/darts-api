@@ -44,13 +44,16 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final DataManagementApi dataManagementApi;
     private final FileContentChecksum fileContentChecksum;
     private final AnnotationPersistenceService annotationPersistenceService;
-    private final Validator<Annotation> annotationValidator;
     private final ExternalObjectDirectoryRepository eodRepository;
     private final AuthorisationApi authorisationApi;
+    private final Validator<Annotation> annotationUploadValidator;
+    private final Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
+    private final Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
+    private final Validator<Integer> annotationExistsValidator;
 
     @Override
     public Integer process(MultipartFile document, Annotation annotation) {
-        annotationValidator.validate(annotation);
+        annotationUploadValidator.validate(annotation);
 
         UUID externalLocation;
         BinaryData binaryData;
@@ -82,12 +85,14 @@ public class AnnotationServiceImpl implements AnnotationService {
     @Override
     public AnnotationResponseDto downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
 
-        final Optional<ExternalObjectDirectoryEntity> annotationDocEodEntityOpt = eodRepository.findByAnnotationIdAndAnnotationDocumentId(annotationId, annotationDocumentId);
+        userAuthorisedToDownloadAnnotationValidator.validate(annotationId);
+
+        final Optional<ExternalObjectDirectoryEntity> eodDir = eodRepository.findByAnnotationIdAndAnnotationDocumentId(annotationId, annotationDocumentId);
         final InputStreamResource blobStream;
 
         final ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
-        if (annotationDocEodEntityOpt.isEmpty()) {
+        if (eodDir.isEmpty()) {
 
             if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))) {
                 throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE);
@@ -97,11 +102,12 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         }
 
-        externalObjectDirectoryEntity = annotationDocEodEntityOpt.get();
+        externalObjectDirectoryEntity = eodDir.get();
 
         try {
 
-            blobStream = new InputStreamResource(dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
+            blobStream = new InputStreamResource(
+                dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
 
         } catch (RuntimeException e) {
             log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getId(), e);
@@ -118,6 +124,13 @@ public class AnnotationServiceImpl implements AnnotationService {
 
     }
 
+
+    @Override
+    public void delete(Integer annotationId) {
+        annotationExistsValidator.validate(annotationId);
+        userAuthorisedToDeleteAnnotationValidator.validate(annotationId);
+        annotationPersistenceService.markForDeletion(annotationId);
+    }
 
     private void attemptToDeleteDocument(UUID externalLocation) {
         try {

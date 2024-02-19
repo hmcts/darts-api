@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
@@ -51,7 +52,7 @@ class AnnotationDownloadServiceTest {
     @Mock
     private AnnotationPersistenceService annotationPersistenceService;
     @Mock
-    private Validator<Annotation> annotationValidator;
+    private ExternalObjectDirectoryRepository eodRepository;
 
     private AnnotationService annotationService;
 
@@ -59,28 +60,38 @@ class AnnotationDownloadServiceTest {
     private AuthorisationApi authorisationApi;
 
     @Mock
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private Validator<Annotation> annotationUploadValidator;
+    @Mock
+    private Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
+    @Mock
+    private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
+    @Mock
+    private Validator<Integer> annotationExistsValidator;
 
 
     @BeforeEach
     void setUp() {
         annotationService = new AnnotationServiceImpl(
-                annotationMapper,
-                annotationDocumentBuilder,
-                externalObjectDirectoryBuilder,
-                dataManagementApi,
-                fileContentChecksum,
-                annotationPersistenceService,
-                annotationValidator,
-                externalObjectDirectoryRepository,
-                authorisationApi
+            annotationMapper,
+            annotationDocumentBuilder,
+            externalObjectDirectoryBuilder,
+            dataManagementApi,
+            fileContentChecksum,
+            annotationPersistenceService,
+            eodRepository,
+            authorisationApi,
+            annotationUploadValidator,
+            userAuthorisedToDeleteAnnotationValidator,
+            userAuthorisedToDownloadAnnotationValidator,
+            annotationExistsValidator
         );
 
     }
 
     @Test
     void throwsIfDownloadAnnotationDocumentFails() {
-        when(externalObjectDirectoryRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(
+        doNothing().when(userAuthorisedToDownloadAnnotationValidator).validate(any());
+        when(eodRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(
                 Optional.of(someExternalObjectDirectoryEntity()));
         when(dataManagementApi.getBlobDataFromInboundContainer(any())).thenThrow(new RuntimeException());
 
@@ -91,7 +102,7 @@ class AnnotationDownloadServiceTest {
 
     @Test
     void throwsIfJudgeAndNoAnnotationDocumentFound() {
-        when(externalObjectDirectoryRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(Optional.empty());
+        doNothing().when(userAuthorisedToDownloadAnnotationValidator).validate(any());
         when(authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))).thenReturn(true);
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
@@ -101,7 +112,6 @@ class AnnotationDownloadServiceTest {
 
     @Test
     void throwsIfNotJudgeAndNoAnnotationDocumentFound() {
-        when(externalObjectDirectoryRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(Optional.empty());
         when(authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))).thenReturn(false);
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
