@@ -96,7 +96,6 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
@@ -147,9 +146,11 @@ public class DartsDatabaseStub {
     private final AuditStub auditStub;
     private final CaseRetentionStub caseRetentionStub;
     private final CourthouseStub courthouseStub;
+    private final CourtroomStub courtroomStub;
     private final EventStub eventStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
     private final HearingStub hearingStub;
+    private final MediaStub mediaStub;
     private final MediaRequestStub mediaRequestStub;
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
@@ -269,8 +270,7 @@ public class DartsDatabaseStub {
     }
 
     public CourtroomEntity createCourtroomUnlessExists(String courthouseName, String courtroomName) {
-        createCourthouseUnlessExists(courthouseName);
-        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouseName, courtroomName);
+        return courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
     }
 
     @Transactional
@@ -338,8 +338,7 @@ public class DartsDatabaseStub {
     }
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        CourtroomEntity courtroom = createCourtroomUnlessExists(courthouseName, courtroomName);
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel));
+        return mediaStub.createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel);
     }
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
