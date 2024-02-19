@@ -20,10 +20,12 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
 
+    long pendingRetentionDays = 7;
+
     @Override
     public void processApplyRetention() {
         List<CaseRetentionEntity> caseRetentionEntities =
-                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(7));
+                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(pendingRetentionDays));
         processList(caseRetentionEntities);
 
     }
