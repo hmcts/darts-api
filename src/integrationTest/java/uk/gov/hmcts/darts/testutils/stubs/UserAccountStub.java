@@ -216,7 +216,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-14);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-14).get();
         securityGroupEntity.setGlobalAccess(true);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
