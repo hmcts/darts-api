@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,6 +59,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
 
+        assertEquals(1, caseRetentionEntities.size());
         assertTrue(caseRetentionEntities.get(0).getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
         assertEquals(caseRetentionEntities.get(0).getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
         assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntities.get(0).getCurrentState());
@@ -78,6 +80,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         applyRetentionProcessor.processApplyRetention();
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
+        caseRetentionEntities.sort(Comparator.comparing(CaseRetentionEntity::getCreatedDateTime));
         assertTrue(caseRetentionEntities.get(0).getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
         assertEquals(caseRetentionEntities.get(0).getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
         assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntities.get(0).getCurrentState());
