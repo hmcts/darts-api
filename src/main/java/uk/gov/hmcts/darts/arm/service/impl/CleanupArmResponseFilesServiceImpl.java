@@ -28,10 +28,10 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INPUT_UPLOAD_FILENAME_KEY;
-import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_FILE_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -53,7 +53,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
     private final List<String> armResponseFilesToBeDeleted = new ArrayList<>();
 
     private ObjectRecordStatusEntity storedStatus;
-    private ObjectRecordStatusEntity failedArmManifestFileStatus;
+    private ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
     private ObjectRecordStatusEntity failedArmResponseProcessing;
     private ObjectRecordStatusEntity failedArmResponseChecksum;
     private UserAccountEntity userAccount;
@@ -65,7 +65,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
 
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
         List<ObjectRecordStatusEntity> statuses = List.of(storedStatus,
-                                                          failedArmManifestFileStatus,
+                                                          failedArmResponseManifestFileStatus,
                                                           failedArmResponseProcessing,
                                                           failedArmResponseChecksum);
 
@@ -96,7 +96,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         String prefix = getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
         try {
-            log.info("About to look for files to cleanup starting with prefix: {}", prefix);
+            log.info("About to look for response files to cleanup, starting with prefix: {}", prefix);
             inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
         } catch (Exception e) {
             log.error("Unable to cleanup response files for prefix: {} - {}", prefix, e.getMessage());
@@ -111,7 +111,6 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 }
             }
         } else {
-            //Assume if no IU file found then it has already been cleaned up
             log.info("Unable to find input upload file with prefix {} for cleanup", prefix);
         }
     }
@@ -149,7 +148,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 createRecordFilename = responseFile;
             } else if (responseFile.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
                 uploadFilename = responseFile;
-            } else if (responseFile.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_INVALID_FILE_FILENAME_KEY))) {
+            } else if (responseFile.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_INVALID_LINE_FILENAME_KEY))) {
                 invalidFileFilename = responseFile;
             }
         }
@@ -200,8 +199,6 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             }
         } else {
             log.warn("Unable to delete all response files for EOD {}", externalObjectDirectory.getId());
-            externalObjectDirectory.setResponseCleaned(false);
-            updateExternalObjectDirectory(externalObjectDirectory);
         }
         armResponseFilesToBeDeleted.clear();
 
@@ -217,7 +214,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
     @SuppressWarnings("java:S3655")
     private void initialisePreloadedObjects() {
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
-        failedArmManifestFileStatus = objectRecordStatusRepository.findById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId()).get();
+        failedArmResponseManifestFileStatus = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED.getId()).get();
         failedArmResponseProcessing = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
         failedArmResponseChecksum = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED.getId()).get();
 
