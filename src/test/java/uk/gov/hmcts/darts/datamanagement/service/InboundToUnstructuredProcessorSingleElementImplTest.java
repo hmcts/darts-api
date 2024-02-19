@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -81,6 +82,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
     @Mock
     private AnnotationDocumentEntity annotationDocumentEntity;
+    @Mock
+    private CaseDocumentEntity caseDocumentEntity;
     @Mock
     ExternalObjectDirectoryEntity externalObjectDirectoryEntityInbound;
     @Mock
@@ -260,6 +263,37 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
         inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+
+        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+
+        assertEquals(STORED.getId(), savedStatus.getId());
+    }
+
+    @Test
+    void processInboundToUnstructuredCaseDocument() {
+
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
+
+        when(externalObjectDirectoryEntityInbound.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(caseDocumentEntity.getId()).thenReturn(44);
+        when(externalObjectDirectoryEntityFailed.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(externalObjectDirectoryEntityFailed.getStatus())
+            .thenReturn(objectRecordStatusEntityFailureChecksum)
+            .thenReturn(objectRecordStatusEntityFailureChecksum)
+            .thenReturn(objectRecordStatusEntityAwaiting)
+            .thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusEntityFailureChecksum.getId()).thenReturn(7);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
+
+        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound,
+                                                            Collections.emptyList(),
+                                                            List.of(externalObjectDirectoryEntityFailed));
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 

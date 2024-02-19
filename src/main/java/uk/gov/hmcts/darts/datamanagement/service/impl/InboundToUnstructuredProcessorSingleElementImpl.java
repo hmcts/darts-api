@@ -76,7 +76,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         if (unstructuredStatus == null
             || unstructuredStatus.getId().equals(STORED.getId())
             || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
-            log.info("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
+            log.trace("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
             return;
         }
 
@@ -97,7 +97,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
                 log.debug("Saving unstructured stored EOD for media ID: {}", unstructuredExternalObjectDirectoryEntity.getId());
                 externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-                log.info("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
+                log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
             }
         } catch (BlobStorageException e) {
             log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
@@ -192,6 +192,11 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
             externalObjectDirectoryEntity = unstructured;
 
+        }
+        if (inbound.getCaseDocument() != null
+            && unstructured.getCaseDocument() != null
+            && (inbound.getCaseDocument().getId()).equals(unstructured.getCaseDocument().getId())) {
+            externalObjectDirectoryEntity = unstructured;
         }
         return externalObjectDirectoryEntity;
     }
