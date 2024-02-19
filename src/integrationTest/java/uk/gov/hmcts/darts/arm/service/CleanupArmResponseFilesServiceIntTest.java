@@ -479,7 +479,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesWithOnlyResponseFileInputUpload() {
+    void cleanupResponseFilesFailesWithOnlyResponseFileInputUpload() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -532,7 +532,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         Optional<ExternalObjectDirectoryEntity> foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armEod.getId());
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
-        assertTrue(foundMedia.isResponseCleaned());
+        assertFalse(foundMedia.isResponseCleaned());
     }
 
     @Test
@@ -572,11 +572,27 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
         String inputUploadBlobFilenameTransferAttempt1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        String inputUploadBlobFilenameTransferAttempt2 = prefix + "2_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadBlobFilenameTransferAttempt2 = prefix + "2_7a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilenameTransferAttempt1);
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilenameTransferAttempt2);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        List<String> hashcodeResponseBlobs1 = new ArrayList<>();
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs1.add(createRecordFilename1);
+        hashcodeResponseBlobs1.add(uploadFileFilename1);
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponseBlobs1);
+
+        List<String> hashcodeResponseBlobs2 = new ArrayList<>();
+        String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
+        hashcodeResponseBlobs2.add(createRecordFilename2);
+        hashcodeResponseBlobs2.add(uploadFileFilename2);
+        when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(hashcodeResponseBlobs2);
 
         when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
 
