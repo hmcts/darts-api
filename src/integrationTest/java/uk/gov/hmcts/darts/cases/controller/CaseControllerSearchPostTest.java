@@ -233,4 +233,27 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void casesSearchPostFailsOnNoPermissions() throws Exception {
+
+        CourthouseEntity wrongCourthouseEntity = dartsDatabase.createCourthouseUnlessExists("SomethingElse");
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(wrongCourthouseEntity.getId()));
+
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "judge_name": "3a"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        assertEquals("[]", actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
 }
