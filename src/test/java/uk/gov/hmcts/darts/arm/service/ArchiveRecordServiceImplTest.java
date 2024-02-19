@@ -68,7 +68,7 @@ class ArchiveRecordServiceImplTest {
     public static final String DARTS = "DARTS";
     public static final String REGION = "GBR";
     public static final int EODID = 1234;
-    public static final String FILE_EXTENTION = "a360";
+    public static final String FILE_EXTENSION = "a360";
     public static final String DATE_FORMAT = "yyyy-MM-dd";
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
@@ -167,6 +167,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
 
         OffsetDateTime startedAt = testTime.minusHours(1);
 
@@ -197,7 +198,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -233,6 +234,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
@@ -264,7 +266,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -299,6 +301,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
 
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
@@ -329,7 +332,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
@@ -361,29 +364,37 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
-        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
+        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
+
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
 
         when(userAccountEntity.getId()).thenReturn(0);
 
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
+        when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
+        when(transcriptionTypeEntity.getDescription()).thenReturn("SPECIFIED_TIMES");
 
-
+        when(transcriptionEntity.getId()).thenReturn(1);
         when(transcriptionEntity.getTranscriptionCommentEntities()).thenReturn(List.of(transcriptionCommentEntity));
         when(transcriptionEntity.getTranscriptionUrgency()).thenReturn(transcriptionUrgencyEntity);
         when(transcriptionEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-
+        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
         when(transcriptionDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
         when(transcriptionDocumentEntity.getFileType()).thenReturn("docx");
+        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
         when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         OffsetDateTime startedAt = testTime.minusHours(1);
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
@@ -395,7 +406,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -427,28 +438,37 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
-        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
+        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
+
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
 
         when(userAccountEntity.getId()).thenReturn(0);
 
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
+        when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
+        when(transcriptionTypeEntity.getDescription()).thenReturn("SPECIFIED_TIMES");
 
-
+        when(transcriptionEntity.getId()).thenReturn(1);
         when(transcriptionEntity.getTranscriptionCommentEntities()).thenReturn(List.of(transcriptionCommentEntity));
         when(transcriptionEntity.getTranscriptionUrgency()).thenReturn(transcriptionUrgencyEntity);
         when(transcriptionEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
+        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
         when(transcriptionDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
         when(transcriptionDocumentEntity.getFileType()).thenReturn("docx");
+        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
         when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         OffsetDateTime startedAt = testTime.minusHours(1);
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
@@ -460,7 +480,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -492,11 +512,16 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
-        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
+        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
+
+        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
+        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
+        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
 
         when(userAccountEntity.getId()).thenReturn(0);
 
@@ -507,6 +532,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = testTime.minusHours(1);
         OffsetDateTime endedAt = testTime.plusHours(2);
 
+        when(transcriptionEntity.getId()).thenReturn(1);
         when(transcriptionEntity.getTranscriptionCommentEntities()).thenReturn(List.of(transcriptionCommentEntity));
         when(transcriptionEntity.getTranscriptionUrgency()).thenReturn(transcriptionUrgencyEntity);
         when(transcriptionEntity.getCourtroom()).thenReturn(courtroomEntity);
@@ -515,11 +541,13 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
+        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
         when(transcriptionDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
         when(transcriptionDocumentEntity.getFileType()).thenReturn("docx");
+        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
         when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
 
@@ -530,7 +558,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
@@ -562,6 +590,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTSAnnotation");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -578,6 +607,7 @@ class ArchiveRecordServiceImplTest {
 
         when(hearingEntity1.getCourtroom()).thenReturn(courtroomEntity);
 
+        when(annotationEntity.getId()).thenReturn(1);
         when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         OffsetDateTime uploadedDateTime = testTime.minusHours(1);
@@ -586,6 +616,7 @@ class ArchiveRecordServiceImplTest {
         when(annotationDocumentEntity.getAnnotation()).thenReturn(annotationEntity);
         when(annotationDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
         when(annotationDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(annotationDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
 
@@ -595,7 +626,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -629,6 +660,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTSAnnotation");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -645,6 +677,7 @@ class ArchiveRecordServiceImplTest {
 
         when(hearingEntity1.getCourtroom()).thenReturn(courtroomEntity);
 
+        when(annotationEntity.getId()).thenReturn(1);
         when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         OffsetDateTime uploadedDateTime = testTime.minusHours(1);
@@ -653,6 +686,7 @@ class ArchiveRecordServiceImplTest {
         when(annotationDocumentEntity.getAnnotation()).thenReturn(annotationEntity);
         when(annotationDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
         when(annotationDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(annotationDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
 
@@ -662,7 +696,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -696,6 +730,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTSAnnotation");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -712,6 +747,7 @@ class ArchiveRecordServiceImplTest {
 
         when(hearingEntity1.getCourtroom()).thenReturn(courtroomEntity);
 
+        when(annotationEntity.getId()).thenReturn(1);
         when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         OffsetDateTime uploadedDateTime = testTime.minusHours(1);
@@ -720,6 +756,7 @@ class ArchiveRecordServiceImplTest {
         when(annotationDocumentEntity.getAnnotation()).thenReturn(annotationEntity);
         when(annotationDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
         when(annotationDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(annotationDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
 
@@ -729,7 +766,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -763,6 +800,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTSCase");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -770,15 +808,23 @@ class ArchiveRecordServiceImplTest {
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
         when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+
         when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
+        when(courtCaseEntity1.getId()).thenReturn(1);
         when(courtCaseEntity1.getHearings()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+
+        OffsetDateTime uploadedDateTime = testTime.minusHours(1);
 
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
+        when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
+        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -786,7 +832,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/case-record.properties");
@@ -819,22 +865,32 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTSCase");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
+        when(courtCaseEntity1.getId()).thenReturn(1);
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
         when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+
         when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
+        when(courtCaseEntity1.getId()).thenReturn(1);
         when(courtCaseEntity1.getHearings()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+
+        OffsetDateTime uploadedDateTime = testTime.minusHours(1);
 
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
+        when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
+        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -842,7 +898,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/case-record.properties");
@@ -875,6 +931,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTSCase");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -882,15 +939,23 @@ class ArchiveRecordServiceImplTest {
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
         when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
+
         when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
         when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
         when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
+        when(courtCaseEntity1.getId()).thenReturn(1);
         when(courtCaseEntity1.getHearings()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+
+        OffsetDateTime uploadedDateTime = testTime.minusHours(1);
 
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
+        when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
+        when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
+        when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
+        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -898,7 +963,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENTION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/all_properties/case-record.properties");

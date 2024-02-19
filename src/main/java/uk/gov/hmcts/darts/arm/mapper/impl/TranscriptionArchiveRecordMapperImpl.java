@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveRecordOperation;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
@@ -49,6 +51,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_018_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_019_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COMMENTS_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTHOUSE_KEY;
@@ -71,6 +74,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Slf4j
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
 
+    private static final String CASE_LIST_DELIMITER = "|";
     private static final String COMMENTS_DELIMITER = "|";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -150,6 +154,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
             .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .eventDate(formatDateTime(transcriptionDocument.getUploadedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(transcriptionDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -227,6 +232,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private String mapToString(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE.getArchiveTypeDescription();
+            case CASE_NUMBERS_KEY -> getCaseNumbers(transcriptionDocument);
             case FILE_TYPE_KEY -> transcriptionDocument.getFileType();
             case HEARING_DATE_KEY -> getHearingDate(transcriptionDocument);
             case CHECKSUM_KEY -> transcriptionDocument.getChecksum();
@@ -242,6 +248,23 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             case COURTROOM_KEY -> getCourtroom(transcriptionDocument);
             default -> null;
         };
+    }
+
+    private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
+        String cases = null;
+        if (nonNull(transcriptionDocumentEntity.getTranscription().getCourtCases())) {
+
+            List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getCourtCases()
+                .stream()
+                .map(CourtCaseEntity::getCaseNumber)
+                .toList();
+            cases = caseListToString(caseNumbers);
+        }
+        return cases;
+    }
+
+    private String caseListToString(List<String> caseNumberList) {
+        return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
     private String getEndDateTime(TranscriptionDocumentEntity transcriptionDocument) {
@@ -344,8 +367,17 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private Integer mapToInt(String key, TranscriptionDocumentEntity transcriptionDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY, PARENT_ID_KEY -> transcriptionDocument.getId();
+            case OBJECT_ID_KEY -> transcriptionDocument.getId();
+            case PARENT_ID_KEY -> transcriptionDocument.getTranscription().getId();
             default -> null;
         };
+    }
+
+    private String formatDateTime(OffsetDateTime offsetDateTime) {
+        String dateTime = null;
+        if (nonNull(offsetDateTime)) {
+            dateTime = offsetDateTime.format(dateTimeFormatter);
+        }
+        return dateTime;
     }
 }

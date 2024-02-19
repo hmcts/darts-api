@@ -136,8 +136,9 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
-            .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+            .recordClass(armDataManagementConfiguration.getCaseRecordClass())
             .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .eventDate(formatDateTime(caseDocument.getUploadedTs()))
             .region(armDataManagementConfiguration.getRegion())
             .title(caseDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -264,7 +265,8 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private Integer mapToInt(String key, CaseDocumentEntity caseDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY, PARENT_ID_KEY -> caseDocument.getId();
+            case OBJECT_ID_KEY -> caseDocument.getId();
+            case PARENT_ID_KEY -> caseDocument.getCourtCase().getId();
             default -> null;
         };
     }

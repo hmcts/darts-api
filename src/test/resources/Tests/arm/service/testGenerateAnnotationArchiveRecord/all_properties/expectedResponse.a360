@@ -2,6 +2,7 @@
   "operation": "create_record",
   "relation_id": "1234",
   "record_metadata": {
+    "record_class": "DARTSAnnotation",
     "publisher": "DARTS",
     "region": "GBR",
     "recordDate": "2023-01-01T10:00:00",
@@ -12,7 +13,6 @@
     "bf_003": "application/msword",
     "bf_004": "2023-01-01",
     "bf_005": "xi/XkzD2HuqTUzDafW8Cgw==",
-    "bf_010": "2023-01-01T09:00:00",
     "bf_011": "2023-01-01T09:00:00",
     "bf_012": 1,
     "bf_013": 1,

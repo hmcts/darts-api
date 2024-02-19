@@ -124,6 +124,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getMediaRecordClass())
             .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .eventDate(formatDateTime(media.getCreatedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(media.getMediaFile())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -233,8 +234,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private String getCaseNumbers(MediaEntity media) {
         String cases = null;
         if (CollectionUtils.isNotEmpty(media.getHearingList())) {
-            List<HearingEntity> hearings = media.getHearingList();
-            List<String> caseNumbers = hearings
+            List<String> caseNumbers = media.getHearingList()
                 .stream()
                 .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)

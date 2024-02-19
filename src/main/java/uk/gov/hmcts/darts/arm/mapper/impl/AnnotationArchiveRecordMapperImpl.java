@@ -122,8 +122,9 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
-            .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+            .recordClass(armDataManagementConfiguration.getAnnotationRecordClass())
             .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .eventDate(formatDateTime(annotationDocument.getUploadedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(annotationDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -232,8 +233,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     private String getCaseNumbers(AnnotationDocumentEntity annotationDocument) {
         String cases = null;
         if (nonNull(annotationDocument.getAnnotation().getHearingList())) {
-            List<HearingEntity> hearings = annotationDocument.getAnnotation().getHearingList();
-            List<String> caseNumbers = hearings
+            List<String> caseNumbers = annotationDocument.getAnnotation().getHearingList()
                 .stream()
                 .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)
@@ -269,7 +269,8 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     private Integer mapToInt(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
-            case OBJECT_ID_KEY, PARENT_ID_KEY -> annotationDocument.getId();
+            case OBJECT_ID_KEY -> annotationDocument.getId();
+            case PARENT_ID_KEY -> annotationDocument.getAnnotation().getId();
             default -> null;
         };
     }
