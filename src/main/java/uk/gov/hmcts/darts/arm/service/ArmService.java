@@ -15,7 +15,7 @@ public interface ArmService {
 
     List<String> listResponseBlobs(String containerName, String filename);
 
-    BinaryData getBlobData(String containerName, String blobName);
+    BinaryData getBlobData(String containerName, String blobPathAndName);
 
     /**
      * Deletes the specified blob in the specified path blobPathAndName from the root container.

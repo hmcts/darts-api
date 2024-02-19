@@ -169,7 +169,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             }
         }
 
-        if (nonNull(invalidLineFilename)) {
+        if (nonNull(invalidLineFilename) && (nonNull(createRecordFilename) || nonNull(uploadFilename))) {
             processInvalidLineFile(armInputUploadFilename, responseBlobs, externalObjectDirectory, invalidLineFilename);
         } else if (nonNull(createRecordFilename) && nonNull(uploadFilename)) {
             processUploadFile(armInputUploadFilename, responseBlobs, externalObjectDirectory, uploadFilename);
@@ -187,7 +187,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(invalidLineFilename);
             ObjectRecordStatusEnum status = readInvalidLineFile(externalObjectDirectory, invalidLineFileBinary, invalidLineFileFilenameProcessor);
             if (ARM_RESPONSE_PROCESSING_FAILED.equals(status)
-                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(status)) {
                 deleteResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
             }

@@ -727,6 +727,14 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -787,6 +795,14 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundAnnotationEod.getStatus().getId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -847,7 +863,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
-        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
@@ -1181,8 +1197,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String invalidLinesFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_0_il.rsp";
-        hashcodeResponseBlobs.add(invalidLinesFilename);
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_0_il.rsp";
+        String failedUploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_4117b202-91de-4530-9fc5-8328f25068ba_0_uf.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        hashcodeResponseBlobs.add(failedUploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -1192,11 +1210,11 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getBlobData(invalidLinesFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(uploadFileBinaryData);
 
         when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLinesFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(uploadFileTestFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -1210,6 +1228,14 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -1249,12 +1275,15 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String invalidLinesFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_il.rsp";
-        hashcodeResponseBlobs.add(invalidLinesFilename);
+        String invalidLineFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_il.rsp";
+        String failedUploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_4117b202-91de-4530-9fc5-8328f25068ba_0_uf.rsp";
+        hashcodeResponseBlobs.add(invalidLineFileFilename);
+        hashcodeResponseBlobs.add(failedUploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
         when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
-        when(armDataManagementApi.deleteBlobData(invalidLinesFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(failedUploadFileFilename)).thenReturn(true);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -1274,8 +1303,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
-        verify(armDataManagementApi).getBlobData(invalidLinesFilename);
-        verify(armDataManagementApi).deleteBlobData(invalidLinesFilename);
+        verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }

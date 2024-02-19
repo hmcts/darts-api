@@ -107,12 +107,12 @@ public class ArmServiceImpl implements ArmService {
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
     }
 
-    public BinaryData getBlobData(String containerName, String blobName) {
+    public BinaryData getBlobData(String containerName, String blobPathAndName) {
 
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobName);
+        BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
         if (Boolean.FALSE.equals(blobClient.exists())) {
-            log.error("Blob {} does not exist in {} container", blobName, containerName);
+            log.error("Blob {} does not exist in {} container", blobPathAndName, containerName);
             return null;
         }
         return blobClient.downloadContent();
