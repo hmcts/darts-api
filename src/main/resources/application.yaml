@@ -207,6 +207,7 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+        dets: darts-dets
     delete:
       timeout: 60
   transcription:

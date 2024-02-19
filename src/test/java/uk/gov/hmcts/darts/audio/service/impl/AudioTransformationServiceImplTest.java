@@ -3,13 +3,16 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
@@ -20,20 +23,26 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -45,10 +54,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
@@ -99,6 +110,24 @@ class AudioTransformationServiceImplTest {
 
     @Mock
     private MediaRepository mediaRepository;
+
+    @Mock
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+
+    @Mock
+    private FileOperationService fileOperationService;
+
+    @Mock
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
+
+    @Mock
+    private ExternalLocationTypeRepository externalLocationTypeRepository;
+
+    @Mock
+    private AudioConfigurationProperties audioConfigurationProperties;
+
+    @TempDir
+    private Path tempDirectory;
 
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
@@ -507,4 +536,35 @@ class AudioTransformationServiceImplTest {
         assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat().getExtension());
         assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize());
     }
+
+    @Test
+    void saveMediaToWorkspaceShouldReturnBlobFromDets() throws IOException {
+
+        final MediaEntity mediaEntity = createMediaEntity(TIME_12_00, TIME_13_00);
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setExternalLocation(BLOB_LOCATION);
+        externalObjectDirectoryEntities.add(externalObjectDirectoryEntity);
+        when(externalObjectDirectoryRepository.findByMediaStatusAndType(any(), any(), any()))
+            .thenReturn(externalObjectDirectoryEntities);
+
+        BlobStorageException blobStorageException = mock(BlobStorageException.class);
+        // unstructured throws exception
+        when(mockDataManagementApi.getBlobDataFromUnstructuredContainer(BLOB_LOCATION))
+            .thenThrow(blobStorageException);
+
+        // dets - no exception so download path is not null
+        when(mockDataManagementApi.getBlobDataFromDetsContainer(BLOB_LOCATION))
+            .thenReturn(BINARY_DATA);
+
+        Path file = tempDirectory.resolve(BLOB_LOCATION.toString());
+        when(fileOperationService.saveFileToTempWorkspace(BINARY_DATA, BLOB_LOCATION.toString()))
+            .thenReturn(file);
+
+        Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
+
+        assertNotNull(downloadPath);
+
+    }
+
 }

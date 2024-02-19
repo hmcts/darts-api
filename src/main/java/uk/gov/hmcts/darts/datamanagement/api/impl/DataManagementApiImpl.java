@@ -31,6 +31,11 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
+    public BinaryData getBlobDataFromDetsContainer(UUID blobId) {
+        return dataManagementService.getBlobData(dataManagementConfiguration.getDetsContainerName(), blobId);
+    }
+
+    @Override
     public BinaryData getBlobDataFromOutboundContainer(UUID blobId) {
         return dataManagementService.getBlobData(getOutboundContainerName(), blobId);
     }

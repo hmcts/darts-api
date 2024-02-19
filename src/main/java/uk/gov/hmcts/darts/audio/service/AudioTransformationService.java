@@ -13,6 +13,8 @@ public interface AudioTransformationService {
 
     BinaryData getUnstructuredAudioBlob(UUID location);
 
+    BinaryData getDetsAudioBlob(UUID location);
+
     BinaryData getOutboundAudioBlob(UUID location);
 
     UUID saveAudioBlobData(BinaryData binaryData);

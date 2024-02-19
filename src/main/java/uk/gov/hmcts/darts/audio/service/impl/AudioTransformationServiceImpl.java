@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -107,6 +108,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public BinaryData getUnstructuredAudioBlob(UUID location) {
         return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
+    }
+
+    @Override
+    public BinaryData getDetsAudioBlob(UUID location) {
+        return dataManagementApi.getBlobDataFromDetsContainer(location);
     }
 
     @Override
@@ -298,11 +304,17 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
         UUID id = getMediaLocation(mediaEntity).orElseThrow(
-            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-            )));
+                () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
+                )));
 
-        log.debug("Downloading audio blob for {} from unstructured datastore", id);
-        BinaryData binaryData = getUnstructuredAudioBlob(id);
+        BinaryData binaryData = null;
+        try {
+            log.debug("Downloading audio blob for {} from unstructured datastore", id);
+            binaryData = getUnstructuredAudioBlob(id);
+        } catch (BlobStorageException blobStorageException) {
+            log.debug("Downloading audio blob for {} from dets datastore", id);
+            binaryData = getDetsAudioBlob(id);
+        }
         log.debug("Download audio blob complete for {}", id);
 
         Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());

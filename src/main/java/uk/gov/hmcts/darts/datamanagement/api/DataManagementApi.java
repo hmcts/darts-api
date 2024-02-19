@@ -13,6 +13,8 @@ public interface DataManagementApi extends BlobContainerDownloadable {
 
     BinaryData getBlobDataFromUnstructuredContainer(UUID blobId);
 
+    BinaryData getBlobDataFromDetsContainer(UUID blobId);
+
     BinaryData getBlobDataFromOutboundContainer(UUID blobId);
 
     BinaryData getBlobDataFromInboundContainer(UUID blobId);
