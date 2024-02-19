@@ -99,8 +99,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            STORED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -164,8 +164,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_RESPONSE_MANIFEST_FAILED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            ARM_RESPONSE_MANIFEST_FAILED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -229,8 +229,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_RESPONSE_PROCESSING_FAILED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            ARM_RESPONSE_PROCESSING_FAILED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -294,8 +294,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -359,8 +359,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            STORED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -435,8 +435,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            STORED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -479,7 +479,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     }
 
     @Test
-    void cleanupResponseFilesFailesWithOnlyResponseFileInputUpload() {
+    void cleanupResponseFilesFailsWithOnlyResponseFileInputUpload() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
@@ -500,8 +500,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            STORED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -557,8 +557,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            STORED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -632,8 +632,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            STORED,
+            ARM,
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
