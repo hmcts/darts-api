@@ -8,11 +8,13 @@ import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectory;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +28,7 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     private final ObjectDirectoryDeletedFinder<T> finder;
     private final DataStoreDeleter deleter;
     private final SystemUserHelper systemUserHelper;
-
+    private final TransformedMediaRepository transformedMediaRepository;
 
     @Override
     public List<T> delete() {
@@ -46,9 +48,10 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
 
             try {
                 deleter.delete(externalLocation);
-                entityToBeDeleted.setStatus(deletedStatus);
-                entityToBeDeleted.setLastModifiedBy(systemUser);
-                repository.saveAndFlush(entityToBeDeleted);
+                repository.delete(entityToBeDeleted);
+                if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
+                    transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
+                }
             } catch (AzureDeleteBlobException e) {
                 log.error("could not delete from container", e);
             }
