@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.retention.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -14,16 +15,19 @@ import java.util.List;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
-    CaseRetentionRepository caseRetentionRepository;
+    private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
+
+    @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
+    private int housekeepingDays;
 
     @Override
     public void processApplyRetention() {
         List<CaseRetentionEntity> caseRetentionEntities =
-                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(7));
+                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(housekeepingDays));
         processList(caseRetentionEntities);
 
     }
