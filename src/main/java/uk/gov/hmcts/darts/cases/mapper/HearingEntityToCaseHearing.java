@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.cases.mapper;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
@@ -33,7 +35,12 @@ public class HearingEntityToCaseHearing {
         hearing.setDate(entity.getHearingDate());
         hearing.setJudges(entity.getJudgesStringList());
         hearing.setCourtroom(entity.getCourtroom().getName());
-        hearing.setTranscriptCount(entity.getTranscriptions().size());
+        var transcripts = entity.getTranscriptions()
+            .stream()
+            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
+                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
+            .toList();
+        hearing.setTranscriptCount(transcripts.size());
 
         return hearing;
     }
