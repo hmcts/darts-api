@@ -10,20 +10,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
@@ -47,7 +47,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
     @MockBean
-    private UserIdentity mockUserIdentity;
+    private AuthorisationApi authorisationApi;
 
     @BeforeEach
     void setupData() {
@@ -137,9 +137,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     void casesSearchPostEndpoint() throws Exception {
 
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
 
         String requestBody = """
             {
@@ -164,9 +162,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     void casesSearchPostEndpointDateRange() throws Exception {
 
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
 
         String requestBody = """
             {
@@ -191,9 +187,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     void casesSearchPostEndpointEventText() throws Exception {
 
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
 
         String requestBody = """
             {
@@ -218,9 +212,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     void casesSearchPostEndpointJudgeName() throws Exception {
 
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
 
         String requestBody = """
             {
