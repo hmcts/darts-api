@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.ExternalDataStoreDeleterImpl;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 @Service
 public class ExternalInboundDataStoreDeleter extends ExternalDataStoreDeleterImpl<ExternalObjectDirectoryEntity> {
@@ -14,7 +15,8 @@ public class ExternalInboundDataStoreDeleter extends ExternalDataStoreDeleterImp
     public ExternalInboundDataStoreDeleter(ObjectRecordStatusRepository objectRecordStatusRepository,
                                            JpaRepository<ExternalObjectDirectoryEntity, Integer> repository,
                                            InboundExternalObjectDirectoryDeletedFinder finder, InboundDataStoreDeleter deleter,
-                                           SystemUserHelper systemUserHelper) {
-        super(objectRecordStatusRepository, repository, finder, deleter, systemUserHelper);
+                                           SystemUserHelper systemUserHelper,
+                                           TransformedMediaRepository transformedMediaRepository) {
+        super(objectRecordStatusRepository, repository, finder, deleter, systemUserHelper, transformedMediaRepository);
     }
 }

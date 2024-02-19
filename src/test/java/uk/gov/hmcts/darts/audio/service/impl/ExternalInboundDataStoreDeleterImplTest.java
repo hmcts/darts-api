@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
@@ -51,7 +52,8 @@ class ExternalInboundDataStoreDeleterImplTest {
     private InboundExternalObjectDirectoryDeletedFinder finder;
     @Mock
     private InboundDataStoreDeleter inboundDataStoreDeleter;
-
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
 
     @BeforeEach
     public void setUp() {
@@ -64,7 +66,8 @@ class ExternalInboundDataStoreDeleterImplTest {
                 objectRecordStatusRepository,
                 externalObjectDirectoryRepository,
                 finder,
-                inboundDataStoreDeleter, systemUserHelper
+                inboundDataStoreDeleter, systemUserHelper,
+                transformedMediaRepository
         );
 
 
