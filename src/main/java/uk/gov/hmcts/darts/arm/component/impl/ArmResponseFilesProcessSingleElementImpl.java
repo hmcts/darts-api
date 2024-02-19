@@ -227,7 +227,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         deletedResponseBlobStatuses = responseBlobs.stream()
             .map(armDataManagementApi::deleteBlobData)
             .toList();
-        if (!deletedResponseBlobStatuses.isEmpty() && !deletedResponseBlobStatuses.contains(false)) {
+        if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
             externalObjectDirectory.setResponseCleaned(
                 armDataManagementApi.deleteBlobData(armInputUploadFilename));
         }
