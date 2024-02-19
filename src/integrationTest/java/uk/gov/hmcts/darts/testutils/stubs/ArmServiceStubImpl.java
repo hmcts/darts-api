@@ -56,12 +56,13 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
-    public boolean deleteResponseBlob(String containerName, String filename) {
+    public boolean deleteBlobData(String containerName, String blobPathAndName) {
+        logStubUsageWarning();
         return true;
     }
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-                 + " you should ask questions! ###");
+                     + " you should ask questions! ###");
     }
 }

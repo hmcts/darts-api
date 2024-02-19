@@ -15,8 +15,15 @@ public interface ArmService {
 
     List<String> listResponseBlobs(String containerName, String filename);
 
-    BinaryData getBlobData(String containerName, String blobName);
+    BinaryData getBlobData(String containerName, String blobPathAndName);
 
-    boolean deleteResponseBlob(String containerName, String filename);
+    /**
+     * Deletes the specified blob in the specified path blobPathAndName from the root container.
+     *
+     * @param containerName   name of blob client container
+     * @param blobPathAndName name of blob in response folder to be deleted
+     * @return true if the blob was successfully deleted otherwise false
+     */
+    boolean deleteBlobData(String containerName, String blobPathAndName);
 
 }
