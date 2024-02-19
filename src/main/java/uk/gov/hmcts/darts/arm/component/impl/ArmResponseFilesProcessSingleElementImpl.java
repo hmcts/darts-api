@@ -342,8 +342,8 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     }
 
     private ObjectRecordStatusEnum processInvalidLineFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                         InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
-                                         ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
+                                                                InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
+                                                                ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
         if (nonNull(armResponseInvalidLineRecord)) {
             //If the filename contains 0
             if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {

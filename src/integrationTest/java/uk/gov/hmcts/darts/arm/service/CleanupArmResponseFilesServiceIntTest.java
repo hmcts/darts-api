@@ -35,9 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
@@ -164,7 +164,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_RESPONSE_MANIFEST_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
@@ -229,7 +229,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RESPONSE_PROCESSING),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_RESPONSE_PROCESSING_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
@@ -294,7 +294,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
