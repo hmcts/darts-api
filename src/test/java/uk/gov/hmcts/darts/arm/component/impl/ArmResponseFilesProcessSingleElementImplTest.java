@@ -330,6 +330,29 @@ class ArmResponseFilesProcessSingleElementImplTest {
     }
 
     @Test
+    void processResponseFilesFor_ListResponsesFails() {
+
+        when(mediaEntity.getId()).thenReturn(1);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
+        when(externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryArmResponseProcessing))
+            .thenReturn(externalObjectDirectoryArmResponseProcessing);
+
+        String prefix = "1_1_1";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new AzureException());
+
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        armResponseFilesProcessSingleElement.processResponseFilesFor(1);
+
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertEquals(objectRecordStatusArmDropZone, externalObjectDirectoryArmResponseProcessing.getStatus());
+        assertFalse(externalObjectDirectoryArmResponseProcessing.isResponseCleaned());
+
+    }
+
+    @Test
     void processResponseFilesFor_WithInvalidUploadFileJson() throws IOException {
 
         when(mediaEntity.getId()).thenReturn(1);
