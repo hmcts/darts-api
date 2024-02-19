@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.retention.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -20,7 +21,9 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
 
-    long pendingRetentionDays = 7;
+
+    @Value("${darts.data-management.pending-retention-days: 7}")
+    long pendingRetentionDays;
 
     @Override
     public void processApplyRetention() {

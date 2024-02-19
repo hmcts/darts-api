@@ -28,6 +28,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
     @Autowired
     CurrentTimeHelper currentTimeHelper;
+    @Autowired
     ApplyRetentionProcessorImpl applyRetentionProcessor;
     DartsDatabaseStub dartsDatabaseStub;
     CourtCaseEntity courtCase;
@@ -51,8 +52,6 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
 
     @Test
     void testCaseRetentionChangeState() {
-        applyRetentionProcessor = new ApplyRetentionProcessorImpl(caseRetentionRepository, currentTimeHelper);
-
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.get(0).getCurrentState());
         applyRetentionProcessor.processApplyRetention();
@@ -72,8 +71,6 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.PENDING, retainUntilDate, false);
         caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now().minusDays(6));
         caseRetentionRepository.saveAndFlush(caseRetentionEntity);
-
-        applyRetentionProcessor = new ApplyRetentionProcessorImpl(caseRetentionRepository, currentTimeHelper);
 
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.get(0).getCurrentState());
@@ -95,8 +92,6 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         CaseRetentionEntity caseRetentionEntity = dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.PENDING, retainUntilDate, false);
         caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now().minusDays(9));
         caseRetentionRepository.saveAndFlush(caseRetentionEntity);
-
-        applyRetentionProcessor = new ApplyRetentionProcessorImpl(caseRetentionRepository, currentTimeHelper);
 
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
         assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.get(0).getCurrentState());
