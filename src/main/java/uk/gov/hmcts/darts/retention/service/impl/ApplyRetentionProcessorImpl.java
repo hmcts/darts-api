@@ -21,13 +21,10 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
     private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
 
-    @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
-    private int housekeepingDays;
-
     @Override
     public void processApplyRetention() {
         List<CaseRetentionEntity> caseRetentionEntities =
-                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(housekeepingDays));
+                caseRetentionRepository.findPendingRetention(currentTimeHelper.currentOffsetDateTime().minusDays(7));
         processList(caseRetentionEntities);
 
     }
