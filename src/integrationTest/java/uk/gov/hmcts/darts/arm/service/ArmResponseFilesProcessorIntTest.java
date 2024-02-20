@@ -140,6 +140,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
+
     }
 
     @Test

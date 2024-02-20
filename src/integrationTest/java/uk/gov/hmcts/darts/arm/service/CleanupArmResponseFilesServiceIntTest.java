@@ -25,6 +25,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
@@ -89,15 +91,15 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
@@ -113,6 +115,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -134,15 +143,15 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
@@ -158,6 +167,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -179,15 +195,15 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
@@ -203,6 +219,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -224,15 +247,15 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
@@ -248,6 +271,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -269,9 +299,9 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
-        String inputUploadBlobFilename2 = prefix + "2_7a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename1, inputUploadBlobFilename2));
+        String inputUploadFilename1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
+        String inputUploadFilename2 = prefix + "2_7a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename1, inputUploadFilename2));
 
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_0_cr.rsp";
@@ -283,11 +313,11 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String uploadFileFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(List.of(createRecordFilename2, uploadFileFilename2));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename2)).thenReturn(true);
 
@@ -303,6 +333,17 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+        verify(armDataManagementApi).listResponseBlobs(hashcode2);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename1);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename2);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename2);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename2);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -323,15 +364,15 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String invalidLineFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, invalidLineFilename));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFilename)).thenReturn(true);
 
@@ -347,6 +388,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFilename);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -368,8 +416,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -383,6 +431,10 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertFalse(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs("6a374f19a9ce7dc9cc480ea8d4eca0fb");
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -404,10 +456,10 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilenameTransferAttempt1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        String inputUploadBlobFilenameTransferAttempt2 = prefix + "2_7a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilenameTransferAttempt1,
-                                                                                inputUploadBlobFilenameTransferAttempt2));
+        String inputUploadFilenameTransferAttempt1 = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String inputUploadFilenameTransferAttempt2 = prefix + "2_7a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilenameTransferAttempt1,
+                                                                                inputUploadFilenameTransferAttempt2));
 
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
@@ -419,11 +471,11 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String invalidLineFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(List.of(createRecordFilename2, invalidLineFilename2));
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilenameTransferAttempt1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilenameTransferAttempt1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFilename1)).thenReturn(true);
 
-        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilenameTransferAttempt2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadFilenameTransferAttempt2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFilename2)).thenReturn(true);
 
@@ -439,6 +491,17 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertTrue(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFilename1);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilenameTransferAttempt1);
+        verify(armDataManagementApi).listResponseBlobs(hashcode2);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename2);
+        verify(armDataManagementApi).deleteBlobData(invalidLineFilename2);
+        verify(armDataManagementApi).deleteBlobData(inputUploadFilenameTransferAttempt2);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -460,8 +523,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
-        String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
+        String inputUploadFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadFilename));
 
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
@@ -483,5 +546,11 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod.isPresent());
         ExternalObjectDirectoryEntity foundMedia = foundMediaEod.get();
         assertFalse(foundMedia.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobs(prefix);
+        verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 }
