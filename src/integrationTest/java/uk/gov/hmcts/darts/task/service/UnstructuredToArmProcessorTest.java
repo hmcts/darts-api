@@ -43,8 +43,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
@@ -245,7 +245,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RAW_DATA_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_RAW_DATA_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -294,7 +294,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_MANIFEST_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -343,7 +343,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_MANIFEST_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -361,7 +361,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(4, foundMedia.getTransferAttempts());
     }
 
@@ -388,7 +388,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
-        armEod.setStatus(dartsDatabase.getObjectRecordStatusRepository().getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId()));
+        armEod.setStatus(dartsDatabase.getObjectRecordStatusRepository().getReferenceById(
+            ARM_RAW_DATA_FAILED.getId()));
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
@@ -404,7 +405,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_RAW_DATA_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_RAW_DATA_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(2, foundMedia.getTransferAttempts());
     }
 
@@ -448,6 +449,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
     }
 }

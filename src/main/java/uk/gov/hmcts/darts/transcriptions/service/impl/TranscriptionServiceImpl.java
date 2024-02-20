@@ -183,7 +183,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
         return updateTranscription(transcriptionId, updateTranscription, false);
@@ -191,7 +190,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
@@ -260,7 +258,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setEndTime(transcriptionRequestDetails.getEndDateTime());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
-        transcription.setIsManualTranscription(isManual);
         transcription.setIsManualTranscription(isManual);
         transcription.setHideRequestFromRequestor(false);
 
@@ -397,7 +394,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
         transcriptionDocumentEntity.setFileType(transcript.getContentType());
-        transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);

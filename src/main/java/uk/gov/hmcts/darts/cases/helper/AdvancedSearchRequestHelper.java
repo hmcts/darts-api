@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
@@ -33,15 +33,11 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
-
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 @Component
 @SuppressWarnings({"PMD.TooManyMethods"})
@@ -50,7 +46,7 @@ public class AdvancedSearchRequestHelper {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    private final UserIdentity userIdentity;
+    private final AuthorisationApi authorisationApi;
 
     public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -76,9 +72,6 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
-        if (!userIdentity.userHasGlobalAccess(Set.of(JUDGE))) {
-            CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
-        }
 
         return predicates;
     }
@@ -143,25 +136,21 @@ public class AdvancedSearchRequestHelper {
 
     private List<Predicate> addCourthouseCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
+
+        //add courthouse permissions
+        List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
+        Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
+        predicateList.add(
+            courthouseJoin.get(CourthouseEntity_.ID).in(courthouseIdsUserHasAccessTo)
+        );
+
+        //add courthouse from search query
         if (StringUtils.isNotBlank(request.getCourthouse())) {
-            Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
             predicateList.add(criteriaBuilder.like(
                 criteriaBuilder.upper(courthouseJoin.get(CourthouseEntity_.COURTHOUSE_NAME)),
                 surroundWithPercentagesUpper(request.getCourthouse())
             ));
         }
-        return predicateList;
-    }
-
-    private List<Predicate> addUserSecurityRolesCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
-        List<Predicate> predicateList = new ArrayList<>();
-        Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
-
-        predicateList.add(criteriaBuilder.equal(
-            criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
-            userIdentity.getUserAccount().getEmailAddress().toLowerCase()
-        ));
-
         return predicateList;
     }
 

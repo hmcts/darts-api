@@ -7,7 +7,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
@@ -25,10 +24,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
@@ -45,7 +42,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @Autowired
     CaseService service;
     @MockBean
-    private UserIdentity mockUserIdentity;
+    private AuthorisationApi authorisationApi;
     CourthouseEntity swanseaCourthouse;
 
     @BeforeEach
@@ -299,33 +296,13 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void whenAdvancedSearchIsRunForUserWithGlobalAccessWithNoCourthouseAccess_thenShouldReturnResultsOk() throws IOException {
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("sE1")
-            .build();
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(JUDGE))).thenReturn(true);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
-        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
-
-        compareJson(actualResponse, expectedResponse);
-    }
-
-    @Test
     void whenAdvancedSearchIsRunForUserWithoutGlobalAccessWithNoCourthouseAccess_thenShouldReturnEmptyArray() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber("sE1")
             .build();
 
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of());
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -335,9 +312,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     private void setupUserAccountAndSecurityGroup() {
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(swanseaCourthouse);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(swanseaCourthouse.getId()));
     }
 
 }
