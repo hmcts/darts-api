@@ -61,7 +61,12 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
 
     @Override
     public void cleanupResponseFiles() {
-        initialisePreloadedObjects();
+        storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        failedArmResponseManifestFileStatus = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_MANIFEST_FAILED.getId());
+        failedArmResponseProcessing = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
+        failedArmResponseChecksum = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
+
+        userAccount = userIdentity.getUserAccount();
 
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
         List<ObjectRecordStatusEntity> statuses = List.of(storedStatus,
@@ -73,7 +78,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             armDataManagementConfiguration.getResponseCleanupBufferDays());
 
         List<ExternalObjectDirectoryEntity> objectDirectoryDataToBeDeleted =
-            externalObjectDirectoryRepository.findByStatusInAndStorageLocationAndResponseCleanedAndLastModifiedDateTimeBefore(
+            externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
                 statuses,
                 armLocation,
                 false,
@@ -105,7 +110,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             for (String armInputUploadFilename : inputUploadBlobs) {
                 log.debug("Found ARM input upload file {} for cleanup", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
-                    readInputUploadFile(externalObjectDirectory, armInputUploadFilename);
+                    processInputUploadFile(externalObjectDirectory, armInputUploadFilename);
                 } else {
                     log.warn("ARM response file {} not input upload file for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
                 }
@@ -115,14 +120,14 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         }
     }
 
-    private void readInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename) {
+    private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename) {
         try {
             InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
             String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
             log.debug("List response files starting with hashcode {}", responseFilesHashcode);
             List<String> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
             if (CollectionUtils.isNotEmpty(responseBlobs)) {
-                processResponseBlobs(responseBlobs, externalObjectDirectory, armInputUploadFilename);
+                processResponseBlobsForDeletion(responseBlobs, externalObjectDirectory, armInputUploadFilename);
             } else {
                 log.warn("Unable to find responses files from Input Upload file {} for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
             }
@@ -134,8 +139,8 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         }
     }
 
-    private void processResponseBlobs(List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
-                                      String armInputUploadFilename) {
+    private void processResponseBlobsForDeletion(List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                 String armInputUploadFilename) {
         String createRecordFilename = null;
         String uploadFilename = null;
         String invalidFileFilename = null;
@@ -210,19 +215,8 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
 
-
-    @SuppressWarnings("java:S3655")
-    private void initialisePreloadedObjects() {
-        storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
-        failedArmResponseManifestFileStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).get();
-        failedArmResponseProcessing = objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).get();
-        failedArmResponseChecksum = objectRecordStatusRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).get();
-
-        userAccount = userIdentity.getUserAccount();
-    }
-
-    public static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return new StringBuilder(externalObjectDirectory.getId().toString())
+    private String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        return new StringBuilder(externalObjectDirectory.getId())
             .append(ARM_FILENAME_SEPARATOR)
             .append(ArmResponseFilesHelper.getObjectTypeId(externalObjectDirectory))
             .append(ARM_FILENAME_SEPARATOR).toString();

@@ -25,6 +25,5 @@ public interface ArmService {
      * @return true if the blob was successfully deleted otherwise false
      */
     boolean deleteBlobData(String containerName, String blobPathAndName);
-
-
+    
 }

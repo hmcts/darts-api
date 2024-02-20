@@ -38,7 +38,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     @Override
     public void processResponseFiles() {
         initialisePreloadedObjects();
-        // Fetch All records from external Object Directory table with external_location_type as 'ARM' and status with 'ARM dropzone'.
+        // Fetch All records from external_object_directory table with external_location_type as 'ARM' and with status 'Arm Drop Zone'.
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ARM.getId());
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);

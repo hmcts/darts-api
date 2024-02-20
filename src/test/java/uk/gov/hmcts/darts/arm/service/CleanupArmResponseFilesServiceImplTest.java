@@ -24,10 +24,10 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -92,10 +92,10 @@ class CleanupArmResponseFilesServiceImplTest {
 
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.of(objectRecordStatusStored));
-        when(objectRecordStatusRepository.findById(17)).thenReturn(Optional.of(objectRecordStatusArmResponseProcessingFailed));
-        when(objectRecordStatusRepository.findById(18)).thenReturn(Optional.of(objectRecordStatusArmResponseChecksumFailed));
-        when(objectRecordStatusRepository.findById(19)).thenReturn(Optional.of(objectRecordStatusArmResponseManifestFailed));
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusStored);
+        when(objectRecordStatusRepository.getReferenceById(17)).thenReturn(objectRecordStatusArmResponseProcessingFailed);
+        when(objectRecordStatusRepository.getReferenceById(18)).thenReturn(objectRecordStatusArmResponseChecksumFailed);
+        when(objectRecordStatusRepository.getReferenceById(19)).thenReturn(objectRecordStatusArmResponseManifestFailed);
 
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
@@ -107,8 +107,8 @@ class CleanupArmResponseFilesServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(externalObjectDirectoryRepository.findByStatusInAndStorageLocationAndResponseCleanedAndLastModifiedDateTimeBefore(
-            any(),
+        when(externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+            anyList(),
             any(),
             anyBoolean(),
             any()
