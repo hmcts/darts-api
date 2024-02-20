@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -442,10 +441,7 @@ class AudioServiceImplTest {
         audioMetadata3.setId(3);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
 
-        ExternalObjectDirectoryEntity eodEntity1 = createEodEntityWithMediaId(1);
-        ExternalObjectDirectoryEntity eodEntity3 = createEodEntityWithMediaId(3);
-
-        when(externalObjectDirectoryRepository.findByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(eodEntity1, eodEntity3));
+        when(externalObjectDirectoryRepository.findEodIdsByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(1, 3));
 
         audioService.setIsAvailable(audioMetadataList);
 
@@ -453,14 +449,4 @@ class AudioServiceImplTest {
         assertEquals(false, audioMetadataList.get(1).getIsAvailable());
         assertEquals(true, audioMetadataList.get(2).getIsAvailable());
     }
-
-    private ExternalObjectDirectoryEntity createEodEntityWithMediaId(int mediaId) {
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(mediaId);
-        ExternalObjectDirectoryEntity eodEntity = new ExternalObjectDirectoryEntity();
-        eodEntity.setMedia(mediaEntity);
-        return eodEntity;
-    }
-
-
 }

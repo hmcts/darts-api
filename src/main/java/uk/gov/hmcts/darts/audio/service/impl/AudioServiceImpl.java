@@ -257,9 +257,8 @@ public class AudioServiceImpl implements AudioService {
         List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
-        List<ExternalObjectDirectoryEntity> storedInUnstructuredList = externalObjectDirectoryRepository.findByInMediaIdStatusAndType(mediaIdList, storedStatus,
-                                                                                                                                      unstructuredLocationType);
-        List<Integer> mediaIdsStoredInUnstructured = storedInUnstructuredList.stream().map(eodEntity -> eodEntity.getMedia().getId()).toList();
+        List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findEodIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
+                                                                                                                          unstructuredLocationType);
 
         for (AudioMetadata audioMetadataItem : audioMetadataList) {
             audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
