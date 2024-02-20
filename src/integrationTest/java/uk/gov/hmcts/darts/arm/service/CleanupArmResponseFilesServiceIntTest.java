@@ -4,21 +4,15 @@ package uk.gov.hmcts.darts.arm.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.service.impl.CleanupArmResponseFilesServiceImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
@@ -40,18 +34,10 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 26);
 
-    @Autowired
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    @Autowired
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Autowired
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
     @MockBean
@@ -61,25 +47,14 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @MockBean
     private CurrentTimeHelper currentTimeHelper;
 
+    @Autowired
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
+
+    private MediaEntity savedMedia;
+    private ExternalObjectDirectoryEntity armEod;
 
     @BeforeEach
     void setupData() {
-
-        cleanupArmResponseFilesService = new CleanupArmResponseFilesServiceImpl(
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            armDataManagementApi,
-            userIdentity,
-            armDataManagementConfiguration,
-            currentTimeHelper
-        );
-    }
-
-    @Test
-    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateStored() {
-
         HearingEntity hearing = dartsDatabase.createHearing(
             "Bristol",
             "Int Test Courtroom 1",
@@ -87,7 +62,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
             HEARING_DATE
         );
 
-        MediaEntity savedMedia = dartsDatabase.save(
+        savedMedia = dartsDatabase.save(
             MediaTestData.createMediaWith(
                 hearing.getCourtroom(),
                 OffsetDateTime.parse("2023-09-26T13:00:00Z"),
@@ -97,7 +72,11 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
         dartsDatabase.save(savedMedia);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+    }
+
+    @Test
+    void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateStored() {
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -145,24 +124,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFileAndStateManifestFailed() {
 
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             ARM_RESPONSE_MANIFEST_FAILED,
             ARM,
@@ -209,23 +171,6 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateArmResponseProcessingFailed() {
-
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -275,23 +220,6 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateArmResponseChecksumFailed() {
 
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED,
@@ -340,24 +268,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_ForMultipleAttempts() {
 
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -415,25 +326,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_InvalidLine() {
-
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -481,24 +374,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesFailsWithOnlyResponseFileInputUpload() {
 
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -538,24 +414,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesWith2InputUploadResponseFilesWithDifferentTransferAttempts() {
 
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -613,24 +472,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesFailsToDeleteResponseFiles() {
 
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "Bristol",
-            "Int Test Courtroom 1",
-            "1",
-            HEARING_DATE
-        );
-
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
-        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
-        dartsDatabase.save(savedMedia);
-
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
