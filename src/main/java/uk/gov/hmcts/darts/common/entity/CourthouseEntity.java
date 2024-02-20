@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,41 +56,27 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "reg_id")})
     private Set<RegionEntity> regions = new LinkedHashSet<>();
 
-    public Set<RegionEntity> getRegions() throws IllegalStateException {
-        try {
-            if (regions.isEmpty()) {
-                regions = null;
-            }
-
-            if (regions != null && regions.size() > 1) {
-                throw new IllegalStateException();
-            }
-
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException(e);
-        }
-        return regions;
-    }
-
-    public void setRegions(Set<RegionEntity> regions) throws IllegalStateException {
-        try {
-            this.regions = regions;
-
-            if (regions == null) {
-                regions = new LinkedHashSet<>();
-            }
-
-            if (regions.size() > 1) {
-                throw new IllegalStateException();
-            }
-
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-
     @Column(name = "display_name")
     private String displayName;
+
+    public RegionEntity getRegion() throws IllegalStateException {
+
+        if (this.regions != null && this.regions.size() > 1) {
+            throw new IllegalStateException();
+        } else if (this.regions == null || this.regions.isEmpty()) {
+            return null;
+        }
+
+        return this.regions.stream().findFirst().get();
+    }
+
+    public void setRegion(RegionEntity region) throws IllegalStateException {
+
+        if (this.regions != null && this.regions.size() > 1) {
+            throw new IllegalStateException();
+        }
+
+        this.regions = (region == null) ? Collections.emptySet() : Collections.singleton(region);
+    }
 
 }

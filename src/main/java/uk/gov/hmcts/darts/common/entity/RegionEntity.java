@@ -36,7 +36,7 @@ public class RegionEntity {
 
     @ManyToMany
     @JoinTable(name = "courthouse_region_ae",
-        joinColumns = {@JoinColumn(name = "grp_id")},
+        joinColumns = {@JoinColumn(name = "cth_id")},
         inverseJoinColumns = {@JoinColumn(name = "reg_id")})
     private Set<CourthouseEntity> courthouseEntities = new LinkedHashSet<>();
 

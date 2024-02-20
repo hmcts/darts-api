@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
@@ -19,8 +18,8 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminCourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
-import uk.gov.hmcts.darts.courthouse.model.ExtendedAdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
@@ -57,13 +56,14 @@ public class CourthousesController implements CourthousesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<ExtendedAdminCourthouse> adminCourthousesCourthouseIdGet(
+    public ResponseEntity<AdminCourthouse> adminCourthousesCourthouseIdGet(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
         try {
             CourthouseEntity courtHouseEntity = courthouseService.getCourtHouseById(
                 courthouseId);
-            ExtendedAdminCourthouse responseEntity = adminMapper.mapFromEntityToExtendedAdminCourthouse(courtHouseEntity);
+
+            AdminCourthouse responseEntity = adminMapper.mapFromEntityToAdminCourthouse(courtHouseEntity);
 
             Set<SecurityGroupEntity> secGrps = courtHouseEntity.getSecurityGroups();
             List<Integer> secGrpIds = new ArrayList<>();
@@ -72,12 +72,13 @@ public class CourthousesController implements CourthousesApi {
             }
             responseEntity.setSecurityGroupIds(secGrpIds);
 
-            Set<RegionEntity> regions = courtHouseEntity.getRegions();
-            List<Integer> regionId;
-            if (regions != null) {
-                regionId = CollectionUtils.emptyIfNull(regions).stream().map(RegionEntity::getId).toList();
-                responseEntity.setRegionId(regionId.get(0));
+            RegionEntity region = courtHouseEntity.getRegion();
+
+            Integer regionId = null;
+            if (region != null) {
+                regionId = region.getId();
             }
+            responseEntity.setRegionId(regionId);
 
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } catch (EntityNotFoundException | JpaObjectRetrievalFailureException | IllegalStateException e) {

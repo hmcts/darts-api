@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.courthouse.model.ExtendedAdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
@@ -20,13 +19,13 @@ import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -58,7 +57,6 @@ class CourthouseApiTest extends IntegrationBase {
     private static final OffsetDateTime ORIGINAL_LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime ORIGINAL_CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -72,6 +70,7 @@ class CourthouseApiTest extends IntegrationBase {
     void courthousesGet() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
+
         Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
@@ -81,45 +80,16 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andDo(print())
             .andReturn();
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
-    }
-
-    @Test
-    void adminCourthousesGetWithEmptySecurityGroupsAndNoRegionId() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        createEnabledUserAccountEntity(user);
-
-        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
-
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andDo(print()).andReturn();
-
-        ExtendedAdminCourthouse adminCourthouse = objectMapper.readValue(
-            response.getResponse().getContentAsString(),
-            ExtendedAdminCourthouse.class
-        );
-
-        assertEquals(null, adminCourthouse.getRegionId());
-        assertEquals(new ArrayList<>(), adminCourthouse.getSecurityGroupIds());
         assertEquals(200, response.getResponse().getStatus());
+        assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
+        assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
-    }
 
-    @Test
-    void getCourthouseByIdNotAuthorised() throws Exception {
-        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
-
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-        MvcResult response = mockMvc.perform((requestBuilder)).andReturn();
-
-        assertEquals(403, response.getResponse().getStatus());
     }
 
     @Test
@@ -129,10 +99,25 @@ class CourthouseApiTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", 900)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andDo(print()).andReturn();
+
+        assertEquals(404, response.getResponse().getStatus());
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesGetNotAuthorised() throws Exception {
+
+        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andDo(print()).andReturn();
+
+        assertEquals(403, response.getResponse().getStatus());
+
     }
 
     @Test
@@ -240,6 +225,7 @@ class CourthouseApiTest extends IntegrationBase {
     void courthousesPut() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
+
         Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
@@ -269,12 +255,14 @@ class CourthouseApiTest extends IntegrationBase {
             .content(requestBody);
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+
     }
 
     @Test
     void courthousesDelete() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
+
         Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         MockHttpServletRequestBuilder requestBuilder = delete("/courthouses/{courthouse_id}", addedEntityId)
