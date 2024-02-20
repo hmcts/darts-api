@@ -8,20 +8,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Transactional
+@SuppressWarnings("VariableDeclarationUsageDistance")
 class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/audio/hearings/{hearing_id}/audios";
@@ -40,6 +42,10 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         var mediaChannel2 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 2);
         var mediaChannel3 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 3);
         var mediaChannel4 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 4);
+        dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(mediaChannel1,
+                                                                                     ObjectRecordStatusEnum.STORED,
+                                                                                     ExternalLocationTypeEnum.UNSTRUCTURED,
+                                                                                     UUID.randomUUID());
 
         var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "999",
@@ -51,6 +57,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         hearingEntity.addMedia(mediaChannel2);
         hearingEntity.addMedia(mediaChannel3);
         hearingEntity.addMedia(mediaChannel4);
+        dartsDatabase.save(hearingEntity);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
@@ -69,7 +76,8 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
                 "id": 1,
                 "media_start_timestamp": "2023-01-01T12:00:00Z",
                 "media_end_timestamp": "2023-01-01T13:00:00Z",
-                "is_archived": false
+                "is_archived": false,
+                "is_available": true
               }
             ]
             """;
