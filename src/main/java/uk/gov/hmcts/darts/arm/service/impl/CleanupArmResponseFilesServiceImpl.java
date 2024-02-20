@@ -49,13 +49,14 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
 
+    private final List<String> armResponseFilesToBeDeleted = new ArrayList<>();
+
     private ObjectRecordStatusEntity storedStatus;
     private ObjectRecordStatusEntity failedArmManifestFileStatus;
     private ObjectRecordStatusEntity failedArmResponseProcessing;
     private ObjectRecordStatusEntity failedArmResponseChecksum;
     private UserAccountEntity userAccount;
 
-    private List<String> armResponseFilesToBeDeleted = new ArrayList<>();
 
     @Override
     public void cleanupResponseFiles() {
@@ -68,15 +69,15 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                                                           failedArmResponseChecksum);
 
         OffsetDateTime dateTimeForDeletion = currentTimeHelper.currentOffsetDateTime().minusDays(
-                armDataManagementConfiguration.getResponseCleanupBufferDays());
+            armDataManagementConfiguration.getResponseCleanupBufferDays());
 
         List<ExternalObjectDirectoryEntity> objectDirectoryDataToBeDeleted =
-                externalObjectDirectoryRepository.findByStatusInAndStorageLocationAndResponseCleanedAndLastModifiedDateTimeBefore(
-                        statuses,
-                        armLocation,
-                        false,
-                        dateTimeForDeletion
-                );
+            externalObjectDirectoryRepository.findByStatusInAndStorageLocationAndResponseCleanedAndLastModifiedDateTimeBefore(
+                statuses,
+                armLocation,
+                false,
+                dateTimeForDeletion
+            );
 
         if (CollectionUtils.isNotEmpty(objectDirectoryDataToBeDeleted)) {
             int row = 1;
@@ -85,7 +86,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 cleanupResponseFilesFor(externalObjectDirectory);
             }
         } else {
-            log.info("No ARM responses found to be deleted");
+            log.info("No ARM responses found to be deleted}");
         }
     }
 
@@ -106,11 +107,13 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                     readInputUploadFile(externalObjectDirectory, armInputUploadFilename);
                     break;
                 } else {
-                    log.warn("ARM file {} not input upload file", armInputUploadFilename);
+                    log.warn("ARM cleanup file {} not input upload file", armInputUploadFilename);
                 }
             }
         } else {
-            log.info("Unable to find input upload file with prefix {}", prefix);
+            log.info("Unable to find cleanup input upload file with prefix {}", prefix);
+            externalObjectDirectory.setResponseCleaned(true);
+            updateExternalObjectDirectory(externalObjectDirectory);
         }
     }
 
@@ -133,7 +136,8 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         }
     }
 
-    private void processResponseBlobs(List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename) {
+    private void processResponseBlobs(List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
+                                      String armInputUploadFilename) {
         String createRecordFilename = null;
         String uploadFilename = null;
         String invalidFileFilename = null;
@@ -149,9 +153,6 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         }
 
         try {
-            if (nonNull(createRecordFilename) || nonNull(uploadFilename) || nonNull(invalidFileFilename)) {
-                armResponseFilesToBeDeleted.add(armInputUploadFilename);
-            }
             if (nonNull(createRecordFilename)) {
                 armResponseFilesToBeDeleted.add(createRecordFilename);
             }
@@ -161,17 +162,23 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             if (nonNull(invalidFileFilename)) {
                 armResponseFilesToBeDeleted.add(invalidFileFilename);
             }
-            deleteResponseFiles(externalObjectDirectory);
+            // Make sure to only add the Input Upload filename last as once this is deleted you cannot find the other response files
+            if (nonNull(createRecordFilename) || nonNull(uploadFilename) || nonNull(invalidFileFilename)) {
+                armResponseFilesToBeDeleted.add(armInputUploadFilename);
+                deleteResponseFiles(externalObjectDirectory);
+            }
+
         } catch (Exception e) {
             log.error("Failure to cleanup response files {}", e.getMessage(), e);
         }
     }
 
-    public void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory) {
         if (CollectionUtils.isNotEmpty(armResponseFilesToBeDeleted)) {
             List<Boolean> deletedFileStatuses = new ArrayList<>();
             for (String responseFile : armResponseFilesToBeDeleted) {
                 try {
+                    log.info("Deleting {} for EOD {}", responseFile, externalObjectDirectory.getId());
                     deletedFileStatuses.add(armDataManagementApi.deleteBlobData(responseFile));
                 } catch (Exception e) {
                     log.error("Failure to delete response file {} - {}", responseFile, e.getMessage(), e);
@@ -179,11 +186,19 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             }
             if (deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
                 externalObjectDirectory.setResponseCleaned(true);
-                externalObjectDirectory.setLastModifiedBy(userAccount);
-                externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
-                externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                updateExternalObjectDirectory(externalObjectDirectory);
+                log.info("Successfully cleaned up {}", externalObjectDirectory.getId());
+            } else {
+                log.warn("Unable to delete all response files for {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectory(externalObjectDirectory);
             }
         }
+    }
+
+    private void updateExternalObjectDirectory(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        externalObjectDirectory.setLastModifiedBy(userAccount);
+        externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
+        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
 
 

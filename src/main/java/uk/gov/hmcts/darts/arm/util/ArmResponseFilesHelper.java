@@ -18,10 +18,10 @@ public class ArmResponseFilesHelper {
 
     public static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return new StringBuilder(externalObjectDirectory.getId().toString())
-                .append(ARM_FILENAME_SEPARATOR)
-                .append(getObjectTypeId(externalObjectDirectory))
-                .append(ARM_FILENAME_SEPARATOR)
-                .append(externalObjectDirectory.getTransferAttempts()).toString();
+            .append(ARM_FILENAME_SEPARATOR)
+            .append(getObjectTypeId(externalObjectDirectory))
+            .append(ARM_FILENAME_SEPARATOR)
+            .append(externalObjectDirectory.getTransferAttempts()).toString();
     }
 
     private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
@@ -32,6 +32,8 @@ public class ArmResponseFilesHelper {
             objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
             objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
+            objectTypeId = externalObjectDirectory.getCaseDocument().getId().toString();
         }
         return objectTypeId;
     }
