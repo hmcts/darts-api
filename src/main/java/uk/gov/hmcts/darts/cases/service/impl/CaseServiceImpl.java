@@ -37,6 +37,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -130,6 +131,8 @@ public class CaseServiceImpl implements CaseService {
         }
 
         updatedCaseEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
+        // set this so it's updated when no other changes are present
+        updatedCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }
