@@ -81,7 +81,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, true));
         Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
-        ExternalObjectDirectoryEntity dets = setupEntityPayload(ExternalLocationTypeEnum.TEMPSTORE, true);
+        ExternalObjectDirectoryEntity dets = setupEntityPayload(ExternalLocationTypeEnum.DETS, true);
 
         Collection<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
@@ -107,7 +107,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, false));
         Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(false);
 
-        ExternalObjectDirectoryEntity dets = setupEntityPayload(ExternalLocationTypeEnum.TEMPSTORE, true);
+        ExternalObjectDirectoryEntity dets = setupEntityPayload(ExternalLocationTypeEnum.DETS, true);
 
         Collection<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
         DownloadableExternalObjectDirectories downloadForExternalObjectDirectories
