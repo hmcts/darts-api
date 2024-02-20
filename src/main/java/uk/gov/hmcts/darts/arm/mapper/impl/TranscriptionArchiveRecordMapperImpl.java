@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -68,6 +69,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.TRANSCRIPT_TYPE_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.TRANSCRIPT_URGENCY_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.UPLOADED_BY_KEY;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 @Component
 @RequiredArgsConstructor
@@ -302,7 +304,16 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private String getTranscriptionComments(TranscriptionDocumentEntity transcriptionDocument) {
         String comments = null;
         if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
-            comments = commentListToString(transcriptionDocument.getTranscription().getTranscriptionCommentEntities());
+            Optional<TranscriptionCommentEntity> transcriptionCommentEntity = transcriptionDocument
+                .getTranscription()
+                .getTranscriptionCommentEntities()
+                .stream()
+                .filter(transcriptionComment ->
+                            REQUESTED.getId().equals(transcriptionComment.getTranscriptionWorkflow().getTranscriptionStatus()))
+                .findFirst();
+            if (transcriptionCommentEntity.isPresent()) {
+                comments = transcriptionCommentEntity.get().getComment();
+            }
         }
         return comments;
     }
@@ -356,13 +367,6 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             courthouse = transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getCourthouseName();
         }
         return courthouse;
-    }
-
-    private String commentListToString(List<TranscriptionCommentEntity> commentEntities) {
-        List<String> comments = commentEntities.stream()
-            .map(TranscriptionCommentEntity::getComment)
-            .toList();
-        return String.join(COMMENTS_DELIMITER, comments);
     }
 
     private Integer mapToInt(String key, TranscriptionDocumentEntity transcriptionDocument) {

@@ -51,6 +51,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyKeys.BF_020_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COMMENTS_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTHOUSE_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTROOM_KEY;
 import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CREATED_DATE_TIME_KEY;
@@ -201,17 +202,26 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     private String mapToString(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
-            case OBJECT_TYPE_KEY -> ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription();
+            case OBJECT_TYPE_KEY -> ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE.getArchiveTypeDescription();
             case CASE_NUMBERS_KEY -> getCaseNumbers(annotationDocument);
             case FILE_TYPE_KEY -> annotationDocument.getFileType();
             case HEARING_DATE_KEY -> getHearingDate(annotationDocument);
             case CHECKSUM_KEY -> annotationDocument.getChecksum();
+            case COMMENTS_KEY -> getAnnotationComments(annotationDocument);
             case CREATED_DATE_TIME_KEY -> formatDateTime(annotationDocument.getUploadedDateTime());
             case UPLOADED_BY_KEY -> getUploadedBy(annotationDocument);
             case COURTHOUSE_KEY -> getCourthouse(annotationDocument);
             case COURTROOM_KEY -> getCourtroom(annotationDocument);
             default -> null;
         };
+    }
+
+    private String getAnnotationComments(AnnotationDocumentEntity annotationDocument) {
+        String comments = null;
+        if (nonNull(annotationDocument.getAnnotation().getText())) {
+            comments = annotationDocument.getAnnotation().getText();
+        }
+        return comments;
     }
 
     private String formatDateTime(OffsetDateTime offsetDateTime) {

@@ -35,11 +35,14 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,7 +65,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
-    public static final String TEST_MEDIA_ARCHIVE_A_360 = "1234-1-1.a360";
+    public static final String TEST_ARCHIVE_FILENAME = "1234-1-1.a360";
     public static final String MP_2 = "mp2";
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String DARTS = "DARTS";
@@ -98,6 +101,10 @@ class ArchiveRecordServiceImplTest {
     private TranscriptionUrgencyEntity transcriptionUrgencyEntity;
     @Mock
     private TranscriptionTypeEntity transcriptionTypeEntity;
+    @Mock
+    private TranscriptionWorkflowEntity transcriptionWorkflowEntity;
+    @Mock
+    private TranscriptionStatusEntity transcriptionStatusEntity;
     @Mock
     private AnnotationEntity annotationEntity;
     @Mock
@@ -185,7 +192,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
-        when(mediaEntity.getMediaFile()).thenReturn(TEST_MEDIA_ARCHIVE_A_360);
+        when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
@@ -252,7 +259,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
         when(mediaEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(mediaEntity.getMediaFile()).thenReturn(TEST_MEDIA_ARCHIVE_A_360);
+        when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getStart()).thenReturn(startedAt);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
@@ -319,7 +326,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
-        when(mediaEntity.getMediaFile()).thenReturn(TEST_MEDIA_ARCHIVE_A_360);
+        when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
@@ -377,7 +384,11 @@ class ArchiveRecordServiceImplTest {
 
         when(userAccountEntity.getId()).thenReturn(0);
 
+        when(transcriptionStatusEntity.getId()).thenReturn(TranscriptionStatusEnum.REQUESTED.getId());
+        when(transcriptionWorkflowEntity.getTranscriptionStatus()).thenReturn(transcriptionStatusEntity);
+        when(transcriptionCommentEntity.getTranscriptionWorkflow()).thenReturn(transcriptionWorkflowEntity);
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
+
         when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
         when(transcriptionTypeEntity.getDescription()).thenReturn("SPECIFIED_TIMES");
 
@@ -609,6 +620,7 @@ class ArchiveRecordServiceImplTest {
 
         when(annotationEntity.getId()).thenReturn(1);
         when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+        when(annotationEntity.getText()).thenReturn("Annotation comments");
 
         OffsetDateTime uploadedDateTime = testTime.minusHours(1);
 
@@ -679,6 +691,7 @@ class ArchiveRecordServiceImplTest {
 
         when(annotationEntity.getId()).thenReturn(1);
         when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+        when(annotationEntity.getText()).thenReturn("Annotation comments");
 
         OffsetDateTime uploadedDateTime = testTime.minusHours(1);
 
@@ -749,6 +762,7 @@ class ArchiveRecordServiceImplTest {
 
         when(annotationEntity.getId()).thenReturn(1);
         when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
+        when(annotationEntity.getText()).thenReturn("Annotation comments");
 
         OffsetDateTime uploadedDateTime = testTime.minusHours(1);
 
