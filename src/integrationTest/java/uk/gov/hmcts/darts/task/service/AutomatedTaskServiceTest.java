@@ -37,7 +37,7 @@ import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
-import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsProcessor;
 
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +63,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
     @Autowired
-    private TranscriptionsApi transcriptionsApi;
+    private TranscriptionsProcessor transcriptionsProcessor;
 
     @Autowired
     private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
@@ -297,7 +297,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                transcriptionsApi
+                transcriptionsProcessor
             );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -329,7 +329,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                transcriptionsApi
+                transcriptionsProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
