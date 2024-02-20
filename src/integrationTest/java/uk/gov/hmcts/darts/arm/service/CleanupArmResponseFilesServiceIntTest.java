@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
@@ -98,7 +97,9 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -145,7 +146,6 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -187,7 +187,9 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -230,7 +232,9 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -279,7 +283,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String uploadFileFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(List.of(createRecordFilename2, uploadFileFilename2));
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename2)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -321,7 +331,9 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String invalidLineFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, invalidLineFilename));
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFilename)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -358,8 +370,6 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String prefix = String.format("%d_%d_", armEod.getId(), savedMedia.getId());
         String inputUploadBlobFilename = prefix + "1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(List.of(inputUploadBlobFilename));
-
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -409,7 +419,13 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String invalidLineFilename2 = "7a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_il.rsp";
         when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(List.of(createRecordFilename2, invalidLineFilename2));
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilenameTransferAttempt1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFilename1)).thenReturn(true);
+
+        when(armDataManagementApi.deleteBlobData(inputUploadBlobFilenameTransferAttempt2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFilename2)).thenReturn(true);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -458,7 +474,8 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(armDataManagementApi.deleteBlobData(any())).thenReturn(false);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(false);
 
         cleanupArmResponseFilesService.cleanupResponseFiles();
 
