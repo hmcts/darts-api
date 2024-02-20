@@ -18,4 +18,12 @@ public class ArchiveConstants {
         public static final String TRANSCRIPTION_REQUEST_AUTOMATIC = "Automatic";
     }
 
+    public static class ArchiveResponseFileAttributes {
+        public static final String ARM_RESPONSE_FILE_EXTENSION = ".rsp";
+        public static final String ARM_INPUT_UPLOAD_FILENAME_KEY = "iu";
+        public static final String ARM_CREATE_RECORD_FILENAME_KEY = "cr";
+        public static final String ARM_UPLOAD_FILE_FILENAME_KEY = "uf";
+        public static final String ARM_INVALID_FILE_FILENAME_KEY = "il";
+        public static final String ARM_RESPONSE_SUCCESS_STATUS_CODE = "1";
+    }
 }

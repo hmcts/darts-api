@@ -44,7 +44,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     public BinaryData getBlobData(String blobPathAndName) {
         return armService.getBlobData(
             armDataManagementConfiguration.getContainerName(),
-            blobPathAndName
+                blobPathAndName
         );
     }
 

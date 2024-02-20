@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
+import uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -39,6 +40,11 @@ import java.util.List;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INPUT_UPLOAD_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_FILE_EXTENSION;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
@@ -51,12 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFilesProcessSingleElement {
 
-    public static final String ARM_RESPONSE_FILE_EXTENSION = ".rsp";
-    public static final String ARM_INPUT_UPLOAD_FILENAME_KEY = "iu";
-    public static final String ARM_CREATE_RECORD_FILENAME_KEY = "cr";
-    public static final String ARM_UPLOAD_FILE_FILENAME_KEY = "uf";
     public static final String ARM_INVALID_LINE_FILENAME_KEY = "il";
-    public static final String ARM_RESPONSE_SUCCESS_STATUS_CODE = "1";
     public static final String ARM_RESPONSE_INVALID_STATUS_CODE = "0";
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -102,7 +103,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
         // IU - Input Upload - This is the manifest file which gets renamed by ARM.
         // EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
-        String prefix = getPrefix(externalObjectDirectory);
+        String prefix = ArmResponseFilesHelper.getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
@@ -482,26 +483,5 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private static String generateSuffix(String filenameKey) {
         return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
     }
-
-    private static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return new StringBuilder(externalObjectDirectory.getId().toString())
-            .append(ARM_FILENAME_SEPARATOR)
-            .append(getObjectTypeId(externalObjectDirectory))
-            .append(ARM_FILENAME_SEPARATOR)
-            .append(externalObjectDirectory.getTransferAttempts()).toString();
-    }
-
-    private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        String objectTypeId = "";
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            objectTypeId = externalObjectDirectory.getMedia().getId().toString();
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
-        }
-        return objectTypeId;
-    }
-
 
 }

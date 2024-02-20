@@ -125,10 +125,10 @@ public class ArmServiceImpl implements ArmService {
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
 
             Response<Boolean> response = blobClient.deleteIfExistsWithResponse(
-                DeleteSnapshotsOptionType.INCLUDE,
-                null,
-                Duration.of(TIMEOUT, ChronoUnit.SECONDS),
-                null
+                    DeleteSnapshotsOptionType.INCLUDE,
+                    null,
+                    Duration.of(TIMEOUT, ChronoUnit.SECONDS),
+                    null
             );
 
             log.debug("Attempted to delete blob data for blob path {}, Returned status code {}", blobPathAndName, response.getStatusCode());

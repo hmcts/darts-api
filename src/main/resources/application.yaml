@@ -187,6 +187,8 @@ darts:
       annotation-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
       case-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
 
+      response-cleanup-buffer-days: 0
+
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
