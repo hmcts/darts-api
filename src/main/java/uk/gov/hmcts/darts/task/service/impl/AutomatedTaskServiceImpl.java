@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
@@ -117,19 +118,24 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
+    @Value("${darts.automated-tasks-pod: false}")
+    boolean automatedTasksPod;
+
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
-        addProcessDailyListToTaskRegistrar(taskRegistrar);
-        addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
-        addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
-        addInboundToUnstructuredTaskRegistrar(taskRegistrar);
-        addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
-        addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
-        addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
-        addUnstructuredToArmTaskRegistrar(taskRegistrar);
-        addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
-        addApplyRetentionToTaskRegistrar(taskRegistrar);
-        addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
+        if (automatedTasksPod) {
+            addProcessDailyListToTaskRegistrar(taskRegistrar);
+            addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
+            addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
+            addInboundToUnstructuredTaskRegistrar(taskRegistrar);
+            addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
+            addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
+            addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
+            addUnstructuredToArmTaskRegistrar(taskRegistrar);
+            addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
+            addApplyRetentionToTaskRegistrar(taskRegistrar);
+            addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
+        }
     }
 
     @Override
