@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,6 +89,11 @@ class CleanupArmResponseFilesServiceImplTest {
             currentTimeHelper
         );
 
+        externalObjectDirectoryEntity = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+            media,
+            ExternalLocationTypeEnum.ARM,
+            ObjectRecordStatusEnum.STORED,
+            UUID.randomUUID());
     }
 
     @Test
@@ -101,11 +108,6 @@ class CleanupArmResponseFilesServiceImplTest {
         when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
 
         when(media.getId()).thenReturn(456);
-
-        externalObjectDirectoryEntity = ExternalObjectDirectoryTestData.createExternalObjectDirectory(media,
-                                                                                                      ExternalLocationTypeEnum.ARM,
-                                                                                                      ObjectRecordStatusEnum.STORED,
-                                                                                                      UUID.randomUUID());
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -137,6 +139,44 @@ class CleanupArmResponseFilesServiceImplTest {
         cleanupArmResponseFilesService.cleanupResponseFiles();
 
         verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        assertTrue(externalObjectDirectoryEntity.isResponseCleaned());
+    }
 
+    @Test
+    void cleanupResponseFiles_WithInputUploadFileNoOtherResponseFiles() {
+        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusStored);
+        when(objectRecordStatusRepository.getReferenceById(17)).thenReturn(objectRecordStatusArmResponseProcessingFailed);
+        when(objectRecordStatusRepository.getReferenceById(18)).thenReturn(objectRecordStatusArmResponseChecksumFailed);
+        when(objectRecordStatusRepository.getReferenceById(19)).thenReturn(objectRecordStatusArmResponseManifestFailed);
+
+        when(armDataManagementConfiguration.getResponseCleanupBufferDays()).thenReturn(0);
+
+        when(media.getId()).thenReturn(456);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        when(externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+            List.of(objectRecordStatusStored,
+                    objectRecordStatusArmResponseManifestFailed,
+                    objectRecordStatusArmResponseProcessingFailed,
+                    objectRecordStatusArmResponseChecksumFailed),
+            externalLocationTypeArm,
+            false,
+            testTime
+        )).thenReturn(List.of(externalObjectDirectoryEntity));
+
+        String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
+        when(armDataManagementApi.listResponseBlobs("123_456_")).thenReturn(inputUploadFilenameResponseBlobs);
+
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles();
+
+        assertFalse(externalObjectDirectoryEntity.isResponseCleaned());
     }
 }
