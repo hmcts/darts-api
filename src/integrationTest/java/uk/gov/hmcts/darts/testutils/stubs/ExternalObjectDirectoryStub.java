@@ -45,7 +45,8 @@ public class ExternalObjectDirectoryStub {
         );
 
         externalObjectDirectory.setMedia(mediaEntity);
-        eodRepository.saveAndFlush(externalObjectDirectory);
+        eodRepository.save(externalObjectDirectory);
+        eodRepository.flush();
 
         return externalObjectDirectory;
     }
