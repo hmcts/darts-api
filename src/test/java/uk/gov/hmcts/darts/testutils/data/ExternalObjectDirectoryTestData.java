@@ -15,7 +15,7 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 @UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor", "OverloadMethodsDeclarationOrder"})
 public class ExternalObjectDirectoryTestData {
 
 
@@ -24,16 +24,6 @@ public class ExternalObjectDirectoryTestData {
     public static final OffsetDateTime CREATED_DATE_TIME = OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC);
     public static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 6, 20, 11, 0, 0, 0, ZoneOffset.UTC);
 
-    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
-                                                                              ExternalLocationTypeEnum externalLocationTypeEnum,
-                                                                              ObjectRecordStatusEnum objectRecordStatusEnum,
-                                                                              UUID externalLocation) {
-
-        return createExternalObjectDirectory(media,
-                                             ObjectRecordStatusTestData.getObjectRecordStatus(objectRecordStatusEnum),
-                                             ExternalLocationTypeTestData.getExternalLocationType(externalLocationTypeEnum),
-                                             externalLocation);
-    }
 
     public static ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
@@ -64,6 +54,17 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
 
         return externalObjectDirectory;
+    }
+
+    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
+                                                                              ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                                              ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                              UUID externalLocation) {
+
+        return createExternalObjectDirectory(media,
+                                             ObjectRecordStatusTestData.getObjectRecordStatus(objectRecordStatusEnum),
+                                             ExternalLocationTypeTestData.getExternalLocationType(externalLocationTypeEnum),
+                                             externalLocation);
     }
 
     public static ExternalObjectDirectoryEntity createMinimalExternalObjectDirectory(ObjectRecordStatusEntity objectRecordStatusEntity,
