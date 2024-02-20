@@ -24,8 +24,4 @@ public class TranscriptionsApiImpl implements TranscriptionsApi {
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription) {
         return transcriptionService.updateTranscription(transcriptionId, updateTranscription, true);
     }
-
-    public void closeTranscriptions() {
-        transcriptionService.closeTranscriptions();
-    }
 }
