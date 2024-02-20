@@ -29,6 +29,7 @@ spring:
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 
 darts:
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8080}
   audio:
