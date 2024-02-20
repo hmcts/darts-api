@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -42,17 +41,20 @@ public class RetentionDateHelper {
     }
 
     public RetentionPolicyTypeEntity getRetentionPolicy(RetentionPolicyEnum policy) {
-        Optional<RetentionPolicyTypeEntity> manualPolicyEntityOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+        List<RetentionPolicyTypeEntity> retentionPolicyList = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
             policy.getPolicyKey(),
             currentTimeHelper.currentOffsetDateTime()
         );
-        if (manualPolicyEntityOpt.isEmpty()) {
+        if (retentionPolicyList.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.INTERNAL_SERVER_ERROR,
                 MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policy.getPolicyKey())
             );
+        } else if (retentionPolicyList.size() > 1) {
+            throw new DartsApiException(RetentionApiError.INTERNAL_SERVER_ERROR,
+                                        MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", policy.getPolicyKey()));
         }
-        return manualPolicyEntityOpt.get();
+        return retentionPolicyList.get(0);
     }
 
     public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {
