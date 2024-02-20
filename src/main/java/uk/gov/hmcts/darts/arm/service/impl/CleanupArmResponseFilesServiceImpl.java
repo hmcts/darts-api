@@ -216,7 +216,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
     }
 
     private String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return new StringBuilder(externalObjectDirectory.getId())
+        return new StringBuilder(String.valueOf(externalObjectDirectory.getId()))
             .append(ARM_FILENAME_SEPARATOR)
             .append(ArmResponseFilesHelper.getObjectTypeId(externalObjectDirectory))
             .append(ARM_FILENAME_SEPARATOR).toString();

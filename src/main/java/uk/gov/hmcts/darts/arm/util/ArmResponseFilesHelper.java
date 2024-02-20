@@ -27,13 +27,13 @@ public class ArmResponseFilesHelper {
     public static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
         String objectTypeId = "";
         if (nonNull(externalObjectDirectory.getMedia())) {
-            objectTypeId = externalObjectDirectory.getMedia().getId().toString();
+            objectTypeId = String.valueOf(externalObjectDirectory.getMedia().getId());
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
+            objectTypeId = String.valueOf(externalObjectDirectory.getTranscriptionDocumentEntity().getId());
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
+            objectTypeId = String.valueOf(externalObjectDirectory.getAnnotationDocumentEntity().getId());
         } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
-            objectTypeId = externalObjectDirectory.getCaseDocument().getId().toString();
+            objectTypeId = String.valueOf(externalObjectDirectory.getCaseDocument().getId());
         }
         return objectTypeId;
     }

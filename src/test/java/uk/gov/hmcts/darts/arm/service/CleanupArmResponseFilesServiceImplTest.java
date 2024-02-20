@@ -16,19 +16,20 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,8 +61,8 @@ class CleanupArmResponseFilesServiceImplTest {
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFailed;
-    @Mock
-    private ExternalObjectDirectoryEntity externalObjectDirectory;
+
+    private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
     @Mock
     private MediaEntity media;
@@ -85,11 +86,11 @@ class CleanupArmResponseFilesServiceImplTest {
             armDataManagementConfiguration,
             currentTimeHelper
         );
+
     }
 
     @Test
     void cleanupResponseFilesSuccess() {
-
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusStored);
@@ -101,31 +102,33 @@ class CleanupArmResponseFilesServiceImplTest {
 
         when(media.getId()).thenReturn(456);
 
-        when(externalObjectDirectory.getId()).thenReturn(123);
-        when(externalObjectDirectory.getMedia()).thenReturn(media);
+        externalObjectDirectoryEntity = ExternalObjectDirectoryTestData.createExternalObjectDirectory(media,
+                                                                                                      ExternalLocationTypeEnum.ARM,
+                                                                                                      ObjectRecordStatusEnum.STORED,
+                                                                                                      UUID.randomUUID());
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
         when(externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
-            anyList(),
-            any(),
-            anyBoolean(),
-            any()
-        )).thenReturn(List.of(externalObjectDirectory));
+            List.of(objectRecordStatusStored,
+                    objectRecordStatusArmResponseManifestFailed,
+                    objectRecordStatusArmResponseProcessingFailed,
+                    objectRecordStatusArmResponseChecksumFailed),
+            externalLocationTypeArm,
+            false,
+            testTime
+        )).thenReturn(List.of(externalObjectDirectoryEntity));
 
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
         inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs("123_456_")).thenReturn(inputUploadFilenameResponseBlobs);
 
-        List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
-        hashcodeResponseBlobs.add(createRecordFilename);
-        hashcodeResponseBlobs.add(uploadFileFilename);
-        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(List.of(createRecordFilename, uploadFileFilename));
 
         when(armDataManagementApi.deleteBlobData(any())).thenReturn(true);
 
@@ -133,7 +136,7 @@ class CleanupArmResponseFilesServiceImplTest {
 
         cleanupArmResponseFilesService.cleanupResponseFiles();
 
-        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
     }
 }
