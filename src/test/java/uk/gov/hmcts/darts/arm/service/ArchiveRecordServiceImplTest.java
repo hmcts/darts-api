@@ -55,7 +55,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
@@ -156,6 +155,12 @@ class ArchiveRecordServiceImplTest {
             externalObjectDirectoryRepository
         );
 
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
     }
 
@@ -168,13 +173,6 @@ class ArchiveRecordServiceImplTest {
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
 
         OffsetDateTime startedAt = testTime.minusHours(1);
 
@@ -204,8 +202,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
@@ -236,13 +233,6 @@ class ArchiveRecordServiceImplTest {
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
         when(courtroomEntity.getName()).thenReturn("Room1");
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
         when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
@@ -272,10 +262,8 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/media-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
@@ -308,8 +296,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
@@ -338,7 +325,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/media-record.properties");
@@ -366,12 +353,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -416,10 +398,8 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/transcription-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
@@ -444,13 +424,6 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -461,6 +434,10 @@ class ArchiveRecordServiceImplTest {
         when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
 
         when(userAccountEntity.getId()).thenReturn(0);
+
+        when(transcriptionStatusEntity.getId()).thenReturn(TranscriptionStatusEnum.REQUESTED.getId());
+        when(transcriptionWorkflowEntity.getTranscriptionStatus()).thenReturn(transcriptionStatusEntity);
+        when(transcriptionCommentEntity.getTranscriptionWorkflow()).thenReturn(transcriptionWorkflowEntity);
 
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
         when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
@@ -490,10 +467,8 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/transcription-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
@@ -518,13 +493,6 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -536,7 +504,11 @@ class ArchiveRecordServiceImplTest {
 
         when(userAccountEntity.getId()).thenReturn(0);
 
+        when(transcriptionStatusEntity.getId()).thenReturn(TranscriptionStatusEnum.REQUESTED.getId());
+        when(transcriptionWorkflowEntity.getTranscriptionStatus()).thenReturn(transcriptionStatusEntity);
+        when(transcriptionCommentEntity.getTranscriptionWorkflow()).thenReturn(transcriptionWorkflowEntity);
         when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
+
         when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
         when(transcriptionTypeEntity.getDescription()).thenReturn("SPECIFIED_TIMES");
 
@@ -568,11 +540,9 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTSTranscription");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/transcription-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
@@ -595,13 +565,6 @@ class ArchiveRecordServiceImplTest {
     void generateArchiveRecord_WithNleAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTSAnnotation");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -638,8 +601,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/nle/annotation-record.properties");
@@ -667,13 +629,6 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTSAnnotation");
-
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -709,8 +664,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/live/annotation-record.properties");
@@ -738,13 +692,6 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTSAnnotation");
-
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getName()).thenReturn("Room1");
@@ -780,8 +727,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/annotation-record.properties");
@@ -809,13 +755,6 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTSCase");
-
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
@@ -846,8 +785,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/case-record.properties");
 
@@ -874,13 +812,6 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTSCase");
-
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtCaseEntity1.getId()).thenReturn(1);
@@ -912,8 +843,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/case-record.properties");
 
@@ -923,7 +853,7 @@ class ArchiveRecordServiceImplTest {
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        log.info("aResponse {}", actualResponse);
+        log.info("actual Response {}", actualResponse);
 
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
@@ -931,7 +861,7 @@ class ArchiveRecordServiceImplTest {
         String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
-        log.info("eResponse {}", expectedResponse);
+        log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
@@ -939,13 +869,6 @@ class ArchiveRecordServiceImplTest {
     void generateArchiveRecord_WithAllCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
-        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTSCase");
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -977,8 +900,7 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/all_properties/case-record.properties");
 
@@ -999,15 +921,7 @@ class ArchiveRecordServiceImplTest {
         log.info("eResponse {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
-
-    @Test
-    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1_1_1");
-
-        assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
-    }
-
-
+    
     private static String getFileContents(File archiveFile) throws IOException {
         StringBuilder fileContents = new StringBuilder();
         try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
