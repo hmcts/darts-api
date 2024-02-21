@@ -11,7 +11,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,12 +115,12 @@ class AnnotationControllerTest extends IntegrationBase {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void shouldThrowHttp404ForValidJudgeAndInvalidAnnotationDocumentEntity() throws Exception {
 
-        someAnnotationCreatedBy(given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE));
+        AnnotationEntity annotationEntity = someAnnotationCreatedBy(given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE));
+        Integer annotationId = annotationEntity.getId();
 
-        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, annotationId, -1);
 
         mockMvc.perform(
                 requestBuilder)
@@ -154,10 +153,10 @@ class AnnotationControllerTest extends IntegrationBase {
         lenient().when(binaryData.toStream()).thenReturn(inputStreamResource);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-                annotationDocumentEntity,
-                dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-                dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-                UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+            annotationDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
         );
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
@@ -165,24 +164,24 @@ class AnnotationControllerTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
 
         mockMvc.perform(
-                        requestBuilder)
-                .andExpect(status().isOk())
-                .andExpect(header().string(
-                        CONTENT_DISPOSITION,
-                        "attachment; filename=\"judges-notes.txt\""
-                ))
-                .andExpect(header().string(
-                        CONTENT_TYPE,
-                        "application/zip"
-                ))
-                .andExpect(header().string(
-                        "external_location",
-                        "665e00c8-5b82-4392-8766-e0c982f603d3"
-                ))
-                .andExpect(header().string(
-                        "annotation_document_id",
-                        "1"
-                ));
+                requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(header().string(
+                CONTENT_DISPOSITION,
+                "attachment; filename=\"judges-notes.txt\""
+            ))
+            .andExpect(header().string(
+                CONTENT_TYPE,
+                "application/zip"
+            ))
+            .andExpect(header().string(
+                "external_location",
+                "665e00c8-5b82-4392-8766-e0c982f603d3"
+            ))
+            .andExpect(header().string(
+                "annotation_document_id",
+                "1"
+            ));
 
     }
 
