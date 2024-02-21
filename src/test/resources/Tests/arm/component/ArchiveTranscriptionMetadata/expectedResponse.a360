@@ -2,7 +2,7 @@
   "operation": "create_record",
   "relation_id": "1234",
   "record_metadata": {
-    "record_class": "DARTSMedia",
+    "record_class": "DARTS",
     "publisher": "DARTS",
     "region": "GBR",
     "recordDate": "2024-01-23T10:00:00",

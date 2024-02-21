@@ -411,8 +411,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
             CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
             if (nonNull(caseDocument.getChecksum())) {
-                String objectChecksum = caseDocument.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, caseDocument.getChecksum());
             } else {
                 log.warn("Unable to verify case checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);

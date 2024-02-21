@@ -157,7 +157,7 @@ class ArchiveRecordFileGeneratorImplTest {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return RecordMetadata.builder()
-            .recordClass("DARTSMedia")
+            .recordClass("DARTS")
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
@@ -234,7 +234,7 @@ class ArchiveRecordFileGeneratorImplTest {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return RecordMetadata.builder()
-            .recordClass("DARTSMedia")
+            .recordClass("DARTS")
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
@@ -292,7 +292,7 @@ class ArchiveRecordFileGeneratorImplTest {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return RecordMetadata.builder()
-            .recordClass("DARTSMedia")
+            .recordClass("DARTS")
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
@@ -349,7 +349,7 @@ class ArchiveRecordFileGeneratorImplTest {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return RecordMetadata.builder()
-            .recordClass("DARTSMedia")
+            .recordClass("DARTS")
             .publisher("DARTS")
             .region("GBR")
             .recordDate(recordTime.format(formatter))
