@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class AudioRequestsController implements AudioRequestsApi {
 
     private final MediaRequestService mediaRequestService;

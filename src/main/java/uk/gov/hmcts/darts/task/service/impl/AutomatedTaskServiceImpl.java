@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.task.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
@@ -77,6 +77,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "automated-tasks-pod", havingValue = "true")
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.TooFewBranchesForASwitchStatement", "PMD.SingularField"})
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
@@ -118,24 +119,20 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
-    @Value("${darts.automated-tasks-pod: false}")
-    boolean automatedTasksPod;
-
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
-        if (automatedTasksPod) {
-            addProcessDailyListToTaskRegistrar(taskRegistrar);
-            addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
-            addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
-            addInboundToUnstructuredTaskRegistrar(taskRegistrar);
-            addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
-            addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
-            addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
-            addUnstructuredToArmTaskRegistrar(taskRegistrar);
-            addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
-            addApplyRetentionToTaskRegistrar(taskRegistrar);
-            addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
-        }
+        log.info("Automated tasks are loading");
+        addProcessDailyListToTaskRegistrar(taskRegistrar);
+        addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
+        addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
+        addInboundToUnstructuredTaskRegistrar(taskRegistrar);
+        addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
+        addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
+        addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
+        addUnstructuredToArmTaskRegistrar(taskRegistrar);
+        addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
+        addApplyRetentionToTaskRegistrar(taskRegistrar);
+        addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
     }
 
     @Override

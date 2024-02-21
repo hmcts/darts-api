@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
@@ -22,6 +23,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CourthousesController implements CourthousesApi {
 
