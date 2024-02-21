@@ -194,6 +194,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
+        when(mediaEntity.getStart()).thenReturn(startedAt);
         when(mediaEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
@@ -317,6 +318,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
+        when(mediaEntity.getStart()).thenReturn(startedAt);
         when(mediaEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
@@ -921,7 +923,7 @@ class ArchiveRecordServiceImplTest {
         log.info("eResponse {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
-    
+
     private static String getFileContents(File archiveFile) throws IOException {
         StringBuilder fileContents = new StringBuilder();
         try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
