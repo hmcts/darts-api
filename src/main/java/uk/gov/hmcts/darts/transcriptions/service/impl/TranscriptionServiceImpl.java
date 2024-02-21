@@ -38,7 +38,6 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.component.YourTranscriptsQuery;
-import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -97,10 +96,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @SuppressWarnings({"PMD.ExcessiveImports"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
-    private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
     public static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
-
-    private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -183,7 +179,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
         return updateTranscription(transcriptionId, updateTranscription, false);
@@ -191,7 +186,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
@@ -261,7 +255,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
         transcription.setIsManualTranscription(isManual);
-        transcription.setIsManualTranscription(isManual);
         transcription.setHideRequestFromRequestor(false);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
@@ -326,38 +319,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public void closeTranscriptions() {
-        try {
-            List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
-            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now()
-                .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
-            List<TranscriptionEntity> transcriptionsToBeClosed =
-                transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
-                    finishedTranscriptionStatuses,
-                    lastCreatedDateTime
-                );
-            if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
-                log.info("No transcriptions to be closed off");
-            } else {
-                log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
-                for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
-                    closeTranscription(transcriptionToBeClosed.getId(), AUTOMATICALLY_CLOSED_TRANSCRIPTION);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Unable to close transcriptions {}", e.getMessage());
-        }
-    }
-
-    private void closeTranscription(Integer transcriptionId, String transcriptionComment) {
+    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
             updateTranscription(transcriptionId, updateTranscription);
-            log.info("Closed off transcription {}", transcriptionId);
+            log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
-            log.error("Unable to close transcription {} - {}", transcriptionId, e.getMessage());
+            log.error("Unable to close transcription {}", transcriptionId, e);
         }
     }
 
@@ -397,7 +367,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
         transcriptionDocumentEntity.setFileType(transcript.getContentType());
-        transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
@@ -475,7 +444,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return externalObjectDirectoryEntity;
     }
 
-    private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
+    @Override
+    public List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
         List<TranscriptionStatusEntity> transcriptionStatuses = new ArrayList<>();
         transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.CLOSED.getId()));
         transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.COMPLETE.getId()));

@@ -31,12 +31,12 @@ public class CaseRetentionStub {
             policy = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
                 RetentionPolicyEnum.MANUAL.getPolicyKey(),
                 currentTimeHelper.currentOffsetDateTime()
-            ).get();
+            ).get(0);
         } else {
             policy = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
                 RetentionPolicyEnum.DEFAULT.getPolicyKey(),
                 currentTimeHelper.currentOffsetDateTime()
-            ).get();
+            ).get(0);
         }
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);

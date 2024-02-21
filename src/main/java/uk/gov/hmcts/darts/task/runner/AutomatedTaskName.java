@@ -15,7 +15,9 @@ public enum AutomatedTaskName {
     EXTERNAL_DATASTORE_DELETER("ExternalDataStoreDeleter"),
     UNSTRUCTURED_AUDIO_DELETER_TASK_NAME("UnstructuredAudioDeleter"),
     UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore"),
-    PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles");
+    PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles"),
+    APPLY_RETENTION("ApplyRetention"),
+    CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles");
 
     private final String taskName;
 

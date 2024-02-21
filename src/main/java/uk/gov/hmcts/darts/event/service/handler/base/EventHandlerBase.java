@@ -21,6 +21,8 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.time.OffsetDateTime;
+
 import static java.lang.String.format;
 import static java.lang.String.join;
 
@@ -86,6 +88,8 @@ public abstract class EventHandlerBase implements EventHandler {
             }
 
             hearingEntity.setLastModifiedBy(currentUser);
+            // set this so it's updated when no other changes are present
+            hearingEntity.setLastModifiedDateTime(OffsetDateTime.now());
 
             EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
             setHearingToActive(hearingEntity);

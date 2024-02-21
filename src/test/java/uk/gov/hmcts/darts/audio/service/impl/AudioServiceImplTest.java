@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -428,5 +429,24 @@ class AudioServiceImplTest {
         audioService.setIsArchived(audioMetadataList, 1);
 
         assertEquals(false, audioMetadataList.get(0).getIsArchived());
+    }
+
+    @Test
+    void whenAudioMetadataListContainsMediaIdsStoredInUnstructured_thenIsAvailableWillBeTrue() {
+        AudioMetadata audioMetadata1 = new AudioMetadata();
+        audioMetadata1.setId(1);
+        AudioMetadata audioMetadata2 = new AudioMetadata();
+        audioMetadata2.setId(2);
+        AudioMetadata audioMetadata3 = new AudioMetadata();
+        audioMetadata3.setId(3);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
+
+        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(1, 3));
+
+        audioService.setIsAvailable(audioMetadataList);
+
+        assertEquals(true, audioMetadataList.get(0).getIsAvailable());
+        assertEquals(false, audioMetadataList.get(1).getIsAvailable());
+        assertEquals(true, audioMetadataList.get(2).getIsAvailable());
     }
 }

@@ -33,6 +33,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
+                SELECT eod.media.id FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.media.id in :mediaIdList
+                AND eod.status = :status
+                AND eod.externalLocationType = :externalLocationType
+            """
+    )
+    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Integer> mediaIdList, ObjectRecordStatusEntity status,
+                                                       ExternalLocationTypeEntity externalLocationType);
+
+    @Query(
+        """
             SELECT eo FROM ExternalObjectDirectoryEntity eo
             WHERE eo.status = :status
             AND eo.externalLocationType = :location1
@@ -135,16 +146,33 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                 OffsetDateTime lastModifiedBefore);
 
     @Query(
-            """
-                SELECT eod FROM ExternalObjectDirectoryEntity eod
-                JOIN eod.annotationDocumentEntity ade
-                JOIN ade.annotation ann
-                JOIN ann.annotationDocuments annD
-                WHERE ann.id = :annotationId
-                AND annD.id = :annotationDocumentId
-                """
+        """
+
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+                  JOIN eod.annotationDocumentEntity ade
+                  JOIN ade.annotation ann
+                  JOIN ann.annotationDocuments annD
+                  WHERE ann.id = :annotationId
+                  AND annD.id = :annotationDocumentId
+                  """
     )
     Optional<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status in :statuses
+            AND eod.externalLocationType = :locationType
+            AND eod.responseCleaned = :responseCleaned
+            AND eod.lastModifiedDateTime < :lastModifiedBefore
+            order by eod.lastModifiedDateTime
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+        List<ObjectRecordStatusEntity> statuses,
+        ExternalLocationTypeEntity locationType,
+        boolean responseCleaned,
+        OffsetDateTime lastModifiedBefore);
 
     @Modifying(clearAutomatically = true)
     @Query(
@@ -154,9 +182,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             eod.lastModifiedBy = :userAccount,
             eod.lastModifiedDateTime = :timestamp
             where eod.id in :idsToDelete
-            """)
+            """
+    )
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
 
-
-
-}
+    }

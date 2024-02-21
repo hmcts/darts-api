@@ -99,7 +99,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         dartsDatabase.save(
             currentMediaRequest);
 
-        TransientObjectDirectoryEntity notMarkedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             unchangedMediaRequest,
             OffsetDateTime.of(
                 DATE_27TH_OCTOBER,
@@ -107,7 +107,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
                 ZoneOffset.UTC
             )
         );
-        TransientObjectDirectoryEntity markedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity markedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.of(
                 DATE_27TH_OCTOBER.minusDays(3),
@@ -122,6 +122,60 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         assertTransientObjectDirectoryStateNotChanged(notMarkedForDeletion.getId());
 
 
+    }
+
+    @Test
+    void whereLastAccessed2DaysAgoAndStatusIsCompletedAndMarkedForDeletion() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        MediaRequestEntity unchangedMediaRequest = AudioTestData.createCurrentMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            AudioRequestType.PLAYBACK,
+            COMPLETED
+        );
+        dartsDatabase.save(
+            unchangedMediaRequest);
+
+        //This media request should be deleted as its 3 days old
+        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            AudioRequestType.DOWNLOAD,
+            COMPLETED
+        );
+        dartsDatabase.save(
+            currentMediaRequest);
+
+        createStoredTransientDirectory(
+            unchangedMediaRequest,
+            OffsetDateTime.of(
+                DATE_27TH_OCTOBER,
+                LOCAL_TIME,
+                ZoneOffset.UTC
+            )
+        );
+        TransientObjectDirectoryEntity markedForDeletion = createStoredTransientDirectory(
+            currentMediaRequest,
+            OffsetDateTime.of(
+                DATE_27TH_OCTOBER.minusDays(3),
+                LOCAL_TIME,
+                ZoneOffset.UTC
+            )
+        );
+        markedForDeletion.setStatus(dartsDatabase.getObjectRecordStatusEntity(MARKED_FOR_DELETION));
+        dartsDatabase.save(markedForDeletion);
+
+        assertEquals(0, outboundAudioDeleterProcessor.markForDeletion().size());
     }
 
     /**
@@ -148,7 +202,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         MediaRequestEntity savedMediaRequest = dartsDatabase.save(
             currentMediaRequest);
 
-        TransientObjectDirectoryEntity markedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity markedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.parse("2023-10-25T11:45:00Z")
         );
@@ -182,7 +236,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         dartsDatabase.save(
             currentMediaRequest);
 
-        TransientObjectDirectoryEntity notMarkedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.parse("2023-10-20T13:45:00Z")
         );
@@ -223,7 +277,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         holidays.add(LocalDate.of(2023, Month.OCTOBER, 25));
         holidays.add(LocalDate.of(2023, Month.OCTOBER, 24));
 
-        TransientObjectDirectoryEntity notMarkedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.of(
                 DATE_27TH_OCTOBER,
@@ -260,7 +314,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         dartsDatabase.save(
             currentMediaRequest);
 
-        TransientObjectDirectoryEntity markedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity markedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.of(
                 DATE_27TH_OCTOBER,
@@ -268,7 +322,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
                 ZoneOffset.UTC
             ).minusDays(5)
         );
-        TransientObjectDirectoryEntity notMarkedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.of(
                 DATE_27TH_OCTOBER,
@@ -304,7 +358,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         dartsDatabase.save(
             currentMediaRequest);
 
-        TransientObjectDirectoryEntity notMarkedForDeletion = createTransientDirectoryAndObjectStatus(
+        TransientObjectDirectoryEntity notMarkedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.of(LocalDate.of(2023, Month.OCTOBER, 22), LOCAL_TIME, ZoneOffset.UTC)
         );
@@ -330,7 +384,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         dartsDatabase.save(
             currentMediaRequest);
 
-        notMarkedForDeletion = createTransientDirectoryAndObjectStatus(
+        notMarkedForDeletion = createStoredTransientDirectory(
             currentMediaRequest,
             OffsetDateTime.of(LocalDate.of(2023, Month.OCTOBER, 21), LOCAL_TIME, ZoneOffset.UTC)
         );
@@ -451,7 +505,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
 
-    private TransientObjectDirectoryEntity createTransientDirectoryAndObjectStatus(MediaRequestEntity currentMediaRequest, OffsetDateTime lastAccessedDate) {
+    private TransientObjectDirectoryEntity createStoredTransientDirectory(MediaRequestEntity currentMediaRequest, OffsetDateTime lastAccessedDate) {
         var blobId = UUID.randomUUID();
 
         var objectDirectoryStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);

@@ -21,9 +21,11 @@ import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -52,6 +54,8 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -80,12 +84,12 @@ public class AudioServiceImpl implements AudioService {
 
     private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return AudioFileInfo.builder()
-                .startTime(mediaEntity.getStart().toInstant())
-                .endTime(mediaEntity.getEnd().toInstant())
-                .channel(mediaEntity.getChannel())
-                .mediaFile(mediaEntity.getMediaFile())
-                .path(downloadPath)
-                .build();
+            .startTime(mediaEntity.getStart().toInstant())
+            .endTime(mediaEntity.getEnd().toInstant())
+            .channel(mediaEntity.getChannel())
+            .mediaFile(mediaEntity.getMediaFile())
+            .path(downloadPath)
+            .build();
     }
 
     private static SseEmitter.SseEventBuilder createPreviewSse(String range, InputStream audioMediaFile) throws IOException {
@@ -93,8 +97,8 @@ public class AudioServiceImpl implements AudioService {
         response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
 
         return SseEmitter.event()
-                .data(response)
-                .name(AUDIO_RESPONSE_EVENT_NAME);
+            .data(response)
+            .name(AUDIO_RESPONSE_EVENT_NAME);
     }
 
     @Override
@@ -105,7 +109,7 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public InputStream preview(Integer mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
-                () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+            () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
         try {
             Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
@@ -149,10 +153,10 @@ public class AudioServiceImpl implements AudioService {
         linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
 
         saveExternalObjectDirectory(
-                externalLocation,
-                checksum,
-                userIdentity.getUserAccount(),
-                savedMedia
+            externalLocation,
+            checksum,
+            userIdentity.getUserAccount(),
+            savedMedia
         );
     }
 
@@ -160,10 +164,10 @@ public class AudioServiceImpl implements AudioService {
     public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
         for (String caseNumber : addAudioMetadataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                    addAudioMetadataRequest.getCourthouse(),
-                    addAudioMetadataRequest.getCourtroom(),
-                    caseNumber,
-                    addAudioMetadataRequest.getStartedAt().toLocalDate()
+                addAudioMetadataRequest.getCourthouse(),
+                addAudioMetadataRequest.getCourtroom(),
+                caseNumber,
+                addAudioMetadataRequest.getStartedAt().toLocalDate()
             );
             hearing.addMedia(savedMedia);
             hearingRepository.saveAndFlush(hearing);
@@ -175,7 +179,7 @@ public class AudioServiceImpl implements AudioService {
 
         if (addAudioMetadataRequest.getTotalChannels() == 1) {
             if (audioConfigurationProperties.getHandheldAudioCourtroomNumbers()
-                    .contains(addAudioMetadataRequest.getCourtroom())) {
+                .contains(addAudioMetadataRequest.getCourtroom())) {
                 return;
             }
         }
@@ -185,16 +189,16 @@ public class AudioServiceImpl implements AudioService {
         OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration());
         OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration());
         var courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
-                courthouse,
-                courtroom,
-                start,
-                end
+            courthouse,
+            courtroom,
+            start,
+            end
         );
 
         var associatedHearings = courtLogs.stream()
-                .flatMap(h -> h.getHearingEntities().stream())
-                .distinct()
-                .collect(Collectors.toList());
+            .flatMap(h -> h.getHearingEntities().stream())
+            .distinct()
+            .collect(Collectors.toList());
 
         for (var hearing : associatedHearings) {
             if (!hearing.getMediaList().contains(savedMedia)) {
@@ -211,7 +215,7 @@ public class AudioServiceImpl implements AudioService {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
-                ObjectRecordStatusEnum.STORED.getId()));
+            ObjectRecordStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
@@ -242,6 +246,22 @@ public class AudioServiceImpl implements AudioService {
             } else {
                 audioMetadataItem.setIsArchived(false);
             }
+        }
+    }
+
+    /*
+    Set the isAvailable flag if the media is available in the unstructured datastore.
+     */
+    @Override
+    public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
+        List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
+        List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
+                                                                                                                            unstructuredLocationType);
+
+        for (AudioMetadata audioMetadataItem : audioMetadataList) {
+            audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
         }
     }
 

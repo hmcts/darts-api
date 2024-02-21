@@ -140,12 +140,6 @@ class ArmServiceImplTest {
 
     @Test
     void testDeleteResponseBlob() {
-        var foldersConfig = new ArmDataManagementConfiguration.Folders();
-        foldersConfig.setSubmission(TEST_DROP_ZONE);
-        foldersConfig.setCollected(TEST_DROP_ZONE);
-        foldersConfig.setResponse(TEST_DROP_ZONE);
-        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
-
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
 
@@ -153,7 +147,7 @@ class ArmServiceImplTest {
 
         when(blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null, Duration.of(60, ChronoUnit.SECONDS), null)).thenReturn(response);
 
-        boolean result = armService.deleteResponseBlob(ARM_BLOB_CONTAINER_NAME, "blobname");
+        boolean result = armService.deleteBlobData(ARM_BLOB_CONTAINER_NAME, "blobPathAndName");
         assertFalse(result);
     }
 
