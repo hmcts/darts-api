@@ -34,6 +34,13 @@ public class ExternalObjectDirectoryStub {
         return eodRepository.save(eod);
     }
 
+    /**
+     * Creates an ExternalObjectDirectoryEntity.
+     *
+     * @deprecated Use
+     *     {@link ExternalObjectDirectoryStub#createExternalObjectDirectory(MediaEntity, ObjectRecordStatusEnum, ExternalLocationTypeEnum, UUID)} instead.
+     */
+    @Deprecated
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
@@ -105,7 +112,7 @@ public class ExternalObjectDirectoryStub {
         externalObjectDirectory.setExternalLocationType(externalLocationTypeEntity);
         externalObjectDirectory.setExternalLocation(externalLocation);
         externalObjectDirectory.setChecksum(null);
-        externalObjectDirectory.setTransferAttempts(null);
+        externalObjectDirectory.setTransferAttempts(1);
         externalObjectDirectory.setVerificationAttempts(1);
 
         var user = userAccountStub.getIntegrationTestUserAccountEntity();

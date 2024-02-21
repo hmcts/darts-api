@@ -137,7 +137,7 @@ public class ArmServiceImpl implements ArmService {
             }
 
         } catch (Exception e) {
-            log.error("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e.getMessage(), e);
+            log.error("Could not delete from container {} blobPathAndName {} - {}", containerName, blobPathAndName, e);
             return false;
         }
         return true;
