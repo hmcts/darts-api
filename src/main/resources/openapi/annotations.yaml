@@ -172,9 +172,7 @@ components:
         - "ANNOTATION_102"
         - "ANNOTATION_103"
         - "ANNOTATION_104"
-        - "ANNOTATION_105"
-        - "ANNOTATION_106"
-      x-enum-varnames: [ HEARING_NOT_FOUND, FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, USER_NOT_AUTHORISED_TO_DOWNLOAD, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE, FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT]
+      x-enum-varnames: [ HEARING_NOT_FOUND, FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, USER_NOT_AUTHORISED_TO_DOWNLOAD, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID, FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT]
 
     AnnotationTitleErrors:
       type: string
@@ -182,8 +180,6 @@ components:
         - "The requested hearing cannot be found"
         - "The annotation failed to be uploaded"
         - "user is not authorised to download annotation documents"
-        - "annotation ID or annotation document ID does not exist"
         - "invalid annotation id or annotation document id"
-        - "invalid annotation id or annotation document id for judge"
         - "The annotation failed to be downloaded"
-      x-enum-varnames: [ HEARING_NOT_FOUND, FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, USER_NOT_AUTHORISED_TO_DOWNLOAD, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE, FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT]
+      x-enum-varnames: [ HEARING_NOT_FOUND, FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, USER_NOT_AUTHORISED_TO_DOWNLOAD, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID, FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT]

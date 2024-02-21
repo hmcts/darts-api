@@ -13,10 +13,8 @@ import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
 import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -24,14 +22,12 @@ import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +41,6 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final FileContentChecksum fileContentChecksum;
     private final AnnotationPersistenceService annotationPersistenceService;
     private final ExternalObjectDirectoryRepository eodRepository;
-    private final AuthorisationApi authorisationApi;
     private final Validator<Annotation> annotationUploadValidator;
     private final Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
     private final Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
@@ -93,13 +88,7 @@ public class AnnotationServiceImpl implements AnnotationService {
         final ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
         if (eodDir.isEmpty()) {
-
-            if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))) {
-                throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE);
-            } else {
                 throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
-            }
-
         }
 
         externalObjectDirectoryEntity = eodDir.get();
@@ -119,8 +108,6 @@ public class AnnotationServiceImpl implements AnnotationService {
                 .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
                 .externalLocation(externalObjectDirectoryEntity.getExternalLocation())
                 .annotationDocumentId(annotationDocumentId).build();
-
-
 
     }
 

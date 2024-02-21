@@ -86,7 +86,6 @@ class AnnotationServiceTest {
         fileContentChecksum,
         annotationPersistenceService,
         eodRepository,
-        authorisationApi,
         annotationUploadValidator,
         userAuthorisedToDeleteAnnotationValidator,
         userAuthorisedToDownloadAnnotationValidator,

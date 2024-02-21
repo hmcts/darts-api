@@ -52,7 +52,6 @@ import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroup
 import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AnnotationControllerTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/annotations");
@@ -117,21 +116,17 @@ class AnnotationControllerTest extends IntegrationBase {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void shouldThrowHttp404ForValidJudgeAndInvalidAnnotationDocumentEntity() throws Exception {
 
-
         someAnnotationCreatedBy(given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE));
-
-        var binaryData = mock(BinaryData.class);
-        lenient().when(dataManagementApi.getBlobDataFromInboundContainer(any(UUID.class))).thenReturn(binaryData);
-        lenient().when(binaryData.toStream()).thenReturn(inputStreamResource);
 
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
 
         mockMvc.perform(
                 requestBuilder)
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("ANNOTATION_104"))
+            .andExpect(jsonPath("$.type").value("ANNOTATION_103"))
             .andExpect(jsonPath("$.title").value("invalid annotation id or annotation document id"))
             .andExpect(jsonPath("$.status").value("404"))
             .andReturn();

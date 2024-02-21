@@ -16,13 +16,11 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,7 +30,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationDownloadServiceTest {
@@ -79,7 +76,6 @@ class AnnotationDownloadServiceTest {
             fileContentChecksum,
             annotationPersistenceService,
             eodRepository,
-            authorisationApi,
             annotationUploadValidator,
             userAuthorisedToDeleteAnnotationValidator,
             userAuthorisedToDownloadAnnotationValidator,
@@ -103,16 +99,14 @@ class AnnotationDownloadServiceTest {
     @Test
     void throwsIfJudgeAndNoAnnotationDocumentFound() {
         doNothing().when(userAuthorisedToDownloadAnnotationValidator).validate(any());
-        when(authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))).thenReturn(true);
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
                 .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE);
+                .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
     }
 
     @Test
     void throwsIfNotJudgeAndNoAnnotationDocumentFound() {
-        when(authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.JUDGE))).thenReturn(false);
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
                 .isInstanceOf(DartsApiException.class)

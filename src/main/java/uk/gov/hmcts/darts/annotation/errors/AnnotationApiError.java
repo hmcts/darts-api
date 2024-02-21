@@ -16,23 +16,16 @@ public enum AnnotationApiError implements DartsApiError {
         HttpStatus.NOT_FOUND,
             AnnotationTitleErrors.HEARING_NOT_FOUND.toString()
     ),
-
     FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT(
         AnnotationErrorCode.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT.getValue(),
         HttpStatus.NOT_FOUND,
         AnnotationTitleErrors.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT.toString()
     ),
-    INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE(
-            AnnotationErrorCode.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE.getValue(),
-            HttpStatus.NOT_FOUND,
-            AnnotationTitleErrors.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID_FOR_JUDGE.toString()
-    ),
     INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID(
             AnnotationErrorCode.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID.getValue(),
-            HttpStatus.FORBIDDEN,
+            HttpStatus.NOT_FOUND,
             AnnotationTitleErrors.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID.toString()
     ),
-
     USER_NOT_AUTHORISED_TO_DOWNLOAD(
         AnnotationErrorCode.USER_NOT_AUTHORISED_TO_DOWNLOAD.getValue(),
         HttpStatus.FORBIDDEN,

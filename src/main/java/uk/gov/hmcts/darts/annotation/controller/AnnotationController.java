@@ -48,7 +48,6 @@ public class AnnotationController implements AnnotationsApi {
     }
 
     @Authorisation(
-            bodyAuthorisation = true,
             contextId = ANNOTATION_ID,
             securityRoles = {JUDGE, ADMIN},
             globalAccessSecurityRoles = {JUDGE, ADMIN})
