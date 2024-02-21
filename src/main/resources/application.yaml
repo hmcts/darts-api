@@ -102,7 +102,7 @@ spring:
     out-of-order: true
 
 darts:
-  automated-tasks-pod: ${AUTOMATED_TASK_MODE:false}
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_POD:true}
   audio:
     allowable-audio-gap-duration: 1s
