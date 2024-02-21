@@ -13,20 +13,16 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +37,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
@@ -131,34 +126,15 @@ class AnnotationControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void shouldDownloadAnnotationDocument() throws Exception {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
-        var annotation = someAnnotationCreatedBy(judge);
-
-        final String fileName = "judges-notes.txt";
-        final String fileType = "text/plain";
-        final int fileSize = 123;
-        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
-        final String checksum = "123";
-        var annotationDocumentEntity = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                                                       judge, uploadedDateTime, checksum
-            );
 
         var binaryData = mock(BinaryData.class);
         lenient().when(dataManagementApi.getBlobDataFromInboundContainer(any(UUID.class))).thenReturn(binaryData);
         lenient().when(binaryData.toStream()).thenReturn(inputStreamResource);
 
-        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-                annotationDocumentEntity,
-                dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-                dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-                UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
-        );
-        armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        dartsDatabase.createValidAnnotationDocumentForDownload(judge);
 
         MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
 
