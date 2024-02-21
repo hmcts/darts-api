@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface InboundToUnstructuredProcessorSingleElement {
 
-    void processSingleElement(ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
+    void processSingleElement(Integer inboundExternalObjectDirectoryId,
                               List<ExternalObjectDirectoryEntity> unstructuredStoredList,
                               List<ExternalObjectDirectoryEntity> unstructuredFailedList);
 }

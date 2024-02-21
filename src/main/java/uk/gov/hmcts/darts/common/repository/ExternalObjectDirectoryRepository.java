@@ -95,6 +95,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                             ExternalLocationTypeEntity type,
                                                                                             Integer transferAttempts);
 
+    List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
     @Query(
         """
