@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
+import uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper;
 import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -27,7 +28,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -35,33 +36,32 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INPUT_UPLOAD_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_FILE_EXTENSION;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_INVALID_STATUS_CODE;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFilesProcessSingleElement {
-    public static final String ARM_RESPONSE_FILE_EXTENSION = ".rsp";
-    public static final String ARM_INPUT_UPLOAD_FILENAME_KEY = "iu";
-    public static final String ARM_CREATE_RECORD_FILENAME_KEY = "cr";
-    public static final String ARM_UPLOAD_FILE_FILENAME_KEY = "uf";
-    public static final String ARM_INVALID_LINE_FILENAME_KEY = "il";
-    public static final String ARM_RESPONSE_SUCCESS_STATUS_CODE = "1";
-    public static final String ARM_RESPONSE_INVALID_STATUS_CODE = "0";
+
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ArmDataManagementApi armDataManagementApi;
     private final FileOperationService fileOperationService;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -70,10 +70,10 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
 
     private ObjectRecordStatusEntity armDropZoneStatus;
     private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
-    private ObjectRecordStatusEntity armResponseProcessingFailed;
-    private ObjectRecordStatusEntity armResponseManifestFileFailed;
+    private ObjectRecordStatusEntity armResponseProcessingFailedStatus;
+    private ObjectRecordStatusEntity armResponseManifestFailedStatus;
     private ObjectRecordStatusEntity storedStatus;
-    private ObjectRecordStatusEntity checksumFailedStatus;
+    private ObjectRecordStatusEntity armResponseChecksumVerificationFailedStatus;
     private UserAccountEntity userAccount;
 
     @Transactional
@@ -90,12 +90,12 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
 
     @SuppressWarnings("java:S3655")
     private void initialisePreloadedObjects() {
+        storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
-        armResponseProcessingFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
-        armResponseManifestFileFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_MANIFEST_FILE_FAILED.getId()).get();
-        storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
-        checksumFailedStatus = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED.getId()).get();
+        armResponseManifestFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).get();
+        armResponseProcessingFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).get();
+        armResponseChecksumVerificationFailedStatus = objectRecordStatusRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).get();
 
         userAccount = userIdentity.getUserAccount();
     }
@@ -103,7 +103,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
         // IU - Input Upload - This is the manifest file which gets renamed by ARM.
         // EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
-        String prefix = getPrefix(externalObjectDirectory);
+        String prefix = ArmResponseFilesHelper.getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
@@ -141,21 +141,21 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             log.debug("List response files starting with hashcode {}", responseFilesHashcode);
             List<String> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
             if (CollectionUtils.isNotEmpty(responseBlobs)) {
-                processResponseBlobs(responseBlobs, externalObjectDirectory);
+                processResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
             } else {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
             }
         } catch (IllegalArgumentException e) {
             // This occurs when the filename is not parsable
             log.error("Unable to process filename: {}", e.getMessage());
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         } catch (Exception e) {
             log.error("Unable to list responses: {}", e.getMessage());
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
         }
     }
 
-    private void processResponseBlobs(List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void processResponseBlobs(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) {
         String createRecordFilename = null;
         String uploadFilename = null;
         String invalidLineFilename = null;
@@ -170,78 +170,114 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             }
         }
 
-        if (nonNull(invalidLineFilename)) {
-            try {
-                BinaryData invalidLineFileBinary = armDataManagementApi.getBlobData(invalidLineFilename);
-
-                InvalidLineFileFilenameProcessor invalidLinesFilenameProcessor = new InvalidLineFileFilenameProcessor(invalidLineFilename);
-                readInvalidLineFile(externalObjectDirectory, invalidLineFileBinary, invalidLinesFilenameProcessor);
-            } catch (IllegalArgumentException e) {
-                // This occurs when the filename is not parsable
-                log.error("Unable to process invalid line file: {} {}", invalidLineFilename, e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
-            } catch (Exception e) {
-                log.error("Failure with invalid line file: {} {}", invalidLineFilename, e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
-            }
+        if (nonNull(invalidLineFilename) && (nonNull(createRecordFilename) || nonNull(uploadFilename))) {
+            processInvalidLineFile(armInputUploadFilename, responseBlobs, externalObjectDirectory, invalidLineFilename);
         } else if (nonNull(createRecordFilename) && nonNull(uploadFilename)) {
-            try {
-                UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
-
-                BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFilename);
-                readUploadFile(externalObjectDirectory, uploadFileBinary, uploadFileFilenameProcessor);
-            } catch (IllegalArgumentException e) {
-                // This occurs when the filename is not parsable
-                log.error("Unable to process filename: {}", e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
-            } catch (Exception e) {
-                log.error("Failure with to get upload file {}", e.getMessage(), e);
-                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-            }
+            processUploadFile(armInputUploadFilename, responseBlobs, externalObjectDirectory, uploadFilename);
         } else {
             log.info("Unable to find response files for external object {}", externalObjectDirectory.getId());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
         }
     }
 
-    private void readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                BinaryData uploadFileBinary,
-                                UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+    private void processInvalidLineFile(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
+                                        String invalidLineFilename) {
+        try {
+            BinaryData invalidLineFileBinary = armDataManagementApi.getBlobData(invalidLineFilename);
+
+            InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(invalidLineFilename);
+            ObjectRecordStatusEnum status = readInvalidLineFile(externalObjectDirectory, invalidLineFileBinary, invalidLineFileFilenameProcessor);
+            if (ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                || ARM_RESPONSE_MANIFEST_FAILED.equals(status)) {
+                deleteResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
+            }
+        } catch (IllegalArgumentException e) {
+            // This occurs when the filename is not parsable
+            log.error("Unable to process invalid line file: {} {}", invalidLineFilename, e.getMessage());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
+        } catch (Exception e) {
+            log.error("Failure with invalid line file: {}", invalidLineFilename, e);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
+        }
+    }
+
+    private void processUploadFile(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
+                                   String uploadFilename) {
+        try {
+            UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
+
+            BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFilename);
+            ObjectRecordStatusEnum status = readUploadFile(externalObjectDirectory, uploadFileBinary, uploadFileFilenameProcessor);
+            if (STORED.equals(status)
+                || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
+                deleteResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
+            }
+        } catch (IllegalArgumentException e) {
+            // This occurs when the filename is not parsable
+            log.error("Unable to process filename: {}", e.getMessage());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
+        } catch (Exception e) {
+            log.error("Failed to get upload file {}", uploadFilename, e);
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+        }
+    }
+
+    void deleteResponseBlobs(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) {
+        List<Boolean> deletedResponseBlobStatuses;
+        deletedResponseBlobStatuses = responseBlobs.stream()
+            .map(armDataManagementApi::deleteBlobData)
+            .toList();
+        if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
+            externalObjectDirectory.setResponseCleaned(
+                armDataManagementApi.deleteBlobData(armInputUploadFilename));
+        }
+    }
+
+    private ObjectRecordStatusEnum readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                  BinaryData uploadFileBinary,
+                                                  UploadFileFilenameProcessor uploadFileFilenameProcessor) {
+        ObjectRecordStatusEnum objectRecordStatusEnum;
+
         if (nonNull(uploadFileBinary)) {
             Path jsonPath = null;
             try {
                 boolean appendUuidToWorkspace = true;
                 jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-                        uploadFileBinary,
-                        uploadFileFilenameProcessor.getUploadFileFilename(),
-                        armDataManagementConfiguration.getTempBlobWorkspace(),
-                        appendUuidToWorkspace
+                    uploadFileBinary,
+                    uploadFileFilenameProcessor.getUploadFileFilename(),
+                    armDataManagementConfiguration.getTempBlobWorkspace(),
+                    appendUuidToWorkspace
                 );
 
                 if (jsonPath.toFile().exists()) {
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
-                    processUploadFileObject(externalObjectDirectory, uploadFileFilenameProcessor, armResponseUploadFileRecord);
+                    objectRecordStatusEnum = processUploadFileObject(externalObjectDirectory, uploadFileFilenameProcessor, armResponseUploadFileRecord);
                 } else {
                     log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilename());
-                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+                    objectRecordStatusEnum = updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
                 }
             } catch (IOException e) {
                 log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
-                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+                objectRecordStatusEnum = updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
             } catch (Exception e) {
                 log.error("Unable to process arm response upload file {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                objectRecordStatusEnum = ObjectRecordStatusEnum.valueOfId(
+                    updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus).getId());
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
-            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+            objectRecordStatusEnum = updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
         }
+        return objectRecordStatusEnum;
     }
 
-    private void readInvalidLineFile(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                     BinaryData invalidLineFileBinary,
-                                     InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor) {
+    private ObjectRecordStatusEnum readInvalidLineFile(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                       BinaryData invalidLineFileBinary,
+                                                       InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor) {
+        ObjectRecordStatusEnum objectRecordStatusEnum;
+
         if (nonNull(invalidLineFileBinary)) {
             Path jsonPath = null;
             try {
@@ -255,30 +291,35 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
 
                 if (jsonPath.toFile().exists()) {
                     ArmResponseInvalidLineRecord armResponseInvalidLineRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
-                    processInvalidLineFileObject(externalObjectDirectory, invalidLineFileFilenameProcessor, armResponseInvalidLineRecord);
+                    objectRecordStatusEnum = processInvalidLineFileObject(externalObjectDirectory, invalidLineFileFilenameProcessor,
+                                                                          armResponseInvalidLineRecord);
                 } else {
-                    log.warn("Failed to write upload file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
-                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armResponseProcessingFailed);
+                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                    objectRecordStatusEnum = updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory,
+                                                                                                       armResponseProcessingFailedStatus);
                 }
             } catch (IOException e) {
-                log.error("Unable to write upload file to temporary workspace {} - {}",
+                log.error("Unable to write invalid line file to temporary workspace {} - {}",
                           invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
-                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armResponseProcessingFailed);
+                objectRecordStatusEnum = updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory,
+                                                                                                   armResponseProcessingFailedStatus);
             } catch (Exception e) {
-                log.error("Unable to process arm response upload file {} - {}",
+                log.error("Unable to process arm response invalid line file {} - {}",
                           invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                objectRecordStatusEnum = ObjectRecordStatusEnum.valueOfId(
+                    updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus).getId());
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
-            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armResponseProcessingFailed);
+            objectRecordStatusEnum = updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
+        return objectRecordStatusEnum;
     }
 
-    private void processUploadFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                         UploadFileFilenameProcessor uploadFileFilenameProcessor,
-                                         ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+    private ObjectRecordStatusEnum processUploadFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                           UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                                           ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         if (nonNull(armResponseUploadFileRecord)) {
             //If the filename contains 1
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
@@ -286,42 +327,44 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             } else {
                 //Read the upload file and log the error code and description with EOD
                 log.warn(
-                        "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
-                        externalObjectDirectory.getId(),
-                        armResponseUploadFileRecord.getExceptionDescription(),
-                        armResponseUploadFileRecord.getErrorStatus()
+                    "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
+                    externalObjectDirectory.getId(),
+                    armResponseUploadFileRecord.getExceptionDescription(),
+                    armResponseUploadFileRecord.getErrorStatus()
                 );
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                externalObjectDirectory = updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
             }
         } else {
             log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            externalObjectDirectory = updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
+        return ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
     }
 
-    private void processInvalidLineFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                         InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
-                                         ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
+    private ObjectRecordStatusEnum processInvalidLineFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
+                                                                ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
         if (nonNull(armResponseInvalidLineRecord)) {
             //If the filename contains 0
             if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
                 //Read the invalid lines file and log the error code and description with EOD
                 log.warn(
-                    "ARM invalid lines for external object id {}. ARM error description: {} ARM error status: {}",
+                    "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
                     externalObjectDirectory.getId(),
                     armResponseInvalidLineRecord.getExceptionDescription(),
                     armResponseInvalidLineRecord.getErrorStatus()
                 );
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseManifestFileFailed);
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseManifestFailedStatus);
             } else {
-                log.warn("Incorrect status [{}] for invalid lines file {}", invalidLineFileFilenameProcessor.getStatus(),
+                log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
                          invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
             }
         } else {
-            log.warn("Unable to read invalid lines file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+            externalObjectDirectory = updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
+        return ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
     }
 
     private void cleanupTemporaryJsonFile(Path jsonPath) {
@@ -343,32 +386,29 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             MediaEntity media = externalObjectDirectory.getMedia();
 
             if (nonNull(media.getChecksum())) {
-                String objectChecksum = media.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, media.getChecksum());
             } else {
                 log.warn("Unable to verify media checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
             }
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
             if (nonNull(transcriptionDocument.getChecksum())) {
-                String objectChecksum = transcriptionDocument.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocument.getChecksum());
             } else {
-                log.warn("Unable to verify transcription checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                log.warn("Unable to verify transcription document checksum for external object {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
             }
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
             if (nonNull(annotationDocument.getChecksum())) {
-                String objectChecksum = annotationDocument.getChecksum();
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocument.getChecksum());
             } else {
-                log.warn("Unable to verify annotation checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, checksumFailedStatus);
+                log.warn("Unable to verify annotation document checksum for external object {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
             }
         } else {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
     }
 
@@ -388,7 +428,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                      armResponseUploadFileRecord.getMd5(), objectChecksum
             );
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, checksumFailedStatus);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
         }
 
     }
@@ -401,65 +441,48 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                 uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
             } catch (JsonMappingException e) {
                 log.error("Unable to map the upload record file input field");
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
             } catch (JsonProcessingException e) {
                 log.error("Unable to parse the upload record file ");
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
             }
         } else {
             log.warn("Unable to get the upload record file input field");
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
         return uploadNewFileRecord;
     }
 
-    private void updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                           ObjectRecordStatusEntity objectRecordStatus) {
+    private ObjectRecordStatusEnum updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                                             ObjectRecordStatusEntity objectRecordStatus) {
         if (externalObjectDirectory.getVerificationAttempts() < armDataManagementConfiguration.getMaxRetryAttempts()) {
             int verificationAttempts = externalObjectDirectory.getVerificationAttempts() + 1;
             externalObjectDirectory.setVerificationAttempts(verificationAttempts);
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, objectRecordStatus);
+            return ObjectRecordStatusEnum.valueOfId(
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, objectRecordStatus)
+                    .getStatus().getId());
         } else {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            return ObjectRecordStatusEnum.valueOfId(
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus)
+                    .getStatus().getId());
         }
     }
 
-    private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity objectRecordStatus) {
+    private ExternalObjectDirectoryEntity updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                              ObjectRecordStatusEntity objectRecordStatus) {
         log.info(
-                "ARM Push updating ARM status from {} to {} for ID {}",
-                externalObjectDirectory.getStatus().getDescription(),
-                objectRecordStatus.getDescription(),
-                externalObjectDirectory.getId()
+            "ARM Push updating ARM status from {} to {} for ID {}",
+            externalObjectDirectory.getStatus().getDescription(),
+            objectRecordStatus.getDescription(),
+            externalObjectDirectory.getId()
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userAccount);
-        externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
-        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+        return externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
 
     private static String generateSuffix(String filenameKey) {
         return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
     }
-
-    private static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return new StringBuilder(externalObjectDirectory.getId().toString())
-                .append(ARM_FILENAME_SEPARATOR)
-                .append(getObjectTypeId(externalObjectDirectory))
-                .append(ARM_FILENAME_SEPARATOR)
-                .append(externalObjectDirectory.getTransferAttempts()).toString();
-    }
-
-    private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        String objectTypeId = "";
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            objectTypeId = externalObjectDirectory.getMedia().getId().toString();
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
-        }
-        return objectTypeId;
-    }
-
 
 }

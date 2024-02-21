@@ -9,6 +9,7 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
+  id 'idea'
   id 'io.spring.dependency-management' version '1.1.4'
   id 'org.springframework.boot' version '3.2.2'
   id 'org.owasp.dependencycheck' version '9.0.9'
@@ -29,7 +30,7 @@ jacoco {
 group = 'uk.gov.hmcts'
 version = '0.0.1'
 
-compileJava   {
+compileJava {
   sourceCompatibility = '17'
   targetCompatibility = '17'
 }
@@ -42,7 +43,7 @@ java {
 
 sourceSets {
   main {
-    java.srcDirs += 'build/generated/openapi/src/main/java'
+    java.srcDir "$buildDir/generated/openapi/src/main/java"
   }
 
   functionalTest {
@@ -73,7 +74,18 @@ sourceSets {
   }
 }
 
-configurations.all {
+idea {
+  module {
+    testSources.from(sourceSets.integrationTest.allSource.srcDirs)
+    testResources.from(sourceSets.integrationTest.resources.srcDirs)
+    testSources.from(sourceSets.functionalTest.allSource.srcDirs)
+    testResources.from(sourceSets.functionalTest.resources.srcDirs)
+    testSources.from(sourceSets.smokeTest.allSource.srcDirs)
+    testResources.from(sourceSets.smokeTest.resources.srcDirs)
+  }
+}
+
+configurations.configureEach {
   exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on' // bcprov-jdk18on-1.73.jar CVE-2023-33201
 }
 
@@ -90,7 +102,7 @@ configurations {
   openapispecifications
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
@@ -99,7 +111,7 @@ tasks.withType(JavaExec).configureEach {
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
   useJUnitPlatform()
 
   testLogging {
@@ -107,21 +119,21 @@ tasks.withType(Test) {
   }
 }
 
-task functional(type: Test) {
+tasks.register('functional', Test) {
   description = "Runs functional tests"
   group = "Verification"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
-task integration(type: Test) {
+tasks.register('integration', Test) {
   description = "Runs integration tests"
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
-task smoke(type: Test) {
+tasks.register('smoke', Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   classpath = sourceSets.smokeTest.runtimeClasspath
@@ -277,8 +289,8 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.22.1"
-  tomcatEmbedVersion = "10.1.18"
+  log4JVersion = "2.23.0"
+  tomcatEmbedVersion = "10.1.19"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -307,7 +319,7 @@ swaggerList.each {
   def apiName = it.getName().replace(".yaml", "");
   def taskName = "openApiGenerate" + apiName.capitalize()
   openApiGenerateTaskList << taskName
-  tasks.create(taskName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask, {
+  tasks.register(taskName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask, {
     generatorName = "spring"
     inputSpec = "$rootDir/src/main/resources/openapi/".toString() + "${apiName}.yaml"
     outputDir = "$buildDir/generated/openapi".toString()
@@ -337,7 +349,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '6.1.4'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.2.1'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.2.2'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.15.1'
   implementation 'org.apache.commons:commons-collections4:4.4'
@@ -374,7 +386,7 @@ dependencies {
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.7.3'
 
   //database
-  implementation 'org.postgresql:postgresql:42.7.1'
+  implementation 'org.postgresql:postgresql:42.7.2'
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.0.0-RELEASE'
 
@@ -390,7 +402,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.2.1'
 
   testImplementation 'com.h2database:h2:2.2.224'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.1'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
@@ -484,13 +496,13 @@ flyway {
 }
 
 // this can be run to clean the DB down allowing from a fresh migration from scratch
-task cleanPostgresDatabase(type: org.flywaydb.gradle.task.FlywayCleanTask) {
+tasks.register('cleanPostgresDatabase', org.flywaydb.gradle.task.FlywayCleanTask) {
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"
   }
 }
 
-task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
+tasks.register('migratePostgresDatabase', org.flywaydb.gradle.task.FlywayMigrateTask) {
   baselineOnMigrate = true
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"
@@ -498,7 +510,7 @@ task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
 }
 
 // Add a new jar that will be published to maven with the classifier -openapi
-task openapiJar(type: Jar) {
+tasks.register('openapiJar', Jar) {
   archiveClassifier = 'openapi'
   from layout.buildDirectory.dir("processedSpecs").get().asFile
 }
@@ -513,7 +525,7 @@ publishing {
     }
 }
 
-task updateOpenSpecificationsWithVersion() {
+tasks.register('updateOpenSpecificationsWithVersion') {
 
   doLast {
     def fileDir = "$projectDir/src/main/resources/openapi/"

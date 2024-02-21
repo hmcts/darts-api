@@ -265,9 +265,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
                            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
-
-                logApi.atsProcessingUpdate(mediaRequestEntity);
             }
+
+            logApi.atsProcessingUpdate(mediaRequestEntity);
 
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }

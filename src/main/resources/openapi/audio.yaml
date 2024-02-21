@@ -38,6 +38,8 @@ paths:
                     - id: 1
                       media_start_timestamp: '2023-07-31T14:32:24.620Z'
                       media_end_timestamp: '2023-07-31T14:32:24.620Z'
+                      is_archived: true
+                      is_available: true
                 media-not-found:
                   summary: No media metadata exists for the given hearing id
                   value:
@@ -181,6 +183,7 @@ components:
         id:
           type: integer
           example: 1
+          description: med_id
         media_start_timestamp:
           type: string
           format: date-time
@@ -188,6 +191,8 @@ components:
           type: string
           format: date-time
         is_archived:
+          type: boolean
+        is_available:
           type: boolean
     AddAudioMetadataRequest:
       type: object

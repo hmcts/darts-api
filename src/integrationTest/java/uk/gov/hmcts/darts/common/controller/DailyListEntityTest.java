@@ -44,6 +44,8 @@ class DailyListEntityTest extends IntegrationBase {
 
     @Test
     void dailyListAddDailyListEndpoint() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
+
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         String jsonDocument = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
@@ -58,6 +60,8 @@ class DailyListEntityTest extends IntegrationBase {
 
     @Test
     void dailyListAddEmptyDailyListEndpoint() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
+
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         String jsonDocument = "";
@@ -72,6 +76,7 @@ class DailyListEntityTest extends IntegrationBase {
 
     @Test
     void dailyListAddXmlDailyListEndpoint() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
@@ -82,6 +87,21 @@ class DailyListEntityTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
         assertEquals(400, response.getResponse().getStatus());
+    }
+
+    @Test
+    void dailyListAddDailyListEndpointNoAuth() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(false);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
+
+        String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
+        MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam(SOURCE_SYSTEM, "CPP")
+            .header("xml_document", xmlString);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
+
+        assertEquals(403, response.getResponse().getStatus());
     }
 
     private String getContentsFromFile(String filelocation) throws IOException {

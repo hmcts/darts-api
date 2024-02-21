@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -96,16 +97,16 @@ class RetentionPostServiceImplTest {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
 
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
-                Optional.of(retentionPolicyTypeManual));
+            List.of(retentionPolicyTypeManual));
 
         RetentionPolicyTypeEntity retentionPolicyTypePermanent = new RetentionPolicyTypeEntity();
         retentionPolicyTypePermanent.setId(2);
         retentionPolicyTypePermanent.setFixedPolicyKey("PERM");
         when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
-                any(OffsetDateTime.class)
+            eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
+            any(OffsetDateTime.class)
         )).thenReturn(
-                Optional.of(retentionPolicyTypePermanent));
+            List.of(retentionPolicyTypePermanent));
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
@@ -129,8 +130,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(null, postRetentionRequest)
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(null, postRetentionRequest)
         );
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
@@ -151,8 +152,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(false, postRetentionRequest)
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
         );
 
         assertEquals("caseId '101' must be closed before the retention period can be amended.", exception.getDetail());
@@ -171,8 +172,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(false, postRetentionRequest)
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
         );
 
         assertEquals("caseId '101' must have a retention policy applied before being changed.", exception.getDetail());
@@ -192,8 +193,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(false, postRetentionRequest)
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
         );
 
         assertEquals("caseId '101' must have a retention date after the last completed automated retention date '2025-10-01'.", exception.getDetail());
@@ -213,13 +214,46 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setComments("TheComments");
 
         var exception = assertThrows(
-                DartsApiException.class,
-                () -> retentionPostService.postRetention(false, postRetentionRequest)
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
         );
 
         assertEquals("You do not have permission to reduce the retention period.", exception.getDetail());
         assertEquals("RETENTION_100", exception.getError().getType().toString());
         assertEquals(403, exception.getError().getHttpStatus().value());
+    }
+
+    @Test
+    void fail_multiplePolicies() {
+        setupStubs();
+
+        RetentionPolicyTypeEntity retentionPolicyTypeManual = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeManual.setId(1);
+        retentionPolicyTypeManual.setFixedPolicyKey("MANUAL");
+
+        RetentionPolicyTypeEntity retentionPolicyTypeManual2 = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeManual.setId(2);
+        retentionPolicyTypeManual.setFixedPolicyKey("MANUAL");
+
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
+            List.of(retentionPolicyTypeManual, retentionPolicyTypeManual2));
+
+
+        when(authorisationApi.userHasOneOfRoles(anyList())).thenReturn(true);
+
+        PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
+        postRetentionRequest.setCaseId(1);
+        postRetentionRequest.setRetentionDate(LocalDate.of(2026, 1, 1));
+        postRetentionRequest.setComments("TheComments");
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> retentionPostService.postRetention(false, postRetentionRequest)
+        );
+
+        assertEquals("More than 1 retention policy found for fixedPolicyKey 'MANUAL'", exception.getDetail());
+        assertEquals("RETENTION_106", exception.getError().getType().toString());
+        assertEquals(500, exception.getError().getHttpStatus().value());
     }
 
     @Test

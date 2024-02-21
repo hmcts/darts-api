@@ -202,13 +202,16 @@ public class StopAndCloseHandler extends EventHandlerBase {
     }
 
     private RetentionPolicyTypeEntity getRetentionPolicy(String fixedPolicyKey) {
-        Optional<RetentionPolicyTypeEntity> retentionPolicyOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+        List<RetentionPolicyTypeEntity> retentionPolicyList = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
             fixedPolicyKey, currentTimeHelper.currentOffsetDateTime());
-        if (retentionPolicyOpt.isEmpty()) {
+        if (retentionPolicyList.isEmpty()) {
             throw new DartsApiException(EVENT_DATA_NOT_FOUND,
                                         MessageFormat.format("Could not find a retention policy for fixedPolicyKey ''{0}''", fixedPolicyKey));
+        } else if (retentionPolicyList.size() > 1) {
+            throw new DartsApiException(EVENT_DATA_NOT_FOUND,
+                                        MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", fixedPolicyKey));
         }
-        return retentionPolicyOpt.get();
+        return retentionPolicyList.get(0);
     }
 
 }

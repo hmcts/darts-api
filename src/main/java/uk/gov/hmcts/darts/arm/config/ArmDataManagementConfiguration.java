@@ -31,6 +31,7 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private String transcriptionRecordPropertiesFile;
     private String annotationRecordPropertiesFile;
     private String caseRecordPropertiesFile;
+    private Integer responseCleanupBufferDays;
 
     @Getter
     @Setter

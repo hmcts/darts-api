@@ -10,6 +10,4 @@ public interface TranscriptionsApi {
 
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription);
 
-    void closeTranscriptions();
-
 }

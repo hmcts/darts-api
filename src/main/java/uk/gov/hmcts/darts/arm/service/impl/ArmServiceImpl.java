@@ -74,6 +74,7 @@ public class ArmServiceImpl implements ArmService {
      * @param containerName name of container
      * @param filename      name of file to look for
      * @return list of the blobs in the response dropzone containing the specified filename with full path
+     *     e.g. returns: dropzone/DARTS/response/123_456_1_2d50a0bbde794e0ea9f4918aafeaccde_1_iu.rsp
      */
     public List<String> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -106,23 +107,18 @@ public class ArmServiceImpl implements ArmService {
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
     }
 
-    public BinaryData getBlobData(String containerName, String blobName) {
+    public BinaryData getBlobData(String containerName, String blobPathAndName) {
 
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobName);
+        BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
         if (Boolean.FALSE.equals(blobClient.exists())) {
-            log.error("Blob {} does not exist in {} container", blobName, containerName);
+            log.error("Blob {} does not exist in {} container", blobPathAndName, containerName);
             return null;
         }
         return blobClient.downloadContent();
     }
 
     @Override
-    public boolean deleteResponseBlob(String containerName, String filename) {
-        String blobname = armDataManagementConfiguration.getFolders().getSubmission() + filename;
-        return deleteBlobData(containerName, blobname);
-    }
-
     public boolean deleteBlobData(String containerName, String blobPathAndName) {
         try {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -141,7 +137,7 @@ public class ArmServiceImpl implements ArmService {
             }
 
         } catch (Exception e) {
-            log.error("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e.getMessage(), e);
+            log.error("Could not delete from container {} blobPathAndName {} - {}", containerName, blobPathAndName, e);
             return false;
         }
         return true;

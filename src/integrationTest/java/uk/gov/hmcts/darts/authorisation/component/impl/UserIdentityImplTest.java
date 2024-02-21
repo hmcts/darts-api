@@ -209,4 +209,22 @@ class UserIdentityImplTest extends IntegrationBase {
         assertTrue(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
     }
+
+
+    @Test
+    void whenUserHasCourthousePermissions_thenBringBackPermissions() {
+        String guid = UUID.randomUUID().toString();
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("preferred_username", "integrationtest.user@EXAMPLE.COM")
+            .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, null);
+        int numCourthouses = dartsDatabase.getCourthouseRepository().findAll().size();
+
+        assertEquals(numCourthouses, userIdentity.getListOfCourthouseIdsUserHasAccessTo().size());
+
+    }
 }
