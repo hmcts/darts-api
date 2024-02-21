@@ -276,7 +276,7 @@ public class AudioServiceImpl implements AudioService {
             log.error("Error when creating preview SSE", e);
             emitter.completeWithError(dartsApiException);
             throw dartsApiException;
-        } catch (DartsApiException e) {
+        } catch (Exception e) {
             emitter.completeWithError(e);
             throw e;
         }
