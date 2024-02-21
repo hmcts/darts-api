@@ -9,17 +9,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class DataManagementAzureClientFactoryImpl implements DataManagementAzureClientFactory {
 
-    private final Map<String, BlobContainerClient> blobContainerClientMap =  new Hashtable<>();
-    private final Map<String, BlobServiceClient> blobServiceClientMap =  new Hashtable<>();
+    private final Map<String, BlobContainerClient> blobContainerClientMap =  new ConcurrentHashMap<>();
+    private final Map<String, BlobServiceClient> blobServiceClientMap =  new ConcurrentHashMap<>();
 
     @Override
     public BlobContainerClient getBlobContainerClient(String containerName, BlobServiceClient serviceClient) {
