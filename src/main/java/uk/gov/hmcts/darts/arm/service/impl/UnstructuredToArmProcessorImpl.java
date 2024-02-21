@@ -251,7 +251,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                                              ObjectRecordStatusEntity objectRecordStatus) {
         log.debug(
-            "Updating ARM status from {} to {} for ID ",
+            "Updating ARM status from {} to {} for ID {}",
             armExternalObjectDirectory.getStatus().getDescription(),
             objectRecordStatus.getDescription(),
             armExternalObjectDirectory.getId()
@@ -289,6 +289,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armExternalObjectDirectoryEntity.setTranscriptionDocumentEntity(externalObjectDirectory.getTranscriptionDocumentEntity());
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
             armExternalObjectDirectoryEntity.setAnnotationDocumentEntity(externalObjectDirectory.getAnnotationDocumentEntity());
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
+            armExternalObjectDirectoryEntity.setCaseDocument(externalObjectDirectory.getCaseDocument());
         }
         OffsetDateTime now = OffsetDateTime.now();
         armExternalObjectDirectoryEntity.setCreatedDateTime(now);
@@ -313,6 +315,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
         } else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
             documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
+        } else if (nonNull(externalObjectDirectoryEntity.getCaseDocument())) {
+            documentId = externalObjectDirectoryEntity.getCaseDocument().getId();
         }
 
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);

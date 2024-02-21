@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -407,6 +408,15 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                 log.warn("Unable to verify annotation document checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
             }
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
+            CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
+            if (nonNull(caseDocument.getChecksum())) {
+                String objectChecksum = caseDocument.getChecksum();
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+            } else {
+                log.warn("Unable to verify case checksum for external object {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
+            }
         } else {
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
@@ -484,5 +494,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private static String generateSuffix(String filenameKey) {
         return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
     }
+
 
 }

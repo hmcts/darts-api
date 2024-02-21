@@ -74,6 +74,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static final String COMMENTS_DELIMITER = "|";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
     private final CurrentTimeHelper currentTimeHelper;
     private Properties transcriptionRecordProperties;
 
@@ -89,17 +90,14 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         try {
             loadTranscriptionProperties();
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
-            TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(
-                    externalObjectDirectory,
-                    externalObjectDirectory.getId()
-            );
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId());
+            TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(transcriptionDocument, externalObjectDirectory.getId(), archiveRecordFile);
             return createTranscriptionArchiveRecord(transcriptionCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error(
-                    "Unable to read transcription property file {} - {}",
-                    armDataManagementConfiguration.getTranscriptionRecordPropertiesFile(),
-                    e.getMessage());
+                "Unable to read transcription property file {} - {}",
+                armDataManagementConfiguration.getTranscriptionRecordPropertiesFile(),
+                e.getMessage());
         }
         return null;
     }
@@ -107,40 +105,39 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private void loadTranscriptionProperties() throws IOException {
         if (isNull(transcriptionRecordProperties) || transcriptionRecordProperties.isEmpty()) {
             transcriptionRecordProperties =
-                    PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
+                PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
         }
     }
 
     private TranscriptionArchiveRecord createTranscriptionArchiveRecord(TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation,
                                                                         UploadNewFileRecord uploadNewFileRecord) {
         return TranscriptionArchiveRecord.builder()
-                .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
-                .uploadNewFileRecord(uploadNewFileRecord)
-                .build();
+            .transcriptionCreateArchiveRecordOperation(transcriptionCreateArchiveRecordOperation)
+            .uploadNewFileRecord(uploadNewFileRecord)
+            .build();
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId) {
+    private UploadNewFileRecord createUploadNewFileRecord(TranscriptionDocumentEntity transcriptionDocument, Integer relationId, File archiveRecordFile) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
         uploadNewFileRecord.setRelationId(relationId.toString());
-        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument));
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(transcriptionDocument, archiveRecordFile));
         return uploadNewFileRecord;
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(TranscriptionDocumentEntity transcriptionDocument) {
+    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(TranscriptionDocumentEntity transcriptionDocument, File archiveRecordFile) {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
-        uploadNewFileRecordMetadata.setDzFilename(transcriptionDocument.getFileName());
+        uploadNewFileRecordMetadata.setDzFilename(archiveRecordFile.getName());
         uploadNewFileRecordMetadata.setFileTag(transcriptionDocument.getFileType());
         return uploadNewFileRecordMetadata;
     }
 
-    private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                                   Integer relationId) {
+    private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return TranscriptionCreateArchiveRecordOperation.builder()
-                .relationId(relationId.toString())
-                .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-                .build();
+            .relationId(String.valueOf(externalObjectDirectory.getId()))
+            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+            .build();
     }
 
     @SuppressWarnings("java:S3776")
@@ -148,13 +145,13 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
 
         RecordMetadata metadata = RecordMetadata.builder()
-                .publisher(armDataManagementConfiguration.getPublisher())
-                .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
-                .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
-                .region(armDataManagementConfiguration.getRegion())
-                .title(transcriptionDocument.getFileName())
-                .clientId(String.valueOf(externalObjectDirectory.getId()))
-                .build();
+            .publisher(armDataManagementConfiguration.getPublisher())
+            .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
+            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .region(armDataManagementConfiguration.getRegion())
+            .title(transcriptionDocument.getFileName())
+            .clientId(String.valueOf(externalObjectDirectory.getId()))
+            .build();
 
         String courthouse = getCourthouse(transcriptionDocument);
         String courtroom = getCourtroom(transcriptionDocument);
@@ -280,7 +277,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private String getTranscriptionComments(TranscriptionDocumentEntity transcriptionDocument) {
         String comments = null;
         if (nonNull(transcriptionDocument.getTranscription())
-                && CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
+            && CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getTranscriptionCommentEntities())) {
             comments = commentListToString(transcriptionDocument.getTranscription().getTranscriptionCommentEntities());
         }
         return comments;
@@ -306,7 +303,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         String transcriptRquest = null;
         if (nonNull(transcriptionDocument.getTranscription())) {
             transcriptRquest = Boolean.TRUE.equals(transcriptionDocument.getTranscription().getIsManualTranscription())
-                    ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
+                ? TRANSCRIPTION_REQUEST_MANUAL : TRANSCRIPTION_REQUEST_AUTOMATIC;
         }
         return transcriptRquest;
     }
@@ -330,8 +327,8 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static String getCourthouse(TranscriptionDocumentEntity transcriptionDocument) {
         String courthouse = null;
         if (nonNull(transcriptionDocument.getTranscription())
-                && nonNull(transcriptionDocument.getTranscription().getCourtroom())
-                && nonNull(transcriptionDocument.getTranscription().getCourtroom().getCourthouse())) {
+            && nonNull(transcriptionDocument.getTranscription().getCourtroom())
+            && nonNull(transcriptionDocument.getTranscription().getCourtroom().getCourthouse())) {
             courthouse = transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getCourthouseName();
         }
         return courthouse;
@@ -339,8 +336,8 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String commentListToString(List<TranscriptionCommentEntity> commentEntities) {
         List<String> comments = commentEntities.stream()
-                .map(TranscriptionCommentEntity::getComment)
-                .toList();
+            .map(TranscriptionCommentEntity::getComment)
+            .toList();
         return String.join(COMMENTS_DELIMITER, comments);
     }
 

@@ -85,7 +85,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             loadMediaProperties();
             MediaEntity media = externalObjectDirectory.getMedia();
             MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory);
-            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId());
+            UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId(), archiveRecordFile);
             return createMediaArchiveRecord(mediaCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
             log.error("Unable to read media property file {} - {}", armDataManagementConfiguration.getMediaRecordPropertiesFile(), e.getMessage());
@@ -102,16 +102,16 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private MediaArchiveRecord createMediaArchiveRecord(MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation,
                                                         UploadNewFileRecord uploadNewFileRecord) {
         return MediaArchiveRecord.builder()
-                .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
-                .uploadNewFileRecord(uploadNewFileRecord)
-                .build();
+            .mediaCreateArchiveRecord(mediaCreateArchiveRecordOperation)
+            .uploadNewFileRecord(uploadNewFileRecord)
+            .build();
     }
 
     private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return MediaCreateArchiveRecordOperation.builder()
-                .relationId(String.valueOf(externalObjectDirectory.getId()))
-                .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
-                .build();
+            .relationId(String.valueOf(externalObjectDirectory.getId()))
+            .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
+            .build();
     }
 
     @SuppressWarnings("java:S3776")
@@ -119,13 +119,13 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         MediaEntity media = externalObjectDirectory.getMedia();
 
         RecordMetadata metadata = RecordMetadata.builder()
-                .publisher(armDataManagementConfiguration.getPublisher())
-                .recordClass(armDataManagementConfiguration.getMediaRecordClass())
-                .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
-                .region(armDataManagementConfiguration.getRegion())
-                .title(media.getMediaFile())
-                .clientId(String.valueOf(externalObjectDirectory.getId()))
-                .build();
+            .publisher(armDataManagementConfiguration.getPublisher())
+            .recordClass(armDataManagementConfiguration.getMediaRecordClass())
+            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .region(armDataManagementConfiguration.getRegion())
+            .title(media.getMediaFile())
+            .clientId(String.valueOf(externalObjectDirectory.getId()))
+            .build();
 
         String courthouse = getCourthouse(media);
         String courtroom = getCourtroom(media);
@@ -233,10 +233,10 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         if (nonNull(media.getHearingList())) {
             List<HearingEntity> hearings = media.getHearingList();
             List<String> caseNumbers = hearings
-                    .stream()
-                    .map(HearingEntity::getCourtCase)
-                    .map(CourtCaseEntity::getCaseNumber)
-                    .toList();
+                .stream()
+                .map(HearingEntity::getCourtCase)
+                .map(CourtCaseEntity::getCaseNumber)
+                .toList();
             cases = caseListToString(caseNumbers);
         }
         return cases;
@@ -263,18 +263,18 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         return String.join(CASE_LIST_DELIMITER, caseNumberList);
     }
 
-    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
+    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId, File archiveRecordFile) {
         UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
         uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
-        uploadNewFileRecord.setRelationId(relationId.toString());
-        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(media));
+        uploadNewFileRecord.setRelationId(String.valueOf(relationId));
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(media, archiveRecordFile));
         return uploadNewFileRecord;
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media) {
+    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media, File archiveRecordFile) {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
-        uploadNewFileRecordMetadata.setDzFilename(media.getMediaFile());
+        uploadNewFileRecordMetadata.setDzFilename(archiveRecordFile.getName());
         uploadNewFileRecordMetadata.setFileTag(media.getMediaFormat());
         return uploadNewFileRecordMetadata;
     }
