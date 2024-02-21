@@ -441,7 +441,7 @@ class AudioServiceImplTest {
         audioMetadata3.setId(3);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
 
-        when(externalObjectDirectoryRepository.findEodIdsByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(1, 3));
+        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(1, 3));
 
         audioService.setIsAvailable(audioMetadataList);
 
