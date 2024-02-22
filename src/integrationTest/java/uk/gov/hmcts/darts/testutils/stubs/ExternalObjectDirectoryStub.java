@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +27,7 @@ public class ExternalObjectDirectoryStub {
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository eodRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
                                                           ObjectRecordStatusEnum objectRecordStatusEnum,
@@ -95,6 +98,23 @@ public class ExternalObjectDirectoryStub {
         externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
 
         return externalObjectDirectory;
+    }
+
+    @Transactional
+    public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(Integer transcriptionDocumentId,
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       UUID externalLocation) {
+        TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
+        ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
+            objectRecordStatusEntity,
+            externalLocationTypeEntity,
+            externalLocation
+        );
+
+        externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocument);
+
+        return eodRepository.saveAndFlush(externalObjectDirectory);
     }
 
     public List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media,

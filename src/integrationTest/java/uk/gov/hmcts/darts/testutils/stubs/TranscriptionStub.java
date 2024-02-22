@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,11 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -30,6 +35,8 @@ import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
+import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
@@ -47,9 +54,10 @@ public class TranscriptionStub {
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
-
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -234,6 +242,27 @@ public class TranscriptionStub {
         return transcriptionWorkflowEntity;
     }
 
+    public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
+                                                               ObjectRecordStatusEnum status,
+                                                               ExternalLocationTypeEnum location) {
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
+        final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
+        final UUID externalLocation = UUID.randomUUID();
+
+        return updateTranscriptionWithDocument(transcriptionEntity,
+                                               fileName,
+                                               fileType,
+                                               fileSize,
+                                               transcriptionEntity.getCreatedBy(),
+                                               objectRecordStatusEntity,
+                                               externalLocationTypeEntity,
+                                               externalLocation,
+                                               getTranscriptionDocumentChecksum());
+    }
+
     @Transactional
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                String fileName,
@@ -247,8 +276,7 @@ public class TranscriptionStub {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
                                                                                                     fileType, fileSize, testUser,
-                                                                                                    checksum
-        );
+                                                                                                    checksum);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -266,6 +294,14 @@ public class TranscriptionStub {
 
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    public static BinaryData getBinaryTranscriptionDocumentData() {
+        return BinaryData.fromString("test binary transcription document data");
+    }
+
+    public static String getTranscriptionDocumentChecksum() {
+        return new String(encodeBase64(md5(getBinaryTranscriptionDocumentData().toBytes())));
     }
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
@@ -331,5 +367,13 @@ public class TranscriptionStub {
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(requestedTranscriptionWorkflowEntity, transcriptionWorkflowEntity));
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    private ExternalLocationTypeEntity getLocationEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {
+        return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
+    }
+
+    private ObjectRecordStatusEntity getStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
+        return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 }

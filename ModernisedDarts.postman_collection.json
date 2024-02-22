@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "bffe439a-7cb3-4798-bef5-4ffbb4670f61",
+		"_postman_id": "2317cf9a-af64-4bc3-9d6f-82021045d1f9",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "26606862"
+		"_exporter_id": "32425403"
 	},
 	"item": [
 		{
@@ -2333,6 +2333,48 @@
 								{
 									"key": "annotation_id",
 									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/annotations/:annotation_id/downloads/annotation_document_id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/annotations/:annotation_id/downloads/:annotation_document_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"annotations",
+								":annotation_id",
+								"downloads",
+								":annotation_document_id"
+							],
+							"variable": [
+								{
+									"key": "annotation_id",
+									"value": "1"
+								},
+								{
+									"key": "annotation_document_id",
+									"value": "1"
 								}
 							]
 						}

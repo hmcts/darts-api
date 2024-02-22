@@ -95,6 +95,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                             ExternalLocationTypeEntity type,
                                                                                             Integer transferAttempts);
 
+    List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
     @Query(
         """
@@ -127,6 +128,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
+
     @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
@@ -144,6 +147,19 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2,
                                                                 OffsetDateTime lastModifiedBefore);
+
+    @Query(
+        """
+
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+                  JOIN eod.annotationDocumentEntity ade
+                  JOIN ade.annotation ann
+                  JOIN ann.annotationDocuments annD
+                  WHERE ann.id = :annotationId
+                  AND annD.id = :annotationDocumentId
+                  """
+    )
+    Optional<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
 
     @Query(
         """
@@ -169,8 +185,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             eod.lastModifiedBy = :userAccount,
             eod.lastModifiedDateTime = :timestamp
             where eod.id in :idsToDelete
-            """)
+            """
+    )
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
 
-
-}
+    }
