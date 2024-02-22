@@ -45,6 +45,7 @@ import static org.springframework.util.unit.DataSize.ofMegabytes;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -275,12 +276,18 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
             .getExternalObjectDirectoryEntities();
-        assertEquals(1, externalObjectDirectoryEntities.size());
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
-        assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
-        assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
-        assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
-        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
+        assertEquals(2, externalObjectDirectoryEntities.size());
+        ExternalObjectDirectoryEntity externalObjectDirectoryInboundEntity = externalObjectDirectoryEntities.get(0);
+        assertEquals(STORED.getId(), externalObjectDirectoryInboundEntity.getStatus().getId());
+        assertEquals(INBOUND.getId(), externalObjectDirectoryInboundEntity.getExternalLocationType().getId());
+        assertNotNull(externalObjectDirectoryInboundEntity.getExternalLocation());
+        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryInboundEntity.getChecksum());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryUnstructuredEntity = externalObjectDirectoryEntities.get(1);
+        assertEquals(STORED.getId(), externalObjectDirectoryUnstructuredEntity.getStatus().getId());
+        assertEquals(UNSTRUCTURED.getId(), externalObjectDirectoryUnstructuredEntity.getExternalLocationType().getId());
+        assertNotNull(externalObjectDirectoryUnstructuredEntity.getExternalLocation());
+        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryUnstructuredEntity.getChecksum());
 
         List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
@@ -340,12 +347,18 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
             .getExternalObjectDirectoryEntities();
-        assertEquals(1, externalObjectDirectoryEntities.size());
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
-        assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
-        assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
-        assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
-        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
+        assertEquals(2, externalObjectDirectoryEntities.size());
+        ExternalObjectDirectoryEntity externalObjectDirectoryInboundEntity = externalObjectDirectoryEntities.get(0);
+        assertEquals(STORED.getId(), externalObjectDirectoryInboundEntity.getStatus().getId());
+        assertEquals(INBOUND.getId(), externalObjectDirectoryInboundEntity.getExternalLocationType().getId());
+        assertNotNull(externalObjectDirectoryInboundEntity.getExternalLocation());
+        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryInboundEntity.getChecksum());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryUnstructuredEntity = externalObjectDirectoryEntities.get(1);
+        assertEquals(STORED.getId(), externalObjectDirectoryUnstructuredEntity.getStatus().getId());
+        assertEquals(UNSTRUCTURED.getId(), externalObjectDirectoryUnstructuredEntity.getExternalLocationType().getId());
+        assertNotNull(externalObjectDirectoryUnstructuredEntity.getExternalLocation());
+        assertEquals(externalObjectDirectoryUnstructuredEntity.getChecksum(), externalObjectDirectoryUnstructuredEntity.getChecksum());
 
         List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
