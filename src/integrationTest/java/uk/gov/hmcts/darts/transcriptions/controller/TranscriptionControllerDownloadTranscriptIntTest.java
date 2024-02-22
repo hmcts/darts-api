@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -14,22 +15,29 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.datamanagement.helper.StorageBlobFileDownloadHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -48,7 +56,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";
-    private static final String EXTERNAL_LOCATION_HEADER = "external_location";
     private static final String TRANSCRIPTION_DOCUMENT_ID_HEADER = "transcription_document_id";
 
     @Autowired
@@ -63,6 +70,8 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
     @MockBean
     private AuditApi mockAuditApi;
+    @MockBean
+    private StorageBlobFileDownloadHelper mockStorageBlobFileDownloadHelper;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -189,6 +198,12 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             checksum
         );
 
+        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        when(mockStorageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
+        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+        when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+        when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
                 "accept",
@@ -206,15 +221,16 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 fileType
             ))
             .andExpect(header().string(
-                EXTERNAL_LOCATION_HEADER,
-                externalLocation.toString()
-            ))
-            .andExpect(header().string(
                 TRANSCRIPTION_DOCUMENT_ID_HEADER,
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockStorageBlobFileDownloadHelper).getDownloadResponse(anyList());
+        verify(fileBasedDownloadResponseMetaData).getContainerTypeUsedToDownload();
+        verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
+        verify(fileBasedDownloadResponseMetaData).getInputStream();
+        verifyNoMoreInteractions(mockStorageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
     }
 
     @Test
@@ -241,6 +257,13 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             checksum
         );
 
+
+        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        when(mockStorageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
+        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+        when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+        when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
                 "accept",
@@ -258,14 +281,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 fileType
             ))
             .andExpect(header().string(
-                EXTERNAL_LOCATION_HEADER,
-                externalLocation.toString()
-            ))
-            .andExpect(header().string(
                 TRANSCRIPTION_DOCUMENT_ID_HEADER,
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockStorageBlobFileDownloadHelper).getDownloadResponse(anyList());
+        verify(fileBasedDownloadResponseMetaData).getContainerTypeUsedToDownload();
+        verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
+        verify(fileBasedDownloadResponseMetaData).getInputStream();
+        verifyNoMoreInteractions(mockStorageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
     }
 }
