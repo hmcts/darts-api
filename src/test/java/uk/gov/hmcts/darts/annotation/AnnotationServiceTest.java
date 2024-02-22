@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotation.service.impl.AnnotationServiceImpl;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -57,31 +59,40 @@ class AnnotationServiceTest {
     @Mock
     private Validator<Annotation> annotationUploadValidator;
     @Mock
+    private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
+    @Mock
     private Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
     @Mock
     private Validator<Integer> annotationExistsValidator;
     @Mock
     private HearingEntity hearing;
+    @Mock
+    private ExternalObjectDirectoryRepository eodRepository;
+    @Mock
+    private AuthorisationApi authorisationApi;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
     private final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = someExternalObjectDirectoryEntity();
     private AnnotationService annotationService;
 
-
     @BeforeEach
     void setUp() {
         annotationService = new AnnotationServiceImpl(
-            annotationMapper,
-            annotationDocumentBuilder,
-            externalObjectDirectoryBuilder,
-            dataManagementApi,
-            fileContentChecksum,
-            annotationPersistenceService,
-            annotationUploadValidator,
-            annotationExistsValidator,
-            userAuthorisedToDeleteAnnotationValidator
+        annotationMapper,
+        annotationDocumentBuilder,
+        externalObjectDirectoryBuilder,
+        dataManagementApi,
+        fileContentChecksum,
+        annotationPersistenceService,
+        eodRepository,
+        annotationUploadValidator,
+        userAuthorisedToDeleteAnnotationValidator,
+        userAuthorisedToDownloadAnnotationValidator,
+        annotationExistsValidator
         );
+
+        when(hearing.getId()).thenReturn(1);
 
         when(hearing.getId()).thenReturn(1);
         doNothing().when(annotationUploadValidator).validate(any());

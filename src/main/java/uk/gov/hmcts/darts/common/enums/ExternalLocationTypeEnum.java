@@ -10,7 +10,7 @@ public enum ExternalLocationTypeEnum {
     INBOUND(1),
     UNSTRUCTURED(2),
     ARM(3),
-    TEMPSTORE(4),
+    DETS(4),
     VODAFONE(5);
 
     private final Integer id;

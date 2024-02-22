@@ -92,12 +92,12 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         ExternalObjectDirectoryEntity externalObjectDirectory, DatastoreContainerType type,
         boolean fetchFromDets) {
         return type != DatastoreContainerType.DETS || fetchFromDets
-            && externalObjectDirectory.isForLocationType(ExternalLocationTypeEnum.TEMPSTORE);
+                && externalObjectDirectory.isForLocationType(ExternalLocationTypeEnum.DETS);
     }
 
     private ExternalLocationTypeEnum getForDatastoreContainerType(DatastoreContainerType type) {
         if (type == DatastoreContainerType.DETS) {
-            return ExternalLocationTypeEnum.TEMPSTORE;
+            return ExternalLocationTypeEnum.DETS;
         } else if (type == DatastoreContainerType.ARM) {
             return ExternalLocationTypeEnum.ARM;
         } else if (type == DatastoreContainerType.UNSTRUCTURED) {

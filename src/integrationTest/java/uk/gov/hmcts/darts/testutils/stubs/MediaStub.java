@@ -19,7 +19,6 @@ public class MediaStub {
     private static final OffsetDateTime MEDIA_1_END_TIME = MEDIA_1_START_TIME.plusHours(1);
     private static final OffsetDateTime MEDIA_2_START_TIME = OffsetDateTime.parse("2023-01-01T16:00:00Z");
     private static final OffsetDateTime MEDIA_2_END_TIME = MEDIA_2_START_TIME.plusHours(1);
-    private static final String TEST_BINARY_DATA = "test binary data";
 
     private final MediaRepository mediaRepository;
     private final CourtroomStub courtroomStub;

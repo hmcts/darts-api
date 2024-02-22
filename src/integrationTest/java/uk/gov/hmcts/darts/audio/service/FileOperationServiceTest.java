@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -32,14 +34,14 @@ class FileOperationServiceTest extends IntegrationBase {
     @TempDir
     private File tempDirectory;
     private Path filePath;
-    private BinaryData mediaFile;
+    private InputStream mediaFile;
     private String fileName;
 
     @BeforeEach
     void setUp() {
 
         String data = "this is a binary data file";
-        mediaFile = BinaryData.fromString(data);
+        mediaFile = new ByteArrayInputStream(data.getBytes());
         fileName = "caseAudioFile.pdf";
     }
 
@@ -60,8 +62,10 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-3: Check if the saved file is equal to the original BinaryData file")
     void saveBlobDataToTempWorkspaceTestThree() throws IOException {
+        mediaFile.mark(0);
         filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
-        assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
+        mediaFile.reset();
+        assertArrayEquals(mediaFile.readAllBytes(), Files.readAllBytes(filePath));
     }
 
     @Test
@@ -87,7 +91,7 @@ class FileOperationServiceTest extends IntegrationBase {
         var tempFilename = UUID.randomUUID().toString();
 
         filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-            mediaFile,
+            BinaryData.fromStream(mediaFile),
             tempFilename,
             tempDirectory.getAbsolutePath(),
             true

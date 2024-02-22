@@ -22,13 +22,13 @@ public class FileOperationServiceImpl implements FileOperationService {
     private final AudioConfigurationProperties audioConfigurationProperties;
 
     @Override
-    public Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
+    public Path saveFileToTempWorkspace(InputStream mediaFile, String fileName) throws IOException {
 
         Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace())
             .resolve(UUID.randomUUID().toString());
         Path targetTempFile = targetTempDirectory.resolve(fileName);
 
-        try (InputStream audioInputStream = mediaFile.toStream()) {
+        try (InputStream audioInputStream = mediaFile) {
             Files.createDirectories(targetTempDirectory);
             Path tempFilePath = Files.createFile(targetTempFile);
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);

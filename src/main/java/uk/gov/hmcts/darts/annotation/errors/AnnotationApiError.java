@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.annotation.errors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.annotations.model.AnnotationErrorCode;
+import uk.gov.hmcts.darts.annotations.model.AnnotationTitleErrors;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
@@ -10,25 +12,38 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum AnnotationApiError implements DartsApiError {
 
     HEARING_NOT_FOUND(
-        "100",
+            AnnotationErrorCode.HEARING_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested hearing cannot be found"
+            AnnotationTitleErrors.HEARING_NOT_FOUND.toString()
     ),
-
     FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT(
-        "101",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "The annotation failed to be uploaded"
+        AnnotationErrorCode.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT.getValue(),
+        HttpStatus.NOT_FOUND,
+        AnnotationTitleErrors.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT.toString()
     ),
-
+    INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID(
+            AnnotationErrorCode.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID.getValue(),
+            HttpStatus.NOT_FOUND,
+            AnnotationTitleErrors.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID.toString()
+    ),
+    USER_NOT_AUTHORISED_TO_DOWNLOAD(
+        AnnotationErrorCode.USER_NOT_AUTHORISED_TO_DOWNLOAD.getValue(),
+        HttpStatus.FORBIDDEN,
+        AnnotationTitleErrors.USER_NOT_AUTHORISED_TO_DOWNLOAD.toString()
+    ),
+    FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT(
+            AnnotationErrorCode.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT.getValue(),
+    HttpStatus.NOT_FOUND,
+            AnnotationTitleErrors.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT.toString()
+            ),
     ANNOTATION_NOT_FOUND(
-        "102",
+        "107",
         HttpStatus.NOT_FOUND,
         "The requested annotation cannot be found"
     ),
 
     NOT_AUTHORISED_TO_DELETE(
-            "102",
+            "108",
             HttpStatus.FORBIDDEN,
             "Not authorized to delete this annotation"
     );
