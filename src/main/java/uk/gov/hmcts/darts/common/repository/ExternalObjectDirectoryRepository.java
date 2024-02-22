@@ -153,10 +153,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                   JOIN ade.annotation ann
                   JOIN ann.annotationDocuments annD
                   WHERE ann.id = :annotationId
+                  AND eod.status = :status
                   AND annD.id = :annotationDocumentId
+                  ORDER BY eod.createdDateTime DESC
                   """
     )
-    Optional<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
+    List<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId,
+                                                                                      Integer annotationDocumentId,
+                                                                                      ObjectRecordStatusEntity status);
 
     @Query(
         """

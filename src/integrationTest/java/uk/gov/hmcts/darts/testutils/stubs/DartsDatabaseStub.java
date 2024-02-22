@@ -95,7 +95,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
@@ -708,7 +708,7 @@ public class DartsDatabaseStub {
 
         ExternalObjectDirectoryEntity armEod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocumentEntity,
-            getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            getObjectRecordStatusEntity(STORED),
             getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
         );

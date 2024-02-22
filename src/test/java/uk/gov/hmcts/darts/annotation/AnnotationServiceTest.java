@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -76,6 +77,8 @@ class AnnotationServiceTest {
     private final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = someExternalObjectDirectoryEntity();
     private AnnotationService annotationService;
 
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
+
     @BeforeEach
     void setUp() {
         annotationService = new AnnotationServiceImpl(
@@ -89,7 +92,8 @@ class AnnotationServiceTest {
         annotationUploadValidator,
         userAuthorisedToDeleteAnnotationValidator,
         userAuthorisedToDownloadAnnotationValidator,
-        annotationExistsValidator
+        annotationExistsValidator,
+        objectRecordStatusRepository
         );
 
         when(hearing.getId()).thenReturn(1);

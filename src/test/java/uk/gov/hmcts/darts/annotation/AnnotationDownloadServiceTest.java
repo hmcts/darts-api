@@ -18,10 +18,11 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,9 +55,6 @@ class AnnotationDownloadServiceTest {
     private AnnotationService annotationService;
 
     @Mock
-    private AuthorisationApi authorisationApi;
-
-    @Mock
     private Validator<Annotation> annotationUploadValidator;
     @Mock
     private Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
@@ -64,6 +62,9 @@ class AnnotationDownloadServiceTest {
     private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     @Mock
     private Validator<Integer> annotationExistsValidator;
+
+    @Mock
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
 
 
     @BeforeEach
@@ -79,7 +80,8 @@ class AnnotationDownloadServiceTest {
             annotationUploadValidator,
             userAuthorisedToDeleteAnnotationValidator,
             userAuthorisedToDownloadAnnotationValidator,
-            annotationExistsValidator
+            annotationExistsValidator,
+            objectRecordStatusRepository
         );
 
     }
@@ -87,8 +89,8 @@ class AnnotationDownloadServiceTest {
     @Test
     void throwsIfDownloadAnnotationDocumentFails() {
         doNothing().when(userAuthorisedToDownloadAnnotationValidator).validate(any());
-        when(eodRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(
-                Optional.of(someExternalObjectDirectoryEntity()));
+        when(eodRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any(), any())).thenReturn(
+            List.of(someExternalObjectDirectoryEntity()));
         when(dataManagementApi.getBlobDataFromInboundContainer(any())).thenThrow(new RuntimeException());
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
