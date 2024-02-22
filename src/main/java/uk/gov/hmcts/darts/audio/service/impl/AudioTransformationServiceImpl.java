@@ -271,9 +271,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             }
 
             logApi.atsProcessingUpdate(updatedMediaRequest);
-
-            log.info("I am a temporary info message");
-            log.error("I am a temporary error message");
         }
     }
 
