@@ -12,16 +12,16 @@ import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotation.service.impl.AnnotationServiceImpl;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,9 +54,6 @@ class AnnotationDownloadServiceTest {
     private AnnotationService annotationService;
 
     @Mock
-    private AuthorisationApi authorisationApi;
-
-    @Mock
     private Validator<Annotation> annotationUploadValidator;
     @Mock
     private Validator<Integer> userAuthorisedToDeleteAnnotationValidator;
@@ -64,6 +61,9 @@ class AnnotationDownloadServiceTest {
     private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     @Mock
     private Validator<Integer> annotationExistsValidator;
+
+    @Mock
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
 
 
     @BeforeEach
@@ -79,7 +79,8 @@ class AnnotationDownloadServiceTest {
             annotationUploadValidator,
             userAuthorisedToDeleteAnnotationValidator,
             userAuthorisedToDownloadAnnotationValidator,
-            annotationExistsValidator
+            annotationExistsValidator,
+            objectRecordStatusRepository
         );
 
     }
@@ -87,13 +88,13 @@ class AnnotationDownloadServiceTest {
     @Test
     void throwsIfDownloadAnnotationDocumentFails() {
         doNothing().when(userAuthorisedToDownloadAnnotationValidator).validate(any());
-        when(eodRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any())).thenReturn(
-                Optional.of(someExternalObjectDirectoryEntity()));
+        when(eodRepository.findByAnnotationIdAndAnnotationDocumentId(any(), any(), any())).thenReturn(
+            List.of(someExternalObjectDirectoryEntity()));
         when(dataManagementApi.getBlobDataFromInboundContainer(any())).thenThrow(new RuntimeException());
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
     }
 
     @Test
@@ -101,16 +102,16 @@ class AnnotationDownloadServiceTest {
         doNothing().when(userAuthorisedToDownloadAnnotationValidator).validate(any());
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
     }
 
     @Test
     void throwsIfNotJudgeAndNoAnnotationDocumentFound() {
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
     }
 
     private AnnotationDocumentEntity someAnnotationDocument() {
