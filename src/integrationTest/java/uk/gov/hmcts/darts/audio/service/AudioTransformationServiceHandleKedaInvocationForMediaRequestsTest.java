@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -152,12 +150,8 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioTransformationService.handleKedaInvocationForMediaRequests()
-        );
 
-        assertEquals("Failed to process audio request", exception.getMessage());
+        audioTransformationService.handleKedaInvocationForMediaRequests();
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
             .findById(mediaRequestId)
