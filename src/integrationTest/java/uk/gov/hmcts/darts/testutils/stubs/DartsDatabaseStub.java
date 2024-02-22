@@ -64,6 +64,7 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -138,6 +139,7 @@ public class DartsDatabaseStub {
     private final SecurityRoleRepository securityRoleRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
@@ -174,6 +176,7 @@ public class DartsDatabaseStub {
         caseManagementRetentionRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+        transcriptionDocumentRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();

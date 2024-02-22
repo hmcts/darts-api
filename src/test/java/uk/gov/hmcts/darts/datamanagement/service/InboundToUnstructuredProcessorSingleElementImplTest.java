@@ -57,6 +57,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     private static final String DOC = "doc";
     private static final String DOCX = "docx";
     private static final String TEST_BINARY_DATA = "test binary data";
+    private static final Integer INBOUND_ID = 5555;
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
@@ -117,6 +118,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
                                                                                              transcriptionConfigurationProperties,
                                                                                              audioConfigurationProperties,
                                                                                              externalObjectDirectoryRepository, mediaRepository);
+        when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.of(externalObjectDirectoryEntityInbound));
     }
 
     @Test
@@ -142,7 +144,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -163,7 +165,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(objectRecordStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
         when(dataManagementService.getBlobData(any(), any())).thenThrow(new BlobStorageException("Blobbed it", null, null));
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -204,7 +206,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         List<ExternalObjectDirectoryEntity> failedList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityFailed));
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), failedList);
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), failedList);
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -233,7 +235,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -262,7 +264,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -291,7 +293,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound,
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID,
                                                             Collections.emptyList(),
                                                             List.of(externalObjectDirectoryEntityFailed));
 
@@ -326,7 +328,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(100);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -357,7 +359,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -389,7 +391,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(1);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
@@ -428,7 +430,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(externalObjectDirectoryEntityInbound, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
