@@ -77,7 +77,6 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "darts", name = "automated-tasks-pod", havingValue = "true")
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.TooFewBranchesForASwitchStatement", "PMD.SingularField"})
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
