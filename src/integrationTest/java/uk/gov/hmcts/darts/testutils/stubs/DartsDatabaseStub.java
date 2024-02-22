@@ -95,7 +95,10 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
 
 @Service
 @AllArgsConstructor
@@ -685,5 +688,40 @@ public class DartsDatabaseStub {
     @Transactional
     public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
         return createdModifiedBaseEntity.getLastModifiedBy().getId();
+    }
+
+    @Transactional
+    public void createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+
+        var annotation = someAnnotationCreatedBy(judge);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "123";
+        var annotationDocumentEntity = getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       judge, uploadedDateTime, checksum
+            );
+
+
+        ExternalObjectDirectoryEntity armEod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocumentEntity,
+            getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+        );
+        armEod.setTransferAttempts(1);
+        save(armEod);
+    }
+
+    protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
+        var annotation = minimalAnnotationEntity();
+        annotation.setDeleted(false);
+        annotation.setCurrentOwner(userAccount);
+        annotation.addHearing(save(someMinimalHearing()));
+        save(annotation);
+        return annotation;
     }
 }
