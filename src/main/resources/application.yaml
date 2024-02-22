@@ -253,7 +253,8 @@ darts:
       daily-test-event-text:
         xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
-
+  hikari:
+    maximum-pool-size: 50
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).

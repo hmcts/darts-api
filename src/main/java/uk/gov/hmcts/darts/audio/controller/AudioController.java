@@ -103,7 +103,7 @@ public class AudioController implements AudioApi {
         return audioService.startStreamingPreview(
             mediaId,
             range,
-            new SseEmitter(Duration.ofMinutes(previewTimeout).toMillis())
+            new SseEmitter(Duration.ofSeconds(previewTimeout).toMillis())
         );
     }
 }
