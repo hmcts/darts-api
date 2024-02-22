@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +20,9 @@ public interface AudioTransformationService {
 
     List<MediaEntity> getMediaMetadata(Integer hearingId);
 
-    Optional<UUID> getMediaLocation(MediaEntity media);
+    Optional<UUID> getMediaLocation(MediaEntity media, Integer containerLocationId);
 
-    Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
+    Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException;
 
     Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException;
 

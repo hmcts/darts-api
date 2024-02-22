@@ -128,6 +128,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
+
     @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
