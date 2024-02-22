@@ -46,6 +46,8 @@ public class SentServerEventsHeartBeatEmitter {
             emitter.completeWithError(dartsApiException);
             log.error("Error while emitting heartbeat", e);
             throw dartsApiException;
+        } catch (IllegalStateException e) {
+            log.debug("trying to send heartbeat while emitter is already closed", e);
         }
     }
 
