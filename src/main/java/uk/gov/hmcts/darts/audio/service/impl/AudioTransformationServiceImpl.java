@@ -251,7 +251,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
 
-            log.debug("Completed processing for requestId {}.", requestId);
+            notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         } catch (Exception e) {
             log.error(
@@ -269,10 +269,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
 
-            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
+            log.info("I am a temporary info message");
+            log.error("I am a temporary error message");
         }
-
-        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
     }
 
     List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
