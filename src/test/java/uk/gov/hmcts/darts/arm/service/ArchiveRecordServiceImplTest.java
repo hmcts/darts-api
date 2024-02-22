@@ -188,6 +188,7 @@ class ArchiveRecordServiceImplTest {
 
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
+        when(mediaEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
         when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
@@ -314,6 +315,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
+        when(mediaEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
         when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
