@@ -34,7 +34,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
@@ -70,7 +69,7 @@ class AudioControllerPreviewWithSendServerEventsIntTest {
         given.externalObjectDirForMedia(mediaEntity);
         doNothing().when(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
         webClient = webClient.mutate()
             .responseTimeout(Duration.ofMillis(TIMEOUT))
@@ -110,14 +109,14 @@ class AudioControllerPreviewWithSendServerEventsIntTest {
     @Test
     void previewShouldReturnError() {
         webClient.get().uri(uriBuilder -> uriBuilder.path(
-                        URL + -1).build())
-                .header(RANGE, RANGE_1024)
-                .accept(TEXT_EVENT_STREAM)
-                .exchange()
-                .expectBody().consumeWith(c -> {
-                    String fullResponse = new String(Objects.requireNonNull(c.getResponseBody()));
-                    assertTrue(fullResponse.contains("{\"type\":\"AUDIO_101\",\"title\":\"The requested data cannot be located\",\"status\":500}"));
-                });
+                URL + -1).build())
+            .header(RANGE, RANGE_1024)
+            .accept(TEXT_EVENT_STREAM)
+            .exchange()
+            .expectBody().consumeWith(c -> {
+                String fullResponse = new String(Objects.requireNonNull(c.getResponseBody()));
+                assertTrue(fullResponse.contains("{\"type\":\"AUDIO_101\",\"title\":\"The requested data cannot be located\",\"status\":500}"));
+            });
 
     }
 

@@ -54,7 +54,8 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
             .andReturn();
 
         List<SecurityGroupWithIdAndRole> groups = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+                                                                         new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+                                                                         });
 
         assertFalse(groups.isEmpty());
 
@@ -66,7 +67,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
         checkGroup(groups.get(3), "Test Judge", false, 3, true);
         checkGroup(groups.get(4), "Test Transcriber", false, 4, true);
         checkGroup(groups.get(5), "Test Language Shop", false, 5, true);
-        checkGroup(groups.get(6), "Test RCJ Appeals", false, 6, true);
+        checkGroup(groups.get(6), "Test RCJ Appeals", true, 6, true);
         checkGroup(groups.get(7), "Xhibit Group", true, 7, true);
         checkGroup(groups.get(8), "Cpp Group", true, 8, true);
         checkGroup(groups.get(9), "Dar Pc Group", true, 9, true);
@@ -99,4 +100,4 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
     }
 
 
-    }
+}
