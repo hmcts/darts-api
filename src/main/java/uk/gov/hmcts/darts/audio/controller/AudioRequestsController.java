@@ -19,13 +19,11 @@ import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
-import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.InputStream;
-import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEARING_ID_TRANSCRIBER;
@@ -54,13 +52,6 @@ public class AudioRequestsController implements AudioRequestsApi {
     public ResponseEntity<AudioNonAccessedResponse> getNonAccessedCount(Integer userId) {
         return new ResponseEntity<>(mediaRequestService.countNonAccessedAudioForUser(userId), HttpStatus.OK);
 
-    }
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<List<GetAudioRequestResponseV1>> getYourAudioV1(Integer userId, Boolean expired) {
-
-        return new ResponseEntity<>(mediaRequestService.getAudioRequestsV1(userId, expired), HttpStatus.OK);
     }
 
     @Override
