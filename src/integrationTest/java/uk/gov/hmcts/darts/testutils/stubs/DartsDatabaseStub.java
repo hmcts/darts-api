@@ -64,6 +64,7 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -95,7 +96,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
@@ -138,6 +139,7 @@ public class DartsDatabaseStub {
     private final SecurityRoleRepository securityRoleRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
@@ -174,6 +176,7 @@ public class DartsDatabaseStub {
         caseManagementRetentionRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+        transcriptionDocumentRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();
@@ -708,12 +711,21 @@ public class DartsDatabaseStub {
 
         ExternalObjectDirectoryEntity armEod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocumentEntity,
-            getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            getObjectRecordStatusEntity(STORED),
             getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
         );
         armEod.setTransferAttempts(1);
         save(armEod);
+
+        ExternalObjectDirectoryEntity armEod2 = getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocumentEntity,
+            getObjectRecordStatusEntity(STORED),
+            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+        );
+        armEod.setTransferAttempts(1);
+        save(armEod2);
     }
 
     protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {

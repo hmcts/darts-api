@@ -87,7 +87,7 @@ public class FunctionalTest {
             .delete();
     }
 
-    private RequestSpecification buildRequestWithAuth(AccessTokenClient accessTokenClient) {
+    protected RequestSpecification buildRequestWithAuth(AccessTokenClient accessTokenClient) {
         return RestAssured.given()
             .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));
     }

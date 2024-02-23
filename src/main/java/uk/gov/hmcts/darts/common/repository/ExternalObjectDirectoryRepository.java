@@ -95,6 +95,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                             ExternalLocationTypeEntity type,
                                                                                             Integer transferAttempts);
 
+    List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
     @Query(
         """
@@ -127,6 +128,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
+
     @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
@@ -153,10 +156,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                   JOIN ade.annotation ann
                   JOIN ann.annotationDocuments annD
                   WHERE ann.id = :annotationId
+                  AND eod.status = :status
                   AND annD.id = :annotationDocumentId
+                  ORDER BY eod.createdDateTime DESC
                   """
     )
-    Optional<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId, Integer annotationDocumentId);
+    List<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId,
+                                                                                  Integer annotationDocumentId,
+                                                                                  ObjectRecordStatusEntity status);
 
     @Query(
         """

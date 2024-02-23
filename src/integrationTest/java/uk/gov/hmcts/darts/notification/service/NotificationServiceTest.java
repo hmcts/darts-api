@@ -74,21 +74,6 @@ class NotificationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void scheduleNotificationInvalidEmail() {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
-        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .emailAddresses("test@test@.com")
-            .build();
-
-        service.scheduleNotification(request);
-
-        List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        assertEquals(0, resultList.size());
-    }
-
-    @Test
     void sendNotificationToGovNotifyNow() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(

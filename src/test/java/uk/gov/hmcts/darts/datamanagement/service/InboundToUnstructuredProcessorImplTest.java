@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.repository.EntityIdOnly;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -30,9 +31,7 @@ class InboundToUnstructuredProcessorImplTest {
     ExternalLocationTypeRepository externalLocationTypeRepository;
     InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
     @Mock
-    ExternalObjectDirectoryEntity externalObjectDirectoryEntityInbound;
-    @Mock
-    ExternalObjectDirectoryEntity externalObjectDirectoryEntityInbound2;
+    EntityIdOnly externalObjectDirectoryId;
     @Mock
     InboundToUnstructuredProcessorSingleElement singleElementProcessor;
 
@@ -48,8 +47,9 @@ class InboundToUnstructuredProcessorImplTest {
         // given
         List<ExternalObjectDirectoryEntity> emptyUnstructuredStored = Collections.emptyList();
             List<ExternalObjectDirectoryEntity> emptyUnstructuredFailed = Collections.emptyList();
+        when(externalObjectDirectoryRepository.findByStatusAndExternalLocationType(any(), any()))
+            .thenReturn(List.of(externalObjectDirectoryId, externalObjectDirectoryId));
         when(externalObjectDirectoryRepository.findByStatusAndType(any(), any()))
-            .thenReturn(List.of(externalObjectDirectoryEntityInbound, externalObjectDirectoryEntityInbound2))
             .thenReturn(emptyUnstructuredStored);
         when(externalObjectDirectoryRepository.findByStatusIdInAndType(any(), any()))
             .thenReturn(emptyUnstructuredFailed);

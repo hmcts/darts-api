@@ -9,6 +9,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -29,8 +30,10 @@ import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProper
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -64,9 +67,12 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     @Override
     @Transactional
-    public void processSingleElement(ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
+    public void processSingleElement(Integer inboundExternalObjectDirectoryId,
                                      List<ExternalObjectDirectoryEntity> unstructuredStoredList,
                                      List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
+
+        ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundExternalObjectDirectoryId)
+            .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundExternalObjectDirectoryId)));
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity =
             getNewOrExistingInUnstructuredStoredOrFailed(inboundExternalObjectDirectory,
@@ -172,7 +178,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return externalObjectDirectoryEntity;
     }
 
-    private static ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
+    private ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
         ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
         if (inbound.getMedia() != null
@@ -295,6 +301,10 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         AnnotationDocumentEntity annotationDocumentEntity = externalObjectDirectory.getAnnotationDocumentEntity();
         if (annotationDocumentEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setAnnotationDocumentEntity(annotationDocumentEntity);
+        }
+        CaseDocumentEntity caseDocumentEntity = externalObjectDirectory.getCaseDocument();
+        if (caseDocumentEntity != null) {
+            unstructuredExternalObjectDirectoryEntity.setCaseDocument(caseDocumentEntity);
         }
         OffsetDateTime now = OffsetDateTime.now();
         unstructuredExternalObjectDirectoryEntity.setCreatedDateTime(now);

@@ -5,13 +5,17 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.OutputStream;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,6 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Profile("intTest")
 public class DataManagementServiceStubImpl implements DataManagementService {
+
+    private final DataManagementConfiguration dataManagementConfiguration;
 
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
@@ -72,7 +78,18 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
+    @SneakyThrows
     public void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report) {
 
+        logStubUsageWarning();
+
+        try (OutputStream downloadOS = report.getOutputStream(dataManagementConfiguration)) {
+            Date downloadStartDate = new Date();
+            downloadOS.write(new byte[1024]);
+            Date downloadEndDate = new Date();
+            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+
+            report.markSuccess(type);
+        }
     }
 }

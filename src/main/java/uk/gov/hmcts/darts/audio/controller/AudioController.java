@@ -32,6 +32,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
@@ -54,8 +55,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE, ADMIN})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioService.getAudioMetadata(hearingId, 1);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
@@ -77,8 +78,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE, ADMIN})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList);
@@ -92,8 +93,8 @@ public class AudioController implements AudioApi {
     @SneakyThrows
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE, ADMIN})
     public SseEmitter previewAlternative(
         @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
         @PathVariable("media_id") Integer mediaId,

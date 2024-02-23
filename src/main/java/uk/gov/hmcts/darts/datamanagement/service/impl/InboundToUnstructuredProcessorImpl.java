@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.repository.EntityIdOnly;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -55,7 +56,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private void processAllStoredInboundExternalObjects() {
 
-        List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(STORED), getType(INBOUND));
+        List<EntityIdOnly> inboundList = externalObjectDirectoryRepository.findByStatusAndExternalLocationType(getStatus(STORED), getType(INBOUND));
         log.info("Found {} EODs in inbound with state STORED to be processed", inboundList.size());
 
         List<ExternalObjectDirectoryEntity> unstructuredStoredList = externalObjectDirectoryRepository.findByStatusAndType(
@@ -63,9 +64,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         List<ExternalObjectDirectoryEntity> unstructuredFailedList = externalObjectDirectoryRepository.findByStatusIdInAndType(
             FAILURE_STATES_LIST, getType(UNSTRUCTURED));
 
-        for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
+        for (EntityIdOnly inboundExternalObjectDirectory : inboundList) {
             try {
-                singleElementProcessor.processSingleElement(inboundExternalObjectDirectory, unstructuredStoredList, unstructuredFailedList);
+                singleElementProcessor.processSingleElement(inboundExternalObjectDirectory.getId(), unstructuredStoredList, unstructuredFailedList);
             } catch (Exception exception) {
                 log.error("Failed to move from inbound file to unstructured data store for EOD id: {}", inboundExternalObjectDirectory.getId(), exception);
             }
