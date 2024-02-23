@@ -470,7 +470,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    @Transactional
     public GetTranscriptionByIdResponse getTranscription(Integer transcriptionId) {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
