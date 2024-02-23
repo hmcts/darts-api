@@ -137,7 +137,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    @Transactional
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
