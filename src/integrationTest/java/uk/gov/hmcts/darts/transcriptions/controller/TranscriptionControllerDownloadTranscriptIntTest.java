@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -22,7 +26,6 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.datamanagement.helper.StorageBlobFileDownloadHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -71,7 +74,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     @MockBean
     private AuditApi mockAuditApi;
     @MockBean
-    private StorageBlobFileDownloadHelper mockStorageBlobFileDownloadHelper;
+    private DataManagementFacade mockDataManagementFacade;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -198,11 +201,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             checksum
         );
 
-        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        when(mockStorageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
-        when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-        when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        var mockDownloadableExternalObjectDirectories = mock(DownloadableExternalObjectDirectories.class);
+        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
+        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(mockDownloadableExternalObjectDirectories);
+        doNothing().when(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+        when(mockDownloadableExternalObjectDirectories.getResponse()).thenReturn(mockFileBasedDownloadResponseMetaData);
+        when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+        when(mockFileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -226,10 +233,11 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             ));
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockStorageBlobFileDownloadHelper).getDownloadResponse(anyList());
-        verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
-        verify(fileBasedDownloadResponseMetaData).getInputStream();
-        verifyNoMoreInteractions(mockStorageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
+        verify(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+        verify(mockFileBasedDownloadResponseMetaData).isSuccessfulDownload();
+        verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+        verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
+        mockedStatic.close();
     }
 
     @Test
@@ -256,12 +264,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             checksum
         );
 
-
-        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        when(mockStorageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
-        when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-        when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        var mockDownloadableExternalObjectDirectories = mock(DownloadableExternalObjectDirectories.class);
+        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
+        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(mockDownloadableExternalObjectDirectories);
+        doNothing().when(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+        when(mockDownloadableExternalObjectDirectories.getResponse()).thenReturn(mockFileBasedDownloadResponseMetaData);
+        when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+        when(mockFileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -285,9 +296,11 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             ));
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockStorageBlobFileDownloadHelper).getDownloadResponse(anyList());
-        verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
-        verify(fileBasedDownloadResponseMetaData).getInputStream();
-        verifyNoMoreInteractions(mockStorageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
+        verify(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+        verify(mockFileBasedDownloadResponseMetaData).isSuccessfulDownload();
+        verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+        verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
+        mockedStatic.close();
     }
+
 }

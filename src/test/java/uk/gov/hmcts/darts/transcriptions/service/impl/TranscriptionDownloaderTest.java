@@ -5,11 +5,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.InputStreamResource;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,7 +23,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
-import uk.gov.hmcts.darts.datamanagement.helper.StorageBlobFileDownloadHelper;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -38,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -55,16 +58,21 @@ class TranscriptionDownloaderTest {
     @Mock
     private TranscriptionRepository transcriptionRepository;
     @Mock
-    private StorageBlobFileDownloadHelper storageBlobFileDownloadHelper;
+    private DataManagementFacade dataManagementFacade;
     @Mock
     private AuditApi auditApi;
+
+    @Mock
+    private DownloadableExternalObjectDirectories downloadableExternalObjectDirectories;
+    @Mock
+    private DownloadResponseMetaData fileBasedDownloadResponseMetaData;
 
     private final Random random = new Random();
     private TranscriptionDownloader transcriptionDownloader;
 
     @BeforeEach
     void setUp() {
-        transcriptionDownloader = new TranscriptionDownloader(transcriptionRepository, storageBlobFileDownloadHelper, auditApi, userIdentity);
+        transcriptionDownloader = new TranscriptionDownloader(transcriptionRepository, dataManagementFacade, auditApi, userIdentity);
 
         var testUser = new UserAccountEntity();
         testUser.setEmailAddress("test.user@example.com");
@@ -79,7 +87,7 @@ class TranscriptionDownloaderTest {
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
-        verifyNoInteractions(storageBlobFileDownloadHelper);
+        verifyNoInteractions(dataManagementFacade);
     }
 
     @Test
@@ -91,28 +99,34 @@ class TranscriptionDownloaderTest {
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
-        verifyNoInteractions(storageBlobFileDownloadHelper);
+        verifyNoInteractions(dataManagementFacade);
     }
 
     @Test
-    void throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() {
+    void throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() throws IOException {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(emptyList());
 
         var transcription = someTranscriptionWith(List.of(transcriptionDocument));
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        when(storageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
+        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
+        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
+        doNothing().when(dataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        when(downloadableExternalObjectDirectories.getResponse()).thenReturn(fileBasedDownloadResponseMetaData);
         when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(false);
+        doNothing().when(fileBasedDownloadResponseMetaData).close();
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
-        verify(storageBlobFileDownloadHelper).getDownloadResponse(anyList());
+        verify(dataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        verify(downloadableExternalObjectDirectories).getResponse();
         verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
-        verifyNoMoreInteractions(storageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
+        verify(fileBasedDownloadResponseMetaData).close();
+        verifyNoMoreInteractions(downloadableExternalObjectDirectories, dataManagementFacade, fileBasedDownloadResponseMetaData);
+        mockedStatic.close();
     }
 
     @Test
@@ -123,19 +137,21 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(List.of(transcriptionDocument));
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        when(storageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
+        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
+        doNothing().when(dataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        when(downloadableExternalObjectDirectories.getResponse()).thenReturn(fileBasedDownloadResponseMetaData);
         when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-
+        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
         when(fileBasedDownloadResponseMetaData.getInputStream()).thenThrow(new IOException());
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
             .isExactlyInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
-        verify(storageBlobFileDownloadHelper).getDownloadResponse(transcriptionDocument.getExternalObjectDirectoryEntities());
-        verifyNoMoreInteractions(storageBlobFileDownloadHelper);
+        verify(dataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        verifyNoMoreInteractions(downloadableExternalObjectDirectories, dataManagementFacade, fileBasedDownloadResponseMetaData);
+        mockedStatic.close();
     }
 
     @Test
@@ -155,8 +171,10 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(transcriptionDocuments);
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        when(storageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
+        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
+        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
+        doNothing().when(dataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        when(downloadableExternalObjectDirectories.getResponse()).thenReturn(fileBasedDownloadResponseMetaData);
         when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
         when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
@@ -169,10 +187,11 @@ class TranscriptionDownloaderTest {
         assertThat(downloadTranscriptResponse.getContentType()).isEqualTo(transcriptionDocumentUploadedToday.getFileType());
         assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(InputStreamResource.class);
 
-        verify(storageBlobFileDownloadHelper).getDownloadResponse(anyList());
+        verify(downloadableExternalObjectDirectories).getResponse();
         verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
         verify(fileBasedDownloadResponseMetaData).getInputStream();
-        verifyNoMoreInteractions(storageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
+        verifyNoMoreInteractions(downloadableExternalObjectDirectories, dataManagementFacade, fileBasedDownloadResponseMetaData);
+        mockedStatic.close();
     }
 
     private ExternalLocationTypeEntity externalLocationTypeFor(ExternalLocationTypeEnum externalLocationTypeEnum) {

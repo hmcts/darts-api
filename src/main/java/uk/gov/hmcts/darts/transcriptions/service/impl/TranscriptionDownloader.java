@@ -6,12 +6,12 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
-import uk.gov.hmcts.darts.datamanagement.helper.StorageBlobFileDownloadHelper;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 public class TranscriptionDownloader {
 
     private final TranscriptionRepository transcriptionRepository;
-    private final StorageBlobFileDownloadHelper storageBlobFileDownloadHelper;
+    private final DataManagementFacade dataManagementFacade;
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
 
@@ -54,14 +54,19 @@ public class TranscriptionDownloader {
     }
 
     private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
-        DownloadResponseMetaData downloadResponseMetaData = storageBlobFileDownloadHelper.getDownloadResponse(
+        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories.getFileBasedDownload(
             latestTranscriptionDocument.getExternalObjectDirectoryEntities());
 
-        if (!downloadResponseMetaData.isSuccessfulDownload()) {
-            throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
-        }
+        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+
+        var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
 
         try {
+            if (!downloadResponseMetaData.isSuccessfulDownload()) {
+                downloadResponseMetaData.close();
+                throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
+            }
+
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
         } catch (IOException e) {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}, containerTypeUsedToDownload = {}",
