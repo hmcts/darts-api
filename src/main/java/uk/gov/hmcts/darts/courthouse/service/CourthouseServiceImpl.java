@@ -5,18 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.courthouse.mapper.AdminCourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -27,6 +34,8 @@ public class CourthouseServiceImpl implements CourthouseService {
     private RetrieveCoreObjectService retrieveCoreObjectService;
 
     private CourthouseToCourthouseEntityMapper mapper;
+
+    private final AdminCourthouseToCourthouseEntityMapper adminMapper;
 
     @Override
     public void deleteCourthouseById(Integer id) {
@@ -47,6 +56,28 @@ public class CourthouseServiceImpl implements CourthouseService {
     @Override
     public CourthouseEntity getCourtHouseById(Integer id) {
         return courthouseRepository.getReferenceById(id);
+    }
+
+    @Override
+    public AdminCourthouse getAdminCourtHouseById(Integer id) {
+        CourthouseEntity courtHouseEntity = courthouseRepository.getReferenceById(id);
+
+        Set<SecurityGroupEntity> secGrps = courtHouseEntity.getSecurityGroups();
+        List<Integer> secGrpIds = new ArrayList<>();
+        if (secGrps != null && !secGrps.isEmpty()) {
+            secGrpIds = secGrps.stream().map(SecurityGroupEntity::getId).collect(Collectors.toList());
+        }
+
+        AdminCourthouse adminCourthouse = adminMapper.mapFromEntityToAdminCourthouse(courtHouseEntity);
+        adminCourthouse.setSecurityGroupIds(secGrpIds);
+
+        RegionEntity region = courtHouseEntity.getRegion();
+
+        if (region != null) {
+            adminCourthouse.setRegionId(region.getId());
+        }
+
+        return adminCourthouse;
     }
 
     @Override

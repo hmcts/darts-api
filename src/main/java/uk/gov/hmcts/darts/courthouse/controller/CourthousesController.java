@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.courthouse.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,15 +11,21 @@ import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
 import java.util.List;
 import javax.validation.Valid;
+
+import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,15 +46,16 @@ public class CourthousesController implements CourthousesApi {
     }
 
     @Override
-    public ResponseEntity<ExtendedCourthouse> courthousesCourthouseIdGet(
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<AdminCourthouse> adminCourthousesCourthouseIdGet(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
         try {
-            CourthouseEntity courtHouseEntity = courthouseService.getCourtHouseById(
-                courthouseId);
-            ExtendedCourthouse responseEntity = mapper.mapFromEntityToExtendedCourthouse(courtHouseEntity);
-            return new ResponseEntity<>(responseEntity, HttpStatus.OK);
-        } catch (EntityNotFoundException | JpaObjectRetrievalFailureException e) {
+            AdminCourthouse adminCourthouse = courthouseService.getAdminCourtHouseById(courthouseId);
+
+            return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
+        } catch (EntityNotFoundException | JpaObjectRetrievalFailureException | IllegalStateException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

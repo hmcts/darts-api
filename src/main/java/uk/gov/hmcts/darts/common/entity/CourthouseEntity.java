@@ -14,8 +14,10 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +51,33 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "courthouse_region_ae",
+        joinColumns = {@JoinColumn(name = "cth_id")},
+        inverseJoinColumns = {@JoinColumn(name = "reg_id")})
+    private Set<RegionEntity> regions = new LinkedHashSet<>();
+
     @Column(name = "display_name")
     private String displayName;
+
+    public RegionEntity getRegion() throws IllegalStateException {
+
+        if (regions != null && regions.size() > 1) {
+            throw new IllegalStateException();
+        } else if (CollectionUtils.isEmpty(regions)) {
+            return null;
+        }
+
+        return regions.stream().findFirst().get();
+    }
+
+    public void setRegion(RegionEntity region) throws IllegalStateException {
+
+        if (regions != null && regions.size() > 1) {
+            throw new IllegalStateException();
+        }
+
+        regions = (region == null) ? Collections.emptySet() : Collections.singleton(region);
+    }
 
 }
