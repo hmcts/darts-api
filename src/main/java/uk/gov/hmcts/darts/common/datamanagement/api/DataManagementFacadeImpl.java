@@ -45,7 +45,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 if (containerName.isPresent()
                         && dataToDownload.isForLocationType(getForDatastoreContainerType(type))
                         && processObjectDirectoryForContainerType(dataToDownload, type, configuration.isFetchFromDetsEnabled())) {
-                        log.info("Downloading blob id {} from container {}", dataToDownload.getExternalLocationType(), type.name());
+                        log.info("Downloading blob id {} from container {}", dataToDownload.getExternalLocation(), type.name());
 
                     processDownloadResponse(type, dataToDownload, downloadableExternalObjectDirectories, container.get());
                 }
