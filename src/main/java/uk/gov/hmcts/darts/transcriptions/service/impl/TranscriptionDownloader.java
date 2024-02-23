@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -55,19 +54,19 @@ public class TranscriptionDownloader {
     }
 
     private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
-        DatastoreContainerType containerTypeUsedToDownload = null;
+        DownloadResponseMetaData downloadResponseMetaData = storageBlobFileDownloadHelper.getDownloadResponse(
+            latestTranscriptionDocument.getExternalObjectDirectoryEntities());
+
+        if (!downloadResponseMetaData.isSuccessfulDownload()) {
+            throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
+        }
+
         try {
-            DownloadResponseMetaData downloadResponseMetaData = storageBlobFileDownloadHelper.getDownloadResponse(
-                latestTranscriptionDocument.getExternalObjectDirectoryEntities());
-            containerTypeUsedToDownload = downloadResponseMetaData.getContainerTypeUsedToDownload();
-            if (!downloadResponseMetaData.isSuccessfulDownload()) {
-                throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
-            }
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
         } catch (IOException e) {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}, containerTypeUsedToDownload = {}",
                       latestTranscriptionDocument.getId(),
-                      containerTypeUsedToDownload,
+                      downloadResponseMetaData.getContainerTypeUsedToDownload(),
                       e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
         }

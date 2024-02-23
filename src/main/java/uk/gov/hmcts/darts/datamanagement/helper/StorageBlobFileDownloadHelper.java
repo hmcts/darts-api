@@ -7,7 +7,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -16,7 +15,7 @@ public class StorageBlobFileDownloadHelper {
 
     private final DataManagementFacade dataManagementFacade;
 
-    public DownloadResponseMetaData getDownloadResponse(List<ExternalObjectDirectoryEntity> externalObjectDirectories) throws IOException {
+    public DownloadResponseMetaData getDownloadResponse(List<ExternalObjectDirectoryEntity> externalObjectDirectories) {
         DownloadableExternalObjectDirectories downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories.getFileBasedDownload(
             externalObjectDirectories);
 
