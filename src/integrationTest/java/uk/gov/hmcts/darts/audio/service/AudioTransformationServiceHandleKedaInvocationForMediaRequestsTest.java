@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
@@ -71,7 +70,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         hearing = given.aHearingWith("T202304130121", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
     }
 
-    @Transactional
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForDownload() {
@@ -104,7 +102,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     }
 
     @Test
-    @Transactional
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
         given.aMediaEntityGraph();
@@ -186,7 +183,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    @Transactional
     public void handleKedaInvocationForMediaRequestsShouldNotInvokeProcessAudioRequestWhenNoOpenMediaRequestsExist(
         AudioRequestType audioRequestType) {
         given.aUserAccount(EMAIL_ADDRESS);
