@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_SERVER_ERROR;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
 
 @Service
@@ -108,7 +108,7 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         } catch (RuntimeException e) {
             log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getId(), e);
-            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, e);
+            throw new DartsApiException(INTERNAL_SERVER_ERROR, e);
         }
 
         return AnnotationResponseDto.builder()

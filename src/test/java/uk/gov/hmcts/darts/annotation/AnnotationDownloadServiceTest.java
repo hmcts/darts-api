@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_SERVER_ERROR;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,7 +94,7 @@ class AnnotationDownloadServiceTest {
 
         assertThatThrownBy(() -> annotationService.downloadAnnotationDoc(1, 1))
             .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+            .hasFieldOrPropertyWithValue("error", INTERNAL_SERVER_ERROR);
     }
 
     @Test

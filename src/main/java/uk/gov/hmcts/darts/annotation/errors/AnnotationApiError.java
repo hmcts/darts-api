@@ -41,11 +41,15 @@ public enum AnnotationApiError implements DartsApiError {
         HttpStatus.NOT_FOUND,
         "The requested annotation cannot be found"
     ),
-
     NOT_AUTHORISED_TO_DELETE(
             "108",
             HttpStatus.FORBIDDEN,
             "Not authorized to delete this annotation"
+    ),
+    INTERNAL_SERVER_ERROR(
+        AnnotationErrorCode.INTERNAL_SERVER_ERROR.getValue(),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        AnnotationTitleErrors.INTERNAL_SERVER_ERROR.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "ANNOTATION";
