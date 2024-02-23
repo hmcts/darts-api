@@ -1,0 +1,33 @@
+{
+  "operation": "create_record",
+  "relation_id": "<EODID>",
+  "record_metadata": {
+    "record_class": "DARTS",
+    "publisher": "DARTS",
+    "region": "GBR",
+    "recordDate": "2023-01-01T10:00:00",
+    "event_date": "2023-01-01T09:00:00",
+    "title": "annotation.docx",
+    "client_identifier": "<EODID>",
+    "contributor": "NEWCASTLE",
+    "bf_001": "Case",
+    "bf_002": "Case1",
+    "bf_003": "application/msword",
+    "bf_004": "2023-06-10",
+    "bf_005": "cBcBPQW8xQMuFCBJCBgh1g==",
+    "bf_010": "2023-01-01T09:00:00",
+    "bf_011": "2023-01-01T09:00:00",
+    "bf_012": <OBJECT_ID>,
+    "bf_013": <PARENT_ID>,
+    "bf_019": "NEWCASTLE"
+  }
+}
+{
+  "operation": "upload_new_file",
+  "relation_id": "<EODID>",
+  "file_metadata": {
+    "publisher": "DARTS",
+    "dz_file_name": "<PREFIX>",
+    "file_tag": "application/msword"
+  }
+}

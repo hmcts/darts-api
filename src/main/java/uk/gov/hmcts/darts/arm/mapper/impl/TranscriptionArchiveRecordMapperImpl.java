@@ -255,7 +255,6 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         String cases = null;
         if (nonNull(transcriptionDocumentEntity.getTranscription().getCourtCases())) {
-
             List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getCourtCases()
                 .stream()
                 .map(CourtCaseEntity::getCaseNumber)
@@ -308,14 +307,22 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
                 .getTranscription()
                 .getTranscriptionCommentEntities()
                 .stream()
-                .filter(transcriptionComment ->
-                            REQUESTED.getId().equals(transcriptionComment.getTranscriptionWorkflow().getTranscriptionStatus().getId()))
+                .filter(transcriptionComment -> isTranscriptionCommentRequested(transcriptionComment))
                 .findFirst();
             if (transcriptionCommentEntity.isPresent()) {
                 comments = transcriptionCommentEntity.get().getComment();
             }
         }
         return comments;
+    }
+
+    private boolean isTranscriptionCommentRequested(TranscriptionCommentEntity transcriptionComment) {
+        boolean isTranscriptionCommentRequested = false;
+        if (nonNull(transcriptionComment.getTranscriptionWorkflow())
+            && nonNull(transcriptionComment.getTranscriptionWorkflow().getTranscriptionStatus())) {
+            isTranscriptionCommentRequested = REQUESTED.getId().equals(transcriptionComment.getTranscriptionWorkflow().getTranscriptionStatus().getId());
+        }
+        return isTranscriptionCommentRequested;
     }
 
     private static String getTranscriptionUrgency(TranscriptionDocumentEntity transcriptionDocument) {

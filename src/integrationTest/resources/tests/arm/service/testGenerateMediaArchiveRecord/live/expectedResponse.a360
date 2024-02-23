@@ -1,0 +1,37 @@
+{
+  "operation": "create_record",
+  "relation_id": "<EODID>",
+  "record_metadata": {
+    "record_class": "DARTS",
+    "publisher": "DARTS",
+    "region": "GBR",
+    "recordDate": "2023-09-23T13:00:00",
+    "event_date": "2023-09-23T13:00:00",
+    "title": "a-media-file",
+    "client_identifier": "<EODID>",
+    "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "bf_001": "Media",
+    "bf_002": "Case1",
+    "bf_003": "mp2",
+    "bf_004": "2023-06-10",
+    "bf_005": "cBcBPQW8xQMuFCBJCBgh1g==",
+    "bf_010": "2023-09-23T13:00:00",
+    "bf_011": "2023-09-23T13:00:00",
+    "bf_012": <OBJECT_ID>,
+    "bf_013": <PARENT_ID>,
+    "bf_014": 1,
+    "bf_015": 2,
+    "bf_017": "2023-09-23T13:45:00",
+    "bf_019": "NEWCASTLE",
+    "bf_020": "Int Test Courtroom 2"
+  }
+}
+{
+  "operation": "upload_new_file",
+  "relation_id": "<EODID>",
+  "file_metadata": {
+    "publisher": "DARTS",
+    "dz_file_name": "<PREFIX>",
+    "file_tag": "mp2"
+  }
+}

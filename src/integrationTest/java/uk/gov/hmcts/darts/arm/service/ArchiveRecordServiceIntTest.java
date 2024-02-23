@@ -1,0 +1,697 @@
+package uk.gov.hmcts.darts.arm.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.data.MediaTestData;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+
+@Slf4j
+@SuppressWarnings({"PMD.ExcessiveImports", "VariableDeclarationUsageDistance", "PMD.AssignmentInOperand"})
+class ArchiveRecordServiceIntTest extends IntegrationBase {
+    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+
+    public static final String DARTS = "DARTS";
+    public static final String REGION = "GBR";
+
+    public static final String FILE_EXTENSION = "a360";
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+
+    @TempDir
+    private File tempDirectory;
+
+    @Autowired
+    private AuthorisationStub authorisationStub;
+
+    @MockBean
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    @MockBean
+    private CurrentTimeHelper currentTimeHelper;
+
+    private HearingEntity hearing;
+
+
+    @Autowired
+    private ArchiveRecordService archiveRecordService;
+
+
+    @BeforeEach
+    void setUp() {
+
+        hearing = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "Case1",
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            HEARING_DATE
+        );
+
+    }
+
+    @Test
+    void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        MediaEntity media = MediaTestData.createMediaWith(
+            hearing.getCourtroom(),
+            startedAt,
+            endedAt,
+            1
+        );
+        MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        savedMedia.setCreatedDateTime(startedAt);
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+        hearing.addMedia(savedMedia);
+        dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/live/media-record.properties");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("actual Response {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/live/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        log.info("expect Response {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithNleMediaProperties_ReturnFileSuccess() throws IOException {
+
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        MediaEntity media = MediaTestData.createMediaWith(
+            hearing.getCourtroom(),
+            startedAt,
+            endedAt,
+            1
+        );
+        MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        savedMedia.setCreatedDateTime(startedAt);
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+        hearing.addMedia(savedMedia);
+        dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/nle/media-record.properties");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("actual Response {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/nle/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        log.info("expect Response {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithAllMediaProperties_ReturnFileSuccess() throws IOException {
+
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        MediaEntity media = MediaTestData.createMediaWith(
+            hearing.getCourtroom(),
+            startedAt,
+            endedAt,
+            1
+        );
+        MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        savedMedia.setCreatedDateTime(startedAt);
+        dartsDatabase.save(savedMedia);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+        hearing.addMedia(savedMedia);
+        dartsDatabase.getHearingRepository().saveAndFlush(hearing);
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/all_properties/media-record.properties");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("actual Response {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/all_properties/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        log.info("expect Response {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithNleTranscriptionProperties_ReturnFileSuccess() throws IOException {
+
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        authorisationStub.givenTestSchema();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            transcriptionDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("tests/arm/properties/nle/transcription-record.properties");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/nle/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+
+    }
+
+    @Test
+    void generateArchiveRecord_WithLiveTranscriptionProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        authorisationStub.givenTestSchema();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            transcriptionDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("tests/arm/properties/live/transcription-record.properties");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/live/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+
+    }
+
+    @Test
+    void generateArchiveRecord_WithAllPropertiesTranscription_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        authorisationStub.givenTestSchema();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            transcriptionDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
+            "tests/arm/properties/all_properties/transcription-record.properties");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/all_properties/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+
+    }
+
+    @Test
+    void generateArchiveRecord_WithNleAnnotationProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        String testAnnotation = "TestAnnotation";
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       testUser, uploadedDateTime, checksum
+            );
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocument,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "tests/arm/properties/nle/annotation-record.properties");
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/nle/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithLiveAnnotationProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        String testAnnotation = "TestAnnotation";
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       testUser, uploadedDateTime, checksum
+            );
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocument,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "tests/arm/properties/live/annotation-record.properties");
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/live/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithAllAnnotationProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        String testAnnotation = "TestAnnotation";
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       testUser, uploadedDateTime, checksum
+            );
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocument,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
+            "tests/arm/properties/all_properties/annotation-record.properties");
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/all_properties/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithNleCaseProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("tests/arm/properties/nle/case-record.properties");
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithLiveCaseProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("tests/arm/properties/live/case-record.properties");
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("actual Response {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("expect Response {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecord_WithAllCaseProperties_ReturnFileSuccess() throws IOException {
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("tests/arm/properties/all_properties/case-record.properties");
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/all_properties/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    private static String getFileContents(File archiveFile) throws IOException {
+        StringBuilder fileContents = new StringBuilder();
+        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContents.append(line);
+            }
+        }
+        return fileContents.toString();
+    }
+}
