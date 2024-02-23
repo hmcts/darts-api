@@ -203,41 +203,42 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         var mockDownloadableExternalObjectDirectories = mock(DownloadableExternalObjectDirectories.class);
-        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
-        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(mockDownloadableExternalObjectDirectories);
-        doNothing().when(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
-        when(mockDownloadableExternalObjectDirectories.getResponse()).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
-        when(mockFileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+        try (MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class)) {
+            when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(mockDownloadableExternalObjectDirectories);
+            doNothing().when(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+            when(mockDownloadableExternalObjectDirectories.getResponse()).thenReturn(mockFileBasedDownloadResponseMetaData);
+            when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+            when(mockFileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+            when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
-            .header(
-                "accept",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            );
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(header().string(
-                CONTENT_DISPOSITION,
-                "attachment; filename=\"" + fileName + "\""
-            ))
-            .andExpect(header().string(
-                CONTENT_TYPE,
-                fileType
-            ))
-            .andExpect(header().string(
-                TRANSCRIPTION_DOCUMENT_ID_HEADER,
-                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
-            ));
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
+                .header(
+                    "accept",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                );
+            mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                    CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileName + "\""
+                ))
+                .andExpect(header().string(
+                    CONTENT_TYPE,
+                    fileType
+                ))
+                .andExpect(header().string(
+                    TRANSCRIPTION_DOCUMENT_ID_HEADER,
+                    String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
+                ));
 
-        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
-        verify(mockFileBasedDownloadResponseMetaData).isSuccessfulDownload();
-        verify(mockFileBasedDownloadResponseMetaData).getInputStream();
-        verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
-        mockedStatic.close();
+            mockedStatic.verify(() -> DownloadableExternalObjectDirectories.getFileBasedDownload(anyList()));
+            verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            verify(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+            verify(mockFileBasedDownloadResponseMetaData).isSuccessfulDownload();
+            verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+            verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
+        }
     }
 
     @Test
@@ -266,41 +267,42 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         var mockDownloadableExternalObjectDirectories = mock(DownloadableExternalObjectDirectories.class);
-        MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class);
-        when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(mockDownloadableExternalObjectDirectories);
-        doNothing().when(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
-        when(mockDownloadableExternalObjectDirectories.getResponse()).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
-        when(mockFileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
+        try (MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class)) {
+            when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(mockDownloadableExternalObjectDirectories);
+            doNothing().when(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+            when(mockDownloadableExternalObjectDirectories.getResponse()).thenReturn(mockFileBasedDownloadResponseMetaData);
+            when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+            when(mockFileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+            when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
-            .header(
-                "accept",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            );
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
-            .andExpect(header().string(
-                CONTENT_DISPOSITION,
-                "attachment; filename=\"" + fileName + "\""
-            ))
-            .andExpect(header().string(
-                CONTENT_TYPE,
-                fileType
-            ))
-            .andExpect(header().string(
-                TRANSCRIPTION_DOCUMENT_ID_HEADER,
-                String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
-            ));
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
+                .header(
+                    "accept",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                );
+            mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                    CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileName + "\""
+                ))
+                .andExpect(header().string(
+                    CONTENT_TYPE,
+                    fileType
+                ))
+                .andExpect(header().string(
+                    TRANSCRIPTION_DOCUMENT_ID_HEADER,
+                    String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
+                ));
 
-        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
-        verify(mockFileBasedDownloadResponseMetaData).isSuccessfulDownload();
-        verify(mockFileBasedDownloadResponseMetaData).getInputStream();
-        verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
-        mockedStatic.close();
+            mockedStatic.verify(() -> DownloadableExternalObjectDirectories.getFileBasedDownload(anyList()));
+            verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            verify(mockDataManagementFacade).getDataFromUnstructuredArmAndDetsBlobs(mockDownloadableExternalObjectDirectories);
+            verify(mockFileBasedDownloadResponseMetaData).isSuccessfulDownload();
+            verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+            verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
+        }
     }
 
 }
