@@ -95,7 +95,7 @@ class TranscriptionDownloaderTest {
     }
 
     @Test
-    void throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() throws IOException {
+    void throwsExceptionIfTranscriptionDocumentHasNoExternalObjectDirectories() {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(emptyList());
 
@@ -104,7 +104,6 @@ class TranscriptionDownloaderTest {
 
         var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(storageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(null);
         when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(false);
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
@@ -112,21 +111,24 @@ class TranscriptionDownloaderTest {
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
         verify(storageBlobFileDownloadHelper).getDownloadResponse(anyList());
-        verify(fileBasedDownloadResponseMetaData).getContainerTypeUsedToDownload();
         verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
         verifyNoMoreInteractions(storageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
     }
 
     @Test
-    void throwsExceptionIfFailsToGetDownloadResponse() throws IOException {
+    void throwsExceptionIfFailsToGetDownloadResponseInputStream() throws IOException {
         var transcriptionDocument = someTranscriptionDocumentWithUploadDate(now());
         transcriptionDocument.setExternalObjectDirectoryEntities(List.of(someExternalObjectDirectoryWithCreationDate(now())));
 
         var transcription = someTranscriptionWith(List.of(transcriptionDocument));
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        when(storageBlobFileDownloadHelper.getDownloadResponse(transcriptionDocument.getExternalObjectDirectoryEntities()))
-            .thenThrow(new IOException());
+        var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        when(storageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
+        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+        when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+
+        when(fileBasedDownloadResponseMetaData.getInputStream()).thenThrow(new IOException());
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
             .isExactlyInstanceOf(DartsApiException.class)
@@ -155,7 +157,6 @@ class TranscriptionDownloaderTest {
 
         var fileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(storageBlobFileDownloadHelper.getDownloadResponse(anyList())).thenReturn(fileBasedDownloadResponseMetaData);
-        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
         when(fileBasedDownloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
         when(fileBasedDownloadResponseMetaData.getInputStream()).thenReturn(IOUtils.toInputStream("test-transcription", Charset.defaultCharset()));
 
@@ -169,7 +170,6 @@ class TranscriptionDownloaderTest {
         assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(InputStreamResource.class);
 
         verify(storageBlobFileDownloadHelper).getDownloadResponse(anyList());
-        verify(fileBasedDownloadResponseMetaData).getContainerTypeUsedToDownload();
         verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
         verify(fileBasedDownloadResponseMetaData).getInputStream();
         verifyNoMoreInteractions(storageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);

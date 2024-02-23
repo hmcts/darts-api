@@ -227,7 +227,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockStorageBlobFileDownloadHelper).getDownloadResponse(anyList());
-        verify(fileBasedDownloadResponseMetaData).getContainerTypeUsedToDownload();
         verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
         verify(fileBasedDownloadResponseMetaData).getInputStream();
         verifyNoMoreInteractions(mockStorageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
@@ -287,7 +286,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockStorageBlobFileDownloadHelper).getDownloadResponse(anyList());
-        verify(fileBasedDownloadResponseMetaData).getContainerTypeUsedToDownload();
         verify(fileBasedDownloadResponseMetaData).isSuccessfulDownload();
         verify(fileBasedDownloadResponseMetaData).getInputStream();
         verifyNoMoreInteractions(mockStorageBlobFileDownloadHelper, fileBasedDownloadResponseMetaData);
