@@ -43,7 +43,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports", "VariableDeclarationUsageDistance", "PMD.AssignmentInOperand"})
 class ArchiveRecordServiceIntTest extends IntegrationBase {
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 23);
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String DATE_FORMAT = "yyyy-MM-dd";
 
