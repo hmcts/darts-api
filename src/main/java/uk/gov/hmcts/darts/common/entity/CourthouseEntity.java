@@ -78,6 +78,10 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         }
 
         regions = (region == null) ? Collections.emptySet() : Collections.singleton(region);
+
+        if (region != null) {
+            region.getCourthouses().add(this);
+        }
     }
 
 }
