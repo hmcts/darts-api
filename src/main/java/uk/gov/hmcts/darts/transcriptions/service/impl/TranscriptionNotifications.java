@@ -47,6 +47,9 @@ public class TranscriptionNotifications {
                                             TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
+        // get the court case through the hearing association?
+        // what do we do for multiple hearings?
+        // or do we audit for each case associated with the transcription
         final var courtCaseEntity = transcriptionEntity.getCourtCase();
         switch (newStatusEnum) {
             case APPROVED -> {
@@ -80,6 +83,9 @@ public class TranscriptionNotifications {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(templateName)
             .userAccountsToEmail(List.of(transcription.getCreatedBy()))
+            // get the court case through the hearing association?
+            // what do we do for multiple hearings?
+            // or do we send a notification each case associated with the transcription
             .caseId(transcription.getCourtCase().getId())
             .templateValues(templateParams)
             .build();
@@ -93,11 +99,17 @@ public class TranscriptionNotifications {
     public void notifyApprovers(TranscriptionEntity transcription) {
         List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
             SecurityRoleEnum.APPROVER,
+            // get the court case through the hearing association?
+            // what do we do for multiple hearings?
+            // or do we send a notification each case associated with the transcription
             transcription.getCourtCase().getCourthouse()
         );
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())
             .userAccountsToEmail(usersToNotify)
+            // get the court case through the hearing association?
+            // what do we do for multiple hearings?
+            // or do we send a notification each case associated with the transcription
             .caseId(transcription.getCourtCase().getId())
             .build();
         notificationApi.scheduleNotification(request);

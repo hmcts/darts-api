@@ -66,6 +66,9 @@ public class TranscriptionResponseMapper {
     }
 
     public GetTranscriptionByIdResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {
+        // get the case to be included in the response
+        // should this be via the hearing? what about legacy transcriptions?
+        // we could pass the hearing ID in the request and get the case from there?
         CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
         if (isNull(courtCase)) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND);

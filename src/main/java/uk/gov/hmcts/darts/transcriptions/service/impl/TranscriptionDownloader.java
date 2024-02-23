@@ -50,6 +50,8 @@ public class TranscriptionDownloader {
             .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
             .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
+        // audit for every case?
+        // we could pass the hearing ID in the request and get the case from there?
         auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         return DownloadTranscriptResponse.builder()

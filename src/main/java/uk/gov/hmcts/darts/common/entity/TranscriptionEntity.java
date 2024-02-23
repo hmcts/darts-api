@@ -134,6 +134,8 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         return courtCases.get(0);
     }
 
+    // add @Deprecated here? or remove?
+    // the only non-test usage is above
     public HearingEntity getHearing() {
         if (CollectionUtils.isEmpty(hearings)) {
             return null;
