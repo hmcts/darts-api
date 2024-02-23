@@ -262,18 +262,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 requestId,
                 e
             );
-            mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
+            var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
-                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
+                notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
                            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 
-            logApi.atsProcessingUpdate(mediaRequestEntity);
-
-            log.info("I am a temporary info message");
-            log.error("I am a temporary error message");
+            logApi.atsProcessingUpdate(updatedMediaRequest);
         }
     }
 

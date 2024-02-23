@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.courthouses;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.AccessTokenClient;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CourthousesFunctionalTest extends FunctionalTest {
 
     public static final String COURTHOUSES_URI = "/courthouses";
+    public static final String ADMIN_COURTHOUSES_URI = "/admin/courthouses";
     public static final String COURTHOUSE_BODY = """
         {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham","code": 5705}""";
     public static final String COURTHOUSE_UPDATEBODY = """
@@ -38,6 +42,14 @@ class CourthousesFunctionalTest extends FunctionalTest {
     public static final int INTERNAL_SERVER_ERROR = 500;
 
     private int testCourthouseId;
+
+    @Autowired
+    private AccessTokenClient externalGlobalAccessTokenClient;
+
+    @Override
+    public RequestSpecification buildRequestWithExternalGlobalAccessAuth() {
+        return buildRequestWithAuth(externalGlobalAccessTokenClient);
+    }
 
     @Test
     @Order(1)
@@ -121,10 +133,10 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(6)
     void getExistingCourthouse() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
             .get()
             .then()
             .extract().response();
@@ -136,10 +148,10 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(7)
     void getCourthouseIdDoesNotExist() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_BAD_ID))
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + COURTHOUSE_BAD_ID))
             .get()
             .then()
             .extract().response();
