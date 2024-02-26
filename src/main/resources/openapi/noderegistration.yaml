@@ -78,8 +78,8 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "NODE_REGISTRATION_100"
-                title: "Could not find the courtroom."
+                type: "COMMON_100"
+                title: "Courthouse 'SWANSEA1' not found."
                 status: 400
 components:
   schemas:
