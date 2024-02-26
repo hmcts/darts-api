@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -255,10 +254,11 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         String cases = null;
-        if (nonNull(transcriptionDocumentEntity.getTranscription().getHearings())) {
-            List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getHearings()
+        if (nonNull(transcriptionDocumentEntity.getTranscription().getHearing())) {
+            cases = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber();
+        } else if (CollectionUtils.isNotEmpty(transcriptionDocumentEntity.getTranscription().getCourtCases())) {
+            List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getCourtCases()
                 .stream()
-                .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)
                 .toList();
             cases = caseListToString(caseNumbers);

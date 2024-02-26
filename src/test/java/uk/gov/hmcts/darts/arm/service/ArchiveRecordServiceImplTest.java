@@ -763,12 +763,7 @@ class ArchiveRecordServiceImplTest {
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
-        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
-        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
 
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
         when(courtCaseEntity1.getId()).thenReturn(1);
@@ -821,12 +816,7 @@ class ArchiveRecordServiceImplTest {
         when(courtCaseEntity1.getId()).thenReturn(1);
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
-        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
-        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
 
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
         when(courtCaseEntity1.getId()).thenReturn(1);
@@ -878,12 +868,7 @@ class ArchiveRecordServiceImplTest {
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
-        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
-        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
-
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
+        
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
         when(courtCaseEntity1.getId()).thenReturn(1);
