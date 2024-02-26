@@ -8,11 +8,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.darts.annotation.service.AnnotationService;
+import uk.gov.hmcts.darts.annotation.service.AnnotationUploadService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -23,11 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class AnnotationServiceTest extends IntegrationBase {
+class AnnotationUploadServiceTest extends IntegrationBase {
     private static final String REQUESTER_EMAIL = "test.user@example.com";
 
     @Autowired
-    private AnnotationService annotationService;
+    private AnnotationUploadService uploadService;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +45,7 @@ class AnnotationServiceTest extends IntegrationBase {
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
-        var annotationId = annotationService.process(document, annotation);
+        var annotationId = uploadService.upload(document, annotation);
 
         assertThat(dartsDatabase.findAnnotationById(annotationId))
             .isInstanceOf(AnnotationEntity.class);
@@ -58,7 +57,7 @@ class AnnotationServiceTest extends IntegrationBase {
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
-        var annotationId = annotationService.process(document, annotation);
+        var annotationId = uploadService.upload(document, annotation);
 
         var annotations = dartsDatabase.findAnnotationsFor(hearing.getId());
         assertThat(annotations).extracting("id").containsExactly(annotationId);
@@ -71,7 +70,7 @@ class AnnotationServiceTest extends IntegrationBase {
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
-        var annotationId = annotationService.process(document, annotation);
+        var annotationId = uploadService.upload(document, annotation);
 
         assertThat(dartsDatabase.findAnnotationDocumentFor(annotationId))
             .isInstanceOf(AnnotationDocumentEntity.class);
@@ -83,17 +82,17 @@ class AnnotationServiceTest extends IntegrationBase {
         var annotation = someAnnotationFor(hearing);
         var document = someMultipartFile();
 
-        var annotationId = annotationService.process(document, annotation);
+        var annotationId = uploadService.upload(document, annotation);
 
-        assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId))
-            .isInstanceOf(ExternalObjectDirectoryEntity.class);
+        assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId).size())
+            .isEqualTo(2);
     }
 
     private MultipartFile someMultipartFile() {
         return new MockMultipartFile(
             "some-multi-part-file",
-            "original-filename",
-            "some-content-type",
+            "original-filename.doc",
+            "application/msword",
             "some-content".getBytes());
     }
 
@@ -102,6 +101,5 @@ class AnnotationServiceTest extends IntegrationBase {
         annotation.setHearingId(hearing.getId());
         return annotation;
     }
-
 
 }

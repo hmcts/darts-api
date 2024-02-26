@@ -1,23 +1,26 @@
-package uk.gov.hmcts.darts.annotation;
+package uk.gov.hmcts.darts.annotation.builders;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.annotation.component.ExternalObjectDirectoryBuilder;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,13 +42,14 @@ class ExternalObjectDirectoryBuilderTest {
         externalObjectDirectoryBuilder = new ExternalObjectDirectoryBuilder(objectRecordStatusRepository, externalLocationTypeRepository);
     }
 
-    @Test
-    void buildsExternalObjectDirectoryCorrectly() {
+    @ParameterizedTest
+    @EnumSource(ExternalLocationTypeEnum.class)
+    void buildsExternalObjectDirectoryCorrectly(ExternalLocationTypeEnum externalLocationType) {
         when(objectRecordStatusRepository.getReferenceById(STORED.getId())).thenReturn(OBJECT_RECORD_STATUS);
-        when(externalLocationTypeRepository.getReferenceById(INBOUND.getId())).thenReturn(EXTERNAL_LOCATION_TYPE);
+        when(externalLocationTypeRepository.getReferenceById(any())).thenReturn(EXTERNAL_LOCATION_TYPE);
         var annotationDocumentEntity = someAnnotationDocument();
 
-        assertThat(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, SOME_EXTERNAL_LOCATION))
+        assertThat(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, SOME_EXTERNAL_LOCATION, externalLocationType))
             .hasFieldOrPropertyWithValue("annotationDocumentEntity", annotationDocumentEntity)
             .hasFieldOrPropertyWithValue("status", OBJECT_RECORD_STATUS)
             .hasFieldOrPropertyWithValue("externalLocationType", EXTERNAL_LOCATION_TYPE)
@@ -54,6 +58,8 @@ class ExternalObjectDirectoryBuilderTest {
             .hasFieldOrPropertyWithValue("createdBy", annotationDocumentEntity.getUploadedBy())
             .hasFieldOrPropertyWithValue("verificationAttempts", 1)
             .hasFieldOrPropertyWithValue("lastModifiedBy", annotationDocumentEntity.getUploadedBy());
+
+        verify(externalLocationTypeRepository, times(1)).getReferenceById(externalLocationType.getId());
     }
 
     private AnnotationDocumentEntity someAnnotationDocument() {

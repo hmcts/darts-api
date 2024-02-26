@@ -1,11 +1,10 @@
-package uk.gov.hmcts.darts.annotation;
+package uk.gov.hmcts.darts.annotation.validators;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.annotation.component.AnnotationUploadValidator;
 import uk.gov.hmcts.darts.annotation.errors.AnnotationApiError;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -16,23 +15,23 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AnnotationUploadValidatorTest {
+class HearingExistsValidatorTest {
 
     @Mock
     private HearingRepository hearingRepository;
 
-    private AnnotationUploadValidator annotationUploadValidator;
+    private HearingExistsValidator hearingExistsValidator;
 
     @BeforeEach
     void setUp() {
-        annotationUploadValidator = new AnnotationUploadValidator(hearingRepository);
+        hearingExistsValidator = new HearingExistsValidator(hearingRepository);
     }
 
     @Test
     void throwsIfHearingNotFound() {
         when(hearingRepository.existsById(1)).thenReturn(false);
 
-        assertThatThrownBy(() -> annotationUploadValidator.validate(someAnnotationForHearingId(1)))
+        assertThatThrownBy(() -> hearingExistsValidator.validate(someAnnotationForHearingId(1)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", AnnotationApiError.HEARING_NOT_FOUND);
     }
@@ -41,7 +40,7 @@ class AnnotationUploadValidatorTest {
     void doesntThrowIfHearingFound() {
         when(hearingRepository.existsById(1)).thenReturn(true);
 
-        assertThatNoException().isThrownBy(() -> annotationUploadValidator.validate(someAnnotationForHearingId(1)));
+        assertThatNoException().isThrownBy(() -> hearingExistsValidator.validate(someAnnotationForHearingId(1)));
     }
 
     private Annotation someAnnotationForHearingId(int hearingId) {

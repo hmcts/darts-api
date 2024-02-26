@@ -84,6 +84,11 @@ public class DataManagementApiImpl implements DataManagementApi {
         return dataManagementService.saveBlobData(getInboundContainerName(), binaryData);
     }
 
+    @Override
+    public UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData) {
+        return dataManagementService.saveBlobData(getUnstructuredContainerName(), binaryData);
+    }
+
     private String getOutboundContainerName() {
         return dataManagementConfiguration.getOutboundContainerName();
     }

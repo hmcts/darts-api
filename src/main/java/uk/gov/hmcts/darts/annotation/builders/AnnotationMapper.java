@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.annotation.component;
+package uk.gov.hmcts.darts.annotation.builders;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
