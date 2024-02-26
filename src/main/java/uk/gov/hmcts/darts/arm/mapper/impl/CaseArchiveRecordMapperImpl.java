@@ -13,9 +13,7 @@ import uk.gov.hmcts.darts.arm.model.record.metadata.RecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.CaseCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
@@ -243,14 +241,8 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private String getCaseNumbers(CaseDocumentEntity caseDocument) {
         String cases = null;
-        if (CollectionUtils.isNotEmpty(caseDocument.getCourtCase().getHearings())) {
-            List<HearingEntity> hearings = caseDocument.getCourtCase().getHearings();
-            List<String> caseNumbers = hearings
-                .stream()
-                .map(HearingEntity::getCourtCase)
-                .map(CourtCaseEntity::getCaseNumber)
-                .toList();
-            cases = caseListToString(caseNumbers);
+        if (nonNull(caseDocument.getCourtCase())) {
+            cases = caseDocument.getCourtCase().getCaseNumber();
         }
         return cases;
     }

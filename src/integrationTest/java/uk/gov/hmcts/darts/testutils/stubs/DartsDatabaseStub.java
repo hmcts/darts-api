@@ -151,6 +151,7 @@ public class DartsDatabaseStub {
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
+    private final CaseDocumentStub caseDocumentStub;
     private final CaseRetentionStub caseRetentionStub;
     private final CourthouseStub courthouseStub;
     private final CourtroomStub courtroomStub;

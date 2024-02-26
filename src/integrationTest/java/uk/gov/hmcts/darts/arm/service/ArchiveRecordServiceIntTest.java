@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -452,6 +453,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     void generateArchiveRecord_WithNleAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
@@ -507,6 +509,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     void generateArchiveRecord_WithLiveAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
@@ -565,6 +568,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     void generateArchiveRecord_WithAllAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
+        authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
@@ -626,17 +630,13 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
+        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
+            caseDocument,
             ARM_DROP_ZONE,
             ARM,
             UUID.randomUUID()
@@ -656,7 +656,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        String prefix = String.format("%d_%d_1", armEod.getId(), caseDocument.getId());
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
@@ -666,8 +666,14 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(caseDocument.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(courtCaseEntity.getId()));
+        expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getUploadedTs().format(formatter));
+
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
@@ -678,17 +684,13 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
 
-        MediaEntity savedMedia = dartsDatabase.save(
-            MediaTestData.createMediaWith(
-                hearing.getCourtroom(),
-                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
-                1
-            ));
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
+        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
+            caseDocument,
             ARM_DROP_ZONE,
             ARM,
             UUID.randomUUID()
@@ -708,7 +710,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        String prefix = String.format("%d_%d_1", armEod.getId(), caseDocument.getId());
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
@@ -718,8 +720,14 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(caseDocument.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(courtCaseEntity.getId()));
+        expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getUploadedTs().format(formatter));
+
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
@@ -730,9 +738,13 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
 
-        CaseDocumentEntity caseDocumentEntity = null;
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
+        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+
+        CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            caseDocumentEntity,
+            caseDocument,
             ARM_DROP_ZONE,
             ARM,
             UUID.randomUUID()
@@ -752,7 +764,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
-        String prefix = String.format("%d_%d_1", armEod.getId(), caseDocumentEntity.getId());
+        String prefix = String.format("%d_%d_1", armEod.getId(), caseDocument.getId());
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
@@ -762,8 +774,14 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/all_properties/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
+        expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(caseDocument.getId()));
+        expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(courtCaseEntity.getId()));
+        expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getUploadedTs().format(formatter));
+
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
