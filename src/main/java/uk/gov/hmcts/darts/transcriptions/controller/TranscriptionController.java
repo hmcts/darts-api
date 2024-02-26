@@ -107,10 +107,6 @@ public class TranscriptionController implements TranscriptionApi {
                 String.format("attachment; filename=\"%s\"", downloadTranscriptResponse.getFileName())
             )
             .header(
-                "external_location",
-                downloadTranscriptResponse.getExternalLocation().toString()
-            )
-            .header(
                 "transcription_document_id",
                 String.valueOf(downloadTranscriptResponse.getTranscriptionDocumentId())
             )
