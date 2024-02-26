@@ -43,9 +43,9 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             if (container.isPresent() && !downloadableExternalObjectDirectories.getResponse().isProcessedByContainer()) {
                 Optional<String> containerName = container.get().getContainerName(type);
                 if (containerName.isPresent()
-                        && dataToDownload.isForLocationType(getForDatastoreContainerType(type))
-                        && processObjectDirectoryForContainerType(dataToDownload, type, configuration.isFetchFromDetsEnabled())) {
-                        log.info("Downloading blob id {} from container {}", dataToDownload.getExternalLocation(), type.name());
+                    && dataToDownload.isForLocationType(getForDatastoreContainerType(type))
+                    && processObjectDirectoryForContainerType(dataToDownload, type, configuration.isFetchFromDetsEnabled())) {
+                    log.info("Downloading blob id {} from container {}", dataToDownload.getId(), type.name());
 
                     processDownloadResponse(type, dataToDownload, downloadableExternalObjectDirectories, container.get());
                 }
@@ -62,8 +62,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     }
 
     private void processDownloadResponse(DatastoreContainerType type, ExternalObjectDirectoryEntity processing,
-                                        DownloadableExternalObjectDirectories downloadableExternalObjectDirectories,
-                                        BlobContainerDownloadable container) {
+                                         DownloadableExternalObjectDirectories downloadableExternalObjectDirectories,
+                                         BlobContainerDownloadable container) {
         if (!downloadableExternalObjectDirectories.getResponse().isSuccessfulDownload()) {
             boolean success = false;
             try {
@@ -79,7 +79,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             }
 
             // if we have been asked to stop processing then fail fast and do not process the rest of the downloads
-            processResponse(downloadableExternalObjectDirectories, success,  type);
+            processResponse(downloadableExternalObjectDirectories, success, type);
         }
     }
 
@@ -89,8 +89,8 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     }
 
     private boolean processObjectDirectoryForContainerType(
-            ExternalObjectDirectoryEntity externalObjectDirectory, DatastoreContainerType type,
-            boolean fetchFromDets) {
+        ExternalObjectDirectoryEntity externalObjectDirectory, DatastoreContainerType type,
+        boolean fetchFromDets) {
         return type != DatastoreContainerType.DETS || fetchFromDets
                 && externalObjectDirectory.isForLocationType(ExternalLocationTypeEnum.DETS);
     }
@@ -110,7 +110,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
     private Optional<BlobContainerDownloadable> getSupportedContainer(DatastoreContainerType typeToFind) {
         return supportedDownloadableContainers.stream().filter(type -> type.getContainerName(typeToFind).isPresent())
-                .findFirst();
+            .findFirst();
     }
 
     private void processResponse(DownloadableExternalObjectDirectories download,

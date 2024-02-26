@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2317cf9a-af64-4bc3-9d6f-82021045d1f9",
+		"_postman_id": "a354837d-3e0a-4054-9aba-5d7653866f9d",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32425403"
@@ -794,62 +794,6 @@
 							],
 							"path": [
 								"audio-requests"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio-requests?expired=false",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "user_id",
-								"value": "{{user_id}}"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests?expired=false",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests"
-							],
-							"query": [
-								{
-									"key": "expired",
-									"value": "false"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio-requests?expired=true",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "user_id",
-								"value": "{{user_id}}"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests?expired=true",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests"
-							],
-							"query": [
-								{
-									"key": "expired",
-									"value": "true"
-								}
 							]
 						}
 					},

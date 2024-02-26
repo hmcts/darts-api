@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -34,10 +32,7 @@ public class RegionEntity {
     @Column(name = "region_name")
     private String regionName;
 
-    @ManyToMany
-    @JoinTable(name = "courthouse_region_ae",
-        joinColumns = {@JoinColumn(name = "cth_id")},
-        inverseJoinColumns = {@JoinColumn(name = "reg_id")})
-    private Set<CourthouseEntity> courthouseEntities = new LinkedHashSet<>();
+    @ManyToMany(mappedBy = CourthouseEntity_.REGIONS)
+    private Set<CourthouseEntity> courthouses = new LinkedHashSet<>();
 
 }

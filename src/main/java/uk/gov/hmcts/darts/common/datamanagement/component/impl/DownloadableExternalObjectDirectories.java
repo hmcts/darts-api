@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.datamanagement.component.impl;
 import lombok.Getter;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
-import java.io.IOException;
 import java.util.Collection;
 
 @Getter
@@ -16,7 +15,7 @@ public class DownloadableExternalObjectDirectories {
         this.response = response;
     }
 
-    public static DownloadableExternalObjectDirectories getFileBasedDownload(Collection<ExternalObjectDirectoryEntity> entities) throws IOException {
+    public static DownloadableExternalObjectDirectories getFileBasedDownload(Collection<ExternalObjectDirectoryEntity> entities) {
         return new DownloadableExternalObjectDirectories(entities, new FileBasedDownloadResponseMetaData());
     }
 }
