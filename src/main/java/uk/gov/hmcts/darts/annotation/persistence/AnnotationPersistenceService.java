@@ -21,11 +21,18 @@ public class AnnotationPersistenceService {
     private final AuthorisationApi authorisationApi;
 
     @Transactional
-    public ExternalObjectDirectoryEntity persistAnnotation(ExternalObjectDirectoryEntity externalObjectDirectoryEntity, Integer hearingId) {
-        hearingRepository.findById(hearingId)
-            .ifPresent(hearingEntity -> hearingEntity.addAnnotation(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getAnnotation()));
+    public void persistAnnotation(
+            ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
+            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+            Integer hearingId) {
 
-        return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+      hearingRepository.findById(hearingId).ifPresent(hearing -> {
+            var annotation = inboundExternalObjectDirectory.getAnnotationDocumentEntity().getAnnotation();
+            hearing.addAnnotation(annotation);
+        });
+
+        externalObjectDirectoryRepository.save(inboundExternalObjectDirectory);
+        externalObjectDirectoryRepository.save(unstructuredExternalObjectDirectory);
     }
 
     @Transactional

@@ -33,4 +33,5 @@ public interface DataManagementApi extends BlobContainerDownloadable {
 
     UUID saveBlobDataToInboundContainer(BinaryData binaryData);
 
+    UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData);
 }

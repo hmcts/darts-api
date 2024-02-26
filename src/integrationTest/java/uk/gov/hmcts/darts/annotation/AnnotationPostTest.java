@@ -133,8 +133,8 @@ class AnnotationPostTest extends IntegrationBase {
     private static MockMultipartFile someAnnotationPostDocument() {
         return new MockMultipartFile(
                 "file",
-                "some-filename.txt",
-                "some-content-type",
+                "some-filename.doc",
+                "application/msword",
                 "some-content".getBytes()
         );
     }
