@@ -38,6 +38,7 @@ import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -52,7 +53,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 @RequiredArgsConstructor
 public class TranscriptionStub {
 
-    public static final String REQUESTED_TRANSCRIPTION = "Requested transcription";
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -166,10 +166,29 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION)
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
+            null
         );
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
+
+    @Transactional
+    public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               String comment,
+                                                                               OffsetDateTime workflowTimestamp) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
+            comment
+        );
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
 
     @Transactional
     public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
@@ -182,7 +201,8 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(COMPLETE)
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
@@ -201,7 +221,8 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(COMPLETE)
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         transcriptionEntity.setStartTime(startDate);
@@ -223,7 +244,8 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(COMPLETE)
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         transcriptionEntity.setStartTime(startDate);
@@ -344,7 +366,8 @@ public class TranscriptionStub {
                                                               CourtCaseEntity courtCaseEntity,
                                                               HearingEntity hearingEntity,
                                                               OffsetDateTime workflowTimestamp,
-                                                              TranscriptionStatusEntity status) {
+                                                              TranscriptionStatusEntity status,
+                                                              String comment) {
         final var transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
@@ -370,12 +393,12 @@ public class TranscriptionStub {
         );
         transcriptionWorkflowRepository.saveAndFlush(requestedTranscriptionWorkflowEntity);
 
-        final var transcriptionComment = createTranscriptionComment(requestedTranscriptionWorkflowEntity,
-                                                                    REQUESTED_TRANSCRIPTION,
-                                                                    userAccountEntity);
-        transcriptionCommentRepository.save(transcriptionComment);
+        if (nonNull(comment)) {
+            final var transcriptionComment = createTranscriptionComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
+            transcriptionCommentRepository.save(transcriptionComment);
 
-        requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
+            requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
+        }
 
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -390,8 +413,8 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    private TranscriptionCommentEntity createTranscriptionComment(TranscriptionWorkflowEntity workflowEntity, String comment,
-                                                                  UserAccountEntity userAccountEntity) {
+    public TranscriptionCommentEntity createTranscriptionComment(TranscriptionWorkflowEntity workflowEntity, String comment,
+                                                                 UserAccountEntity userAccountEntity) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setTranscription(workflowEntity.getTranscription());
         transcriptionCommentEntity.setTranscriptionWorkflow(workflowEntity);

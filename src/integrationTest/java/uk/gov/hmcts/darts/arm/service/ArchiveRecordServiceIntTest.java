@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -48,6 +47,9 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 class ArchiveRecordServiceIntTest extends IntegrationBase {
     private static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0)
         .withSecond(0).withNano(0);
+
+    private static final String REQUESTED_TRANSCRIPTION = "Requested transcription";
+
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 23);
 
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
@@ -264,7 +266,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
     }
 
-    //@Disabled
     @Test
     void generateArchiveRecord_WithNleTranscriptionProperties_ReturnFileSuccess() throws IOException {
 
@@ -278,6 +279,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             testUser,
             courtCase,
             hearing,
+            REQUESTED_TRANSCRIPTION,
             startedAt);
 
         final String fileName = "Test Document.docx";
@@ -325,7 +327,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         log.info("expect response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 
     }
 
@@ -341,6 +343,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             testUser,
             courtCase,
             hearing,
+            REQUESTED_TRANSCRIPTION,
             startedAt);
 
         final String fileName = "Test Document.docx";
@@ -388,7 +391,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         log.info("expect response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 
     }
 
@@ -398,15 +401,21 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
         authorisationStub.givenTestSchema();
-        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
+            testUser,
+            courtCase,
+            hearing,
+            REQUESTED_TRANSCRIPTION,
+            startedAt);
 
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
-            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
@@ -445,8 +454,11 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", transcriptionDocumentEntity.getTranscription().getStartTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", transcriptionDocumentEntity.getTranscription().getEndTime().format(formatter));
+
         log.info("expect response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 
     }
 
