@@ -56,7 +56,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     }
 
     @Test
-    void testInvalidCourtroom() throws Exception {
+    void testCourtroomNotExist() throws Exception {
         setupExternalUserForCourthouse(null);
         dartsDatabase.createCourthouseUnlessExists("SWANSEA");
 
@@ -66,6 +66,16 @@ class NodeRegistrationControllerTest extends IntegrationBase {
         assertNotNull(courtroomEntity);
         String response = mvcResult.getResponse().getContentAsString();
         assertTrue(response.contains("node_id"));
+    }
+
+    @Test
+    void testCourthouseNotExist() throws Exception {
+        setupExternalUserForCourthouse(null);
+
+        MockHttpServletRequestBuilder requestBuilder = buildRequest("SWANSEA", "999", "DAR");
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+        String response = mvcResult.getResponse().getContentAsString();
+        assertTrue(response.contains("Courthouse 'SWANSEA' not found."));
     }
 
     @Test
