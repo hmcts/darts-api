@@ -33,6 +33,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
+                SELECT eod.media.id FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.media.id in :mediaIdList
+                AND eod.status = :status
+                AND eod.externalLocationType = :externalLocationType
+            """
+    )
+    List<Integer> findMediaIdsByInMediaIdStatusAndType(List<Integer> mediaIdList, ObjectRecordStatusEntity status,
+                                                       ExternalLocationTypeEntity externalLocationType);
+
+    @Query(
+        """
             SELECT eo FROM ExternalObjectDirectoryEntity eo
             WHERE eo.status = :status
             AND eo.externalLocationType = :location1
@@ -84,6 +95,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                                             ExternalLocationTypeEntity type,
                                                                                             Integer transferAttempts);
 
+    List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
     @Query(
         """
@@ -116,6 +128,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
+
     @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
@@ -134,6 +148,39 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                 ExternalLocationTypeEntity location2,
                                                                 OffsetDateTime lastModifiedBefore);
 
+    @Query(
+        """
+
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+                  JOIN eod.annotationDocumentEntity ade
+                  JOIN ade.annotation ann
+                  JOIN ann.annotationDocuments annD
+                  WHERE ann.id = :annotationId
+                  AND eod.status = :status
+                  AND annD.id = :annotationDocumentId
+                  ORDER BY eod.createdDateTime DESC
+                  """
+    )
+    List<ExternalObjectDirectoryEntity> findByAnnotationIdAndAnnotationDocumentId(Integer annotationId,
+                                                                                  Integer annotationDocumentId,
+                                                                                  ObjectRecordStatusEntity status);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status in :statuses
+            AND eod.externalLocationType = :locationType
+            AND eod.responseCleaned = :responseCleaned
+            AND eod.lastModifiedDateTime < :lastModifiedBefore
+            order by eod.lastModifiedDateTime
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+        List<ObjectRecordStatusEntity> statuses,
+        ExternalLocationTypeEntity locationType,
+        boolean responseCleaned,
+        OffsetDateTime lastModifiedBefore);
+
     @Modifying(clearAutomatically = true)
     @Query(
         """
@@ -142,7 +189,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             eod.lastModifiedBy = :userAccount,
             eod.lastModifiedDateTime = :timestamp
             where eod.id in :idsToDelete
-            """)
+            """
+    )
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
 
-}
+    }

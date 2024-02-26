@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.event.service.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
@@ -53,6 +56,9 @@ public class StopAndCloseHandler extends EventHandlerBase {
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final RetentionApi retentionApi;
+
+    @Value("${darts.retention.overridable-fixed-policy-keys}")
+    List<String> overridableFixedPolicyKeys;
 
     public StopAndCloseHandler(RetrieveCoreObjectService retrieveCoreObjectService,
                                EventRepository eventRepository,
@@ -98,6 +104,12 @@ public class StopAndCloseHandler extends EventHandlerBase {
             return;
         }
 
+        //ignore the caseTotalSentence if it's not an overridable policy
+        if (dartsEvent.getRetentionPolicy().getCaseTotalSentence() != null && !overridableFixedPolicyKeys.contains(
+            dartsEvent.getRetentionPolicy().getCaseRetentionFixedPolicy())) {
+            dartsEvent.getRetentionPolicy().setCaseTotalSentence(null);
+        }
+
         Optional<PendingRetention> latestPendingRetentionOpt = caseRetentionRepository.findLatestPendingRetention(courtCase);
         if (latestPendingRetentionOpt.isEmpty()) {
             closeCase(dartsEvent, courtCase);
@@ -122,10 +134,13 @@ public class StopAndCloseHandler extends EventHandlerBase {
         }
     }
 
-    private static void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
-        //setting the case to closed after notifying DAR Pc to ensure notification is sent.
-        courtCase.setClosed(TRUE);
-        courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
+    private void closeCase(DartsEvent dartsEvent, CourtCaseEntity courtCase) {
+        if (BooleanUtils.isNotTrue(courtCase.getClosed()) || courtCase.getCaseClosedTimestamp() == null) {
+            //setting the case to closed after notifying DAR Pc to ensure notification is sent.
+            courtCase.setClosed(TRUE);
+            courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
+            courtCase.setLastModifiedBy(authorisationApi.getCurrentUser());
+        }
     }
 
     private void updateExistingRetention(CaseManagementRetentionEntity caseManagementRetentionEntity, CaseRetentionEntity existingCaseRetention,
@@ -187,13 +202,16 @@ public class StopAndCloseHandler extends EventHandlerBase {
     }
 
     private RetentionPolicyTypeEntity getRetentionPolicy(String fixedPolicyKey) {
-        Optional<RetentionPolicyTypeEntity> retentionPolicyOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+        List<RetentionPolicyTypeEntity> retentionPolicyList = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
             fixedPolicyKey, currentTimeHelper.currentOffsetDateTime());
-        if (retentionPolicyOpt.isEmpty()) {
+        if (retentionPolicyList.isEmpty()) {
             throw new DartsApiException(EVENT_DATA_NOT_FOUND,
                                         MessageFormat.format("Could not find a retention policy for fixedPolicyKey ''{0}''", fixedPolicyKey));
+        } else if (retentionPolicyList.size() > 1) {
+            throw new DartsApiException(EVENT_DATA_NOT_FOUND,
+                                        MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", fixedPolicyKey));
         }
-        return retentionPolicyOpt.get();
+        return retentionPolicyList.get(0);
     }
 
 }

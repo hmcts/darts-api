@@ -71,4 +71,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
         hearingList.add(hearingEntity);
     }
 
+    public boolean isOwnedBy(UserAccountEntity userAccount) {
+        return userAccount.getId().equals(currentOwner.getId());
+    }
 }

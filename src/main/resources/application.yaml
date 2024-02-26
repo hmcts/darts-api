@@ -133,6 +133,7 @@ darts:
       unstructured:
         arm-minimum:
           weeks: 30
+    pending-retention-days: 7
   daily-list:
     housekeeping:
       enabled: true
@@ -159,6 +160,8 @@ darts:
         transcription_available: b3378991-ad90-4430-8005-45dcb35741b8
         transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
+  retention:
+    overridable-fixed-policy-keys: 3
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
@@ -184,6 +187,8 @@ darts:
       transcription-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
       annotation-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
       case-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+
+      response-cleanup-buffer-days: 0
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
@@ -246,7 +251,8 @@ darts:
       daily-test-event-text:
         xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
-
+  hikari:
+    maximum-pool-size: 50
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.BlobClient;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.PartialFailureException;
@@ -38,7 +41,6 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.component.YourTranscriptsQuery;
-import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -65,7 +67,9 @@ import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -77,7 +81,9 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
@@ -97,10 +103,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @SuppressWarnings({"PMD.ExcessiveImports"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
-    private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
     public static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
-
-    private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -183,7 +186,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
         return updateTranscription(transcriptionId, updateTranscription, false);
@@ -191,7 +193,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
@@ -261,7 +262,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
         transcription.setIsManualTranscription(isManual);
-        transcription.setIsManualTranscription(isManual);
         transcription.setHideRequestFromRequestor(false);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
@@ -326,38 +326,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public void closeTranscriptions() {
-        try {
-            List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
-            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now()
-                .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
-            List<TranscriptionEntity> transcriptionsToBeClosed =
-                transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
-                    finishedTranscriptionStatuses,
-                    lastCreatedDateTime
-                );
-            if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
-                log.info("No transcriptions to be closed off");
-            } else {
-                log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
-                for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
-                    closeTranscription(transcriptionToBeClosed.getId(), AUTOMATICALLY_CLOSED_TRANSCRIPTION);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Unable to close transcriptions {}", e.getMessage());
-        }
-    }
-
-    private void closeTranscription(Integer transcriptionId, String transcriptionComment) {
+    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
             updateTranscription(transcriptionId, updateTranscription);
-            log.info("Closed off transcription {}", transcriptionId);
+            log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
-            log.error("Unable to close transcription {} - {}", transcriptionId, e.getMessage());
+            log.error("Unable to close transcription {}", transcriptionId, e);
         }
     }
 
@@ -380,12 +357,18 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
 
-        final UUID externalLocation;
+        final BlobClient inboundBlobCLient;
+        final BlobClient unstructuredBlobClient;
         final String checksum;
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put(TRANSCRIPTION_ID, String.valueOf(transcriptionId));
+
         try {
             BinaryData binaryData = BinaryData.fromStream(transcript.getInputStream());
             checksum = fileContentChecksum.calculate(binaryData.toBytes());
-            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
+            inboundBlobCLient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.INBOUND, metadata);
+            unstructuredBlobClient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.UNSTRUCTURED, metadata);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_ATTACH_TRANSCRIPT, e);
         }
@@ -397,22 +380,23 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
         transcriptionDocumentEntity.setFileType(transcript.getContentType());
-        transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
 
-        final var externalObjectDirectoryEntity = saveExternalObjectDirectory(
-            externalLocation, checksum, userAccountEntity, transcriptionDocumentEntity);
+        final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
+            UUID.fromString(inboundBlobCLient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
+        final var externalObjectDirectoryUnstructuredEntity = saveExternalObjectDirectory(
+            UUID.fromString(unstructuredBlobClient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, UNSTRUCTURED);
 
-        transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
+        transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryInboundEntity);
+        transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryUnstructuredEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
 
         auditApi.recordAudit(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
-        attachTranscriptResponse.setTranscriptionDocumentId(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()
-                                                                .getId());
+        attachTranscriptResponse.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());
         attachTranscriptResponse.setTranscriptionWorkflowId(updateTranscription.getTranscriptionWorkflowId());
 
         return attachTranscriptResponse;
@@ -460,12 +444,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
                                                                       String checksum,
                                                                       UserAccountEntity userAccountEntity,
-                                                                      TranscriptionDocumentEntity transcriptionDocumentEntity) {
+                                                                      TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                                      ExternalLocationTypeEnum externalLocationTypeEnum) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
             ObjectRecordStatusEnum.STORED.getId()));
-        externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
+        externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
         externalObjectDirectoryEntity.setVerificationAttempts(INITIAL_VERIFICATION_ATTEMPTS);
@@ -475,7 +460,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return externalObjectDirectoryEntity;
     }
 
-    private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
+    @Override
+    public List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
         List<TranscriptionStatusEntity> transcriptionStatuses = new ArrayList<>();
         transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.CLOSED.getId()));
         transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.COMPLETE.getId()));

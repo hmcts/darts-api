@@ -268,5 +268,4 @@ class AuthorisationImplTest extends IntegrationBase {
         assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER.getTitle(), exception.getMessage());
         assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER, exception.getError());
     }
-
 }

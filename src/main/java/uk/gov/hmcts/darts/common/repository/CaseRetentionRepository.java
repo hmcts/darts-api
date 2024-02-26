@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.event.model.stopandclosehandler.PendingRetention;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,4 +80,14 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         """)
     Optional<PendingRetention> findLatestPendingRetention(CourtCaseEntity courtCase);
 
+
+    @Query("""
+        SELECT c
+        FROM CaseRetentionEntity c
+        WHERE currentState='PENDING'
+        AND createdDateTime  <= :pendingCutoff
+        ORDER BY createdDateTime DESC
+        """
+    )
+    List<CaseRetentionEntity> findPendingRetention(OffsetDateTime pendingCutoff);
 }

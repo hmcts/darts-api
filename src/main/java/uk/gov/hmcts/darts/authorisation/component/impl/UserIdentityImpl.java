@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 
 import java.util.List;
 import java.util.Set;
@@ -30,6 +31,7 @@ public class UserIdentityImpl implements UserIdentity {
     private static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;
+    private final UserRolesCourthousesRepository userRolesCourthousesRepository;
 
     private String getEmailAddressFromToken() {
         if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
@@ -117,5 +119,11 @@ public class UserIdentityImpl implements UserIdentity {
             }
         }
         return userHasGlobalAccess;
+    }
+
+    @Override
+    public List<Integer> getListOfCourthouseIdsUserHasAccessTo() {
+        UserAccountEntity userAccount = getUserAccount();
+        return userRolesCourthousesRepository.findAllCourthouseIdsByUserAccount(userAccount);
     }
 }

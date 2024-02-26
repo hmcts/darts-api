@@ -5,20 +5,37 @@ import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,6 +43,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
@@ -38,27 +56,120 @@ class CourthouseApiTest extends IntegrationBase {
         "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseDisplayName.json";
     private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
 
+    private static final String ORIGINAL_USERNAME = "James Smith";
+    private static final String ORIGINAL_EMAIL_ADDRESS = "james.smith@hmcts.net";
+    private static final String ORIGINAL_DESCRIPTION = "A test user";
+    private static final boolean ORIGINAL_SYSTEM_USER_FLAG = false;
+    private static final OffsetDateTime ORIGINAL_LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime ORIGINAL_LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime ORIGINAL_CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private AdminUserStub adminUserStub;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     @Test
     void courthousesGet() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
         Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
-        MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", addedId)
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
             .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andDo(print())
+            .andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+        assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
+        assertFalse(response.getResponse().getContentAsString().contains("region_id"));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+
+    }
+
+    @Test
+    @Transactional
+    void courthousesWithRegionAndSecurityGroupsGet() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        final Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists("HAVERFORDWEST");
+
+        RegionEntity region = new RegionEntity();
+        region.setId(5);
+        courtHouseEntity.setRegion(region);
+
+        Set<SecurityGroupEntity> secGrps = new LinkedHashSet<>();
+        SecurityGroupEntity s1 = new SecurityGroupEntity();
+        s1.setId(3);
+        secGrps.add(s1);
+        SecurityGroupEntity s2 = new SecurityGroupEntity();
+        s2.setId(4);
+        secGrps.add(s2);
+
+        courtHouseEntity.setSecurityGroups(secGrps);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.region_id", is(5)))
+            .andExpect(jsonPath("$.security_group_ids", hasSize(2)))
+            .andExpect(jsonPath("$.security_group_ids", contains(3,4)))
+            .andDo(print())
+            .andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+        assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
+        assertTrue(response.getResponse().getContentAsString().contains("region_id"));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+
     }
 
     @Test
     void courthousesGetNonExistingId() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", 900)
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", 900)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andDo(print()).andReturn();
+
+        assertEquals(404, response.getResponse().getStatus());
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesGetNotAuthorised() throws Exception {
+
+        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andDo(print()).andReturn();
+
+        assertEquals(403, response.getResponse().getStatus());
+
     }
 
     @Test
@@ -164,6 +275,9 @@ class CourthouseApiTest extends IntegrationBase {
 
     @Test
     void courthousesPut() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
         Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
@@ -172,7 +286,7 @@ class CourthouseApiTest extends IntegrationBase {
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
-        requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
+        requestBuilder = get("/admin/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
@@ -180,6 +294,9 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.code", is(9001)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
@@ -190,19 +307,26 @@ class CourthouseApiTest extends IntegrationBase {
             .content(requestBody);
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+
     }
 
     @Test
     void courthousesDelete() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
         Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         MockHttpServletRequestBuilder requestBuilder = delete("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
-        requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
+        requestBuilder = get("/admin/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     /**
@@ -222,5 +346,24 @@ class CourthouseApiTest extends IntegrationBase {
         MvcResult addedCourthouseResponse = makeRequestToAddCourthouseToDatabase(fileLocation);
         return JsonPath.read(addedCourthouseResponse.getResponse().getContentAsString(), "$.id");
     }
+
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setUserName(ORIGINAL_USERNAME);
+        userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
+        userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
+        userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
+        userAccountEntity.setActive(true);
+        userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
+        userAccountEntity.setLastModifiedDateTime(ORIGINAL_LAST_MODIFIED_DATE_TIME);
+        userAccountEntity.setCreatedDateTime(ORIGINAL_CREATED_DATE_TIME);
+        userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
+        userAccountEntity.setCreatedBy(user);
+        userAccountEntity.setLastModifiedBy(user);
+
+        return dartsDatabase.getUserAccountRepository()
+            .save(userAccountEntity);
+    }
+
 }
 

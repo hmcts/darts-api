@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -46,6 +47,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private OutboundExternalObjectDirectoryDeletedFinder finder;
     @Mock
     private OutboundDataStoreDeleter outboundDataStoreDeleter;
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +61,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
                 objectRecordStatusRepository,
                 transientObjectDirectoryRepository,
                 finder,
-                outboundDataStoreDeleter, systemUserHelper
+                outboundDataStoreDeleter, systemUserHelper,
+                transformedMediaRepository
         );
     }
 

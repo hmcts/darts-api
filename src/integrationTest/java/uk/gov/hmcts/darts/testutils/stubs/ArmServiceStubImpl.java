@@ -56,7 +56,8 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
-    public boolean deleteResponseBlob(String containerName, String filename) {
+    public boolean deleteBlobData(String containerName, String blobPathAndName) {
+        logStubUsageWarning();
         return true;
     }
 

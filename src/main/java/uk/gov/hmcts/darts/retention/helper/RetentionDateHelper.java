@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
@@ -15,7 +16,7 @@ import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
@@ -30,30 +31,37 @@ public class RetentionDateHelper {
     private final CurrentTimeHelper currentTimeHelper;
     private Pattern policyFormat = Pattern.compile("^\\d+Y\\d+M\\d+D$");
 
+    @Value("${darts.retention.overridable-fixed-policy-keys}")
+    List<String> overridableFixedPolicyKeys;
+
+
     public LocalDate getRetentionDateForPolicy(CourtCaseEntity courtCase, RetentionPolicyEnum policy) {
         RetentionPolicyTypeEntity retentionPolicy = getRetentionPolicy(policy);
         return applyPolicyString(courtCase.getCaseClosedTimestamp().toLocalDate(), retentionPolicy.getDuration());
     }
 
     public RetentionPolicyTypeEntity getRetentionPolicy(RetentionPolicyEnum policy) {
-        Optional<RetentionPolicyTypeEntity> manualPolicyEntityOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                policy.getPolicyKey(),
-                currentTimeHelper.currentOffsetDateTime()
+        List<RetentionPolicyTypeEntity> retentionPolicyList = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            policy.getPolicyKey(),
+            currentTimeHelper.currentOffsetDateTime()
         );
-        if (manualPolicyEntityOpt.isEmpty()) {
+        if (retentionPolicyList.isEmpty()) {
             throw new DartsApiException(
-                    RetentionApiError.INTERNAL_SERVER_ERROR,
-                    MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policy.getPolicyKey())
+                RetentionApiError.INTERNAL_SERVER_ERROR,
+                MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policy.getPolicyKey())
             );
+        } else if (retentionPolicyList.size() > 1) {
+            throw new DartsApiException(RetentionApiError.INTERNAL_SERVER_ERROR,
+                                        MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", policy.getPolicyKey()));
         }
-        return manualPolicyEntityOpt.get();
+        return retentionPolicyList.get(0);
     }
 
     public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {
         if (StringUtils.isBlank(policyString) || !policyFormat.matcher(policyString).matches()) {
             throw new DartsApiException(
-                    RetentionApiError.INTERNAL_SERVER_ERROR,
-                    MessageFormat.format("PolicyString ''{0}'', is not in the required format.", policyString)
+                RetentionApiError.INTERNAL_SERVER_ERROR,
+                MessageFormat.format("PolicyString ''{0}'', is not in the required format.", policyString)
             );
         }
 
@@ -66,7 +74,7 @@ public class RetentionDateHelper {
     }
 
     public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString, RetentionPolicyTypeEntity retentionPolicyType) {
-        if (RetentionPolicyEnum.CUSTODIAL.getPolicyKey().equals(retentionPolicyType.getFixedPolicyKey())) {
+        if (overridableFixedPolicyKeys.contains(retentionPolicyType.getFixedPolicyKey())) {
             //take max of policy/totalSentence
             LocalDate policyDate = applyPolicyString(dateToAppend, retentionPolicyType.getDuration());
             LocalDate termInRequest = applyPolicyString(dateToAppend, policyString);

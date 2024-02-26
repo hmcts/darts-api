@@ -30,7 +30,9 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -62,6 +64,7 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -93,12 +96,15 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({
+    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
@@ -133,6 +139,7 @@ public class DartsDatabaseStub {
     private final SecurityRoleRepository securityRoleRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
@@ -144,9 +151,11 @@ public class DartsDatabaseStub {
     private final AuditStub auditStub;
     private final CaseRetentionStub caseRetentionStub;
     private final CourthouseStub courthouseStub;
+    private final CourtroomStub courtroomStub;
     private final EventStub eventStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
     private final HearingStub hearingStub;
+    private final MediaStub mediaStub;
     private final MediaRequestStub mediaRequestStub;
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
@@ -167,6 +176,7 @@ public class DartsDatabaseStub {
         caseManagementRetentionRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+        transcriptionDocumentRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();
@@ -202,8 +212,8 @@ public class DartsDatabaseStub {
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
                                                                              String someCourthouse) {
         return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-                someCaseNumber,
-                someCourthouse
+            someCaseNumber,
+            someCourthouse
         );
     }
 
@@ -239,13 +249,13 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+        String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                courthouseName,
-                courtroomName,
-                caseNumber,
-                hearingDate
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
@@ -266,8 +276,7 @@ public class DartsDatabaseStub {
     }
 
     public CourtroomEntity createCourtroomUnlessExists(String courthouseName, String courtroomName) {
-        createCourthouseUnlessExists(courthouseName);
-        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouseName, courtroomName);
+        return courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
     }
 
     @Transactional
@@ -288,10 +297,10 @@ public class DartsDatabaseStub {
                                        LocalDate hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearing(
-                courthouseName,
-                courtroomName,
-                caseNumber,
-                hearingDate
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
         );
     }
 
@@ -318,25 +327,24 @@ public class DartsDatabaseStub {
     @Transactional
     public void createDailyLists(String listingCourthouse) throws IOException {
         DailyListEntity xhbDailyList = DailyListTestData.createDailyList(
-                LocalTime.of(13, 0),
-                String.valueOf(SourceType.XHB),
-                listingCourthouse,
-                "tests/dailyListProcessorTest/dailyListXHB.json"
+            LocalTime.of(13, 0),
+            String.valueOf(SourceType.XHB),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListXHB.json"
         );
 
         DailyListEntity cppDailyList = DailyListTestData.createDailyList(
-                LocalTime.of(13, 0),
-                String.valueOf(SourceType.CPP),
-                listingCourthouse,
-                "tests/dailyListProcessorTest/dailyListCPP.json"
+            LocalTime.of(13, 0),
+            String.valueOf(SourceType.CPP),
+            listingCourthouse,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
         dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
     }
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        CourtroomEntity courtroom = createCourtroomUnlessExists(courthouseName, courtroomName);
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel));
+        return mediaStub.createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel);
     }
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
@@ -352,7 +360,7 @@ public class DartsDatabaseStub {
     }
 
     public ObjectRecordStatusEntity getObjectRecordStatusEntity(
-            ObjectRecordStatusEnum objectRecordStatusEnum) {
+        ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 
@@ -362,13 +370,13 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         return save(
-                AudioTestData.createCurrentMediaRequest(
-                        hearing,
-                        requestor,
-                        OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                        OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                        audioRequestType, OPEN
-                ));
+            AudioTestData.createCurrentMediaRequest(
+                hearing,
+                requestor,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                audioRequestType, OPEN
+            ));
     }
 
     @Transactional
@@ -378,10 +386,10 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
         );
         save(completedMediaRequest);
 
@@ -397,24 +405,24 @@ public class DartsDatabaseStub {
                                                                      AudioRequestType audioRequestType) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
         return save(
-                AudioTestData.createExpiredMediaRequest(
-                        hearing,
-                        requestor,
-                        now.minusDays(5),
-                        now.minusDays(4),
-                        audioRequestType
-                ));
+            AudioTestData.createExpiredMediaRequest(
+                hearing,
+                requestor,
+                now.minusDays(5),
+                now.minusDays(4),
+                audioRequestType
+            ));
     }
 
     public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
                                                                        UserAccountEntity requestor,
                                                                        AudioRequestType audioRequestType) {
         MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                audioRequestType
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            audioRequestType
         );
         return save(completedMediaRequest);
     }
@@ -438,7 +446,9 @@ public class DartsDatabaseStub {
         return hearingEntity;
     }
 
+    @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
+        entityManager.merge(annotationEntity.getCurrentOwner());
         return annotationRepository.save(annotationEntity);
     }
 
@@ -488,11 +498,17 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
-        return hearingRepository.saveAndFlush(hearingEntity);
+        courthouseRepository.save(hearingEntity.getCourtroom().getCourthouse());
+        courtroomRepository.save(hearingEntity.getCourtroom());
+        return hearingRepository.save(hearingEntity);
     }
 
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    public TransientObjectDirectoryEntity save(TransientObjectDirectoryEntity transientObjectDirectory) {
+        return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectory);
     }
 
     public TranscriptionWorkflowEntity save(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
@@ -550,8 +566,8 @@ public class DartsDatabaseStub {
 
     public void addToUserAccountTrash(String... emailAddresses) {
         stream(emailAddresses)
-                .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
-                .forEach(userAccountBin::add);
+            .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
+            .forEach(userAccountBin::add);
     }
 
     public void createTestUserAccount() {
@@ -587,26 +603,11 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public TranscriptionEntity saveWithType(TranscriptionEntity transcriptionEntity) {
-        var typeRef = transcriptionTypeRepository.getReferenceById(transcriptionEntity.getTranscriptionType().getId());
-        transcriptionEntity.setTranscriptionType(typeRef);
-
-        var statusRef = transcriptionStatusRepository.getReferenceById(transcriptionEntity.getTranscriptionStatus().getId());
-        transcriptionEntity.setTranscriptionStatus(statusRef);
-
-        var systemUserRef = userAccountRepository.getReferenceById(0);
-        transcriptionEntity.setLastModifiedBy(systemUserRef);
-        transcriptionEntity.setCreatedBy(systemUserRef);
-
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
-    }
-
-    @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-                RetentionPolicyEnum.MANUAL.getPolicyKey(),
-                currentTimeHelper.currentOffsetDateTime()
-        ).get();
+            RetentionPolicyEnum.MANUAL.getPolicyKey(),
+            currentTimeHelper.currentOffsetDateTime()
+        ).get(0);
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
         caseRetentionRepository.save(caseRetentionEntity1);
@@ -648,28 +649,29 @@ public class DartsDatabaseStub {
 
     public List<NotificationEntity> getNotificationFor(String someCaseNumber) {
         return notificationRepository.findAll().stream()
-                .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
-                .toList();
+            .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
+            .toList();
     }
 
+    @Transactional
     public AnnotationEntity findAnnotationById(Integer annotationId) {
         return annotationRepository.findById(annotationId).orElseThrow();
     }
 
     public AnnotationDocumentEntity findAnnotationDocumentFor(Integer annotationId) {
         return annotationDocumentRepository.findAll().stream()
-                .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
-                .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
     }
 
     public ExternalObjectDirectoryEntity findExternalObjectDirectoryFor(Integer annotationId) {
         var annotationDocumentEntity = annotationDocumentRepository.findAll().stream()
-                .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
-                .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
 
         return externalObjectDirectoryRepository.findAll().stream()
-                .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
-                .findFirst().orElseThrow(() -> new RuntimeException("No external object directory found for annotation id: " + annotationId));
+            .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
+            .findFirst().orElseThrow(() -> new RuntimeException("No external object directory found for annotation id: " + annotationId));
     }
 
     @Transactional
@@ -684,5 +686,54 @@ public class DartsDatabaseStub {
         userAccount.getSecurityGroupEntities().add(securityGroup);
         securityGroupRepository.save(securityGroup);
         userAccountRepository.save(userAccount);
+    }
+
+    @Transactional
+    public Integer getLastModifiedByUserId(CreatedModifiedBaseEntity createdModifiedBaseEntity) {
+        return createdModifiedBaseEntity.getLastModifiedBy().getId();
+    }
+
+    @Transactional
+    public void createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+
+        var annotation = someAnnotationCreatedBy(judge);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "123";
+        var annotationDocumentEntity = getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       judge, uploadedDateTime, checksum
+            );
+
+
+        ExternalObjectDirectoryEntity armEod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocumentEntity,
+            getObjectRecordStatusEntity(STORED),
+            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+        );
+        armEod.setTransferAttempts(1);
+        save(armEod);
+
+        ExternalObjectDirectoryEntity armEod2 = getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocumentEntity,
+            getObjectRecordStatusEntity(STORED),
+            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
+        );
+        armEod.setTransferAttempts(1);
+        save(armEod2);
+    }
+
+    protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
+        var annotation = minimalAnnotationEntity();
+        annotation.setDeleted(false);
+        annotation.setCurrentOwner(userAccount);
+        annotation.addHearing(save(someMinimalHearing()));
+        save(annotation);
+        return annotation;
     }
 }

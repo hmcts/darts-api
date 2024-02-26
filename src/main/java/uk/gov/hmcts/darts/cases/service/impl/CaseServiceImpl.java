@@ -4,8 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
@@ -39,6 +37,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -132,6 +131,8 @@ public class CaseServiceImpl implements CaseService {
         }
 
         updatedCaseEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
+        // set this so it's updated when no other changes are present
+        updatedCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }
@@ -158,17 +159,8 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
-        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseId(caseId);
-        List<TranscriptionEntity> filteredTranscriptionEntities = findNonAutomaticTranscripts(transcriptionEntities);
-        return TranscriptionMapper.mapResponse(filteredTranscriptionEntities);
-    }
-
-    private List<TranscriptionEntity> findNonAutomaticTranscripts(List<TranscriptionEntity> transcriptionEntities) {
-        //only show manual transcriptions or ones that came from legacy. Do not show Modernised automatic transcriptions.
-        return transcriptionEntities.stream()
-            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
-            .toList();
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
+        return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
     @Override

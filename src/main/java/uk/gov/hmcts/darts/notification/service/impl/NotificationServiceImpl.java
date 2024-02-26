@@ -102,7 +102,6 @@ public class NotificationServiceImpl implements NotificationService {
                 emailAddressList,
                 request.getUserAccountsToEmail().stream()
                     .map(UserAccountEntity::getEmailAddress)
-                    .filter(emailAddress -> EmailValidator.getInstance().isValid(emailAddress))
                     .toList()
             );
         }
@@ -111,10 +110,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private NotificationEntity saveNotificationToDb(String eventId, Integer caseId, String emailAddress, String templateValues) {
-        if (!emailValidator.isValid(emailAddress)) {
-            log.warn("The supplied email address, {}, is not valid, and so has been ignored.", emailAddress);
-            return null;
-        }
         NotificationEntity dbNotification = new NotificationEntity();
         dbNotification.setEventId(eventId);
         dbNotification.setCourtCase(caseRepository.getReferenceById(caseId));

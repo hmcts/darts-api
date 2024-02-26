@@ -4,22 +4,21 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
+import java.util.Random;
+
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class CourtroomTestData {
 
-    public static CourtroomEntity someMinimalCourtRoom() {
-        var courtroom = new CourtroomEntity();
-        courtroom.setCourthouse(createCourthouse("some-courthouse"));
-        courtroom.setName("room_a");
-        return courtroom;
-    }
+    private static final Random RANDOM = new Random();
 
-    public static CourtroomEntity createCourtRoomAtCourthouse(CourthouseEntity courthouse) {
-        var courtroom = someMinimalCourtRoom();
-        courtroom.setCourthouse(courthouse);
+    public static CourtroomEntity someMinimalCourtRoom() {
+        var postfix = RANDOM.nextInt(1000, 9999);
+        var courtroom = new CourtroomEntity();
+        courtroom.setCourthouse(createCourthouse("some-courthouse-" + postfix));
+        courtroom.setName("room_a-" + postfix);
         return courtroom;
     }
 

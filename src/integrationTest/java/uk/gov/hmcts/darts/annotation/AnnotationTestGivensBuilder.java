@@ -1,0 +1,68 @@
+package uk.gov.hmcts.darts.annotation;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+
+import java.util.List;
+import java.util.UUID;
+
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
+
+@Component
+public class AnnotationTestGivensBuilder {
+
+    @Autowired
+    private DartsDatabaseStub dartsDatabase;
+
+    public UserAccountEntity anAuthenticatedUserWithGlobalAccessAndRole(SecurityRoleEnum role) {
+        var userEmail = role.name() + "@global.com";
+        anAuthenticatedUserFor(userEmail);
+
+        var securityGroup = buildGroupForRole(role);
+        securityGroup.setGlobalAccess(true);
+
+        var user = minimalUserAccount();
+        user.setEmailAddress(userEmail);
+
+        dartsDatabase.addUserToGroup(user, securityGroup);
+        dartsDatabase.addToTrash(securityGroup);
+        dartsDatabase.addToUserAccountTrash(userEmail);
+
+        return user;
+    }
+
+    public UserAccountEntity anAuthenticatedUserAuthorizedForCourthouse(SecurityRoleEnum role, CourthouseEntity courthouse) {
+        var userEmail = role.name() + "@" + courthouse.getCourthouseName() + ".com";
+        anAuthenticatedUserFor(userEmail);
+
+        var securityGroup = buildGroupForRoleAndCourthouse(JUDGE, courthouse);
+        dartsDatabase.addToTrash(securityGroup);
+
+        var judge = minimalUserAccount();
+        judge.setEmailAddress(userEmail);
+        dartsDatabase.addToUserAccountTrash(userEmail);
+
+        dartsDatabase.addUserToGroup(judge, securityGroup);
+
+        return judge;
+    }
+
+    private void anAuthenticatedUserFor(String userEmail) {
+        Jwt jwt = Jwt.withTokenValue("some-token")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of(userEmail))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
+}

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPolicyTypeEntity, Integer> {
@@ -19,6 +19,6 @@ public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPo
         and (policyEnd is null or policyEnd > :currentTime)
         """
     )
-    Optional<RetentionPolicyTypeEntity> findCurrentWithFixedPolicyKey(String fixedPolicyKey, OffsetDateTime currentTime);
+    List<RetentionPolicyTypeEntity> findCurrentWithFixedPolicyKey(String fixedPolicyKey, OffsetDateTime currentTime);
 
 }
