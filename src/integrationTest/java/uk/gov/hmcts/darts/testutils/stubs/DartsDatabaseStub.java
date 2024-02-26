@@ -173,8 +173,7 @@ public class DartsDatabaseStub {
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
-        annotationDocumentRepository.deleteAll();
-        //caseDocumentRepository.deleteAll();
+        caseDocumentRepository.deleteAll();
         caseRetentionRepository.deleteAll();
         caseManagementRetentionRepository.deleteAll();
         transcriptionDocumentRepository.deleteAll();
@@ -187,6 +186,7 @@ public class DartsDatabaseStub {
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
+        annotationDocumentRepository.deleteAll();
         annotationRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
@@ -457,7 +457,7 @@ public class DartsDatabaseStub {
     }
 
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        return externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
+        return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
     }
 
     public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {

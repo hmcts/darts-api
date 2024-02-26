@@ -42,7 +42,7 @@ public class AnnotationStub {
         annotationDocument.setUploadedBy(uploadedBy);
         annotationDocument.setUploadedDateTime(uploadedDateTime);
         annotationDocument.setChecksum(checksum);
-        annotationDocumentRepository.save(annotationDocument);
+        annotationDocument = annotationDocumentRepository.save(annotationDocument);
         return annotationDocument;
     }
 

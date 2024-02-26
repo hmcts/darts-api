@@ -92,7 +92,12 @@ public class ExternalObjectDirectoryStub {
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,
                                                                        UUID externalLocation) {
 
-        return createExternalObjectDirectory(caseDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
+        ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
+            caseDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
+
+        externalObjectDirectory.setCaseDocument(caseDocumentEntity);
+
+        return externalObjectDirectory;
     }
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
@@ -106,6 +111,7 @@ public class ExternalObjectDirectoryStub {
         );
 
         externalObjectDirectory.setAnnotationDocumentEntity(annotationDocumentEntity);
+        eodRepository.saveAndFlush(externalObjectDirectory);
 
         return externalObjectDirectory;
     }
