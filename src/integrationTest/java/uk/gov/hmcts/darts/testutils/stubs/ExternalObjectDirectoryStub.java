@@ -111,7 +111,6 @@ public class ExternalObjectDirectoryStub {
         );
 
         externalObjectDirectory.setAnnotationDocumentEntity(annotationDocumentEntity);
-        eodRepository.saveAndFlush(externalObjectDirectory);
 
         return externalObjectDirectory;
     }
@@ -134,9 +133,9 @@ public class ExternalObjectDirectoryStub {
 
     @Transactional
     public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(Integer transcriptionDocumentId,
-                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                              ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              UUID externalLocation) {
         TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,

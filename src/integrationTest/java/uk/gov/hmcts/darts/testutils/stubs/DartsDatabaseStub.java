@@ -174,6 +174,7 @@ public class DartsDatabaseStub {
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
+        annotationDocumentRepository.deleteAll();
         caseDocumentRepository.deleteAll();
         caseRetentionRepository.deleteAll();
         caseManagementRetentionRepository.deleteAll();
@@ -187,7 +188,6 @@ public class DartsDatabaseStub {
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
-        annotationDocumentRepository.deleteAll();
         annotationRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();

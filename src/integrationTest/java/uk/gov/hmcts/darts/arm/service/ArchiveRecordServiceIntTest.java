@@ -32,11 +32,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static org.mockito.Mockito.when;
@@ -48,7 +46,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports", "VariableDeclarationUsageDistance", "PMD.AssignmentInOperand"})
 class ArchiveRecordServiceIntTest extends IntegrationBase {
-    private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
+    private static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0)
         .withSecond(0).withNano(0);
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 23);
 
@@ -95,9 +93,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 9, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 9, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 9, 45, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 9, 45, 0, 0, UTC);
 
         MediaEntity media = MediaTestData.createMediaWith(
             hearing.getCourtroom(),
@@ -152,9 +150,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     @Test
     void generateArchiveRecord_WithNleMediaProperties_ReturnFileSuccess() throws IOException {
 
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, UTC);
 
         MediaEntity media = MediaTestData.createMediaWith(
             hearing.getCourtroom(),
@@ -212,9 +210,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     @Test
     void generateArchiveRecord_WithAllMediaProperties_ReturnFileSuccess() throws IOException {
 
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 14, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 14, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 14, 45, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 14, 45, 0, 0, UTC);
 
         MediaEntity media = MediaTestData.createMediaWith(
             hearing.getCourtroom(),
@@ -270,7 +268,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     @Test
     void generateArchiveRecord_WithNleTranscriptionProperties_ReturnFileSuccess() throws IOException {
 
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
         authorisationStub.givenTestSchema();
@@ -333,7 +331,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithLiveTranscriptionProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
         authorisationStub.givenTestSchema();
@@ -396,7 +394,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithAllPropertiesTranscription_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
 
         authorisationStub.givenTestSchema();
@@ -454,13 +452,13 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithNleAnnotationProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -468,7 +466,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+            .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
@@ -477,7 +475,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
+        dartsDatabase.save(armEod);
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -504,19 +502,20 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
     void generateArchiveRecord_WithLiveAnnotationProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -524,9 +523,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                                                       testUser, uploadedDateTime, checksum
-            );
+            .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize,
+                                            testUser, uploadedDateTime, checksum);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
@@ -535,7 +533,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -562,6 +560,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -569,13 +568,14 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithAllAnnotationProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
         authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -583,9 +583,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
-                                                       testUser, uploadedDateTime, checksum
-            );
+            .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize,
+                                            testUser, uploadedDateTime, checksum);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
@@ -594,7 +593,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
@@ -622,6 +621,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -629,9 +629,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithNleCaseProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
 
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -683,9 +682,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithLiveCaseProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
 
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -737,9 +735,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithAllCaseProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, ZoneOffset.UTC);
 
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();

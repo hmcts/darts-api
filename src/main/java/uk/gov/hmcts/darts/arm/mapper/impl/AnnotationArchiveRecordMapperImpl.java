@@ -248,7 +248,9 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
                 .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)
                 .toList();
-            cases = caseListToString(caseNumbers);
+            if (CollectionUtils.isNotEmpty(caseNumbers)) {
+                cases = caseListToString(caseNumbers);
+            }
         }
         return cases;
     }
