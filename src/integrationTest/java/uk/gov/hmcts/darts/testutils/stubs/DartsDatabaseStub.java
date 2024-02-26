@@ -39,6 +39,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -112,6 +113,7 @@ public class DartsDatabaseStub {
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
     private final AuditRepository auditRepository;
+    private final CaseDocumentRepository caseDocumentRepository;
     private final CaseManagementRetentionRepository caseManagementRetentionRepository;
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
@@ -172,8 +174,10 @@ public class DartsDatabaseStub {
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         annotationDocumentRepository.deleteAll();
+        //caseDocumentRepository.deleteAll();
         caseRetentionRepository.deleteAll();
         caseManagementRetentionRepository.deleteAll();
+        transcriptionDocumentRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
         transcriptionDocumentRepository.deleteAll();
@@ -453,7 +457,7 @@ public class DartsDatabaseStub {
     }
 
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+        return externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
     }
 
     public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {

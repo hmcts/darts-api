@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -254,9 +255,10 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
         String cases = null;
-        if (nonNull(transcriptionDocumentEntity.getTranscription().getCourtCases())) {
-            List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getCourtCases()
+        if (nonNull(transcriptionDocumentEntity.getTranscription().getHearings())) {
+            List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getHearings()
                 .stream()
+                .map(HearingEntity::getCourtCase)
                 .map(CourtCaseEntity::getCaseNumber)
                 .toList();
             cases = caseListToString(caseNumbers);
@@ -352,15 +354,20 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private String getHearingDate(TranscriptionDocumentEntity transcriptionDocument) {
         String hearingDate = null;
-        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
+        if (nonNull(transcriptionDocument.getTranscription().getHearingDate())) {
             hearingDate = transcriptionDocument.getTranscription().getHearingDate().format(dateFormatter);
+        } else if (CollectionUtils.isNotEmpty(transcriptionDocument.getTranscription().getHearings())) {
+            hearingDate = transcriptionDocument.getTranscription().getHearings().get(0).getHearingDate().format(dateFormatter);
         }
         return hearingDate;
     }
 
     private static String getCourtroom(TranscriptionDocumentEntity transcriptionDocument) {
         String courtroom = null;
-        if (nonNull(transcriptionDocument.getTranscription()) && nonNull(transcriptionDocument.getTranscription().getCourtroom())) {
+        if (nonNull(transcriptionDocument.getTranscription().getHearing())
+            && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom())) {
+            courtroom = transcriptionDocument.getTranscription().getHearing().getCourtroom().getName();
+        } else if (nonNull(transcriptionDocument.getTranscription().getCourtroom())) {
             courtroom = transcriptionDocument.getTranscription().getCourtroom().getName();
         }
         return courtroom;
@@ -368,7 +375,11 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
 
     private static String getCourthouse(TranscriptionDocumentEntity transcriptionDocument) {
         String courthouse = null;
-        if (nonNull(transcriptionDocument.getTranscription())
+        if (nonNull(transcriptionDocument.getTranscription().getHearing())
+            && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom())
+            && nonNull(transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse())) {
+            courthouse = transcriptionDocument.getTranscription().getHearing().getCourtroom().getCourthouse().getCourthouseName();
+        } else if (nonNull(transcriptionDocument.getTranscription())
             && nonNull(transcriptionDocument.getTranscription().getCourtroom())
             && nonNull(transcriptionDocument.getTranscription().getCourtroom().getCourthouse())) {
             courthouse = transcriptionDocument.getTranscription().getCourtroom().getCourthouse().getCourthouseName();
