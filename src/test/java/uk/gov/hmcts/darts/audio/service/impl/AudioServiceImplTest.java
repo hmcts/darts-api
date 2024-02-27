@@ -41,6 +41,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,6 +115,8 @@ class AudioServiceImplTest {
     private DataManagementApi dataManagementApi;
     @Mock
     AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
+    @Mock
+    private LogApi logApi;
     private AudioService audioService;
 
     @BeforeEach
@@ -137,7 +140,8 @@ class AudioServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             heartBeatEmitter,
-            audioBeingProcessedFromArchiveQuery
+            audioBeingProcessedFromArchiveQuery,
+            logApi
         );
     }
 
@@ -282,6 +286,8 @@ class AudioServiceImplTest {
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
+        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
+
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());
