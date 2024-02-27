@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
 import uk.gov.hmcts.darts.annotation.service.AnnotationDownloadService;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -14,8 +16,10 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
+import java.io.IOException;
 import java.util.List;
 
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
 
 @Service
@@ -27,7 +31,7 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
     private final ExternalObjectDirectoryRepository eodRepository;
     private final Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
-
+    private final DataManagementFacade dataManagementFacade;
 
     @Override
     public AnnotationResponseDto downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
@@ -44,14 +48,29 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
             throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
         }
 
-        final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = eodDir.get(0);
+        final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity = eodDir.get(0);
 
-        final InputStreamResource blobStream = annotationDataManagement.download(externalObjectDirectoryEntity);
+        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories
+            .getFileBasedDownload(eodDir);
 
-        return AnnotationResponseDto.builder()
-            .resource(blobStream)
-            .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
-            .externalLocation(externalObjectDirectoryEntity.getExternalLocation())
-            .annotationDocumentId(annotationDocumentId).build();
+        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
+
+        try {
+            if (!downloadResponseMetaData.isSuccessfulDownload()) {
+                downloadResponseMetaData.close();
+                throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+            }
+
+            return AnnotationResponseDto.builder()
+                .resource(new InputStreamResource(downloadResponseMetaData.getInputStream()))
+                .fileName(latestExternalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
+                .externalLocation(latestExternalObjectDirectoryEntity.getExternalLocation())
+                .annotationDocumentId(annotationDocumentId).build();
+
+        } catch (IOException e) {
+            log.error("Failed to download annotation document {}",annotationDocumentId, e);
+            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+        }
     }
 }
