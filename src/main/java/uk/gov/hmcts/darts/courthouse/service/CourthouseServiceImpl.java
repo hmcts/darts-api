@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class CourthouseServiceImpl implements CourthouseService {
 
     private CourthouseRepository courthouseRepository;
+    private RegionRepository regionRepository;
     private RetrieveCoreObjectService retrieveCoreObjectService;
 
     private CourthouseToCourthouseEntityMapper mapper;
@@ -78,6 +80,11 @@ public class CourthouseServiceImpl implements CourthouseService {
         }
 
         return adminCourthouse;
+    }
+
+    @Override
+    public List<RegionEntity> getAdminAllRegions() {
+        return regionRepository.findAll();
     }
 
     @Override

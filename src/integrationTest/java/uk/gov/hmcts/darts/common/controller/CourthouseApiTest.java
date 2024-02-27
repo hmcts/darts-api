@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -69,6 +70,9 @@ class CourthouseApiTest extends IntegrationBase {
 
     @Autowired
     private AdminUserStub adminUserStub;
+
+    @Autowired
+    private RegionStub regionStub;
 
     @MockBean
     private UserIdentity mockUserIdentity;
@@ -327,6 +331,39 @@ class CourthouseApiTest extends IntegrationBase {
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void adminRegionsGet() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        regionStub.createRegionsUnlessExists("South Wales");
+        regionStub.createRegionsUnlessExists("North Wales");
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/regions")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].id", is(1)))
+            .andExpect(jsonPath("$.[0].name", is("South Wales")))
+            .andExpect(jsonPath("$.[1].id", is(2)))
+            .andExpect(jsonPath("$.[1].name", is("North Wales")))
+            .andDo(print())
+            .andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void adminRegionsNotAuthorised() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/regions")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andDo(print()).andReturn();
+
+        assertEquals(403, response.getResponse().getStatus());
     }
 
     /**

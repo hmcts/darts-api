@@ -40,7 +40,20 @@ paths:
                 $ref: '#/components/schemas/CourtList'
         '500':
           description: Internal Server Error
-
+  /admin/regions:
+    get:
+      tags:
+        - Courthouses
+      summary: Gets all regions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRegionList'
+        '500':
+          description: Internal Server Error
   /admin/courthouses/{courthouse_id}:
     get:
       tags:
@@ -148,6 +161,18 @@ components:
         region_id:
           type: integer
           example: 0
+    AdminRegion:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+    AdminRegionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/AdminRegion'
     AdminCourthouse:
       allOf:
         - $ref: '#/components/schemas/ExtendedCourthouse'
