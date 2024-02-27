@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.annotation.service.impl.AnnotationServiceImpl;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -71,6 +72,8 @@ class AnnotationServiceTest {
     private ExternalObjectDirectoryRepository eodRepository;
     @Mock
     private AuthorisationApi authorisationApi;
+    @Mock
+    private DataManagementFacade dataManagementFacade;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
@@ -78,6 +81,7 @@ class AnnotationServiceTest {
     private AnnotationService annotationService;
 
     private ObjectRecordStatusRepository objectRecordStatusRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -93,7 +97,8 @@ class AnnotationServiceTest {
             userAuthorisedToDeleteAnnotationValidator,
             userAuthorisedToDownloadAnnotationValidator,
             annotationExistsValidator,
-            objectRecordStatusRepository
+            objectRecordStatusRepository,
+            dataManagementFacade
         );
 
         when(hearing.getId()).thenReturn(1);

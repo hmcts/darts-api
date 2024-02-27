@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -28,8 +30,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_SERVER_ERROR;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
 
 @Service
@@ -49,6 +51,7 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     private final Validator<Integer> annotationExistsValidator;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final DataManagementFacade dataManagementFacade;
 
     @Override
     public Integer process(MultipartFile document, Annotation annotation) {
@@ -91,32 +94,37 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         final List<ExternalObjectDirectoryEntity> eodDir = eodRepository.findByAnnotationIdAndAnnotationDocumentId(
             annotationId, annotationDocumentId, storedStatus);
-        final InputStreamResource blobStream;
 
-        final ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
+        final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity;
 
         if (eodDir.isEmpty()) {
             throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
         }
 
-        externalObjectDirectoryEntity = eodDir.get(0);
+        latestExternalObjectDirectoryEntity = eodDir.get(0);
+
+        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories
+            .getFileBasedDownload(eodDir);
+
+        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
 
         try {
+            if (!downloadResponseMetaData.isSuccessfulDownload()) {
+                downloadResponseMetaData.close();
+                throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+            }
 
-            blobStream = new InputStreamResource(
-                dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
+            return AnnotationResponseDto.builder()
+                .resource(new InputStreamResource(downloadResponseMetaData.getInputStream()))
+                .fileName(latestExternalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
+                .externalLocation(latestExternalObjectDirectoryEntity.getExternalLocation())
+                .annotationDocumentId(annotationDocumentId).build();
 
-        } catch (RuntimeException e) {
-            log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getId(), e);
-            throw new DartsApiException(INTERNAL_SERVER_ERROR, e);
+        } catch (IOException e) {
+            log.error("Failed to download annotation document {}",annotationDocumentId, e);
+            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
         }
-
-        return AnnotationResponseDto.builder()
-            .resource(blobStream)
-            .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
-            .externalLocation(externalObjectDirectoryEntity.getExternalLocation())
-            .annotationDocumentId(annotationDocumentId).build();
-
     }
 
 

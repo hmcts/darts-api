@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.annotation;
 
-import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.json.BasicJsonTester;
@@ -14,6 +15,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -27,9 +30,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -59,6 +61,12 @@ class AnnotationControllerTest extends IntegrationBase {
 
     @Mock
     private InputStream inputStreamResource;
+
+    @Mock
+    private DownloadableExternalObjectDirectories downloadableExternalObjectDirectories;
+
+    @Mock
+    private DownloadResponseMetaData downloadResponseMetaData;
 
     @Autowired
     private MockMvc mockMvc;
@@ -130,33 +138,39 @@ class AnnotationControllerTest extends IntegrationBase {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
 
-        var binaryData = mock(BinaryData.class);
-        lenient().when(dataManagementApi.getBlobDataFromInboundContainer(any(UUID.class))).thenReturn(binaryData);
-        lenient().when(binaryData.toStream()).thenReturn(inputStreamResource);
+        try (MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class)) {
+            when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
+            when(downloadableExternalObjectDirectories.getResponse()).thenReturn(downloadResponseMetaData);
+            when(downloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+            when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
 
-        dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+            dartsDatabase.createValidAnnotationDocumentForDownload(judge);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+            MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
 
-        mockMvc.perform(
-                        requestBuilder)
+            mockMvc.perform(
+                    requestBuilder)
                 .andExpect(status().isOk())
                 .andExpect(header().string(
-                        CONTENT_DISPOSITION,
-                        "attachment; filename=\"judges-notes.txt\""
+                    CONTENT_DISPOSITION,
+                    "attachment; filename=\"judges-notes.txt\""
                 ))
                 .andExpect(header().string(
-                        CONTENT_TYPE,
-                        "application/zip"
+                    CONTENT_TYPE,
+                    "application/zip"
                 ))
                 .andExpect(header().string(
-                        "external_location",
-                        "665e00c8-5b82-4392-8766-e0c982f603d3"
+                    "external_location",
+                    "665e00c8-5b82-4392-8766-e0c982f603d3"
                 ))
                 .andExpect(header().string(
-                        "annotation_document_id",
-                        "1"
+                    "annotation_document_id",
+                    "1"
                 ));
+
+        }
+
+
 
     }
 
