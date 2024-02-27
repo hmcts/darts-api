@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -15,6 +16,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -63,5 +66,8 @@ public class AnnotationDocumentEntity {
 
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
+
+    @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.ANNOTATION_DOCUMENT_ENTITY)
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
 }

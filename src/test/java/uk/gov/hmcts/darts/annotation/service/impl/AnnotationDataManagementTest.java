@@ -6,11 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,11 +33,14 @@ class AnnotationDataManagementTest {
     @Mock
     private DataManagementApi dataManagementApi;
 
+    @Mock
+    private DataManagementFacade dataManagementFacade;
+
     private AnnotationDataManagement annotationDataManagement;
 
     @BeforeEach
     void setUp() {
-        annotationDataManagement = new AnnotationDataManagement(dataManagementApi);
+        annotationDataManagement = new AnnotationDataManagement(dataManagementApi, dataManagementFacade);
     }
 
     @Test
@@ -91,9 +97,7 @@ class AnnotationDataManagementTest {
 
     @Test
     void throwsIfDownloadAnnotationDocumentFails() {
-        when(dataManagementApi.getBlobDataFromInboundContainer(any())).thenThrow(new RuntimeException());
-
-        assertThatThrownBy(() -> annotationDataManagement.download(someExternalObjectDirectoryEntity()))
+        assertThatThrownBy(() -> annotationDataManagement.download(someExternalObjectDirectoryEntity().getAnnotationDocumentEntity()))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", INTERNAL_SERVER_ERROR);
     }
@@ -101,6 +105,10 @@ class AnnotationDataManagementTest {
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setId(1);
+        AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+        annotationDocumentEntity.setId(1);
+        annotationDocumentEntity.setExternalObjectDirectoryEntities(List.of(externalObjectDirectoryEntity));
+        externalObjectDirectoryEntity.setAnnotationDocumentEntity(annotationDocumentEntity);
         return externalObjectDirectoryEntity;
     }
 }

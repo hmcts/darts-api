@@ -46,7 +46,7 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
 
         final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = eodDir.get(0);
 
-        final InputStreamResource blobStream = annotationDataManagement.download(externalObjectDirectoryEntity);
+        final InputStreamResource blobStream = annotationDataManagement.download(externalObjectDirectoryEntity.getAnnotationDocumentEntity());
 
         return AnnotationResponseDto.builder()
             .resource(blobStream)
