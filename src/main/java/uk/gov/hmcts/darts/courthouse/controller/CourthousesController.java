@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
+import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.AdminRegion;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
@@ -35,6 +38,8 @@ public class CourthousesController implements CourthousesApi {
     private final CourthouseService courthouseService;
 
     private final CourthouseToCourthouseEntityMapper mapper;
+
+    private final AdminRegionToRegionEntityMapper regionMapper;
 
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdDelete(
@@ -56,6 +61,19 @@ public class CourthousesController implements CourthousesApi {
 
             return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
         } catch (EntityNotFoundException | JpaObjectRetrievalFailureException | IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<List<AdminRegion>> adminRegionsGet() {
+        try {
+            List<RegionEntity> regionsEntities = courthouseService.getAdminAllRegions();
+            List<AdminRegion> adminRegions = regionMapper.mapFromEntityToAdminRegion(regionsEntities);
+            return new ResponseEntity<>(adminRegions, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

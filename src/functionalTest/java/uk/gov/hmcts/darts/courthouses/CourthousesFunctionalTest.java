@@ -25,6 +25,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
     public static final String COURTHOUSES_URI = "/courthouses";
     public static final String ADMIN_COURTHOUSES_URI = "/admin/courthouses";
+    public static final String ADMIN_REGION_URI = "/admin/regions";
     public static final String COURTHOUSE_BODY = """
         {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham","code": 5705}""";
     public static final String COURTHOUSE_UPDATEBODY = """
@@ -169,6 +170,22 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .delete()
             .then()
             .statusCode(NO_CONTENT)
+            .extract().response();
+
+        assertNotNull(response);
+    }
+
+    @Test
+    @Order(9)
+    void getAllRegions() {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(ADMIN_REGION_URI))
+            .get()
+            .then()
+            .assertThat()
+            .statusCode(OK)
             .extract().response();
 
         assertNotNull(response);
