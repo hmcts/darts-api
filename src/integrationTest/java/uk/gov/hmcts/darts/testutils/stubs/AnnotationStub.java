@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -32,11 +32,18 @@ public class AnnotationStub {
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
                                                               String annotationText,
                                                               HearingEntity hearingEntity) {
+        AnnotationEntity annotationEntity = createAnnotationEntity(currentOwner, annotationText, hearingEntity);
+        return annotationRepository.save(annotationEntity);
+    }
+
+    public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText, HearingEntity hearingEntity) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
         annotationEntity.addHearing(hearingEntity);
-        return annotationRepository.save(annotationEntity);
+        annotationEntity.setTimestamp(OffsetDateTime.now());
+        annotationEntity.setCreatedBy(currentOwner);
+        return annotationEntity;
     }
 
 
@@ -50,20 +57,21 @@ public class AnnotationStub {
                                                                               String checksum) {
         AnnotationDocumentEntity annotationDocument = createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize,
                                                                                      uploadedBy, uploadedDateTime, checksum);
-        annotationDocument = annotationDocumentRepository.save(annotationDocument);
+        annotationDocument = annotationDocumentRepository.saveAndFlush(annotationDocument);
         return annotationDocument;
     }
 
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, String checksum) {
         AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
-        annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
+        annotationDocument.setAnnotation(annotationEntity);
         annotationDocument.setFileName(fileName);
         annotationDocument.setFileType(fileType);
         annotationDocument.setFileSize(fileSize);
         annotationDocument.setUploadedBy(uploadedBy);
         annotationDocument.setUploadedDateTime(uploadedDateTime);
         annotationDocument.setChecksum(checksum);
+
         return annotationDocument;
     }
 
