@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
-import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 
 import java.io.IOException;
 
@@ -65,9 +64,8 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
                 inboundExternalObjectDirectory,
                 unstructuredExternalObjectDirectory,
                 annotation.getHearingId());
-            final var hearing = hearingRepository.findById(annotation.getHearingId()).orElseThrow(
-                () -> new DartsApiException(HearingApiError.HEARING_NOT_FOUND));
-            auditApi.recordAudit(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearing.getCourtCase());
+            final var hearing = hearingRepository.findById(annotation.getHearingId());
+            hearing.ifPresent(hearingEntity -> auditApi.recordAudit(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearingEntity.getCourtCase()));
 
         } catch (RuntimeException exception) {
             annotationDataManagement.attemptToDeleteDocument(containerLocations.inboundLocation());
