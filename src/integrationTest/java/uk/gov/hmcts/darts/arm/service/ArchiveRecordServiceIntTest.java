@@ -146,7 +146,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
         log.info("expect Response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -206,7 +206,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
 
         log.info("expect Response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -263,7 +263,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
         log.info("expect Response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -327,7 +327,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         log.info("expect response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
 
@@ -391,7 +391,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         log.info("expect response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
 
@@ -458,7 +458,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", transcriptionDocumentEntity.getTranscription().getEndTime().format(formatter));
 
         log.info("expect response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
 

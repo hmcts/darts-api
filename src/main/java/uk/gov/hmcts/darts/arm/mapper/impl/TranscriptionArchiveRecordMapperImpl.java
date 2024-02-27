@@ -77,7 +77,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
-    private static final String COMMENTS_DELIMITER = "|";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
