@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class CaseServiceImpl implements CaseService {
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
     private final AuthorisationApi authorisationApi;
+    private final LogApi logApi;
 
     @Override
     @Transactional
@@ -71,8 +73,12 @@ public class CaseServiceImpl implements CaseService {
             request.getDate()
         );
         createCourtroomIfMissing(hearings, request);
-        return casesMapper.mapToScheduledCases(hearings);
 
+        List<ScheduledCase> scheduledCases = casesMapper.mapToScheduledCases(hearings);
+
+        logApi.casesRequestedByDarPc(request);
+
+        return scheduledCases;
     }
 
     @Override
