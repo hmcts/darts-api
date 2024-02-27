@@ -52,19 +52,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdminRegionList'
-        '404':
-          description: Not Found
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
         '500':
           description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
   /admin/courthouses/{courthouse_id}:
     get:
       tags:

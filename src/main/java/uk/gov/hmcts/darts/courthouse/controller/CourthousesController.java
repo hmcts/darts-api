@@ -37,7 +37,7 @@ public class CourthousesController implements CourthousesApi {
 
     private final CourthouseService courthouseService;
 
-    private final CourthouseToCourthouseEntityMapper mapper;
+    private final CourthouseToCourthouseEntityMapper courthouseMapper;
 
     private final AdminRegionToRegionEntityMapper regionMapper;
 
@@ -69,13 +69,9 @@ public class CourthousesController implements CourthousesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
     public ResponseEntity<List<AdminRegion>> adminRegionsGet() {
-        try {
             List<RegionEntity> regionsEntities = courthouseService.getAdminAllRegions();
             List<AdminRegion> adminRegions = regionMapper.mapFromEntityToAdminRegion(regionsEntities);
             return new ResponseEntity<>(adminRegions, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
     }
 
     @Override
@@ -98,7 +94,7 @@ public class CourthousesController implements CourthousesApi {
 
     ) {
         List<CourthouseEntity> courtHouseEntities = courthouseService.getAllCourthouses();
-        List<ExtendedCourthouse> responseEntities = mapper.mapFromListEntityToListExtendedCourthouse(courtHouseEntities);
+        List<ExtendedCourthouse> responseEntities = courthouseMapper.mapFromListEntityToListExtendedCourthouse(courtHouseEntities);
         return new ResponseEntity<>(responseEntities, HttpStatus.OK);
     }
 
@@ -107,7 +103,7 @@ public class CourthousesController implements CourthousesApi {
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
         CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
-        ExtendedCourthouse extendedCourthouse = mapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
+        ExtendedCourthouse extendedCourthouse = courthouseMapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }
 }
