@@ -68,7 +68,7 @@ class AnnotationGetTest extends IntegrationBase {
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
 
         var binaryData = mock(BinaryData.class);
-        lenient().when(dataManagementApi.getBlobDataFromInboundContainer(any(UUID.class))).thenReturn(binaryData);
+        lenient().when(dataManagementApi.getBlobDataFromUnstructuredContainer(any(UUID.class))).thenReturn(binaryData);
         lenient().when(binaryData.toStream()).thenReturn(inputStreamResource);
 
         dartsDatabase.createValidAnnotationDocumentForDownload(judge);

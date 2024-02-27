@@ -45,7 +45,7 @@ public class AnnotationDataManagement {
     public InputStreamResource download(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         try {
             return new InputStreamResource(
-                dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
+                dataManagementApi.getBlobDataFromUnstructuredContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
         } catch (RuntimeException e) {
             log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getId(), e);
             throw new DartsApiException(INTERNAL_SERVER_ERROR, e);
