@@ -12,6 +12,8 @@ import java.util.List;
 public interface AdminRegionToRegionEntityMapper {
 
     @Mapping(source = "regionName", target = "name")
+    AdminRegion mapFromEntitiesToAdminRegions(RegionEntity regionEntity);
+
     List<AdminRegion> mapFromEntityToAdminRegion(List<RegionEntity> regionEntity);
 
 }

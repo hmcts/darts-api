@@ -339,12 +339,15 @@ class CourthouseApiTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         regionStub.createRegionsUnlessExists("South Wales");
+        regionStub.createRegionsUnlessExists("North Wales");
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/regions")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.id", is("1")))
-            .andExpect(jsonPath("$.name", is("South Wales")))
+            .andExpect(jsonPath("$.[0].id", is(1)))
+            .andExpect(jsonPath("$.[0].name", is("South Wales")))
+            .andExpect(jsonPath("$.[1].id", is(2)))
+            .andExpect(jsonPath("$.[1].name", is("North Wales")))
             .andDo(print())
             .andReturn();
 
