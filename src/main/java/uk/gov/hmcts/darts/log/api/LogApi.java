@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.log.api;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.log.util.LogJobReport;
+import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 
 public interface LogApi {
     void eventReceived(DartsEvent event);
@@ -11,7 +11,7 @@ public interface LogApi {
 
     void missingNodeRegistry(DartsEvent event);
 
-    void processedDailyListJob(LogJobReport report);
+    void processedDailyListJob(DailyListLogJobReport report);
 
     void atsProcessingUpdate(MediaRequestEntity mediaRequestEntity);
 }

@@ -20,8 +20,12 @@ public class DailyListTestData {
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setStartDate(LocalDate.now());
         dailyListEntity.setEndDate(LocalDate.now());
+
         dailyListEntity.setListingCourthouse(listingCourthouse);
-        dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(fileLocation)));
+        String fileContents = getContentsFromFile(fileLocation);
+        fileContents = fileContents.replace("${COURTHOUSE}", listingCourthouse);
+
+        dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(fileContents));
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
         dailyListEntity.setSource(source);
         return dailyListEntity;

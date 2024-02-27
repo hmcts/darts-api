@@ -8,7 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -17,6 +20,8 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
@@ -33,8 +38,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.times;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.FAILED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.IGNORED;
+import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PARTIALLY_PROCESSED;
+import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PROCESSED;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @Slf4j
@@ -48,6 +58,10 @@ class DailyListProcessorTest extends IntegrationBase {
     public static final String CASE_NUMBER_1 = "Case1";
     public static final String CASE_NUMBER_2 = "Case2";
     static final ObjectMapper MAPPER = new ObjectMapper();
+    
+    @MockBean
+    private LogApi logApi;
+
     @Autowired
     DailyListProcessor dailyListProcessor;
 
@@ -89,6 +103,81 @@ class DailyListProcessorTest extends IntegrationBase {
 
         dailyListProcessor.processAllDailyLists();
 
+        DailyListLogJobReport report = new DailyListLogJobReport(2, SourceType.CPP);
+        report.registerResult(PROCESSED);
+        report.registerResult(IGNORED);
+
+        DailyListLogReportMatcher matcher = new DailyListLogReportMatcher(report);
+        Mockito.verify(logApi).processedDailyListJob(argThat(matcher));
+
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, newCase1.getCaseNumber());
+        assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase1.getDefendantList().size());
+        assertEquals(1, newCase1.getDefenceList().size());
+        assertEquals(1, newCase1.getProsecutorList().size());
+        assertEquals(1, newCase1.getJudges().size());
+
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        assertEquals(LocalDate.now(), newHearing1.getHearingDate());
+        assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
+        assertEquals(1, newHearing1.getJudges().size());
+        assertEquals(LocalTime.of(11, 0), newHearing1.getScheduledStartTime());
+
+        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
+        assertEquals(URN_2, newCase2.getCaseNumber());
+        assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase2.getDefendantList().size());
+        assertEquals(1, newCase2.getDefenceList().size());
+        assertEquals(1, newCase2.getProsecutorList().size());
+        assertEquals(1, newCase2.getJudges().size());
+
+        List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
+        assertEquals(1, newHearing2.size());
+        assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
+        assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
+        assertEquals(1, newHearing2.get(0).getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
+        log.info("end dailyListProcessorMultipleDailyList");
+    }
+
+    @Test
+    void dailyListForListingCourthouseWithIgnoreNoReport() throws IOException {
+        dailyListProcessor.processAllDailyListForListingCourthouse("doesnotexist");
+
+        Mockito.verify(logApi, times(0)).processedDailyListJob(Mockito.notNull());
+    }
+
+    @Test
+    void dailyListForListingCourthouseWithIgnore() throws IOException {
+        log.info("start dailyListProcessorMultipleDailyList");
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
+        LocalTime dailyListTIme = LocalTime.of(13, 0);
+        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme,
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity.getCourthouseName(),
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
+
+        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme.minusHours(3),
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity.getCourthouseName(),
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
+
+        dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
+
+        dailyListProcessor.processAllDailyListForListingCourthouse(swanseaCourtEntity.getCourthouseName());
+
+        DailyListLogJobReport report = new DailyListLogJobReport(2, SourceType.CPP);
+        report.registerResult(PROCESSED);
+        report.registerResult(IGNORED);
+        DailyListLogReportMatcher matcher = new DailyListLogReportMatcher(report);
+
+        Mockito.verify(logApi, times(1)).processedDailyListJob(argThat(matcher));
+
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
         assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
@@ -123,6 +212,13 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
+    void dailyListProcessorNoDailyListNoReport() throws IOException {
+        dailyListProcessor.processAllDailyLists();
+
+        Mockito.verify(logApi, times(0)).processedDailyListJob(Mockito.notNull());
+    }
+
+    @Test
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
@@ -130,15 +226,23 @@ class DailyListProcessorTest extends IntegrationBase {
 
         dailyListProcessor.processAllDailyLists();
 
-        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
+        report.registerResult(PROCESSED);
+
+        CourtCaseEntity newCase1 = caseRepository
+            .findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        Mockito.verify(logApi).processedDailyListJob(argThat(
+            new DailyListLogReportMatcher(report)));
         assertEquals(URN_1, newCase1.getCaseNumber());
+
         assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
         assertEquals(1, newCase1.getDefendantList().size());
         assertEquals(1, newCase1.getDefenceList().size());
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
+        CourtCaseEntity newCase2 = caseRepository
+            .findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
         assertEquals(URN_2, newCase2.getCaseNumber());
         assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
         assertEquals(1, newCase2.getDefendantList().size());
@@ -187,6 +291,11 @@ class DailyListProcessorTest extends IntegrationBase {
         dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
         dailyListProcessor.processAllDailyLists();
 
+        DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
+        report.registerResult(PROCESSED);
+
+        Mockito.verify(logApi).processedDailyListJob(argThat(new DailyListLogReportMatcher(report)));
+
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
         assertFalse(newCase1.getClosed());
@@ -210,6 +319,49 @@ class DailyListProcessorTest extends IntegrationBase {
         assertNull(updatedCase.getCaseClosedTimestamp());
     }
 
+    @Test
+    void dailyListReopenCaseWithNewHearingPartialUpdate() throws IOException {
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
+        dartsDatabase.createDailyLists("courtthousedoesnotexist");
+        dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
+
+        dailyListProcessor.processAllDailyLists();
+
+        DailyListLogJobReport reportCpp = new DailyListLogJobReport(2, SourceType.CPP);
+        DailyListLogJobReport reportXhb = new DailyListLogJobReport(2, SourceType.XHB);
+        reportCpp.registerResult(PARTIALLY_PROCESSED);
+        reportXhb.registerResult(PARTIALLY_PROCESSED);
+        reportCpp.registerResult(PROCESSED);
+        reportXhb.registerResult(PROCESSED);
+
+        Mockito.verify(logApi, times(2)).processedDailyListJob(notNull());
+        DailyListLogReportMatcher cppMatcher = new DailyListLogReportMatcher(reportCpp);
+        DailyListLogReportMatcher xppMatcher = new DailyListLogReportMatcher(reportCpp);
+        Mockito.verify(logApi, times(1)).processedDailyListJob(argThat(cppMatcher));
+        Mockito.verify(logApi, times(1)).processedDailyListJob(argThat(xppMatcher));
+
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, newCase1.getCaseNumber());
+        assertFalse(newCase1.getClosed());
+        assertNull(newCase1.getCaseClosedTimestamp());
+
+        newCase1.setClosed(true);
+        newCase1.setCaseClosedTimestamp(OffsetDateTime.now());
+        caseRepository.save(newCase1);
+
+        CourtCaseEntity closedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, closedCase.getCaseNumber());
+        assertTrue(closedCase.getClosed());
+        assertNotNull(closedCase.getCaseClosedTimestamp());
+
+        dartsDatabase.createDailyLists(SWANSEA);
+        dailyListProcessor.processAllDailyLists();
+
+        CourtCaseEntity updatedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, updatedCase.getCaseNumber());
+        assertFalse(updatedCase.getClosed());
+        assertNull(updatedCase.getCaseClosedTimestamp());
+    }
 
     @Test
     void setsDailyListStatusToFailedIfUpdateFails() {
@@ -217,12 +369,19 @@ class DailyListProcessorTest extends IntegrationBase {
         dailyListEntity.setListingCourthouse("some-courthouse");
         dailyListEntity.setStartDate(LocalDate.now());
         dailyListEntity.setSource("CPP");
+
         var dailyListEntities = dartsDatabase.saveAll(dailyListEntity);
 
         dailyListProcessor.processAllDailyLists();
 
+        int id = dailyListEntities.get(0).getId();
+
+        DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
+        report.registerResult(FAILED);
+
+        Mockito.verify(logApi).processedDailyListJob(argThat(new DailyListLogReportMatcher(report)));
         var dailyListStatus = dartsDatabase.getDailyListRepository()
-            .findById(dailyListEntities.get(0).getId()).orElseThrow()
+            .findById(id).orElseThrow()
             .getStatus();
 
         Assertions.assertThat(dailyListStatus).isEqualTo(FAILED);
@@ -246,10 +405,35 @@ class DailyListProcessorTest extends IntegrationBase {
 
         dailyListProcessor.processAllDailyLists();
 
+        DailyListLogJobReport report = new DailyListLogJobReport(2, SourceType.CPP);
+        report.registerResult(PARTIALLY_PROCESSED);
+        report.registerResult(IGNORED);
+
+        Mockito.verify(logApi).processedDailyListJob(argThat(new DailyListLogReportMatcher(report)));
+
         var dailyListStatus = dartsDatabase.getDailyListRepository()
             .findById(oldDailyList.getId()).orElseThrow()
             .getStatus();
 
         Assertions.assertThat(dailyListStatus).isEqualTo(IGNORED);
+    }
+
+    class DailyListLogReportMatcher implements ArgumentMatcher<DailyListLogJobReport> {
+
+        private final DailyListLogJobReport[] objectToAssertAgainst;
+
+        DailyListLogReportMatcher(DailyListLogJobReport... report) {
+            this.objectToAssertAgainst = report.clone();
+        }
+        
+        @Override
+        public boolean matches(DailyListLogJobReport argument) {
+            for (DailyListLogJobReport dailyListLogJobReport : objectToAssertAgainst) {
+                if (dailyListLogJobReport.toString().equals(argument.toString())) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

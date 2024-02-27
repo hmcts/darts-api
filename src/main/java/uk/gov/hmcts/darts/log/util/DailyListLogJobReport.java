@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class LogJobReport {
+public class DailyListLogJobReport {
     private Map<JobStatusType, Integer> mapOfResults = new HashMap<JobStatusType, Integer>();
 
     public static final int ZERO_ENTRIES = 0;
@@ -19,19 +19,20 @@ public class LogJobReport {
     private int total = ZERO_ENTRIES;
     private SourceType source;
 
-    private String jobTitle;
+    public static final String JOB_TITLE = "Daily list job";
 
-    private final static String REPORT_MESSAGE =
-        "{}: source={}, job_status={}}, total={}, processed={}, partially_processed={}, failed={}, ignored={}";
+    private String jobTitle = JOB_TITLE;
 
-    public LogJobReport(String jobTitle, int total, SourceType source) {
+    private static final String REPORT_MESSAGE =
+        "%1$s: source=%2$s, job_status=%3$s, total=%4$s, processed=%5$s, partially_processed=%6$s, failed=%7$s, ignored=%8$s";
+
+    public DailyListLogJobReport(int total, SourceType source) {
         this.total = total;
         this.source = source;
-        this.jobTitle = jobTitle;
     }
 
     public void registerResult(JobStatusType status) {
-        if (mapOfResults.containsKey(status)) {
+        if (!mapOfResults.containsKey(status)) {
             mapOfResults.put(status, 0);
         }
 
@@ -39,7 +40,7 @@ public class LogJobReport {
     }
 
     public boolean haveAllProcessed() {
-        return getProcessed() == total;
+        return getProcessed() >= total;
     }
 
     public int getAggregatedResultCount() {
@@ -88,7 +89,22 @@ public class LogJobReport {
     @Override
     public String toString() {
         String status = haveAllProcessed() ? "COMPLETED" : "FAILED";
-        return REPORT_MESSAGE.formatted(jobTitle, source.toString(), status,
-                                                   getProcessed(), getPartiallyProcessed(), getFailed(), getIgnored());
+
+        // gets the unprocessed entries and add them to the ignored count
+        int unprocessed = getUnprocessedJobEntries() + getIgnored();
+
+        return getReportString(jobTitle, source, status, total,
+                                                   getProcessed(), getPartiallyProcessed(), getFailed(), unprocessed);
+    }
+
+    private int getUnprocessedJobEntries() {
+        int diff = getTotal() - getAggregatedResultCount();
+        return Math.max(diff, 0);
+    }
+
+    public static String getReportString(String title, SourceType source, String status,
+                                         int total, int processed, int partiallyProcessed, int failed, int ignored) {
+        return REPORT_MESSAGE.formatted(title, source.toString(), status,
+                                        total, processed, partiallyProcessed, failed, ignored);
     }
 }

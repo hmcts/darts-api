@@ -6,9 +6,9 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.log.service.AtsLoggerService;
+import uk.gov.hmcts.darts.log.service.DailyListLogJobService;
 import uk.gov.hmcts.darts.log.service.EventLoggerService;
-import uk.gov.hmcts.darts.log.service.LogJobService;
-import uk.gov.hmcts.darts.log.util.LogJobReport;
+import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class LogApiImpl implements LogApi {
     private final EventLoggerService eventLoggerService;
     private final AtsLoggerService atsLoggerService;
 
-    private final LogJobService logJobService;
+    private final DailyListLogJobService logJobService;
 
     @Override
     public void eventReceived(DartsEvent event) {
@@ -35,7 +35,7 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
-    public void processedDailyListJob(LogJobReport report) {
+    public void processedDailyListJob(DailyListLogJobReport report) {
         logJobService.logJobReport(report);
     }
 

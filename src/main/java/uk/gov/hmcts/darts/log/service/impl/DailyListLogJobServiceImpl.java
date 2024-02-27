@@ -1,19 +1,18 @@
 package uk.gov.hmcts.darts.log.service.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.log.service.LogJobService;
-import uk.gov.hmcts.darts.log.util.LogJobReport;
+import uk.gov.hmcts.darts.log.service.DailyListLogJobService;
+import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 
 @Service
 @AllArgsConstructor
 @Slf4j
-public class LogJobServiceImpl implements LogJobService {
+public class DailyListLogJobServiceImpl implements DailyListLogJobService {
 
     @Override
-    public void logJobReport(LogJobReport report) {
+    public void logJobReport(DailyListLogJobReport report) {
         if (report.haveAllProcessed()) {
             log.info(String.valueOf(report));
         } else {
