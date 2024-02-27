@@ -60,7 +60,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     }
 
     private void reportStats(DailyListLogJobReport report) {
-        if (report.getTotal() > 0) {
+        if (report.getTotalJobs() > 0) {
             logApi.processedDailyListJob(report);
         }
     }

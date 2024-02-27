@@ -28,7 +28,7 @@
           "court_house_short_name": "SWANS",
           "code": 457
         },
-        "court_house_name": "SWANSEA"
+        "court_house_name": "${COURTHOUSE}"
       },
       "sittings": [
         {

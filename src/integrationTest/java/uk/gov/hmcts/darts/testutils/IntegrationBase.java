@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.common.util.LogUtil;
+import uk.gov.hmcts.darts.common.util.MemoryAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 @AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
@@ -18,8 +20,11 @@ public class IntegrationBase {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    protected MemoryAppender logAppender = LogUtil.getMemoryLogger();
+
     @BeforeEach
     void clearDb() {
+        logAppender.reset();
         dartsDatabase.clearDatabaseInThisOrder();
     }
 }
