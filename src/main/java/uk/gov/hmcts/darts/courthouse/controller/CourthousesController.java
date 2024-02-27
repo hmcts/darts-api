@@ -93,8 +93,10 @@ public class CourthousesController implements CourthousesApi {
     public ResponseEntity<List<ExtendedCourthouse>> courthousesGet(
 
     ) {
-        List<CourthouseEntity> courtHouseEntities = courthouseService.getAllCourthouses();
-        List<ExtendedCourthouse> responseEntities = courthouseMapper.mapFromListEntityToListExtendedCourthouse(courtHouseEntities);
+
+        List<CourthouseEntity> courthouseEntities = courthouseService.getAllCourthouses();
+        List<ExtendedCourthouse> responseEntities = courthouseService.mapFromEntitiesToExtendedCourthouses(courthouseEntities);
+
         return new ResponseEntity<>(responseEntities, HttpStatus.OK);
     }
 
