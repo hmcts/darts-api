@@ -173,7 +173,24 @@ components:
         - "ANNOTATION_103"
         - "ANNOTATION_104"
         - "ANNOTATION_105"
-      x-enum-varnames: [ HEARING_NOT_FOUND, FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, USER_NOT_AUTHORISED_TO_DOWNLOAD, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID, FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, INTERNAL_SERVER_ERROR]
+        - "ANNOTATION_106"
+        - "ANNOTATION_107"
+        - "ANNOTATION_108"
+        - "ANNOTATION_109"
+        - "ANNOTATION_110"
+      x-enum-varnames: [
+        HEARING_NOT_FOUND,
+        FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT,
+        USER_NOT_AUTHORISED_TO_DOWNLOAD,
+        INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID,
+        FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT,
+        INTERNAL_SERVER_ERROR,
+        BAD_REQUEST_DOC_TYPE,
+        BAD_REQUEST_CONTENT_TYPE,
+        ANNOTATION_NOT_FOUND,
+        NOT_AUTHORISED_TO_DELETE,
+        BAD_REQUEST_FILE_SIZE
+      ]
 
     AnnotationTitleErrors:
       type: string
@@ -184,4 +201,22 @@ components:
         - "invalid annotation id or annotation document id"
         - "The annotation failed to be downloaded"
         - "An Internal server error has occurred."
-      x-enum-varnames: [ HEARING_NOT_FOUND, FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, USER_NOT_AUTHORISED_TO_DOWNLOAD, INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID, FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, INTERNAL_SERVER_ERROR]
+        - "The file extension is not allowed"
+        - "The declared content type of the request is not allowed"
+        - "The requested annotation cannot be found"
+        - "Not authorized to delete this annotation"
+        - "The file exceeds the maximum file size"
+
+      x-enum-varnames: [
+        HEARING_NOT_FOUND,
+        FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT,
+        USER_NOT_AUTHORISED_TO_DOWNLOAD,
+        INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID,
+        FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT,
+        INTERNAL_SERVER_ERROR,
+        BAD_REQUEST_DOC_TYPE,
+        BAD_REQUEST_CONTENT_TYPE,
+        ANNOTATION_NOT_FOUND,
+        NOT_AUTHORISED_TO_DELETE,
+        BAD_REQUEST_FILE_SIZE
+      ]

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.annotation.component;
+package uk.gov.hmcts.darts.annotation.validators;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 @RequiredArgsConstructor
 @Component
-public class AnnotationUploadValidator implements Validator<Annotation> {
+public class HearingExistsValidator implements Validator<Annotation> {
 
     private final HearingRepository hearingRepository;
 

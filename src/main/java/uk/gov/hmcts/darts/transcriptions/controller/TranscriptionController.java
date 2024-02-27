@@ -62,7 +62,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        securityRoles = {JUDGE, REQUESTER, APPROVER},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
@@ -96,8 +96,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -147,8 +147,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, ADMIN, APPROVER, REQUESTER, TRANSCRIBER, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE, ADMIN})
+        securityRoles = {JUDGE, ADMIN, APPROVER, REQUESTER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDGE, ADMIN, RCJ_APPEALS})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
         @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
             in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
@@ -171,7 +171,7 @@ public class TranscriptionController implements TranscriptionApi {
         // we authorise the transcription ids
         authorisation.authoriseWithIdsForTranscription(request,
                                                        e -> e.getTranscriptionId().toString(),
-                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER},
                                                        executeOnAuth
         );
 

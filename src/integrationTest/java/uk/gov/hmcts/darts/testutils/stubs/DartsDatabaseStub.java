@@ -664,14 +664,14 @@ public class DartsDatabaseStub {
             .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
     }
 
-    public ExternalObjectDirectoryEntity findExternalObjectDirectoryFor(Integer annotationId) {
+    public List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryFor(Integer annotationId) {
         var annotationDocumentEntity = annotationDocumentRepository.findAll().stream()
-            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
-            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+                .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+                .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
 
         return externalObjectDirectoryRepository.findAll().stream()
-            .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
-            .findFirst().orElseThrow(() -> new RuntimeException("No external object directory found for annotation id: " + annotationId));
+                .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
+                .toList();
     }
 
     @Transactional
