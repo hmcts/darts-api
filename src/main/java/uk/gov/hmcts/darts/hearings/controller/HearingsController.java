@@ -35,8 +35,8 @@ public class HearingsController implements HearingsApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE, ADMIN})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, ADMIN, RCJ_APPEALS})
     @Override
     public ResponseEntity<GetHearingResponse> getHearing(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getHearings(hearingId), HttpStatus.OK);
@@ -44,8 +44,8 @@ public class HearingsController implements HearingsApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE, ADMIN})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, ADMIN, RCJ_APPEALS})
     @Override
     public ResponseEntity<List<EventResponse>> getEvents(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getEvents(hearingId), HttpStatus.OK);

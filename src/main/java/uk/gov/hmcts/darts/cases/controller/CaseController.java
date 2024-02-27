@@ -99,8 +99,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE, ADMIN})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, ADMIN, RCJ_APPEALS})
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
 
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
@@ -109,8 +109,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE, ADMIN})
+        securityRoles = {JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, ADMIN, RCJ_APPEALS})
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
@@ -121,8 +121,8 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, RCJ_APPEALS})
     public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
         PatchCaseRequestValidator.validate(patchRequestObject);
         return new ResponseEntity<>(caseService.patchCase(caseId, patchRequestObject), HttpStatus.OK);

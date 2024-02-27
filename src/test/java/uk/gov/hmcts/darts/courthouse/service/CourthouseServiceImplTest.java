@@ -13,8 +13,10 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 
@@ -46,10 +48,16 @@ class CourthouseServiceImplTest {
     CourthouseServiceImpl courthouseService;
 
     @Mock
-    CourthouseRepository repository;
+    CourthouseRepository courthouseRepository;
 
     @Mock
-    CourthouseToCourthouseEntityMapper mapper;
+    RegionRepository regionRepository;
+
+    @Mock
+    CourthouseToCourthouseEntityMapper courthouseMapper;
+
+    @Mock
+    AdminRegionToRegionEntityMapper regionMapper;
 
     @Captor
     ArgumentCaptor<Integer> captorInteger;
@@ -65,8 +73,8 @@ class CourthouseServiceImplTest {
         courthouseModel.setCode((int) CODE);
 
 
-        Mockito.when(mapper.mapToEntity(courthouseModel)).thenReturn(courthouseEntity);
-        Mockito.when(repository.saveAndFlush(courthouseEntity)).thenReturn(courthouseEntity);
+        Mockito.when(courthouseMapper.mapToEntity(courthouseModel)).thenReturn(courthouseEntity);
+        Mockito.when(courthouseRepository.saveAndFlush(courthouseEntity)).thenReturn(courthouseEntity);
 
 
         CourthouseEntity returnedEntity = courthouseService.addCourtHouse(courthouseModel);
@@ -85,7 +93,7 @@ class CourthouseServiceImplTest {
         courthouseModel.setCode((int) CODE);
 
 
-        Mockito.when(repository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.of(new CourthouseEntity()));
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.of(new CourthouseEntity()));
 
         var exception = assertThrows(
             DartsApiException.class,
@@ -106,8 +114,8 @@ class CourthouseServiceImplTest {
         courthouseModel.setCode((int) CODE);
 
 
-        Mockito.when(repository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.empty());
-        Mockito.when(repository.findByCode(any(Integer.class))).thenReturn(Optional.of(new CourthouseEntity()));
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.empty());
+        Mockito.when(courthouseRepository.findByCode(any(Integer.class))).thenReturn(Optional.of(new CourthouseEntity()));
 
         var exception = assertThrows(
             DartsApiException.class,
@@ -119,11 +127,11 @@ class CourthouseServiceImplTest {
 
     @Test
     void testDeleteCourthouseById() {
-        Mockito.doNothing().when(repository).deleteById(COURTHOUSE_ID);
+        Mockito.doNothing().when(courthouseRepository).deleteById(COURTHOUSE_ID);
 
         courthouseService.deleteCourthouseById(COURTHOUSE_ID);
 
-        Mockito.verify(repository).deleteById(captorInteger.capture());
+        Mockito.verify(courthouseRepository).deleteById(captorInteger.capture());
         assertEquals(COURTHOUSE_ID, captorInteger.getValue());
     }
 
@@ -142,8 +150,8 @@ class CourthouseServiceImplTest {
         courthouseEntityChanged.setCode(543);
 
 
-        Mockito.when(repository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);
-        Mockito.when(repository.saveAndFlush(any())).thenReturn(courthouseEntityChanged);
+        Mockito.when(courthouseRepository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);
+        Mockito.when(courthouseRepository.saveAndFlush(any())).thenReturn(courthouseEntityChanged);
 
         CourthouseEntity returnedEntity = courthouseService.amendCourthouseById(
             courthouseModelAmendment,
@@ -162,7 +170,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        Mockito.when(repository.getReferenceById(anyInt())).thenReturn(courthouseEntity);
+        Mockito.when(courthouseRepository.getReferenceById(anyInt())).thenReturn(courthouseEntity);
 
 
         CourthouseEntity returnedEntity = courthouseService.getCourtHouseById(COURTHOUSE_ID);
@@ -181,7 +189,7 @@ class CourthouseServiceImplTest {
         courthouseEntity2.setCode(CODE);
 
         List<CourthouseEntity> courthouseList = Arrays.asList(courthouseEntity, courthouseEntity2);
-        Mockito.when(repository.findAll()).thenReturn(courthouseList);
+        Mockito.when(courthouseRepository.findAll()).thenReturn(courthouseList);
 
 
         List<CourthouseEntity> returnedEntities = courthouseService.getAllCourthouses();
@@ -190,7 +198,7 @@ class CourthouseServiceImplTest {
 
     @Test
     void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        Mockito.when(repository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
@@ -199,7 +207,7 @@ class CourthouseServiceImplTest {
 
     @Test
     void retrieveCourthouseUsingCodeAndName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        Mockito.when(repository.findByCode(SWANSEA_CODE)).thenReturn(Optional.of(
+        Mockito.when(courthouseRepository.findByCode(SWANSEA_CODE)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(SWANSEA_CODE, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
@@ -208,8 +216,8 @@ class CourthouseServiceImplTest {
 
     @Test
     void retrieveCourthouseUsingNameAndDifferentCode() {
-        Mockito.when(repository.findByCode(458)).thenReturn(Optional.empty());
-        Mockito.when(repository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
+        Mockito.when(courthouseRepository.findByCode(458)).thenReturn(Optional.empty());
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
 
         CourthouseCodeNotMatchException thrownException = assertThrows(
@@ -224,8 +232,8 @@ class CourthouseServiceImplTest {
 
     @Test
     void retrieveCourthouseUsingInvalidName() {
-        Mockito.when(repository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
-        Mockito.when(repository.findByCourthouseNameIgnoreCase("TEST")).thenReturn(Optional.empty());
+        Mockito.when(courthouseRepository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase("TEST")).thenReturn(Optional.empty());
 
         assertThrows(
             CourthouseNameNotFoundException.class,
@@ -356,6 +364,24 @@ class CourthouseServiceImplTest {
 
         assertEquals(expectedList, actualList);
 
+    }
+
+    @Test
+    void testGetAllRegions() {
+        RegionEntity regionEntity1 = new RegionEntity();
+        regionEntity1.setId(1);
+        regionEntity1.setRegionName("South");
+        RegionEntity regionEntity2 = new RegionEntity();
+        regionEntity2.setId(2);
+        regionEntity2.setRegionName("North");
+
+        List<RegionEntity> regions = Arrays.asList(regionEntity1, regionEntity2);
+        Mockito.when(regionRepository.findAll()).thenReturn(regions);
+
+        List<RegionEntity> returnedEntities = courthouseService.getAdminAllRegions();
+        assertEquals(2, returnedEntities.size());
+        assertEquals(regionEntity1, returnedEntities.get(0));
+        assertEquals(regionEntity2, returnedEntities.get(1));
     }
 
 

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.courthouse.service;
 
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
@@ -24,4 +25,6 @@ public interface CourthouseService {
         throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
 
     AdminCourthouse getAdminCourtHouseById(Integer id);
+
+    List<RegionEntity> getAdminAllRegions();
 }

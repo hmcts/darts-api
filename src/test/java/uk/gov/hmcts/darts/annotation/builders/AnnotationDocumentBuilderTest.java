@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.annotation;
+package uk.gov.hmcts.darts.annotation.builders;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.darts.annotation.component.AnnotationDocumentBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;

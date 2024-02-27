@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
+import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.AdminRegion;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
@@ -36,7 +39,9 @@ public class CourthousesController implements CourthousesApi {
 
     private final CourthouseService courthouseService;
 
-    private final CourthouseToCourthouseEntityMapper mapper;
+    private final CourthouseToCourthouseEntityMapper courthouseMapper;
+
+    private final AdminRegionToRegionEntityMapper regionMapper;
 
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdDelete(
@@ -63,6 +68,15 @@ public class CourthousesController implements CourthousesApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<List<AdminRegion>> adminRegionsGet() {
+            List<RegionEntity> regionsEntities = courthouseService.getAdminAllRegions();
+            List<AdminRegion> adminRegions = regionMapper.mapFromEntityToAdminRegion(regionsEntities);
+            return new ResponseEntity<>(adminRegions, HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Void> courthousesCourthouseIdPut(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId,
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
@@ -82,7 +96,7 @@ public class CourthousesController implements CourthousesApi {
 
     ) {
         List<CourthouseEntity> courtHouseEntities = courthouseService.getAllCourthouses();
-        List<ExtendedCourthouse> responseEntities = mapper.mapFromListEntityToListExtendedCourthouse(courtHouseEntities);
+        List<ExtendedCourthouse> responseEntities = courthouseMapper.mapFromListEntityToListExtendedCourthouse(courtHouseEntities);
         return new ResponseEntity<>(responseEntities, HttpStatus.OK);
     }
 
@@ -91,7 +105,7 @@ public class CourthousesController implements CourthousesApi {
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
         CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
-        ExtendedCourthouse extendedCourthouse = mapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
+        ExtendedCourthouse extendedCourthouse = courthouseMapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }
 }

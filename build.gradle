@@ -377,7 +377,7 @@ dependencies {
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-  implementation platform('com.azure:azure-sdk-bom:1.2.20')
+  implementation platform('com.azure:azure-sdk-bom:1.2.21')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'

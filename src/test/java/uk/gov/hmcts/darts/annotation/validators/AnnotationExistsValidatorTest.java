@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.annotation.component;
+package uk.gov.hmcts.darts.annotation.validators;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

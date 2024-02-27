@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
@@ -50,7 +49,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         given.externalObjectDirForMedia(mediaEntity);
         doNothing().when(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 
@@ -64,7 +63,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
         verify(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
-            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 
@@ -91,7 +90,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
         verify(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
-            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 
@@ -105,7 +104,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
         verify(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
-            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 
@@ -119,7 +118,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
         verify(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
-            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, ADMIN, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
     }
 }

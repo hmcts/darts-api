@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
-import uk.gov.hmcts.darts.annotation.service.AnnotationService;
+import uk.gov.hmcts.darts.annotation.service.AnnotationDeleteService;
+import uk.gov.hmcts.darts.annotation.service.AnnotationDownloadService;
+import uk.gov.hmcts.darts.annotation.service.AnnotationUploadService;
 import uk.gov.hmcts.darts.annotations.http.api.AnnotationsApi;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.annotations.model.PostAnnotationResponse;
@@ -26,7 +28,9 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class AnnotationController implements AnnotationsApi {
 
-    private final AnnotationService annotationService;
+    private final AnnotationDownloadService downloadService;
+    private final AnnotationDeleteService deleteService;
+    private final AnnotationUploadService uploadService;
 
     @Authorisation(
         bodyAuthorisation = true,
@@ -35,7 +39,7 @@ public class AnnotationController implements AnnotationsApi {
         globalAccessSecurityRoles = {JUDGE})
     @Override
     public ResponseEntity<PostAnnotationResponse> postAnnotation(MultipartFile file, Annotation annotation) {
-        var annotationId = annotationService.process(file, annotation);
+        var annotationId = uploadService.upload(file, annotation);
         return ResponseEntity.ok(new PostAnnotationResponse(annotationId));
     }
 
@@ -45,7 +49,7 @@ public class AnnotationController implements AnnotationsApi {
             globalAccessSecurityRoles = {JUDGE, ADMIN})
     @Override
     public ResponseEntity<Void> deleteAnnotation(Integer annotationId) {
-        annotationService.delete(annotationId);
+        deleteService.delete(annotationId);
         return ResponseEntity.noContent().build();
     }
 
@@ -56,7 +60,7 @@ public class AnnotationController implements AnnotationsApi {
     @Override
     public ResponseEntity<Resource> downloadAnnotation(Integer annotationId, Integer annotationDocumentId) {
 
-        final AnnotationResponseDto annotationResponseDto = annotationService.downloadAnnotationDoc(annotationId, annotationDocumentId);
+        final AnnotationResponseDto annotationResponseDto = downloadService.downloadAnnotationDoc(annotationId, annotationDocumentId);
 
         return ResponseEntity.ok()
                 .header(

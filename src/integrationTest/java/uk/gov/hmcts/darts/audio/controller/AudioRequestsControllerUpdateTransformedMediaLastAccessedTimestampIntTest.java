@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
@@ -61,7 +60,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
         Integer transformedMediaId = transformedMediaEntity.getId();
         doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
         doNothing().when(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, transformedMediaId);
@@ -72,7 +71,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
         verify(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
     }
@@ -95,7 +94,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
         Integer transformedMediaId = transformedMediaEntity.getId();
         doNothing().when(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
 
         doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))
@@ -119,7 +118,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
         verify(mockAuthorisation).authoriseTransformedMediaAgainstUser(transformedMediaId);
     }
