@@ -709,23 +709,13 @@ public class DartsDatabaseStub {
             );
 
 
-        ExternalObjectDirectoryEntity armEod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity eod = getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocumentEntity,
             getObjectRecordStatusEntity(STORED),
-            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
             UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
         );
-        armEod.setTransferAttempts(1);
-        save(armEod);
-
-        ExternalObjectDirectoryEntity armEod2 = getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            annotationDocumentEntity,
-            getObjectRecordStatusEntity(STORED),
-            getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
-            UUID.fromString("665e00c8-5b82-4392-8766-e0c982f603d3")
-        );
-        armEod.setTransferAttempts(1);
-        save(armEod2);
+        save(eod);
     }
 
     protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {

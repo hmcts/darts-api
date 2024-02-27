@@ -1,23 +1,21 @@
 package uk.gov.hmcts.darts.annotation;
 
-import com.azure.core.util.BinaryData;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.annotation.service.impl.AnnotationDataManagement;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-
-import java.io.InputStream;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,10 +32,7 @@ class AnnotationGetTest extends IntegrationBase {
     private static final String ANNOTATION_DOCUMENT_ENDPOINT = "/annotations/{annotation_id}/documents/{annotation_document_id}";
 
     @Mock
-    private DataManagementApi dataManagementApi;
-
-    @Mock
-    private InputStream inputStreamResource;
+    private AnnotationDataManagement annotationDataManagement;
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,12 +59,10 @@ class AnnotationGetTest extends IntegrationBase {
 
     @Test
     void shouldDownloadAnnotationDocument() throws Exception {
-
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
+        var stubInputStreamResource = new InputStreamResource(IOUtils.toInputStream("Test", "UTF-8"));
 
-        var binaryData = mock(BinaryData.class);
-        lenient().when(dataManagementApi.getBlobDataFromInboundContainer(any(UUID.class))).thenReturn(binaryData);
-        lenient().when(binaryData.toStream()).thenReturn(inputStreamResource);
+        lenient().when(annotationDataManagement.download(any(AnnotationDocumentEntity.class))).thenReturn(stubInputStreamResource);
 
         dartsDatabase.createValidAnnotationDocumentForDownload(judge);
 

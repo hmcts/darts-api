@@ -45,7 +45,7 @@ public class AnnotationDataManagement {
         return new ExternalBlobLocations(inboundLocation, unstructuredLocation);
     }
 
-    InputStreamResource download(AnnotationDocumentEntity latestAnnotationDocument) {
+    public InputStreamResource download(AnnotationDocumentEntity latestAnnotationDocument) {
         var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories.getFileBasedDownload(
             latestAnnotationDocument.getExternalObjectDirectoryEntities());
 
