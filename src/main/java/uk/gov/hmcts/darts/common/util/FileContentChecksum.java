@@ -13,9 +13,13 @@ import static org.apache.commons.codec.digest.DigestUtils.md5;
  * Document.doc" | base64
  */
 @Component
-@SuppressWarnings({"java:S4790"})
+@SuppressWarnings({"java:S4790", "checkstyle:SummaryJavadoc"})
 public class FileContentChecksum {
 
+    /**
+     * @deprecated This implementation is not memory-efficient with large files, use calculate(DigestInputStream digestInputStream) instead.
+     */
+    @Deprecated
     public String calculate(byte[] bytes) {
         return encodeToString(md5(bytes));
     }
