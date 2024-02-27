@@ -16,20 +16,25 @@ import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotation.service.impl.AnnotationServiceImpl;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,8 +42,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_ANNOTATION;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationServiceTest {
@@ -71,11 +78,19 @@ class AnnotationServiceTest {
     private ExternalObjectDirectoryRepository eodRepository;
     @Mock
     private AuthorisationApi authorisationApi;
+    @Mock
+    private UserAccountEntity userAccountEntity;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
     private final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = someExternalObjectDirectoryEntity();
     private AnnotationService annotationService;
+    @Mock
+    private AuditApi auditApi;
+    @Mock
+    private HearingRepository hearingRepository;
+    @Mock
+    private UserIdentity userIdentity;
 
     private ObjectRecordStatusRepository objectRecordStatusRepository;
 
@@ -93,7 +108,10 @@ class AnnotationServiceTest {
             userAuthorisedToDeleteAnnotationValidator,
             userAuthorisedToDownloadAnnotationValidator,
             annotationExistsValidator,
-            objectRecordStatusRepository
+            objectRecordStatusRepository,
+            auditApi,
+            hearingRepository,
+            userIdentity
         );
 
         when(hearing.getId()).thenReturn(1);
@@ -109,6 +127,8 @@ class AnnotationServiceTest {
         assertThatThrownBy(() -> annotationService.process(someMultipartFile(), someAnnotationFor(hearing)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+
+        verifyNoInteractions(auditApi);
     }
 
     @Test
@@ -116,6 +136,8 @@ class AnnotationServiceTest {
         assertThatThrownBy(() -> annotationService.process(someMultipartFileWithBadInputStream(), someAnnotationFor(hearing)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+
+        verifyNoInteractions(auditApi);
     }
 
     @Test
@@ -127,6 +149,7 @@ class AnnotationServiceTest {
         annotationService.process(someMultipartFile(), someAnnotationFor(hearing));
 
         verify(dataManagementApi).deleteBlobDataFromInboundContainer(SOME_EXTERNAL_LOCATION);
+        verifyNoInteractions(auditApi);
     }
 
     @Test
@@ -136,10 +159,13 @@ class AnnotationServiceTest {
         when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, SOME_EXTERNAL_LOCATION)).thenReturn(externalObjectDirectoryEntity);
         when(dataManagementApi.saveBlobDataToInboundContainer(any())).thenReturn(SOME_EXTERNAL_LOCATION);
         when(annotationPersistenceService.persistAnnotation(any(), any())).thenReturn(externalObjectDirectoryEntity);
+        when(hearingRepository.findById(any())).thenReturn(Optional.of(someHearing()));
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         annotationService.process(someMultipartFile(), someAnnotationFor(hearing));
 
         verify(annotationPersistenceService).persistAnnotation(externalObjectDirectoryEntity, hearing.getId());
+        verify(auditApi).recordAudit(IMPORT_ANNOTATION, userAccountEntity, hearing.getCourtCase());
     }
 
     @Test
@@ -153,6 +179,8 @@ class AnnotationServiceTest {
         assertThatThrownBy(() -> annotationService.process(someMultipartFile(), someAnnotationFor(hearing)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+
+        verifyNoInteractions(auditApi);
     }
 
     private AnnotationEntity someAnnotationEntity() {
@@ -181,6 +209,12 @@ class AnnotationServiceTest {
             "some-content-type",
             "some-content".getBytes()
         );
+    }
+
+    private HearingEntity someHearing() {
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setId(1);
+        return hearingEntity;
     }
 
     @SneakyThrows

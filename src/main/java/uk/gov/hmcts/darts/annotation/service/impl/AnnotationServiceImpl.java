@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.annotation.controller.dto.AnnotationResponseDto;
 import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -20,9 +22,11 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,6 +35,7 @@ import java.util.UUID;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_SERVER_ERROR;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_ANNOTATION;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +54,10 @@ public class AnnotationServiceImpl implements AnnotationService {
     private final Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     private final Validator<Integer> annotationExistsValidator;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final AuditApi auditApi;
+    private final HearingRepository hearingRepository;
+    private final UserIdentity userIdentity;
+
 
     @Override
     public Integer process(MultipartFile document, Annotation annotation) {
@@ -74,6 +83,9 @@ public class AnnotationServiceImpl implements AnnotationService {
 
         try {
             annotationPersistenceService.persistAnnotation(externalObjectDirectoryEntity, annotation.getHearingId());
+            final var hearing = hearingRepository.findById(annotation.getHearingId()).orElseThrow(
+                () -> new DartsApiException(HearingApiError.HEARING_NOT_FOUND));
+            auditApi.recordAudit(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearing.getCourtCase());
         } catch (RuntimeException exception) {
             attemptToDeleteDocument(externalLocation);
         }

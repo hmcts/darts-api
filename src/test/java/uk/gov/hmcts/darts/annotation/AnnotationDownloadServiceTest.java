@@ -12,11 +12,14 @@ import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationService;
 import uk.gov.hmcts.darts.annotation.service.impl.AnnotationServiceImpl;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -61,9 +64,14 @@ class AnnotationDownloadServiceTest {
     private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     @Mock
     private Validator<Integer> annotationExistsValidator;
-
     @Mock
     private ObjectRecordStatusRepository objectRecordStatusRepository;
+    @Mock
+    private AuditApi auditApi;
+    @Mock
+    private HearingRepository hearingRepository;
+    @Mock
+    private UserIdentity userIdentity;
 
 
     @BeforeEach
@@ -80,7 +88,10 @@ class AnnotationDownloadServiceTest {
             userAuthorisedToDeleteAnnotationValidator,
             userAuthorisedToDownloadAnnotationValidator,
             annotationExistsValidator,
-            objectRecordStatusRepository
+            objectRecordStatusRepository,
+            auditApi,
+            hearingRepository,
+            userIdentity
         );
 
     }
