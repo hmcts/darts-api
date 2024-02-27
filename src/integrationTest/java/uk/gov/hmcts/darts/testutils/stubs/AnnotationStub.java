@@ -19,7 +19,6 @@ public class AnnotationStub {
     private final AnnotationRepository annotationRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
 
-    @Transactional
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
                                                               String annotationText) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
@@ -57,6 +56,7 @@ public class AnnotationStub {
                                                                               String checksum) {
         AnnotationDocumentEntity annotationDocument = createAnnotationDocumentEntity(annotationEntity, fileName, fileType, fileSize,
                                                                                      uploadedBy, uploadedDateTime, checksum);
+        annotationDocument.setAnnotation(annotationRepository.getReferenceById(annotationEntity.getId()));
         annotationDocument = annotationDocumentRepository.saveAndFlush(annotationDocument);
         return annotationDocument;
     }
