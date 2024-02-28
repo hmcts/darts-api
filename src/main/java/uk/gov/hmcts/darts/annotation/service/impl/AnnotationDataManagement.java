@@ -5,15 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_SERVER_ERROR;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_S
 public class AnnotationDataManagement {
 
     private final DataManagementApi dataManagementApi;
+    private final DataManagementFacade dataManagementFacade;
 
     public ExternalBlobLocations upload(BinaryData binaryData, String filename) {
         UUID inboundLocation = null;
@@ -41,14 +46,24 @@ public class AnnotationDataManagement {
         return new ExternalBlobLocations(inboundLocation, unstructuredLocation);
     }
 
+    public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
+        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories
+            .getFileBasedDownload(externalObjectDirectoryEntities);
 
-    public InputStreamResource download(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
+
         try {
-            return new InputStreamResource(
-                dataManagementApi.getBlobDataFromInboundContainer(externalObjectDirectoryEntity.getExternalLocation()).toStream());
-        } catch (RuntimeException e) {
-            log.error("Failed to download annotation document {}", externalObjectDirectoryEntity.getId(), e);
-            throw new DartsApiException(INTERNAL_SERVER_ERROR, e);
+            if (!downloadResponseMetaData.isSuccessfulDownload()) {
+                downloadResponseMetaData.close();
+                throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+            }
+
+            return new InputStreamResource(downloadResponseMetaData.getInputStream());
+        } catch (IOException e) {
+            log.error("Failed to download annotation document {}",
+                      externalObjectDirectoryEntities.get(0).getAnnotationDocumentEntity().getId(), e);
+            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
         }
     }
 
