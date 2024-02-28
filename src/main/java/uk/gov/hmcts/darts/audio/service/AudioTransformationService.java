@@ -14,10 +14,6 @@ public interface AudioTransformationService {
 
     BinaryData getUnstructuredAudioBlob(UUID location);
 
-    BinaryData getOutboundAudioBlob(UUID location);
-
-    UUID saveAudioBlobData(BinaryData binaryData);
-
     List<MediaEntity> getMediaMetadata(Integer hearingId);
 
     Optional<UUID> getMediaLocation(MediaEntity media, Integer containerLocationId);
