@@ -134,6 +134,7 @@ darts:
         arm-minimum:
           weeks: 30
     pending-retention-days: 7
+    inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
       enabled: true

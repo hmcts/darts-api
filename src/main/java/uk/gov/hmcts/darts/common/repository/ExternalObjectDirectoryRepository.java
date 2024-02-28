@@ -193,4 +193,37 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
 
-    }
+    @Query(
+        """
+            SELECT eod.id FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status 
+            AND eod.externalLocationType = :type
+            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2 
+            where (eod2.status = :notExistsStatus or eod2.transferAttempts >= :maxTransferAttempts) 
+            AND eod2.externalLocationType = :notExistsType
+            and (eod.media = eod2.media
+              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
+              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
+              OR eod.caseDocument = eod2.caseDocument ))
+            order by eod.lastModifiedDateTime
+            LIMIT 100
+            """
+    )
+    List<Integer> findEodIdsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
+                                        ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
+                                        Integer maxTransferAttempts);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status.id in :failureStatesList and
+            (eod.media.id = :mediaId or eod.caseDocument.id = :caseDocumentId
+            or eod.annotationDocumentEntity.id = :annotationDocumentId
+            or eod.transcriptionDocumentEntity.id = :transcriptionDocumentId)
+            and eod.transferAttempts < 3
+            order by eod.lastModifiedDateTime
+            """
+    )
+    ExternalObjectDirectoryEntity findByIdsAndFailure(Integer mediaId, Integer caseDocumentId, Integer annotationDocumentId, Integer transcriptionDocumentId,
+                                                      List<Integer> failureStatesList);
+}

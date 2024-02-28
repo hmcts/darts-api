@@ -9,4 +9,6 @@ public interface InboundToUnstructuredProcessorSingleElement {
     void processSingleElement(Integer inboundExternalObjectDirectoryId,
                               List<ExternalObjectDirectoryEntity> unstructuredStoredList,
                               List<ExternalObjectDirectoryEntity> unstructuredFailedList);
+
+    void processSingleElement(Integer inboundObjectId);
 }
