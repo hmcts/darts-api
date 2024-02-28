@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +117,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
 
             String rawFilename = generateFilename(armExternalObjectDirectory);
-            log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), LocalDateTime.now());
+            log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
             boolean copyRawDataToArmSuccessful = copyRawDataToArm(
                 unstructuredExternalObjectDirectory,
                 armExternalObjectDirectory,
@@ -128,7 +127,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
                 updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
             }
-            log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), LocalDateTime.now());
+            log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
         }
     }
 
