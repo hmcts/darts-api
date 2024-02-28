@@ -123,7 +123,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getMediaRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
             .eventDate(formatDateTime(media.getCreatedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(media.getMediaFile())

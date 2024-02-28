@@ -124,7 +124,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getAnnotationRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
             .eventDate(formatDateTime(annotationDocument.getUploadedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(annotationDocument.getFileName())

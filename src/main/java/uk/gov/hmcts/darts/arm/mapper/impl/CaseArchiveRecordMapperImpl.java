@@ -135,7 +135,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getCaseRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
             .eventDate(formatDateTime(caseDocument.getUploadedTs()))
             .region(armDataManagementConfiguration.getRegion())
             .title(caseDocument.getFileName())

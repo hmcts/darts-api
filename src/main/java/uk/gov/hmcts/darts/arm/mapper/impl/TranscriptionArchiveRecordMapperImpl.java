@@ -154,7 +154,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
-            .recordDate(currentTimeHelper.currentOffsetDateTime().format(dateTimeFormatter))
+            .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
             .eventDate(formatDateTime(transcriptionDocument.getUploadedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(transcriptionDocument.getFileName())
