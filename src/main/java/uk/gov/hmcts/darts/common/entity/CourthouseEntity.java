@@ -57,6 +57,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "reg_id")})
     private Set<RegionEntity> regions = new LinkedHashSet<>();
 
+
     @Column(name = "display_name")
     private String displayName;
 
@@ -82,6 +83,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         if (region != null) {
             region.getCourthouses().add(this);
         }
+
     }
 
 }
