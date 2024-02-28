@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -132,6 +133,7 @@ class AnnotationDataManagementTest {
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setId(1);
+        externalObjectDirectoryEntity.setAnnotationDocumentEntity(new AnnotationDocumentEntity());
         return externalObjectDirectoryEntity;
     }
 }
