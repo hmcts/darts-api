@@ -28,7 +28,6 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
     private final Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
 
-
     @Override
     public AnnotationResponseDto downloadAnnotationDoc(Integer annotationId, Integer annotationDocumentId) {
 
@@ -37,21 +36,21 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
         final ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(
             ObjectRecordStatusEnum.STORED.getId());
 
-        final List<ExternalObjectDirectoryEntity> eodDir = eodRepository.findByAnnotationIdAndAnnotationDocumentId(
+        final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = eodRepository.findByAnnotationIdAndAnnotationDocumentId(
             annotationId, annotationDocumentId, storedStatus);
 
-        if (eodDir.isEmpty()) {
+        if (externalObjectDirectoryEntities.isEmpty()) {
             throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
         }
 
-        final ExternalObjectDirectoryEntity externalObjectDirectoryEntity = eodDir.get(0);
+        final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity = externalObjectDirectoryEntities.get(0);
 
-        final InputStreamResource blobStream = annotationDataManagement.download(externalObjectDirectoryEntity);
+        final InputStreamResource blobStream = annotationDataManagement.download(externalObjectDirectoryEntities);
 
         return AnnotationResponseDto.builder()
             .resource(blobStream)
-            .fileName(externalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
-            .externalLocation(externalObjectDirectoryEntity.getExternalLocation())
+            .fileName(latestExternalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
             .annotationDocumentId(annotationDocumentId).build();
+
     }
 }
