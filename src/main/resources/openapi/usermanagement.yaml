@@ -393,6 +393,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecurityGroupId'
+      required:
+        - full_name
+        - email_address
     UserSearch:
       type: object
       properties:
