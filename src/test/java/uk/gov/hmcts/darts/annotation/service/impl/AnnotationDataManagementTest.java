@@ -1,40 +1,57 @@
 package uk.gov.hmcts.darts.annotation.service.impl;
 
 import com.azure.core.util.BinaryData;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
-import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.INTERNAL_SERVER_ERROR;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationDataManagementTest {
 
     @Mock
     private DataManagementApi dataManagementApi;
+    @Mock
+    private DataManagementFacade dataManagementFacade;
+    @Mock
+    private ExternalObjectDirectoryRepository eodRepository;
+    @Mock
+    private DownloadableExternalObjectDirectories downloadableExternalObjectDirectories;
+    @Mock
+    private DownloadResponseMetaData downloadResponseMetaData;
 
     private AnnotationDataManagement annotationDataManagement;
 
     @BeforeEach
     void setUp() {
-        annotationDataManagement = new AnnotationDataManagement(dataManagementApi);
+        annotationDataManagement = new AnnotationDataManagement(dataManagementApi, dataManagementFacade);
     }
 
     @Test
@@ -90,12 +107,25 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsIfDownloadAnnotationDocumentFails() {
-        when(dataManagementApi.getBlobDataFromInboundContainer(any())).thenThrow(new RuntimeException());
-
+    void throwsIfDownloadAnnotationDocumentResponseFails() {
         assertThatThrownBy(() -> annotationDataManagement.download(someExternalObjectDirectoryEntity()))
             .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", INTERNAL_SERVER_ERROR);
+            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+    }
+
+    @SneakyThrows
+    @Test
+    void throwsIfDownloadAnnotationDocumentInputStreamFails() {
+        try (MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class)) {
+            when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
+            when(downloadableExternalObjectDirectories.getResponse()).thenReturn(downloadResponseMetaData);
+            when(downloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
+            when(downloadResponseMetaData.getInputStream()).thenThrow(new IOException());
+
+            assertThatThrownBy(() -> annotationDataManagement.download(someExternalObjectDirectoryEntity()))
+                .isInstanceOf(DartsApiException.class)
+                .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+        }
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {

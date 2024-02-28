@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.annotation.service.AnnotationDownloadService;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
-import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -28,8 +27,6 @@ class AnnotationDownloadServiceTest {
     private Validator<Integer> userAuthorisedToDownloadAnnotationValidator;
     @Mock
     private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Mock
-    private DataManagementFacade dataManagementFacade;
 
     private AnnotationDownloadService downloadService;
 
@@ -39,8 +36,7 @@ class AnnotationDownloadServiceTest {
             annotationDataManagement,
             eodRepository,
             userAuthorisedToDownloadAnnotationValidator,
-            objectRecordStatusRepository,
-            dataManagementFacade
+            objectRecordStatusRepository
             );
     }
 
