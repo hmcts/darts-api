@@ -20,7 +20,7 @@ class DailyListLogJobReportTest {
 
         Assertions.assertEquals(DailyListLogJobReport.JOB_TITLE, dailyListLogJobReport.getJobTitle());
         Assertions.assertTrue(dailyListLogJobReport.toString().matches(REGEX_FOR_REPORT));
-        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalJobs());
+        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalDailyListRegisteredJobStatus());
         Assertions.assertEquals(SourceType.CPP, dailyListLogJobReport.getSource());
 
         Assertions.assertTrue(DailyListLogJobReport
@@ -36,7 +36,7 @@ class DailyListLogJobReportTest {
 
         Assertions.assertEquals(DailyListLogJobReport.JOB_TITLE, dailyListLogJobReport.getJobTitle());
         Assertions.assertTrue(dailyListLogJobReport.toString().matches(REGEX_FOR_REPORT));
-        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalJobs());
+        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalDailyListRegisteredJobStatus());
         Assertions.assertEquals(SourceType.CPP, dailyListLogJobReport.getSource());
 
         dailyListLogJobReport.registerResult(JobStatusType.IGNORED);
@@ -50,10 +50,8 @@ class DailyListLogJobReportTest {
         dailyListLogJobReport.registerResult(JobStatusType.IGNORED);
         dailyListLogJobReport.registerResult(JobStatusType.IGNORED);
 
-        Assertions.assertFalse(dailyListLogJobReport.haveAllProcessed());
-
         SourceType source = SourceType.CPP;
-        String status = "FAILED";
+        String status = "COMPLETED";
         Assertions.assertEquals(DailyListLogJobReport
                                   .getReportString(DailyListLogJobReport.JOB_TITLE,
                                                    source, status, totalNumberOfRequests,2,1, 2, 5), dailyListLogJobReport.toString());
@@ -68,7 +66,7 @@ class DailyListLogJobReportTest {
 
         Assertions.assertEquals(DailyListLogJobReport.JOB_TITLE, dailyListLogJobReport.getJobTitle());
         Assertions.assertTrue(dailyListLogJobReport.toString().matches(REGEX_FOR_REPORT));
-        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalJobs());
+        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalDailyListRegisteredJobStatus());
         Assertions.assertEquals(SourceType.CPP, dailyListLogJobReport.getSource());
 
         dailyListLogJobReport.registerResult(JobStatusType.PROCESSED);
@@ -78,10 +76,10 @@ class DailyListLogJobReportTest {
         String status = "FAILED";
 
         Assertions.assertEquals(2, dailyListLogJobReport.getAggregatedResultCount());
-        Assertions.assertFalse(dailyListLogJobReport.haveAllProcessed());
+        Assertions.assertFalse(dailyListLogJobReport.haveAllExpectedResults());
         Assertions.assertEquals(DailyListLogJobReport
                                     .getReportString(DailyListLogJobReport.JOB_TITLE,
-                                                     source, status, totalNumberOfRequests,2,0, 0, 8), dailyListLogJobReport.toString());
+                                                     source, status, totalNumberOfRequests,2,0, 0, 0), dailyListLogJobReport.toString());
     }
 
     @Test
@@ -93,7 +91,7 @@ class DailyListLogJobReportTest {
 
         Assertions.assertEquals(DailyListLogJobReport.JOB_TITLE, dailyListLogJobReport.getJobTitle());
         Assertions.assertTrue(dailyListLogJobReport.toString().matches(REGEX_FOR_REPORT));
-        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalJobs());
+        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalDailyListRegisteredJobStatus());
         Assertions.assertEquals(SourceType.CPP, dailyListLogJobReport.getSource());
 
         dailyListLogJobReport.registerResult(JobStatusType.PROCESSED);
@@ -104,10 +102,9 @@ class DailyListLogJobReportTest {
         dailyListLogJobReport.registerResult(JobStatusType.PARTIALLY_PROCESSED);
 
         SourceType source = SourceType.CPP;
-        String status = "FAILED";
+        String status = "COMPLETED";
 
         Assertions.assertEquals(6, dailyListLogJobReport.getAggregatedResultCount());
-        Assertions.assertFalse(dailyListLogJobReport.haveAllProcessed());
         Assertions.assertEquals(DailyListLogJobReport
                                     .getReportString(DailyListLogJobReport.JOB_TITLE,
                                                      source, status, totalNumberOfRequests,2,2, 1, 1), dailyListLogJobReport.toString());
@@ -122,7 +119,7 @@ class DailyListLogJobReportTest {
 
         Assertions.assertEquals(DailyListLogJobReport.JOB_TITLE, dailyListLogJobReport.getJobTitle());
         Assertions.assertTrue(dailyListLogJobReport.toString().matches(REGEX_FOR_REPORT));
-        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalJobs());
+        Assertions.assertEquals(totalNumberOfRequests, dailyListLogJobReport.getTotalDailyListRegisteredJobStatus());
         Assertions.assertEquals(SourceType.CPP, dailyListLogJobReport.getSource());
 
         dailyListLogJobReport.registerResult(JobStatusType.PROCESSED);
@@ -131,7 +128,7 @@ class DailyListLogJobReportTest {
         SourceType source = SourceType.CPP;
         String status = "COMPLETED";
 
-        Assertions.assertTrue(dailyListLogJobReport.haveAllProcessed());
+        Assertions.assertTrue(dailyListLogJobReport.haveAllExpectedResults());
         Assertions.assertEquals(DailyListLogJobReport
                                     .getReportString(DailyListLogJobReport.JOB_TITLE, source,
                                                      status, totalNumberOfRequests,2,0, 0, 0), dailyListLogJobReport.toString());

@@ -98,7 +98,7 @@ class DailyListProcessorTest extends IntegrationBase {
         report.registerResult(PROCESSED);
         report.registerResult(IGNORED);
 
-        assertFalse(logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.ERROR_INT)).isEmpty());
+        assertFalse(logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).isEmpty());
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
@@ -165,7 +165,7 @@ class DailyListProcessorTest extends IntegrationBase {
         report.registerResult(PROCESSED);
         report.registerResult(IGNORED);
 
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.ERROR_INT)).size());
+        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
@@ -328,8 +328,8 @@ class DailyListProcessorTest extends IntegrationBase {
         reportCpp.registerResult(PROCESSED);
         reportXhb.registerResult(PROCESSED);
 
-        assertEquals(1, logAppender.searchLogApiLogs(reportCpp.toString(), Level.toLevel(Level.ERROR_INT)).size());
-        assertEquals(1, logAppender.searchLogApiLogs(reportXhb.toString(), Level.toLevel(Level.ERROR_INT)).size());
+        assertEquals(1, logAppender.searchLogApiLogs(reportCpp.toString(), Level.toLevel(Level.INFO_INT)).size());
+        assertEquals(1, logAppender.searchLogApiLogs(reportXhb.toString(), Level.toLevel(Level.INFO_INT)).size());
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
@@ -369,7 +369,7 @@ class DailyListProcessorTest extends IntegrationBase {
 
         DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
         report.registerResult(FAILED);
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.ERROR_INT)).size());
+        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
 
         var dailyListStatus = dartsDatabase.getDailyListRepository()
             .findById(id).orElseThrow()
@@ -400,7 +400,7 @@ class DailyListProcessorTest extends IntegrationBase {
         report.registerResult(PARTIALLY_PROCESSED);
         report.registerResult(IGNORED);
 
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.ERROR_INT)).size());
+        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
 
         var dailyListStatus = dartsDatabase.getDailyListRepository()
             .findById(oldDailyList.getId()).orElseThrow()

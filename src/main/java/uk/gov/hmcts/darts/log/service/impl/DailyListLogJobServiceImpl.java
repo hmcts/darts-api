@@ -13,7 +13,7 @@ public class DailyListLogJobServiceImpl implements DailyListLogJobService {
 
     @Override
     public void logJobReport(DailyListLogJobReport report) {
-        if (report.haveAllProcessed()) {
+        if (report.haveAllExpectedResults()) {
             log.info(String.valueOf(report));
         } else {
             log.error(String.valueOf(report));

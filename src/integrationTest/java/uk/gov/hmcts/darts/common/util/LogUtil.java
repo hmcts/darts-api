@@ -14,7 +14,7 @@ public final class LogUtil {
 
     }
 
-    public static MemoryAppender getMemoryLogger() {
+    public static MemoryLogAppender getMemoryLogger() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         for (Logger logger : loggerContext.getLoggerList()) {
@@ -22,8 +22,8 @@ public final class LogUtil {
 
             while (appenderIterator.hasNext()) {
                 Appender appender = appenderIterator.next();
-                if (appender instanceof MemoryAppender) {
-                    return (MemoryAppender) appender;
+                if (appender instanceof MemoryLogAppender) {
+                    return (MemoryLogAppender) appender;
                 }
             }
         }

@@ -18,7 +18,7 @@ public class DailyListLogJobReport {
 
     public static final String JOB_TITLE = "Daily list job";
 
-    private int totalJobs;
+    private int totalDailyListRegisteredJobStatus;
 
     private SourceType source;
 
@@ -27,8 +27,8 @@ public class DailyListLogJobReport {
     private static final String REPORT_MESSAGE =
         "%1$s: source=%2$s, job_status=%3$s, total=%4$s, processed=%5$s, partially_processed=%6$s, failed=%7$s, ignored=%8$s";
 
-    public DailyListLogJobReport(int total, SourceType source) {
-        this.totalJobs = total;
+    public DailyListLogJobReport(int totalDailyListRegisteredJobStatus, SourceType source) {
+        this.totalDailyListRegisteredJobStatus = totalDailyListRegisteredJobStatus;
         this.source = source;
     }
 
@@ -40,8 +40,8 @@ public class DailyListLogJobReport {
         mapOfJobResultCount.put(status, mapOfJobResultCount.get(status) + 1);
     }
 
-    public boolean haveAllProcessed() {
-        return getProcessed() >= totalJobs;
+    public boolean haveAllExpectedResults() {
+        return getAggregatedResultCount() >= totalDailyListRegisteredJobStatus;
     }
 
     public int getAggregatedResultCount() {
@@ -63,23 +63,19 @@ public class DailyListLogJobReport {
         return ZERO_ENTRIES;
     }
 
-    private boolean isAllProcessed() {
-        return getFailed() > 0;
-    }
-
-    public int getFailed() {
+    public int getFailedCount() {
         return getCountForJobStatus(JobStatusType.FAILED);
     }
 
-    public int getIgnored() {
+    public int getIgnoredCount() {
         return getCountForJobStatus(JobStatusType.IGNORED);
     }
 
-    public int getProcessed() {
+    public int getProcessedCount() {
         return getCountForJobStatus(JobStatusType.PROCESSED);
     }
 
-    public int getPartiallyProcessed() {
+    public int getPartiallyProcessedCount() {
         return getCountForJobStatus(JobStatusType.PARTIALLY_PROCESSED);
     }
 
@@ -89,18 +85,10 @@ public class DailyListLogJobReport {
 
     @Override
     public String toString() {
-        String status = haveAllProcessed() ? "COMPLETED" : "FAILED";
+        String status = haveAllExpectedResults() ? "COMPLETED" : "FAILED";
 
-        // gets the unprocessed entries and adds them to the ignored count
-        int unprocessed = getUnprocessedJobEntries() + getIgnored();
-
-        return getReportString(jobTitle, source, status, totalJobs,
-                               getProcessed(), getPartiallyProcessed(), getFailed(), unprocessed);
-    }
-
-    private int getUnprocessedJobEntries() {
-        int diff = getTotalJobs() - getAggregatedResultCount();
-        return Math.max(diff, 0);
+        return getReportString(jobTitle, source, status, totalDailyListRegisteredJobStatus,
+                               getProcessedCount(), getPartiallyProcessedCount(), getFailedCount(), getIgnoredCount());
     }
 
     public static String getReportString(String title, SourceType source, String status,
