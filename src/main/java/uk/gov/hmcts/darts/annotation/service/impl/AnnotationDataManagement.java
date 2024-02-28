@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
@@ -46,9 +46,9 @@ public class AnnotationDataManagement {
         return new ExternalBlobLocations(inboundLocation, unstructuredLocation);
     }
 
-    public InputStreamResource download(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+    public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
         var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories
-            .getFileBasedDownload(Arrays.asList(externalObjectDirectoryEntity));
+            .getFileBasedDownload(externalObjectDirectoryEntities);
 
         dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
         var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
@@ -62,7 +62,7 @@ public class AnnotationDataManagement {
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
         } catch (IOException e) {
             log.error("Failed to download annotation document {}",
-                      externalObjectDirectoryEntity.getId(), e);
+                      externalObjectDirectoryEntities.get(0).getId(), e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
         }
     }

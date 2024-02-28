@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,7 +109,7 @@ class AnnotationDataManagementTest {
 
     @Test
     void throwsIfDownloadAnnotationDocumentResponseFails() {
-        assertThatThrownBy(() -> annotationDataManagement.download(someExternalObjectDirectoryEntity()))
+        assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
     }
@@ -122,7 +123,7 @@ class AnnotationDataManagementTest {
             when(downloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
             when(downloadResponseMetaData.getInputStream()).thenThrow(new IOException());
 
-            assertThatThrownBy(() -> annotationDataManagement.download(someExternalObjectDirectoryEntity()))
+            assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
                 .isInstanceOf(DartsApiException.class)
                 .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
         }

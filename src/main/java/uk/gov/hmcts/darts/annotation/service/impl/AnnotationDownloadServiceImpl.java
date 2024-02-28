@@ -45,12 +45,11 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
 
         final ExternalObjectDirectoryEntity latestExternalObjectDirectoryEntity = eodDir.get(0);
 
-        final InputStreamResource blobStream = annotationDataManagement.download(latestExternalObjectDirectoryEntity);
+        final InputStreamResource blobStream = annotationDataManagement.download(eodDir);
 
         return AnnotationResponseDto.builder()
             .resource(blobStream)
             .fileName(latestExternalObjectDirectoryEntity.getAnnotationDocumentEntity().getFileName())
-            .externalLocation(latestExternalObjectDirectoryEntity.getExternalLocation())
             .annotationDocumentId(annotationDocumentId).build();
 
     }

@@ -96,10 +96,6 @@ class AnnotationGetTest extends IntegrationBase {
                     "application/zip"
                 ))
                 .andExpect(header().string(
-                    "external_location",
-                    "665e00c8-5b82-4392-8766-e0c982f603d3"
-                ))
-                .andExpect(header().string(
                     "annotation_document_id",
                     "1"
                 ));
