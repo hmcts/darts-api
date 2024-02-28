@@ -40,7 +40,7 @@ class InboundToUnstructuredProcessorImplTest {
     @Test
     void testContinuesProcessingNextIterationOnException() {
         // given
-        when(externalObjectDirectoryRepository.findEodIdsForTransfer(any(), any(), any(), any(), any()))
+        when(externalObjectDirectoryRepository.findEodIdsForTransfer(any(), any(), any(), any(), any(), any()))
             .thenReturn(List.of(1, 2));
 
         doThrow(new RuntimeException("some exception"))

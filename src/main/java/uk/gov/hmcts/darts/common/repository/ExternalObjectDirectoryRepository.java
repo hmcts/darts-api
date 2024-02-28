@@ -206,12 +206,12 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
               OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
               OR eod.caseDocument = eod2.caseDocument ))
             order by eod.lastModifiedDateTime
-            LIMIT 100
+            LIMIT :limitRecords
             """
     )
     List<Integer> findEodIdsForTransfer(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type,
                                         ObjectRecordStatusEntity notExistsStatus, ExternalLocationTypeEntity notExistsType,
-                                        Integer maxTransferAttempts);
+                                        Integer maxTransferAttempts, Integer limitRecords);
 
     @Query(
         """

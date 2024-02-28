@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -36,8 +37,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final InboundToUnstructuredProcessorSingleElement singleElementProcessor;
 
-    //@Value("darts.data-management.inbound-to-unstructured-limit: 100")
-    //private final Integer limit;
+    @Value("${darts.data-management.inbound-to-unstructured-limit: 100}")
+    private Integer limit;
     
     public static final List<Integer> FAILURE_STATES_LIST =
         List.of(
@@ -57,7 +58,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private void processAllStoredInboundExternalObjectsOneCall() {
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodIdsForTransfer(getStatus(STORED), getType(INBOUND),
-            getStatus(STORED), getType(UNSTRUCTURED),3);
+            getStatus(STORED), getType(UNSTRUCTURED),3, limit);
 
         for (Integer inboundObjectId: inboundList) {
             try {
