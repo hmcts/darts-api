@@ -68,10 +68,6 @@ public class AnnotationController implements AnnotationsApi {
                         String.format("attachment; filename=\"%s\"", annotationResponseDto.getFileName())
                 )
                 .header(
-                        "external_location",
-                        String.valueOf(annotationResponseDto.getExternalLocation())
-                )
-                .header(
                         "annotation_document_id",
                         String.valueOf(annotationResponseDto.getAnnotationDocumentId())
                 )

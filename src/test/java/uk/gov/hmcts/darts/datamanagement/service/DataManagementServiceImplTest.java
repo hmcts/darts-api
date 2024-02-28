@@ -19,7 +19,9 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,6 +77,19 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         UUID blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
+        assertNotNull(blobId);
+    }
+
+    @Test
+    void testSaveBlobDataViaInputStream() {
+        when(dataManagementConfiguration.getBlobClientBlockSizeBytes()).thenReturn(1L);
+        when(dataManagementConfiguration.getBlobClientMaxSingleUploadSizeBytes()).thenReturn(1L);
+        when(dataManagementConfiguration.getBlobClientMaxConcurrency()).thenReturn(1);
+        when(dataManagementConfiguration.getBlobClientTimeout()).thenReturn(Duration.ofMinutes(1));
+
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        UUID blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, new ByteArrayInputStream(TEST_BINARY_STRING.getBytes()));
         assertNotNull(blobId);
     }
 

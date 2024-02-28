@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownload
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -105,4 +107,16 @@ class DataManagementServiceTest {
             assertEquals(TEST_BINARY_STRING, new String(responseMetaData.getInputStream().readAllBytes()));
         }
     }
+
+    @Test
+    void saveBlobDataShouldSucceedAndReturnUuid() {
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(testStringInBytes);
+
+        var uuid = dataManagementService.saveBlobData(unstructuredStorageContainerName, byteArrayInputStream);
+
+        assertTrue(uuid instanceof UUID);
+        assertTrue(StringUtils.isNotEmpty(uuid.toString()));
+    }
+
 }

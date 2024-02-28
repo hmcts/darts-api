@@ -6,13 +6,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 
+import java.time.Duration;
+
 @Slf4j
 @Configuration
 @Getter
 public class DataManagementConfiguration extends StorageConfiguration {
 
-    @Value("${darts.storage.blob.connection-string}")
+    @Value("${darts.storage.blob.client.connection-string}")
     private String blobStorageAccountConnectionString;
+
+    @Value("${darts.storage.blob.client.block-size-bytes}")
+    private long blobClientBlockSizeBytes;
+
+    @Value("${darts.storage.blob.client.max-single-upload-size-bytes}")
+    private long blobClientMaxSingleUploadSizeBytes;
+
+    @Value("${darts.storage.blob.client.max-concurrency}")
+    private int blobClientMaxConcurrency;
+
+    @Value("${darts.storage.blob.client.timeout}")
+    private Duration blobClientTimeout;
 
     @Value("${darts.storage.blob.container-name.unstructured}")
     private String unstructuredContainerName;
