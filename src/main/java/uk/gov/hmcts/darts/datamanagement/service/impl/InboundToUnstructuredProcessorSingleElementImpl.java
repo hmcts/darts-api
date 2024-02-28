@@ -136,39 +136,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return unstructuredExternalObjectDirectoryEntity;
     }
 
-    private ExternalObjectDirectoryEntity getUnstructuredFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-                                                                List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        for (ExternalObjectDirectoryEntity eod : unstructuredFailedList) {
-            if (FAILURE_STATES_LIST.contains(eod.getStatus().getId())) {
-                externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(inboundExternalObjectDirectory, eod);
-                if (externalObjectDirectoryEntity != null) {
-                    break;
-                }
-            }
-        }
-
-        return externalObjectDirectoryEntity;
-    }
-
-    private ExternalObjectDirectoryEntity getUnstructuredStored(ExternalObjectDirectoryEntity inbound,
-                                                                List<ExternalObjectDirectoryEntity> unstructuredStoredList) {
-        // check in unstructuredStoredList
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        for (ExternalObjectDirectoryEntity unstructured : unstructuredStoredList) {
-            externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(
-                inbound,
-                unstructured
-            );
-            if (externalObjectDirectoryEntity != null) {
-                break;
-            }
-
-        }
-
-        return externalObjectDirectoryEntity;
-    }
-
     private ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
         ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
