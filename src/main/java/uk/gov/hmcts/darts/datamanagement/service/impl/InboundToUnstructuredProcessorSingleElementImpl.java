@@ -67,63 +67,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     @Override
     @Transactional
-    public void processSingleElement(Integer inboundExternalObjectDirectoryId,
-                                     List<ExternalObjectDirectoryEntity> unstructuredStoredList,
-                                     List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
-
-        ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundExternalObjectDirectoryId)
-            .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundExternalObjectDirectoryId)));
-
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity =
-            getNewOrExistingInUnstructuredStoredOrFailed(inboundExternalObjectDirectory,
-                                                         unstructuredStoredList,
-                                                         unstructuredFailedList);
-        ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
-        if (unstructuredStatus == null
-            || unstructuredStatus.getId().equals(STORED.getId())
-            || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
-            log.trace("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
-            return;
-        }
-
-        // save it as AWAITING_VERIFICATION
-        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
-        externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-
-        try {
-            BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
-            final String calculatedChecksum = new String(encodeBase64(md5(inboundFile.toBytes())));
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity);
-
-            if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
-                // upload file
-                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
-                unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
-                unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
-                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
-                log.debug("Saving unstructured stored EOD for media ID: {}", unstructuredExternalObjectDirectoryEntity.getId());
-                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-                log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
-            }
-        } catch (BlobStorageException e) {
-            log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
-                      getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId()
-            );
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
-            setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
-        } catch (Exception e) {
-            log.error("Failed to move from inboundExternalObjectDirectory to unstructuredExternalObjectDirectoryEntity for EOD ID: {}, with error: {}",
-                      inboundExternalObjectDirectory.getId(), e.getMessage(), e
-            );
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
-            setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
-        } finally {
-            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-        }
-    }
-
-    @Override
-    @Transactional
     public void processSingleElement(Integer inboundObjectId) {
         ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundObjectId)
             .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundObjectId)));
@@ -165,29 +108,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         }
     }
 
-    private boolean attemptsExceeded(ObjectRecordStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
-        if (FAILURE_STATES_LIST.contains(unstructuredStatus.getId()) && (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null)) {
-            int numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
-            return numAttempts >= 3;
-        }
-        return false;
-    }
-
-    private ExternalObjectDirectoryEntity getNewOrExistingInUnstructuredStoredOrFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-                                                                                       List<ExternalObjectDirectoryEntity> unstructuredStoredList,
-                                                                                       List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
-
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity =
-            getUnstructuredStored(inboundExternalObjectDirectory, unstructuredStoredList);
-        if (unstructuredExternalObjectDirectoryEntity == null) {
-            unstructuredExternalObjectDirectoryEntity = getUnstructuredFailed(inboundExternalObjectDirectory, unstructuredFailedList);
-            if (unstructuredExternalObjectDirectoryEntity == null) {
-                unstructuredExternalObjectDirectoryEntity = createUnstructuredAwaitingVerificationExternalObjectDirectoryEntity(
-                    inboundExternalObjectDirectory);
-            }
-        }
-        return unstructuredExternalObjectDirectoryEntity;
-    }
 
     private ExternalObjectDirectoryEntity getNewOrExistingInUnstructuredFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
         Integer mediaId = null;

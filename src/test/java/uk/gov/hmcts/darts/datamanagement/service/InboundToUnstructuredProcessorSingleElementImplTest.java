@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProce
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -289,14 +288,13 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(mediaRepository.findById(any())).thenReturn(Optional.of(mediaEntity));
 
         when(objectRecordStatusEntityFailureChecksum.getId()).thenReturn(7);
-        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
         when(objectRecordStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
         when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(audioConfigurationProperties.getAllowedMediaFormats()).thenReturn(Arrays.asList(MP2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
 
-        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID, Collections.emptyList(), Collections.emptyList());
+        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
