@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementApiImpl implements DataManagementApi {
 
     private final DataManagementService dataManagementService;
@@ -38,11 +40,6 @@ public class DataManagementApiImpl implements DataManagementApi {
     @Override
     public BinaryData getBlobDataFromInboundContainer(UUID blobId) {
         return dataManagementService.getBlobData(getInboundContainerName(), blobId);
-    }
-
-    @Override
-    public UUID saveBlobDataToOutboundContainer(BinaryData binaryData) {
-        return dataManagementService.saveBlobData(getOutboundContainerName(), binaryData);
     }
 
     @Override
@@ -79,6 +76,15 @@ public class DataManagementApiImpl implements DataManagementApi {
         dataManagementService.deleteBlobData(getUnstructuredContainerName(), blobId);
     }
 
+    @Override
+    public UUID saveBlobDataToInboundContainer(InputStream inputStream) {
+        return dataManagementService.saveBlobData(getInboundContainerName(), inputStream);
+    }
+
+    /**
+     * @deprecated This implementation is not memory-efficient with large files, use saveBlobDataToInboundContainer(InputStream inputStream) instead.
+     */
+    @Deprecated
     @Override
     public UUID saveBlobDataToInboundContainer(BinaryData binaryData) {
         return dataManagementService.saveBlobData(getInboundContainerName(), binaryData);

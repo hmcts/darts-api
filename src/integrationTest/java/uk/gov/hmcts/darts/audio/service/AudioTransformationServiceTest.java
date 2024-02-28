@@ -88,25 +88,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void shouldSaveAudioBlobData() {
-        String containerName = dataManagementConfiguration.getOutboundContainerName();
-
-        when(mockDataManagementService.saveBlobData(
-                containerName,
-                BINARY_DATA
-        )).thenReturn(BLOB_LOCATION);
-
-        UUID externalLocation = audioTransformationService.saveAudioBlobData(BINARY_DATA);
-
-        assertEquals(BLOB_LOCATION, externalLocation);
-        verify(mockDataManagementService).saveBlobData(
-                containerName,
-                BINARY_DATA
-        );
-        verifyNoMoreInteractions(mockDataManagementService);
-    }
-
-    @Test
     void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());

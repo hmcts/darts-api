@@ -41,9 +41,13 @@ import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -136,13 +140,19 @@ public class AudioServiceImpl implements AudioService {
     @Override
     @Transactional
     public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
+        MessageDigest md5Digest;
+        try {
+            md5Digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+        }
+
         final UUID externalLocation;
         final String checksum;
 
-        try {
-            BinaryData binaryData = BinaryData.fromStream(audioFileStream.getInputStream());
-            checksum = fileContentChecksum.calculate(binaryData.toBytes());
-            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
+        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
+            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
+            checksum = fileContentChecksum.calculate(digestInputStream);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
