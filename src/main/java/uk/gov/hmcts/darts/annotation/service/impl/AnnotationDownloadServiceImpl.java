@@ -36,10 +36,10 @@ public class AnnotationDownloadServiceImpl implements AnnotationDownloadService 
         final ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(
             ObjectRecordStatusEnum.STORED.getId());
 
-        final List<ExternalObjectDirectoryEntity> eodDir = eodRepository.findByAnnotationIdAndAnnotationDocumentId(
+        final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = eodRepository.findByAnnotationIdAndAnnotationDocumentId(
             annotationId, annotationDocumentId, storedStatus);
 
-        if (eodDir.isEmpty()) {
+        if (externalObjectDirectoryEntities.isEmpty()) {
             throw new DartsApiException(INVALID_ANNOTATIONID_OR_ANNOTATION_DOCUMENTID);
         }
 
