@@ -99,6 +99,9 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         if (isNull(mediaRecordProperties) || mediaRecordProperties.isEmpty()) {
             mediaRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getMediaRecordPropertiesFile());
         }
+        if (mediaRecordProperties.isEmpty()) {
+            log.warn("Failed to load property file {}", armDataManagementConfiguration.getMediaRecordPropertiesFile());
+        }
     }
 
     private MediaArchiveRecord createMediaArchiveRecord(MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation,
