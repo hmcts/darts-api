@@ -11,17 +11,13 @@ import uk.gov.hmcts.darts.annotation.builders.ExternalObjectDirectoryBuilder;
 import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationUploadService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
-import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 
 import java.io.IOException;
 
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_ANNOTATION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 
@@ -38,9 +34,6 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
     private final Validator<Annotation> hearingExistsValidator;
     private final Validator<MultipartFile> fileTypeValidator;
     private final AnnotationDataManagement annotationDataManagement;
-    private final AuditApi auditApi;
-    private final HearingRepository hearingRepository;
-    private final UserIdentity userIdentity;
 
     @Override
     public Integer upload(MultipartFile multipartFile, Annotation annotation) {
@@ -64,8 +57,6 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
                 inboundExternalObjectDirectory,
                 unstructuredExternalObjectDirectory,
                 annotation.getHearingId());
-            final var hearing = hearingRepository.findById(annotation.getHearingId());
-            hearing.ifPresent(hearingEntity -> auditApi.recordAudit(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearingEntity.getCourtCase()));
 
         } catch (RuntimeException exception) {
             annotationDataManagement.attemptToDeleteDocument(containerLocations.inboundLocation());

@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationUploadService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -24,11 +23,9 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,7 +37,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_ANNOTATION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 
@@ -68,10 +64,6 @@ class AnnotationUploadTest {
     @Mock
     private AuditApi auditApi;
     @Mock
-    private HearingRepository hearingRepository;
-    @Mock
-    private UserIdentity userIdentity;
-    @Mock
     private UserAccountEntity userAccountEntity;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
@@ -91,10 +83,7 @@ class AnnotationUploadTest {
             annotationPersistenceService,
             hearingExistsValidator,
             fileTypeValidator,
-            annotationDataManagement,
-            auditApi,
-            hearingRepository,
-            userIdentity
+            annotationDataManagement
         );
 
         when(hearing.getId()).thenReturn(1);
@@ -156,8 +145,6 @@ class AnnotationUploadTest {
         when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.unstructuredLocation(), UNSTRUCTURED))
             .thenReturn(externalObjectDirectoryEntityForUnstructuredContainer);
         when(annotationDataManagement.upload(any(), any())).thenReturn(externalBlobLocations);
-        when(hearingRepository.findById(any())).thenReturn(Optional.of(someHearing()));
-        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         uploadService.upload(someMultipartFile(), someAnnotationFor(hearing));
 
@@ -167,7 +154,6 @@ class AnnotationUploadTest {
             externalObjectDirectoryEntityForInboundContainer,
             externalObjectDirectoryEntityForUnstructuredContainer,
             hearing.getId());
-        verify(auditApi).recordAudit(IMPORT_ANNOTATION, userAccountEntity, hearing.getCourtCase());
     }
 
     private AnnotationEntity someAnnotationEntity() {
@@ -209,12 +195,6 @@ class AnnotationUploadTest {
         var annotation = new Annotation();
         annotation.setHearingId(hearing.getId());
         return annotation;
-    }
-
-    private HearingEntity someHearing() {
-        HearingEntity hearingEntity = new HearingEntity();
-        hearingEntity.setId(1);
-        return hearingEntity;
     }
 
 }
