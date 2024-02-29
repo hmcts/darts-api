@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.Map;
@@ -41,6 +42,15 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     public UUID saveBlobData(String containerName, BinaryData binaryData) {
+        return saveBlobData();
+    }
+
+    @Override
+    public UUID saveBlobData(String containerName, InputStream inputStream) {
+        return saveBlobData();
+    }
+
+    private UUID saveBlobData() {
         logStubUsageWarning();
 
         UUID uuid = UUID.randomUUID();
@@ -68,6 +78,8 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     public Response<Void> deleteBlobData(String containerName, UUID blobId) {
+        logStubUsageWarning();
+
         log.info("Delete blob data method executed");
         return null;
     }

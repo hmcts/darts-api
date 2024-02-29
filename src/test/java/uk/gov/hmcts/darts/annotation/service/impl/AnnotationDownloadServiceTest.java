@@ -36,7 +36,8 @@ class AnnotationDownloadServiceTest {
             annotationDataManagement,
             eodRepository,
             userAuthorisedToDownloadAnnotationValidator,
-            objectRecordStatusRepository);
+            objectRecordStatusRepository
+            );
     }
 
     @Test

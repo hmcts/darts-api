@@ -4,7 +4,6 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
@@ -23,6 +22,8 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     @Override
-    @Transactional
     public void processUnstructuredToArm() {
         preloadObjectRecordStatuses();
 
@@ -116,17 +116,18 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
 
-            String filename = generateFilename(armExternalObjectDirectory);
-
+            String rawFilename = generateFilename(armExternalObjectDirectory);
+            log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
             boolean copyRawDataToArmSuccessful = copyRawDataToArm(
                 unstructuredExternalObjectDirectory,
                 armExternalObjectDirectory,
-                filename,
+                rawFilename,
                 previousStatus
             );
-            if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
+            if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
                 updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
             }
+            log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
         }
     }
 
@@ -153,8 +154,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
-    private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armExternalObjectDirectory.getId());
+    private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory, String rawFilename) {
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armExternalObjectDirectory.getId(), rawFilename);
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
@@ -214,11 +215,20 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             if (previousStatus == null
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
+                Instant start = Instant.now();
+                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
+
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
+
+                Instant finish = Instant.now();
+                long timeElapsed = Duration.between(start, finish).toMillis();
+                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
+                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
+
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
@@ -251,7 +261,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                                              ObjectRecordStatusEntity objectRecordStatus) {
         log.debug(
-            "Updating ARM status from {} to {} for ID ",
+            "Updating ARM status from {} to {} for ID {}",
             armExternalObjectDirectory.getStatus().getDescription(),
             objectRecordStatus.getDescription(),
             armExternalObjectDirectory.getId()
@@ -289,6 +299,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armExternalObjectDirectoryEntity.setTranscriptionDocumentEntity(externalObjectDirectory.getTranscriptionDocumentEntity());
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
             armExternalObjectDirectoryEntity.setAnnotationDocumentEntity(externalObjectDirectory.getAnnotationDocumentEntity());
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
+            armExternalObjectDirectoryEntity.setCaseDocument(externalObjectDirectory.getCaseDocument());
         }
         OffsetDateTime now = OffsetDateTime.now();
         armExternalObjectDirectoryEntity.setCreatedDateTime(now);
@@ -313,6 +325,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
         } else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
             documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
+        } else if (nonNull(externalObjectDirectoryEntity.getCaseDocument())) {
+            documentId = externalObjectDirectoryEntity.getCaseDocument().getId();
         }
 
         return String.format("%s_%s_%s", entityId, documentId, transferAttempts);

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.dets.api.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.dets.service.DetsApiService;
 import java.util.Objects;
 import java.util.Optional;
 
+@Service
 @RequiredArgsConstructor
 public class DetsDataManagementApiImpl implements DetsDataManagementApi {
 

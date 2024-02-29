@@ -134,6 +134,7 @@ darts:
         arm-minimum:
           weeks: 30
     pending-retention-days: 7
+    inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
       enabled: true
@@ -174,11 +175,12 @@ darts:
       max-blobs-per-page: 3
       publisher: DARTS
       region: GBR
-      media-record-class: DARTSMedia
-      transcription-record-class: DARTSTranscription
-      annotation-record-class: DARTSAnnotation
+      media-record-class: DARTS
+      transcription-record-class: DARTS
+      annotation-record-class: DARTS
+      case-record-class: DARTS
       temp-blob-workspace: ${user.home}/arm/tempworkspace
-      date-time-format: yyyy-MM-dd'T'HH:mm:ss
+      date-time-format: yyyy-MM-dd'T'HH:mm:ssX
       date-format: yyyy-MM-dd
       file-extension: a360
       list-blobs-timeout-duration: 60s
@@ -204,7 +206,13 @@ darts:
       fetch-from-dets-enabled: true
       temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
-      connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      client:
+        connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+        ## See https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-tune-upload-download-java
+        block-size-bytes: 10_000_000
+        max-single-upload-size-bytes: 10_000_000
+        max-concurrency: 5
+        timeout: 15m
       temp-blob-workspace: ${user.home}/blob/tempworkspace
       container-name:
         unstructured: darts-unstructured

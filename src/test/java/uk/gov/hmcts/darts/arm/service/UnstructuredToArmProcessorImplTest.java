@@ -128,7 +128,7 @@ class UnstructuredToArmProcessorImplTest {
             .fileGenerationSuccessful(true)
             .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
             .build();
-        when(archiveRecordService.generateArchiveRecord(any())).thenReturn(archiveRecordFileInfo);
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
@@ -166,7 +166,7 @@ class UnstructuredToArmProcessorImplTest {
             .fileGenerationSuccessful(true)
             .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
             .build();
-        when(archiveRecordService.generateArchiveRecord(any())).thenReturn(archiveRecordFileInfo);
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
@@ -288,7 +288,7 @@ class UnstructuredToArmProcessorImplTest {
             .fileGenerationSuccessful(true)
             .archiveRecordFile(archiveRecordFile)
             .build();
-        when(archiveRecordService.generateArchiveRecord(any())).thenReturn(archiveRecordFileInfo);
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
         when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
@@ -352,7 +352,7 @@ class UnstructuredToArmProcessorImplTest {
             .fileGenerationSuccessful(true)
             .archiveRecordFile(archiveRecordFile)
             .build();
-        when(archiveRecordService.generateArchiveRecord(any())).thenReturn(archiveRecordFileInfo);
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
@@ -395,7 +395,7 @@ class UnstructuredToArmProcessorImplTest {
             .fileGenerationSuccessful(true)
             .archiveRecordFile(archiveRecordFile)
             .build();
-        when(archiveRecordService.generateArchiveRecord(any())).thenReturn(archiveRecordFileInfo);
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
@@ -437,7 +437,7 @@ class UnstructuredToArmProcessorImplTest {
             .fileGenerationSuccessful(true)
             .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
             .build();
-        when(archiveRecordService.generateArchiveRecord(any())).thenReturn(archiveRecordFileInfo);
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
         when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));

@@ -6,6 +6,8 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
+import com.azure.storage.blob.models.ParallelTransferOptions;
+import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -29,6 +32,7 @@ import java.util.UUID;
 @Slf4j
 @Profile("!intTest")
 @RequiredArgsConstructor
+@SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementServiceImpl implements DataManagementService {
 
     private final DataManagementConfiguration dataManagementConfiguration;
@@ -53,6 +57,10 @@ public class DataManagementServiceImpl implements DataManagementService {
         return binaryData;
     }
 
+    /**
+     * @deprecated This implementation is not memory-efficient with large files, use saveBlobData(String containerName, InputStream inputStream) instead.
+     */
+    @Deprecated
     @Override
     public UUID saveBlobData(String containerName, BinaryData binaryData) {
 
@@ -67,6 +75,22 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
+    public UUID saveBlobData(String containerName, InputStream inputStream) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+
+        var uniqueBlobId = UUID.randomUUID();
+
+        var client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
+
+        var uploadOptions = new BlobParallelUploadOptions(inputStream);
+        uploadOptions.setParallelTransferOptions(createCommonTransferOptions());
+        client.uploadWithResponse(uploadOptions, dataManagementConfiguration.getBlobClientTimeout(), null);
+
+        return uniqueBlobId;
+    }
+
+    @Override
     public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
         UUID uniqueBlobId = UUID.randomUUID();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
@@ -76,6 +100,13 @@ public class DataManagementServiceImpl implements DataManagementService {
         client.upload(binaryData);
         client.setMetadata(metadata);
         return client;
+    }
+
+    private ParallelTransferOptions createCommonTransferOptions() {
+        return new ParallelTransferOptions()
+            .setBlockSizeLong(dataManagementConfiguration.getBlobClientBlockSizeBytes())
+            .setMaxSingleUploadSizeLong(dataManagementConfiguration.getBlobClientMaxSingleUploadSizeBytes())
+            .setMaxConcurrency(dataManagementConfiguration.getBlobClientMaxConcurrency());
     }
 
     @Override

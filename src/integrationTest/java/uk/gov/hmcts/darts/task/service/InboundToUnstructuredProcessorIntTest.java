@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.task.service;
 
+import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +31,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.getBinaryTranscriptionDocumentData;
 
@@ -46,7 +52,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     @BeforeEach
     public void setup() {
         externalObjectDirectoryStub = dartsDatabase.getExternalObjectDirectoryStub();
-        when(dataManagementService.saveBlobData(any(), any())).thenReturn(UUID.randomUUID());
+        when(dataManagementService.saveBlobData(any(), any(BinaryData.class))).thenReturn(UUID.randomUUID());
     }
 
     @Test
@@ -99,7 +105,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND);
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
-        when(dataManagementService.saveBlobData(any(), any())).thenReturn(UUID.randomUUID());
+        when(dataManagementService.saveBlobData(any(), any(BinaryData.class))).thenReturn(UUID.randomUUID());
 
         var existingUnstructuredStored = eodRepository.findByStatusAndType(dartsDatabase.getObjectRecordStatusEntity(STORED),
                                                                            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
@@ -120,7 +126,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         List<Integer> createdUnstructuredTranscriptionId = createdUnstructured.stream().map(
             eod -> eod.getTranscriptionDocumentEntity().getTranscription().getId()).collect(toList());
         assertThat(createdUnstructuredTranscriptionId).contains(transcription.getId());
-        verify(dataManagementService).saveBlobData(any(), any());
+        verify(dataManagementService).saveBlobData(any(), any(BinaryData.class));
     }
 
     @Test
@@ -150,7 +156,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
                                                                                   dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(unstructuredAfterProcessing).hasSize(1);
         assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
-        verify(dataManagementService, never()).saveBlobData(any(), any());
+        verify(dataManagementService, never()).saveBlobData(any(), any(BinaryData.class));
     }
 
     @Test
@@ -180,6 +186,64 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
                                                                             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(unstructuredAfterProcessing).hasSize(1);
         assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
-        verify(dataManagementService).saveBlobData(any(), any());
+        verify(dataManagementService).saveBlobData(any(), any(BinaryData.class));
+    }
+
+    @Test
+    void processInboundMediasToUnstructuredBlobException() {
+        // given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+
+        //matches because no corresponding unstructured
+        var media1 = medias.get(0);
+        externalObjectDirectoryStub.createAndSaveEod(media1, STORED, INBOUND);
+
+        when(dataManagementService.getBlobData(any(), any())).thenThrow(new BlobStorageException("No blob", null, null));
+
+        // when
+        inboundToUnstructuredProcessor.processInboundToUnstructured();
+
+        // then
+        assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media1, FAILURE_FILE_NOT_FOUND, UNSTRUCTURED)).hasSize(1);
+        var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
+        verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
+    }
+
+    @Test
+    void processInboundMediasFailedType() {
+        // given
+        MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("testCourthouse", "testCourtroom",
+           OffsetDateTime.parse("2023-01-01T12:00:00Z"), OffsetDateTime.parse("2023-01-01T12:00:00Z"), 1, "some.other");
+
+        externalObjectDirectoryStub.createAndSaveEod(media, STORED, INBOUND);
+
+        when(dataManagementService.getBlobData(any(), any())).thenReturn(MediaTestData.getBinaryData());
+
+        // when
+        inboundToUnstructuredProcessor.processInboundToUnstructured();
+
+        // then
+        assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media, FAILURE_FILE_TYPE_CHECK_FAILED, UNSTRUCTURED)).hasSize(1);
+        var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
+        verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
+    }
+
+    @Test
+    void processInboundMediasFailedChecksum() {
+        // given
+        MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("testCourthouse", "testCourtroom",
+           OffsetDateTime.parse("2023-01-01T12:00:00Z"), OffsetDateTime.parse("2023-01-01T12:00:00Z"), 1);
+        externalObjectDirectoryStub.createAndSaveEod(media, STORED, INBOUND);
+
+        //generates a different checksum
+        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
+
+        // when
+        inboundToUnstructuredProcessor.processInboundToUnstructured();
+
+        // then
+        assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media, FAILURE_CHECKSUM_FAILED, UNSTRUCTURED)).hasSize(1);
+        var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
+        verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
     }
 }

@@ -41,6 +41,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +80,7 @@ class AudioServiceImplTest {
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Captor
-    ArgumentCaptor<BinaryData> inboundBlobStorageArgumentCaptor;
+    ArgumentCaptor<InputStream> inboundBlobStorageArgumentCaptor;
     @Mock
     SentServerEventsHeartBeatEmitter heartBeatEmitter;
     @Captor
@@ -114,6 +115,8 @@ class AudioServiceImplTest {
     private DataManagementApi dataManagementApi;
     @Mock
     AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
+    @Mock
+    private LogApi logApi;
     private AudioService audioService;
 
     @BeforeEach
@@ -137,7 +140,8 @@ class AudioServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             heartBeatEmitter,
-            audioBeingProcessedFromArchiveQuery
+            audioBeingProcessedFromArchiveQuery,
+            logApi
         );
     }
 
@@ -246,6 +250,7 @@ class AudioServiceImplTest {
 
     @Test
     void addAudio() throws IOException {
+        // Given
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
@@ -274,15 +279,15 @@ class AudioServiceImplTest {
         );
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
 
+        // When
         audioService.addAudio(audioFile, addAudioMetadataRequest);
 
+        // Then
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
-        var binaryData = inboundBlobStorageArgumentCaptor.getValue();
-        assertEquals(BinaryData.fromStream(audioFile.getInputStream()).toString(), binaryData.toString());
-
-
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
+        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
+
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());

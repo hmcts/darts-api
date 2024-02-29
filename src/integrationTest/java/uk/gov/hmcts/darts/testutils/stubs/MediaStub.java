@@ -23,9 +23,14 @@ public class MediaStub {
     private final MediaRepository mediaRepository;
     private final CourtroomStub courtroomStub;
 
-    public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+    public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+    String mediaType) {
         CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
-        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel));
+        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
+    }
+
+    public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        return createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
     public List<MediaEntity> createAndSaveSomeMedias() {
