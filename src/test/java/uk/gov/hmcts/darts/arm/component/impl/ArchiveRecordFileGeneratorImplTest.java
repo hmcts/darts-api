@@ -41,6 +41,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @Slf4j
 class ArchiveRecordFileGeneratorImplTest {
 
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
     @TempDir
     private File tempDirectory;
 
@@ -155,7 +156,7 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private RecordMetadata createMediaArchiveRecordMetadata() {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         return RecordMetadata.builder()
             .recordClass("DARTS")
             .publisher("DARTS")
@@ -232,7 +233,7 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private RecordMetadata createTranscriptionArchiveRecordMetadata() {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         return RecordMetadata.builder()
             .recordClass("DARTS")
             .publisher("DARTS")
@@ -290,7 +291,7 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private RecordMetadata createAnnotationArchiveRecordMetadata() {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         return RecordMetadata.builder()
             .recordClass("DARTS")
             .publisher("DARTS")
@@ -347,7 +348,7 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private RecordMetadata createCaseArchiveRecordMetadata() {
         OffsetDateTime recordTime = OffsetDateTime.of(2024, 1, 23, 10, 0, 0, 0, ZoneOffset.UTC);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         return RecordMetadata.builder()
             .recordClass("DARTS")
             .publisher("DARTS")

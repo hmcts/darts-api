@@ -52,7 +52,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 23);
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     private static final String DARTS = "DARTS";
@@ -145,6 +145,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", media.getStart().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", media.getEnd().format(formatter));
+
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }

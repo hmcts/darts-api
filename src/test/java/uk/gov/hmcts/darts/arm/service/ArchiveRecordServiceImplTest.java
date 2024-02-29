@@ -66,7 +66,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 class ArchiveRecordServiceImplTest {
     public static final String TEST_ARCHIVE_FILENAME = "1234-1-1.a360";
     public static final String MP_2 = "mp2";
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
     public static final String DARTS = "DARTS";
     public static final String REGION = "GBR";
     public static final int EODID = 1234;
@@ -868,7 +868,7 @@ class ArchiveRecordServiceImplTest {
 
         when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
         when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
-        
+
         when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
 
         when(courtCaseEntity1.getId()).thenReturn(1);
