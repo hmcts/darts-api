@@ -31,6 +31,8 @@ spring:
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_POD:true}
+  data-management:
+    inbound-to-unstructured-limit: 100
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8080}
   audio:
@@ -49,7 +51,6 @@ darts:
       arm-username: some-username
       arm-password: some-password
       url: http://localhost:4551
-
 logging:
   level:
     uk:
