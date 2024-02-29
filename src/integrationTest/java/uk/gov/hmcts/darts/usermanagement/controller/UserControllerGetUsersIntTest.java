@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
 class UserControllerGetUsersIntTest extends IntegrationBase {
@@ -45,14 +45,14 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity mockUserIdentity;
 
     @Test
     void usersGetShouldReturnForbiddenError() throws Exception {
-        adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
             .andExpect(status().isForbidden())
@@ -67,13 +67,13 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
     void getUsersAuthorised() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         createEnabledUserAccountEntity(user);
 
@@ -90,19 +90,19 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at").exists())
             .andReturn();
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
     void getUsersEmailNotFound() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                            .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
-                            .queryParam(COURTHOUSE_ID, "21"))
+                                                 .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
+                                                 .queryParam(COURTHOUSE_ID, "21"))
             .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.com"));
@@ -111,12 +111,12 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
 
     @Test
     void getUsersNotAuthorised() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
-                            .queryParam(COURTHOUSE_ID, "21"))
+                                                 .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
+                                                 .queryParam(COURTHOUSE_ID, "21"))
             .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.net"));

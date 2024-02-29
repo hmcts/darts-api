@@ -11,7 +11,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.ANNOTATION_NOT_FOUND;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.NOT_AUTHORISED_TO_DELETE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @RequiredArgsConstructor
 @Component
@@ -24,7 +24,7 @@ public class UserAuthorisedToDeleteAnnotationValidator implements Validator<Inte
     public void validate(Integer id) {
         var annotation = annotationRepository.findById(id).orElseThrow(() -> new DartsApiException(ANNOTATION_NOT_FOUND));
         var currentUser = authorisationApi.getCurrentUser();
-        if (!authorisationApi.userHasOneOfRoles(List.of(ADMIN)) && !annotation.isOwnedBy(currentUser)) {
+        if (!authorisationApi.userHasOneOfRoles(List.of(SUPER_ADMIN)) && !annotation.isOwnedBy(currentUser)) {
             throw new DartsApiException(NOT_AUTHORISED_TO_DELETE);
         }
     }

@@ -18,10 +18,10 @@ import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
@@ -33,6 +33,7 @@ public class RetentionController implements RetentionApi {
 
     private final RetentionPostService retentionPostService;
 
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Override
     public ResponseEntity<List<GetCaseRetentionsResponse>> retentionsGet(Integer caseId) {
         return new ResponseEntity<>(retentionService.getCaseRetentions(caseId), HttpStatus.OK);
@@ -40,8 +41,8 @@ public class RetentionController implements RetentionApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ContextIdEnum.CASE_ID, bodyAuthorisation = true,
-            securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
-            globalAccessSecurityRoles = {JUDGE, ADMIN})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, TRANSLATION_QA})
     @Override
     public ResponseEntity<PostRetentionResponse> retentionsPost(Boolean validateOnly,
                                                                 PostRetentionRequest postRetentionRequest) {
@@ -49,4 +50,5 @@ public class RetentionController implements RetentionApi {
         PostRetentionResponse response = retentionPostService.postRetention(validateOnly, postRetentionRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }

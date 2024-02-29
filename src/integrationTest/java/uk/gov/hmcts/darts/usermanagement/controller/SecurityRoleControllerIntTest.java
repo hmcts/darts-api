@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -26,7 +26,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
     public static final String ENDPOINT_URL = "/admin/security-roles";
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity userIdentity;
@@ -36,7 +36,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityRolesShouldSucceedAndReturnAllRoles() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -98,7 +98,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                   },
                   {
                     "id": 11,
-                    "display_name": "Admin",
+                    "display_name": "Super Admin",
                     "display_state": true
                   }
                 ]

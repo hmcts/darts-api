@@ -14,8 +14,8 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourthouseStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
 import java.util.Comparator;
@@ -31,7 +31,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/security-groups";
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @Autowired
     CourthouseStub courthouseStub;
@@ -47,7 +47,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     @Test
     void shouldReturnAllSecurityGroupsWithCourthouseIds() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isOk())
@@ -61,7 +61,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
         groups.sort(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed());
 
-        checkGroup(groups.get(0), "ADMIN", true, 11, true);
+        checkGroup(groups.get(0), "SUPER_ADMIN", true, 11, true);
         checkGroup(groups.get(1), "Test Approver", false, 1, true);
         checkGroup(groups.get(2), "Test Requestor", false, 2, true);
         checkGroup(groups.get(3), "Test Judge", false, 3, true);
@@ -83,7 +83,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     @Test
     void givenAUserNotAuthorisedThenReturnA403() throws Exception {
-        adminUserStub.givenUserIsNotAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("int-test-courthouse");
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity);

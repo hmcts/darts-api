@@ -14,7 +14,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -39,7 +39,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity userIdentity;
@@ -53,7 +53,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldSucceedWhenProvidedWithValidValuesForMinRequiredFields() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
@@ -94,7 +94,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldSucceedWhenProvidedWithValidValuesForAllFields() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
@@ -136,7 +136,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldFailWhenRequiredFieldsAreMissing() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
@@ -151,7 +151,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldFailWhenAttemptingToCreateGroupThatAlreadyExists() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestForInitialGroup = buildRequest()
             .content("""
@@ -181,7 +181,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldFailIfUserIsNotAuthorised() throws Exception {
-        adminUserStub.givenUserIsNotAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
