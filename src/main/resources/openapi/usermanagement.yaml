@@ -322,7 +322,7 @@ components:
       maxLength: 256
       type: string
     UserDescription:
-      minLength: 1
+      minLength: 0
       maxLength: 256
       type: string
     UserActive:
