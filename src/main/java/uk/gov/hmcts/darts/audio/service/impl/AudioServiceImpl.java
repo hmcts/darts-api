@@ -40,6 +40,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -85,6 +86,7 @@ public class AudioServiceImpl implements AudioService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
     private final AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
+    private final LogApi logApi;
 
     private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return AudioFileInfo.builder()
@@ -168,6 +170,8 @@ public class AudioServiceImpl implements AudioService {
             userIdentity.getUserAccount(),
             savedMedia
         );
+
+        logApi.audioUploaded(addAudioMetadataRequest);
     }
 
     @Override
