@@ -97,7 +97,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
             .forEach(userAccountEntity -> {
-                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndUserFullName(userAccountEntity);
                 userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
                 userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
             });
