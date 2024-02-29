@@ -60,7 +60,9 @@ public class DarNotifyServiceImpl {
 
 
             dartsGatewayClient.darNotify(darNotifyEvent);
-            log.trace("response from DarNotify for event {} is successful", event.getDartsEvent().getEventId());
+            log.info("Response from DarNotify for event {} is successful", event.getDartsEvent().getEventId());
+        } else {
+            log.info("No open cases for courthouse, ignoring DAR event {}", event.getDartsEvent().getEventId());
         }
     }
 }
