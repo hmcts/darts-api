@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -61,12 +62,42 @@ public class ExternalObjectDirectoryStub {
         return externalObjectDirectory;
     }
 
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(CaseDocumentEntity caseDocumentEntity,
+                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       UUID externalLocation) {
+        ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
+            objectRecordStatusEntity,
+            externalLocationTypeEntity,
+            externalLocation
+        );
+
+        externalObjectDirectory.setCaseDocument(caseDocumentEntity);
+        eodRepository.save(externalObjectDirectory);
+        eodRepository.flush();
+
+        return externalObjectDirectory;
+    }
+
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity media,
                                                                        ObjectRecordStatusEnum objectRecordStatusEnum,
                                                                        ExternalLocationTypeEnum externalLocationTypeEnum,
                                                                        UUID externalLocation) {
 
         return createExternalObjectDirectory(media, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
+    }
+
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(CaseDocumentEntity caseDocumentEntity,
+                                                                       ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                                       ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                                       UUID externalLocation) {
+
+        ExternalObjectDirectoryEntity externalObjectDirectory = createExternalObjectDirectory(
+            caseDocumentEntity, getStatus(objectRecordStatusEnum), getLocation(externalLocationTypeEnum), externalLocation);
+
+        externalObjectDirectory.setCaseDocument(caseDocumentEntity);
+
+        return externalObjectDirectory;
     }
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(AnnotationDocumentEntity annotationDocumentEntity,
@@ -102,9 +133,9 @@ public class ExternalObjectDirectoryStub {
 
     @Transactional
     public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(Integer transcriptionDocumentId,
-                                                                       ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                              ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              UUID externalLocation) {
         TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,

@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import java.io.File;
 
 public interface TranscriptionArchiveRecordMapper {
-
-    TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile);
+    TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                               File archiveRecordFile,
+                                                               String rawFilename);
 }

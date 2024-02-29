@@ -177,11 +177,12 @@ darts:
       max-blobs-per-page: 3
       publisher: DARTS
       region: GBR
-      media-record-class: DARTSMedia
-      transcription-record-class: DARTSTranscription
-      annotation-record-class: DARTSAnnotation
+      media-record-class: DARTS
+      transcription-record-class: DARTS
+      annotation-record-class: DARTS
+      case-record-class: DARTS
       temp-blob-workspace: ${user.home}/arm/tempworkspace
-      date-time-format: yyyy-MM-dd'T'HH:mm:ss
+      date-time-format: yyyy-MM-dd'T'HH:mm:ssX
       date-format: yyyy-MM-dd
       file-extension: a360
       list-blobs-timeout-duration: 60s

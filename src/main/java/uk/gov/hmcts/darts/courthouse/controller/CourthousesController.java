@@ -8,13 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
@@ -49,7 +50,6 @@ public class CourthousesController implements CourthousesApi {
     ) {
         courthouseService.deleteCourthouseById(courthouseId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
     }
 
     @Override
@@ -60,10 +60,9 @@ public class CourthousesController implements CourthousesApi {
     ) {
         try {
             AdminCourthouse adminCourthouse = courthouseService.getAdminCourtHouseById(courthouseId);
-
             return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
-        } catch (EntityNotFoundException | JpaObjectRetrievalFailureException | IllegalStateException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (EntityNotFoundException e) {
+            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NOT_FOUND);
         }
     }
 
@@ -85,7 +84,7 @@ public class CourthousesController implements CourthousesApi {
             courthouseService.amendCourthouseById(courthouse, courthouseId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException exception) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NOT_FOUND);
         }
 
 
