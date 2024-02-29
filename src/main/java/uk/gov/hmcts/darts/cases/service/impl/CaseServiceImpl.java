@@ -66,6 +66,7 @@ public class CaseServiceImpl implements CaseService {
     @Override
     @Transactional
     public List<ScheduledCase> getHearings(GetCasesRequest request) {
+        logApi.casesRequestedByDarPc(request);
 
         List<HearingEntity> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
             request.getCourthouse(),
@@ -74,11 +75,7 @@ public class CaseServiceImpl implements CaseService {
         );
         createCourtroomIfMissing(hearings, request);
 
-        List<ScheduledCase> scheduledCases = casesMapper.mapToScheduledCases(hearings);
-
-        logApi.casesRequestedByDarPc(request);
-
-        return scheduledCases;
+        return casesMapper.mapToScheduledCases(hearings);
     }
 
     @Override
