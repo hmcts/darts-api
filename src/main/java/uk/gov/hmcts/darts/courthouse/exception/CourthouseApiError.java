@@ -20,6 +20,11 @@ public enum CourthouseApiError implements DartsApiError {
         CourthouseErrorCode.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS.getValue(),
         HttpStatus.CONFLICT,
         CourthouseTitleErrors.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS.toString()
+    ),
+    COURTHOUSE_NOT_FOUND(
+        CourthouseErrorCode.COURTHOUSE_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        CourthouseTitleErrors.COURTHOUSE_NOT_FOUND.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "COURTHOUSE";
