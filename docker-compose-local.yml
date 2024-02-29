@@ -45,6 +45,7 @@ services:
       - ARM_USERNAME
       - ARM_PASSWORD
       - ARM_URL=http://darts-stub-services:4551
+      - ARM_PROPERTY_FILE_ENVIRONMENT=nle
     build:
       context: .
       dockerfile: Dockerfile
