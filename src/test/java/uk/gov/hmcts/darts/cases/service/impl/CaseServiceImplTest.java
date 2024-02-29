@@ -103,7 +103,7 @@ class CaseServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
+        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, logApi);
         service = new CaseServiceImpl(
             mapper,
             annotationMapper,
@@ -395,6 +395,25 @@ class CaseServiceImplTest {
         assertEquals(3, updatedCaseEntity.getProsecutorList().size());
         assertEquals(3, updatedCaseEntity.getDefenceList().size());
 
+    }
+
+    @Test
+    void testAddCaseDefendantNameTooLong() throws IOException {
+        when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return args[0];
+        });
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCase("testAddCase");
+        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(courtCase);
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
+
+        AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
+        request.setDefendants(List.of("name ".repeat(121), "shortname"));
+
+        service.addCaseOrUpdate(request);
+
+        verify(logApi, times(1)).defendantNameOver600Chars(request);
     }
 
     private HearingEntity createHearingEntity() {

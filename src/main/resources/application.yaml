@@ -102,6 +102,8 @@ spring:
     out-of-order: true
 
 darts:
+  cases:
+    defendant-name-char-limit: 600
   audio:
     allowable-audio-gap-duration: 1s
     ffmpeg-executable: ffmpeg

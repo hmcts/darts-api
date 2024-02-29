@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.log.api;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
@@ -15,6 +16,8 @@ public interface LogApi {
     void atsProcessingUpdate(MediaRequestEntity mediaRequestEntity);
 
     void audioUploaded(AddAudioMetadataRequest addAudioMetadataRequest);
+
+    void defendantNameOver600Chars(AddCaseRequest addCaseRequest);
 
     void casesRequestedByDarPc(GetCasesRequest getCasesRequest);
 

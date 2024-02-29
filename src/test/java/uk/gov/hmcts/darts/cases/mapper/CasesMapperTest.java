@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -48,12 +49,14 @@ class CasesMapperTest {
     private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
+    @Mock
+    private LogApi logApi;
 
     private CasesMapper caseMapper;
 
     @BeforeEach
     void setUp() {
-        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
+        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, logApi);
     }
 
     @Test
@@ -191,4 +194,6 @@ class CasesMapperTest {
             "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
+
+
 }
