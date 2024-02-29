@@ -209,6 +209,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             if (STORED.equals(status)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
+                log.info("About to delete blob responses for EOD {}", externalObjectDirectory.getId());
                 deleteResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
             }
         } catch (IllegalArgumentException e) {
@@ -229,6 +230,8 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
             externalObjectDirectory.setResponseCleaned(
                 armDataManagementApi.deleteBlobData(armInputUploadFilename));
+        } else {
+            log.warn("Unable to successfully delete the response files for EOD {} ", externalObjectDirectory.getId());
         }
     }
 
