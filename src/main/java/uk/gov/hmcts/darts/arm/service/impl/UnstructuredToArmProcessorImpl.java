@@ -92,42 +92,46 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities = getArmExternalObjectDirectoryEntities(inboundLocation, armLocation);
 
         for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
+            try {
+                ObjectRecordStatusEntity previousStatus = null;
+                ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory;
+                ExternalObjectDirectoryEntity armExternalObjectDirectory;
 
-            ObjectRecordStatusEntity previousStatus = null;
-            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory;
-            ExternalObjectDirectoryEntity armExternalObjectDirectory;
-
-            if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(armLocation.getId())) {
-                armExternalObjectDirectory = currentExternalObjectDirectory;
-                previousStatus = armExternalObjectDirectory.getStatus();
-                var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory);
-                if (matchingEntity.isPresent()) {
-                    unstructuredExternalObjectDirectory = matchingEntity.get();
+                if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(armLocation.getId())) {
+                    armExternalObjectDirectory = currentExternalObjectDirectory;
+                    previousStatus = armExternalObjectDirectory.getStatus();
+                    var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory);
+                    if (matchingEntity.isPresent()) {
+                        unstructuredExternalObjectDirectory = matchingEntity.get();
+                    } else {
+                        log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
+                        updateTransferAttempts(armExternalObjectDirectory);
+                        updateExternalObjectDirectoryStatus(armExternalObjectDirectory, failedArmRawDataStatus);
+                        continue;
+                    }
                 } else {
-                    log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
-                    updateTransferAttempts(armExternalObjectDirectory);
-                    updateExternalObjectDirectoryStatus(armExternalObjectDirectory, failedArmRawDataStatus);
-                    continue;
+                    unstructuredExternalObjectDirectory = currentExternalObjectDirectory;
+                    armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory);
                 }
-            } else {
-                unstructuredExternalObjectDirectory = currentExternalObjectDirectory;
-                armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory);
+
+                updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
+
+                String rawFilename = generateFilename(armExternalObjectDirectory);
+                log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
+                boolean copyRawDataToArmSuccessful = copyRawDataToArm(
+                    unstructuredExternalObjectDirectory,
+                    armExternalObjectDirectory,
+                    rawFilename,
+                    previousStatus
+                );
+                if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
+                    updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
+                }
+                log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
+            } catch (Exception e) {
+                log.error("Unable to push EOD {} to ARM", currentExternalObjectDirectory.getId(), e);
             }
 
-            updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
-
-            String rawFilename = generateFilename(armExternalObjectDirectory);
-            log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
-            boolean copyRawDataToArmSuccessful = copyRawDataToArm(
-                unstructuredExternalObjectDirectory,
-                armExternalObjectDirectory,
-                rawFilename,
-                previousStatus
-            );
-            if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
-                updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
-            }
-            log.info("Finished running ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
         }
     }
 

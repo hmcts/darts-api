@@ -39,7 +39,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     @Value("${darts.data-management.inbound-to-unstructured-limit: 100}")
     private Integer limit;
-    
+
     public static final List<Integer> FAILURE_STATES_LIST =
         List.of(
             FAILURE.getId(),
@@ -58,9 +58,10 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private void processAllStoredInboundExternalObjectsOneCall() {
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodIdsForTransfer(getStatus(STORED), getType(INBOUND),
-            getStatus(STORED), getType(UNSTRUCTURED),3, limit);
-
-        for (Integer inboundObjectId: inboundList) {
+                                                                                            getStatus(STORED), getType(UNSTRUCTURED), 3, limit);
+        int count = 1;
+        for (Integer inboundObjectId : inboundList) {
+            log.debug("Processing Inbound to Unstructured record {} of {} with EOD {}", count++, inboundList.size(), inboundObjectId);
             try {
                 singleElementProcessor.processSingleElement(inboundObjectId);
             } catch (Exception exception) {
