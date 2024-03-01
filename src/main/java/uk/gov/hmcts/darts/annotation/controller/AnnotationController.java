@@ -37,7 +37,7 @@ public class AnnotationController implements AnnotationsApi {
         bodyAuthorisation = true,
         contextId = HEARING_ID,
         securityRoles = {JUDGE},
-        globalAccessSecurityRoles = {JUDGE})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
     @Override
     public ResponseEntity<PostAnnotationResponse> postAnnotation(MultipartFile file, Annotation annotation) {
         var annotationId = uploadService.upload(file, annotation);

@@ -63,7 +63,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER},
-        globalAccessSecurityRoles = {JUDGE})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
 
@@ -97,7 +97,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
