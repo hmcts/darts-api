@@ -15,11 +15,13 @@ import uk.gov.hmcts.darts.annotation.builders.ExternalObjectDirectoryBuilder;
 import uk.gov.hmcts.darts.annotation.persistence.AnnotationPersistenceService;
 import uk.gov.hmcts.darts.annotation.service.AnnotationUploadService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -58,6 +61,10 @@ class AnnotationUploadTest {
     private Validator<MultipartFile> fileTypeValidator;
     @Mock
     private HearingEntity hearing;
+    @Mock
+    private AuditApi auditApi;
+    @Mock
+    private UserAccountEntity userAccountEntity;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
@@ -92,6 +99,8 @@ class AnnotationUploadTest {
         assertThatThrownBy(() -> uploadService.upload(someMultipartFile(), someAnnotationFor(hearing)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+
+        verifyNoInteractions(auditApi);
     }
 
     @Test
@@ -99,6 +108,8 @@ class AnnotationUploadTest {
         assertThatThrownBy(() -> uploadService.upload(someMultipartFileWithBadInputStream(), someAnnotationFor(hearing)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+
+        verifyNoInteractions(auditApi);
     }
 
     @Test
@@ -116,6 +127,8 @@ class AnnotationUploadTest {
 
         verify(annotationDataManagement, times(1)).attemptToDeleteDocument(externalBlobLocations.inboundLocation());
         verify(annotationDataManagement, times(1)).attemptToDeleteDocument(externalBlobLocations.unstructuredLocation());
+
+        verifyNoInteractions(auditApi);
     }
 
     private AnnotationDataManagement.ExternalBlobLocations someExternalBlobLocations() {

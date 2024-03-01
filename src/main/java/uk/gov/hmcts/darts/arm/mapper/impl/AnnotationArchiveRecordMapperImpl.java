@@ -102,6 +102,9 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         if (isNull(annotationRecordProperties) || annotationRecordProperties.isEmpty()) {
             annotationRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
         }
+        if (annotationRecordProperties.isEmpty()) {
+            log.warn("Failed to load property file {}", armDataManagementConfiguration.getAnnotationRecordPropertiesFile());
+        }
     }
 
     private AnnotationArchiveRecord createAnnotationArchiveRecord(AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation,
