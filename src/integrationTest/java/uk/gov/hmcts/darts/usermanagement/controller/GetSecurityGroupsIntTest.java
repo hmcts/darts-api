@@ -66,7 +66,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
         checkGroup(groups.get(2), "Test Requestor", false, 2, true);
         checkGroup(groups.get(3), "Test Judge", false, 3, true);
         checkGroup(groups.get(4), "Test Transcriber", false, 4, true);
-        checkGroup(groups.get(5), "Test Translation QA", true, 5, true);
+        checkGroup(groups.get(5), "Test Language Shop", true, 5, true);
         checkGroup(groups.get(6), "Test RCJ Appeals", true, 6, true);
         checkGroup(groups.get(7), "Xhibit Group", true, 7, true);
         checkGroup(groups.get(8), "Cpp Group", true, 8, true);
