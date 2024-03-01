@@ -140,16 +140,16 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public Response<Void> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException {
+    public Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException {
         try {
             BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
             BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
             BlobClient client = blobServiceFactory.getBlobClient(containerClient, blobId);
-            Response<Void> response = client.deleteWithResponse(DeleteSnapshotsOptionType.INCLUDE, null,
-                                                                    Duration.of(
-                                                                        dataManagementConfiguration.getDeleteTimeout(),
-                                                                        ChronoUnit.SECONDS
-                                                                    ), null
+            Response<Boolean> response = client.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null,
+                                                                           Duration.of(
+                                                                               dataManagementConfiguration.getDeleteTimeout(),
+                                                                               ChronoUnit.SECONDS
+                                                                           ), null
             );
 
             if (202 != response.getStatusCode()) {
@@ -158,8 +158,7 @@ public class DataManagementServiceImpl implements DataManagementService {
             return response;
         } catch (RuntimeException e) {
             throw new AzureDeleteBlobException(
-                "Could not delete from container: " + containerName + " uuid: " + blobId + " connection-string: " +
-                    dataManagementConfiguration.getBlobStorageAccountConnectionString(), e
+                "Could not delete from container: " + containerName + " uuid: " + blobId, e
             );
         }
     }
