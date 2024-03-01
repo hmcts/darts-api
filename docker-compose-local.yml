@@ -58,8 +58,6 @@ services:
   darts-gateway:
     container_name: darts-gateway
     image: darts-gateway:master
-    environment:
-      - DAR_NOTIFY_DEFAULT_URL=http://darts-stub-services:4551/VIQDARNotifyEvent/DARNotifyEvent.asmx
     ports:
       - "8070:8070"
     networks:
