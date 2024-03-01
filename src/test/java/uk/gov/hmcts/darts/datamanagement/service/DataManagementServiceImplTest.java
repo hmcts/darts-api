@@ -41,7 +41,7 @@ class DataManagementServiceImplTest {
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     @Mock
-    public Response<Void> responseMock;
+    public Response<Boolean> responseMock;
     @Mock
     private DataManagementAzureClientFactory dataManagementFactory;
     @Mock
@@ -99,11 +99,11 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(responseMock.getStatusCode()).thenReturn(202);
-        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
 
         dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
 
-        verify(blobClient, times(1)).deleteWithResponse(any(), any(), any(), any());
+        verify(blobClient, times(1)).deleteIfExistsWithResponse(any(), any(), any(), any());
     }
 
     @Test
@@ -112,7 +112,7 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(responseMock.getStatusCode()).thenReturn(400);
-        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
 
         assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
     }
@@ -122,7 +122,7 @@ class DataManagementServiceImplTest {
         when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(0);
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
-        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenThrow(new RuntimeException("timeout"));
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenThrow(new RuntimeException("timeout"));
 
         assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
     }
