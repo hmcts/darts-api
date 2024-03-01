@@ -1520,7 +1520,7 @@
 					"response": []
 				},
 				{
-					"name": "/users/search",
+					"name": "admin/users/search",
 					"protocolProfileBehavior": {
 						"disabledSystemHeaders": {}
 					},
@@ -1537,7 +1537,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{serverUrl}}/users/search",
+							"raw": "{{serverUrl}}/admin/users/search",
 							"host": [
 								"{{serverUrl}}"
 							],

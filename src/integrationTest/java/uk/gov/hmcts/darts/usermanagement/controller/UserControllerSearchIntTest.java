@@ -149,7 +149,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
@@ -172,7 +172,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())
@@ -189,14 +189,14 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("adminUserAccount");
-        userSearch.setFullName("adminUserAccountUsername");
+        userSearch.setFullName("adminUserAccountFullName");
 
         mockMvc.perform(post(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
                             .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountUsername"))
+            .andExpect(jsonPath("$[0].full_name").value("adminUserAccountFullName"))
             .andExpect(jsonPath("$[0].email_address").value("adminUserAccount@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_group_ids").isArray())

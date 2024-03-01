@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.dailylist.model.Sitting;
 
 import java.time.DateTimeException;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
@@ -77,10 +78,14 @@ class DailyListUpdater {
                         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
                         hearing.setCreatedBy(dailyListSystemUser);
                         hearing.setLastModifiedBy(dailyListSystemUser);
+                        // set this so it's updated when no other changes are present
+                        hearing.setLastModifiedDateTime(OffsetDateTime.now());
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
                         courtCase.setCreatedBy(dailyListSystemUser);
                         courtCase.setLastModifiedBy(dailyListSystemUser);
+                        // set this so it's updated when no other changes are present
+                        courtCase.setLastModifiedDateTime(OffsetDateTime.now());
                         updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
