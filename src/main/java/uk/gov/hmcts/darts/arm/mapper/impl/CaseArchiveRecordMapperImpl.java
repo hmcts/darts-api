@@ -97,6 +97,9 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         if (isNull(caseRecordProperties) || caseRecordProperties.isEmpty()) {
             caseRecordProperties = PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getCaseRecordPropertiesFile());
         }
+        if (caseRecordProperties.isEmpty()) {
+            log.warn("Failed to load property file {}", armDataManagementConfiguration.getCaseRecordPropertiesFile());
+        }
     }
 
     private CaseArchiveRecord createCaseArchiveRecord(CaseCreateArchiveRecordOperation caseCreateArchiveRecordOperation,

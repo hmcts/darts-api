@@ -114,6 +114,9 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             transcriptionRecordProperties =
                 PropertyFileLoader.loadPropertiesFromFile(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
         }
+        if (transcriptionRecordProperties.isEmpty()) {
+            log.warn("Failed to load property file {}", armDataManagementConfiguration.getTranscriptionRecordPropertiesFile());
+        }
     }
 
     private TranscriptionArchiveRecord createTranscriptionArchiveRecord(TranscriptionCreateArchiveRecordOperation transcriptionCreateArchiveRecordOperation,
