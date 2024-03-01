@@ -22,7 +22,7 @@ public interface DataManagementService {
 
     void addMetaData(BlobClient client, Map<String, String> metadata);
 
-    Response<Void> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException;
+    Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException;
 
-    void downloadData(DatastoreContainerType type,  String containerName, UUID blobId, DownloadResponseMetaData report);
+    void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report);
 }
