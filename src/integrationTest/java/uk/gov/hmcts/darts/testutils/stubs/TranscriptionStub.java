@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -21,10 +22,12 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -35,6 +38,7 @@ import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -50,9 +54,11 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 public class TranscriptionStub {
 
     private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
+    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -63,9 +69,7 @@ public class TranscriptionStub {
         return createTranscription(hearingStub.createMinimalHearing());
     }
 
-    public TranscriptionEntity createTranscription(
-        HearingEntity hearing
-    ) {
+    public TranscriptionEntity createTranscription(HearingEntity hearing) {
         TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
@@ -80,9 +84,7 @@ public class TranscriptionStub {
         );
     }
 
-    public TranscriptionEntity createTranscription(
-        CourtCaseEntity courtCase
-    ) {
+    public TranscriptionEntity createTranscription(CourtCaseEntity courtCase) {
         TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
@@ -164,10 +166,29 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION)
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
+            null
         );
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
+
+    @Transactional
+    public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               String comment,
+                                                                               OffsetDateTime workflowTimestamp) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
+            comment
+        );
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
 
     @Transactional
     public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
@@ -180,7 +201,8 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(COMPLETE)
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
@@ -199,7 +221,8 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(COMPLETE)
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         transcriptionEntity.setStartTime(startDate);
@@ -221,7 +244,8 @@ public class TranscriptionStub {
             courtCaseEntity,
             hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(COMPLETE)
+            getTranscriptionStatusByEnum(COMPLETE),
+            null
         );
         transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         transcriptionEntity.setStartTime(startDate);
@@ -317,6 +341,15 @@ public class TranscriptionStub {
         return transcriptionDocumentEntity;
     }
 
+    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
+                                                                                int fileSize, UserAccountEntity testUser, String checksum,
+                                                                                OffsetDateTime uploadedDateTime) {
+        TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+        transcriptionDocumentEntity.setUploadedDateTime(uploadedDateTime);
+        return transcriptionDocumentEntity;
+    }
+
     public TranscriptionStatusEntity getTranscriptionStatusByEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
         return transcriptionStatusRepository.getReferenceById(transcriptionStatusEnum.getId());
     }
@@ -333,7 +366,8 @@ public class TranscriptionStub {
                                                               CourtCaseEntity courtCaseEntity,
                                                               HearingEntity hearingEntity,
                                                               OffsetDateTime workflowTimestamp,
-                                                              TranscriptionStatusEntity status) {
+                                                              TranscriptionStatusEntity status,
+                                                              String comment) {
         final var transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
@@ -349,6 +383,7 @@ public class TranscriptionStub {
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
         transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);
+        transcriptionRepository.save(transcriptionEntity);
 
         final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -356,6 +391,14 @@ public class TranscriptionStub {
             workflowTimestamp,
             getTranscriptionStatusByEnum(REQUESTED)
         );
+        transcriptionWorkflowRepository.saveAndFlush(requestedTranscriptionWorkflowEntity);
+
+        if (nonNull(comment)) {
+            final var transcriptionComment = createTranscriptionComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
+            transcriptionCommentRepository.save(transcriptionComment);
+
+            requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
+        }
 
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -363,10 +406,22 @@ public class TranscriptionStub {
             workflowTimestamp,
             status
         );
+        transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
 
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(requestedTranscriptionWorkflowEntity, transcriptionWorkflowEntity));
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    public TranscriptionCommentEntity createTranscriptionComment(TranscriptionWorkflowEntity workflowEntity, String comment,
+                                                                 UserAccountEntity userAccountEntity) {
+        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
+        transcriptionCommentEntity.setTranscription(workflowEntity.getTranscription());
+        transcriptionCommentEntity.setTranscriptionWorkflow(workflowEntity);
+        transcriptionCommentEntity.setComment(comment);
+        transcriptionCommentEntity.setLastModifiedBy(userAccountEntity);
+        transcriptionCommentEntity.setCreatedBy(userAccountEntity);
+        return transcriptionCommentEntity;
     }
 
     private ExternalLocationTypeEntity getLocationEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {

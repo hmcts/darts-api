@@ -132,13 +132,6 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void dailyListForListingCourthouseWithIgnoreNoReport() throws IOException {
-        dailyListProcessor.processAllDailyListForListingCourthouse("doesnotexist");
-
-        assertFalse(logAppender.hasLogApiCallTakenPlace());
-    }
-
-    @Test
     void dailyListForListingCourthouseWithIgnore() throws IOException {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();

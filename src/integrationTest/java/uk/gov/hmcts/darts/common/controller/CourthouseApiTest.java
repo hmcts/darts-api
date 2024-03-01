@@ -16,9 +16,12 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -63,6 +66,11 @@ class CourthouseApiTest extends IntegrationBase {
     private static final OffsetDateTime ORIGINAL_LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime ORIGINAL_LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime ORIGINAL_CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    public static final String SWANSEA_CROWN_COURT = "SWANSEA CROWN COURT";
+    public static final String LEEDS_COURT = "LEEDS";
+    public static final String MANCHESTER_COURT = "MANCHESTER";
+    public static final String WALES_REGION = "Wales";
+    public static final String NORTH_WEST_REGION = "North West";
 
     @Autowired
     private MockMvc mockMvc;
@@ -70,11 +78,20 @@ class CourthouseApiTest extends IntegrationBase {
     @Autowired
     private AdminUserStub adminUserStub;
 
+    @Autowired
+    private RegionStub regionStub;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
+    @Autowired
+    RegionRepository regionRepository;
+
+    @Autowired
+    CourthouseRepository courthouseRepository;
+
     @Test
-    void courthousesGet() throws Exception {
+    void adminCourthousesGet() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
@@ -135,12 +152,47 @@ class CourthouseApiTest extends IntegrationBase {
             .andDo(print())
             .andReturn();
 
+
         assertEquals(200, response.getResponse().getStatus());
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertTrue(response.getResponse().getContentAsString().contains("region_id"));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
+
+    }
+
+    @Test
+    @Transactional
+    void courthousesGet() throws Exception {
+        CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
+
+        RegionEntity walesRegion = new RegionEntity();
+        walesRegion.setRegionName(WALES_REGION);
+        regionRepository.save(walesRegion);
+        swanseaCourthouse.setRegion(walesRegion);
+
+        dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
+
+        CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
+
+        RegionEntity northWestRegion = new RegionEntity();
+        northWestRegion.setRegionName(NORTH_WEST_REGION);
+        regionRepository.save(northWestRegion);
+        manchesterCourthouse.setRegion(northWestRegion);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].courthouse_name", is(SWANSEA_CROWN_COURT)))
+            .andExpect(jsonPath("$[0].region_id", is(walesRegion.getId())))
+            .andExpect(jsonPath("$[1].courthouse_name", is(LEEDS_COURT)))
+            .andExpect(jsonPath("[1].region_id").doesNotExist())
+            .andExpect(jsonPath("$[2].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[2].region_id", is(northWestRegion.getId())))
+            .andDo(print()).andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
 
     }
 
@@ -327,6 +379,39 @@ class CourthouseApiTest extends IntegrationBase {
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void adminRegionsGet() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        RegionEntity region1 = regionStub.createRegionsUnlessExists("South Wales");
+        RegionEntity region2 = regionStub.createRegionsUnlessExists("North Wales");
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/regions")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.[0].id", is(region1.getId())))
+            .andExpect(jsonPath("$.[0].name", is("South Wales")))
+            .andExpect(jsonPath("$.[1].id", is(region2.getId())))
+            .andExpect(jsonPath("$.[1].name", is("North Wales")))
+            .andDo(print())
+            .andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void adminRegionsNotAuthorised() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/regions")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andDo(print()).andReturn();
+
+        assertEquals(403, response.getResponse().getStatus());
     }
 
     /**

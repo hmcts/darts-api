@@ -377,7 +377,7 @@ dependencies {
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-  implementation platform('com.azure:azure-sdk-bom:1.2.20')
+  implementation platform('com.azure:azure-sdk-bom:1.2.21')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
@@ -390,8 +390,8 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.0.0-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.0'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.0'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.1'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.1'
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'

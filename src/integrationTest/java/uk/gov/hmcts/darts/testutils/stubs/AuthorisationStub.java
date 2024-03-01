@@ -76,8 +76,6 @@ public class AuthorisationStub {
         bristolAppr.setCourthouseEntities(Set.of(courthouseEntity));
 
         testUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
-
-
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         createCourtCase();

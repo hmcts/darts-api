@@ -41,13 +41,18 @@ public class MediaTestData {
     }
 
     public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        return createMediaWith(courtroomEntity, startTime, endTime, channel, "mp2");
+    }
+
+    public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+                                              String mediaType) {
         var mediaEntity = someMinimalMedia();
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(endTime);
         mediaEntity.setChannel(channel);
         mediaEntity.setTotalChannels(2);
-        mediaEntity.setMediaFormat("mp2");
+        mediaEntity.setMediaFormat(mediaType);
         mediaEntity.setMediaFile("a-media-file");
         mediaEntity.setFileSize(1000L);
         mediaEntity.setChecksum(getChecksum());

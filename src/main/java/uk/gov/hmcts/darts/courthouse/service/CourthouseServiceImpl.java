@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.courthouse.mapper.AdminCourthouseToCourthouseEntityMap
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +33,10 @@ import java.util.stream.Collectors;
 public class CourthouseServiceImpl implements CourthouseService {
 
     private CourthouseRepository courthouseRepository;
+    private RegionRepository regionRepository;
     private RetrieveCoreObjectService retrieveCoreObjectService;
 
-    private CourthouseToCourthouseEntityMapper mapper;
+    private CourthouseToCourthouseEntityMapper courthouseMapper;
 
     private final AdminCourthouseToCourthouseEntityMapper adminMapper;
 
@@ -60,24 +63,43 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     @Override
     public AdminCourthouse getAdminCourtHouseById(Integer id) {
-        CourthouseEntity courtHouseEntity = courthouseRepository.getReferenceById(id);
+        CourthouseEntity courthouseEntity = courthouseRepository.getReferenceById(id);
 
-        Set<SecurityGroupEntity> secGrps = courtHouseEntity.getSecurityGroups();
+        Set<SecurityGroupEntity> secGrps = courthouseEntity.getSecurityGroups();
         List<Integer> secGrpIds = new ArrayList<>();
         if (secGrps != null && !secGrps.isEmpty()) {
             secGrpIds = secGrps.stream().map(SecurityGroupEntity::getId).collect(Collectors.toList());
         }
 
-        AdminCourthouse adminCourthouse = adminMapper.mapFromEntityToAdminCourthouse(courtHouseEntity);
+        AdminCourthouse adminCourthouse = adminMapper.mapFromEntityToAdminCourthouse(courthouseEntity);
         adminCourthouse.setSecurityGroupIds(secGrpIds);
 
-        RegionEntity region = courtHouseEntity.getRegion();
+        RegionEntity region = courthouseEntity.getRegion();
 
         if (region != null) {
             adminCourthouse.setRegionId(region.getId());
         }
 
         return adminCourthouse;
+    }
+
+    @Override
+    public List<RegionEntity> getAdminAllRegions() {
+        return regionRepository.findAll();
+    }
+
+    public List<ExtendedCourthouse> mapFromEntitiesToExtendedCourthouses(List<CourthouseEntity> courthouseEntities) {
+        List<ExtendedCourthouse> extendedCourthouses = new ArrayList<>();
+
+        courthouseEntities
+            .forEach(courthouseEntity -> {
+                ExtendedCourthouse extendedCourthouse = courthouseMapper.mapFromEntityToExtendedCourthouse(courthouseEntity);
+                extendedCourthouse.setRegionId(courthouseEntity.getRegion() == null ? null : courthouseEntity.getRegion().getId());
+                extendedCourthouses.add(extendedCourthouse);
+            });
+
+        return extendedCourthouses;
+
     }
 
     @Override
@@ -88,7 +110,7 @@ public class CourthouseServiceImpl implements CourthouseService {
     @Override
     public CourthouseEntity addCourtHouse(Courthouse courthouse) {
         checkCourthouseIsUnique(courthouse);
-        CourthouseEntity mappedEntity = this.mapper.mapToEntity(courthouse);
+        CourthouseEntity mappedEntity = this.courthouseMapper.mapToEntity(courthouse);
         return courthouseRepository.saveAndFlush(mappedEntity);
     }
 

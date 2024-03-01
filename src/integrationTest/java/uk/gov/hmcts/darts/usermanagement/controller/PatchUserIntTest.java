@@ -38,6 +38,7 @@ class PatchUserIntTest extends IntegrationBase {
     private static final String ORIGINAL_USERNAME = "James Smith";
     private static final String ORIGINAL_EMAIL_ADDRESS = "james.smith@hmcts.net";
     private static final String ORIGINAL_DESCRIPTION = "A test user";
+    private static final boolean ORIGINAL_ACTIVE_STATE = true;
     private static final int ORIGINAL_SECURITY_GROUP_ID_1 = -1;
     private static final int ORIGINAL_SECURITY_GROUP_ID_2 = -2;
     private static final boolean ORIGINAL_SYSTEM_USER_FLAG = false;
@@ -87,7 +88,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
+            .andExpect(jsonPath("$.active").value(ORIGINAL_ACTIVE_STATE))
             .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
@@ -101,7 +102,7 @@ class PatchUserIntTest extends IntegrationBase {
             assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
-            assertEquals(true, latestUserAccountEntity.isActive());
+            assertEquals(ORIGINAL_ACTIVE_STATE, latestUserAccountEntity.isActive());
             assertThat(
                 getSecurityGroupIds(latestUserAccountEntity),
                 hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2)
@@ -165,6 +166,56 @@ class PatchUserIntTest extends IntegrationBase {
         });
     }
 
+    // Regression test to cover bug DMP-2459
+    @Test
+    void patchUserShouldSucceedWhenAnExistingDescriptionIsRemoved() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
+        Integer userId = existingAccount.getId();
+
+        MockHttpServletRequestBuilder request = buildRequest(userId)
+            .content("""
+                         {
+                           "description": ""
+                         }
+                         """);
+        mockMvc.perform(request)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
+            .andExpect(jsonPath("$.description").value(""))
+            .andExpect(jsonPath("$.active").value(ORIGINAL_ACTIVE_STATE))
+            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
+                ORIGINAL_SECURITY_GROUP_ID_1,
+                ORIGINAL_SECURITY_GROUP_ID_2
+            )));
+
+        transactionTemplate.execute(status -> {
+            UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
+                .findById(userId)
+                .orElseThrow();
+            assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUserName());
+            assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
+            assertEquals("", latestUserAccountEntity.getUserDescription());
+            assertEquals(ORIGINAL_ACTIVE_STATE, latestUserAccountEntity.isActive());
+            assertThat(
+                getSecurityGroupIds(latestUserAccountEntity),
+                hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2)
+            );
+            assertEquals(ORIGINAL_SYSTEM_USER_FLAG, latestUserAccountEntity.getIsSystemUser());
+
+            assertEquals(existingAccount.getCreatedDateTime(), latestUserAccountEntity.getCreatedDateTime());
+            assertThat(latestUserAccountEntity.getLastModifiedDateTime(), greaterThan(existingAccount.getLastModifiedDateTime()));
+            assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
+            assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());
+
+            return null;
+        });
+    }
+
     @Test
     void patchUserShouldFailIfChangeWithInvalidDataIsAttempted() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
@@ -175,14 +226,13 @@ class PatchUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest(userId)
             .content("""
                          {
-                           "full_name": "",
-                           "description": ""
+                           "full_name": ""
                          }
                          """);
         mockMvc.perform(request)
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
-            .andExpect(jsonPath("$.violations[*].field", hasItems("fullName", "description")));
+            .andExpect(jsonPath("$.violations[*].field", hasItems("fullName")));
     }
 
     @Test
@@ -252,7 +302,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
+            .andExpect(jsonPath("$.active").value(ORIGINAL_ACTIVE_STATE))
             .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
@@ -261,7 +311,7 @@ class PatchUserIntTest extends IntegrationBase {
                 .findById(userId)
                 .orElseThrow();
 
-            assertEquals(true, latestUserAccountEntity.isActive());
+            assertEquals(ORIGINAL_ACTIVE_STATE, latestUserAccountEntity.isActive());
             assertThat(getSecurityGroupIds(latestUserAccountEntity), empty());
 
             return null;
@@ -286,7 +336,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.active").value(true))
+            .andExpect(jsonPath("$.active").value(ORIGINAL_ACTIVE_STATE))
             .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids", not(Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
@@ -397,7 +447,7 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(email);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
-        userAccountEntity.setActive(true);
+        userAccountEntity.setActive(ORIGINAL_ACTIVE_STATE);
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
 
         userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);

@@ -40,7 +40,20 @@ paths:
                 $ref: '#/components/schemas/CourtList'
         '500':
           description: Internal Server Error
-
+  /admin/regions:
+    get:
+      tags:
+        - Courthouses
+      summary: Gets all regions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRegionList'
+        '500':
+          description: Internal Server Error
   /admin/courthouses/{courthouse_id}:
     get:
       tags:
@@ -148,6 +161,18 @@ components:
         region_id:
           type: integer
           example: 0
+    AdminRegion:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+    AdminRegionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/AdminRegion'
     AdminCourthouse:
       allOf:
         - $ref: '#/components/schemas/ExtendedCourthouse'
@@ -188,14 +213,16 @@ components:
       enum:
         - "COURTHOUSE_100"
         - "COURTHOUSE_101"
-      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
+        - "COURTHOUSE_102"
+      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS, COURTHOUSE_NOT_FOUND ]
 
     CourthouseTitleErrors:
       type: string
       enum:
         - "Provided courthouse name already exists."
         - "Provided courthouse code already exists."
-      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
+        - "Courthouse with provided ID does not exist."
+      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS, COURTHOUSE_NOT_FOUND ]
 
     UserAuthorisation403_109ErrorCode:
       type: string

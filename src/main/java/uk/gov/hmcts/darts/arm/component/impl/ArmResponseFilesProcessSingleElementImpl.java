@@ -22,11 +22,9 @@ import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -211,6 +209,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             if (STORED.equals(status)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
+                log.info("About to delete blob responses for EOD {}", externalObjectDirectory.getId());
                 deleteResponseBlobs(armInputUploadFilename, responseBlobs, externalObjectDirectory);
             }
         } catch (IllegalArgumentException e) {
@@ -231,6 +230,8 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
             externalObjectDirectory.setResponseCleaned(
                 armDataManagementApi.deleteBlobData(armInputUploadFilename));
+        } else {
+            log.warn("Unable to successfully delete the response files for EOD {} ", externalObjectDirectory.getId());
         }
     }
 
@@ -381,10 +382,10 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
 
     private void processUploadFileDataSuccess(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                               ExternalObjectDirectoryEntity externalObjectDirectory) {
-        // Validate the checksum in external object directory table against the Media, TranscriptionDocument, or AnnotationDocument
+        // Validate the upload file checksum against the external object directory tables object Media, TranscriptionDocument, AnnotationDocument
+        // or Case Document
         if (nonNull(externalObjectDirectory.getMedia())) {
             MediaEntity media = externalObjectDirectory.getMedia();
-
             if (nonNull(media.getChecksum())) {
                 verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, media.getChecksum());
             } else {
@@ -392,21 +393,14 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
             }
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
-            if (nonNull(transcriptionDocument.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocument.getChecksum());
-            } else {
-                log.warn("Unable to verify transcription document checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
-            }
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
+                                          externalObjectDirectory.getTranscriptionDocumentEntity().getChecksum());
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
-            if (nonNull(annotationDocument.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocument.getChecksum());
-            } else {
-                log.warn("Unable to verify annotation document checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
-            }
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
+                                          externalObjectDirectory.getAnnotationDocumentEntity().getChecksum());
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
+                                          externalObjectDirectory.getCaseDocument().getChecksum());
         } else {
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
         }
@@ -484,5 +478,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private static String generateSuffix(String filenameKey) {
         return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
     }
+
 
 }

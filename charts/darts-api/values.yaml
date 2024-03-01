@@ -89,6 +89,7 @@ java:
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     DARTS_PORTAL_URL: https://darts.{{ .Values.global.environment }}.apps.hmcts.net
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
+    ARM_PROPERTY_FILE_ENVIRONMENT: nle
 
 function:
   scaleType: Job

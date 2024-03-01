@@ -1,0 +1,35 @@
+{
+  "operation": "create_record",
+  "relation_id": "<EODID>",
+  "record_metadata": {
+    "record_class": "DARTS",
+    "publisher": "DARTS",
+    "region": "GBR",
+    "recordDate": "2023-09-23T13:00:00Z",
+    "event_date": "<UPLOADED_DATE_TIME>",
+    "title": "judges-notes.txt",
+    "client_identifier": "<EODID>",
+    "contributor": "NEWCASTLE & Int Test Courtroom 2",
+    "bf_001": "Annotation",
+    "bf_002": "Case1",
+    "bf_003": "text/plain",
+    "bf_004": "2023-09-23",
+    "bf_005": "C3CCA7021CF79B42F245AF350601C284",
+    "bf_009": "TestAnnotation",
+    "bf_011": "<UPLOADED_DATE_TIME>",
+    "bf_012": <OBJECT_ID>,
+    "bf_013": <PARENT_ID>,
+    "bf_016": "2",
+    "bf_019": "NEWCASTLE",
+    "bf_020": "Int Test Courtroom 2"
+  }
+}
+{
+  "operation": "upload_new_file",
+  "relation_id": "<EODID>",
+  "file_metadata": {
+    "publisher": "DARTS",
+    "dz_file_name": "<PREFIX>",
+    "file_tag": "application/msword"
+  }
+}

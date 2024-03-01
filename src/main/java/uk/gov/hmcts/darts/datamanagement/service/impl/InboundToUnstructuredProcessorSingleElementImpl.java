@@ -67,26 +67,12 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     @Override
     @Transactional
-    public void processSingleElement(Integer inboundExternalObjectDirectoryId,
-                                     List<ExternalObjectDirectoryEntity> unstructuredStoredList,
-                                     List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
+    public void processSingleElement(Integer inboundObjectId) {
+        ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundObjectId)
+            .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundObjectId)));
 
-        ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundExternalObjectDirectoryId)
-            .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundExternalObjectDirectoryId)));
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundExternalObjectDirectory);
 
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity =
-            getNewOrExistingInUnstructuredStoredOrFailed(inboundExternalObjectDirectory,
-                                                         unstructuredStoredList,
-                                                         unstructuredFailedList);
-        ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
-        if (unstructuredStatus == null
-            || unstructuredStatus.getId().equals(STORED.getId())
-            || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
-            log.trace("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
-            return;
-        }
-
-        // save it as AWAITING_VERIFICATION
         unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
@@ -122,60 +108,32 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         }
     }
 
-    private boolean attemptsExceeded(ObjectRecordStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
-        if (FAILURE_STATES_LIST.contains(unstructuredStatus.getId()) && (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null)) {
-            int numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
-            return numAttempts >= 3;
+
+    private ExternalObjectDirectoryEntity getNewOrExistingInUnstructuredFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
+        Integer mediaId = null;
+        Integer caseDocumentId = null;
+        Integer annotationDocumentId = null;
+        Integer transcriptionDocumentId = null;
+        if (inboundExternalObjectDirectory.getMedia() != null) {
+            mediaId = inboundExternalObjectDirectory.getMedia().getId();
         }
-        return false;
-    }
-
-    private ExternalObjectDirectoryEntity getNewOrExistingInUnstructuredStoredOrFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-                                                                                       List<ExternalObjectDirectoryEntity> unstructuredStoredList,
-                                                                                       List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
-
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getUnstructuredStored(inboundExternalObjectDirectory, unstructuredStoredList);
+        if (inboundExternalObjectDirectory.getCaseDocument() != null) {
+            caseDocumentId = inboundExternalObjectDirectory.getCaseDocument().getId();
+        }
+        if (inboundExternalObjectDirectory.getAnnotationDocumentEntity() != null) {
+            annotationDocumentId = inboundExternalObjectDirectory.getAnnotationDocumentEntity().getId();
+        }
+        if (inboundExternalObjectDirectory.getTranscriptionDocumentEntity() != null) {
+            transcriptionDocumentId = inboundExternalObjectDirectory.getTranscriptionDocumentEntity().getId();
+        }
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity =
+            externalObjectDirectoryRepository.findByIdsAndFailure(mediaId, caseDocumentId, annotationDocumentId, transcriptionDocumentId, FAILURE_STATES_LIST);
         if (unstructuredExternalObjectDirectoryEntity == null) {
-            unstructuredExternalObjectDirectoryEntity = getUnstructuredFailed(inboundExternalObjectDirectory, unstructuredFailedList);
-            if (unstructuredExternalObjectDirectoryEntity == null) {
-                unstructuredExternalObjectDirectoryEntity = createUnstructuredAwaitingVerificationExternalObjectDirectoryEntity(
-                    inboundExternalObjectDirectory);
-            }
+            unstructuredExternalObjectDirectoryEntity = createUnstructuredAwaitingVerificationExternalObjectDirectoryEntity(
+                inboundExternalObjectDirectory);
         }
+
         return unstructuredExternalObjectDirectoryEntity;
-    }
-
-    private ExternalObjectDirectoryEntity getUnstructuredFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-                                                                List<ExternalObjectDirectoryEntity> unstructuredFailedList) {
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        for (ExternalObjectDirectoryEntity eod : unstructuredFailedList) {
-            if (FAILURE_STATES_LIST.contains(eod.getStatus().getId())) {
-                externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(inboundExternalObjectDirectory, eod);
-                if (externalObjectDirectoryEntity != null) {
-                    break;
-                }
-            }
-        }
-
-        return externalObjectDirectoryEntity;
-    }
-
-    private ExternalObjectDirectoryEntity getUnstructuredStored(ExternalObjectDirectoryEntity inbound,
-                                                                List<ExternalObjectDirectoryEntity> unstructuredStoredList) {
-        // check in unstructuredStoredList
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        for (ExternalObjectDirectoryEntity unstructured : unstructuredStoredList) {
-            externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(
-                inbound,
-                unstructured
-            );
-            if (externalObjectDirectoryEntity != null) {
-                break;
-            }
-
-        }
-
-        return externalObjectDirectoryEntity;
     }
 
     private ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(

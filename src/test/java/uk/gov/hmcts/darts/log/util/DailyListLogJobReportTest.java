@@ -143,4 +143,30 @@ class DailyListLogJobReportTest {
         Assertions.assertTrue(DailyListLogJobReport
                                     .getReportString(title, source, status, 10,0,0, 0, 0).matches(REGEX_FOR_REPORT));
     }
+
+    @Test
+    void testDoesNotConsiderNullStatus() {
+        DailyListLogJobReport dailyListLogJobReport
+            = new DailyListLogJobReport(2, SourceType.CPP);
+        dailyListLogJobReport.registerResult(JobStatusType.PROCESSED);
+        dailyListLogJobReport.registerResult(null);
+
+        DailyListLogJobReport reportAssertion
+            = new DailyListLogJobReport(2, SourceType.CPP);
+        reportAssertion.registerResult(JobStatusType.PROCESSED);
+
+        Assertions.assertEquals(reportAssertion, dailyListLogJobReport);
+    }
+
+    @Test
+    void testExpectNothingToBeProcessed() {
+        DailyListLogJobReport dailyListLogJobReport
+            = new DailyListLogJobReport(0, SourceType.CPP);
+        String status = "COMPLETED";
+        String title = DailyListLogJobReport.JOB_TITLE;
+        SourceType source = SourceType.CPP;
+
+        Assertions.assertEquals(dailyListLogJobReport.toString(), DailyListLogJobReport
+                                  .getReportString(title, source, status, 0,0,0, 0, 0));
+    }
 }

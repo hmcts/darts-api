@@ -23,6 +23,7 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private String mediaRecordClass;
     private String transcriptionRecordClass;
     private String annotationRecordClass;
+    private String caseRecordClass;
     private String dateTimeFormat;
     private String dateFormat;
     private String fileExtension;

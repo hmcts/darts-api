@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.log.util;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class DailyListLogJobReport {
     private Map<JobStatusType, Integer> mapOfJobResultCount = new HashMap<JobStatusType, Integer>();
 
@@ -33,11 +35,11 @@ public class DailyListLogJobReport {
     }
 
     public void registerResult(JobStatusType status) {
-        if (!mapOfJobResultCount.containsKey(status)) {
-            mapOfJobResultCount.put(status, 0);
+        if (status != null && !mapOfJobResultCount.containsKey(status)) {
+            mapOfJobResultCount.put(status, 1);
+        } else if (status != null) {
+            mapOfJobResultCount.put(status, mapOfJobResultCount.get(status) + 1);
         }
-
-        mapOfJobResultCount.put(status, mapOfJobResultCount.get(status) + 1);
     }
 
     public boolean haveAllExpectedResults() {
