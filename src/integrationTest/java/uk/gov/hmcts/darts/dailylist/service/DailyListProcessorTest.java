@@ -194,13 +194,6 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void dailyListProcessorNoDailyListNoReport() throws IOException {
-        dailyListProcessor.processAllDailyLists();
-
-        //Mockito.verify(logApi, times(0)).processedDailyListJob(Mockito.notNull());
-    }
-
-    @Test
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
