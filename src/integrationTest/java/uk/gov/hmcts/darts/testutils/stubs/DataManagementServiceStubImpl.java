@@ -77,7 +77,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public Response<Void> deleteBlobData(String containerName, UUID blobId) {
+    public Response<Boolean> deleteBlobData(String containerName, UUID blobId) {
         logStubUsageWarning();
 
         log.info("Delete blob data method executed");
