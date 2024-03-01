@@ -102,8 +102,6 @@ spring:
     out-of-order: true
 
 darts:
-  cases:
-    defendant-name-char-limit: 600
   audio:
     allowable-audio-gap-duration: 1s
     ffmpeg-executable: ffmpeg
@@ -269,6 +267,8 @@ darts:
       daily-test-event-text:
         xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
+    cases:
+      defendant-name-char-limit: 600
   hikari:
     maximum-pool-size: 50
 dbMigration:
