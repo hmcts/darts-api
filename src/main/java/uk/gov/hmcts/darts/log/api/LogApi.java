@@ -17,7 +17,7 @@ public interface LogApi {
 
     void audioUploaded(AddAudioMetadataRequest addAudioMetadataRequest);
 
-    void defendantNameOver600Chars(AddCaseRequest addCaseRequest);
+    void defendantNameOverflow(AddCaseRequest addCaseRequest);
 
     void casesRequestedByDarPc(GetCasesRequest getCasesRequest);
 

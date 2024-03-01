@@ -54,7 +54,7 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
-    public void defendantNameOver600Chars(AddCaseRequest addCaseRequest) {
+    public void defendantNameOverflow(AddCaseRequest addCaseRequest) {
         casesLoggerService.defendantNameOverflow(addCaseRequest);
     }
 }
