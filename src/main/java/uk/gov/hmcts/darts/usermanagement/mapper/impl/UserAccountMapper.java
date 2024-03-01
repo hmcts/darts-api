@@ -43,4 +43,16 @@ public interface UserAccountMapper {
         @Mapping(source = "createdDateTime", target = "createdAt")
     })
     UserWithIdAndTimestamps mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
+
+    @Mappings({
+        @Mapping(source = "id", target = "id"),
+        @Mapping(source = "userFullName", target = "fullName"),
+        @Mapping(source = "emailAddress", target = "emailAddress"),
+        @Mapping(source = "userDescription", target = "description"),
+        @Mapping(source = "active", target = "active"),
+        @Mapping(source = "lastLoginTime", target = "lastLoginAt"),
+        @Mapping(source = "lastModifiedDateTime", target = "lastModifiedAt"),
+        @Mapping(source = "createdDateTime", target = "createdAt")
+    })
+    UserWithIdAndTimestamps mapToUserWithIdAndUserFullName(UserAccountEntity userAccountEntity);
 }
