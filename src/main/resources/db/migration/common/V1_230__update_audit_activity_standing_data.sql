@@ -11,6 +11,6 @@ INSERT INTO audit_activity (aua_id, activity_name, activity_description, created
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (9, 'Authorise Transcription', 'Authorise Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (10, 'Reject Transcription', 'Reject Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (11, 'Accept Transcription', 'Accept Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (13, 'Import Annotation', 'Import Annotation', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (12, 'Complete Transcription', 'Complete Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 
-ALTER SEQUENCE aua_seq RESTART WITH 14;
+ALTER SEQUENCE aua_seq RESTART WITH 13;
