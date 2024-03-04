@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a354837d-3e0a-4054-9aba-5d7653866f9d",
+		"_postman_id": "c8d8926f-b274-4ca6-9903-7973df4343bc",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32425403"
@@ -298,44 +298,6 @@
 									],
 									"path": [
 										"cases"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "PATCH /cases/{case_id}",
-					"item": [
-						{
-							"name": "PATCH /cases/{case_id}",
-							"request": {
-								"method": "PATCH",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"retain_until\": \"2023-09-06T16:16:57.331Z\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{serverUrl}}/cases/:case_id",
-									"host": [
-										"{{serverUrl}}"
-									],
-									"path": [
-										"cases",
-										":case_id"
-									],
-									"variable": [
-										{
-											"key": "case_id",
-											"value": "1"
-										}
 									]
 								}
 							},
@@ -1537,7 +1499,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{serverUrl}}/admin/users/search",
+							"raw": "{{serverUrl}}/users/search",
 							"host": [
 								"{{serverUrl}}"
 							],

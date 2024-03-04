@@ -15,14 +15,12 @@ import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
-import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
-import uk.gov.hmcts.darts.cases.validator.PatchCaseRequestValidator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -113,17 +111,6 @@ public class CaseController implements CasesApi {
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
 
-    }
-
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, RCJ_APPEALS})
-    public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
-        PatchCaseRequestValidator.validate(patchRequestObject);
-        return new ResponseEntity<>(caseService.patchCase(caseId, patchRequestObject), HttpStatus.OK);
     }
 
     @Override

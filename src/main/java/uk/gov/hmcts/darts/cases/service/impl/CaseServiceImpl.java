@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
-import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
@@ -151,13 +150,6 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
-    }
-
-    @Override
-    public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
-        CourtCaseEntity foundCase = getCourtCaseById(caseId);
-        caseRepository.save(foundCase);
-        return casesMapper.mapToSingleCase(foundCase);
     }
 
     @Override
