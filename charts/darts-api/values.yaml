@@ -89,6 +89,8 @@ java:
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     DARTS_PORTAL_URL: https://darts.{{ .Values.global.environment }}.apps.hmcts.net
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
+    AUTOMATED_TASK_MODE: false
+    API_MODE: true
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
 
 function:
