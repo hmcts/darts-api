@@ -265,8 +265,8 @@ public class UserAccountStub {
     }
 
     @Transactional
-    public UserAccountEntity createAdminUser() {
-        var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
+    public UserAccountEntity createSuperAdminUser() {
+        var adminGroup = securityGroupRepository.findByGroupName("SUPER_ADMIN")
             .orElseThrow();
         adminGroup.setGlobalAccess(true);
         adminGroup.getCourthouseEntities().clear();

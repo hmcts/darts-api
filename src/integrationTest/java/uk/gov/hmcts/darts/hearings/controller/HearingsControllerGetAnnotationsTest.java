@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -46,6 +47,8 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     );
     @Autowired
     private transient MockMvc mockMvc;
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -117,7 +120,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
 
 
         UserAccountEntity adminUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+            .createSuperAdminUser();
         AnnotationEntity annotation2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(adminUser, "annotationText1");
         annotation2.addHearing(hearingEntity);
         dartsDatabase.save(annotation2);
@@ -205,7 +208,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
         );
 
         UserAccountEntity adminUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+            .createSuperAdminUser();
         AnnotationEntity annotation2 = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(adminUser, "annotationText1");
         annotation2.addHearing(hearingEntity);
         dartsDatabase.save(annotation2);
@@ -242,7 +245,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     }
 
     @Test
-    void allAnnotationsReturned_Admin() throws Exception {
+    void allAnnotationsReturned_SuperAdmin() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
@@ -299,8 +302,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
             "xxxx"
         );
 
-        UserAccountEntity thisTestUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+        UserAccountEntity thisTestUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         when(mockUserIdentity.getUserAccount()).thenReturn(thisTestUser);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
@@ -346,7 +348,7 @@ class HearingsControllerGetAnnotationsTest extends IntegrationBase {
     }
 
     @Test
-    void fail_NotJudgeOrAdmin() throws Exception {
+    void fail_NotJudgeOrSuperAdmin() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,

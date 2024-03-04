@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -53,7 +53,7 @@ class PatchUserIntTest extends IntegrationBase {
     private PlatformTransactionManager transactionManager;
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity userIdentity;
@@ -72,7 +72,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -121,7 +121,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -169,7 +169,7 @@ class PatchUserIntTest extends IntegrationBase {
     // Regression test to cover bug DMP-2459
     @Test
     void patchUserShouldSucceedWhenAnExistingDescriptionIsRemoved() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -218,7 +218,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfChangeWithInvalidDataIsAttempted() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -237,7 +237,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfProvidedUserIdDoesNotExistInDB() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest(818_231)
             .content("""
@@ -252,7 +252,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedAndClearSecurityGroupsWhenAccountGetsDisabledAndNoSecurityGroupsAreExplicitlyProvided() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -286,7 +286,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenAccountGetsEnabled() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createDisabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -320,7 +320,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenSecurityGroupsAreUpdated() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -364,7 +364,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedIfEmailAddressChangeDifferent() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -385,7 +385,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserSameEmailShouldBeOkAndDataShouldRemainUnchanged() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -404,7 +404,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserDuplicateEmailShouldFail() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         createEnabledUserAccountEntity(user);
         UserAccountEntity secondAccount = createEnabledUserAccountEntity(user, SECOND_EMAIL_ADDRESS);
@@ -426,7 +426,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfUserIsNotAuthorised() throws Exception {
-        UserAccountEntity user = adminUserStub.givenUserIsNotAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -463,7 +463,7 @@ class PatchUserIntTest extends IntegrationBase {
         return dartsDatabase.getUserAccountRepository()
             .save(userAccountEntity);
     }
-    
+
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
         return createEnabledUserAccountEntity(user, ORIGINAL_EMAIL_ADDRESS);
     }

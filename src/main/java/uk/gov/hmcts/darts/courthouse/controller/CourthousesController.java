@@ -30,7 +30,7 @@ import javax.validation.Valid;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,7 +54,7 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
     public ResponseEntity<AdminCourthouse> adminCourthousesCourthouseIdGet(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
@@ -68,11 +68,11 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
     public ResponseEntity<List<AdminRegion>> adminRegionsGet() {
-            List<RegionEntity> regionsEntities = courthouseService.getAdminAllRegions();
-            List<AdminRegion> adminRegions = regionMapper.mapFromEntityToAdminRegion(regionsEntities);
-            return new ResponseEntity<>(adminRegions, HttpStatus.OK);
+        List<RegionEntity> regionsEntities = courthouseService.getAdminAllRegions();
+        List<AdminRegion> adminRegions = regionMapper.mapFromEntityToAdminRegion(regionsEntities);
+        return new ResponseEntity<>(adminRegions, HttpStatus.OK);
     }
 
     @Override

@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.util.Set;
 
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
 class UserControllerGetUsersByIdIntTest extends IntegrationBase {
@@ -29,14 +29,14 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity mockUserIdentity;
 
     @Test
     void usersGetShouldReturnOk() throws Exception {
-        adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
             .andExpect(status().isOk())
@@ -54,13 +54,13 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
     void usersGetShouldReturnForbiddenError() throws Exception {
-        adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
             .andExpect(status().isForbidden())
@@ -77,13 +77,13 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
     void usersGetShouldReturnNotFoundError() throws Exception {
-        adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "123456"))
             .andExpect(status().isNotFound())
@@ -101,7 +101,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 }
