@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -58,4 +59,10 @@ public class LogApiImpl implements LogApi {
     public void audioUploaded(AddAudioMetadataRequest addAudioMetadataRequest) {
         audioLoggerService.audioUploaded(addAudioMetadataRequest);
     }
+
+    @Override
+    public void defendantNameOverflow(AddCaseRequest addCaseRequest) {
+        casesLoggerService.defendantNameOverflow(addCaseRequest);
+    }
 }
+
