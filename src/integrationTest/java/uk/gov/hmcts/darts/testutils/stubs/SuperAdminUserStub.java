@@ -12,12 +12,12 @@ import static org.mockito.ArgumentMatchers.any;
 
 @Component
 @RequiredArgsConstructor
-public class AdminUserStub {
+public class SuperAdminUserStub {
 
     private final UserAccountStub userAccountStub;
 
     public UserAccountEntity givenUserIsAuthorised(UserIdentity userIdentity) {
-        var user = userAccountStub.createAdminUser();
+        var user = userAccountStub.createSuperAdminUser();
 
         Mockito.when(userIdentity.getUserAccount())
             .thenReturn(user);

@@ -22,7 +22,7 @@ class RetentionFunctionalTest extends FunctionalTest {
     void testGetCaseRetention() {
         String caseId = createCaseRetentions();
 
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASE_RETENTION_URI))
