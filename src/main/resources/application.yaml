@@ -99,7 +99,6 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
-    out-of-order: true
 
 darts:
   audio:
