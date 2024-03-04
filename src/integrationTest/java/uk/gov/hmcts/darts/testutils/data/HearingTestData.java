@@ -20,6 +20,8 @@ import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.someMinimalCou
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class HearingTestData {
 
+    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 20);
+
     public static HearingEntity createSomeMinimalHearing() {
         var minimalCase = createSomeMinimalCase();
         var minimalCourtRoom = someMinimalCourtRoom();
@@ -49,7 +51,7 @@ public class HearingTestData {
                 createCourthouse("NEWCASTLE"),
                 "1"
             ),
-            LocalDate.of(2023, 6, 20),
+            HEARING_DATE,
             null
         );
         hearing1.setScheduledStartTime(scheduledStartTime);
@@ -60,7 +62,7 @@ public class HearingTestData {
         HearingEntity hearingEntity = someMinimalHearing();
         hearingEntity.setCourtCase(caseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
-        hearingEntity.setHearingDate(null);
+        hearingEntity.setHearingDate(HEARING_DATE);
         return hearingEntity;
     }
 

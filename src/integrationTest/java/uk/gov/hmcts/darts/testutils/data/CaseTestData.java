@@ -41,9 +41,16 @@ public class CaseTestData {
     }
 
     public static CourtCaseEntity createCaseAt(CourthouseEntity courthouse) {
-        var courtCaseEntity = someMinimalCase();
-        courtCaseEntity.setCourthouse(courthouse);
-        return courtCaseEntity;
+        var courtCase = someMinimalCase();
+        courtCase.setCourthouse(courthouse);
+        return courtCase;
+    }
+
+    public static CourtCaseEntity createCaseAt(CourthouseEntity courthouse, String caseNumber) {
+        var courtCase = someMinimalCase();
+        courtCase.setCourthouse(courthouse);
+        courtCase.setCaseNumber(caseNumber);
+        return courtCase;
     }
 
     public static CourtCaseEntity createCaseWithCaseNumber(String caseNumber) {

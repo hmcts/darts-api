@@ -138,10 +138,18 @@ public class AdvancedSearchRequestHelper {
         List<Predicate> predicateList = new ArrayList<>();
 
         //add courthouse permissions
-        List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
+        List<Integer> allCourthouses = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
+        List<Integer> courthousesIfInterpreter = authorisationApi.getListOfCourthouseIdsUserHasAccessToIfInterpreterUsed();
+        List<Integer> courthousesIgnoringInterpreter = new ArrayList<>(CollectionUtils.disjunction(allCourthouses, courthousesIfInterpreter));
         Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
+        Predicate courthouseIdInCourthousesIgnoringInterpreter = courthouseJoin.get(CourthouseEntity_.ID).in(courthousesIgnoringInterpreter);
+        Predicate courthouseIdInCourthousesConsideringInterpreter = criteriaBuilder
+            .and(
+                courthouseJoin.get(CourthouseEntity_.ID).in(courthousesIfInterpreter),
+                criteriaBuilder.isTrue(caseRoot.get(CourtCaseEntity_.interpreterUsed))
+            );
         predicateList.add(
-            courthouseJoin.get(CourthouseEntity_.ID).in(courthouseIdsUserHasAccessTo)
+            criteriaBuilder.or(courthouseIdInCourthousesIgnoringInterpreter, courthouseIdInCourthousesConsideringInterpreter)
         );
 
         //add courthouse from search query

@@ -41,6 +41,9 @@ class AuthorisationServiceTest extends IntegrationBase {
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
     private static final String TEST_BRISTOL_EMAIL = "test.bristol@example.com";
     private static final String TEST_NEW_EMAIL = "test.new@example.com";
+    private static final int TEST_JUDGE_ID = -3;
+    private static final int REQUESTOR_SG_ID = -2;
+    private static final int APPROVER_SG_ID = -1;
 
 
     @Autowired
@@ -55,7 +58,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
-        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(-3);
+        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(TEST_JUDGE_ID);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUserName("Test Judge");
         judgeUserAccount.setUserFullName("Test Judge");
@@ -69,8 +72,8 @@ class AuthorisationServiceTest extends IntegrationBase {
         UserAccountRepository userAccountRepository = dartsDatabase.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
-        SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(-2);
-        SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(-1);
+        SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(REQUESTOR_SG_ID);
+        SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(APPROVER_SG_ID);
         UserAccountEntity bristolUserAccount = new UserAccountEntity();
         bristolUserAccount.setUserName("Test Bristol");
         bristolUserAccount.setUserFullName("Test Bristol");

@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 
@@ -167,6 +169,19 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole,
                                                                 CourthouseEntity courthouse) {
         return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Integer> getListOfCourthouseIdsUserHasAccessToIfInterpreterUsed() {
+        var userSecurityGroups = userIdentity.getUserAccount().getSecurityGroupEntities();
+        var securityGroupsWithInterpreterTrue = userSecurityGroups.stream().filter(SecurityGroupEntity::getUseInterpreter).toList();
+        var courthouseIds = securityGroupsWithInterpreterTrue.stream().flatMap(this::getSecurityGroupCourthousesIds).toList();
+        return courthouseIds;
+    }
+
+    private Stream<Integer> getSecurityGroupCourthousesIds(SecurityGroupEntity sg) {
+        return sg.getCourthouseEntities().stream().map(CourthouseEntity::getId);
     }
 
 }
