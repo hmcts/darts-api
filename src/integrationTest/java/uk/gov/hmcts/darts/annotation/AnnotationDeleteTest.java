@@ -18,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.EnumSource.Mode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
@@ -60,9 +60,9 @@ class AnnotationDeleteTest extends IntegrationBase {
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, hearing);
 
         mockMvc.perform(
-                        delete(ENDPOINT + "/" + annotation.getId()))
-                .andExpect(status().isNoContent())
-                .andReturn();
+                delete(ENDPOINT + "/" + annotation.getId()))
+            .andExpect(status().isNoContent())
+            .andReturn();
     }
 
     @Test
@@ -73,9 +73,9 @@ class AnnotationDeleteTest extends IntegrationBase {
         var annotation = someAnnotationForHearingNotMarkedForDeletionCreatedBy(judge, annotationHearing);
 
         mockMvc.perform(
-                        delete(ENDPOINT + "/" + annotation.getId()))
-                .andExpect(status().isForbidden())
-                .andReturn();
+                delete(ENDPOINT + "/" + annotation.getId()))
+            .andExpect(status().isForbidden())
+            .andReturn();
     }
 
     @Test
@@ -91,8 +91,8 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @Test
-    void allowsDeleteAnnotationByAdmin() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(ADMIN);
+    void allowsDeleteAnnotationBySuperAdmin() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var someJudge = minimalUserAccount();
         var annotation = someAnnotationNotMarkedForDeletionCreatedBy(someJudge);
 
@@ -103,8 +103,8 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SecurityRoleEnum.class, names = {"ADMIN", "JUDGE"}, mode = Mode.EXCLUDE)
-    void disallowsDeleteAnnotationByRolesOtherThanAdminAndJudge(SecurityRoleEnum role) throws Exception {
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN", "JUDGE"}, mode = Mode.EXCLUDE)
+    void disallowsDeleteAnnotationByRolesOtherThanSuperAdminAndJudge(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         var someJudge = minimalUserAccount();
         var annotation = someAnnotationNotMarkedForDeletionCreatedBy(someJudge);
@@ -117,7 +117,7 @@ class AnnotationDeleteTest extends IntegrationBase {
 
     @Test
     void returns404IfAnnotationDoesntExist() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(ADMIN);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         mockMvc.perform(
                 delete(ENDPOINT + "/" + "-1"))
@@ -126,7 +126,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     }
 
     private AnnotationEntity someAnnotationNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount) {
-       return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
+        return someAnnotationForHearingNotMarkedForDeletionCreatedBy(userAccount, someMinimalHearing());
     }
 
     private AnnotationEntity someAnnotationForHearingNotMarkedForDeletionCreatedBy(UserAccountEntity userAccount, HearingEntity hearing) {
