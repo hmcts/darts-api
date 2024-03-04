@@ -71,6 +71,7 @@ class DailyListLogJobReportTest {
 
         dailyListLogJobReport.registerResult(JobStatusType.PROCESSED);
         dailyListLogJobReport.registerResult(JobStatusType.PROCESSED);
+        dailyListLogJobReport.registerResult(JobStatusType.NEW);
 
         SourceType source = SourceType.CPP;
         String status = "FAILED";
