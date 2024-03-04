@@ -475,6 +475,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String testAnnotation = "TestAnnotation";
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAnnotationEntity(
             testUser, testAnnotation, hearing);
+        dartsDatabase.save(annotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -483,6 +484,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        dartsDatabase.save(annotationDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
@@ -533,6 +535,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String testAnnotation = "TestAnnotation";
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAnnotationEntity(
             testUser, testAnnotation, hearing);
+        dartsDatabase.save(annotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -541,6 +544,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        dartsDatabase.save(annotationDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
@@ -593,6 +597,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAnnotationEntity(
             testUser, testAnnotation, hearing);
+        dartsDatabase.getAnnotationRepository().saveAndFlush(annotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -601,6 +606,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
             .createAnnotationDocumentEntity(annotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
+        dartsDatabase.getAnnotationDocumentRepository().saveAndFlush(annotationDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
