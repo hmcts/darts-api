@@ -186,6 +186,8 @@ components:
               items:
                 type: integer
               example: [1, 2]
+            has_data:
+              type: boolean
 
     ExtendedCourthouse:
       allOf:

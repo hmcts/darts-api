@@ -8,7 +8,9 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 public class CourthouseServiceImpl implements CourthouseService {
 
     private CourthouseRepository courthouseRepository;
+    private HearingRepository hearingRepository;
+    private CaseRepository caseRepository;
     private RegionRepository regionRepository;
     private RetrieveCoreObjectService retrieveCoreObjectService;
 
@@ -79,6 +83,9 @@ public class CourthouseServiceImpl implements CourthouseService {
         if (region != null) {
             adminCourthouse.setRegionId(region.getId());
         }
+
+        adminCourthouse.setHasData(hearingRepository.countHearingsForCourthouse(id) > 0
+            || caseRepository.countCasesForCourthouse(id) > 0);
 
         return adminCourthouse;
     }
