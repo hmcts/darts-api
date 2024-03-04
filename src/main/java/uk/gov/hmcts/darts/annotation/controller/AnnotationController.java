@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.annotation.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class AnnotationController implements AnnotationsApi {
 
     private final AnnotationDownloadService downloadService;
