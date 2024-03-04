@@ -174,7 +174,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearingEntitys = courtCaseEntity.get().getHearings();
 
-        if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.ADMIN))) {
+        if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIds(
                     hearingEntitys

@@ -22,7 +22,7 @@ class SecurityGroupUtilTest {
 
 
         List<SecurityRoleEnum> securityRoles = new ArrayList<>();
-        securityRoles.add(SecurityRoleEnum.ADMIN);
+        securityRoles.add(SecurityRoleEnum.SUPER_ADMIN);
 
         assertFalse(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
     }
@@ -47,7 +47,7 @@ class SecurityGroupUtilTest {
 
         List<SecurityRoleEnum> securityRoles = new ArrayList<>();
         securityRoles.add(SecurityRoleEnum.JUDGE);
-        securityRoles.add(SecurityRoleEnum.ADMIN);
+        securityRoles.add(SecurityRoleEnum.SUPER_ADMIN);
 
         assertTrue(SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles));
     }

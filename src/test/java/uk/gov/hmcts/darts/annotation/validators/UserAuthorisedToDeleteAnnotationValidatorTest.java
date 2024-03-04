@@ -18,12 +18,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @ExtendWith(MockitoExtension.class)
 class UserAuthorisedToDeleteAnnotationValidatorTest {
-
     @Mock
     private AnnotationRepository annotationRepository;
 
@@ -38,10 +37,10 @@ class UserAuthorisedToDeleteAnnotationValidatorTest {
     }
 
     @Test
-    void doesntThrowIfUserIsAdmin() {
+    void doesntThrowIfUserIsSuperAdmin() {
         when(annotationRepository.findById(1)).thenReturn(Optional.of(new AnnotationEntity()));
-        when(authorisationApi.getCurrentUser()).thenReturn(userWithRole(ADMIN));
-        when(authorisationApi.userHasOneOfRoles(List.of(ADMIN))).thenReturn(true);
+        when(authorisationApi.getCurrentUser()).thenReturn(userWithRole(SUPER_ADMIN));
+        when(authorisationApi.userHasOneOfRoles(List.of(SUPER_ADMIN))).thenReturn(true);
 
         assertThatNoException().isThrownBy(() -> userAuthorisedToDeleteAnnotationValidator.validate(1));
     }
