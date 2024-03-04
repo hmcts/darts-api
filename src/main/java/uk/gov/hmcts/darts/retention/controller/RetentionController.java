@@ -23,7 +23,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,7 +39,7 @@ public class RetentionController implements RetentionApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ContextIdEnum.CASE_ID, bodyAuthorisation = true,
-            securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
+            securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, ADMIN},
             globalAccessSecurityRoles = {JUDGE, ADMIN})
     @Override
     public ResponseEntity<PostRetentionResponse> retentionsPost(Boolean validateOnly,
