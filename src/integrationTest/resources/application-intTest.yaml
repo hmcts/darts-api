@@ -55,4 +55,4 @@ logging:
       gov:
         hmcts:
           darts: DEBUG
-
+  config: classpath:logback-test.xml
