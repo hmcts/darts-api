@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,12 +45,12 @@ class ProcessAllDailyListsTest {
     private DailyListEntity oldestDailyListForLeeds;
     @Mock
     private DailyListEntity latestDailyListForLeeds;
-
-
+    @Mock
+    private LogApi logApi;
 
     @BeforeEach
     void setUp() {
-        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater);
+        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, dailyListUpdater, logApi);
         setCourthouseForStubs("Swansea", dailyListForSwansea);
         setCourthouseForStubs("Leeds",
                               oldestDailyListForLeeds,
