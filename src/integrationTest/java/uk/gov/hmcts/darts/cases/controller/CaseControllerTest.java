@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
@@ -25,6 +26,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,6 +62,9 @@ class CaseControllerTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @MockBean
+    LogApi logApi;
 
     private HearingEntity setupHearingForCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case1 = createCaseAt(swanseaCourthouse);
@@ -279,6 +286,18 @@ class CaseControllerTest extends IntegrationBase {
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesPostDefendant() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyDefendantNameOverflow.json"));
+        mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        verify(logApi, times(2)).defendantNameOverflow(any());
     }
 
     private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
