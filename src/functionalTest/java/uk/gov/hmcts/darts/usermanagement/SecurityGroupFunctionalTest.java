@@ -93,7 +93,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         checkGroup(staticGroups.get(2), "hmcts_staff_2", false, 2, true, 1);
         checkGroup(staticGroups.get(3), "hmcts_staff_3", false, 3, true, 1);
         checkGroup(staticGroups.get(4), "hmcts_staff_4", false, 4, true, 1);
-        checkGroup(staticGroups.get(5), "hmcts_staff_5", false, 5, true, 1);
+        checkGroup(staticGroups.get(5), "hmcts_staff_5", true, 5, true, 1);
         checkGroup(staticGroups.get(6), "hmcts_staff_6", true, 6, true, 1);
         checkGroup(staticGroups.get(7), "Xhibit Group", true, 7, true, 1);
         checkGroup(staticGroups.get(8), "Cpp Group", true, 8, true, 1);
