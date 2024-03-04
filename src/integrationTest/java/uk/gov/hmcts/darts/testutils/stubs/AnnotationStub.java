@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -27,19 +26,10 @@ public class AnnotationStub {
         return annotationRepository.save(annotationEntity);
     }
 
-    @Transactional
-    public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
-                                                              String annotationText,
-                                                              HearingEntity hearingEntity) {
-        AnnotationEntity annotationEntity = createAnnotationEntity(currentOwner, annotationText, hearingEntity);
-        return annotationRepository.save(annotationEntity);
-    }
-
-    public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText, HearingEntity hearingEntity) {
+    public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
-        annotationEntity.addHearing(hearingEntity);
         annotationEntity.setTimestamp(OffsetDateTime.now());
         annotationEntity.setCreatedBy(currentOwner);
         return annotationEntity;
@@ -74,8 +64,5 @@ public class AnnotationStub {
 
         return annotationDocument;
     }
-
-    public void saveAnnotation(AnnotationEntity annotationEntity) {
-        annotationRepository.saveAndFlush(annotationEntity);
-    }
+    
 }
