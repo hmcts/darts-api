@@ -119,6 +119,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
+        log.info("Automated tasks are loading");
         addProcessDailyListToTaskRegistrar(taskRegistrar);
         addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
         addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);

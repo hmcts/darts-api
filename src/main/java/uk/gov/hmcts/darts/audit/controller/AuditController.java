@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audit.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.DataBinder;
@@ -24,6 +25,7 @@ import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.
 
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class AuditController implements AuditApi {
 
     private final AuditService auditService;
