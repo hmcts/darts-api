@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 
 import java.io.IOException;
@@ -65,6 +67,10 @@ class AnnotationUploadTest {
     private AuditApi auditApi;
     @Mock
     private UserAccountEntity userAccountEntity;
+    @Mock
+    private AnnotationRepository annotationRepository;
+    @Mock
+    private AnnotationDocumentRepository annotationDocumentRepository;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
@@ -83,7 +89,9 @@ class AnnotationUploadTest {
             annotationPersistenceService,
             hearingExistsValidator,
             fileTypeValidator,
-            annotationDataManagement
+            annotationDataManagement,
+            annotationRepository,
+            annotationDocumentRepository
         );
 
         when(hearing.getId()).thenReturn(1);
