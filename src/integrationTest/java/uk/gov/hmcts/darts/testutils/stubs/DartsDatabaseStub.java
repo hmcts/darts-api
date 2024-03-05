@@ -207,7 +207,6 @@ public class DartsDatabaseStub {
         // securityGroupRepository.deleteAll(securityGroupBin);
         // securityGroupBin.clear();
         courthouseRepository.deleteAll();
-        regionRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
         annotationRepository.deleteAll();
