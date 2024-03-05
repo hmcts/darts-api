@@ -9,6 +9,6 @@ public interface SecurityGroupService {
 
     SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroup);
 
-    List<SecurityGroupWithIdAndRole> getSecurityGroups();
+    List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId);
 
 }
