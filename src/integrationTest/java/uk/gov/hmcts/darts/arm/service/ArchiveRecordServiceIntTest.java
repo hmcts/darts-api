@@ -473,11 +473,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAnnotationEntity(
-            testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
         dartsDatabase.getAnnotationRepository().save(annotation);
-        hearing.addAnnotation(annotation);
-        dartsDatabase.save(hearing);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -535,10 +532,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAnnotationEntity(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
         dartsDatabase.getAnnotationRepository().save(annotation);
-        hearing.addAnnotation(annotation);
-        dartsDatabase.save(hearing);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -597,10 +592,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAnnotationEntity(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation, hearing);
         dartsDatabase.getAnnotationRepository().save(annotation);
-        hearing.addAnnotation(annotation);
-        dartsDatabase.save(hearing);
+
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -630,7 +624,6 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
-
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
