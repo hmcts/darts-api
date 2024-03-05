@@ -52,7 +52,7 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
 
         var checksum = fileContentChecksum.calculate(binaryData.toBytes());
         var annotationDocumentEntity = annotationDocumentBuilder.buildFrom(multipartFile, annotationEntity, checksum);
-        //annotationDocumentRepository.save(annotationDocumentEntity);
+        annotationDocumentRepository.save(annotationDocumentEntity);
 
         var inboundExternalObjectDirectory = externalObjectDirectoryBuilder.buildFrom(
             annotationDocumentEntity, containerLocations.inboundLocation(), INBOUND);
