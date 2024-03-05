@@ -339,7 +339,7 @@ class UnstructuredToArmProcessorImplTest {
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
     }
 
     @Test
@@ -482,7 +482,7 @@ class UnstructuredToArmProcessorImplTest {
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
     }
 

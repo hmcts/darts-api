@@ -43,7 +43,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @JoinColumn(name = "trd_id", foreignKey = @ForeignKey(name = "eod_transcription_document_fk"))
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ado_id", foreignKey = @ForeignKey(name = "eod_annotation_document_fk"))
     private AnnotationDocumentEntity annotationDocumentEntity;
 
