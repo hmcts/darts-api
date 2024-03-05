@@ -121,6 +121,10 @@ darts:
     post-amble-duration: 30
     handheld-audio-courtroom-numbers:
       - 199
+    preview:
+      redis-ttl-mins: 10
+      redis-failed-ttl-mins: 2
+      redis-folder: audio-previews
   azure:
     active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}
     active-directory-b2c-auth-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}
@@ -263,9 +267,6 @@ darts:
     ssl-enabled: ${REDIS_SSL_ENABLED:true}
   audit:
     application-server: ${CLUSTER_NAME:not available}
-  sse:
-    heartbeat: 5 # in seconds
-    sse-preview-timeout: 120 # in seconds
   log:
     events:
       daily-test-event-text:
