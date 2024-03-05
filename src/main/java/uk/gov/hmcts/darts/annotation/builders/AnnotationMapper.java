@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
 @Component
@@ -19,10 +20,11 @@ public class AnnotationMapper {
         annotationEntity.setText(annotation.getComment());
         annotationEntity.setDeleted(false);
         annotationEntity.setTimestamp(currentTimeHelper.currentOffsetDateTime());
-        annotationEntity.setCurrentOwner(authorisationApi.getCurrentUser());
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        annotationEntity.setCurrentOwner(currentUser);
         annotationEntity.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
-        annotationEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
-        annotationEntity.setCreatedBy(authorisationApi.getCurrentUser());
+        annotationEntity.setLastModifiedBy(currentUser);
+        annotationEntity.setCreatedBy(currentUser);
 
         return annotationEntity;
     }

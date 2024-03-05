@@ -16,9 +16,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
 
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
-
 @Entity
 @Setter
 @Getter
@@ -31,7 +28,7 @@ public class AnnotationDocumentEntity {
     @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ann_id", nullable = false)
     private AnnotationEntity annotation;
 
