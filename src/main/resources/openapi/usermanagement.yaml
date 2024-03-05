@@ -122,9 +122,17 @@ paths:
       summary: Get security groups
       parameters:
         - in: query
-          name: courthouse_id
+          name: role_ids
+          description: Filter by list of role ids
+          style: form
+          explode: false
           schema:
-            $ref: "#/components/schemas/CourthouseId"
+            $ref: '#/components/schemas/RoleIds'
+        - in: query
+          name: courthouse_id
+          description: Filter by Courthouse Id
+          schema:
+            $ref: '#/components/schemas/CourthouseId'
       tags:
         - SecurityGroup
       responses:
@@ -355,6 +363,11 @@ components:
       maxLength: 256
     RoleDisplayState:
       type: boolean
+
+    RoleIds:
+      type: array
+      items:
+        type: integer
 
     CourthouseId:
       type: integer
