@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
@@ -31,6 +32,7 @@ public class SystemCommandExecutorStubImpl implements SystemCommandExecutor {
 
         String executable = command.getExecutable();
         List<String> arguments = Arrays.asList(command.getArguments());
+        log.debug("Stubbing ffmpeg arguments {}", StringUtils.join(arguments, " "));
         if (executable.contains("ffmpeg")) {
             // The output path is assumed to always be the final argument
             var fileOutputPath = Path.of(arguments.get(arguments.size() - 1));
