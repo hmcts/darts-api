@@ -12,8 +12,7 @@ import java.io.InputStream;
 @UtilityClass
 public class StreamingResponseEntityUtil {
 
-    public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, String httpRangeList) throws IOException {
-        byte[] bytes = IOUtils.toByteArray(inputStream);
+    public ResponseEntity<byte[]> createResponseEntity(byte[] bytes, String httpRangeList) throws IOException {
         long fileSize = bytes.length;
         if (StringUtils.isNotBlank(httpRangeList)) {
             httpRangeList = StringUtils.trim(httpRangeList);
@@ -37,6 +36,11 @@ public class StreamingResponseEntityUtil {
             .header("Content-Length", String.valueOf(bytes.length))
             .header("Content-Range", contentRange)
             .body(bytes);
+    }
+
+    public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, String httpRangeList) throws IOException {
+        byte[] bytes = IOUtils.toByteArray(inputStream);
+        return createResponseEntity(bytes, httpRangeList);
     }
 
     private static long getRangeEnd(long fileSize, String[] ranges) {

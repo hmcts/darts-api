@@ -18,10 +18,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import uk.gov.hmcts.darts.audio.model.AudioPreview;
 
 import java.net.InetAddress;
 import java.net.URLDecoder;
@@ -81,6 +86,16 @@ public class RedisConnectionConfig {
         redisConfig.setPassword(RedisPassword.of(redisConnectionProperties.password()));
 
         return new LettuceConnectionFactory(redisConfig, clientConfigurationBuilder.build());
+    }
+
+    @Bean
+    public RedisTemplate<String, AudioPreview> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String,AudioPreview> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setDefaultSerializer(new JdkSerializationRedisSerializer());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new JdkSerializationRedisSerializer());
+        return template;
     }
 
     private UnaryOperator<HostAndPort> getHostAndPortMappingFunctionFor(String host) {
