@@ -1499,7 +1499,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{serverUrl}}/users/search",
+							"raw": "{{serverUrl}}/admin/users/search",
 							"host": [
 								"{{serverUrl}}"
 							],
