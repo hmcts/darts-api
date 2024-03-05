@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.util.Set;
 
@@ -28,7 +28,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
     public static final Integer MID_TIER_GROUP_ID = -17;
     public static final String ADMIN_SECURITY_GROUPS_ENDPOINT_URL = "/admin/security-groups";
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
     @MockBean
     private UserIdentity userIdentity;
     @Autowired
@@ -36,7 +36,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsShouldSucceedAndReturnAllGroups() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -52,7 +52,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsFilterByRoleIdShouldSucceedAndReturnFilteredGroups() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("role_ids", "1")
@@ -80,7 +80,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsFilterByRoleIdsShouldSucceedAndReturnFilteredGroups() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("role_ids", "3,6")
@@ -116,7 +116,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsFilterByRoleIdWithNoMatchShouldSucceedAndReturnEmptyArray() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("role_ids", "100")
@@ -131,7 +131,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsByCourthouseIdShouldSucceedAndReturnFilteredGroups() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         var courthouseEntity = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME);
         addCourthouseToSecurityGroup(courthouseEntity, MID_TIER_GROUP_ID);
@@ -162,7 +162,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsByCourthouseIdWithNoMatchShouldSucceedAndReturnEmptyArray() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("courthouse_id","500")
@@ -177,7 +177,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityGroupsByRoleIdsAndCourthouseIdShouldSucceedAndReturnFilteredGroups() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         var courthouseEntity = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME);
         addCourthouseToSecurityGroup(courthouseEntity, MID_TIER_GROUP_ID);

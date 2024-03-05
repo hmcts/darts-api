@@ -127,7 +127,9 @@ paths:
           style: form
           explode: false
           schema:
-            $ref: '#/components/schemas/RoleIds'
+            type: array
+            items:
+              $ref: '#/components/schemas/RoleId'
         - in: query
           name: courthouse_id
           description: Filter by Courthouse Id
@@ -363,12 +365,6 @@ components:
       maxLength: 256
     RoleDisplayState:
       type: boolean
-
-    RoleIds:
-      type: array
-      items:
-        type: integer
-
     CourthouseId:
       type: integer
 
