@@ -17,7 +17,7 @@ public enum SecurityRoleEnum {
     CPP(8),
     DAR_PC(9),
     MID_TIER(10),
-    ADMIN(11);
+    SUPER_ADMIN(11);
 
     private final Integer id;
 

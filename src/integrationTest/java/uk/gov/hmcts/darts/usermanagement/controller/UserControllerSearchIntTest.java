@@ -12,8 +12,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 
 import java.util.Set;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
 class UserControllerSearchIntTest extends IntegrationBase {
@@ -47,14 +47,14 @@ class UserControllerSearchIntTest extends IntegrationBase {
     private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity userIdentity;
 
     @Test
     void searchShouldReturnForbiddenError() throws Exception {
-        adminUserStub.givenUserIsNotAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("@example");
@@ -74,13 +74,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchShouldReturnBadRequestError() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("");
@@ -115,7 +115,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     void searchShouldReturnOk() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("@test");
@@ -133,13 +133,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchByEmailAddressShouldReturnOk() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("adminUserAccount");
@@ -156,13 +156,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchByFullNameShouldReturnOk() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setFullName("adminUserAccount");
@@ -179,13 +179,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchByEmailAddressAndFullNameShouldReturnOk() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("adminUserAccount");
@@ -203,13 +203,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void returnsActiveAndInactiveUsersGivenActiveValueNotProvided() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String randomStr = randomAlphabetic(4);
         String username1 = randomStr + "-user-1";
@@ -229,7 +229,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
@@ -237,7 +237,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     void doesntReturnActiveUsersWhenInactiveProvidedInTheUserSearch() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String randomStr = randomAlphabetic(4);
         String username1 = randomStr + "-user-1";
@@ -259,7 +259,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
@@ -267,7 +267,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     void doesntReturnInactiveUsersWhenActiveProvidedInTheUserSearch() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String randomStr = randomAlphabetic(4);
         String username1 = randomStr + "-user-1";
@@ -289,7 +289,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");

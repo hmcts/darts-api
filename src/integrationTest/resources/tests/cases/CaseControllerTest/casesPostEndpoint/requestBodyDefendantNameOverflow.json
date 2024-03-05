@@ -1,0 +1,18 @@
+{
+  "courthouse": "SWANSEA",
+  "case_number": "CASE1001",
+  "defendants": [
+    "Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs ",
+    "short name",
+    "Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs Jow Bloggs "
+  ],
+  "judges": [
+    "Mr Judge"
+  ],
+  "prosecutors": [
+    "Mrs Prosecutor"
+  ],
+  "defenders": [
+    "Mr Defender"
+  ]
+}

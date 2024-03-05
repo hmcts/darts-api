@@ -38,7 +38,7 @@ import java.util.Optional;
 @Slf4j
 public class RetentionPostServiceImpl implements RetentionPostService {
 
-    public static final List<SecurityRoleEnum> JUDGE_AND_ADMIN_ROLES = List.of(SecurityRoleEnum.JUDGE, SecurityRoleEnum.ADMIN);
+    public static final List<SecurityRoleEnum> JUDGE_AND_SUPER_ADMIN_ROLES = List.of(SecurityRoleEnum.JUDGE, SecurityRoleEnum.SUPER_ADMIN);
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
     private final AuthorisationApi authorisationApi;
@@ -97,7 +97,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             //Only Judges and Admin can reduce a set retention date
             LocalDate currentRetentionDate = getLatestCompletedCaseRetention(courtCase).getRetainUntil().toLocalDate();
             if (newRetentionDate.isBefore(currentRetentionDate)) {
-                if (!authorisationApi.userHasOneOfRoles(JUDGE_AND_ADMIN_ROLES)) {
+                if (!authorisationApi.userHasOneOfRoles(JUDGE_AND_SUPER_ADMIN_ROLES)) {
                     throw new DartsApiException(
                         RetentionApiError.NO_PERMISSION_REDUCE_RETENTION, "You do not have permission to reduce the retention period."
                     );

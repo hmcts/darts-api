@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public abstract class AbstractUserController implements AuthenticationController {
 
     private final AuthenticationService authenticationService;

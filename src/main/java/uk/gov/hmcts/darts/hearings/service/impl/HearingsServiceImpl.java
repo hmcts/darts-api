@@ -40,7 +40,7 @@ public class HearingsServiceImpl implements HearingsService {
     private final AnnotationRepository annotationRepository;
     private final AuthorisationApi authorisationApi;
 
-    public static final List<SecurityRoleEnum> ADMIN_ROLE = List.of(SecurityRoleEnum.ADMIN);
+    public static final List<SecurityRoleEnum> SUPER_ADMIN_ROLE = List.of(SecurityRoleEnum.SUPER_ADMIN);
 
 
     @Override
@@ -72,7 +72,7 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public List<Annotation> getAnnotationsByHearingId(Integer hearingId) {
         List<AnnotationEntity> annotations;
-        if (authorisationApi.userHasOneOfRoles(ADMIN_ROLE)) {
+        if (authorisationApi.userHasOneOfRoles(SUPER_ADMIN_ROLE)) {
             //admin will see all annotations
             annotations = annotationRepository.findByHearingId(hearingId);
         } else {

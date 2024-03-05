@@ -16,8 +16,8 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.AnnotationStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -33,14 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     private static final OffsetDateTime CREATED_DATE = OffsetDateTime.parse("2023-07-31T12:00Z");
 
-    private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-09-01T12:00Z");
-
-    private static final String SOME_COURTHOUSE = "some-courthouse";
-    private static final String SOME_COURTROOM = "some-courtroom";
-    private static final String SOME_CASE_ID = "1";
-
     @Autowired
-    AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity mockUserIdentity;
@@ -49,7 +43,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     private transient MockMvc mockMvc;
 
     @Autowired
-    AnnotationStub annotationStub;
+    private AnnotationStub annotationStub;
 
     @Test
     void givenJudgeUserReturnOwnAnnotationsButNotDeleted() throws Exception {
@@ -62,7 +56,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         UserAccountEntity adminUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+            .createSuperAdminUser();
 
         createAnnotation(adminUser, hearingEntity);
         final AnnotationEntity annotationEntity2 = createAnnotation(testUser, hearingEntity);
@@ -75,7 +69,8 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         List<Annotation> annotations = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              new TypeReference<List<Annotation>>(){});
+                                                              new TypeReference<List<Annotation>>() {
+                                                              });
 
         annotations.sort(comparing(Annotation::getAnnotationId));
         assertEquals(2, annotations.size());
@@ -108,7 +103,8 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         List<Annotation> annotations = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              new TypeReference<List<Annotation>>(){});
+                                                              new TypeReference<List<Annotation>>() {
+                                                              });
 
         annotations.sort(comparing(Annotation::getAnnotationId));
         assertEquals(4, annotations.size());
@@ -119,23 +115,21 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     }
 
 
-
     @Test
-    void givenAdminUserReturnAllAnnotations() throws Exception {
+    void givenSuperAdminUserReturnAllAnnotations() throws Exception {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
             .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
 
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+        UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
-        UserAccountEntity adminUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+        UserAccountEntity superAdminUser = dartsDatabase.getUserAccountStub()
+            .createSuperAdminUser();
         UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
             .createJudgeUser("1");
 
-        final AnnotationEntity annotationEntity1 = createAnnotation(adminUser, hearingEntity);
+        final AnnotationEntity annotationEntity1 = createAnnotation(superAdminUser, hearingEntity);
         final AnnotationEntity annotationEntity2 = createAnnotation(testUser, hearingEntity);
         final AnnotationEntity annotationEntity3 = createAnnotation(judgeUser, hearingEntity);
 
@@ -145,17 +139,18 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         List<Annotation> annotations = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              new TypeReference<List<Annotation>>(){});
+                                                              new TypeReference<List<Annotation>>() {
+                                                              });
 
         annotations.sort(comparing(Annotation::getAnnotationId));
         assertEquals(3, annotations.size());
-        checkAnnotation(annotations.get(0), hearingEntity, adminUser, annotationEntity1);
+        checkAnnotation(annotations.get(0), hearingEntity, superAdminUser, annotationEntity1);
         checkAnnotation(annotations.get(1), hearingEntity, testUser, annotationEntity2);
         checkAnnotation(annotations.get(2), hearingEntity, judgeUser, annotationEntity3);
     }
 
     @Test
-    void givenNonAdminJudgeUserReturnForbidden() throws Exception {
+    void givenNonSuperAdminJudgeUserReturnForbidden() throws Exception {
         final CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
             .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
@@ -180,7 +175,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     @Test
     void givenUserRequestsNonExistingHearingThenReturn404() throws Exception {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAdminUser();
+            .createSuperAdminUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         mockMvc.perform(get("/cases/200/annotations")
