@@ -6,4 +6,4 @@ INSERT INTO region (reg_id, region_name) VALUES(5, 'North East');
 INSERT INTO region (reg_id, region_name) VALUES(6, 'North West');
 INSERT INTO region (reg_id, region_name) VALUES(7, 'Wales');
 
-ALTER SEQUENCE aut_seq RESTART WITH 8;
+ALTER SEQUENCE reg_seq RESTART WITH 8;
