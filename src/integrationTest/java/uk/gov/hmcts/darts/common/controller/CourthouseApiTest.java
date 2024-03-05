@@ -47,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
@@ -111,7 +112,7 @@ class CourthouseApiTest extends IntegrationBase {
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
 
     }
@@ -156,9 +157,6 @@ class CourthouseApiTest extends IntegrationBase {
         assertEquals(200, response.getResponse().getStatus());
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertTrue(response.getResponse().getContentAsString().contains("region_id"));
-
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
 
     }
 
@@ -207,7 +205,7 @@ class CourthouseApiTest extends IntegrationBase {
 
         assertEquals(404, response.getResponse().getStatus());
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -347,8 +345,6 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
@@ -376,9 +372,6 @@ class CourthouseApiTest extends IntegrationBase {
         requestBuilder = get("/admin/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
-
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test

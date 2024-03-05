@@ -22,6 +22,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @RestController
@@ -35,7 +36,7 @@ public class RetentionController implements RetentionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
     @Override
     public ResponseEntity<List<GetCaseRetentionsResponse>> retentionsGet(Integer caseId) {
         return new ResponseEntity<>(retentionService.getCaseRetentions(caseId), HttpStatus.OK);
@@ -44,7 +45,7 @@ public class RetentionController implements RetentionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID, bodyAuthorisation = true,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
     @Override
     public ResponseEntity<PostRetentionResponse> retentionsPost(Boolean validateOnly,
                                                                 PostRetentionRequest postRetentionRequest) {
