@@ -28,9 +28,9 @@ public class AnnotationPersistenceService {
 
     @Transactional
     public void persistAnnotation(
-            ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
-            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-            Integer hearingId) {
+        ExternalObjectDirectoryEntity inboundExternalObjectDirectory,
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+        Integer hearingId) {
 
         final var hearing = hearingRepository.findById(hearingId);
 
@@ -39,8 +39,8 @@ public class AnnotationPersistenceService {
                 auditApi.recordAudit(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearingEntity.getCourtCase());
                 var annotation = inboundExternalObjectDirectory.getAnnotationDocumentEntity().getAnnotation();
                 hearing.get().addAnnotation(annotation);
+                hearingRepository.save(hearingEntity);
             }
-
         );
 
         externalObjectDirectoryRepository.save(inboundExternalObjectDirectory);

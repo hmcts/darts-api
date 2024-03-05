@@ -31,22 +31,21 @@ public class AnnotationStub {
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
                                                               String annotationText,
                                                               HearingEntity hearingEntity) {
-        AnnotationEntity annotationEntity = createAnnotationEntity(currentOwner, annotationText, hearingEntity);
+        AnnotationEntity annotationEntity = createAnnotationEntity(currentOwner, annotationText);
+        annotationEntity.addHearing(hearingEntity);
         return annotationRepository.save(annotationEntity);
     }
 
-    public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText, HearingEntity hearingEntity) {
+    public static AnnotationEntity createAnnotationEntity(UserAccountEntity currentOwner, String annotationText) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
-        annotationEntity.addHearing(hearingEntity);
         annotationEntity.setTimestamp(OffsetDateTime.now());
         annotationEntity.setCreatedBy(currentOwner);
         return annotationEntity;
     }
 
 
-    @Transactional
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
                                                                               String fileName,
                                                                               String fileType,
@@ -75,7 +74,4 @@ public class AnnotationStub {
         return annotationDocument;
     }
 
-    public void saveAnnotation(AnnotationEntity annotationEntity) {
-        annotationRepository.saveAndFlush(annotationEntity);
-    }
 }
