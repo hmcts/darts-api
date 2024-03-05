@@ -43,8 +43,8 @@ public class AnnotationPersistenceService {
             }
         );
 
-        externalObjectDirectoryRepository.saveAndFlush(inboundExternalObjectDirectory);
-        externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectory);
+        externalObjectDirectoryRepository.save(inboundExternalObjectDirectory);
+        externalObjectDirectoryRepository.save(unstructuredExternalObjectDirectory);
     }
 
     @Transactional
