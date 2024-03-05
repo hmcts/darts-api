@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,6 +50,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;

@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.cases.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,19 +17,19 @@ import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
-import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
-import uk.gov.hmcts.darts.cases.validator.PatchCaseRequestValidator;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
@@ -44,9 +46,15 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;
+
+    private final LogApi logApi;
+
+    @Value("${darts.cases.defendant-name-char-limit: 600}")
+    private int limit;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -71,7 +79,16 @@ public class CaseController implements CasesApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {MID_TIER})
     public ResponseEntity<PostCaseResponse> casesPost(AddCaseRequest addCaseRequest) {
+        validateRequest(addCaseRequest);
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
+    }
+
+    private void validateRequest(AddCaseRequest addCaseRequest) {
+        emptyIfNull(addCaseRequest.getDefendants()).forEach(newDefendant -> {
+            if (newDefendant.length() > limit) {
+                logApi.defendantNameOverflow(addCaseRequest);
+            }
+        });
     }
 
     @Override
@@ -114,17 +131,6 @@ public class CaseController implements CasesApi {
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
 
-    }
-
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = CASE_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
-        PatchCaseRequestValidator.validate(patchRequestObject);
-        return new ResponseEntity<>(caseService.patchCase(caseId, patchRequestObject), HttpStatus.OK);
     }
 
     @Override

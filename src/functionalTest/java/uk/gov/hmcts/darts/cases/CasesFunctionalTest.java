@@ -171,36 +171,4 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(404, response.statusCode());
     }
 
-    @Test
-    @Order(6)
-    void patchCase() {
-        String patchCaseBody = """
-            {
-                "retain_until": "2030-10-07T23:59:59.000Z"
-            }
-            """;
-
-        Response patchCaseResponse = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_PATH + "/" + caseId))
-            .body(patchCaseBody)
-            .patch()
-            .then()
-            .extract().response();
-
-        assertEquals(200, patchCaseResponse.statusCode());
-
-        Response getCaseresponse = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_PATH + "/" + caseId))
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(200, getCaseresponse.statusCode());
-        assertEquals(CASE_NUMBER, getCaseresponse.jsonPath().get("case_number"));
-    }
-
 }
