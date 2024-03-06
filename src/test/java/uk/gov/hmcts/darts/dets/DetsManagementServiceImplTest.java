@@ -53,9 +53,9 @@ class DetsManagementServiceImplTest {
         blobClient = mock(BlobClient.class);
         serviceClient = mock(BlobServiceClient.class);
 
-        String connectionString = "test connection string";
-        when(dataManagementConfiguration.getConnectionString()).thenReturn(connectionString);
-        when(dataManagementFactory.getBlobServiceClient(connectionString)).thenReturn(serviceClient);
+        String sasEndpoint = "test sas url endpoint";
+        when(dataManagementConfiguration.getSasEndpoint()).thenReturn(sasEndpoint);
+        when(dataManagementFactory.getBlobServiceClientWithSasEndpoint(sasEndpoint)).thenReturn(serviceClient);
         when(dataManagementConfiguration.getContainerName()).thenReturn(BLOB_CONTAINER_NAME);
     }
 

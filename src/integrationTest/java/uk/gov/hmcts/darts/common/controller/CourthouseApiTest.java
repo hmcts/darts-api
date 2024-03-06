@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -104,6 +105,66 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.has_data", is(false)))
+            .andDo(print())
+            .andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+        assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
+        assertFalse(response.getResponse().getContentAsString().contains("region_id"));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+
+    }
+
+    @Test
+    void adminCourthousesGetWithCase() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+
+        dartsDatabase.createCase("HAVERFORDWEST", "101");
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.has_data", is(true)))
+            .andDo(print())
+            .andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+        assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
+        assertFalse(response.getResponse().getContentAsString().contains("region_id"));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+
+    }
+
+    @Test
+    void adminCourthousesGetWithHearing() throws Exception {
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+
+        dartsDatabase.createHearing("HAVERFORDWEST",
+                                                                  "roomname", "101", LocalDate.now());
+
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.has_data", is(true)))
             .andDo(print())
             .andReturn();
 
