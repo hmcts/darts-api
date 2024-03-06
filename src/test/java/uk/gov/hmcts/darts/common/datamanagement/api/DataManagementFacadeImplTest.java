@@ -307,8 +307,8 @@ class DataManagementFacadeImplTest {
 
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
 
-        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(MediaEntity.class), any(ObjectRecordStatusEntity.class))).
-            thenReturn(List.of(inboundEntity));
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(MediaEntity.class), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
                                                                                objectRecordStatusRepository, storageOrderHelper,
@@ -352,8 +352,8 @@ class DataManagementFacadeImplTest {
 
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
 
-        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(TranscriptionDocumentEntity.class), any(ObjectRecordStatusEntity.class))).
-            thenReturn(List.of(inboundEntity));
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(TranscriptionDocumentEntity.class), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
                                                                                objectRecordStatusRepository, storageOrderHelper,
@@ -398,8 +398,8 @@ class DataManagementFacadeImplTest {
 
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
 
-        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(AnnotationDocumentEntity.class), any(ObjectRecordStatusEntity.class))).
-            thenReturn(List.of(inboundEntity));
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(AnnotationDocumentEntity.class), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
                                                                                objectRecordStatusRepository, storageOrderHelper,
