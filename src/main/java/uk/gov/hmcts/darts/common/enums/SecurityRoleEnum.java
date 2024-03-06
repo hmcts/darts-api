@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 public enum SecurityRoleEnum {
 
     APPROVER(1),
-    REQUESTER(2),//all cases in Swansea(1)
+    REQUESTER(2),
     JUDGE(3),
     TRANSCRIBER(4),
-    TRANSLATION_QA(5),//interpreter cases in all courthouses (1,2,3)
+    TRANSLATION_QA(5),
     RCJ_APPEALS(6),
     XHIBIT(7),
     CPP(8),

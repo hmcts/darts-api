@@ -10,7 +10,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public enum DatastoreContainerType {
     INBOUND(1, Optional.of(ExternalLocationTypeEnum.INBOUND)),
-    OUTBOUND(-1, Optional.ofNullable(null)),
+    OUTBOUND(-1, Optional.empty()),
     UNSTRUCTURED(2, Optional.of(ExternalLocationTypeEnum.UNSTRUCTURED)),
     ARM(3, Optional.of(ExternalLocationTypeEnum.ARM)),
     DETS(4, Optional.of(ExternalLocationTypeEnum.DETS));
