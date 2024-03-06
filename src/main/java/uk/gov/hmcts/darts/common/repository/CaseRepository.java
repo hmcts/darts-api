@@ -24,4 +24,11 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         """)
     List<String> findOpenCaseNumbers(String courthouseName, List<String> caseNumbers);
 
+    @Query("""
+        select exists(
+        SELECT cc.id FROM CourtCaseEntity cc
+        WHERE cc.courthouse.id = :courthouseId)
+        """)
+    boolean caseExistsForCourthouse(Integer courthouseId);
+
 }
