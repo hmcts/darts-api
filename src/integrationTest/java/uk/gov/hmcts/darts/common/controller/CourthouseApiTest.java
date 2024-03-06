@@ -226,20 +226,17 @@ class CourthouseApiTest extends IntegrationBase {
     @Test
     @Transactional
     void courthousesGet() throws Exception {
-        CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
 
-        RegionEntity walesRegion = new RegionEntity();
-        walesRegion.setRegionName(WALES_REGION);
-        regionRepository.save(walesRegion);
+        final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
+        final RegionEntity northWestRegion = regionStub.createRegionsUnlessExists(NORTH_WEST_REGION);
+        final RegionEntity walesRegion = regionStub.createRegionsUnlessExists(WALES_REGION);
+
         swanseaCourthouse.setRegion(walesRegion);
 
         dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
 
-        CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
+        final CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
 
-        RegionEntity northWestRegion = new RegionEntity();
-        northWestRegion.setRegionName(NORTH_WEST_REGION);
-        regionRepository.save(northWestRegion);
         manchesterCourthouse.setRegion(northWestRegion);
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
