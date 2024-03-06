@@ -31,7 +31,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     @Override
     @SneakyThrows
     public void downloadData(UUID blobId, DownloadResponseMetaData report) {
-        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(configuration.getConnectionString());
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
 
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
@@ -55,7 +55,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     @Override
     public UUID saveBlobData(BinaryData binaryData) {
         UUID uniqueBlobId = UUID.randomUUID();
-        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(configuration.getConnectionString());
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(configuration.getContainerName(), serviceClient);
 
         BlobClient client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);

@@ -186,6 +186,9 @@ components:
               items:
                 type: integer
               example: [1, 2]
+            has_data:
+              type: boolean
+              description: Indicates whether the courthouse has related cases or hearings
 
     ExtendedCourthouse:
       allOf:

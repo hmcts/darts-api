@@ -605,3 +605,15 @@ INSERT INTO transcription_urgency (tru_id, description, display_state, priority_
 INSERT INTO transcription_urgency (tru_id, description, display_state, priority_order) VALUES (5, 'Up to 7 working days', true, 4);
 INSERT INTO transcription_urgency (tru_id, description, display_state, priority_order) VALUES (6, 'Up to 12 working days', true, 5);
 INSERT INTO transcription_urgency (tru_id, description, display_state, priority_order) VALUES (7, 'Up to 2 working days', true, 2);
+
+INSERT INTO region (reg_id, region_name) VALUES(1, 'London');
+INSERT INTO region (reg_id, region_name) VALUES(2, 'South East');
+INSERT INTO region (reg_id, region_name) VALUES(3, 'South West');
+INSERT INTO region (reg_id, region_name) VALUES(4, 'Midlands');
+INSERT INTO region (reg_id, region_name) VALUES(5, 'North East');
+INSERT INTO region (reg_id, region_name) VALUES(6, 'North West');
+INSERT INTO region (reg_id, region_name) VALUES(7, 'Wales');
+
+INSERT INTO courthouse_region_ae (cth_id, reg_id) VALUES (2,5);
+INSERT INTO courthouse_region_ae (cth_id, reg_id) VALUES (3,6);
+INSERT INTO courthouse_region_ae (cth_id, reg_id) VALUES (1,7);
