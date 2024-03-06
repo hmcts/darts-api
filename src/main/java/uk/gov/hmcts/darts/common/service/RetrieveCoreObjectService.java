@@ -41,6 +41,9 @@ public interface RetrieveCoreObjectService {
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     JudgeEntity retrieveOrCreateJudge(String judgeName);
 
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount);
+
     @Transactional
     DefenceEntity createDefence(String defence, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 

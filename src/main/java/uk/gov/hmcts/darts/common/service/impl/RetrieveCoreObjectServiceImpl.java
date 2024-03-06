@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -41,6 +42,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private final DefenceRepository defenceRepository;
     private final DefendantRepository defendantRepository;
     private final ProsecutorRepository prosecutorRepository;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
@@ -138,13 +140,21 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     @Override
     public JudgeEntity retrieveOrCreateJudge(String judgeName) {
-        Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
-        return foundJudge.orElseGet(() -> createJudge(judgeName));
+        UserAccountEntity userAccount = authorisationApi.getCurrentUser();
+        return retrieveOrCreateJudge(judgeName, userAccount);
     }
 
-    private JudgeEntity createJudge(String judgeName) {
+    @Override
+    public JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount) {
+        Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
+        return foundJudge.orElseGet(() -> createJudge(judgeName, userAccount));
+    }
+
+    private JudgeEntity createJudge(String judgeName, UserAccountEntity userAccount) {
         JudgeEntity judge = new JudgeEntity();
         judge.setName(judgeName);
+        judge.setCreatedBy(userAccount);
+        judge.setLastModifiedBy(userAccount);
         judgeRepository.saveAndFlush(judge);
         return judge;
     }
