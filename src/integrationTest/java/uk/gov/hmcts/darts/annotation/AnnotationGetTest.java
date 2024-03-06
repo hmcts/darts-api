@@ -2,14 +2,13 @@ package uk.gov.hmcts.darts.annotation;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -37,10 +36,9 @@ class AnnotationGetTest extends IntegrationBase {
     private InputStream inputStreamResource;
 
     @Mock
-    private DownloadableExternalObjectDirectories downloadableExternalObjectDirectories;
-
-    @Mock
     private DownloadResponseMetaData downloadResponseMetaData;
+    @MockBean
+    private DataManagementFacade dataManagementFacade;
     @Autowired
     private MockMvc mockMvc;
 
@@ -70,33 +68,29 @@ class AnnotationGetTest extends IntegrationBase {
 
         var judge = given.anAuthenticatedUserWithGlobalAccessAndRole(JUDGE);
 
-        try (MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class)) {
-            when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
-            when(downloadableExternalObjectDirectories.getResponse()).thenReturn(downloadResponseMetaData);
-            when(downloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-            when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
+        when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
+        when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
-            dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+        dartsDatabase.createValidAnnotationDocumentForDownload(judge);
 
-            MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
 
-            mockMvc.perform(
-                    requestBuilder)
-                .andExpect(status().isOk())
-                .andExpect(header().string(
-                    CONTENT_DISPOSITION,
-                    "attachment; filename=\"judges-notes.txt\""
-                ))
-                .andExpect(header().string(
-                    CONTENT_TYPE,
-                    "application/zip"
-                ))
-                .andExpect(header().string(
-                    "annotation_document_id",
-                    "1"
-                ));
+        mockMvc.perform(
+                requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(header().string(
+                CONTENT_DISPOSITION,
+                "attachment; filename=\"judges-notes.txt\""
+            ))
+            .andExpect(header().string(
+                CONTENT_TYPE,
+                "application/zip"
+            ))
+            .andExpect(header().string(
+                "annotation_document_id",
+                "1"
+            ));
 
-        }
     }
 
     private AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {

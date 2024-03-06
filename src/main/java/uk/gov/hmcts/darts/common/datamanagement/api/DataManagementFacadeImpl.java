@@ -1,125 +1,184 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
+import com.azure.storage.blob.models.BlobStorageException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.datamanagement.helper.StorageOrderHelper;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DataManagementFacadeImpl implements DataManagementFacade {
 
     private final List<BlobContainerDownloadable> supportedDownloadableContainers;
-
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
+    private final StorageOrderHelper storageOrderHelper;
     private final DetsDataManagementConfiguration configuration;
 
-    // The order to process the download data containers
-    private static final List<DatastoreContainerType> CONTAINER_PROCESSING_ORDER = new ArrayList<>();
-
-    public DataManagementFacadeImpl(List<BlobContainerDownloadable> supportedDownloadableContainers, DetsDataManagementConfiguration configuration) {
-        this.supportedDownloadableContainers = supportedDownloadableContainers;
-        this.configuration = configuration;
-
-        // the containers in the order in which they need to be processed
-        CONTAINER_PROCESSING_ORDER.add(DatastoreContainerType.UNSTRUCTURED);
-        CONTAINER_PROCESSING_ORDER.add(DatastoreContainerType.DETS);
-        CONTAINER_PROCESSING_ORDER.add(DatastoreContainerType.ARM);
+    @Override
+    public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException {
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(mediaEntity, storedStatus);
+        if (CollectionUtils.isEmpty(storedEodEntities)) {
+            log.error("No eodEntities found for mediaId {}", mediaEntity.getId());
+            throw new FileNotDownloadedException();
+        }
+        try {
+            return getDataFromStorage(storedEodEntities);
+        } catch (FileNotDownloadedException fnde) {
+            log.error("Could not retrieve file from any storage for mediaId {}", mediaEntity.getId());
+            throw fnde;
+        }
     }
 
     @Override
-    public void getDataFromUnstructuredArmAndDetsBlobs(DownloadableExternalObjectDirectories downloadableExternalObjectDirectories) {
-
-        // process for all standard blob stores
-        downloadableExternalObjectDirectories.getEntities().forEach(dataToDownload -> CONTAINER_PROCESSING_ORDER.forEach(type -> {
-            Optional<BlobContainerDownloadable> container = getSupportedContainer(type);
-            if (container.isPresent() && !downloadableExternalObjectDirectories.getResponse().isProcessedByContainer()) {
-                Optional<String> containerName = container.get().getContainerName(type);
-                if (containerName.isPresent()
-                    && dataToDownload.isForLocationType(getForDatastoreContainerType(type))
-                    && processObjectDirectoryForContainerType(dataToDownload, type, configuration.isFetchFromDetsEnabled())) {
-                    log.info("Downloading blob id {} from container {}", dataToDownload.getId(), type.name());
-
-                    processDownloadResponse(type, dataToDownload, downloadableExternalObjectDirectories, container.get());
-                }
-            }
-        }));
-
-        if (!downloadableExternalObjectDirectories.getResponse().isProcessedByContainer()) {
-
-            log.info("Downloading was not attempted, Falling back...");
-
-            // now fallback as we have not found any way of processing the download
-            processFallback(downloadableExternalObjectDirectories);
+    public DownloadResponseMetaData retrieveFileFromStorage(TranscriptionDocumentEntity transcriptionDocumentEntity) throws FileNotDownloadedException {
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(transcriptionDocumentEntity,
+                                                                                                                        storedStatus);
+        if (CollectionUtils.isEmpty(storedEodEntities)) {
+            log.error("No eodEntities found for TranscriptionId {}", transcriptionDocumentEntity.getId());
+            throw new FileNotDownloadedException();
+        }
+        try {
+            return getDataFromStorage(storedEodEntities);
+        } catch (FileNotDownloadedException fnde) {
+            log.error("Could not retrieve file from any storage for TranscriptionId {}", transcriptionDocumentEntity.getId());
+            throw fnde;
         }
     }
 
-    private void processDownloadResponse(DatastoreContainerType type, ExternalObjectDirectoryEntity processing,
-                                         DownloadableExternalObjectDirectories downloadableExternalObjectDirectories,
-                                         BlobContainerDownloadable container) {
-        if (!downloadableExternalObjectDirectories.getResponse().isSuccessfulDownload()) {
-            boolean success = false;
+    @Override
+    public DownloadResponseMetaData retrieveFileFromStorage(AnnotationDocumentEntity annotationDocumentEntity) throws FileNotDownloadedException {
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(annotationDocumentEntity, storedStatus);
+        if (CollectionUtils.isEmpty(storedEodEntities)) {
+            log.error("No eodEntities found for AnnotationDocId {}", annotationDocumentEntity.getId());
+            throw new FileNotDownloadedException();
+        }
+        try {
+            return getDataFromStorage(storedEodEntities);
+        } catch (FileNotDownloadedException fnde) {
+            log.error("Could not retrieve file from any storage for AnnotationDocId {}", annotationDocumentEntity.getId());
+            throw fnde;
+        }
+    }
+
+    @Override
+    public DownloadResponseMetaData retrieveFileFromStorage(List<ExternalObjectDirectoryEntity> eodEntities) throws FileNotDownloadedException {
+        if (CollectionUtils.isEmpty(eodEntities)) {
+            log.error("Supplied list of EodEntities is empty");
+            throw new FileNotDownloadedException();
+        }
+
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        List<ExternalObjectDirectoryEntity> storedEodEntities = eodEntities.stream().filter(eodEntity -> eodEntity.getStatus().equals(storedStatus)).toList();
+        if (CollectionUtils.isEmpty(storedEodEntities)) {
+            log.error("Supplied list of EodEntities does not have any that are stored");
+            throw new FileNotDownloadedException("Supplied list of EodEntities does not have any that are stored");
+        }
+        try {
+            return getDataFromStorage(storedEodEntities);
+        } catch (FileNotDownloadedException fnde) {
+            log.error("Could not retrieve file from any storage for eodId: {}", eodEntities.get(0).getId());
+            throw fnde;
+        }
+    }
+
+    private DownloadResponseMetaData retrieveFileFromStorage(DatastoreContainerType datastoreType, ExternalObjectDirectoryEntity eodEntity,
+                                                             BlobContainerDownloadable container) throws FileNotDownloadedException {
+        try {
+            return container.downloadBlobFromContainer(datastoreType, eodEntity);
+        } catch (UncheckedIOException | BlobStorageException e) {
+            throw new FileNotDownloadedException(eodEntity.getExternalLocation(), datastoreType.name(), "Error downloading blob", e);
+        }
+    }
+
+    /**
+     * Loop through each storage type in order to see if it has a matched EodEntity, and if it does, try to download the file from there, if it fails,
+     * move to the next one, if they all fail then throw a FileNotDownloadedException.
+     */
+    private DownloadResponseMetaData getDataFromStorage(List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException {
+        List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
+        StringBuilder logBuilder = new StringBuilder("Starting to search for files with " + storedEodEntities.size() + " eodEntities\n");
+
+        for (DatastoreContainerType datastoreContainerType : storageOrder) {
+            logBuilder.append("checking container " + datastoreContainerType.name() + "\n");
+            boolean useContainerType = shouldUseContainerType(datastoreContainerType, configuration.isFetchFromDetsEnabled());
+            if (!useContainerType) {
+                logBuilder.append("Ignoring container as its been turned off " + datastoreContainerType.name() + "\n");
+                continue;
+            }
+
+            ExternalObjectDirectoryEntity eodEntity = findCorrespondingEodEntityForStorageLocation(storedEodEntities, datastoreContainerType);
+            if (eodEntity == null) {
+                logBuilder.append("matching eodEntity not found for " + datastoreContainerType.name() + "\n");
+                continue;
+            }
+            Optional<BlobContainerDownloadable> container = getSupportedContainer(datastoreContainerType);
+            if (container.isEmpty()) {
+                logBuilder.append("Supporting Container " + datastoreContainerType.name() + " not found\n");
+                continue;
+            }
+            log.info("Downloading blob id {} from container {}", eodEntity.getExternalLocation(), datastoreContainerType.name());
+
             try {
-                success = container.downloadBlobFromContainer(type,
-                                                              processing, downloadableExternalObjectDirectories.getResponse());
-            } catch (UncheckedIOException e) {
-                log.error("Error occurred working out whether to continue", e);
+                DownloadResponseMetaData downloadResponseMetaData = retrieveFileFromStorage(datastoreContainerType, eodEntity, container.get());
+                downloadResponseMetaData.setEodEntity(eodEntity);
+                downloadResponseMetaData.setContainerTypeUsedToDownload(datastoreContainerType);
+                return downloadResponseMetaData;
+            } catch (FileNotDownloadedException e) {
+                String logMessage = MessageFormat.format("Could not download file for eodEntity ''{0,number,#}''", eodEntity.getId());
+                logBuilder.append(logMessage + "\n");
+                log.error(logMessage, e);
             }
-
-            if (!success) {
-                log.info("Failed to download blob id {} from container {}, " +
-                             "continuing to process...", processing.getExternalLocationType(), type.name());
-            }
-
-            // if we have been asked to stop processing then fail fast and do not process the rest of the downloads
-            processResponse(downloadableExternalObjectDirectories, success, type);
         }
+        throw new FileNotDownloadedException(logBuilder.toString());
     }
 
-    @SuppressWarnings("java:S1135")
-    private void processFallback(DownloadableExternalObjectDirectories downloadableExternalObjectDirectories) {
-        // TODO: Implement this method to do something as a fallback.
-    }
-
-    private boolean processObjectDirectoryForContainerType(
-        ExternalObjectDirectoryEntity externalObjectDirectory, DatastoreContainerType type,
-        boolean fetchFromDets) {
-        return type != DatastoreContainerType.DETS || fetchFromDets
-                && externalObjectDirectory.isForLocationType(ExternalLocationTypeEnum.DETS);
-    }
-
-    private ExternalLocationTypeEnum getForDatastoreContainerType(DatastoreContainerType type) {
-        if (type == DatastoreContainerType.DETS) {
-            return ExternalLocationTypeEnum.DETS;
-        } else if (type == DatastoreContainerType.ARM) {
-            return ExternalLocationTypeEnum.ARM;
-        } else if (type == DatastoreContainerType.UNSTRUCTURED) {
-            return ExternalLocationTypeEnum.UNSTRUCTURED;
+    private ExternalObjectDirectoryEntity findCorrespondingEodEntityForStorageLocation(List<ExternalObjectDirectoryEntity> storedEodEntities,
+                                                                                       DatastoreContainerType datastoreContainerType) {
+        Optional<ExternalLocationTypeEnum> externalLocationTypeEnumOpt = datastoreContainerType.getExternalLocationTypeEnum();
+        if (externalLocationTypeEnumOpt.isEmpty()) {
+            return null;
         }
-
-        // no match found
-        return null;
+        Integer locationTypeId = externalLocationTypeEnumOpt.get().getId();
+        return storedEodEntities.stream().filter(storedEntity -> storedEntity.getExternalLocationType().getId().equals(locationTypeId)).findAny().orElse(null);
     }
+
+    //Check if DETS flag is turned off
+    private boolean shouldUseContainerType(DatastoreContainerType type, boolean fetchFromDets) {
+        return !(type == DatastoreContainerType.DETS && !fetchFromDets);
+    }
+
 
     private Optional<BlobContainerDownloadable> getSupportedContainer(DatastoreContainerType typeToFind) {
         return supportedDownloadableContainers.stream().filter(type -> type.getContainerName(typeToFind).isPresent())
-            .findFirst();
+            .findAny();
     }
 
-    private void processResponse(DownloadableExternalObjectDirectories download,
-                                 boolean downloadSuccess,
-                                 DatastoreContainerType processContainer) {
-        if (downloadSuccess) {
-            download.getResponse().markSuccess(processContainer);
-        } else {
-            download.getResponse().markFailure(processContainer);
-        }
-    }
 }

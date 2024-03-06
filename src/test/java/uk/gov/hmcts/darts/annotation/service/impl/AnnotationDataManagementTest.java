@@ -1,22 +1,20 @@
 package uk.gov.hmcts.darts.annotation.service.impl;
 
 import com.azure.core.util.BinaryData;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,9 +23,10 @@ import java.util.Map;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,8 +45,6 @@ class AnnotationDataManagementTest {
     @Mock
     private DataManagementFacade dataManagementFacade;
     @Mock
-    private DownloadableExternalObjectDirectories downloadableExternalObjectDirectories;
-    @Mock
     private DownloadResponseMetaData downloadResponseMetaData;
 
     private AnnotationDataManagement annotationDataManagement;
@@ -63,8 +60,8 @@ class AnnotationDataManagementTest {
         when(dataManagementApi.saveBlobDataToInboundContainer(binaryData)).thenThrow(new RuntimeException());
 
         assertThatThrownBy(() -> annotationDataManagement.upload(binaryData, "test.pdf"))
-              .isInstanceOf(DartsApiException.class)
-              .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
 
         verify(dataManagementApi, never()).saveBlobDataToUnstructuredContainer(any());
     }
@@ -77,8 +74,8 @@ class AnnotationDataManagementTest {
         when(dataManagementApi.saveBlobDataToUnstructuredContainer(binaryData)).thenThrow(new RuntimeException());
 
         assertThatThrownBy(() -> annotationDataManagement.upload(binaryData, "test.pdf"))
-              .isInstanceOf(DartsApiException.class)
-              .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
 
         verify(dataManagementApi, times(1)).deleteBlobDataFromInboundContainer(inboundLocationUuid);
 
@@ -94,8 +91,9 @@ class AnnotationDataManagementTest {
 
         var containerLocations = annotationDataManagement.upload(binaryData, "test.pdf");
 
-        assertThat(containerLocations.get(INBOUND)).isEqualTo(inboundLocationUuid);
-        assertThat(containerLocations.get(UNSTRUCTURED)).isEqualTo(unstructuredLocationUuid);
+        assertThat(containerLocations)
+            .hasFieldOrPropertyWithValue("unstructuredLocation", unstructuredLocationUuid)
+            .hasFieldOrPropertyWithValue("inboundLocation", inboundLocationUuid);
     }
 
     @Test
@@ -122,25 +120,23 @@ class AnnotationDataManagementTest {
     }
 
     @Test
-    void throwsIfDownloadAnnotationDocumentResponseFails() {
+    void throwsIfDownloadAnnotationDocumentResponseFails() throws FileNotDownloadedException {
+        when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenThrow(new FileNotDownloadedException());
         assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
     }
 
-    @SneakyThrows
     @Test
-    void throwsIfDownloadAnnotationDocumentInputStreamFails() {
-        try (MockedStatic<DownloadableExternalObjectDirectories> mockedStatic = Mockito.mockStatic(DownloadableExternalObjectDirectories.class)) {
-            when(DownloadableExternalObjectDirectories.getFileBasedDownload(anyList())).thenReturn(downloadableExternalObjectDirectories);
-            when(downloadableExternalObjectDirectories.getResponse()).thenReturn(downloadResponseMetaData);
-            when(downloadResponseMetaData.isSuccessfulDownload()).thenReturn(true);
-            when(downloadResponseMetaData.getInputStream()).thenThrow(new IOException());
+    void throwsIfDownloadAnnotationDocumentInputStreamFails() throws FileNotDownloadedException, IOException {
+        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
+        when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);
 
-            assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
-                .isInstanceOf(DartsApiException.class)
-                .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
-        }
+        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenThrow(new IOException());
+
+        assertThatThrownBy(() -> annotationDataManagement.download(Arrays.asList(someExternalObjectDirectoryEntity())))
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
     }
 
     private ExternalObjectDirectoryEntity someExternalObjectDirectoryEntity() {

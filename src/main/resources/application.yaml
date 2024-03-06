@@ -221,6 +221,8 @@ darts:
         outbound: darts-outbound
     delete:
       timeout: 60
+    search:
+      order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:
     allowed-extensions:
       - "docx"

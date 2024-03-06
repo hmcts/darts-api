@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.dets;
 
-import com.azure.core.http.rest.Response;
-import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -10,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -18,9 +15,9 @@ import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 
-import java.io.OutputStream;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -32,10 +29,6 @@ class DetsManagementServiceImplTest {
 
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
     public static final UUID BLOB_ID = UUID.randomUUID();
-    private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
-    private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
-    @Mock
-    public Response<Void> responseMock;
     @Mock
     private DataManagementAzureClientFactory dataManagementFactory;
     @Mock
@@ -61,20 +54,13 @@ class DetsManagementServiceImplTest {
 
     @Test
     void testDownloadData() throws Exception {
-        try (OutputStream stream = mock(OutputStream.class)) {
-            when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
-            when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
 
-            try (DownloadResponseMetaData metaData = mock(DownloadResponseMetaData.class)) {
-                when(metaData.getOutputStream(Mockito.notNull())).thenReturn(stream);
-
-                try (DownloadResponseMetaData downloadResponseMetaData = metaData) {
-                    dataManagementService.downloadData(BLOB_ID, downloadResponseMetaData);
-
-                    verify(downloadResponseMetaData, times(1)).markSuccess(DatastoreContainerType.DETS);
-                    verify(blobClient, times(1)).downloadStream(any());
-                }
-            }
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(BLOB_ID)) {
+            assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
+            verify(blobClient, times(1)).downloadStream(any());
         }
     }
 }

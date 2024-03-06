@@ -18,8 +18,7 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -35,6 +34,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -277,7 +277,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
-            Path downloadPath = saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
 
             downloadedMedias.put(mediaEntity, downloadPath);
         }
@@ -285,22 +285,18 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
+    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
 
-        var externalObjectDirectoryEntities = externalObjectDirectoryRepository.findByMedia(mediaEntity);
-        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories.getFileBasedDownload(externalObjectDirectoryEntities);
-        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
-
-        if (!downloadableExternalObjectDirectories.getResponse().isSuccessfulDownload()) {
-            throw new RuntimeException(String.format("Could not locate media: %s", mediaEntity.getId()));
+        DownloadResponseMetaData downloadResponseMetaData = null;
+        try {
+            downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity);
+        } catch (FileNotDownloadedException e) {
+            throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
         }
 
-        DatastoreContainerType containerType = downloadableExternalObjectDirectories.getResponse().getContainerTypeUsedToDownload();
-        UUID id = getMediaLocation(mediaEntity, containerType.getId()).orElseThrow(
-            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-            )));
+        UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
 
-        var mediaData = downloadableExternalObjectDirectories.getResponse().getInputStream();
+        var mediaData = downloadResponseMetaData.getInputStream();
         Path downloadPath = saveBlobDataToTempWorkspace(mediaData, id.toString());
 
         return downloadPath;

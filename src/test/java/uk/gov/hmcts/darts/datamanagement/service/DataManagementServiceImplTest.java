@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
@@ -133,18 +132,13 @@ class DataManagementServiceImplTest {
 
             when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
             when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+            when(blobClient.exists()).thenReturn(true);
+            when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
 
-            try (DownloadResponseMetaData metaData = mock(DownloadResponseMetaData.class)) {
-                when(metaData.getOutputStream(Mockito.notNull())).thenReturn(stream);
+            dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME,
+                                               BLOB_ID);
 
-                try (DownloadResponseMetaData downloadResponseMetaData = metaData) {
-
-                    dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
-
-                    verify(blobClient, times(1)).downloadStream(any());
-                    verify(downloadResponseMetaData, times(1)).markSuccess(DatastoreContainerType.UNSTRUCTURED);
-                }
-            }
+            verify(blobClient, times(1)).downloadStream(any());
         }
     }
 }

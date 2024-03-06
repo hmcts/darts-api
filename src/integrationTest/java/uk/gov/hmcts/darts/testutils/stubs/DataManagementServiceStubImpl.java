@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.InputStream;
@@ -84,24 +86,25 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         return null;
     }
 
-    private void logStubUsageWarning() {
-        log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-                     + " you should ask questions! ###");
-    }
-
     @Override
     @SneakyThrows
-    public void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report) {
-
+    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException {
         logStubUsageWarning();
 
-        try (OutputStream downloadOS = report.getOutputStream(dataManagementConfiguration)) {
+        FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+
+
+        try (OutputStream downloadOS = fileBasedDownloadResponseMetaData.getOutputStream(dataManagementConfiguration)) {
             Date downloadStartDate = new Date();
             downloadOS.write(new byte[1024]);
             Date downloadEndDate = new Date();
             log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
-
-            report.markSuccess(type);
         }
+        return fileBasedDownloadResponseMetaData;
+    }
+
+    private void logStubUsageWarning() {
+        log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
+                     + " you should ask questions! ###");
     }
 }

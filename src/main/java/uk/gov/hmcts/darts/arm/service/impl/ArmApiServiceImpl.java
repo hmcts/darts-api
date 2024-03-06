@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
@@ -14,9 +13,11 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 
 @Service
@@ -46,8 +47,8 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     @Override
-    @SneakyThrows
-    public InputStream downloadArmData(String externalRecordId, String externalFileId, DownloadResponseMetaData responseMetaData) {
+    public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
+        DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
         feign.Response response = armApiClient.downloadArmData(
             getArmBearerToken(),
             armApiConfigurationProperties.getCabinetId(),
@@ -56,10 +57,14 @@ public class ArmApiServiceImpl implements ArmApiService {
         );
 
         responseMetaData.markSuccess(DatastoreContainerType.ARM);
-        responseMetaData.markInputStream(response.body().asInputStream());
+        try {
+            responseMetaData.markInputStream(response.body().asInputStream());
+        } catch (IOException e) {
+            throw new FileNotDownloadedException("Arm file failed to download, externalRecordId:" + externalRecordId + ", externalFileId:" + externalFileId, e);
+        }
 
         log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
-        return response.body().asInputStream();
+        return responseMetaData;
     }
 
     private String getArmBearerToken() {

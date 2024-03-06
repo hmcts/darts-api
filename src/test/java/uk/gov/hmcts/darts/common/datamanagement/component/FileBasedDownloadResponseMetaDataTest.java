@@ -25,17 +25,12 @@ class FileBasedDownloadResponseMetaDataTest {
 
                 fileCount = new File(configuration.getTempBlobWorkspace()).list().length;
 
-                Assertions.assertFalse(fileBasedDownloadResponseMetaData.isProcessedByContainer());
-                Assertions.assertFalse(fileBasedDownloadResponseMetaData.isSuccessfulDownload());
-
                 fileBasedDownloadResponseMetaData.markSuccess(DatastoreContainerType.ARM);
 
-                Assertions.assertTrue(fileBasedDownloadResponseMetaData.isSuccessfulDownload());
                 Assertions.assertEquals(DatastoreContainerType.ARM, fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload());
 
                 fileBasedDownloadResponseMetaData.markFailure(DatastoreContainerType.ARM);
 
-                Assertions.assertFalse(fileBasedDownloadResponseMetaData.isSuccessfulDownload());
                 Assertions.assertEquals(DatastoreContainerType.ARM, fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload());
 
                 // ensure we do not generate new is or os

@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -49,6 +50,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 public class AudioController implements AudioApi {
 
     private final AudioService audioService;
+    private final AudioTransformationService audioTransformationService;
     private final AudioResponseMapper audioResponseMapper;
 
     @Value("${darts.sse.sse-preview-timeout: 120}")
