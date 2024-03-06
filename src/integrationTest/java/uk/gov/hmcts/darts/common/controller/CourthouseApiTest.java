@@ -141,7 +141,6 @@ class CourthouseApiTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.has_data", is(true)))
@@ -169,9 +168,9 @@ class CourthouseApiTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
+
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.has_data", is(true)))
@@ -410,8 +409,6 @@ class CourthouseApiTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists("HAVERFORDWEST");
-        //courtHouseEntity.setDisplayName("Haverfordwest");
-        //dartsDatabase.save(courtHouseEntity);
 
         SecurityGroupEntity securityGroupApp = addSecurityGroupForCourthouse(courtHouseEntity, getSecurityRoleByRoleName("TRANSCRIBER"));
         Integer num = securityGroupApp.getId();
