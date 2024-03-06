@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
@@ -49,7 +48,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-@Transactional
 class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
@@ -194,6 +192,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, uploadedBy, checksum);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         when(userIdentity.getUserAccount()).thenReturn(uploadedBy);
 
@@ -203,7 +202,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
             UUID.randomUUID()
         );
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().save(unstructuredEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

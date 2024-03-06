@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -115,6 +116,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserAccountRepository userAccountRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     private final TranscriptionNotifications transcriptionNotifications;
     private final DataManagementApi dataManagementApi;
@@ -383,6 +385,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
+
+        transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
             UUID.fromString(inboundBlobCLient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);
