@@ -10,9 +10,12 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.datamanagement.helper.StorageOrderHelper;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -28,8 +31,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DataManagementFacadeImplTest {
@@ -91,7 +96,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, true));
-        Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
+        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         ExternalObjectDirectoryEntity arm = createEodEntity(armLocationEntity);
 
@@ -99,7 +104,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               externalLocationTypeRepository, objectRecordStatusRepository, storageOrderHelper,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
                                                                                configuration);
 
         // make the assertion on the response
@@ -117,7 +122,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.UNSTRUCTURED, true));
-        Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
+        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         ExternalObjectDirectoryEntity dets = createEodEntity(unstructuredLocationEntity);
 
@@ -125,7 +130,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               externalLocationTypeRepository, objectRecordStatusRepository, storageOrderHelper,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
                                                                                configuration);
 
         // make the assertion on the response
@@ -143,7 +148,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, true));
-        Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
+        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         ExternalObjectDirectoryEntity dets = createEodEntity(detsLocationEntity);
 
@@ -151,7 +156,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               externalLocationTypeRepository, objectRecordStatusRepository, storageOrderHelper,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
                                                                                configuration);
 
         // make the assertion on the response
@@ -169,7 +174,7 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, false));
-        Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(false);
+        when(configuration.isFetchFromDetsEnabled()).thenReturn(false);
 
         ExternalObjectDirectoryEntity dets = createEodEntity(detsLocationEntity);
 
@@ -177,7 +182,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               externalLocationTypeRepository, objectRecordStatusRepository, storageOrderHelper,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
                                                                                configuration);
 
         // make the assertion on the response
@@ -200,7 +205,7 @@ class DataManagementFacadeImplTest {
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
         blobContainerDownloadables.add(downloadable);
 
-        Mockito.when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
+        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         // create the payload to be tested
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
@@ -209,7 +214,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               externalLocationTypeRepository, objectRecordStatusRepository, storageOrderHelper,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
                                                                                configuration);
 
         // make the assertion on the response
@@ -225,8 +230,6 @@ class DataManagementFacadeImplTest {
     void testDownloadOfFacadeWithUnstructuredAndArmProcessedInPriorityOrder() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
-
-        // setup the containers to use
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
         // create the payload entities to be tested
@@ -238,7 +241,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               externalLocationTypeRepository, objectRecordStatusRepository, storageOrderHelper,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
                                                                                configuration);
 
         // make the assertion on the response
@@ -250,15 +253,174 @@ class DataManagementFacadeImplTest {
         assertTrue(exception.getMessage().contains("checking container ARM"));
     }
 
+    @Test
+    void retrieveFileFromStorageListEmpty() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = new ArrayList<>();
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        // make the assertion on the response
+        var exception = assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
+        );
+
+        assertTrue(exception.getMessage().contains("Supplied list of EodEntities is empty"));
+    }
+
+    @Test
+    void retrieveFileFromStorageMediaEmpty() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        MediaEntity mediaEntity = new MediaEntity();
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        // make the assertion on the response
+        var exception = assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+        );
+
+        assertTrue(exception.getMessage().contains("No eodEntities found for mediaId"));
+    }
+
+    @Test
+    void retrieveFileFromStorageMediaFail() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        MediaEntity mediaEntity = new MediaEntity();
+
+        ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(MediaEntity.class), any(ObjectRecordStatusEntity.class))).
+            thenReturn(List.of(inboundEntity));
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+        );
+    }
+
+    @Test
+    void retrieveFileFromStorageTranscriptionEmpty() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        // make the assertion on the response
+        var exception = assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
+        );
+
+        assertTrue(exception.getMessage().contains("No eodEntities found for TranscriptionDocumentId"));
+    }
+
+    @Test
+    void retrieveFileFromStorageTranscriptionFail() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+
+        ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(TranscriptionDocumentEntity.class), any(ObjectRecordStatusEntity.class))).
+            thenReturn(List.of(inboundEntity));
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
+        );
+    }
+
+
+    @Test
+    void retrieveFileFromStorageAnnotationDocumentEmpty() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        // make the assertion on the response
+        var exception = assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(annotationDocumentEntity)
+        );
+
+        assertTrue(exception.getMessage().contains("No eodEntities found for AnnotationDocId"));
+    }
+
+    @Test
+    void retrieveFileFromStorageAnnotationFail() throws Exception {
+        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        AnnotationDocumentEntity annotationDocumentEntity = new AnnotationDocumentEntity();
+
+        ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(AnnotationDocumentEntity.class), any(ObjectRecordStatusEntity.class))).
+            thenReturn(List.of(inboundEntity));
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper,
+                                                                               configuration);
+
+        assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(annotationDocumentEntity)
+        );
+    }
+
+
     private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
                                                                  boolean processSuccess) throws Exception {
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
 
         Mockito.lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
         if (processSuccess) {
-            Mockito.when(downloadable
-                             .downloadBlobFromContainer(eq(containerType),
-                                                        Mockito.notNull())).thenReturn(new FileBasedDownloadResponseMetaData());
+            when(downloadable
+                     .downloadBlobFromContainer(eq(containerType),
+                                                Mockito.notNull())).thenReturn(new FileBasedDownloadResponseMetaData());
         } else {
             Mockito.lenient().when(downloadable
                                        .downloadBlobFromContainer(eq(containerType),
