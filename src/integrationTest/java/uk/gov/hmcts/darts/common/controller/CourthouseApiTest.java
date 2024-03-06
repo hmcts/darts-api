@@ -114,7 +114,7 @@ class CourthouseApiTest extends IntegrationBase {
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
 
     }
@@ -143,7 +143,7 @@ class CourthouseApiTest extends IntegrationBase {
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
 
     }
@@ -156,7 +156,7 @@ class CourthouseApiTest extends IntegrationBase {
         Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         dartsDatabase.createHearing("HAVERFORDWEST",
-                                                                  "roomname", "101", LocalDate.now());
+                                    "roomname", "101", LocalDate.now());
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
