@@ -84,8 +84,8 @@ public class CourthouseServiceImpl implements CourthouseService {
             adminCourthouse.setRegionId(region.getId());
         }
 
-        adminCourthouse.setHasData(hearingRepository.countHearingsForCourthouse(id) > 0
-            || caseRepository.countCasesForCourthouse(id) > 0);
+        adminCourthouse.setHasData(hearingRepository.hearingsExistForCourthouse(id)
+            || caseRepository.caseExistsForCourthouse(id));
 
         return adminCourthouse;
     }
