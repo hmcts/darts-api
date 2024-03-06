@@ -65,6 +65,16 @@ public enum AuthorisationError implements DartsApiError {
             "109",
             HttpStatus.BAD_REQUEST,
             "Failed to check authorisation for the annotation"
+    ),
+    BAD_REQUEST_ONLY_TRANSCIBER_ROLES_MAY_BE_ASSIGNED(
+            "109",
+            HttpStatus.BAD_REQUEST,
+            "Only TRANSCRIBER roles may be assigned"
+    ),
+    BAD_REQUEST_REGION_ID_DOES_NOT_EXIST(
+        "109",
+        HttpStatus.BAD_REQUEST,
+        "Region id does not exist"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

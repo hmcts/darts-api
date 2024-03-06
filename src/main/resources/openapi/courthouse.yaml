@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:4550/
 paths:
-  /courthouses:
+  /admin/courthouses:
     post:
       tags:
         - Courthouses
@@ -20,13 +20,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtendedCourthouse'
+                $ref: '#/components/schemas/ExtendedCourthousePost'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
           description: Resource already exists.
         '500':
           description: Internal Server Error
+  /courthouses:
     get:
       tags:
         - Courthouses
@@ -107,7 +108,7 @@ paths:
             type: integer
           required: true
       requestBody:
-        $ref: '#/components/requestBodies/CourthousePost'
+        $ref: '#/components/requestBodies/CourthousePut'
       responses:
         '204':
           description: No Content
@@ -139,12 +140,18 @@ paths:
 
 components:
   requestBodies:
-    CourthousePost:
+    CourthousePut:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Courthouse'
+    CourthousePost:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CourthousePost'
   schemas:
     Courthouse:
       type: object
@@ -161,6 +168,24 @@ components:
         region_id:
           type: integer
           example: 0
+    CourthousePost:
+      type: object
+      required:
+        - courthouse_name
+        - display_name
+      properties:
+        courthouse_name:
+          type: string
+        display_name:
+          type: string
+        region_id:
+          type: integer
+          example: 0
+        security_group_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
     AdminRegion:
       type: object
       properties:
@@ -193,6 +218,21 @@ components:
     ExtendedCourthouse:
       allOf:
         - $ref: '#/components/schemas/Courthouse'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+            last_modified_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+    ExtendedCourthousePost:
+      allOf:
+        - $ref: '#/components/schemas/CourthousePost'
         - type: object
           properties:
             id:

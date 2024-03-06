@@ -18,11 +18,13 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
-import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouse.mapper.CourthousePostToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.AdminRegion;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
 import java.util.List;
@@ -40,7 +42,7 @@ public class CourthousesController implements CourthousesApi {
 
     private final CourthouseService courthouseService;
 
-    private final CourthouseToCourthouseEntityMapper courthouseMapper;
+    private final CourthousePostToCourthouseEntityMapper courthousePostMapper;
 
     private final AdminRegionToRegionEntityMapper regionMapper;
 
@@ -91,9 +93,7 @@ public class CourthousesController implements CourthousesApi {
     }
 
     @Override
-    public ResponseEntity<List<ExtendedCourthouse>> courthousesGet(
-
-    ) {
+    public ResponseEntity<List<ExtendedCourthouse>> courthousesGet() {
 
         List<CourthouseEntity> courthouseEntities = courthouseService.getAllCourthouses();
         List<ExtendedCourthouse> responseEntities = courthouseService.mapFromEntitiesToExtendedCourthouses(courthouseEntities);
@@ -102,11 +102,12 @@ public class CourthousesController implements CourthousesApi {
     }
 
     @Override
-    public ResponseEntity<ExtendedCourthouse> courthousesPost(
-        @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
-    ) {
-        CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
-        ExtendedCourthouse extendedCourthouse = courthouseMapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<ExtendedCourthousePost> adminCourthousesPost(
+        @Parameter(name = "CourthousePost", description = "", required = true) @jakarta.validation.Valid @RequestBody CourthousePost courthousePost
+        ) {
+        ExtendedCourthousePost extendedCourthouse = courthouseService.mapFromEntitiesToExtendedCourthousePost(courthousePost);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }
 }
