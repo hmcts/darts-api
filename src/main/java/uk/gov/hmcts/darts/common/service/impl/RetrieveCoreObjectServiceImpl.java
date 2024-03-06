@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -138,14 +139,23 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public JudgeEntity retrieveOrCreateJudge(String judgeName) {
         Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
-        return foundJudge.orElseGet(() -> judgeRepository.createJudge(judgeName));
+        return foundJudge.orElseGet(() -> createJudge(judgeName));
+    }
+
+    private JudgeEntity createJudge(String judgeName) {
+        JudgeEntity judge = new JudgeEntity();
+        judge.setName(judgeName);
+        judgeRepository.saveAndFlush(judge);
+        return judge;
     }
 
     @Override
-    public DefenceEntity createDefence(String defenceName, CourtCaseEntity courtCase) {
+    public DefenceEntity createDefence(String defenceName, CourtCaseEntity courtCase, UserAccountEntity userAccount) {
         DefenceEntity defence = new DefenceEntity();
         defence.setName(defenceName);
         defence.setCourtCase(courtCase);
+        defence.setCreatedBy(userAccount);
+        defence.setLastModifiedBy(userAccount);
         return defenceRepository.saveAndFlush(defence);
     }
 

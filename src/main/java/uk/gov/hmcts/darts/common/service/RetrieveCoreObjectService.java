@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.LocalDate;
 
@@ -41,7 +42,7 @@ public interface RetrieveCoreObjectService {
     JudgeEntity retrieveOrCreateJudge(String judgeName);
 
     @Transactional
-    DefenceEntity createDefence(String defence, CourtCaseEntity courtCase);
+    DefenceEntity createDefence(String defence, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 
     DefendantEntity createDefendant(String defendant, CourtCaseEntity courtCase);
 
