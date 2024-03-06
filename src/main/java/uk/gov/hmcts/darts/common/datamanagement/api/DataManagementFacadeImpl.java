@@ -129,12 +129,6 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
         for (DatastoreContainerType datastoreContainerType : storageOrder) {
             logBuilder.append("checking container " + datastoreContainerType.name() + "\n");
-            boolean useContainerType = shouldUseContainerType(datastoreContainerType, configuration.isFetchFromDetsEnabled());
-            if (!useContainerType) {
-                logBuilder.append("Ignoring container as its been turned off " + datastoreContainerType.name() + "\n");
-                continue;
-            }
-
             ExternalObjectDirectoryEntity eodEntity = findCorrespondingEodEntityForStorageLocation(storedEodEntities, datastoreContainerType);
             if (eodEntity == null) {
                 logBuilder.append("matching eodEntity not found for " + datastoreContainerType.name() + "\n");
@@ -170,12 +164,6 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         Integer locationTypeId = externalLocationTypeEnumOpt.get().getId();
         return storedEodEntities.stream().filter(storedEntity -> storedEntity.getExternalLocationType().getId().equals(locationTypeId)).findAny().orElse(null);
     }
-
-    //Check if DETS flag is turned off
-    private boolean shouldUseContainerType(DatastoreContainerType type, boolean fetchFromDets) {
-        return !(type == DatastoreContainerType.DETS && !fetchFromDets);
-    }
-
 
     private Optional<BlobContainerDownloadable> getSupportedContainer(DatastoreContainerType typeToFind) {
         return supportedDownloadableContainers.stream().filter(type -> type.getContainerName(typeToFind).isPresent())

@@ -96,7 +96,6 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, true));
-        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         ExternalObjectDirectoryEntity arm = createEodEntity(armLocationEntity);
 
@@ -122,7 +121,6 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.UNSTRUCTURED, true));
-        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         ExternalObjectDirectoryEntity dets = createEodEntity(unstructuredLocationEntity);
 
@@ -148,7 +146,6 @@ class DataManagementFacadeImplTest {
         blobContainerDownloadables.add(downloadable);
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, true));
-        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         ExternalObjectDirectoryEntity dets = createEodEntity(detsLocationEntity);
 
@@ -166,36 +163,6 @@ class DataManagementFacadeImplTest {
     }
 
     @Test
-    void testDownloadOfFacadeWithDetsDisabled() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
-        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
-
-        BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
-        blobContainerDownloadables.add(downloadable);
-
-        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, false));
-        when(configuration.isFetchFromDetsEnabled()).thenReturn(false);
-
-        ExternalObjectDirectoryEntity dets = createEodEntity(detsLocationEntity);
-
-        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
-
-        // execute the code
-        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
-
-        // make the assertion on the response
-        var exception = assertThrows(
-            FileNotDownloadedException.class,
-            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
-        );
-
-        assertTrue(exception.getMessage().contains("Ignoring container as its been turned off DETS"));
-
-    }
-
-    @Test
     void testDownloadOfFacadeWithNoneProcessed() throws Exception {
         final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
@@ -204,8 +171,6 @@ class DataManagementFacadeImplTest {
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
         blobContainerDownloadables.add(downloadable);
-
-        when(configuration.isFetchFromDetsEnabled()).thenReturn(true);
 
         // create the payload to be tested
         ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
