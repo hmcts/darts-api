@@ -159,20 +159,23 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         return defenceRepository.saveAndFlush(defence);
     }
 
-
     @Override
-    public DefendantEntity createDefendant(String defendantName, CourtCaseEntity courtCase) {
+    public DefendantEntity createDefendant(String defendantName, CourtCaseEntity courtCase, UserAccountEntity userAccount) {
         DefendantEntity defendant = new DefendantEntity();
         defendant.setName(defendantName);
         defendant.setCourtCase(courtCase);
+        defendant.setCreatedBy(userAccount);
+        defendant.setLastModifiedBy(userAccount);
         return defendantRepository.saveAndFlush(defendant);
     }
 
     @Override
-    public ProsecutorEntity createProsecutor(String prosecutorName, CourtCaseEntity courtCase) {
+    public ProsecutorEntity createProsecutor(String prosecutorName, CourtCaseEntity courtCase, UserAccountEntity userAccount) {
         ProsecutorEntity prosecutor = new ProsecutorEntity();
         prosecutor.setName(prosecutorName);
         prosecutor.setCourtCase(courtCase);
+        prosecutor.setCreatedBy(userAccount);
+        prosecutor.setLastModifiedBy(userAccount);
         prosecutorRepository.saveAndFlush(prosecutor);
         return prosecutor;
     }

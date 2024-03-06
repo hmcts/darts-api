@@ -187,16 +187,17 @@ class DailyListUpdater {
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate ->
                               courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                                  buildFullName(advocate.getName()), courtCase)));
+                                  buildFullName(advocate.getName()), courtCase, dailyListSystemUser)));
 
     }
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
             for (PersonalDetails personalDetails : defendant.getCounsel()) {
-                UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
                     buildFullName(personalDetails.getName()), courtCase, dailyListSystemUser));
             }
@@ -204,20 +205,20 @@ class DailyListUpdater {
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
             courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
                 buildFullName(defendant.getPersonalDetails().getName()),
-                courtCase
+                courtCase,
+                dailyListSystemUser
             ));
         }
-
     }
 
     private void addJudges(Sitting sitting, HearingEntity hearing) {
         for (CitizenName judge : sitting.getJudiciary()) {
             JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName());
             hearing.addJudge(judgeEntity);
-
         }
     }
 
