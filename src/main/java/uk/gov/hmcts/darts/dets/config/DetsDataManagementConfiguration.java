@@ -12,6 +12,6 @@ import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 @Setter
 public class DetsDataManagementConfiguration extends StorageConfiguration {
     private String containerName;
-    private String connectionString;
+    private String sasEndpoint;
     private boolean fetchFromDetsEnabled;
 }
