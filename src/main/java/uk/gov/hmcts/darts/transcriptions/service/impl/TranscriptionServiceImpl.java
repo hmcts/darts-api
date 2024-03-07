@@ -188,6 +188,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
+    @SuppressWarnings("java:S6809")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
         return updateTranscription(transcriptionId, updateTranscription, false);
