@@ -27,7 +27,6 @@ public class ExternalObjectDirectoryBuilder {
           ExternalLocationTypeEnum externalLocationType) {
 
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setAnnotationDocumentEntity(annotationDocumentEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(externalLocationType.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
