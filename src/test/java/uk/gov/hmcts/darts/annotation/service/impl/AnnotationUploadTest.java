@@ -22,12 +22,13 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -67,10 +68,6 @@ class AnnotationUploadTest {
     private AuditApi auditApi;
     @Mock
     private UserAccountEntity userAccountEntity;
-    @Mock
-    private AnnotationRepository annotationRepository;
-    @Mock
-    private AnnotationDocumentRepository annotationDocumentRepository;
 
     private final AnnotationEntity annotationEntity = someAnnotationEntity();
     private final AnnotationDocumentEntity annotationDocumentEntity = someAnnotationDocument();
@@ -89,9 +86,7 @@ class AnnotationUploadTest {
             annotationPersistenceService,
             hearingExistsValidator,
             fileTypeValidator,
-            annotationDataManagement,
-            annotationRepository,
-            annotationDocumentRepository
+            annotationDataManagement
         );
 
         when(hearing.getId()).thenReturn(1);
@@ -129,18 +124,15 @@ class AnnotationUploadTest {
             .when(annotationPersistenceService).persistAnnotation(
                 any(ExternalObjectDirectoryEntity.class),
                 any(ExternalObjectDirectoryEntity.class),
-                any(Integer.class));
+                any(Integer.class),
+                any(AnnotationEntity.class),
+                any(AnnotationDocumentEntity.class));
 
         uploadService.upload(someMultipartFile(), someAnnotationFor(hearing));
 
-        verify(annotationDataManagement, times(1)).attemptToDeleteDocument(externalBlobLocations.inboundLocation());
-        verify(annotationDataManagement, times(1)).attemptToDeleteDocument(externalBlobLocations.unstructuredLocation());
+        verify(annotationDataManagement, times(1)).attemptToDeleteDocuments(externalBlobLocations);
 
         verifyNoInteractions(auditApi);
-    }
-
-    private AnnotationDataManagement.ExternalBlobLocations someExternalBlobLocations() {
-        return new AnnotationDataManagement.ExternalBlobLocations(randomUUID(), randomUUID());
     }
 
     @Test
@@ -148,20 +140,29 @@ class AnnotationUploadTest {
         var externalBlobLocations = someExternalBlobLocations();
         when(annotationMapper.mapFrom(any())).thenReturn(annotationEntity);
         when(annotationDocumentBuilder.buildFrom(any(), any(), any())).thenReturn(annotationDocumentEntity);
-        when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.inboundLocation(), INBOUND))
+        when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.get(INBOUND), INBOUND))
             .thenReturn(externalObjectDirectoryEntityForInboundContainer);
-        when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.unstructuredLocation(), UNSTRUCTURED))
+        when(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, externalBlobLocations.get(UNSTRUCTURED), UNSTRUCTURED))
             .thenReturn(externalObjectDirectoryEntityForUnstructuredContainer);
         when(annotationDataManagement.upload(any(), any())).thenReturn(externalBlobLocations);
 
         uploadService.upload(someMultipartFile(), someAnnotationFor(hearing));
 
-        verify(externalObjectDirectoryBuilder).buildFrom(annotationDocumentEntity, externalBlobLocations.inboundLocation(), INBOUND);
-        verify(externalObjectDirectoryBuilder).buildFrom(annotationDocumentEntity, externalBlobLocations.unstructuredLocation(), UNSTRUCTURED);
+        verify(externalObjectDirectoryBuilder).buildFrom(annotationDocumentEntity, externalBlobLocations.get(INBOUND), INBOUND);
+        verify(externalObjectDirectoryBuilder).buildFrom(annotationDocumentEntity, externalBlobLocations.get(UNSTRUCTURED), UNSTRUCTURED);
         verify(annotationPersistenceService).persistAnnotation(
             externalObjectDirectoryEntityForInboundContainer,
             externalObjectDirectoryEntityForUnstructuredContainer,
-            hearing.getId());
+            hearing.getId(),
+            annotationEntity,
+            annotationDocumentEntity);
+    }
+
+    private Map<ExternalLocationTypeEnum, UUID> someExternalBlobLocations() {
+        return Map.of(
+            INBOUND, randomUUID(),
+            UNSTRUCTURED, randomUUID()
+        );
     }
 
     private AnnotationEntity someAnnotationEntity() {

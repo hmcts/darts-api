@@ -50,7 +50,6 @@ class ExternalObjectDirectoryBuilderTest {
         var annotationDocumentEntity = someAnnotationDocument();
 
         assertThat(externalObjectDirectoryBuilder.buildFrom(annotationDocumentEntity, SOME_EXTERNAL_LOCATION, externalLocationType))
-            .hasFieldOrPropertyWithValue("annotationDocumentEntity", annotationDocumentEntity)
             .hasFieldOrPropertyWithValue("status", OBJECT_RECORD_STATUS)
             .hasFieldOrPropertyWithValue("externalLocationType", EXTERNAL_LOCATION_TYPE)
             .hasFieldOrPropertyWithValue("externalLocation", SOME_EXTERNAL_LOCATION)
