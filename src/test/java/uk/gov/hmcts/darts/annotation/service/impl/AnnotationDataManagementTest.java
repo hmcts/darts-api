@@ -31,7 +31,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
@@ -108,7 +108,7 @@ class AnnotationDataManagementTest {
 
         verify(dataManagementApi, times(1)).deleteBlobDataFromInboundContainer(inboundLocation);
         verify(dataManagementApi, times(1)).deleteBlobDataFromUnstructuredContainer(unstructuredLocation);
-        verifyNoInteractions(dataManagementApi);
+        verifyNoMoreInteractions(dataManagementApi);
     }
 
     @Test
