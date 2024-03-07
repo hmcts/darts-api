@@ -452,7 +452,7 @@ class CourthouseApiTest extends IntegrationBase {
 
         assertEquals(200, response.getResponse().getStatus());
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
