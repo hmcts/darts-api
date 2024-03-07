@@ -44,6 +44,8 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
         '403':
           description: Forbidden Error
           content:
@@ -65,6 +67,14 @@ paths:
       responses:
         '204':
           description: Annotation has been deleted
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '401':
+          description: Unauthorised Error
         '403':
           description: Forbidden Error
           content:
@@ -105,6 +115,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
         '401':
           description: Unauthorised Error
         '403':
