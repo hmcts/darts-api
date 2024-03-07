@@ -83,7 +83,7 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 
-        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription));
+        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription, false));
     }
 
     @Override

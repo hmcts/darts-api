@@ -188,14 +188,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings("java:S6809")
-    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                           UpdateTranscription updateTranscription) {
-        return updateTranscription(transcriptionId, updateTranscription, false);
-    }
-
-    @Override
-    @Transactional
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
@@ -335,7 +327,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
-            updateTranscription(transcriptionId, updateTranscription);
+            updateTranscription(transcriptionId, updateTranscription, false);
             log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
@@ -359,7 +351,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptFileValidator.validate(transcript);
 
-        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
+        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()), false);
 
         final BlobClient inboundBlobCLient;
         final BlobClient unstructuredBlobClient;
