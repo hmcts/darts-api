@@ -55,8 +55,8 @@ class AnnotationPostTest extends IntegrationBase {
 
         var response = mvcResult.getResponse().getContentAsString();
         assertThat(json.from(response)).hasJsonPathNumberValue("annotation_id");
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        Integer annotationId = JsonPath.parse(actualJson).read("$.annotation_id");
+
+        Integer annotationId = JsonPath.parse(response).read("$.annotation_id");
         assertNotNull(annotationId);
 
         Optional<AnnotationEntity> annotation = dartsDatabase.getAnnotationRepository().findById(annotationId);

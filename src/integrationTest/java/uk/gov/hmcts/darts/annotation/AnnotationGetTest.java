@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
@@ -33,9 +32,6 @@ import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHeari
 class AnnotationGetTest extends IntegrationBase {
 
     private static final String ANNOTATION_DOCUMENT_ENDPOINT = "/annotations/{annotation_id}/documents/{annotation_document_id}";
-
-    @Mock
-    private DataManagementApi dataManagementApi;
 
     @Mock
     private InputStream inputStreamResource;

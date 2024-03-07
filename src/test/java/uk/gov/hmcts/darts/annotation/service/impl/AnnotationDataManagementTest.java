@@ -16,11 +16,11 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +34,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT;
 import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 
 @ExtendWith(MockitoExtension.class)
 class AnnotationDataManagementTest {
@@ -42,8 +44,6 @@ class AnnotationDataManagementTest {
     private DataManagementApi dataManagementApi;
     @Mock
     private DataManagementFacade dataManagementFacade;
-    @Mock
-    private ExternalObjectDirectoryRepository eodRepository;
     @Mock
     private DownloadableExternalObjectDirectories downloadableExternalObjectDirectories;
     @Mock
@@ -93,9 +93,8 @@ class AnnotationDataManagementTest {
 
         var containerLocations = annotationDataManagement.upload(binaryData, "test.pdf");
 
-        assertThat(containerLocations)
-              .hasFieldOrPropertyWithValue("unstructuredLocation", unstructuredLocationUuid)
-              .hasFieldOrPropertyWithValue("inboundLocation", inboundLocationUuid);
+        assertThat(containerLocations.get(INBOUND)).isEqualTo(inboundLocationUuid);
+        assertThat(containerLocations.get(UNSTRUCTURED)).isEqualTo(unstructuredLocationUuid);
     }
 
     @Test
@@ -103,7 +102,7 @@ class AnnotationDataManagementTest {
         var externalLocationUuid = UUID.randomUUID();
         doThrow(new AzureDeleteBlobException("some-message")).when(dataManagementApi).deleteBlobDataFromInboundContainer(externalLocationUuid);
 
-        assertThatThrownBy(() -> annotationDataManagement.attemptToDeleteDocument(externalLocationUuid))
+        assertThatThrownBy(() -> annotationDataManagement.attemptToDeleteDocuments(Map.of(INBOUND, externalLocationUuid)))
               .isInstanceOf(DartsApiException.class)
               .hasFieldOrPropertyWithValue("error", FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT);
     }

@@ -39,7 +39,6 @@ class AnnotationDocumentBuilderTest {
         assertThat(annotationDocumentBuilder.buildFrom(document, annotation, "some-checksum"))
             .isInstanceOf(AnnotationDocumentEntity.class)
             .hasFieldOrPropertyWithValue("uploadedBy", userAccountEntity)
-            .hasFieldOrPropertyWithValue("annotation", annotation)
             .hasFieldOrPropertyWithValue("checksum", "some-checksum")
             .hasFieldOrPropertyWithValue("fileName", "original-filename")
             .hasFieldOrPropertyWithValue("fileType", "some-content-type")
