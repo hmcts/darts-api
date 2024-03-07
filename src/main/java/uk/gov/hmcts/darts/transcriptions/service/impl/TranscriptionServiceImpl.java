@@ -329,6 +329,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
+    @SuppressWarnings("java:S6809")
     public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
@@ -353,6 +354,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
+    @SuppressWarnings("java:S6809")
     public AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript) {
 
         transcriptFileValidator.validate(transcript);
