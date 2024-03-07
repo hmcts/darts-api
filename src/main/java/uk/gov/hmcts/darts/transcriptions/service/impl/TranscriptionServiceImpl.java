@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -352,8 +352,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
-                                                     MultipartFile transcript) {
+    public AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript) {
 
         transcriptFileValidator.validate(transcript);
 
@@ -385,7 +384,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
-
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
