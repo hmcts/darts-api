@@ -101,12 +101,10 @@ public class RetentionPostServiceImpl implements RetentionPostService {
 
             //Only Judges, Super Admin, Super User can reduce a set retention date
             LocalDate currentRetentionDate = getLatestCompletedCaseRetention(courtCase).getRetainUntil().toLocalDate();
-            if (newRetentionDate.isBefore(currentRetentionDate)) {
-                if (!authorisationApi.userHasOneOfRoles(JUDGE_AND_SUPER_ADMIN_USER_ROLES)) {
-                    throw new DartsApiException(
-                        RetentionApiError.NO_PERMISSION_REDUCE_RETENTION, "You do not have permission to reduce the retention period."
-                    );
-                }
+            if (newRetentionDate.isBefore(currentRetentionDate) && !authorisationApi.userHasOneOfRoles(JUDGE_AND_SUPER_ADMIN_USER_ROLES)) {
+                throw new DartsApiException(
+                    RetentionApiError.NO_PERMISSION_REDUCE_RETENTION, "You do not have permission to reduce the retention period."
+                );
             }
 
             //No users can reduce the retention date to earlier than the last Completed automated date.

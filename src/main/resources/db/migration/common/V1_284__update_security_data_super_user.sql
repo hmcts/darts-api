@@ -25,3 +25,18 @@ FROM user_account usr,
 security_group grp
 WHERE user_name = 'darts_global_test_user'
 AND grp.group_name = 'SUPER_USER';
+
+INSERT INTO security_group_user_account_ae (usr_id, grp_id)
+SELECT usr.usr_id, grp.grp_id
+FROM user_account usr,
+security_group grp
+WHERE usr.user_name = 'darts_global_test_user'
+AND grp.group_name = 'SUPER_ADMIN'
+AND NOT EXISTS (
+SELECT usr.usr_id, grp.grp_id
+FROM security_group_user_account_ae gua
+INNER JOIN user_account usr ON gua.usr_id = usr.usr_id
+        AND usr.user_name = 'darts_global_test_user'
+INNER JOIN security_group grp ON gua.grp_id = grp.grp_id
+        AND grp.group_name = 'SUPER_ADMIN'
+);

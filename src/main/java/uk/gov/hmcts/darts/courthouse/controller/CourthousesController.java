@@ -60,7 +60,7 @@ public class CourthousesController implements CourthousesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<AdminRegion>> adminRegionsGet() {
         List<RegionEntity> regionsEntities = courthouseService.getAdminAllRegions();
         List<AdminRegion> adminRegions = regionMapper.mapFromEntityToAdminRegion(regionsEntities);
