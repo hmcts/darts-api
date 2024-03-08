@@ -50,7 +50,7 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | AZURE_AD_FUNCTIONAL_TEST_PASSWORD        | AzureADFunctionalTestPassword             |
 | ARM_SAS_ENDPOINT                         | ARMSasEndpoint                            |
 | ARM_URL                                  | ArmUrl                                    |
-| DETS_SAS__URL_ENDPOINT                   | DETSSasURLEndpoint                        |
+| DETS_SAS_URL_ENDPOINT                    | DETSSasURLEndpoint                        |
 | ARM_USERNAME                             | ArmUsername                               |
 | ARM_PASSWORD                             | ArmPassword                               |
 

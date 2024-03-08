@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @AutoConfigureMockMvc
 class UserControllerSearchIntTest extends IntegrationBase {
@@ -74,7 +75,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -133,7 +134,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -156,7 +157,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -179,7 +180,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -203,7 +204,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
             .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
     }
 
@@ -229,7 +230,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
@@ -259,7 +260,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
@@ -289,7 +290,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
 
-        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(userIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");

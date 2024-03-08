@@ -59,8 +59,8 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         Optional<String> transformedMediaIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
         transformedMediaIdControllerAuthorisation.checkAuthorisationByTransformedMediaId(transformedMediaIdParamOptional, roles);
 
-        Optional<String>  annotationIdParamOptional = getEntityParamOptional(request, annotationIdControllerAuthorisation.getEntityIdParam());
-        annotationIdControllerAuthorisation.checkAuthorisationByAnnotationId(transformedMediaIdParamOptional, roles);
+        Optional<String> annotationIdParamOptional = getEntityParamOptional(request, annotationIdControllerAuthorisation.getEntityIdParam());
+        annotationIdControllerAuthorisation.checkAuthorisationByAnnotationId(annotationIdParamOptional, roles);
 
         if (hearingIdParamOptional.isEmpty()
             && caseIdParamOptional.isEmpty()
