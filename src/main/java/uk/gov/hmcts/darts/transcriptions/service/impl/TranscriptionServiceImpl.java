@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -115,6 +116,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserAccountRepository userAccountRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     private final TranscriptionNotifications transcriptionNotifications;
     private final DataManagementApi dataManagementApi;
@@ -182,13 +184,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         RequestTranscriptionResponse requestTranscriptionResponse = new RequestTranscriptionResponse();
         requestTranscriptionResponse.setTranscriptionId(transcription.getId());
         return requestTranscriptionResponse;
-    }
-
-    @Override
-    @Transactional
-    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                           UpdateTranscription updateTranscription) {
-        return updateTranscription(transcriptionId, updateTranscription, false);
     }
 
     @Override
@@ -326,12 +321,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
+    @SuppressWarnings("java:S6809")
     public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
-            updateTranscription(transcriptionId, updateTranscription);
+            updateTranscription(transcriptionId, updateTranscription, false);
             log.debug("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
@@ -350,12 +346,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
-                                                     MultipartFile transcript) {
+    @SuppressWarnings("java:S6809")
+    public AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript) {
 
         transcriptFileValidator.validate(transcript);
 
-        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
+        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()), false);
 
         final BlobClient inboundBlobCLient;
         final BlobClient unstructuredBlobClient;
@@ -383,6 +379,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
+        transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
             UUID.fromString(inboundBlobCLient.getBlobName()), checksum, userAccountEntity, transcriptionDocumentEntity, INBOUND);

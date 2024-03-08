@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -43,6 +42,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -55,7 +55,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-@Transactional
 class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
@@ -793,7 +792,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor.processResponseFiles();
 
-        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findById(armEod.getId()).orElseThrow();
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundAnnotationEod.getStatus().getId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
 
@@ -819,6 +819,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
@@ -827,7 +828,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
-        dartsDatabase.save(armEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
         String inputUploadFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -858,7 +859,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor.processResponseFiles();
 
-        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findById(armEod.getId()).orElseThrow();
+        assertNotNull(foundTranscriptionEod);
         assertEquals(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId(), foundTranscriptionEod.getStatus().getId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
 
@@ -999,7 +1002,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor.processResponseFiles();
 
-        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findById(armEod.getId()).orElseThrow();
         assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
         assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
         assertEquals("152821", foundAnnotationEod.getExternalRecordId());
@@ -1027,6 +1031,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
@@ -1066,7 +1071,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor.processResponseFiles();
 
-        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        ExternalObjectDirectoryEntity foundTranscriptionEod = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findById(armEod.getId()).orElseThrow();
         assertEquals(STORED.getId(), foundTranscriptionEod.getStatus().getId());
         assertEquals("A360230516_TestIngestion_1.docx", foundTranscriptionEod.getExternalFileId());
         assertEquals("152821", foundTranscriptionEod.getExternalRecordId());
