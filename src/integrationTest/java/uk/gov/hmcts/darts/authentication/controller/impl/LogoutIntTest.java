@@ -25,7 +25,7 @@ class LogoutIntTest extends IntegrationBase {
     void logoutShouldReturnRedirectWhenAccessTokenExists() throws Exception {
         String accessToken = "DummyAccessToken";
 
-        String expectedUri = "https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com" +
+        String expectedUri = "http://localhost:8080" +
                              "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
                              accessToken +
                              "&post_logout_redirect_uri=https%3A%2F%2Fdarts.staging.apps.hmcts.net%2Fauth%2Flogout-callback";
@@ -45,7 +45,7 @@ class LogoutIntTest extends IntegrationBase {
     void logoutShouldReturnRedirectWithOverriddenRedirectUri() throws Exception {
         String accessToken = "DummyAccessToken";
 
-        String expectedUri = "https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com" +
+        String expectedUri = "http://localhost:8080" +
                              "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
                              accessToken +
                              "&post_logout_redirect_uri=https%3A%2F%2Fdarts-portal.com%2Fauth%2Flogout-callback";

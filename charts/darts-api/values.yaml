@@ -92,6 +92,8 @@ java:
     AUTOMATED_TASK_MODE: false
     API_MODE: true
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
+    ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
+    ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
 
 function:
   scaleType: Job
@@ -184,6 +186,8 @@ function:
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
+    ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
+    ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:

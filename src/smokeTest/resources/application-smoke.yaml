@@ -8,3 +8,30 @@ darts:
       url: http://localhost:4551
   automated-tasks-pod: true
   api-pod: true
+spring:
+  config:
+    import: "optional:configtree:/mnt/secrets/darts/"
+  application:
+    name: Darts Api
+  security:
+    oauth2:
+      client:
+        registration:
+          external-azure-ad:
+            client-id: dummy_client_id
+            client-secret: dummy_client_secret
+            scope: openid
+            redirect-uri: https://example.com/handle-oauth-code
+            authorization-grant-type: authorization_code
+            response-type: code
+            response-mode: form_post
+            prompt: login
+            issuer-uri: dummy_issuer_uri
+            provider: external-azure-ad-provider
+        provider:
+          external-azure-ad-provider:
+            authorization-uri: http://localhost:4551/oauth2/v2.0/authorize
+            token-uri: http://localhost:4551/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:4551/discovery/v2.0/keys
+            logout-uri: http://localhost:4551/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:4551/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
