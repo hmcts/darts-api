@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.common.datamanagement.helper;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -21,12 +21,10 @@ public class StorageOrderHelper {
     private List<DatastoreContainerType> storageOrderContainerList;
 
     public List<DatastoreContainerType> getStorageOrder() {
-        if (CollectionUtils.isEmpty(storageOrderContainerList)) {
-            populateStorageOrder();
-        }
         return storageOrderContainerList;
     }
 
+    @PostConstruct
     private void populateStorageOrder() {
         List<DatastoreContainerType> newList = new ArrayList<>();
         for (String storageString : storageOrderStringList) {
