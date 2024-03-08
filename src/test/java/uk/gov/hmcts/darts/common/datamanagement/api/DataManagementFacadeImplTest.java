@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
-import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,7 +88,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeWithArm() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
@@ -103,8 +101,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
@@ -114,7 +111,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeWithUnstructured() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
@@ -128,8 +124,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
@@ -139,7 +134,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeWithDetsEnabled() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
@@ -153,8 +147,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
@@ -164,7 +157,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeWithNoneProcessed() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
 
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.INBOUND, false));
@@ -179,8 +171,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -193,7 +184,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void testDownloadOfFacadeWithUnstructuredAndArmProcessedInPriorityOrder() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -206,8 +196,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -220,7 +209,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void retrieveFileFromStorageListEmpty() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -228,8 +216,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -242,7 +229,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void retrieveFileFromStorageMediaEmpty() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -250,8 +236,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -259,12 +244,11 @@ class DataManagementFacadeImplTest {
             () -> dmFacade.retrieveFileFromStorage(mediaEntity)
         );
 
-        assertTrue(exception.getMessage().contains("No eodEntities found for mediaId"));
+        assertTrue(exception.getMessage().contains("No storedEodEntities found for mediaId"));
     }
 
     @Test
     void retrieveFileFromStorageMediaFail() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -276,8 +260,7 @@ class DataManagementFacadeImplTest {
             .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         assertThrows(
             FileNotDownloadedException.class,
@@ -287,7 +270,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void retrieveFileFromStorageTranscriptionEmpty() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -295,8 +277,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -304,12 +285,11 @@ class DataManagementFacadeImplTest {
             () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
         );
 
-        assertTrue(exception.getMessage().contains("No eodEntities found for TranscriptionDocumentId"));
+        assertTrue(exception.getMessage().contains("No storedEodEntities found for transcriptionDocumentId"));
     }
 
     @Test
     void retrieveFileFromStorageTranscriptionFail() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -321,8 +301,7 @@ class DataManagementFacadeImplTest {
             .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         assertThrows(
             FileNotDownloadedException.class,
@@ -333,7 +312,6 @@ class DataManagementFacadeImplTest {
 
     @Test
     void retrieveFileFromStorageAnnotationDocumentEmpty() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -341,8 +319,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -350,12 +327,11 @@ class DataManagementFacadeImplTest {
             () -> dmFacade.retrieveFileFromStorage(annotationDocumentEntity)
         );
 
-        assertTrue(exception.getMessage().contains("No eodEntities found for AnnotationDocId"));
+        assertTrue(exception.getMessage().contains("No storedEodEntities found for annotationDocumentId"));
     }
 
     @Test
     void retrieveFileFromStorageAnnotationFail() throws Exception {
-        final DetsDataManagementConfiguration configuration = Mockito.mock(DetsDataManagementConfiguration.class);
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
         blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
 
@@ -367,8 +343,7 @@ class DataManagementFacadeImplTest {
             .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper,
-                                                                               configuration);
+                                                                               objectRecordStatusRepository, storageOrderHelper);
 
         assertThrows(
             FileNotDownloadedException.class,

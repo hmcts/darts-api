@@ -56,7 +56,7 @@ public class ArmApiServiceImpl implements ArmApiService {
             externalFileId
         );
 
-        responseMetaData.markSuccess(DatastoreContainerType.ARM);
+        responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
         try {
             responseMetaData.markInputStream(response.body().asInputStream());
         } catch (IOException e) {

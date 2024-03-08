@@ -17,7 +17,6 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
-import uk.gov.hmcts.darts.dets.config.DetsDataManagementConfiguration;
 
 import java.io.UncheckedIOException;
 import java.text.MessageFormat;
@@ -35,14 +34,13 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final StorageOrderHelper storageOrderHelper;
-    private final DetsDataManagementConfiguration configuration;
 
     @Override
     public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(mediaEntity, storedStatus);
         if (CollectionUtils.isEmpty(storedEodEntities)) {
-            String errorMessage = MessageFormat.format("No eodEntities found for mediaId {0,number,#}", mediaEntity.getId());
+            String errorMessage = MessageFormat.format("No storedEodEntities found for mediaId {0,number,#}", mediaEntity.getId());
             log.error(errorMessage);
             throw new FileNotDownloadedException(errorMessage);
         }
@@ -60,14 +58,15 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(transcriptionDocumentEntity,
                                                                                                                         storedStatus);
         if (CollectionUtils.isEmpty(storedEodEntities)) {
-            String errorMessage = MessageFormat.format("No eodEntities found for TranscriptionDocumentId {0,number,#}", transcriptionDocumentEntity.getId());
+            String errorMessage = MessageFormat.format("No storedEodEntities found for transcriptionDocumentId {0,number,#}",
+                                                       transcriptionDocumentEntity.getId());
             log.error(errorMessage);
             throw new FileNotDownloadedException(errorMessage);
         }
         try {
             return getDataFromStorage(storedEodEntities);
         } catch (FileNotDownloadedException fnde) {
-            log.error("Could not retrieve file from any storage for TranscriptionDocumentId {}", transcriptionDocumentEntity.getId());
+            log.error("Could not retrieve file from any storage for transcriptionDocumentId {}", transcriptionDocumentEntity.getId());
             throw fnde;
         }
     }
@@ -77,14 +76,14 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         List<ExternalObjectDirectoryEntity> storedEodEntities = externalObjectDirectoryRepository.findByEntityAndStatus(annotationDocumentEntity, storedStatus);
         if (CollectionUtils.isEmpty(storedEodEntities)) {
-            String errorMessage = MessageFormat.format("No eodEntities found for AnnotationDocId {0,number,#}", annotationDocumentEntity.getId());
+            String errorMessage = MessageFormat.format("No storedEodEntities found for annotationDocumentId {0,number,#}", annotationDocumentEntity.getId());
             log.error(errorMessage);
             throw new FileNotDownloadedException(errorMessage);
         }
         try {
             return getDataFromStorage(storedEodEntities);
         } catch (FileNotDownloadedException fnde) {
-            log.error("Could not retrieve file from any storage for AnnotationDocId {}", annotationDocumentEntity.getId());
+            log.error("Could not retrieve file from any storage for annotationDocumentId {}", annotationDocumentEntity.getId());
             throw fnde;
         }
     }
@@ -99,8 +98,9 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         List<ExternalObjectDirectoryEntity> storedEodEntities = eodEntities.stream().filter(eodEntity -> eodEntity.getStatus().equals(storedStatus)).toList();
         if (CollectionUtils.isEmpty(storedEodEntities)) {
-            log.error("Supplied list of EodEntities does not have any that are stored");
-            throw new FileNotDownloadedException("Supplied list of EodEntities does not have any that are stored");
+            String errorMessage = "Supplied list of EodEntities does not have any that are stored";
+            log.error(errorMessage);
+            throw new FileNotDownloadedException(errorMessage);
         }
         try {
             return getDataFromStorage(storedEodEntities);

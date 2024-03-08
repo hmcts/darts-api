@@ -138,7 +138,7 @@ public class DataManagementServiceImpl implements DataManagementService {
             Date downloadEndDate = new Date();
             log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
-            downloadResponse.markSuccess(type);
+            downloadResponse.setContainerTypeUsedToDownload(type);
         } catch (IOException e) {
             log.error("Error trying to download Blob {} from container{}", blobId, containerName, e);
             throw new FileNotDownloadedException(blobId, containerName, "Error trying to download blob", e);

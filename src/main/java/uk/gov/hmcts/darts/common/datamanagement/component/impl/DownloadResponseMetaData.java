@@ -27,14 +27,6 @@ public abstract class DownloadResponseMetaData implements Closeable {
     @Setter
     private DatastoreContainerType containerTypeUsedToDownload;
 
-    public void markSuccess(DatastoreContainerType containerType) {
-        this.containerTypeUsedToDownload = containerType;
-    }
-
-    public void markFailure(DatastoreContainerType containerType) {
-        this.containerTypeUsedToDownload = containerType;
-    }
-
     public InputStream getInputStream() throws IOException {
         return inputStream;
     }

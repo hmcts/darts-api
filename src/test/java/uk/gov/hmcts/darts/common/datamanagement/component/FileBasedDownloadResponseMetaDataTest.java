@@ -25,11 +25,7 @@ class FileBasedDownloadResponseMetaDataTest {
 
                 fileCount = new File(configuration.getTempBlobWorkspace()).list().length;
 
-                fileBasedDownloadResponseMetaData.markSuccess(DatastoreContainerType.ARM);
-
-                Assertions.assertEquals(DatastoreContainerType.ARM, fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload());
-
-                fileBasedDownloadResponseMetaData.markFailure(DatastoreContainerType.ARM);
+                fileBasedDownloadResponseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
 
                 Assertions.assertEquals(DatastoreContainerType.ARM, fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload());
 
