@@ -14,7 +14,7 @@ public class HearingStub {
 
     private final CourthouseStub courthouseStub;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
-
+    private final UserAccountStub userAccountStub;
 
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
                                        LocalDate hearingDate) {
@@ -23,7 +23,8 @@ public class HearingStub {
             courthouseName,
             courtroomName,
             caseNumber,
-            hearingDate
+            hearingDate,
+            userAccountStub.getSystemUserAccountEntity()
         );
     }
 

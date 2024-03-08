@@ -181,7 +181,8 @@ public class AudioServiceImpl implements AudioService {
                 addAudioMetadataRequest.getCourthouse(),
                 addAudioMetadataRequest.getCourtroom(),
                 caseNumber,
-                addAudioMetadataRequest.getStartedAt().toLocalDate()
+                addAudioMetadataRequest.getStartedAt().toLocalDate(),
+                userIdentity.getUserAccount()
             );
             hearing.addMedia(savedMedia);
             hearingRepository.saveAndFlush(hearing);

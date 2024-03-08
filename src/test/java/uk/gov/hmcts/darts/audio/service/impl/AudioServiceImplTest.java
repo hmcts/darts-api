@@ -256,6 +256,7 @@ class AudioServiceImplTest {
             anyString(),
             anyString(),
             anyString(),
+            any(),
             any()
         )).thenReturn(hearingEntity);
 
@@ -401,6 +402,7 @@ class AudioServiceImplTest {
             anyString(),
             anyString(),
             anyString(),
+            any(),
             any()
         )).thenReturn(hearing);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);

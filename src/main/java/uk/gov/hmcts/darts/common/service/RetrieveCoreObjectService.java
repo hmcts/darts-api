@@ -25,6 +25,10 @@ public interface RetrieveCoreObjectService {
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount);
+
+    @Transactional
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName);
 
     @Transactional
@@ -34,6 +38,10 @@ public interface RetrieveCoreObjectService {
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber);
+
+    @Transactional
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount);
 
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourthouseEntity retrieveCourthouse(String courthouseName);

@@ -46,6 +46,13 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
+        UserAccountEntity userAccount = authorisationApi.getCurrentUser();
+        return retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
+    }
+
+    @Override
+    public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber,
+                                                 LocalDate hearingDate, UserAccountEntity userAccount) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
             courthouseName,
             courtroomName,
@@ -56,12 +63,13 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
             courthouseName,
             courtroomName,
             caseNumber,
-            hearingDate
+            hearingDate,
+            userAccount
         ));
     }
 
-    private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
-        CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber);
+    private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount) {
+        CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
         CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
         HearingEntity hearing = new HearingEntity();
         hearing.setCourtCase(courtCase);
@@ -69,6 +77,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         hearing.setHearingDate(hearingDate);
         hearing.setNew(true);
         hearing.setHearingIsActual(false);
+        hearing.setCreatedBy(userAccount);
+        hearing.setLastModifiedBy(userAccount);
         hearingRepository.saveAndFlush(hearing);
         return hearing;
     }
@@ -108,20 +118,27 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
+        UserAccountEntity userAccount = authorisationApi.getCurrentUser();
+        return retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+    }
+
+    public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
             caseNumber,
             courthouseName
         );
-        return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber));
+        return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
     }
 
-    private CourtCaseEntity createCase(String courthouseName, String caseNumber) {
+    private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
         CourthouseEntity foundCourthouse = retrieveCourthouse(courthouseName);
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
         courtCase.setCourthouse(foundCourthouse);
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
+        courtCase.setCreatedBy(userAccount);
+        courtCase.setLastModifiedBy(userAccount);
         caseRepository.saveAndFlush(courtCase);
         return courtCase;
     }

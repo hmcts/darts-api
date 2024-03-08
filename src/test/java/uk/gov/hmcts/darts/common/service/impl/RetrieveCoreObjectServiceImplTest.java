@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -41,6 +42,9 @@ class RetrieveCoreObjectServiceImplTest {
 
     @Mock
     CourtroomRepository courtroomRepository;
+
+    @Mock
+    AuthorisationApi authorisationApi;
 
     @InjectMocks
     RetrieveCoreObjectServiceImpl retrieveCoreObjectServiceImpl;

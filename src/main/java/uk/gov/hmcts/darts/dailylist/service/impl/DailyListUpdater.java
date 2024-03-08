@@ -56,6 +56,7 @@ class DailyListUpdater {
     public void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException, IllegalArgumentException {
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
 
         for (CourtList courtList : dailyList.getCourtLists()) {
 
@@ -73,9 +74,9 @@ class DailyListUpdater {
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                             courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
+                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate(),
+                            dailyListSystemUser
                         );
-                        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
                         hearing.setCreatedBy(dailyListSystemUser);
                         hearing.setLastModifiedBy(dailyListSystemUser);
                         // set this so it's updated when no other changes are present
