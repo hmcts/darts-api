@@ -112,9 +112,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 } else {
                     unstructuredExternalObjectDirectory = currentExternalObjectDirectory;
                     armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory);
-                    updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
                 }
-
 
                 String rawFilename = generateFilename(armExternalObjectDirectory);
                 log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
@@ -312,8 +310,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         armExternalObjectDirectoryEntity.setCreatedBy(systemUser);
         armExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
         armExternalObjectDirectoryEntity.setTransferAttempts(1);
-
-        return armExternalObjectDirectoryEntity;
+        armExternalObjectDirectoryEntity.setLastModifiedBy(userAccount);
+        ExternalObjectDirectoryEntity armExternalObjectDirectory = externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
+        return armExternalObjectDirectory;
     }
 
 
