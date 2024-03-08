@@ -91,9 +91,8 @@ class AnnotationDataManagementTest {
 
         var containerLocations = annotationDataManagement.upload(binaryData, "test.pdf");
 
-        assertThat(containerLocations)
-            .hasFieldOrPropertyWithValue("unstructuredLocation", unstructuredLocationUuid)
-            .hasFieldOrPropertyWithValue("inboundLocation", inboundLocationUuid);
+        assertThat(containerLocations.get(INBOUND)).isEqualTo(inboundLocationUuid);
+        assertThat(containerLocations.get(UNSTRUCTURED)).isEqualTo(unstructuredLocationUuid);
     }
 
     @Test
