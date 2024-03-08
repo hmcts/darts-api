@@ -269,13 +269,25 @@ public class UserAccountStub {
         var adminGroup = securityGroupRepository.findByGroupName("SUPER_ADMIN")
             .orElseThrow();
         adminGroup.setGlobalAccess(true);
-        adminGroup.getCourthouseEntities().clear();
-        adminGroup.getCourthouseEntities().addAll(courthouseRepository.findAll());
         adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
 
         var user = getIntegrationTestUserAccountEntity("adminUserAccount");
         user.getSecurityGroupEntities().clear();
         user.getSecurityGroupEntities().add(adminGroup);
+
+        return userAccountRepository.saveAndFlush(user);
+    }
+
+    @Transactional
+    public UserAccountEntity createSuperUser() {
+        var superUserGroup = securityGroupRepository.findByGroupName("SUPER_USER")
+            .orElseThrow();
+        superUserGroup.setGlobalAccess(true);
+        superUserGroup = securityGroupRepository.saveAndFlush(superUserGroup);
+
+        var user = getIntegrationTestUserAccountEntity("superUserAccount");
+        user.getSecurityGroupEntities().clear();
+        user.getSecurityGroupEntities().add(superUserGroup);
 
         return userAccountRepository.saveAndFlush(user);
     }

@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +9,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
@@ -46,6 +43,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 
@@ -64,7 +62,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
 
@@ -79,7 +77,9 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER})
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        securityRoles = {APPROVER, TRANSCRIBER},
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 
@@ -98,7 +98,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -149,11 +149,8 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS})
-    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
-        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
-            in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
-    ) {
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
+    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Integer transcriptionId) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),
             HttpStatus.OK

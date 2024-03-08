@@ -23,6 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
@@ -36,7 +37,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
     @Override
     public ResponseEntity<GetHearingResponse> getHearing(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getHearings(hearingId), HttpStatus.OK);
@@ -45,7 +46,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS, TRANSLATION_QA})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
     @Override
     public ResponseEntity<List<EventResponse>> getEvents(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getEvents(hearingId), HttpStatus.OK);
@@ -55,7 +56,7 @@ public class HearingsController implements HearingsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
     public ResponseEntity<List<Transcript>> hearingsHearingIdTranscriptsGet(Integer hearingId) {
         return new ResponseEntity<>(hearingsService.getTranscriptsByHearingId(hearingId), HttpStatus.OK);
     }

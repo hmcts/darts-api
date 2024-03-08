@@ -147,7 +147,7 @@ class AnnotationIdControllerAuthorisationImplTest {
     }
 
     @Test
-    void checkAuthorisationShouldThrowBadRequestWhenTranscriptionIdParameterMissing() {
+    void checkAuthorisationShouldThrowBadRequestWhenAnnotationIdParameterMissing() {
         MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,

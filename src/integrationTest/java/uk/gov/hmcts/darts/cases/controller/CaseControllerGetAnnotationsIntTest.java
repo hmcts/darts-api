@@ -21,12 +21,17 @@ import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @Slf4j
 @AutoConfigureMockMvc
@@ -170,6 +175,35 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andExpect(status().isForbidden())
             .andReturn();
 
+        verify(mockUserIdentity).getUserAccount();
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDGE, SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void givenSuperUserReturnForbidden() throws Exception {
+        final CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
+        HearingEntity hearingEntity = dartsDatabase.getHearingStub()
+            .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
+
+        UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
+            .createJudgeUser("1");
+        log.debug("judgeUser.getId() " + judgeUser.getId());
+
+        createAnnotation(judgeUser, hearingEntity);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createSuperUser();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        mockMvc.perform(get("/cases/" + courtCaseEntity.getId() + "/annotations")
+                            .header("user_id", testUser.getId()))
+            .andExpect(status().isForbidden())
+            .andReturn();
+
+        verify(mockUserIdentity).getUserAccount();
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(JUDGE, SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
