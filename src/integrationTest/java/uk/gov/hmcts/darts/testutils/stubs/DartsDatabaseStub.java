@@ -61,6 +61,7 @@ import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
+import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -148,6 +149,7 @@ public class DartsDatabaseStub {
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
+    private final RegionRepository regionRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -205,6 +207,7 @@ public class DartsDatabaseStub {
         // securityGroupRepository.deleteAll(securityGroupBin);
         // securityGroupBin.clear();
         courthouseRepository.deleteAll();
+        regionRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
         annotationRepository.deleteAll();
@@ -364,8 +367,7 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectRecordStatusEntity getObjectRecordStatusEntity(
-        ObjectRecordStatusEnum objectRecordStatusEnum) {
+    public ObjectRecordStatusEntity getObjectRecordStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 
@@ -671,12 +673,12 @@ public class DartsDatabaseStub {
 
     public List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryFor(Integer annotationId) {
         var annotationDocumentEntity = annotationDocumentRepository.findAll().stream()
-                .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
-                .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
 
         return externalObjectDirectoryRepository.findAll().stream()
-                .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
-                .toList();
+            .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
+            .toList();
     }
 
     @Transactional

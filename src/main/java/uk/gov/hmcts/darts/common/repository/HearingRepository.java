@@ -44,5 +44,12 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
     )
     Optional<HearingEntity> findHearing(String courthouse, String courtroom, String caseNumber, LocalDate date);
 
+    @Query("""
+        select exists
+        (select he.id FROM HearingEntity he
+        WHERE he.courtroom.id in (select courtroom.id from CourtroomEntity where courthouse.id = :courthouseId))
+    """)
+    boolean hearingsExistForCourthouse(Integer courthouseId);
+
     boolean existsById(Integer id);
 }

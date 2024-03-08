@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -64,6 +65,7 @@ public class TranscriptionStub {
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -301,6 +303,9 @@ public class TranscriptionStub {
         TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
                                                                                                     fileType, fileSize, testUser,
                                                                                                     checksum);
+        transcriptionDocumentRepository.save(transcriptionDocumentEntity);
+        transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
+        transcriptionRepository.save(transcriptionEntity);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -312,12 +317,10 @@ public class TranscriptionStub {
         externalObjectDirectoryEntity.setCreatedBy(testUser);
         externalObjectDirectoryEntity.setLastModifiedBy(testUser);
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
-        externalObjectDirectoryEntity = externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
+        externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
-
-        transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+        return transcriptionRepository.save(transcriptionEntity);
     }
 
     public static BinaryData getBinaryTranscriptionDocumentData() {

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,12 +48,39 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupWithIdAndRole;
     }
 
-    public List<SecurityGroupWithIdAndRole> getSecurityGroups() {
+    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId) {
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
+
+        securityGroupEntities = filterSecurityGroupEntitiesByRoleIds(securityGroupEntities, roleIds);
+        securityGroupEntities = filterSecurityGroupEntitiesByCourthouseId(securityGroupEntities, courthouseId);
+
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = securityGroupEntities.stream()
             .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
 
         return securityGroupWithIdAndRoles;
+    }
+
+    private List<SecurityGroupEntity> filterSecurityGroupEntitiesByRoleIds(
+        List<SecurityGroupEntity> securityGroupEntities, List<Integer> roleIds) {
+
+        if (roleIds != null) {
+            return securityGroupEntities.stream()
+                .filter(securityGroup -> roleIds.contains(securityGroup.getSecurityRoleEntity().getId()))
+                .collect(Collectors.toList());
+        }
+        return securityGroupEntities;
+    }
+
+    private List<SecurityGroupEntity> filterSecurityGroupEntitiesByCourthouseId(
+        List<SecurityGroupEntity> securityGroupEntities, Integer courthouseId) {
+
+        if (courthouseId != null) {
+            return securityGroupEntities.stream()
+                .filter(securityGroupEntity -> securityGroupEntity.getCourthouseEntities().stream()
+                    .anyMatch(courthouseEntity -> courthouseEntity.getId().equals(courthouseId)))
+                .collect(Collectors.toList());
+        }
+        return securityGroupEntities;
     }
 
 }

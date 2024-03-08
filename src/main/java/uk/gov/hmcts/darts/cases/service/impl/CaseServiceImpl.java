@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
-import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
@@ -149,13 +148,6 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
-    public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
-        CourtCaseEntity foundCase = getCourtCaseById(caseId);
-        caseRepository.save(foundCase);
-        return casesMapper.mapToSingleCase(foundCase);
-    }
-
-    @Override
     public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
         return TranscriptionMapper.mapResponse(transcriptionEntities);
@@ -169,7 +161,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<HearingEntity> hearingEntitys = courtCaseEntity.get().getHearings();
 
-        if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.ADMIN))) {
+        if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
             List<AnnotationEntity> annotationsEntities =
                 annotationRepository.findByListOfHearingIds(
                     hearingEntitys

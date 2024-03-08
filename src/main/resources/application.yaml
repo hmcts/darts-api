@@ -99,9 +99,10 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
-    out-of-order: true
 
 darts:
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  api-pod: ${API_MODE:true}
   audio:
     allowable-audio-gap-duration: 1s
     ffmpeg-executable: ffmpeg
@@ -185,10 +186,10 @@ darts:
       file-extension: a360
       list-blobs-timeout-duration: 60s
 
-      media-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
-      transcription-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
-      annotation-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
-      case-record-properties-file: properties/arm/{ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+      media-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
+      transcription-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
+      annotation-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
+      case-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
 
       response-cleanup-buffer-days: 0
 
@@ -201,7 +202,7 @@ darts:
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
     dets:
-      connection-string: ${DETS_SAS_ENDPOINT:${AZURE_STORAGE_CONNECTION_STRING}}
+      sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-dets
       fetch-from-dets-enabled: true
       temp-blob-workspace: ${user.home}/dets/tempworkspace
@@ -267,6 +268,8 @@ darts:
       daily-test-event-text:
         xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
+    cases:
+      defendant-name-char-limit: 600
   hikari:
     maximum-pool-size: 50
 dbMigration:

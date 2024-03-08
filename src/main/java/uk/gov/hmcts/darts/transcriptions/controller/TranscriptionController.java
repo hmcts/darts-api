@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,17 +41,18 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;
@@ -62,7 +64,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER},
-        globalAccessSecurityRoles = {JUDGE})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
 
@@ -81,7 +83,7 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 
-        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription));
+        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription, false));
     }
 
     @Override
@@ -96,7 +98,7 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, RCJ_APPEALS})
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -146,8 +148,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, ADMIN, APPROVER, REQUESTER, TRANSCRIBER},
-        globalAccessSecurityRoles = {JUDGE, ADMIN, RCJ_APPEALS})
+        securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, RCJ_APPEALS})
     public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
         @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
             in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId

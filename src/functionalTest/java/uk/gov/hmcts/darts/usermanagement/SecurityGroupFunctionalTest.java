@@ -88,7 +88,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                 .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
                 .toList();
 
-        checkGroup(staticGroups.get(0), "ADMIN", true, 11, true, null);
+        checkGroup(staticGroups.get(0), "SUPER_ADMIN", true, 11, true, null);
         checkGroup(staticGroups.get(1), "hmcts_staff_1", false, 1, true, 1);
         checkGroup(staticGroups.get(2), "hmcts_staff_2", false, 2, true, 1);
         checkGroup(staticGroups.get(3), "hmcts_staff_3", false, 3, true, 1);

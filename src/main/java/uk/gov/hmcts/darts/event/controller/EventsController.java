@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 @SuppressWarnings({"checkstyle.LineLengthCheck"})
 public class EventsController implements EventApi {
 

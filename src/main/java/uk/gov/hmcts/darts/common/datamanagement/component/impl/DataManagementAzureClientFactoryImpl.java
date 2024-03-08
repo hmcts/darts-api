@@ -36,4 +36,9 @@ public class DataManagementAzureClientFactoryImpl implements DataManagementAzure
         return blobServiceClientMap.computeIfAbsent(containerString, k -> new BlobServiceClientBuilder()
             .connectionString(containerString).buildClient());
     }
+
+    public BlobServiceClient getBlobServiceClientWithSasEndpoint(String sasEndpoint) {
+        return blobServiceClientMap.computeIfAbsent(sasEndpoint, k -> new BlobServiceClientBuilder()
+            .endpoint(sasEndpoint).buildClient());
+    }
 }

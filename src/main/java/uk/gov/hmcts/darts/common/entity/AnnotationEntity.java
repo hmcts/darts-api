@@ -57,7 +57,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = AnnotationDocumentEntity_.ANNOTATION)
     private List<AnnotationDocumentEntity> annotationDocuments = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany()
     @JoinTable(name = "hearing_annotation_ae",
         joinColumns = {@JoinColumn(name = "ann_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})

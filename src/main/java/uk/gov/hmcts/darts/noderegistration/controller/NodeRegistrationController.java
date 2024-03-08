@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class NodeRegistrationController implements DevicesApi {
 
     private final NodeRegistrationService nodeRegistrationService;

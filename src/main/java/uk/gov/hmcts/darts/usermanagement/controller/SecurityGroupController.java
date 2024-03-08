@@ -15,7 +15,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,14 +25,15 @@ public class SecurityGroupController implements SecurityGroupApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(Integer courthouse) {
-        return ResponseEntity.status(HttpStatus.OK).body(securityGroupService.getSecurityGroups());
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(List<Integer> roleIds, Integer courthouseId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(securityGroupService.getSecurityGroups(roleIds, courthouseId));
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
     public ResponseEntity<SecurityGroupWithIdAndRole> adminSecurityGroupsPost(SecurityGroup securityGroup) {
         SecurityGroupWithIdAndRole response = securityGroupService.createSecurityGroup(securityGroup);
 

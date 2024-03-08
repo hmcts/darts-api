@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -51,7 +51,7 @@ class PostUserIntTest extends IntegrationBase {
     private PlatformTransactionManager transactionManager;
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private AuthorisationApi authorisationApi;
@@ -79,7 +79,7 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldSucceedWhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
@@ -125,7 +125,7 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldSucceedWhenProvidedWithValidValuesForAllFields() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
@@ -181,7 +181,7 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldFailWhenRequiredFieldsAreMissing() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .header("Content-Type", "application/json")
@@ -200,7 +200,7 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldSucceedWhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName("James Smith");
@@ -224,7 +224,7 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldFailWhenProvidedWithASecurityGroupThatDoesntExist() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""

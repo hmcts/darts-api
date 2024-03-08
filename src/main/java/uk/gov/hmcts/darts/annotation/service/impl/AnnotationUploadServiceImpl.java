@@ -44,23 +44,26 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
         var containerLocations = annotationDataManagement.upload(binaryData, multipartFile.getOriginalFilename());
 
         var annotationEntity = annotationMapper.mapFrom(annotation);
+
         var checksum = fileContentChecksum.calculate(binaryData.toBytes());
         var annotationDocumentEntity = annotationDocumentBuilder.buildFrom(multipartFile, annotationEntity, checksum);
 
         var inboundExternalObjectDirectory = externalObjectDirectoryBuilder.buildFrom(
-              annotationDocumentEntity, containerLocations.inboundLocation(), INBOUND);
+            annotationDocumentEntity, containerLocations.get(INBOUND), INBOUND);
         var unstructuredExternalObjectDirectory = externalObjectDirectoryBuilder.buildFrom(
-              annotationDocumentEntity, containerLocations.unstructuredLocation(), UNSTRUCTURED);
+            annotationDocumentEntity, containerLocations.get(UNSTRUCTURED), UNSTRUCTURED);
 
         try {
             annotationPersistenceService.persistAnnotation(
                 inboundExternalObjectDirectory,
                 unstructuredExternalObjectDirectory,
-                annotation.getHearingId());
+                annotation.getHearingId(),
+                annotationEntity,
+                annotationDocumentEntity);
 
         } catch (RuntimeException exception) {
-            annotationDataManagement.attemptToDeleteDocument(containerLocations.inboundLocation());
-            annotationDataManagement.attemptToDeleteDocument(containerLocations.unstructuredLocation());
+            log.error("Unable to persist annotation ", exception);
+            annotationDataManagement.attemptToDeleteDocuments(containerLocations);
         }
 
         return annotationEntity.getId();

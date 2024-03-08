@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.annotation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +17,16 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
+@Slf4j
 class AnnotationUploadServiceTest extends IntegrationBase {
     private static final String REQUESTER_EMAIL = "test.user@example.com";
 
@@ -47,8 +52,7 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
         var annotationId = uploadService.upload(document, annotation);
 
-        assertThat(dartsDatabase.findAnnotationById(annotationId))
-            .isInstanceOf(AnnotationEntity.class);
+        assertThat(dartsDatabase.findAnnotationById(annotationId)).isInstanceOf(AnnotationEntity.class);
     }
 
     @Test
@@ -72,8 +76,7 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
         var annotationId = uploadService.upload(document, annotation);
 
-        assertThat(dartsDatabase.findAnnotationDocumentFor(annotationId))
-            .isInstanceOf(AnnotationDocumentEntity.class);
+        assertThat(dartsDatabase.findAnnotationDocumentFor(annotationId)).isInstanceOf(AnnotationDocumentEntity.class);
     }
 
     @Test
@@ -84,8 +87,13 @@ class AnnotationUploadServiceTest extends IntegrationBase {
 
         var annotationId = uploadService.upload(document, annotation);
 
-        assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId).size())
-            .isEqualTo(2);
+        Optional<AnnotationEntity> annotationEntityOptional = dartsDatabase.getAnnotationRepository().findById(annotationId);
+        assertTrue(annotationEntityOptional.isPresent());
+
+        List<AnnotationEntity> annotationByHearing = dartsDatabase.getAnnotationRepository().findByHearingId(hearing.getId());
+        assertFalse(annotationByHearing.isEmpty());
+
+        assertThat(dartsDatabase.findExternalObjectDirectoryFor(annotationId).size()).isEqualTo(2);
     }
 
     private MultipartFile someMultipartFile() {

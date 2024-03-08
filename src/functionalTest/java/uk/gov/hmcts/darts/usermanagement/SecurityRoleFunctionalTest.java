@@ -17,7 +17,7 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldCreateSecurityGroup() {
+    void shouldGetSecurityRoles() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-roles"))
             .get()
@@ -80,7 +80,7 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                   },
                   {
                     "id": 11,
-                    "display_name": "Admin",
+                    "display_name": "Super Admin",
                     "display_state": true
                   }
                 ]

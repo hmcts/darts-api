@@ -29,6 +29,8 @@ spring:
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 
 darts:
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  api-pod: ${API_MODE:true}
   data-management:
     inbound-to-unstructured-limit: 100
   gateway:
