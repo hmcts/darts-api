@@ -3,17 +3,22 @@ package uk.gov.hmcts.darts.courthouse.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.component.validation.BiValidator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminCourthouseToCourthouseEntityMapper;
@@ -21,9 +26,13 @@ import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
+import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupIdMapper;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,12 +52,14 @@ public class CourthouseServiceImpl implements CourthouseService {
     private final RegionRepository regionRepository;
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
+    private final SecurityGroupRepository securityGroupRepository;
+    private final SecurityRoleRepository securityRoleRepository;
 
     private final CourthouseToCourthouseEntityMapper courthouseMapper;
-
-    private final AdminCourthouseToCourthouseEntityMapper adminMapper;
-    private final BiValidator<CourthousePatch, Integer> courthousePatchValidator;
     private final CourthouseUpdateMapper courthouseUpdateMapper;
+    private final AdminCourthouseToCourthouseEntityMapper adminMapper;
+
+    private final BiValidator<CourthousePatch, Integer> courthousePatchValidator;
 
     @Override
     public void deleteCourthouseById(Integer id) {
@@ -116,6 +127,157 @@ public class CourthouseServiceImpl implements CourthouseService {
         CourthouseEntity mappedEntity = this.courthouseMapper.mapToEntity(courthouse);
         return courthouseRepository.saveAndFlush(mappedEntity);
     }
+
+    private final SecurityGroupIdMapper securityGroupIdMapper;
+
+    @Override
+    @Transactional
+    public ExtendedCourthousePost mapFromEntitiesToExtendedCourthousePost(CourthousePost courthousePost) {
+        final SecurityRoleEntity securityRoleTranscriber = getSecurityRoleByRoleName("TRANSCRIBER");
+        final SecurityRoleEntity securityRoleRequester = getSecurityRoleByRoleName("REQUESTER");
+        final SecurityRoleEntity securityRoleApprover = getSecurityRoleByRoleName("APPROVER");
+
+        //check duplicate names
+        checkCourthouseNameIsUnique(courthousePost);
+        checkCourthouseDisplayNameIsUnique(courthousePost);
+
+        List<Integer> securityRoleIds = getSecurityRoleIds(courthousePost, securityRoleTranscriber);
+        CourthouseEntity mappedEntity = createCourthouseEntity(courthousePost);
+
+        Set<SecurityGroupEntity> securityGroupEntities = getSecurityGroupEntities(courthousePost, mappedEntity,
+                                                                                  securityRoleIds, securityRoleRequester,
+                                                                                  securityRoleApprover);
+        mappedEntity.setSecurityGroups(securityGroupEntities);
+
+        courthouseRepository.saveAndFlush(mappedEntity);
+
+        return createCourthouseEntity(courthousePost, mappedEntity);
+    }
+
+    private List<Integer> getSecurityRoleIds(CourthousePost courthousePost, SecurityRoleEntity securityRoleTranscriber) {
+        List<Integer> securityGroupIds = (courthousePost.getSecurityGroupIds() == null) ? new ArrayList<>() : courthousePost.getSecurityGroupIds();
+        courthousePost.securityGroupIds(securityGroupIds);
+
+        //for each security_group get role_ids
+        List<Integer> securityRoleIds = new ArrayList<>();
+        for (Integer secGrpIds : securityGroupIds) {
+            Optional<SecurityGroupEntity> securityGroupEntity = securityGroupRepository.findById(secGrpIds);
+            securityGroupEntity.ifPresent(groupEntity -> securityRoleIds.add(groupEntity.getSecurityRoleEntity().getId()));
+        }
+
+        //ensure if security roles exist, TRANSCRIBER role also exists
+        if ((CollectionUtils.isNotEmpty(securityRoleIds) && securityRoleTranscriber != null) && !securityRoleIds.contains(securityRoleTranscriber.getId())) {
+                throw new DartsApiException(CourthouseApiError.ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED);
+        }
+        return securityRoleIds;
+    }
+
+    private ExtendedCourthousePost createCourthouseEntity(CourthousePost courthousePost, CourthouseEntity mappedEntity) {
+        ExtendedCourthousePost extendedCourthousePost = courthousePostMapper.mapFromEntityToExtendedCourthousePost(courthousePost);
+
+        extendedCourthousePost.setId(mappedEntity.getId());
+        extendedCourthousePost.setCreatedDateTime(mappedEntity.getCreatedDateTime());
+        extendedCourthousePost.setLastModifiedDateTime(mappedEntity.getLastModifiedDateTime());
+        extendedCourthousePost.securityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(mappedEntity.getSecurityGroups()));
+        extendedCourthousePost.setRegionId(mappedEntity.getRegion() == null ? null : mappedEntity.getRegion().getId());
+
+        return extendedCourthousePost;
+    }
+
+    private CourthouseEntity createCourthouseEntity(CourthousePost courthousePost) {
+        CourthouseEntity mappedEntity = courthousePostMapper.mapToEntity(courthousePost);
+
+        //ensure region exists in dB
+        List<RegionEntity> regions = regionRepository.findAll();
+        if (CollectionUtils.isNotEmpty(regions) && courthousePost.getRegionId() != null) {
+            List<Integer> regionIds = regions.stream().map(RegionEntity::getId).toList();
+
+            if (CollectionUtils.isNotEmpty(regionIds) && !regionIds.contains(courthousePost.getRegionId())) {
+                throw new DartsApiException(CourthouseApiError.REGION_ID_DOES_NOT_EXIST);
+            }
+
+            //get region
+            RegionEntity regionFound = null;
+            for (RegionEntity region : regions) {
+                if (region.getId().equals(courthousePost.getRegionId())) {
+                    regionFound = region;
+                }
+            }
+
+            mappedEntity.setRegion(regionFound);
+        }
+        return mappedEntity;
+    }
+
+    private Set<SecurityGroupEntity> getSecurityGroupEntities(CourthousePost courthousePost, CourthouseEntity mappedEntity, List<Integer> securityRoleIds,
+                                                              SecurityRoleEntity securityRoleRequester, SecurityRoleEntity securityRoleApprover) {
+        Set<SecurityGroupEntity> securityGroupEntities =
+            (CollectionUtils.isEmpty(mappedEntity.getSecurityGroups())) ? new LinkedHashSet<>() : mappedEntity.getSecurityGroups();
+
+        for (Integer id : securityRoleIds) {
+            SecurityRoleEntity securityRoleEntity = getSecurityRoleByRoleId(id);
+            if (securityRoleEntity != null) {
+                SecurityGroupEntity securityGroupEntity = addSecurityGroupForCourthouse(courthousePost, securityRoleEntity);
+                securityGroupEntities.add(securityGroupEntity);
+            }
+        }
+        SecurityGroupEntity securityGroupRequesterEntity = addSecurityGroupForCourthouse(courthousePost, securityRoleRequester);
+        SecurityGroupEntity securityGroupApprovarEntity = addSecurityGroupForCourthouse(courthousePost, securityRoleApprover);
+
+        securityGroupEntities.add(securityGroupApprovarEntity);
+        securityGroupEntities.add(securityGroupRequesterEntity);
+        return securityGroupEntities;
+    }
+
+    private SecurityGroupEntity addSecurityGroupForCourthouse(CourthousePost courthousePost, SecurityRoleEntity securityRole) {
+        SecurityGroupEntity securityGroupEntity = new SecurityGroupEntity();
+
+        securityGroupEntity.setDisplayName(courthousePost.getDisplayName() + " " + securityRole.getRoleName().toUpperCase());
+        securityGroupEntity.setGroupName(courthousePost.getCourthouseName().toUpperCase() + "_" + securityRole.getRoleName().toUpperCase());
+        securityGroupEntity.setGlobalAccess(false);
+        securityGroupEntity.setDisplayState(true);
+        securityGroupEntity.setUseInterpreter(false);
+        securityGroupEntity.setSecurityRoleEntity(securityRole);
+        securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        return securityGroupEntity;
+    }
+
+    private SecurityRoleEntity getSecurityRoleByRoleName(String securityRole) {
+        assert securityRoleRepository != null;
+        List<SecurityRoleEntity> securityRoleEntities = securityRoleRepository.findAllByOrderById();
+        for (SecurityRoleEntity securityRoleEntity: securityRoleEntities) {
+            if (securityRoleEntity.getRoleName().equals(securityRole)) {
+                return securityRoleEntity;
+            }
+        }
+        return null;
+    }
+
+    private SecurityRoleEntity getSecurityRoleByRoleId(Integer roleId) {
+        List<SecurityRoleEntity> securityRoleEntities = securityRoleRepository.findAllByOrderById();
+        for (SecurityRoleEntity securityRoleEntity: securityRoleEntities) {
+            if (securityRoleEntity.getId().equals(roleId)) {
+                return securityRoleEntity;
+            }
+        }
+        return null;
+    }
+
+    private void checkCourthouseDisplayNameIsUnique(CourthousePost courthousePost) {
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByDisplayNameIgnoreCase(courthousePost.getDisplayName());
+        if (foundCourthouse.isPresent()) {
+            throw new DartsApiException(CourthouseApiError.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
+        }
+    }
+
+    private void checkCourthouseNameIsUnique(CourthousePost courthousePost) {
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthousePost.getCourthouseName());
+        if (foundCourthouse.isPresent()) {
+            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
+        }
+    }
+
 
     private void checkCourthouseIsUnique(Courthouse courthouse) {
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouse.getCourthouseName());

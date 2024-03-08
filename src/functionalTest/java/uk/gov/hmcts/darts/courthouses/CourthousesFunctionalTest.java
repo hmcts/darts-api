@@ -23,24 +23,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestMethodOrder(OrderAnnotation.class)
 class CourthousesFunctionalTest extends FunctionalTest {
 
-    public static final String COURTHOUSES_URI = "/courthouses";
-    public static final String ADMIN_COURTHOUSES_URI = "/admin/courthouses";
-    public static final String ADMIN_REGION_URI = "/admin/regions";
-    public static final String COURTHOUSE_BODY = """
-        {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham","code": 5705}""";
-    public static final String COURTHOUSE_PATCH_BODY = """
+    private static final String COURTHOUSES_URI = "/courthouses";
+    private static final String ADMIN_COURTHOUSES_URI = "/admin/courthouses";
+    private static final String ADMIN_REGION_URI = "/admin/regions";
+    private static final String COURTHOUSE_BODY_NO_CODE = """
+        {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham"}""";
+    private static final String COURTHOUSE_PATCH_BODY = """
         {"courthouse_name": "MANCHESTER","display_name": "Manchester"}""";
-    public static final String COURTHOUSE_PATCH_INVALID_BODY = """
+    private static final String COURTHOUSE_PATCH_INVALID_BODY = """
         {"courthouse_name": "READING","display_name": "Reading", code: "1234"}""";
-    public static final String COURTHOUSE_BAD_ID = "/99999";
-    public static final int OK = 200;
-    public static final int CREATED = 201;
-    public static final int NO_CONTENT = 204;
-    public static final int BAD_REQUEST = 400;
-    public static final int NOT_FOUND = 404;
-    public static final int RESOURCE_ALREADY_EXISTS = 409;
-
-    public static final int INTERNAL_SERVER_ERROR = 500;
+    private static final String COURTHOUSE_BAD_ID = "/99999";
+    private static final int OK = 200;
+    private static final int CREATED = 201;
+    private static final int NO_CONTENT = 204;
+    private static final int BAD_REQUEST = 400;
+    private static final int NOT_FOUND = 404;
+    private static final int RESOURCE_ALREADY_EXISTS = 409;
 
     private int testCourthouseId;
 
@@ -71,11 +69,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(2)
     void createCourthouse() {
-        testCourthouseId = buildRequestWithExternalAuth()
+        testCourthouseId = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY)
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
+            .body(COURTHOUSE_BODY_NO_CODE)
             .post()
             .then()
             .assertThat()
@@ -89,11 +87,20 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(3)
     void createSameCourthouse() {
-        Response response = buildRequestWithExternalAuth()
+        buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY)
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
+            .body(COURTHOUSE_BODY_NO_CODE)
+            .post()
+            .then()
+            .extract().response();
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
+            .body(COURTHOUSE_BODY_NO_CODE)
             .post()
             .then()
             .extract().response();
