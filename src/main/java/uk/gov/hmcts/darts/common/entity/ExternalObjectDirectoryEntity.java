@@ -20,9 +20,6 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
-
 @Entity
 @Table(name = "external_object_directory")
 @Getter
@@ -39,7 +36,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @JoinColumn(name = "med_id", foreignKey = @ForeignKey(name = "eod_media_fk"))
     private MediaEntity media;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trd_id", foreignKey = @ForeignKey(name = "eod_transcription_document_fk"))
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
 

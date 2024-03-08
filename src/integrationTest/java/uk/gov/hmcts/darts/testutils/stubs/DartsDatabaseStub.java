@@ -367,8 +367,7 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectRecordStatusEntity getObjectRecordStatusEntity(
-        ObjectRecordStatusEnum objectRecordStatusEnum) {
+    public ObjectRecordStatusEntity getObjectRecordStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 
@@ -674,12 +673,12 @@ public class DartsDatabaseStub {
 
     public List<ExternalObjectDirectoryEntity> findExternalObjectDirectoryFor(Integer annotationId) {
         var annotationDocumentEntity = annotationDocumentRepository.findAll().stream()
-                .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
-                .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
+            .filter(annotationDocument -> annotationDocument.getAnnotation().getId().equals(annotationId))
+            .findFirst().orElseThrow(() -> new RuntimeException("No annotation document found for annotation id: " + annotationId));
 
         return externalObjectDirectoryRepository.findAll().stream()
-                .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
-                .toList();
+            .filter(externalObjectDirectory -> externalObjectDirectory.getAnnotationDocumentEntity().getId().equals(annotationDocumentEntity.getId()))
+            .toList();
     }
 
     @Transactional
