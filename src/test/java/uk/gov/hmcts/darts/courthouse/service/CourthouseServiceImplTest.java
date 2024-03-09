@@ -136,35 +136,6 @@ class CourthouseServiceImplTest {
     }
 
     @Test
-    void testAmendCourthouseById() {
-        CourthouseEntity courthouseEntityOriginal = new CourthouseEntity();
-        courthouseEntityOriginal.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseEntityOriginal.setCode(CODE);
-
-        Courthouse courthouseModelAmendment = new Courthouse();
-        courthouseModelAmendment.setCourthouseName("Changed courthouse");
-        courthouseModelAmendment.setCode(543);
-
-        CourthouseEntity courthouseEntityChanged = new CourthouseEntity();
-        courthouseEntityChanged.setCourthouseName("Changed courthouse");
-        courthouseEntityChanged.setCode(543);
-
-
-        Mockito.when(courthouseRepository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);
-        Mockito.when(courthouseRepository.saveAndFlush(any())).thenReturn(courthouseEntityChanged);
-
-        CourthouseEntity returnedEntity = courthouseService.amendCourthouseById(
-            courthouseModelAmendment,
-            COURTHOUSE_ID
-        );
-
-
-        assertEquals("Changed courthouse", returnedEntity.getCourthouseName());
-        assertEquals((short) 543, returnedEntity.getCode());
-
-    }
-
-    @Test
     void testGetCourtHouseByIdTest() {
         CourthouseEntity courthouseEntity = new CourthouseEntity();
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);

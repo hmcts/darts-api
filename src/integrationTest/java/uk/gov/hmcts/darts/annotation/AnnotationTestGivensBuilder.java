@@ -19,7 +19,7 @@ import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroup
 import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
 
 @Component
-public class AnnotationTestGivensBuilder {
+public class TestGivenBuilder {
 
     @Autowired
     private DartsDatabaseStub dartsDatabase;
