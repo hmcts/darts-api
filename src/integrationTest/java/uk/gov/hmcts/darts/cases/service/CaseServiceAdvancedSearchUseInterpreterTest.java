@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
@@ -42,6 +43,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     CourthouseEntity swanseaCourthouse;
     CourthouseEntity cardiffCourthouse;
     CourthouseEntity liverpoolCourthouse;
+    UserAccountEntity user;
 
 
     @BeforeEach
@@ -87,6 +89,8 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         dartsDatabase.saveAll(hearing5, hearing6);
 
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        user.getSecurityGroupEntities().clear();
     }
 
     @AfterEach
@@ -95,11 +99,110 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     }
 
     @Test
+    void testSearchAllCasesWithPermissionsGlobalTrueUseInterpreterTrue() {
+        // given
+        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        securityGroup.setGlobalAccess(true);
+        securityGroup.setUseInterpreter(true);
+        assignSecurityGroupToUser(user, securityGroup);
+
+        userAccountRepository.save(user);
+
+        // when
+        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+
+        // then
+        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case2", "Case4", "Case6");
+    }
+
+    @Test
+    void testSearchAllCasesWithPermissionsGlobalTrueUseInterpreterFalse() {
+        // given
+        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        securityGroup.setGlobalAccess(true);
+        securityGroup.setUseInterpreter(false);
+        assignSecurityGroupToUser(user, securityGroup);
+
+        userAccountRepository.save(user);
+
+        // when
+        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+
+        // then
+        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2", "Case3", "Case4", "Case5", "Case6");
+    }
+
+    @Test
+    void testSearchAllCasesWithPermissionsGlobalTrueUseInterpreterTrueAndInterpreterFalseOnSingleCourthouse() {
+        // given
+        var securityGroup = SecurityGroupTestData.buildGroupForRole(APPROVER);
+        securityGroup.setGlobalAccess(true);
+        securityGroup.setUseInterpreter(true);
+        assignSecurityGroupToUser(user, securityGroup);
+
+        var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
+        securityGroupSwansea.setGlobalAccess(false);
+        securityGroupSwansea.setUseInterpreter(false);
+        assignSecurityGroupToUser(user, securityGroupSwansea);
+
+        userAccountRepository.save(user);
+
+        // when
+        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+
+        // then
+        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2", "Case4", "Case6");
+    }
+
+    @Test
+    void testSearchAllCasesWithPermissionsGlobalFalseUseInterpreterTrueOnSingleCourthouse() {
+        // given
+        var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
+        securityGroupSwansea.setGlobalAccess(false);
+        securityGroupSwansea.setUseInterpreter(true);
+        assignSecurityGroupToUser(user, securityGroupSwansea);
+
+        userAccountRepository.save(user);
+
+        // when
+        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+
+        // then
+        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case2");
+    }
+
+    @Test
+    //TODO
+    void testSearchAllCasesWithPermissionsGlobalTrueUseInterpreterTrueOnSingleCourthouse() {
+        // given
+        var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
+        securityGroupSwansea.setGlobalAccess(true);
+        securityGroupSwansea.setUseInterpreter(true);
+        assignSecurityGroupToUser(user, securityGroupSwansea);
+
+        userAccountRepository.save(user);
+
+        // when
+        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+
+        // then
+        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case2", "Case3", "Case4", "Case5", "Case6");
+    }
+
+    @Test
     void testSearchAllCasesWithPermissionsGlobalTrueAndUseInterpreterWithDifferentValuesForCourthouses() {
         // given
-        var user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        user.getSecurityGroupEntities().clear();
-
+        //FIXME it defaults to use interpreter true in this case
         var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
         securityGroupSwansea.setGlobalAccess(true);
         securityGroupSwansea.setUseInterpreter(true);
@@ -123,10 +226,8 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
 
     @Test
     void testSearchAllCasesWithPermissionsGlobalTrueUseInterpreterFalseForAllCourthouses() {
+        //TODO confirm: in this case use interpreter on the global access is considered false?
         // given
-        var user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        user.getSecurityGroupEntities().clear();
-
         var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
         securityGroupSwansea.setGlobalAccess(true);
         securityGroupSwansea.setUseInterpreter(false);
@@ -151,9 +252,6 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     @Test
     void testSearchAllCasesWithPermissionsGlobalFalseUseInterpreterTrueForAllCourthouses() {
         // given
-        var user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        user.getSecurityGroupEntities().clear();
-
         var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
         securityGroupSwansea.setGlobalAccess(false);
         securityGroupSwansea.setUseInterpreter(true);
