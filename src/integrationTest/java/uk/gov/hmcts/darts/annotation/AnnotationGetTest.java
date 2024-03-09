@@ -45,7 +45,7 @@ class AnnotationGetTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Autowired
-    private AnnotationTestGivensBuilder given;
+    private TestGivenBuilder given;
 
 
     @Test

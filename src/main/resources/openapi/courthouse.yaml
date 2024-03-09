@@ -95,11 +95,11 @@ paths:
           description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
-  /courthouses/{courthouse_id}:
-    put:
+    patch:
+      operationId: updateCourthouse
+      summary: Update an existing courthouse record.
       tags:
         - Courthouses
-      summary: Amends a courthouse record with supplied details.
       parameters:
         - in: path
           name: courthouse_id
@@ -107,18 +107,16 @@ paths:
             type: integer
           required: true
       requestBody:
-        $ref: '#/components/requestBodies/CourthousePost'
+        $ref: '#/components/requestBodies/CourthousePatch'
       responses:
-        '204':
-          description: No Content
-        '400':
-          description: A required parameter is missing or an invalid datatype or value was provided for property.
-        '409':
-          description: Returned in the case where courthouse name or code amended is not unique.
-        '404':
-          description: Resource with the provided id does not exist.
-        '500':
-          description: Internal Server Error
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCourthouse'
+        # *** error responses ***
+  /courthouses/{courthouse_id}:
     delete:
       tags:
         - Courthouses
@@ -145,6 +143,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Courthouse'
+    CourthousePatch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CourthousePatch'
   schemas:
     Courthouse:
       type: object
@@ -161,6 +165,21 @@ components:
         region_id:
           type: integer
           example: 0
+    CourthousePatch:
+      type: object
+      properties:
+        courthouse_name:
+          type: string
+        display_name:
+          type: string
+        region_id:
+          type: integer
+          example: 0
+        security_group_ids:
+          type: array
+          items:
+            type: integer
+          example: [ 1, 2 ]
     AdminRegion:
       type: object
       properties:
@@ -217,7 +236,14 @@ components:
         - "COURTHOUSE_100"
         - "COURTHOUSE_101"
         - "COURTHOUSE_102"
-      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS, COURTHOUSE_NOT_FOUND ]
+        - "COURTHOUSE_103"
+        - "COURTHOUSE_104"
+      x-enum-varnames: [
+        COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_NOT_FOUND,
+        DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
 
     CourthouseTitleErrors:
       type: string
@@ -225,7 +251,14 @@ components:
         - "Provided courthouse name already exists."
         - "Provided courthouse code already exists."
         - "Courthouse with provided ID does not exist."
-      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS, COURTHOUSE_NOT_FOUND ]
+        - "Provided display name already exists."
+        - "The courthouse name cannot be change because it has existing cases."
+      x-enum-varnames: [
+        COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_NOT_FOUND,
+        DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
 
     UserAuthorisation403_109ErrorCode:
       type: string

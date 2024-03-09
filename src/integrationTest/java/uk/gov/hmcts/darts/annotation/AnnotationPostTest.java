@@ -34,7 +34,7 @@ class AnnotationPostTest extends IntegrationBase {
     private final BasicJsonTester json = new BasicJsonTester(getClass());
 
     @Autowired
-    private AnnotationTestGivensBuilder given;
+    private TestGivenBuilder given;
 
 
     @Autowired

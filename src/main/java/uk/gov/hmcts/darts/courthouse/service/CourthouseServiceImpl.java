@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.courthouse.service;
 
-import lombok.AllArgsConstructor;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.component.validation.BiValidator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -12,14 +14,14 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
-import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminCourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 
 import java.util.ArrayList;
@@ -29,37 +31,34 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
+
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class CourthouseServiceImpl implements CourthouseService {
 
-    private CourthouseRepository courthouseRepository;
-    private HearingRepository hearingRepository;
-    private CaseRepository caseRepository;
-    private RegionRepository regionRepository;
-    private RetrieveCoreObjectService retrieveCoreObjectService;
+    private final CourthouseRepository courthouseRepository;
+    private final RegionRepository regionRepository;
+    private final HearingRepository hearingRepository;
+    private final CaseRepository caseRepository;
 
-    private CourthouseToCourthouseEntityMapper courthouseMapper;
+    private final CourthouseToCourthouseEntityMapper courthouseMapper;
+    private final SecurityGroupRepository securityGroupRepository;
 
     private final AdminCourthouseToCourthouseEntityMapper adminMapper;
+    private final BiValidator<CourthousePatch, Integer> courthousePatchValidator;
+    private final CourthouseUpdateMapper courthouseUpdateMapper;
 
     @Override
     public void deleteCourthouseById(Integer id) {
         courthouseRepository.deleteById(id);
     }
 
-    @Override
-    public CourthouseEntity amendCourthouseById(Courthouse courthouse, Integer id) {
-        checkCourthouseIsUnique(courthouse);
-
-        CourthouseEntity originalEntity = courthouseRepository.getReferenceById(id);
-        originalEntity.setCourthouseName(courthouse.getCourthouseName());
-        originalEntity.setCode(courthouse.getCode());
-
-        return courthouseRepository.saveAndFlush(originalEntity);
-    }
-
+    // TODO: needs to be removed. Only used in test
     @Override
     public CourthouseEntity getCourtHouseById(Integer id) {
         return courthouseRepository.getReferenceById(id);
@@ -124,12 +123,12 @@ public class CourthouseServiceImpl implements CourthouseService {
     private void checkCourthouseIsUnique(Courthouse courthouse) {
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouse.getCourthouseName());
         if (foundCourthouse.isPresent()) {
-            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
+            throw new DartsApiException(COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
         }
         if (courthouse.getCode() != null) {
             foundCourthouse = courthouseRepository.findByCode(courthouse.getCode());
             if (foundCourthouse.isPresent()) {
-                throw new DartsApiException(CourthouseApiError.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS);
+                throw new DartsApiException(COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS);
             }
 
         }
@@ -177,5 +176,18 @@ public class CourthouseServiceImpl implements CourthouseService {
             }
         }
         return courthouseOptional.get();
+    }
+
+    @Override
+    @Transactional
+    public AdminCourthouse updateCourthouse(Integer courthouseId, CourthousePatch courthousePatch) {
+        var courthouseEntity = courthouseRepository.findById(courthouseId)
+            .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
+        courthousePatchValidator.validate(courthousePatch, courthouseId);
+
+        var patchedCourthouse = courthouseUpdateMapper.mapPatchToEntity(courthousePatch, courthouseEntity);
+        courthouseRepository.save(patchedCourthouse);
+
+        return courthouseUpdateMapper.mapEntityToAdminCourthouse(patchedCourthouse);
     }
 }
