@@ -17,5 +17,4 @@ public interface AuthorisationService {
 
     List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
 
-    List<Integer> getListOfCourthouseIdsUserHasAccessToIfInterpreterUsed();
 }

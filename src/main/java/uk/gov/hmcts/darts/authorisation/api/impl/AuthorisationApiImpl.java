@@ -60,9 +60,4 @@ public class AuthorisationApiImpl implements AuthorisationApi {
         return userIdentity.getListOfCourthouseIdsUserHasAccessTo();
     }
 
-    @Override
-    public List<Integer> getListOfCourthouseIdsUserHasAccessToIfInterpreterUsed() {
-        return authorisationService.getListOfCourthouseIdsUserHasAccessToIfInterpreterUsed();
-    }
-
 }

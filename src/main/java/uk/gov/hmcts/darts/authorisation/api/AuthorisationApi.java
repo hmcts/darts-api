@@ -23,5 +23,4 @@ public interface AuthorisationApi {
 
     List<Integer> getListOfCourthouseIdsUserHasAccessTo();
 
-    List<Integer> getListOfCourthouseIdsUserHasAccessToIfInterpreterUsed();
 }
