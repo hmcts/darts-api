@@ -1,17 +1,17 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.platform.commons.JUnitException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -25,14 +25,10 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
-import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -463,71 +459,11 @@ public class DartsDatabaseStub {
         return annotationRepository.save(annotationEntity);
     }
 
-    public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
-    }
-
-    public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {
-        return caseRepository.save(courtCaseEntity);
-    }
-
-    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
-        return caseManagementRetentionRepository.save(caseManagementRetentionEntity);
-    }
-
-    public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
-        return caseRetentionRepository.save(caseRetentionEntity);
-    }
-
-    public CourthouseEntity save(CourthouseEntity courthouseEntity) {
-        return courthouseRepository.save(courthouseEntity);
-    }
-
-    public CourtroomEntity save(CourtroomEntity courtroom) {
-        return courtroomRepository.save(courtroom);
-    }
-
-    public EventEntity save(EventEntity eventEntity) {
-        return eventRepository.save(eventEntity);
-    }
-
-    public MediaRequestEntity save(MediaRequestEntity mediaRequestEntity) {
-        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
-    }
-
-    public MediaEntity save(MediaEntity media) {
-        return mediaRepository.save(media);
-    }
-
-    public JudgeEntity save(JudgeEntity judge) {
-        return judgeRepository.save(judge);
-    }
-
-    public TransformedMediaEntity save(TransformedMediaEntity transformedMediaEntity) {
-        return transformedMediaRepository.saveAndFlush(transformedMediaEntity);
-    }
-
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         courthouseRepository.save(hearingEntity.getCourtroom().getCourthouse());
         courtroomRepository.save(hearingEntity.getCourtroom());
         return hearingRepository.save(hearingEntity);
-    }
-
-    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
-    }
-
-    public TransientObjectDirectoryEntity save(TransientObjectDirectoryEntity transientObjectDirectory) {
-        return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectory);
-    }
-
-    public TranscriptionWorkflowEntity save(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
-        return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
-    }
-
-    public AnnotationDocumentEntity save(AnnotationDocumentEntity annotationDocumentEntity) {
-        return annotationDocumentRepository.save(annotationDocumentEntity);
     }
 
     public void save(TranscriptionWorkflowEntity... transcriptionWorkflowEntity) {
@@ -537,9 +473,10 @@ public class DartsDatabaseStub {
     public void save(TranscriptionCommentEntity... transcriptionCommentEntities) {
         transcriptionCommentRepository.saveAllAndFlush(asList(transcriptionCommentEntities));
     }
+
     @Transactional
     public <T> T save(T entity) {
-        Method getIdInstanceMethod = null;
+        Method getIdInstanceMethod;
         try {
             getIdInstanceMethod = entity.getClass().getMethod("getId");
             Integer id = (Integer) getIdInstanceMethod.invoke(entity);
@@ -550,8 +487,34 @@ public class DartsDatabaseStub {
                 return this.entityManager.merge(entity);
             }
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new JUnitException("Failed to save entity", e);
         }
+    }
+
+    @SneakyThrows
+    @Transactional
+    public <T> void saveAll(T... entities) {
+        if (entities == null || entities.length == 0) {
+            return;
+        }
+
+        var getIdInstanceMethod = entities[0].getClass().getMethod("getId");
+
+        stream(entities).forEach(entity -> {
+            Integer id = null;
+
+            try {
+                id = (Integer) getIdInstanceMethod.invoke(entity);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (id == null) {
+                this.entityManager.persist(entity);
+            } else {
+                this.entityManager.merge(entity);
+            }
+        });
     }
 
 
