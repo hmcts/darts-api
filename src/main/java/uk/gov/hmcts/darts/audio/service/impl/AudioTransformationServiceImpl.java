@@ -287,19 +287,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
 
-        DownloadResponseMetaData downloadResponseMetaData = null;
-        try {
-            downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity);
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
+            UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
+
+            var mediaData = downloadResponseMetaData.getInputStream();
+            Path downloadPath = saveBlobDataToTempWorkspace(mediaData, id.toString());
+            return downloadPath;
         } catch (FileNotDownloadedException e) {
             throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
         }
-
-        UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
-
-        var mediaData = downloadResponseMetaData.getInputStream();
-        Path downloadPath = saveBlobDataToTempWorkspace(mediaData, id.toString());
-
-        return downloadPath;
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")

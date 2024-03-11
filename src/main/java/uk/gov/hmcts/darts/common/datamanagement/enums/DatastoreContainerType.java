@@ -9,12 +9,11 @@ import java.util.Optional;
 @Getter
 @RequiredArgsConstructor
 public enum DatastoreContainerType {
-    INBOUND(1, Optional.of(ExternalLocationTypeEnum.INBOUND)),
-    OUTBOUND(-1, Optional.empty()),
-    UNSTRUCTURED(2, Optional.of(ExternalLocationTypeEnum.UNSTRUCTURED)),
-    ARM(3, Optional.of(ExternalLocationTypeEnum.ARM)),
-    DETS(4, Optional.of(ExternalLocationTypeEnum.DETS));
+    INBOUND(Optional.of(ExternalLocationTypeEnum.INBOUND)),
+    OUTBOUND(Optional.empty()),
+    UNSTRUCTURED(Optional.of(ExternalLocationTypeEnum.UNSTRUCTURED)),
+    ARM(Optional.of(ExternalLocationTypeEnum.ARM)),
+    DETS(Optional.of(ExternalLocationTypeEnum.DETS));
 
-    private final Integer id;
     private final Optional<ExternalLocationTypeEnum> externalLocationTypeEnum;
 }

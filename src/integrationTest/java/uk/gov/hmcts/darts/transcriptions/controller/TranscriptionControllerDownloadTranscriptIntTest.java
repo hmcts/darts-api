@@ -279,6 +279,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockDataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
         verify(mockFileBasedDownloadResponseMetaData).getInputStream();
+        verify(mockFileBasedDownloadResponseMetaData).close();
         verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);
     }
 

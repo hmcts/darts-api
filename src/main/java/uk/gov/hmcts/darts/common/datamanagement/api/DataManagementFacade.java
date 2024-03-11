@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import java.util.List;
 
 /**
- * An interface that mediates between the three data management APIs.
+ * An interface that mediates between the three data management APIs. Shoudl be used with try-with-resources.
  * {@link uk.gov.hmcts.darts.datamanagement.api.DataManagementApi}
  * {@link uk.gov.hmcts.darts.dets.api.DetsDataManagementApi}
  * {@link uk.gov.hmcts.darts.arm.api.ArmDataManagementApi}

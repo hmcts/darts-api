@@ -54,9 +54,7 @@ public class AnnotationDataManagement {
     }
 
     public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
-        try {
-            DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities);
-
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities)) {
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",
@@ -78,7 +76,8 @@ public class AnnotationDataManagement {
                 case UNSTRUCTURED:
                     dataManagementApi.deleteBlobDataFromUnstructuredContainer(location);
                     break;
-                default: throw new IllegalArgumentException("Unexpected value: " + type);
+                default:
+                    throw new IllegalArgumentException("Unexpected value: " + type);
             }
         } catch (AzureDeleteBlobException e) {
             log.error("Failed to delete orphaned annotation document {}", location, e);

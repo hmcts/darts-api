@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -123,7 +122,6 @@ class TranscriptionDownloaderTest {
         var transcription = someTranscriptionWith(List.of(transcriptionDocument));
         when(transcriptionRepository.findById(transcription.getId())).thenReturn(Optional.of(transcription));
 
-        when(fileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
         when(fileBasedDownloadResponseMetaData.getInputStream()).thenThrow(new IOException());
         when(dataManagementFacade.retrieveFileFromStorage(any(TranscriptionDocumentEntity.class))).thenReturn(fileBasedDownloadResponseMetaData);
 
@@ -132,6 +130,7 @@ class TranscriptionDownloaderTest {
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
         verify(dataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
+        verify(fileBasedDownloadResponseMetaData).close();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
     }
 
@@ -164,6 +163,7 @@ class TranscriptionDownloaderTest {
         assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(InputStreamResource.class);
 
         verify(fileBasedDownloadResponseMetaData).getInputStream();
+        verify(fileBasedDownloadResponseMetaData).close();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
 
     }
