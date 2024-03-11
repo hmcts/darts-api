@@ -704,4 +704,13 @@ public class DartsDatabaseStub {
         save(annotation);
         return annotation;
     }
+
+    public SecurityGroupEntity getSecurityGroupRef(int id) {
+        return securityGroupRepository.getReferenceById(id);
+    }
+
+
+    public CourthouseEntity findCourthouseById(int id) {
+        return courthouseRepository.findById(id).orElseThrow();
+    }
 }
