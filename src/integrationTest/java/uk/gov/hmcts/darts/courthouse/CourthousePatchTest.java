@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.json.BasicJsonTester;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
 
@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.RegionTestData.minimalRegion;
 
 @AutoConfigureMockMvc
 class CourthousePatchTest extends IntegrationBase {
@@ -82,23 +83,24 @@ class CourthousePatchTest extends IntegrationBase {
     @Test
     void updatesRegions() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var region = dartsDatabase.save(minimalRegion());
         var courthouse = dartsDatabase.save(someMinimalCourthouse());
 
         var mvcResult = mockMvc.perform(
                 patch(ENDPOINT + courthouse.getId().toString())
-                    .content(regionPatch(1))
+                    .content(regionPatch(region.getId()))
                     .contentType("application/json"))
             .andExpect(status().isOk())
             .andReturn();
 
         var response = json.from(mvcResult.getResponse().getContentAsString());
-        assertThat(response).extractingJsonPathNumberValue("region_id").isEqualTo(1);
+        assertThat(response).extractingJsonPathNumberValue("region_id").isEqualTo(region.getId());
     }
 
     private String regionPatch(Integer regionId) {
          return String.format("""
             {
-              "region_id": %n
+              "region_id": %d
             }""", regionId);
     }
 

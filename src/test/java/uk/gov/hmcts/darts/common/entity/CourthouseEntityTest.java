@@ -16,10 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class CourthouseEntityTest {
 
-    public static final String TEST_COURTHOUSE_NAME = "Test courthouse";
-
-    public static final int CODE = 123;
-
     @Test
     void adminCourtHouseEmptyRegions() {
 

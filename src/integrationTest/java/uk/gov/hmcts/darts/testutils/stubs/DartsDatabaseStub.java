@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
@@ -84,6 +86,8 @@ import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -533,6 +537,23 @@ public class DartsDatabaseStub {
     public void save(TranscriptionCommentEntity... transcriptionCommentEntities) {
         transcriptionCommentRepository.saveAllAndFlush(asList(transcriptionCommentEntities));
     }
+    @Transactional
+    public <T> T save(T entity) {
+        Method getIdInstanceMethod = null;
+        try {
+            getIdInstanceMethod = entity.getClass().getMethod("getId");
+            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
+            if (id == null) {
+                this.entityManager.persist(entity);
+                return entity;
+            } else {
+                return this.entityManager.merge(entity);
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public void saveAll(HearingEntity... hearingEntities) {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));

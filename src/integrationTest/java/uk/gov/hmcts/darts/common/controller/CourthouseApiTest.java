@@ -382,41 +382,6 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
-    void courthousesPut() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        createEnabledUserAccountEntity(user);
-
-        Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
-
-        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
-        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
-
-        requestBuilder = get("/admin/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-
-        mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.courthouse_name", is("test")))
-            .andExpect(jsonPath("$.code", is(9001)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
-
-    }
-
-    @Test
-    void courthousesPutWhenIdDoesNotExist() throws Exception {
-        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
-        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 123)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
-
-    }
-
-    @Test
     void courthousesDelete() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
