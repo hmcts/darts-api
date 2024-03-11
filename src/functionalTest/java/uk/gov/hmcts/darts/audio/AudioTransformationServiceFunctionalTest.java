@@ -31,7 +31,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
 
     @Test
-    void test() throws IOException {
+    void testPostAudio() throws IOException {
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
         String caseNumber = "func-case-" + randomAlphanumeric(7);
@@ -62,17 +62,6 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
         assertEquals(201, caseResponse.statusCode());
 
-        /*private OffsetDateTime startedAt;
-        private OffsetDateTime endedAt;
-        private Integer channel;
-        private Integer totalChannels;
-        private String format;
-        private String filename;
-        private String courthouse;
-        private String courtroom;
-        private String mediaFile;
-        private Long fileSize;
-        private String checksum;*/
         String audio1 = getContentsFromFile("audio/functional-test-ch1.mp2");
         String audioMetadata = """
             {
@@ -97,7 +86,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .mimeType("audio/mpeg")
             .build();
 
-        Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
+        Response postAudioResponse = buildRequestWithInternalAuth()
             .contentType(ContentType.MULTIPART)
             .multiPart(multiPartSpecification)
             .when()
