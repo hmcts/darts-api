@@ -27,8 +27,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -466,14 +464,6 @@ public class DartsDatabaseStub {
         return hearingRepository.save(hearingEntity);
     }
 
-    public void save(TranscriptionWorkflowEntity... transcriptionWorkflowEntity) {
-        transcriptionWorkflowRepository.saveAllAndFlush(asList(transcriptionWorkflowEntity));
-    }
-
-    public void save(TranscriptionCommentEntity... transcriptionCommentEntities) {
-        transcriptionCommentRepository.saveAllAndFlush(asList(transcriptionCommentEntities));
-    }
-
     @Transactional
     public <T> T save(T entity) {
         Method getIdInstanceMethod;
@@ -493,7 +483,7 @@ public class DartsDatabaseStub {
 
     @SneakyThrows
     @Transactional
-    public <T> void saveAll(T... entities) {
+    public void saveAll(Object... entities) {
         if (entities == null || entities.length == 0) {
             return;
         }
@@ -501,12 +491,12 @@ public class DartsDatabaseStub {
         var getIdInstanceMethod = entities[0].getClass().getMethod("getId");
 
         stream(entities).forEach(entity -> {
-            Integer id = null;
+            Integer id;
 
             try {
                 id = (Integer) getIdInstanceMethod.invoke(entity);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
+                throw new JUnitException("Failed to save entity", e);
             }
 
             if (id == null) {
@@ -515,19 +505,6 @@ public class DartsDatabaseStub {
                 this.entityManager.merge(entity);
             }
         });
-    }
-
-
-    public void saveAll(HearingEntity... hearingEntities) {
-        hearingRepository.saveAllAndFlush(asList(hearingEntities));
-    }
-
-    public void saveAll(EventEntity... eventEntities) {
-        eventRepository.saveAll(asList(eventEntities));
-    }
-
-    public void saveAll(EventHandlerEntity... eventHandlerEntities) {
-        eventHandlerRepository.saveAll(asList(eventHandlerEntities));
     }
 
     public void saveAll(UserAccountEntity... testUsers) {

@@ -28,7 +28,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
         var courthouseEntity = repository.findById(id)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
 
-        if (!nonNull(patch.getCourthouseName())) {
+        if (nonNull(patch.getCourthouseName())) {
             if (caseRepository.existsByCourthouse(courthouseEntity)) {
                 throw new DartsApiException(COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING);
             }
@@ -38,8 +38,8 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
             }
         }
 
-        if (!nonNull(patch.getDisplayName())) {
-            if (repository.existsByDisplayNameIgnoreCaseAndIdNot(patch.getCourthouseName(), id)) {
+        if (nonNull(patch.getDisplayName())) {
+            if (repository.existsByDisplayNameIgnoreCaseAndIdNot(patch.getDisplayName(), id)) {
                 throw new DartsApiException(DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
             }
         }
