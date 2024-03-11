@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @AutoConfigureMockMvc
 class UserControllerGetUsersByIdIntTest extends IntegrationBase {
@@ -54,7 +55,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -77,7 +78,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -101,7 +102,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 }

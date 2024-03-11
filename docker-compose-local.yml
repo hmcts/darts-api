@@ -41,11 +41,13 @@ services:
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
       - ARM_SAS_ENDPOINT
-      - DETS_SAS_ENDPOINT
+      - DETS_SAS_URL_ENDPOINT
       - ARM_USERNAME
       - ARM_PASSWORD
       - ARM_URL=http://darts-stub-services:4551
       - ARM_PROPERTY_FILE_ENVIRONMENT=nle
+      - ACTIVE_DIRECTORY_B2C_BASE_URI=https://hmctsstgextid.b2clogin.com
+      - ACTIVE_DIRECTORY_B2C_AUTH_URI=https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     build:
       context: .
       dockerfile: Dockerfile

@@ -13,8 +13,6 @@ import uk.gov.hmcts.darts.annotation.service.AnnotationUploadService;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 
 import java.io.IOException;
@@ -36,8 +34,6 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
     private final Validator<Annotation> hearingExistsValidator;
     private final Validator<MultipartFile> fileTypeValidator;
     private final AnnotationDataManagement annotationDataManagement;
-    private final AnnotationRepository annotationRepository;
-    private final AnnotationDocumentRepository annotationDocumentRepository;
 
     @Override
     public Integer upload(MultipartFile multipartFile, Annotation annotation) {
@@ -48,27 +44,26 @@ public class AnnotationUploadServiceImpl implements AnnotationUploadService {
         var containerLocations = annotationDataManagement.upload(binaryData, multipartFile.getOriginalFilename());
 
         var annotationEntity = annotationMapper.mapFrom(annotation);
-        annotationRepository.save(annotationEntity);
 
         var checksum = fileContentChecksum.calculate(binaryData.toBytes());
         var annotationDocumentEntity = annotationDocumentBuilder.buildFrom(multipartFile, annotationEntity, checksum);
-        annotationDocumentRepository.save(annotationDocumentEntity);
 
         var inboundExternalObjectDirectory = externalObjectDirectoryBuilder.buildFrom(
-            annotationDocumentEntity, containerLocations.inboundLocation(), INBOUND);
+            annotationDocumentEntity, containerLocations.get(INBOUND), INBOUND);
         var unstructuredExternalObjectDirectory = externalObjectDirectoryBuilder.buildFrom(
-            annotationDocumentEntity, containerLocations.unstructuredLocation(), UNSTRUCTURED);
+            annotationDocumentEntity, containerLocations.get(UNSTRUCTURED), UNSTRUCTURED);
 
         try {
             annotationPersistenceService.persistAnnotation(
                 inboundExternalObjectDirectory,
                 unstructuredExternalObjectDirectory,
-                annotation.getHearingId());
+                annotation.getHearingId(),
+                annotationEntity,
+                annotationDocumentEntity);
 
         } catch (RuntimeException exception) {
             log.error("Unable to persist annotation ", exception);
-            annotationDataManagement.attemptToDeleteDocument(containerLocations.inboundLocation());
-            annotationDataManagement.attemptToDeleteDocument(containerLocations.unstructuredLocation());
+            annotationDataManagement.attemptToDeleteDocuments(containerLocations);
         }
 
         return annotationEntity.getId();

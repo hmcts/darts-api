@@ -100,6 +100,11 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                     "id": 11,
                     "display_name": "Super Admin",
                     "display_state": true
+                  },
+                  {
+                    "id": 12,
+                    "display_name": "Super User",
+                    "display_state": true
                   }
                 ]
             """;

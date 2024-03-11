@@ -15,7 +15,6 @@ public class AnnotationDocumentBuilder {
 
     public AnnotationDocumentEntity buildFrom(MultipartFile document, AnnotationEntity annotationEntity, String checksum) {
         final var annotationDocumentEntity = new AnnotationDocumentEntity();
-        annotationDocumentEntity.setAnnotation(annotationEntity);
         annotationDocumentEntity.setFileName(document.getOriginalFilename());
         annotationDocumentEntity.setFileType(document.getContentType());
         annotationDocumentEntity.setFileSize((int) document.getSize());

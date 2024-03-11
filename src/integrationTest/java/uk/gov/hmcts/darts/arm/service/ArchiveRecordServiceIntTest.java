@@ -291,6 +291,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
@@ -355,6 +356,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
@@ -419,6 +421,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         final String checksum = "C3CCA7021CF79B42F245AF350601C284";
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, testUser, checksum, startedAt);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,

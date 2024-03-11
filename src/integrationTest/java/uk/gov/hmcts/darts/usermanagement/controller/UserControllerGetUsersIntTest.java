@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 
 @AutoConfigureMockMvc
 class UserControllerGetUsersIntTest extends IntegrationBase {
@@ -67,7 +68,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -90,7 +91,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at").exists())
             .andReturn();
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 

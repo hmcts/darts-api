@@ -74,8 +74,8 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
-        - name: DETSSasEndpoint
-          alias: DETS_SAS_ENDPOINT
+        - name: DETSSasURLEndpoint
+          alias: DETS_SAS_URL_ENDPOINT
         - name: ArmUrl
           alias: ARM_URL
         - name: ArmUsername
@@ -86,12 +86,14 @@ java:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
-    DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
+    DARTS_GATEWAY_URL: http://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     DARTS_PORTAL_URL: https://darts.{{ .Values.global.environment }}.apps.hmcts.net
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     AUTOMATED_TASK_MODE: false
     API_MODE: true
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
+    ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
+    ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
 
 function:
   scaleType: Job
@@ -184,6 +186,8 @@ function:
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
+    ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
+    ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:
