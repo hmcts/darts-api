@@ -42,7 +42,8 @@ public class DetsApiServiceImpl implements DetsApiService {
             log.error("Blob {} does not exist in {} container", blobId, configuration.getContainerName());
         }
 
-        try (OutputStream downloadOS = downloadResponseMetaData.getOutputStream(configuration)) {
+        try {
+            OutputStream downloadOS = downloadResponseMetaData.getOutputStream(configuration);
             Date downloadStartDate = new Date();
             blobClient.downloadStream(downloadOS);
             Date downloadEndDate = new Date();

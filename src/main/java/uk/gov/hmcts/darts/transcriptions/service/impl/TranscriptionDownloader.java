@@ -55,7 +55,8 @@ public class TranscriptionDownloader {
     }
 
     private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
-        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument)) {
+        try {
+            DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument);
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",

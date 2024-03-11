@@ -130,7 +130,6 @@ class TranscriptionDownloaderTest {
             .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
 
         verify(dataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
-        verify(fileBasedDownloadResponseMetaData).close();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
     }
 
@@ -163,7 +162,6 @@ class TranscriptionDownloaderTest {
         assertThat(downloadTranscriptResponse.getResource()).isInstanceOf(InputStreamResource.class);
 
         verify(fileBasedDownloadResponseMetaData).getInputStream();
-        verify(fileBasedDownloadResponseMetaData).close();
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
 
     }
