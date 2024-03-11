@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -34,7 +35,7 @@ class AnnotationPostTest extends IntegrationBase {
     private final BasicJsonTester json = new BasicJsonTester(getClass());
 
     @Autowired
-    private TestGivenBuilder given;
+    private GivenBuilder given;
 
 
     @Autowired

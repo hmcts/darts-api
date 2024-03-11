@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
@@ -21,14 +20,10 @@ import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -51,10 +46,10 @@ class CourthouseServiceImplTest {
     CourthouseRepository courthouseRepository;
 
     @Mock
-    RegionRepository regionRepository;
+    CourthouseToCourthouseEntityMapper courthouseMapper;
 
     @Mock
-    CourthouseToCourthouseEntityMapper courthouseMapper;
+    RegionRepository regionRepository;
 
     @Mock
     AdminRegionToRegionEntityMapper regionMapper;
@@ -221,123 +216,6 @@ class CourthouseServiceImplTest {
     }
 
     @Test
-    void adminCourtHouseEmptyRegions() {
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        Set<RegionEntity> regions = new LinkedHashSet<>();
-
-        courthouseEntity.setRegions(regions);
-
-        assertNull(courthouseEntity.getRegion());
-
-    }
-
-    @Test
-    void adminCourtHouseNullRegions() {
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setRegions(null);
-        courthouseEntity.setRegion(null);
-
-        assertNull(courthouseEntity.getRegion());
-
-    }
-
-    @Test
-    void adminCourtHouseSetOneRegionAndNoRegions() {
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-
-        RegionEntity region1 = new RegionEntity();
-        region1.setId(5);
-
-        courthouseEntity.setRegions(null);
-        courthouseEntity.setRegion(region1);
-
-        assertEquals(5, courthouseEntity.getRegion().getId());
-    }
-
-    @Test
-    void adminCourtHouseSetRegionsAndRegion() {
-
-        Set<RegionEntity> regions = new LinkedHashSet<>();
-        RegionEntity region1 = new RegionEntity();
-        region1.setId(5);
-        RegionEntity region2 = new RegionEntity();
-        region2.setId(6);
-        regions.add(region1);
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setRegions(regions);
-        courthouseEntity.setRegion(region2);
-
-        assertEquals(6, courthouseEntity.getRegion().getId());
-    }
-
-    @Test
-    void adminCourtHouseSetRegionsWithTwoRegionEntities() {
-
-        Set<RegionEntity> regions = new LinkedHashSet<>();
-        RegionEntity region1 = new RegionEntity();
-        region1.setId(5);
-        RegionEntity region2 = new RegionEntity();
-        region2.setId(6);
-        regions.add(region1);
-        regions.add(region2);
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setRegions(regions);
-
-        Exception exception = assertThrows(IllegalStateException.class, courthouseEntity::getRegion);
-
-        assertNull(exception.getMessage());
-
-    }
-
-    @Test
-    void adminCourtHouseSetOneRegion() {
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-
-        Set<RegionEntity> regions = new LinkedHashSet<>();
-        RegionEntity region1 = new RegionEntity();
-        region1.setId(5);
-
-        courthouseEntity.setRegions(regions);
-        courthouseEntity.setRegion(region1);
-
-        assertEquals(5, courthouseEntity.getRegion().getId());
-
-    }
-
-    @Test
-    void adminCourtHouseSecurityRegions() {
-
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseEntity.setId(88);
-        courthouseEntity.setCode(CODE);
-
-        Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
-        SecurityGroupEntity securityGroup1 = new SecurityGroupEntity();
-        securityGroup1.setId(3);
-        SecurityGroupEntity securityGroup2 = new SecurityGroupEntity();
-        securityGroup2.setId(4);
-
-        securityGroups.add(securityGroup1);
-        securityGroups.add(securityGroup2);
-
-        courthouseEntity.setSecurityGroups(securityGroups);
-
-        Set<SecurityGroupEntity> secGrps = courthouseEntity.getSecurityGroups();
-        Set<Integer> expectedList = new LinkedHashSet<>(Arrays.asList(3, 4));
-        Set<Integer> actualList = secGrps.stream().map(SecurityGroupEntity::getId).collect(Collectors.toSet());
-
-        assertEquals(expectedList, actualList);
-
-    }
-
-    @Test
     void testGetAllRegions() {
         RegionEntity regionEntity1 = new RegionEntity();
         regionEntity1.setId(1);
@@ -354,7 +232,5 @@ class CourthouseServiceImplTest {
         assertEquals(regionEntity1, returnedEntities.get(0));
         assertEquals(regionEntity2, returnedEntities.get(1));
     }
-
-
 
 }

@@ -61,12 +61,12 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     @Column(name = "display_name")
     private String displayName;
 
-    public void setRegions(Set<RegionEntity> regions) {
-        if (regions.size() > 1) {
-            throw new IllegalArgumentException("Courthouses can only support 1 Region");
-        }
-        setRegion(regions.iterator().next());
-    }
+    //    public void setRegions(Set<RegionEntity> regions) {
+    //        if (regions.size() > 1) {
+    //            throw new IllegalArgumentException("Courthouses can only support 1 Region");
+    //        }
+    //        setRegion(regions.iterator().next());
+    //    }
 
 
     public RegionEntity getRegion() throws IllegalStateException {

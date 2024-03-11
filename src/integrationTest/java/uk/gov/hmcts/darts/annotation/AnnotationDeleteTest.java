@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TestGivenBuilder;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 
 import java.net.URI;
 
@@ -33,7 +33,7 @@ class AnnotationDeleteTest extends IntegrationBase {
     private static final URI ENDPOINT = URI.create("/annotations");
 
     @Autowired
-    private TestGivenBuilder given;
+    private GivenBuilder given;
 
     @Autowired
     private MockMvc mockMvc;

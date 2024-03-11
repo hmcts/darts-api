@@ -6,18 +6,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.json.BasicJsonTester;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TestGivenBuilder;
-import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.*;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
 
 @AutoConfigureMockMvc
 class CourthousePatchTest extends IntegrationBase {
@@ -27,14 +24,14 @@ class CourthousePatchTest extends IntegrationBase {
     private final BasicJsonTester json = new BasicJsonTester(getClass());
 
     @Autowired
-    private TestGivenBuilder given;
+    private GivenBuilder given;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void updatesCourthouseName() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(ADMIN);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var courthouse = dartsDatabase.save(someMinimalCourthouse());
 
         var mvcResult = mockMvc.perform(
@@ -51,7 +48,7 @@ class CourthousePatchTest extends IntegrationBase {
 
     @Test
     void updatesDisplayName() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(ADMIN);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var courthouse = dartsDatabase.save(someMinimalCourthouse());
 
         var mvcResult = mockMvc.perform(
@@ -68,7 +65,7 @@ class CourthousePatchTest extends IntegrationBase {
 
     @Test
     void updatesSecurityGroups() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(ADMIN);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var courthouse = dartsDatabase.save(someMinimalCourthouse());
 
         var mvcResult = mockMvc.perform(
@@ -84,7 +81,7 @@ class CourthousePatchTest extends IntegrationBase {
 
     @Test
     void updatesRegions() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(ADMIN);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var courthouse = dartsDatabase.save(someMinimalCourthouse());
 
         var mvcResult = mockMvc.perform(
