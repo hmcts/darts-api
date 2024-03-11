@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.audio;
 
+import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.MultiPartSpecification;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
@@ -79,7 +81,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
               "channel": 1,
               "total_channels": 4,
               "format": "mp2",
-              "filename": "functional-test-ch1",
+              "filename": "functional-test-ch1.mp2",
               "courthouse": "<<courthouse>>",
               "courtroom": "<<courtroom>>",
               "file_size": 9600,
@@ -89,9 +91,15 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         audioMetadata = audioMetadata.replace("<<courthouse>>", courthouseName);
         audioMetadata = audioMetadata.replace("<<courtroom>>", courtroomName);
 
+        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
+            .fileName("functional-test-ch1.mp2")
+            .controlName("file")
+            .mimeType("audio/mpeg")
+            .build();
+
         Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.MULTIPART)
-            .multiPart("file", audio1)
+            .multiPart(multiPartSpecification)
             .when()
             .baseUri(getUri(AUDIOS_PATH))
             .body(audioMetadata)
