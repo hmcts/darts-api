@@ -61,12 +61,15 @@ public class NotificationServiceImpl implements NotificationService {
         List<String> emailAddresses = getEmailAddresses(request);
         String templateParamsString = getTemplateParamsString(request);
         for (String emailAddress : emailAddresses) {
-            saveNotificationToDb(
+            NotificationEntity notificationEntity = saveNotificationToDb(
                 request.getEventId(),
                 request.getCaseId(),
                 StringUtils.trim(emailAddress),
                 templateParamsString
             );
+            log.info("Notification scheduled: notificationId={}, type={}, caseId={}, status={}",
+                 notificationEntity.getId(), notificationEntity.getEventId(), request.getCaseId(),
+                 notificationEntity.getStatus());
         }
     }
 
@@ -152,19 +155,28 @@ public class NotificationServiceImpl implements NotificationService {
 
             GovNotifyRequest govNotifyRequest = null;
             try {
+                log.info("Notification sending: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}",
+                     notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId,
+                     notification.getStatus(), notification.getAttempts());
                 govNotifyRequest = govNotifyRequestHelper.map(notification, templateId);
                 govNotifyService.sendNotification(govNotifyRequest);
                 updateNotificationStatus(notification, NotificationStatus.SENT);
+                log.info("Notification sent: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}",
+                     notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId,
+                     notification.getStatus(), notification.getAttempts());
             } catch (JsonProcessingException e) {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
-                log.error(
-                    "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
-                    notification.getId(),
-                    govNotifyRequest,
-                    e.getMessage()
-                );
                 incrementNotificationFailureCount(notification);
+                if (notification.getAttempts() < maxRetry) {
+                    log.info("Notification GovNotify error, retrying: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}, error={}",
+                         notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId, notification.getStatus(),
+                         notification.getAttempts(), e.getMessage());
+                } else {
+                    log.info("Notification failed to send: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}, error={}",
+                         notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId, notification.getStatus(),
+                         notification.getAttempts(), e.getMessage());
+                }
             }
         }
     }
