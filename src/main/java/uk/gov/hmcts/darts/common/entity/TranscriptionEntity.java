@@ -113,7 +113,6 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     public void addHearing(HearingEntity hearing) {
         if (hearing != null) {
-            addCase(hearing.getCourtCase());
             hearings.add(hearing);
         }
     }
