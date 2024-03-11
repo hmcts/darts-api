@@ -59,6 +59,8 @@ public class CourthouseUpdateMapper {
         Optional.ofNullable(patchedCourthouse.getRegion()).ifPresent(
             region -> adminCourthouse.setRegionId(region.getId())
         );
+        adminCourthouse.setLastModifiedDateTime(patchedCourthouse.getLastModifiedDateTime());
+        adminCourthouse.setCreatedDateTime(patchedCourthouse.getCreatedDateTime());
 
         return adminCourthouse;
     }

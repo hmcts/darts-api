@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CourthouseUpdateMapperTest {
+class CourthouseUpdatePatchToEntityMapperTest {
 
     @Mock
     private RegionRepository regionRepository;
