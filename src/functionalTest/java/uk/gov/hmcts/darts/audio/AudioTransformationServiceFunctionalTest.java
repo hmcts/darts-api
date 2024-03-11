@@ -71,7 +71,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         private String mediaFile;
         private Long fileSize;
         private String checksum;*/
-        String audio1 = getContentsFromFile("functional-test-ch1.mp2");
+        String audio1 = getContentsFromFile("audio/functional-test-ch1.mp2");
         String audioMetadata = """
             {
               "started_at": "2024-03-11T10:12:05.362Z",
