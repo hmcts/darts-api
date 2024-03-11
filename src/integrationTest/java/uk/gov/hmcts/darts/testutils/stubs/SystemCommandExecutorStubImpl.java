@@ -32,7 +32,7 @@ public class SystemCommandExecutorStubImpl implements SystemCommandExecutor {
 
         String executable = command.getExecutable();
         List<String> arguments = Arrays.asList(command.getArguments());
-        log.debug("Stubbing ffmpeg arguments {}", StringUtils.join(arguments, " "));
+        log.debug("Stubbing command line arguments {}", StringUtils.join(arguments, " "));
         if (executable.contains("ffmpeg")) {
             // The output path is assumed to always be the final argument
             var fileOutputPath = Path.of(arguments.get(arguments.size() - 1));
