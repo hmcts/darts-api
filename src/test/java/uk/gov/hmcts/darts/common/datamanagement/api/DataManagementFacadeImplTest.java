@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -130,6 +131,31 @@ class DataManagementFacadeImplTest {
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
             assertEquals(DatastoreContainerType.UNSTRUCTURED, downloadResponseMetaData.getContainerTypeUsedToDownload());
         }
+    }
+
+    @Test
+    void testThrowErrorNoStoredEodEntities() throws Exception {
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+
+        BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
+        blobContainerDownloadables.add(downloadable);
+
+        ExternalObjectDirectoryEntity dets = createEodEntity(unstructuredLocationEntity);
+        dets.getStatus().setId(ObjectRecordStatusEnum.FAILURE.getId());
+
+        List<ExternalObjectDirectoryEntity> entitiesToDownload = Arrays.asList(dets);
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper);
+
+        // make the assertion on the response
+        var exception = assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(entitiesToDownload)
+        );
+
+        assertTrue(exception.getMessage().contains("Supplied list of EodEntities does not have any that are stored"));
     }
 
     @Test
