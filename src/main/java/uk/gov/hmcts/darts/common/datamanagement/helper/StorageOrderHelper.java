@@ -4,13 +4,13 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class StorageOrderHelper {
