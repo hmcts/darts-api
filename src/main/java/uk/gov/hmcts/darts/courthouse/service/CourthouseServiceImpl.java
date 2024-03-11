@@ -46,7 +46,6 @@ public class CourthouseServiceImpl implements CourthouseService {
     private final CaseRepository caseRepository;
 
     private final CourthouseToCourthouseEntityMapper courthouseMapper;
-    private final SecurityGroupRepository securityGroupRepository;
 
     private final AdminCourthouseToCourthouseEntityMapper adminMapper;
     private final BiValidator<CourthousePatch, Integer> courthousePatchValidator;
