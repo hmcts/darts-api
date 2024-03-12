@@ -120,7 +120,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         assertEquals(200, postAudioResponse.statusCode());
     }
 
-    private File getFile(String fileName) throws IOException {
+    File getFile(String fileName) throws IOException {
         return new ClassPathResource(fileName).getFile();
     }
 
