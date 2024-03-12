@@ -104,7 +104,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(4)
     void patchCourthouse() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
