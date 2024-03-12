@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
@@ -48,12 +49,14 @@ class CasesMapperTest {
     private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
+    @Mock
+    private AuthorisationApi authorisationApi;
 
     private CasesMapper caseMapper;
 
     @BeforeEach
     void setUp() {
-        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
+        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository, authorisationApi);
     }
 
     @Test
