@@ -86,6 +86,8 @@ public class TestSupportController {
         removeHearingEventJoins(session, hearingIds);
         removeHearingMediaJoins(session, hearingIds);
 
+        externalObjectDirectoriesToBeDeleted(session, mediaIds);
+
         removeMedia(session, mediaIds);
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
@@ -126,6 +128,14 @@ public class TestSupportController {
         session.close();
 
         log.info("Cleanup finished");
+    }
+
+    private void externalObjectDirectoriesToBeDeleted(Session session, Object mediaIds) {
+        session.createNativeQuery("""
+                                      delete from darts.external_object_directory where med_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, mediaIds)
+            .executeUpdate();
     }
 
     private Object mediaIdsToBeDeleted(Session session, List<Integer> hearingIds) {
