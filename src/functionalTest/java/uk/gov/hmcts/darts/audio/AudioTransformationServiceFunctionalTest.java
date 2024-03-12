@@ -1,9 +1,7 @@
 package uk.gov.hmcts.darts.audio;
 
-import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import io.restassured.specification.MultiPartSpecification;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
@@ -14,6 +12,7 @@ import java.io.IOException;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({"VariableDeclarationUsageDistance", "CommentsIndentation"})
 class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
     public static final int NO_CONTENT = 204;
@@ -64,7 +63,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
         assertEquals(201, caseResponse.statusCode());
 
-        String audio1 = getContentsFromFile("audio/functional-test-ch1.mp2");
+        //String audio1 = getContentsFromFile("audio/functional-test-ch1.mp2");
         String audioMetadata = """
             {
               "started_at": "2024-03-11T10:12:05.362Z",
@@ -87,11 +86,11 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         audioMetadata = audioMetadata.replace("<<caseNumber>>", caseNumber);
 
 
-        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
-            .fileName("functional-test-ch1.mp2")
-            .controlName("file")
-            .mimeType("audio/mpeg")
-            .build();
+//        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
+//            .fileName("functional-test-ch1.mp2")
+//            .controlName("file")
+//            .mimeType("audio/mpeg")
+//            .build();
 
         /*Response postAudioResponse = buildRequestWithInternalAuth()
             .contentType(ContentType.MULTIPART)
