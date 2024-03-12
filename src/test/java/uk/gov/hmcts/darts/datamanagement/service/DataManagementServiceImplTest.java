@@ -133,18 +133,15 @@ class DataManagementServiceImplTest {
 
             when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
             when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+            when(blobClient.exists()).thenReturn(true);
+            when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
 
-            try (DownloadResponseMetaData metaData = mock(DownloadResponseMetaData.class)) {
-                when(metaData.getOutputStream(Mockito.notNull())).thenReturn(stream);
-
-                try (DownloadResponseMetaData downloadResponseMetaData = metaData) {
-
-                    dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
-
-                    verify(blobClient, times(1)).downloadStream(any());
-                    verify(downloadResponseMetaData, times(1)).markSuccess(DatastoreContainerType.UNSTRUCTURED);
-                }
+            try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED,
+                                                                                                        BLOB_CONTAINER_NAME,
+                                                                                                        BLOB_ID)) {
+                verify(blobClient, times(1)).downloadStream(any());
             }
+
         }
     }
 }

@@ -6,12 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,20 +54,10 @@ public class AnnotationDataManagement {
     }
 
     public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
-        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories
-            .getFileBasedDownload(externalObjectDirectoryEntities);
-
-        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
-        var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
-
         try {
-            if (!downloadResponseMetaData.isSuccessfulDownload()) {
-                downloadResponseMetaData.close();
-                throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
-            }
-
+            DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities);
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
-        } catch (IOException e) {
+        } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",
                       externalObjectDirectoryEntities.get(0).getAnnotationDocumentEntity().getId(), e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
@@ -86,7 +77,8 @@ public class AnnotationDataManagement {
                 case UNSTRUCTURED:
                     dataManagementApi.deleteBlobDataFromUnstructuredContainer(location);
                     break;
-                default: throw new IllegalArgumentException("Unexpected value: " + type);
+                default:
+                    throw new IllegalArgumentException("Unexpected value: " + type);
             }
         } catch (AzureDeleteBlobException e) {
             log.error("Failed to delete orphaned annotation document {}", location, e);

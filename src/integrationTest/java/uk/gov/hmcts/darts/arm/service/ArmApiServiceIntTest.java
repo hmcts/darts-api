@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.UUID;
@@ -109,12 +108,12 @@ class ArmApiServiceIntTest extends IntegrationBase {
         when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(response);
 
         // When
-        InputStream inputStreamResult = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, Mockito.mock(DownloadResponseMetaData.class));
+        DownloadResponseMetaData downloadResponseMetaData = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
 
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
         verify(armApiClient).downloadArmData("Bearer some-token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
-        assertThat(inputStreamResult.readAllBytes()).isEqualTo(binaryData);
+        assertThat(downloadResponseMetaData.getInputStream().readAllBytes()).isEqualTo(binaryData);
     }
 
 }

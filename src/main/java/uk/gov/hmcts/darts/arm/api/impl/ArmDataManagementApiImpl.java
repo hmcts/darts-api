@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -59,12 +60,14 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, DownloadResponseMetaData response) {
+    public DownloadResponseMetaData downloadBlobFromContainer(DatastoreContainerType container,
+                                                              ExternalObjectDirectoryEntity blobId) throws FileNotDownloadedException {
         Optional<String> containerName = getContainerName(container);
         if (containerName.isPresent()) {
-            armApiService.downloadArmData(blobId.getExternalRecordId(), blobId.getExternalFileId(), response);
+            return armApiService.downloadArmData(blobId.getExternalRecordId(), blobId.getExternalFileId());
         }
-        return containerName.isPresent();
+        throw new FileNotDownloadedException("Container for " + container.name() + " not found in ARM.");
+
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {

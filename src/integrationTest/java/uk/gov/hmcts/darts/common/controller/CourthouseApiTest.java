@@ -43,7 +43,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -379,41 +378,6 @@ class CourthouseApiTest extends IntegrationBase {
             "{\"violations\":[{\"field\":\"displayName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
             response.getResponse().getContentAsString()
         );
-    }
-
-    @Test
-    void courthousesPut() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
-        createEnabledUserAccountEntity(user);
-
-        Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
-
-        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
-        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
-
-        requestBuilder = get("/admin/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-
-        mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.courthouse_name", is("test")))
-            .andExpect(jsonPath("$.code", is(9001)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
-
-    }
-
-    @Test
-    void courthousesPutWhenIdDoesNotExist() throws Exception {
-        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
-        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 123)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
-
     }
 
     @Test

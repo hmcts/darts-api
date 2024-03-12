@@ -6,6 +6,7 @@ import com.azure.storage.blob.BlobClient;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -24,5 +25,5 @@ public interface DataManagementService {
 
     Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException;
 
-    void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report);
+    DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException;
 }

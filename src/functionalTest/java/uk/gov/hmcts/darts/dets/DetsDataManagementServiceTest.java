@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.dets.service.impl.DetsApiServiceImpl;
 
 import java.io.IOException;
@@ -28,18 +28,16 @@ class DetsDataManagementServiceTest {
     private DetsApiServiceImpl dataManagementService;
 
     @Test
-    void fetchBinaryDataFromBlobStorage() throws IOException {
+    void fetchBinaryDataFromBlobStorage() throws IOException, FileNotDownloadedException {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
         var uuid = dataManagementService.saveBlobData(data);
 
-        try (DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData()) {
-            dataManagementService.downloadData(
-                    uuid,
-                    responseMetaData
-            );
-            assertEquals(TEST_BINARY_STRING, new String(responseMetaData.getInputStream().readAllBytes()));
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(
+            uuid
+        )) {
+            assertEquals(TEST_BINARY_STRING, new String(downloadResponseMetaData.getInputStream().readAllBytes()));
         }
     }
 }
