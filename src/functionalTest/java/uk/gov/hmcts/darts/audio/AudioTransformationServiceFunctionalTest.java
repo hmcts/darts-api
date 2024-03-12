@@ -4,6 +4,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import java.io.File;
@@ -20,6 +21,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
     private static final String AUDIOS_PATH = "/audios";
     private static final Object CONTENT_TYPE_APPLICATION_JSON = "application/json";
+    public static final String AUDIO_FUNCTIONAL_TEST_CH_1_MP_2 = "audio/functional-test-ch1.mp2";
 
 
     @AfterEach
@@ -63,7 +65,6 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
         assertEquals(201, caseResponse.statusCode());
 
-        //String audio1 = getContentsFromFile("audio/functional-test-ch1.mp2");
         String audioMetadata = """
             {
               "started_at": "2024-03-11T10:12:05.362Z",
@@ -85,6 +86,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         audioMetadata = audioMetadata.replace("<<courtroom>>", courtroomName);
         audioMetadata = audioMetadata.replace("<<caseNumber>>", caseNumber);
 
+        //String audio1 = getContentsFromFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2);
 
 //        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
 //            .fileName("functional-test-ch1.mp2")
@@ -104,7 +106,8 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.MULTIPART)
             .baseUri(getUri(AUDIOS_PATH))
-            .multiPart("file", new File("audio/functional-test-ch1.mp2"))
+            .multiPart("file", getFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2))
+            .multiPart("metadata", audioMetadata)
             //.multiPart("metadata", audioMetadata, CONTENT_TYPE_APPLICATION_JSON)
             .when()
             .body(audioMetadata)
@@ -113,6 +116,10 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .extract().response();
 
         assertEquals(NO_CONTENT, postAudioResponse.statusCode());
+    }
+
+    File getFile(String fileName) throws IOException {
+        return new ClassPathResource(fileName).getFile();
     }
 
 //    Testers code
