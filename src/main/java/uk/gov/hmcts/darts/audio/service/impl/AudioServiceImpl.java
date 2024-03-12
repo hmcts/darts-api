@@ -118,7 +118,7 @@ public class AudioServiceImpl implements AudioService {
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
         try {
-            Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
 
             AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
 
