@@ -28,9 +28,9 @@ class CourthousesFunctionalTest extends FunctionalTest {
     public static final String ADMIN_REGION_URI = "/admin/regions";
     public static final String COURTHOUSE_BODY = """
         {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham","code": 5705}""";
-    public static final String COURTHOUSE_UPDATEBODY = """
-        {"courthouse_name": "MANCHESTER","display_name": "Manchester","code": 2112}""";
-    public static final String COURTHOUSE_INVALIDBODY = """
+    public static final String COURTHOUSE_PATCH_BODY = """
+        {"courthouse_name": "MANCHESTER","display_name": "Manchester"}""";
+    public static final String COURTHOUSE_PATCH_INVALID_BODY = """
         {"courthouse_name": "READING","display_name": "Reading", code: "1234"}""";
     public static final String COURTHOUSE_BAD_ID = "/99999";
     public static final int OK = 200;
@@ -103,12 +103,12 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
     @Test
     @Order(4)
-    void updateCourthouse() {
+    void patchCourthouse() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
-            .body(COURTHOUSE_UPDATEBODY)
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
+            .body(COURTHOUSE_PATCH_BODY)
             .put()
             .then()
             .extract().response();
@@ -118,12 +118,12 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
     @Test
     @Order(5)
-    void updateCourthouseWithInvalidBody() {
+    void patchCourthouseWithInvalidBody() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
-            .body(COURTHOUSE_INVALIDBODY)
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
+            .body(COURTHOUSE_PATCH_INVALID_BODY)
             .put()
             .then()
             .extract().response();
