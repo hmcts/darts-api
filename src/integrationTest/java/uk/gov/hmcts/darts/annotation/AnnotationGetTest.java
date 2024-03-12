@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
@@ -43,7 +44,7 @@ class AnnotationGetTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Autowired
-    private AnnotationTestGivensBuilder given;
+    private GivenBuilder given;
 
 
     @Test

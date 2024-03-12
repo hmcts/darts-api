@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.AdminRegion;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
@@ -68,16 +69,6 @@ public class CourthousesController implements CourthousesApi {
     }
 
     @Override
-    public ResponseEntity<Void> courthousesCourthouseIdPut(Integer courthouseId, Courthouse courthouse) {
-        try {
-            courthouseService.amendCourthouseById(courthouse, courthouseId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (EntityNotFoundException exception) {
-            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NOT_FOUND);
-        }
-    }
-
-    @Override
     public ResponseEntity<List<ExtendedCourthouse>> courthousesGet() {
         List<CourthouseEntity> courthouseEntities = courthouseService.getAllCourthouses();
         List<ExtendedCourthouse> responseEntities = courthouseService.mapFromEntitiesToExtendedCourthouses(courthouseEntities);
@@ -90,5 +81,13 @@ public class CourthousesController implements CourthousesApi {
         CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
         ExtendedCourthouse extendedCourthouse = courthouseMapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<AdminCourthouse> updateCourthouse(Integer courthouseId, CourthousePatch courthousePatch) {
+        var adminCourthouse = courthouseService.updateCourthouse(courthouseId, courthousePatch);
+        return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
     }
 }
