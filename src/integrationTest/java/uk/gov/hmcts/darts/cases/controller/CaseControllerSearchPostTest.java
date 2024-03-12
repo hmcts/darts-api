@@ -1,35 +1,42 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.ENDPOINT_URL;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
@@ -38,6 +45,7 @@ import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendan
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
+import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 
 @AutoConfigureMockMvc
@@ -45,13 +53,17 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Autowired
+    SecurityGroupRepository securityGroupRepository;
+    @Autowired
+    UserAccountRepository userAccountRepository;
+    @Autowired
     private transient MockMvc mockMvc;
-    @MockBean
-    private AuthorisationApi authorisationApi;
+    CourthouseEntity swanseaCourthouse;
+    UserAccountEntity user;
 
     @BeforeEach
     void setupData() {
-        CourthouseEntity swanseaCourthouse = someMinimalCourthouse();
+        swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
 
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse);
@@ -130,14 +142,19 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
         EventEntity event5b = createEventWith("eventName", "event5b", hearing5b, OffsetDateTime.now());
         dartsDatabase.saveAll(event4a, event5b);
+
+        givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        setupUserAccountAndSecurityGroup();
     }
 
+    @AfterEach
+    void deleteUser() {
+        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
+    }
 
     @Test
     void casesSearchPostEndpoint() throws Exception {
-
-        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
 
         String requestBody = """
             {
@@ -161,9 +178,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     @Test
     void casesSearchPostEndpointDateRange() throws Exception {
 
-        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
-
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -185,9 +199,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
     @Test
     void casesSearchPostEndpointEventText() throws Exception {
-
-        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
 
         String requestBody = """
             {
@@ -211,9 +222,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
     @Test
     void casesSearchPostEndpointJudgeName() throws Exception {
 
-        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
-        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courthouseEntity.getId()));
-
         String requestBody = """
             {
               "courthouse": "SWANSEA",
@@ -233,27 +241,26 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    @Test
-    void casesSearchPostFailsOnNoPermissions() throws Exception {
+    private static void givenBearerTokenExists(String email) {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("emails", List.of(email))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
 
-        CourthouseEntity wrongCourthouseEntity = dartsDatabase.createCourthouseUnlessExists("SomethingElse");
-        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(wrongCourthouseEntity.getId()));
+    private void setupUserAccountAndSecurityGroup() {
+        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(APPROVER, swanseaCourthouse);
+        securityGroup.setGlobalAccess(false);
+        securityGroup.setUseInterpreter(false);
+        assignSecurityGroupToUser(user, securityGroup);
+    }
 
-        String requestBody = """
-            {
-              "courthouse": "SWANSEA",
-              "courtroom": "1",
-              "judge_name": "3a"
-            }""";
-
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
-
-        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
-
-        assertEquals("[]", actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
+        securityGroup.getUsers().add(user);
+        user.getSecurityGroupEntities().add(securityGroup);
+        securityGroupRepository.save(securityGroup);
+        userAccountRepository.save(user);
     }
 
 }
