@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -55,6 +56,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${darts.notification.max_retry_attempts}")
     private int maxRetry;
 
+    private final LogApi logApi;
+
     @Override
     @Transactional
     public void scheduleNotification(SaveNotificationToDbRequest request) {
@@ -67,9 +70,8 @@ public class NotificationServiceImpl implements NotificationService {
                 StringUtils.trim(emailAddress),
                 templateParamsString
             );
-            log.info("Notification scheduled: notificationId={}, type={}, caseId={}, status={}",
-                 notificationEntity.getId(), notificationEntity.getEventId(), request.getCaseId(),
-                 notificationEntity.getStatus());
+            logApi.scheduleNotification(notificationEntity, request.getCaseId());
+
         }
     }
 
@@ -155,27 +157,21 @@ public class NotificationServiceImpl implements NotificationService {
 
             GovNotifyRequest govNotifyRequest = null;
             try {
-                log.info("Notification sending: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}",
-                     notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId,
-                     notification.getStatus(), notification.getAttempts());
+                logApi.sendingNotification(notification, templateId, notification.getAttempts());
+
                 govNotifyRequest = govNotifyRequestHelper.map(notification, templateId);
                 govNotifyService.sendNotification(govNotifyRequest);
                 updateNotificationStatus(notification, NotificationStatus.SENT);
-                log.info("Notification sent: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}",
-                     notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId,
-                     notification.getStatus(), notification.getAttempts());
+
+                logApi.sentNotification(notification, templateId, notification.getAttempts());
             } catch (JsonProcessingException e) {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
                 incrementNotificationFailureCount(notification);
                 if (notification.getAttempts() < maxRetry) {
-                    log.info("Notification GovNotify error, retrying: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}, error={}",
-                         notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId, notification.getStatus(),
-                         notification.getAttempts(), e.getMessage());
+                    logApi.errorRetryingNotification(notification, templateId, e);
                 } else {
-                    log.info("Notification failed to send: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}, error={}",
-                         notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId, notification.getStatus(),
-                         notification.getAttempts(), e.getMessage());
+                    logApi.failedNotification(notification, templateId, e);
                 }
             }
         }
