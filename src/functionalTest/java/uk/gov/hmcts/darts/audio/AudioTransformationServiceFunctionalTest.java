@@ -101,13 +101,18 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
         Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.MULTIPART)
+            .accept("application/json, text/plain, */*")
+            /*.multiPart("data",body,"application/json")
+            .multiPart("file[0]", new File(file1),"multipart/form-data")
+            .multiPart("file[1]", new File(file2),"multipart/form-data")*/
             //.header(CONTENT_TYPE, CONTENT_TYPE_MULTIPART_FORM_DATA)
             .baseUri(getUri(AUDIOS_PATH))
             //.multiPart("file", getFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2))
             .multiPart(multiPartSpecification)
-            .multiPart(multiPartSpecificationJson)
-            //.multiPart("metadata", audioMetadata)
+            //.multiPart(multiPartSpecificationJson)
+            .multiPart("metadata", audioMetadata, "application/json")
             .when()
+            //.body(audioMetadata)
             .post(getUri(AUDIOS_PATH))
             .then()
             .extract().response();
