@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.audio;
 
+import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.MultiPartSpecification;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -86,28 +88,26 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         audioMetadata = audioMetadata.replace("<<courtroom>>", courtroomName);
         audioMetadata = audioMetadata.replace("<<caseNumber>>", caseNumber);
 
-        //String audio1 = getContentsFromFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2);
+        String audio1 = getContentsFromFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2);
 
-//        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
-//            .fileName("functional-test-ch1.mp2")
-//            .controlName("file")
-//            .mimeType("audio/mpeg")
-//            .build();
+        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
+            .fileName("functional-test-ch1.mp2")
+            .controlName("file")
+            .mimeType("audio/mpeg")
+            .build();
 
-        /*Response postAudioResponse = buildRequestWithInternalAuth()
-            .contentType(ContentType.MULTIPART)
-            .multiPart(multiPartSpecification)
-            .when()
-            .baseUri(getUri(AUDIOS_PATH))
-            .body(audioMetadata)
-            .post()
-            .then()
-            .extract().response();*/
+        MultiPartSpecification multiPartSpecificationJson = new MultiPartSpecBuilder(audioMetadata.getBytes())
+            .mimeType("application/json")
+            .build();
+
         Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.MULTIPART)
+            //.header(CONTENT_TYPE, CONTENT_TYPE_MULTIPART_FORM_DATA)
             .baseUri(getUri(AUDIOS_PATH))
-            .multiPart("file", getFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2))
-            .multiPart("metadata", audioMetadata)
+            //.multiPart("file", getFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2))
+            .multiPart(multiPartSpecification)
+            .multiPart(multiPartSpecificationJson)
+            //.multiPart("metadata", audioMetadata)
             //.multiPart("metadata", audioMetadata, CONTENT_TYPE_APPLICATION_JSON)
             .when()
             .body(audioMetadata)
