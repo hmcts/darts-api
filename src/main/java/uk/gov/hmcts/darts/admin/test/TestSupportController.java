@@ -137,7 +137,11 @@ public class TestSupportController {
     }
 
     private void removeMedia(Session session, Object mediaIds) {
-
+        session.createNativeQuery("""
+                                      delete from darts.media where med_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, mediaIds)
+            .executeUpdate();
     }
 
 
