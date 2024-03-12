@@ -113,7 +113,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        assertEquals(NO_CONTENT, response.statusCode());
+        assertEquals(OK, response.statusCode());
     }
 
     @Test
