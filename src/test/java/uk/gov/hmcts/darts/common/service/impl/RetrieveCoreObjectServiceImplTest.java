@@ -82,6 +82,8 @@ class RetrieveCoreObjectServiceImplTest {
         assertEquals(COURTROOM_1, response.getCourtroom().getName());
         assertEquals(1, response.getCourtroom().getCourthouse().getId());
         assertEquals(CASE_NUMBER_1, response.getCourtCase().getCaseNumber());
+        assertEquals(response.getCreatedBy(), authorisationApi.getCurrentUser());
+        assertEquals(response.getLastModifiedBy(), authorisationApi.getCurrentUser());
     }
 
     @Test
