@@ -97,6 +97,18 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
+    public void copyBlobData(String sourceContainer, String destinationContainer, UUID sourceBlobId) {
+        BlobServiceClient sourceServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, sourceServiceClient);
+        BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
+
+        BlobServiceClient destinationServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, destinationServiceClient);
+
+        destinationContainerClient.getBlobClient(sourceBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl());
+    }
+
+    @Override
     public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
         UUID uniqueBlobId = UUID.randomUUID();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
