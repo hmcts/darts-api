@@ -72,13 +72,11 @@ public class AdvancedSearchRequestHelper {
     private List<Predicate> createUserPredicates(CriteriaBuilder criteriaBuilder, Root<UserAccountCourtCaseEntity> caseRoot) {
         List<Predicate> predicates = new ArrayList<>();
         Join<UserAccountCourtCaseEntity, UserAccountEntity> userJoin = caseRoot.join(UserAccountCourtCaseEntity_.USER_ACCOUNT);
-        predicates.add(criteriaBuilder.and(
-            criteriaBuilder.equal(
-                criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
-                userIdentity.getUserAccount().getEmailAddress().toLowerCase()
-            ),
-            criteriaBuilder.isTrue(userJoin.get(UserAccountEntity_.ACTIVE))
-        ));
+        predicates.add(
+            criteriaBuilder.equal(userJoin.get(UserAccountEntity_.ID),
+            userIdentity.getUserAccount().getId()
+            )
+        );
         return predicates;
     }
 
