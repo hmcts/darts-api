@@ -85,7 +85,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             """;
         audioMetadata = audioMetadata.replace("<<courthouse>>", courthouseName);
         audioMetadata = audioMetadata.replace("<<courtroom>>", courtroomName);
-        audioMetadata = audioMetadata.replace("<<caseNumber>>", caseNumber);
+        audioMetadata = audioMetadata.replace("<<casenumber>>", caseNumber);
 
         String audio1 = getContentsFromFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2);
 
