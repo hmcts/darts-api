@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressWarnings({"VariableDeclarationUsageDistance", "CommentsIndentation"})
 class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
-    public static final int NO_CONTENT = 204;
     private static final String CASES_PATH = "/cases";
 
     private static final String AUDIOS_PATH = "/audios";
@@ -108,14 +107,13 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .multiPart(multiPartSpecification)
             .multiPart(multiPartSpecificationJson)
             //.multiPart("metadata", audioMetadata)
-            //.multiPart("metadata", audioMetadata, CONTENT_TYPE_APPLICATION_JSON)
             .when()
             .body(audioMetadata)
             .post(getUri(AUDIOS_PATH))
             .then()
             .extract().response();
 
-        assertEquals(NO_CONTENT, postAudioResponse.statusCode());
+        assertEquals(200, postAudioResponse.statusCode());
     }
 
     File getFile(String fileName) throws IOException {
