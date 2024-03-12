@@ -109,7 +109,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .when()
             .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
             .body(COURTHOUSE_PATCH_BODY)
-            .put()
+            .patch()
             .then()
             .extract().response();
 
@@ -124,7 +124,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .when()
             .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
             .body(COURTHOUSE_PATCH_INVALID_BODY)
-            .put()
+            .patch()
             .then()
             .extract().response();
 
