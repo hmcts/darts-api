@@ -72,7 +72,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "VariableDeclarationUsageDistance"})
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
         Session session = sessionFactory.openSession();
@@ -137,7 +137,7 @@ public class TestSupportController {
     }
 
     private void removeMedia(Session session, Object mediaIds) {
-        
+
     }
 
 
