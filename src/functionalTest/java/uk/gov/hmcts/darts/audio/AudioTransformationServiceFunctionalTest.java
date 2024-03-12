@@ -95,9 +95,9 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .mimeType("audio/mpeg")
             .build();
 
-        MultiPartSpecification multiPartSpecificationJson = new MultiPartSpecBuilder(audioMetadata.getBytes())
-            .mimeType("application/json")
-            .build();
+//        MultiPartSpecification multiPartSpecificationJson = new MultiPartSpecBuilder(audioMetadata.getBytes())
+//            .mimeType("application/json")
+//            .build();
 
         Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.MULTIPART)
