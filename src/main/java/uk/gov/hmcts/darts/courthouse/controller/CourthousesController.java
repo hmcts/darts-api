@@ -78,7 +78,7 @@ public class CourthousesController implements CourthousesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<ExtendedCourthousePost> adminCourthousesPost(CourthousePost courthousePost) {
-        ExtendedCourthousePost extendedCourthouse = courthouseService.mapFromEntitiesToExtendedCourthousePost(courthousePost);
+        ExtendedCourthousePost extendedCourthouse = courthouseService.createCourthouseAndGroups(courthousePost);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }
 

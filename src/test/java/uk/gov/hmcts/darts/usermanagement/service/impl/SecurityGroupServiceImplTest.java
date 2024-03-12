@@ -9,11 +9,11 @@ import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
+import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +35,7 @@ class SecurityGroupServiceImplTest {
     @Mock
     SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
     @Mock
-    Validator<SecurityGroup> securityGroupCreationValidation;
+    Validator<SecurityGroupModel> securityGroupCreationValidation;
 
     @BeforeEach
     void setUp() {

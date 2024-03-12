@@ -2,21 +2,25 @@ package uk.gov.hmcts.darts.courthouses;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.AccessTokenClient;
+import org.skyscreamer.jsonassert.ArrayValueMatcher;
+import org.skyscreamer.jsonassert.Customization;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
+import org.skyscreamer.jsonassert.comparator.ArraySizeComparator;
+import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
@@ -26,10 +30,8 @@ class CourthousesFunctionalTest extends FunctionalTest {
     private static final String COURTHOUSES_URI = "/courthouses";
     private static final String ADMIN_COURTHOUSES_URI = "/admin/courthouses";
     private static final String ADMIN_REGION_URI = "/admin/regions";
-    private static final String COURTHOUSE_BODY_NO_CODE = """
-        {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham"}""";
     private static final String COURTHOUSE_PATCH_BODY = """
-        {"courthouse_name": "MANCHESTER","display_name": "Manchester"}""";
+        {"display_name": "Swansea Modified Functional Test Courthouse"}""";
     private static final String COURTHOUSE_PATCH_INVALID_BODY = """
         {"courthouse_name": "READING","display_name": "Reading", code: "1234"}""";
     private static final String COURTHOUSE_BAD_ID = "/99999";
@@ -38,20 +40,13 @@ class CourthousesFunctionalTest extends FunctionalTest {
     private static final int NO_CONTENT = 204;
     private static final int BAD_REQUEST = 400;
     private static final int NOT_FOUND = 404;
-    private static final int RESOURCE_ALREADY_EXISTS = 409;
 
-    private int testCourthouseId;
-
-    @Autowired
-    private AccessTokenClient externalGlobalAccessTokenClient;
-
-    @Override
-    public RequestSpecification buildRequestWithExternalGlobalAccessAuth() {
-        return buildRequestWithAuth(externalGlobalAccessTokenClient);
+    @AfterEach
+    void tearDown() {
+        clean();
     }
 
     @Test
-    @Order(1)
     void getAllCourthouses() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -67,50 +62,39 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(2)
     void createCourthouse() {
-        testCourthouseId = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY_NO_CODE)
-            .post()
-            .then()
-            .assertThat()
-            .statusCode(CREATED)
-            .extract()
-            .path("id");
+        Response response = executeCourthousesPost();
 
-        assertTrue(testCourthouseId > 0);
+        assertEquals(CREATED, response.statusCode());
+
+        JSONAssert.assertEquals(
+            """
+                {
+                    "courthouse_name": "func-swansea",
+                    "display_name": "Swansea Functional Test Courthouse",
+                    "id": 0,
+                    "security_group_ids": [ ],
+                    "created_date_time": "",
+                    "last_modified_date_time": ""
+                }
+                """,
+            response.asString(),
+            new CustomComparator(
+                JSONCompareMode.NON_EXTENSIBLE,
+                new Customization("id", new RegularExpressionValueMatcher<>("\\d+")),
+                new Customization("security_group_ids", new ArrayValueMatcher<>(new ArraySizeComparator(JSONCompareMode.STRICT), 2)),
+                new Customization("created_date_time", (actual, expected) -> isIsoDateTimeString(actual.toString())),
+                new Customization("last_modified_date_time", (actual, expected) -> isIsoDateTimeString(actual.toString()))
+            )
+        );
     }
 
     @Test
-    @Order(3)
-    void createSameCourthouse() {
-        buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY_NO_CODE)
-            .post()
-            .then()
-            .extract().response();
-
-        Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY_NO_CODE)
-            .post()
-            .then()
-            .extract().response();
-
-        assertEquals(RESOURCE_ALREADY_EXISTS, response.statusCode());
-    }
-
-    @Test
-    @Order(4)
     void patchCourthouse() {
+        Response createCourthouseResponse = executeCourthousesPost();
+        int testCourthouseId = new JSONObject(createCourthouseResponse.asString())
+            .getInt("id");
+
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -124,8 +108,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
     void patchCourthouseWithInvalidBody() {
+        Response createCourthouseResponse = executeCourthousesPost();
+        int testCourthouseId = new JSONObject(createCourthouseResponse.asString())
+            .getInt("id");
+
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -139,8 +126,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(6)
     void getExistingCourthouse() {
+        Response createCourthouseResponse = executeCourthousesPost();
+        int testCourthouseId = new JSONObject(createCourthouseResponse.asString())
+            .getInt("id");
+
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -154,7 +144,6 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
 
     @Test
-    @Order(7)
     void getCourthouseIdDoesNotExist() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
@@ -168,22 +157,6 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(8)
-    void deleteCourthouse() {
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
-            .delete()
-            .then()
-            .statusCode(NO_CONTENT)
-            .extract().response();
-
-        assertNotNull(response);
-    }
-
-    @Test
-    @Order(9)
     void getAllRegions() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
@@ -196,6 +169,21 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .extract().response();
 
         assertNotNull(response);
+    }
+
+    private Response executeCourthousesPost() {
+        return buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
+            .body("""
+                {
+                    "courthouse_name": "func-swansea",
+                    "display_name": "Swansea Functional Test Courthouse"
+                }
+            """)
+            .post()
+            .thenReturn();
     }
 
 }

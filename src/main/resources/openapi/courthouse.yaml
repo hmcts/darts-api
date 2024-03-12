@@ -138,12 +138,6 @@ paths:
 
 components:
   requestBodies:
-    CourthousePut:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Courthouse'
     CourthousePost:
       required: true
       content:
@@ -280,6 +274,7 @@ components:
         - "COURTHOUSE_104"
         - "COURTHOUSE_105"
         - "COURTHOUSE_106"
+        - "COURTHOUSE_107"
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
@@ -287,6 +282,7 @@ components:
         COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
         ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED,
         REGION_ID_DOES_NOT_EXIST,
+        SECURITY_GROUP_ID_DOES_NOT_EXIST,
         COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
 
     CourthouseTitleErrors:
@@ -298,6 +294,7 @@ components:
         - "Provided courthouse display name already exists."
         - "Only TRANSCRIBER roles may be assigned"
         - "Region id does not exist"
+        - "Security group id does not exist"
         - "The courthouse name cannot be change because it has existing cases."
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
@@ -306,6 +303,7 @@ components:
         COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
         ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED,
         REGION_ID_DOES_NOT_EXIST,
+        SECURITY_GROUP_ID_DOES_NOT_EXIST,
         COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
 
     UserAuthorisation403_109ErrorCode:
