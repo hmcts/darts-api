@@ -108,7 +108,6 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .multiPart(multiPartSpecificationJson)
             //.multiPart("metadata", audioMetadata)
             .when()
-            .body(audioMetadata)
             .post(getUri(AUDIOS_PATH))
             .then()
             .extract().response();
@@ -116,7 +115,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         assertEquals(200, postAudioResponse.statusCode());
     }
 
-    File getFile(String fileName) throws IOException {
+    private File getFile(String fileName) throws IOException {
         return new ClassPathResource(fileName).getFile();
     }
 
