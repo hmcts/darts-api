@@ -38,6 +38,8 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     private static final OffsetDateTime TIME_13_01 = OffsetDateTime.parse("2023-01-01T13:01Z");
     private static final OffsetDateTime TIME_13_30 = OffsetDateTime.parse("2023-01-01T13:30Z");
     private static final OffsetDateTime TIME_14_00 = OffsetDateTime.parse("2023-01-01T14:00Z");
+    private static final OffsetDateTime TIME_20_00 = OffsetDateTime.parse("2023-01-01T20:00Z");
+    private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
 
 
     private final DartsDatabaseStub dartsDatabaseStub;
@@ -76,11 +78,17 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
                                                                    TIME_14_00,
                                                                    channelNumber
             );
+            var mediaEntity5 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
+                                                                   TIME_20_00,
+                                                                   TIME_20_30,
+                                                                   channelNumber
+            );
 
             hearingEntity.addMedia(mediaEntity);
             hearingEntity.addMedia(mediaEntity2);
             hearingEntity.addMedia(mediaEntity3);
             hearingEntity.addMedia(mediaEntity4);
+            hearingEntity.addMedia(mediaEntity5);
             dartsDatabaseStub.getHearingRepository().saveAndFlush(hearingEntity);
 
             var inboundExternalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
@@ -107,6 +115,13 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             var inboundExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity4,
+                    objectRecordStatusEnum,
+                    inboundExternalLocationTypeEnum,
+                    UUID.randomUUID()
+                );
+            var inboundExternalObjectDirectoryEntity5 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity5,
                     objectRecordStatusEnum,
                     inboundExternalLocationTypeEnum,
                     UUID.randomUUID()
@@ -145,6 +160,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity2);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity3);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity4);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity5);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity2);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity3);
