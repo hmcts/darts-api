@@ -121,7 +121,7 @@ class AudioServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService);
+        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity);
         FileContentChecksum fileContentChecksum = new FileContentChecksum();
         audioService = new AudioServiceImpl(
             audioTransformationService,
