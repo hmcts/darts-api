@@ -87,8 +87,6 @@ public class TestSupportController {
         removeHearingMediaJoins(session, hearingIds);
 
         externalObjectDirectoriesToBeDeleted(session, mediaIds);
-        transformedMediaToBeDeleted(session, mediaIds);
-        mediaRequestsToBeDeleted(session, mediaIds);
 
         removeMedia(session, mediaIds);
         removeEvents(session, eventIds);
@@ -130,22 +128,6 @@ public class TestSupportController {
         session.close();
 
         log.info("Cleanup finished");
-    }
-
-    private void mediaRequestsToBeDeleted(Session session, Object mediaIds) {
-        session.createNativeQuery("""
-                                      delete from darts.media_request where med_id in (?)
-                                      """, Integer.class)
-            .setParameter(1, mediaIds)
-            .executeUpdate();
-    }
-
-    private void transformedMediaToBeDeleted(Session session, Object mediaIds) {
-        session.createNativeQuery("""
-                                      delete from darts.transformed_media where med_id in (?)
-                                      """, Integer.class)
-            .setParameter(1, mediaIds)
-            .executeUpdate();
     }
 
     private void externalObjectDirectoriesToBeDeleted(Session session, Object mediaIds) {
