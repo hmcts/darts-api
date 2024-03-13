@@ -50,6 +50,16 @@ public enum CourthouseApiError implements DartsApiError {
         CourthouseErrorCode.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING.getValue(),
         HttpStatus.UNPROCESSABLE_ENTITY,
         CourthouseTitleErrors.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING.toString()
+    ),
+    REGION_DOES_NOT_EXIST(
+        CourthouseErrorCode.REGION_DOES_NOT_EXIST.getValue(),
+        HttpStatus.BAD_REQUEST,
+        CourthouseTitleErrors.REGION_DOES_NOT_EXIST.getValue()
+    ),
+    SECURITY_GROUP_DOES_NOT_EXIST(
+        CourthouseErrorCode.SECURITY_GROUP_DOES_NOT_EXIST.getValue(),
+        HttpStatus.BAD_REQUEST,
+        CourthouseTitleErrors.SECURITY_GROUP_DOES_NOT_EXIST.getValue()
     );
 
     private static final String ERROR_TYPE_PREFIX = "COURTHOUSE";
