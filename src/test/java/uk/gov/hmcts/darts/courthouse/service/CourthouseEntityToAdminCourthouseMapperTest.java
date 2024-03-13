@@ -11,14 +11,11 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CourthouseEntityToAdminCourthouseMapperTest {

@@ -105,8 +105,6 @@ class CourthousePatchValidatorTest {
     @Test
     void throwsWhenSecurityGroupDoesntExist() {
         when(courthouseRepository.findById(1)).thenReturn(Optional.of(someCourthouse()));
-        when(regionRepository.existsById(any())).thenReturn(true);
-
         when(securityGroupRepository.existsAllByIdIn(Set.of(2))).thenReturn(false);
 
         assertThatThrownBy(() -> validator.validate(someCourtHousePatchForSecurityGroup(2), 1))
@@ -138,7 +136,7 @@ class CourthousePatchValidatorTest {
     }
 
     private CourthouseEntity someCourthouse() {
-        var courthouse= new CourthouseEntity();
+        var courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("some-name");
         return courthouse;
     }

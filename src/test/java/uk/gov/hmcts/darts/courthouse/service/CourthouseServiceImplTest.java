@@ -6,7 +6,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
@@ -30,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,11 +133,11 @@ class CourthouseServiceImplTest {
 
     @Test
     void testDeleteCourthouseById() {
-        Mockito.doNothing().when(courthouseRepository).deleteById(COURTHOUSE_ID);
+        doNothing().when(courthouseRepository).deleteById(COURTHOUSE_ID);
 
         courthouseService.deleteCourthouseById(COURTHOUSE_ID);
 
-        Mockito.verify(courthouseRepository).deleteById(captorInteger.capture());
+        verify(courthouseRepository).deleteById(captorInteger.capture());
         assertEquals(COURTHOUSE_ID, captorInteger.getValue());
     }
 
