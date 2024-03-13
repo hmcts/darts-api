@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
@@ -71,6 +73,7 @@ public class TestSupportController {
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
+    private final AudioTransformationService audioTransformationService;
 
     @SuppressWarnings({"unchecked", "VariableDeclarationUsageDistance"})
     @DeleteMapping(value = "/clean")
@@ -82,12 +85,18 @@ public class TestSupportController {
         var hearingIds = hearingIdsToBeDeleted(session, caseIds);
         var eventIds = eventIdsToBeDeleted(session, hearingIds);
         var mediaIds = mediaIdsToBeDeleted(session, hearingIds);
+        var mediaRequestIds = mediaRequestIdsToBeDeleted(session, hearingIds);
+        var transformedMediaIds = transformedMediaIdsToBeDeleted(session, mediaRequestIds);
+        var transientObjectDirectoryIds = transientObjectDirectoryIdsToBeDeleted(session, transformedMediaIds);
 
         removeHearingEventJoins(session, hearingIds);
         removeHearingMediaJoins(session, hearingIds);
 
         externalObjectDirectoriesToBeDeleted(session, mediaIds);
 
+        removeTransientObjectDirectories(session, transientObjectDirectoryIds);
+        removeTransformedMediaIds(session, transformedMediaIds);
+        removeMediaRequestIds(session, mediaRequestIds);
         removeMedia(session, mediaIds);
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
@@ -128,6 +137,54 @@ public class TestSupportController {
         session.close();
 
         log.info("Cleanup finished");
+    }
+
+    private void removeTransientObjectDirectories(Session session, Object transientObjectDirectoryIds) {
+        session.createNativeQuery("""
+                                      delete from darts.transient_object_directory where tod_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, transientObjectDirectoryIds)
+            .executeUpdate();
+    }
+
+    private void removeTransformedMediaIds(Session session, Object transformedMediaIds) {
+        session.createNativeQuery("""
+                                      delete from darts.transformed_media where trm_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, transformedMediaIds)
+            .executeUpdate();
+    }
+
+    private void removeMediaRequestIds(Session session, Object mediaRequestIds) {
+        session.createNativeQuery("""
+                                      delete from darts.media_request where mer_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, mediaRequestIds)
+            .executeUpdate();
+    }
+
+    private Object transientObjectDirectoryIdsToBeDeleted(Session session, Object transformedMediaIds) {
+        return session.createNativeQuery("""
+                                             select tod_id from darts.transformed_media where trm_id in (?)
+                                             """, Integer.class)
+            .setParameter(1, transformedMediaIds)
+            .getResultList();
+    }
+
+    private Object transformedMediaIdsToBeDeleted(Session session, Object mediaRequestIds) {
+        return session.createNativeQuery("""
+                                             select trm_id from darts.transformed_media where mer_id in (?)
+                                             """, Integer.class)
+            .setParameter(1, mediaRequestIds)
+            .getResultList();
+    }
+
+    private Object mediaRequestIdsToBeDeleted(Session session, List<Integer> hearingIds) {
+        return session.createNativeQuery("""
+                                             select mer_id from darts.media_request where hea_id in (?)
+                                             """, Integer.class)
+            .setParameter(1, hearingIds)
+            .getResultList();
     }
 
     private void externalObjectDirectoriesToBeDeleted(Session session, Object mediaIds) {
@@ -218,6 +275,14 @@ public class TestSupportController {
         }
 
         return new ResponseEntity<>(CREATED);
+    }
+
+    @PostMapping(value = "/handleKedaInvocationForMediaRequests/{media_request_id}")
+    @Transactional
+    public ResponseEntity<Void> handleKedaInvocationForMediaRequests(
+        @PathVariable(name = "media_request_id") Integer mediaRequestId) {
+        audioTransformationService.processAudioRequest(mediaRequestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     private void newUserCourthousePermissions(CourthouseEntity courthouse) {

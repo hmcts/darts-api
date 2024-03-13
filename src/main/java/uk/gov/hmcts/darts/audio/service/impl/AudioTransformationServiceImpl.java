@@ -167,7 +167,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
      * @param requestId The id of the AudioRequest to be processed.
      */
     @SuppressWarnings("PMD.AvoidRethrowingException")
-    private void processAudioRequest(Integer requestId) {
+    public void processAudioRequest(Integer requestId) {
 
         log.info("Starting processing for audio request id: {}", requestId);
         mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);

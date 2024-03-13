@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -45,6 +46,8 @@ class TestSupportControllerTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
     @MockBean
     private BankHolidaysService mockBankHolidaysService;
+    @MockBean
+    private AudioTransformationService audioTransformationService;
 
     @MockBean
     private UserAccountEntity mockUserAccountEntity;
