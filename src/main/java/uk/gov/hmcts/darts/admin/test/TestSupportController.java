@@ -92,6 +92,7 @@ public class TestSupportController {
         removeHearingMediaJoins(session, hearingIds);
 
         externalObjectDirectoriesToBeDeleted(session, mediaIds);
+        notificationCase(session, caseIds);
 
         removeTransientObjectDirectories(session, transientObjectDirectoryIds);
         removeTransformedMediaIds(session, transformedMediaIds);
@@ -136,6 +137,14 @@ public class TestSupportController {
         session.close();
 
         log.info("Cleanup finished");
+    }
+
+    private void notificationCase(Session session, List<Integer> caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.notification where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
     }
 
     private void removeTransientObjectDirectories(Session session, Object transientObjectDirectoryIds) {
