@@ -63,11 +63,6 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     private final uk.gov.hmcts.darts.common.util.StringUtils stringUtils;
 
-    @Override
-    public void deleteCourthouseById(Integer id) {
-        courthouseRepository.deleteById(id);
-    }
-
     // TODO: needs to be removed. Only used in test
     @Override
     public CourthouseEntity getCourtHouseById(Integer id) {
