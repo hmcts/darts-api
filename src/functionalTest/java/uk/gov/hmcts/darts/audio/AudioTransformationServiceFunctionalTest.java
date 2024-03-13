@@ -21,7 +21,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
     private static final String CASES_PATH = "/cases";
     private static final String AUDIOS_PATH = "/audios";
     private static final String CASE_SEARCH_URL = "/cases/search";
-    private static final String AUDIO_REQUESTS_PATH = "/audio_requests";
+    private static final String AUDIO_REQUESTS_PATH = "/audio-requests";
 
 
     @AfterEach
@@ -74,6 +74,15 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
         Integer requestId = audioRequestResponse.path("request_id");
         assertNotNull(requestId);
+
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/handleKedaInvocationForMediaRequests/" + requestId))
+            .redirects().follow(false)
+            .post().then()
+            .assertThat()
+            .statusCode(200)
+            .extract().response();
+
     }
 
     private void createCase(String courthouseName, String caseNumber) {
