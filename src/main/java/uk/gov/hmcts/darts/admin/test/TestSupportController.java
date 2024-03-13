@@ -165,7 +165,7 @@ public class TestSupportController {
 
     private Object transientObjectDirectoryIdsToBeDeleted(Session session, Object transformedMediaIds) {
         return session.createNativeQuery("""
-                                             select tod_id from darts.transformed_media where trm_id in (?)
+                                             select tod_id from darts.transient_object_directory where trm_id in (?)
                                              """, Integer.class)
             .setParameter(1, transformedMediaIds)
             .getResultList();
