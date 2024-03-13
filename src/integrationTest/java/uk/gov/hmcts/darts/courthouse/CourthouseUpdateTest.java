@@ -7,8 +7,8 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.DbAssertions;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.LinkedHashSet;
 import java.util.List;

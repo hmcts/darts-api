@@ -238,12 +238,16 @@ components:
         - "COURTHOUSE_102"
         - "COURTHOUSE_103"
         - "COURTHOUSE_104"
+        - "COURTHOUSE_105"
+        - "COURTHOUSE_106"
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_NOT_FOUND,
         DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
-        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
+        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING,
+        REGION_DOES_NOT_EXIST,
+        SECURITY_GROUP_DOES_NOT_EXIST]
 
     CourthouseTitleErrors:
       type: string
@@ -253,12 +257,16 @@ components:
         - "Courthouse with provided ID does not exist."
         - "Provided display name already exists."
         - "The courthouse name cannot be change because it has existing cases."
+        - "The provided region does not exist."
+        - "The provided security group does not exist."
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_NOT_FOUND,
         DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
-        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
+        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING,
+        REGION_DOES_NOT_EXIST,
+        SECURITY_GROUP_DOES_NOT_EXIST]
 
     UserAuthorisation403_109ErrorCode:
       type: string
