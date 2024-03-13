@@ -55,9 +55,9 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         String audioRequest = """
             {
               "hearing_id": <<hearingId>>,
-              "requestor": 0,
+              "requestor": -34,
               "start_time": "2024-03-11T10:15:00.000Z",
-              "end_time": "2022-03-11T10:20:00.000Z",
+              "end_time": "2024-03-11T10:20:00.000Z",
               "request_type": "DOWNLOAD"
             }
             """;
@@ -106,7 +106,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         String audioMetadata = """
             {
               "started_at": "2024-03-11T10:12:05.362Z",
-              "ended_at": "2022-03-11T10:22:05.362Z",
+              "ended_at": "2024-03-11T10:22:05.362Z",
               "channel": <<channelNumber>>,
               "total_channels": 4,
               "format": "mp2",
