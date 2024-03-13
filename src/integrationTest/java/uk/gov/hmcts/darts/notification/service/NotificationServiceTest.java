@@ -162,8 +162,8 @@ class NotificationServiceTest extends IntegrationBase {
 
         verify(logApi, times(1)).scheduleNotification(any(), any());
         verify(logApi, times(4)).sendingNotification(any(), any(), any());
-        verify(logApi, times(2)).errorRetryingNotification(any(), any(), any());
-        verify(logApi, times(2)).failedNotification(any(), any(), any());
+        verify(logApi, times(3)).errorRetryingNotification(any(), any(), any());
+        verify(logApi, times(1)).failedNotification(any(), any(), any());
     }
 
     @Test

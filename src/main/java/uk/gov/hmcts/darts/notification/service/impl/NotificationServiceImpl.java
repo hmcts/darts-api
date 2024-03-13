@@ -167,12 +167,12 @@ public class NotificationServiceImpl implements NotificationService {
             } catch (JsonProcessingException e) {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
-                incrementNotificationFailureCount(notification);
                 if (notification.getAttempts() < maxRetry) {
                     logApi.errorRetryingNotification(notification, templateId, e);
                 } else {
                     logApi.failedNotification(notification, templateId, e);
                 }
+                incrementNotificationFailureCount(notification);
             }
         }
     }
