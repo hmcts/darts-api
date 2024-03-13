@@ -106,6 +106,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             1
         );
         MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         dartsDatabase.save(savedMedia);
 
@@ -166,6 +167,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             1
         );
         MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         dartsDatabase.save(savedMedia);
 
@@ -226,6 +228,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
             1
         );
         MediaEntity savedMedia = dartsDatabase.getMediaRepository().saveAndFlush(media);
+        savedMedia.setMediaFile("a-media-file.mp2");
         savedMedia.setCreatedDateTime(startedAt);
         dartsDatabase.save(savedMedia);
 
@@ -657,6 +660,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        caseDocument.setFileName("test_filename.docx");
+        dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             caseDocument,
@@ -710,6 +715,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        caseDocument.setFileName("test_filename.docx");
+        dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             caseDocument,
@@ -763,6 +770,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        caseDocument.setFileName("test_filename.docx");
+        dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             caseDocument,

@@ -122,8 +122,16 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(caseDocument.getFileType());
+        uploadNewFileRecordMetadata.setFileTag(getFileTag(caseDocument.getFileType()));
         return uploadNewFileRecordMetadata;
+    }
+
+    private String getFileTag(String filename) {
+        String fileTag = null;
+        if (nonNull(filename) && filename.contains(".") && filename.lastIndexOf(".") + 1 < filename.length()) {
+            fileTag = filename.substring(filename.lastIndexOf(".") + 1);
+        }
+        return fileTag;
     }
 
     private CaseCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {
