@@ -139,8 +139,16 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(transcriptionDocument.getFileType());
+        uploadNewFileRecordMetadata.setFileTag(getFileTag(transcriptionDocument.getFileName()));
         return uploadNewFileRecordMetadata;
+    }
+
+    private String getFileTag(String filename) {
+        String fileTag = null;
+        if (nonNull(filename) && filename.contains(".") && filename.lastIndexOf(".") + 1 < filename.length()) {
+            fileTag = filename.substring(filename.lastIndexOf(".") + 1);
+        }
+        return fileTag;
     }
 
     private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {

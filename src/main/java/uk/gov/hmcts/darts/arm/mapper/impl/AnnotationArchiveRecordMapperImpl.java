@@ -306,7 +306,15 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(annotationDocument.getFileType());
+        uploadNewFileRecordMetadata.setFileTag(getFileTag(annotationDocument.getFileName()));
         return uploadNewFileRecordMetadata;
+    }
+
+    private String getFileTag(String filename) {
+        String fileTag = null;
+        if (nonNull(filename) && filename.contains(".") && filename.lastIndexOf(".") + 1 < filename.length()) {
+            fileTag = filename.substring(filename.lastIndexOf(".") + 1);
+        }
+        return fileTag;
     }
 }
