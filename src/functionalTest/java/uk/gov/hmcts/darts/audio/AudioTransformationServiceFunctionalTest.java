@@ -19,11 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
     private static final String CASES_PATH = "/cases";
-
     private static final String AUDIOS_PATH = "/audios";
-    private static final String AUDIO_FUNCTIONAL_TEST_CH_1_MP_2 = "audio/functional-test-ch1.mp2";
-
     private static final String CASE_SEARCH_URL = "/cases/search";
+    private static final String AUDIO_REQUESTS_PATH = "/audio_requests";
 
 
     @AfterEach
@@ -43,6 +41,42 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
+        createCase(courthouseName, caseNumber);
+
+        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch1.mp2", 1);
+        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch2.mp2", 2);
+        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch3.mp2", 3);
+        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch4.mp2", 4);
+
+        int hearingId = getHearingIdByCaseNumber(caseNumber);
+
+        assertNotNull(hearingId);
+
+        String audioRequest = """
+            {
+              "hearing_id": <<hearingId>>,
+              "requestor": 0,
+              "start_time": "2024-03-11T10:15:00.000Z",
+              "end_time": "2022-03-11T10:20:00.000Z",
+              "request_type": "DOWNLOAD"
+            }
+            """;
+        audioRequest = audioRequest.replace("<<hearingId>>", String.valueOf(hearingId));
+
+        Response audioRequestResponse = buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(AUDIO_REQUESTS_PATH))
+            .body(audioRequest)
+            .post()
+            .then()
+            .extract().response();
+
+        Integer requestId = audioRequestResponse.path("request_id");
+        assertNotNull(requestId);
+    }
+
+    private void createCase(String courthouseName, String caseNumber) {
         String caseBody = """
             {
                 "courthouse": "<<courthouse>>",
@@ -66,15 +100,6 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .extract().response();
 
         assertEquals(201, caseResponse.statusCode());
-
-        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch1.mp2", 1);
-        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch2.mp2", 2);
-        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch3.mp2", 3);
-        postAudio(courthouseName, courtroomName, caseNumber, "functional-test-ch4.mp2", 4);
-
-        var hearingId = getHearingIdByCaseNumber(caseNumber);
-
-        assertNotNull(hearingId);
     }
 
     private void postAudio(String courthouseName, String courtroomName, String caseNumber, String audioFilename, int channelNumber) throws IOException {
@@ -101,9 +126,9 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         audioMetadata = audioMetadata.replace("<<audioFilename>>", audioFilename);
         audioMetadata = audioMetadata.replace("<<channelNumber>>", String.valueOf(channelNumber));
 
-        String audio1 = getContentsFromFile("audio/" + audioFilename);
+        String audio = getContentsFromFile("audio/" + audioFilename);
 
-        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio1.getBytes())
+        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(audio.getBytes())
             .fileName(audioFilename)
             .controlName("file")
             .mimeType("audio/mpeg")
@@ -129,7 +154,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             {
                 "case_number": "<<caseNumber>>"
             }
-                """;
+            """;
 
         caseBody = caseBody.replace("<<caseNumber>>", caseNumber);
 
