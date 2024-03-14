@@ -10,10 +10,10 @@ import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.DISPLAY_NAME_PROVIDED_ALREADY_EXISTS;
 
 @Component
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
 
         if (nonNull(patch.getDisplayName())) {
             if (repository.existsByDisplayNameIgnoreCaseAndIdNot(patch.getDisplayName(), id)) {
-                throw new DartsApiException(DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
+                throw new DartsApiException(COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
             }
         }
     }

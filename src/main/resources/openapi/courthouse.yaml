@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:4550/
 paths:
-  /courthouses:
+  /admin/courthouses:
     post:
       tags:
         - Courthouses
@@ -20,13 +20,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtendedCourthouse'
+                $ref: '#/components/schemas/ExtendedCourthousePost'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
           description: Resource already exists.
         '500':
           description: Internal Server Error
+  /courthouses:
     get:
       tags:
         - Courthouses
@@ -142,7 +143,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Courthouse'
+            $ref: '#/components/schemas/CourthousePost'
     CourthousePatch:
       required: true
       content:
@@ -165,6 +166,24 @@ components:
         region_id:
           type: integer
           example: 0
+    CourthousePost:
+      type: object
+      required:
+        - courthouse_name
+        - display_name
+      properties:
+        courthouse_name:
+          type: string
+        display_name:
+          type: string
+        region_id:
+          type: integer
+          example: 0
+        security_group_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
     CourthousePatch:
       type: object
       properties:
@@ -224,6 +243,21 @@ components:
               type: string
               format: date-time
               example: "2024-02-09T14:26:31.118Z"
+    ExtendedCourthousePost:
+      allOf:
+        - $ref: '#/components/schemas/CourthousePost'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+            last_modified_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
 
     CourtList:
       type: array
@@ -238,11 +272,17 @@ components:
         - "COURTHOUSE_102"
         - "COURTHOUSE_103"
         - "COURTHOUSE_104"
+        - "COURTHOUSE_105"
+        - "COURTHOUSE_106"
+        - "COURTHOUSE_107"
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_NOT_FOUND,
-        DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED,
+        REGION_ID_DOES_NOT_EXIST,
+        SECURITY_GROUP_ID_DOES_NOT_EXIST,
         COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
 
     CourthouseTitleErrors:
@@ -251,13 +291,19 @@ components:
         - "Provided courthouse name already exists."
         - "Provided courthouse code already exists."
         - "Courthouse with provided ID does not exist."
-        - "Provided display name already exists."
+        - "Provided courthouse display name already exists."
+        - "Only TRANSCRIBER roles may be assigned"
+        - "Region ID does not exist"
+        - "Security group ID does not exist"
         - "The courthouse name cannot be change because it has existing cases."
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
         COURTHOUSE_NOT_FOUND,
-        DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED,
+        REGION_ID_DOES_NOT_EXIST,
+        SECURITY_GROUP_ID_DOES_NOT_EXIST,
         COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
 
     UserAuthorisation403_109ErrorCode:

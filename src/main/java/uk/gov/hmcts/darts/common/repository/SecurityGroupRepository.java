@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface SecurityGroupRepository extends JpaRepository<SecurityGroupEntity, Integer> {
 
-    Optional<SecurityGroupEntity> findByGroupName(String name);
+    Optional<SecurityGroupEntity> findByGroupNameIgnoreCase(String name);
 
 }
