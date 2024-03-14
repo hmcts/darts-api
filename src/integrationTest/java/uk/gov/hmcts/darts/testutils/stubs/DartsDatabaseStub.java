@@ -201,9 +201,8 @@ public class DartsDatabaseStub {
         dailyListRepository.deleteAll();
         userAccountRepository.deleteAll(userAccountBin);
         userAccountBin.clear();
-        // Look at why this doesn't work
-        // securityGroupRepository.deleteAll(securityGroupBin);
-        // securityGroupBin.clear();
+        securityGroupRepository.deleteAll(securityGroupBin);
+        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);

@@ -18,10 +18,10 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
-import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.DISPLAY_NAME_PROVIDED_ALREADY_EXISTS;
 
 @ExtendWith(MockitoExtension.class)
 class CourthousePatchValidatorTest {
@@ -76,7 +76,7 @@ class CourthousePatchValidatorTest {
 
         assertThatThrownBy(() -> validator.validate(someCourthousePatchWithCourthouseDisplayName("some-already-existing-display-name"), 1))
             .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
+            .hasFieldOrPropertyWithValue("error", COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
     }
 
     @Test

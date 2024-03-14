@@ -373,6 +373,7 @@ public class TestSupportController {
     private void removeSecurityGroups(Session session) {
         session.createNativeQuery("""
                                           delete from darts.security_group where description = 'A temporary group created by functional test'
+                                          or description like '%func-%'
                                           """, Integer.class)
                 .executeUpdate();
     }

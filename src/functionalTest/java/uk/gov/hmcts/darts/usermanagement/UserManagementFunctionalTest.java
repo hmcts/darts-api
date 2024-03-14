@@ -17,9 +17,6 @@ import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -212,15 +209,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
         assertEquals(201, response.getStatusCode());
 
         return response;
-    }
-
-    private boolean isIsoDateTimeString(String string) {
-        try {
-            LocalDateTime.parse(string, DateTimeFormatter.ISO_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-        return true;
     }
 
     @Test
