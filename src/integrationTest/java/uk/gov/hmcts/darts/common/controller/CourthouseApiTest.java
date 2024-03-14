@@ -80,7 +80,7 @@ class CourthouseApiTest extends IntegrationBase {
     private static final String COURTHOUSE_NAME = "INT-TEST_HAVERFORDWEST";
     private static final String ANOTHER_COURTHOUSE_NAME = "INT-TEST_SWANSEA";
     private static final String COURTHOUSE_DISPLAY_NAME = "Haverfordwest";
-    public static final int TRANSCRIBER_GROUP_ID = -4;
+    private static final int TRANSCRIBER_GROUP_ID = -4;
 
     @Autowired
     private MockMvc mockMvc;
@@ -401,7 +401,7 @@ class CourthouseApiTest extends IntegrationBase {
             assertEquals("INT-TEST_HAVERFORDWEST_REQUESTER", requesterGroup.getGroupName());
             assertEquals("Haverfordwest Requestor", requesterGroup.getDisplayName());
 
-            verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+            verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
             verifyNoMoreInteractions(mockUserIdentity);
         });
     }
@@ -441,7 +441,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("COURTHOUSE_104"))
             .andExpect(jsonPath("$.title").value("Only TRANSCRIBER roles may be assigned"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -485,7 +485,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.security_group_ids", hasItems(TRANSCRIBER_GROUP_ID)))
             .andExpect(jsonPath("$.security_group_ids", hasSize(3)));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -516,7 +516,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("COURTHOUSE_100"))
             .andExpect(jsonPath("$.title").value("Provided courthouse name already exists."));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -547,7 +547,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("COURTHOUSE_103"))
             .andExpect(jsonPath("$.title").value("Provided courthouse display name already exists."));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -583,7 +583,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -614,7 +614,7 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.type").value("COURTHOUSE_105"))
             .andExpect(jsonPath("$.title").value("Region ID does not exist"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 

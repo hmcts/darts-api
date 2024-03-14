@@ -20,7 +20,7 @@ public class SecurityGroupCreationValidation implements Validator<SecurityGroupM
     public void validate(SecurityGroupModel securityGroup) {
         String name = securityGroup.getName();
 
-        securityGroupRepository.findByGroupName(name)
+        securityGroupRepository.findByGroupNameIgnoreCase(name)
             .ifPresent(existingGroup -> {
                 throw new DartsApiException(
                     UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
