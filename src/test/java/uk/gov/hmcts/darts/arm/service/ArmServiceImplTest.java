@@ -24,6 +24,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -139,11 +140,26 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testDeleteResponseBlob() {
+    void testDeleteResponseBlobIsSuccessful() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
 
         Response<Boolean> response = mock(Response.class);
+        when(response.getStatusCode()).thenReturn(202);
+
+        when(blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null, Duration.of(60, ChronoUnit.SECONDS), null)).thenReturn(response);
+
+        boolean result = armService.deleteBlobData(ARM_BLOB_CONTAINER_NAME, "blobPathAndName");
+        assertTrue(result);
+    }
+
+    @Test
+    void testDeleteResponseBlobIsNotSuccessful() {
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+
+        Response<Boolean> response = mock(Response.class);
+        when(response.getStatusCode()).thenReturn(500);
 
         when(blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null, Duration.of(60, ChronoUnit.SECONDS), null)).thenReturn(response);
 
