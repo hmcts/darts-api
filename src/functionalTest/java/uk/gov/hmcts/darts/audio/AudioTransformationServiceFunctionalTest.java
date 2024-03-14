@@ -6,10 +6,8 @@ import io.restassured.response.Response;
 import io.restassured.specification.MultiPartSpecification;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import uk.gov.hmcts.darts.FunctionalTest;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -95,24 +93,13 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
             .mimeType("audio/mpeg")
             .build();
 
-//        MultiPartSpecification multiPartSpecificationJson = new MultiPartSpecBuilder(audioMetadata.getBytes())
-//            .mimeType("application/json")
-//            .build();
-
         Response postAudioResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.MULTIPART)
             .accept("application/json, text/plain, */*")
-            /*.multiPart("data",body,"application/json")
-            .multiPart("file[0]", new File(file1),"multipart/form-data")
-            .multiPart("file[1]", new File(file2),"multipart/form-data")*/
-            //.header(CONTENT_TYPE, CONTENT_TYPE_MULTIPART_FORM_DATA)
             .baseUri(getUri(AUDIOS_PATH))
-            //.multiPart("file", getFile(AUDIO_FUNCTIONAL_TEST_CH_1_MP_2))
             .multiPart(multiPartSpecification)
-            //.multiPart(multiPartSpecificationJson)
             .multiPart("metadata", audioMetadata, "application/json")
             .when()
-            //.body(audioMetadata)
             .post(getUri(AUDIOS_PATH))
             .then()
             .extract().response();
@@ -120,30 +107,5 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
         assertEquals(200, postAudioResponse.statusCode());
     }
 
-    File getFile(String fileName) throws IOException {
-        return new ClassPathResource(fileName).getFile();
-    }
 
-//    Testers code
-//    public ApiResponse postMultipartAudioApi(String endpoint, String body, String filename) {
-//        response =
-//            given()
-//                .spec(requestLogLevel(ReadProperties.requestLogLevel))
-//                .accept(ACCEPT_JSON_STRING)
-//                .header(USER_AGENT, USER_AGENT_STRING)
-//                .header(ACCEPT_ENCODING, ACCEPT_ENCODING_STRING)
-//                .header(CONNECTION, CONNECTION_STRING)
-//                .header(CONTENT_TYPE, CONTENT_TYPE_MULTIPART_FORM_DATA)
-//                .header(AUTHORIZATION, authorization)
-//                .baseUri(baseUri)
-//                .basePath("")
-//                .multiPart("file", new File(filename))
-//                .multiPart("metadata", body, CONTENT_TYPE_APPLICATION_JSON)
-//                .when()
-//                .post(endpoint)
-//                .then()
-//                .spec(responseLogLevel(ReadProperties.responseLogLevel))
-//                .extract().response();
-//        return new ApiResponse(response.statusCode(), response.asString());
-//    }
 }
