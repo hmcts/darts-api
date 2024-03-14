@@ -122,7 +122,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(getFileTag(caseDocument.getFileType()));
+        uploadNewFileRecordMetadata.setFileTag(getFileTag(caseDocument.getFileName()));
         return uploadNewFileRecordMetadata;
     }
 
