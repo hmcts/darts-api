@@ -636,7 +636,7 @@ class ArchiveRecordServiceImplTest {
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
-        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
+        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
@@ -878,7 +878,7 @@ class ArchiveRecordServiceImplTest {
 
         when(annotationDocumentEntity.getId()).thenReturn(1);
         when(annotationDocumentEntity.getAnnotation()).thenReturn(annotationEntity);
-        when(annotationDocumentEntity.getFileName()).thenReturn("annotation.docx");
+        when(annotationDocumentEntity.getFileName()).thenReturn("annotation.d");
         when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
@@ -1080,7 +1080,7 @@ class ArchiveRecordServiceImplTest {
 
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
+        when(caseDocumentEntity.getFileName()).thenReturn("annotation.");
         when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
