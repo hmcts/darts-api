@@ -14,12 +14,12 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
-import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.AdminCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.AdminRegion;
-import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
 import java.util.List;
@@ -36,8 +36,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 public class CourthousesController implements CourthousesApi {
 
     private final CourthouseService courthouseService;
-
-    private final CourthouseToCourthouseEntityMapper courthouseMapper;
 
     private final AdminRegionToRegionEntityMapper regionMapper;
 
@@ -77,9 +75,10 @@ public class CourthousesController implements CourthousesApi {
     }
 
     @Override
-    public ResponseEntity<ExtendedCourthouse> courthousesPost(Courthouse courthouse) {
-        CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
-        ExtendedCourthouse extendedCourthouse = courthouseMapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<ExtendedCourthousePost> adminCourthousesPost(CourthousePost courthousePost) {
+        ExtendedCourthousePost extendedCourthouse = courthouseService.createCourthouseAndGroups(courthousePost);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }
 
@@ -90,4 +89,5 @@ public class CourthousesController implements CourthousesApi {
         var adminCourthouse = courthouseService.updateCourthouse(courthouseId, courthousePatch);
         return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
     }
+
 }
