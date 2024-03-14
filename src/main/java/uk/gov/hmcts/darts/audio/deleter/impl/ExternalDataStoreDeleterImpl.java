@@ -38,16 +38,18 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
 
             try {
                 deleter.delete(externalLocation);
-                repository.delete(entityToBeDeleted);
-                if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
-                    transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
-                }
             } catch (AzureDeleteBlobException e) {
                 log.error(
                     "Failed to delete storage data with externalLocation={} for entityId={} and statusId={}",
                     externalLocation, entityId, statusId, e
                 );
             }
+
+            repository.delete(entityToBeDeleted);
+            if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
+                transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
+            }
+
         }
         return toBeDeleted;
     }
