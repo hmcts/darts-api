@@ -53,13 +53,13 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
 
         if (nonNull(patch.getRegionId())) {
             if (!regionRepository.existsById(patch.getRegionId())) {
-                throw new DartsApiException(CourthouseApiError.REGION_DOES_NOT_EXIST);
+                throw new DartsApiException(CourthouseApiError.REGION_ID_DOES_NOT_EXIST);
             }
         }
 
         if (nonNull(patch.getSecurityGroupIds()) && !patch.getSecurityGroupIds().isEmpty()) {
             if (!securityGroupRepository.existsAllByIdIn(new HashSet<>(patch.getSecurityGroupIds()))) {
-                throw new DartsApiException(CourthouseApiError.SECURITY_GROUP_DOES_NOT_EXIST);
+                throw new DartsApiException(CourthouseApiError.SECURITY_GROUP_ID_DOES_NOT_EXIST);
             }
         }
     }

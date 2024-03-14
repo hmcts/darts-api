@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHO
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
+import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.SECURITY_GROUP_ID_DOES_NOT_EXIST;
 
 @ExtendWith(MockitoExtension.class)
 class CourthousePatchValidatorTest {
@@ -97,7 +99,7 @@ class CourthousePatchValidatorTest {
 
         assertThatThrownBy(() -> validator.validate(someCourtHousePatchForRegion(2), 1))
             .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", REGION_DOES_NOT_EXIST);
+            .hasFieldOrPropertyWithValue("error", CourthouseApiError.REGION_ID_DOES_NOT_EXIST);
     }
 
     @Test
@@ -107,7 +109,7 @@ class CourthousePatchValidatorTest {
 
         assertThatThrownBy(() -> validator.validate(someCourtHousePatchForSecurityGroup(2), 1))
             .isInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", SECURITY_GROUP_DOES_NOT_EXIST);
+            .hasFieldOrPropertyWithValue("error", SECURITY_GROUP_ID_DOES_NOT_EXIST);
     }
 
     @Test
