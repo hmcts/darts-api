@@ -13,7 +13,10 @@ import uk.gov.hmcts.darts.log.service.AudioLoggerService;
 import uk.gov.hmcts.darts.log.service.CasesLoggerService;
 import uk.gov.hmcts.darts.log.service.DailyListLoggerService;
 import uk.gov.hmcts.darts.log.service.EventLoggerService;
+import uk.gov.hmcts.darts.log.service.impl.NotificationLoggerService;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.service.notify.NotificationClientException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class LogApiImpl implements LogApi {
     private final AtsLoggerService atsLoggerService;
     private final CasesLoggerService casesLoggerService;
     private final AudioLoggerService audioLoggerService;
+    private final NotificationLoggerService notificationLoggerService;
 
     private final DailyListLoggerService logJobService;
 
@@ -63,6 +67,31 @@ public class LogApiImpl implements LogApi {
     @Override
     public void defendantNameOverflow(AddCaseRequest addCaseRequest) {
         casesLoggerService.defendantNameOverflow(addCaseRequest);
+    }
+
+    @Override
+    public void scheduleNotification(NotificationEntity notificationEntity, Integer caseId) {
+        notificationLoggerService.scheduleNotification(notificationEntity, caseId);
+    }
+
+    @Override
+    public void sendingNotification(NotificationEntity notification, String templateId, Integer attempts) {
+        notificationLoggerService.sendingNotification(notification, templateId, attempts);
+    }
+
+    @Override
+    public void sentNotification(NotificationEntity notification, String templateId, Integer attempts) {
+        notificationLoggerService.sentNotification(notification, templateId, attempts);
+    }
+
+    @Override
+    public void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
+        notificationLoggerService.errorRetryingNotification(notification, templateId, e);
+    }
+
+    @Override
+    public void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
+        notificationLoggerService.failedNotification(notification, templateId, e);
     }
 }
 

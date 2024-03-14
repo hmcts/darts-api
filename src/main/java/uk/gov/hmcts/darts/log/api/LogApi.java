@@ -6,6 +6,8 @@ import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.service.notify.NotificationClientException;
 
 public interface LogApi {
     void eventReceived(DartsEvent event);
@@ -23,4 +25,16 @@ public interface LogApi {
     void defendantNameOverflow(AddCaseRequest addCaseRequest);
 
     void casesRequestedByDarPc(GetCasesRequest getCasesRequest);
+
+    void scheduleNotification(NotificationEntity notificationEntity, Integer caseId);
+
+    void sendingNotification(NotificationEntity notification, String templateId, Integer attempts);
+
+    void sentNotification(NotificationEntity notification, String templateId, Integer attempts);
+
+    void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException e);
+
+    void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e);
+
+
 }
