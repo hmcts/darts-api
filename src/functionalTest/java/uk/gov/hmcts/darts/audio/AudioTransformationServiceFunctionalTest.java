@@ -58,7 +58,7 @@ class AudioTransformationServiceFunctionalTest extends FunctionalTest {
               "requestor": 0,
               "start_time": "2024-03-11T10:15:00.000Z",
               "end_time": "2024-03-11T10:20:00.000Z",
-              "request_type": "PLAYBACK"
+              "request_type": "DOWNLOAD"
             }
             """;
         audioRequest = audioRequest.replace("<<hearingId>>", String.valueOf(hearingId));
