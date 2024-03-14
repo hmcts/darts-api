@@ -293,8 +293,8 @@ components:
         - "Courthouse with provided ID does not exist."
         - "Provided courthouse display name already exists."
         - "Only TRANSCRIBER roles may be assigned"
-        - "Region id does not exist"
-        - "Security group id does not exist"
+        - "Region ID does not exist"
+        - "Security group ID does not exist"
         - "The courthouse name cannot be change because it has existing cases."
       x-enum-varnames: [
         COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,

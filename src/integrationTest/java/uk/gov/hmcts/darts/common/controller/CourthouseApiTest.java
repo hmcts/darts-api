@@ -612,7 +612,7 @@ class CourthouseApiTest extends IntegrationBase {
             // Then
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("COURTHOUSE_105"))
-            .andExpect(jsonPath("$.title").value("Region id does not exist"));
+            .andExpect(jsonPath("$.title").value("Region ID does not exist"));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
