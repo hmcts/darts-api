@@ -28,6 +28,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -157,5 +158,15 @@ class TestSupportControllerTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful());
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNull();
+    }
+
+    @Test
+    void handleKedaInvocationForMediaRequests() throws Exception {
+        Integer mediaRequestId = 1;
+        MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/handleKedaInvocationForMediaRequests/" + mediaRequestId))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertTrue(response.getResponse().getContentAsString().isEmpty());
     }
 }
