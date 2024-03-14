@@ -369,7 +369,6 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
 
         OffsetDateTime startedAt = testTime.minusHours(1);
-        OffsetDateTime endedAt = testTime;
 
         when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
@@ -398,6 +397,7 @@ class ArchiveRecordServiceImplTest {
 
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual Response {}", actualResponse);
+        OffsetDateTime endedAt = testTime;
 
         String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateMediaArchiveRecord/invalid_properties_path/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
@@ -631,7 +631,6 @@ class ArchiveRecordServiceImplTest {
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
 
         OffsetDateTime startedAt = testTime.minusHours(1);
-        OffsetDateTime endedAt = testTime.plusHours(2);
 
         when(transcriptionEntity.getCourtroom()).thenReturn(courtroomEntity);
 
@@ -658,6 +657,8 @@ class ArchiveRecordServiceImplTest {
 
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime endedAt = testTime.plusHours(2);
 
         String expectedResponse = getContentsFromFile(
             "Tests/arm/service/testGenerateTranscriptionArchiveRecord/invalid_properties_path/expectedResponse.a360");
