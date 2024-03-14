@@ -157,7 +157,6 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(8)
     void getAllRegions() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
