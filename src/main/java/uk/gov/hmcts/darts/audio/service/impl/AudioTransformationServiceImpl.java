@@ -312,12 +312,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                                                              ExternalLocationTypeEnum location1,
                                                              ExternalLocationTypeEnum location2) {
 
-        for (MediaEntity mediaEntity : mediaEntities) {
-            if (!existsMediaInTwoStorageLocation(mediaEntity, location1, location2)) {
-                return false;
-            }
-        }
-        return true;
+        return mediaEntities.stream()
+            .allMatch(mediaEntity -> existsMediaInTwoStorageLocation(mediaEntity, location1, location2));
     }
 
     private boolean existsMediaInTwoStorageLocation(MediaEntity mediaEntity,
