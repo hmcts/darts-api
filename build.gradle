@@ -386,7 +386,7 @@ dependencies {
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.7.3'
 
   //database
-  implementation 'org.postgresql:postgresql:42.7.2'
+  implementation 'org.postgresql:postgresql:42.7.3'
 
   implementation 'uk.gov.service.notify:notifications-java-client:5.0.0-RELEASE'
 
@@ -402,7 +402,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-hc5', version: '13.2.1'
 
   testImplementation 'com.h2database:h2:2.2.224'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
