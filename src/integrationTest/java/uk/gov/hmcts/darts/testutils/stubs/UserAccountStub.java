@@ -281,7 +281,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createSuperAdminUser() {
-        var adminGroup = securityGroupRepository.findByGroupName("SUPER_ADMIN")
+        var adminGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_ADMIN")
             .orElseThrow();
         adminGroup.setGlobalAccess(true);
         adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
@@ -295,7 +295,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createSuperUser() {
-        var superUserGroup = securityGroupRepository.findByGroupName("SUPER_USER")
+        var superUserGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_USER")
             .orElseThrow();
         superUserGroup.setGlobalAccess(true);
         superUserGroup = securityGroupRepository.saveAndFlush(superUserGroup);

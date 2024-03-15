@@ -11,6 +11,7 @@ import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
@@ -22,15 +23,17 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.valueOf;
+
 @Service
 @Slf4j
 @Profile("!intTest")
 @RequiredArgsConstructor
 public class ArmServiceImpl implements ArmService {
 
-    public static final String FILE_PATH_DELIMITER = "/";
-    public static final int STATUS_CODE_202 = 202;
-    protected static final long TIMEOUT = 60;
+    private static final String FILE_PATH_DELIMITER = "/";
+    private static final long TIMEOUT = 60;
 
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -100,7 +103,7 @@ public class ArmServiceImpl implements ArmService {
 
     public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
                                                                 String delimiter,
-                                                                String prefix /* ="" */) {
+                                                                String prefix) {
 
         ListBlobsOptions options = new ListBlobsOptions().setPrefix(prefix);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
@@ -124,7 +127,8 @@ public class ArmServiceImpl implements ArmService {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
 
-            log.info("About to delete blob data for blob path {}", blobPathAndName);
+            log.info("About to delete blob data for containerName={}, blobPathAndName={}",
+                     containerName, blobPathAndName);
             Response<Boolean> response = blobClient.deleteIfExistsWithResponse(
                 DeleteSnapshotsOptionType.INCLUDE,
                 null,
@@ -132,16 +136,22 @@ public class ArmServiceImpl implements ArmService {
                 null
             );
 
-            log.debug("Attempted to delete blob data for blob path {}, Returned status code {}", blobPathAndName, response.getStatusCode());
-            if (STATUS_CODE_202 != response.getStatusCode()) {
-                throw new AzureDeleteBlobException("Failed to delete blob " + blobPathAndName + " because of status code: " + response.getStatusCode());
+            HttpStatus httpStatus = valueOf(response.getStatusCode());
+            log.debug("Attempted to delete blob data for containerName={}, blobPathAndName={}, httpStatus={}",
+                      containerName, blobPathAndName, httpStatus);
+            if (httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus)) {
+                return true;
+            } else {
+                String message = String.format("Failed to delete from storage container=%s, blobPathAndName=%s, httpStatus=%s",
+                                               containerName, blobPathAndName, httpStatus);
+                throw new AzureDeleteBlobException(message);
             }
 
         } catch (Exception e) {
-            log.error("Could not delete from container {} blobPathAndName {} - {}", containerName, blobPathAndName, e);
+            log.error("Could not delete from storage container={}, blobPathAndName {}",
+                      containerName, blobPathAndName, e);
             return false;
         }
-        return true;
     }
 
 }

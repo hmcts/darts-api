@@ -1,7 +1,8 @@
 package uk.gov.hmcts.darts.common.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,15 +11,21 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
-import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -26,39 +33,37 @@ import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
 class CourthouseApiTest extends IntegrationBase {
-
-    public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
-    public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON =
-        "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
-    public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON =
-        "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseDisplayName.json";
-    private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
 
     private static final String ORIGINAL_USERNAME = "James Smith";
     private static final String ORIGINAL_EMAIL_ADDRESS = "james.smith@hmcts.net";
@@ -67,11 +72,15 @@ class CourthouseApiTest extends IntegrationBase {
     private static final OffsetDateTime ORIGINAL_LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime ORIGINAL_LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime ORIGINAL_CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
-    public static final String SWANSEA_CROWN_COURT = "SWANSEA CROWN COURT";
-    public static final String LEEDS_COURT = "LEEDS";
-    public static final String MANCHESTER_COURT = "MANCHESTER";
-    public static final String WALES_REGION = "Wales";
-    public static final String NORTH_WEST_REGION = "North West";
+    private static final String SWANSEA_CROWN_COURT = "SWANSEA CROWN COURT";
+    private static final String LEEDS_COURT = "LEEDS";
+    private static final String MANCHESTER_COURT = "MANCHESTER";
+    private static final String WALES_REGION = "Wales";
+    private static final String NORTH_WEST_REGION = "North West";
+    private static final String COURTHOUSE_NAME = "INT-TEST_HAVERFORDWEST";
+    private static final String ANOTHER_COURTHOUSE_NAME = "INT-TEST_SWANSEA";
+    private static final String COURTHOUSE_DISPLAY_NAME = "Haverfordwest";
+    private static final int TRANSCRIBER_GROUP_ID = -4;
 
     @Autowired
     private MockMvc mockMvc;
@@ -82,6 +91,12 @@ class CourthouseApiTest extends IntegrationBase {
     @Autowired
     private RegionStub regionStub;
 
+    @Autowired
+    private SecurityGroupRepository securityGroupRepository;
+
+    @Autowired
+    private SecurityRoleRepository securityRoleRepository;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -91,18 +106,41 @@ class CourthouseApiTest extends IntegrationBase {
     @Autowired
     CourthouseRepository courthouseRepository;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private TransactionTemplate transactionTemplate;
+
+    @BeforeEach
+    void setUp() {
+        transactionTemplate = new TransactionTemplate(transactionManager);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Set<SecurityGroupEntity> securityGroupsToBeDeleted = dartsDatabase.getSecurityGroupRepository()
+            .findAll()
+            .stream()
+            .filter(securityGroupEntity -> securityGroupEntity.getGroupName().contains("INT-TEST"))
+            .collect(Collectors.toSet());
+        dartsDatabase.addToTrash(securityGroupsToBeDeleted);
+    }
+
     @Test
     void adminCourthousesGet() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
-        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+        Integer addedId = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME)
+            .getId();
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.has_data", is(false)))
@@ -113,7 +151,7 @@ class CourthouseApiTest extends IntegrationBase {
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, times(1)).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
 
     }
@@ -123,15 +161,15 @@ class CourthouseApiTest extends IntegrationBase {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
-        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+        Integer addedId = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME)
+            .getId();
 
-        dartsDatabase.createCase("HAVERFORDWEST", "101");
+        dartsDatabase.createCase(COURTHOUSE_NAME, "101");
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.has_data", is(true)))
@@ -142,7 +180,7 @@ class CourthouseApiTest extends IntegrationBase {
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, times(1)).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
 
     }
@@ -152,16 +190,16 @@ class CourthouseApiTest extends IntegrationBase {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
-        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+        Integer addedId = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME)
+            .getId();
 
-        dartsDatabase.createHearing("HAVERFORDWEST",
+        dartsDatabase.createHearing(COURTHOUSE_NAME,
                                     "roomname", "101", LocalDate.now());
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.has_data", is(true)))
@@ -172,7 +210,7 @@ class CourthouseApiTest extends IntegrationBase {
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertFalse(response.getResponse().getContentAsString().contains("region_id"));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verify(mockUserIdentity, times(1)).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
 
     }
@@ -183,8 +221,7 @@ class CourthouseApiTest extends IntegrationBase {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
-        final Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
-        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists("HAVERFORDWEST");
+        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME);
 
         RegionEntity region = new RegionEntity();
         region.setId(5);
@@ -200,11 +237,10 @@ class CourthouseApiTest extends IntegrationBase {
 
         courtHouseEntity.setSecurityGroups(secGrps);
 
-        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
+        MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", courtHouseEntity.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.region_id", is(5)))
@@ -217,6 +253,9 @@ class CourthouseApiTest extends IntegrationBase {
         assertEquals(200, response.getResponse().getStatus());
         assertTrue(response.getResponse().getContentAsString().contains("security_group_ids"));
         assertTrue(response.getResponse().getContentAsString().contains("region_id"));
+
+        verify(mockUserIdentity, times(1)).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verifyNoMoreInteractions(mockUserIdentity);
 
     }
 
@@ -268,132 +307,367 @@ class CourthouseApiTest extends IntegrationBase {
 
     @Test
     void courthousesGetNotAuthorised() throws Exception {
-
-        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+        CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
+        Integer addedId = swanseaCourthouse.getId();
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andDo(print()).andReturn();
 
         assertEquals(403, response.getResponse().getStatus());
-
     }
 
     @Test
     void courthousesGetAll() throws Exception {
-
-        MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
-            REQUEST_BODY_HAVERFORDWEST_JSON);
-        MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_TEST_JSON);
-
-
-        ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(
-            haverfordwestResponse.getResponse().getContentAsString(),
-            ExtendedCourthouse.class
-        );
-        ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(
-            swanseaResponse.getResponse().getContentAsString(),
-            ExtendedCourthouse.class
-        );
-
-        // Truncate created and modified to milliseconds as the post (saveAndFlush) returns a more precise timestamp
-        haverfordwestCourthouse.setCreatedDateTime(haverfordwestCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
-        haverfordwestCourthouse.setLastModifiedDateTime(haverfordwestCourthouse.getLastModifiedDateTime().truncatedTo(
-            ChronoUnit.MILLIS));
-        swanseaCourthouse.setCreatedDateTime(swanseaCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
-        swanseaCourthouse.setLastModifiedDateTime(swanseaCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
-
-        MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andDo(print()).andReturn();
-
-        List<ExtendedCourthouse> courthouseList = objectMapper.readValue(
-            response.getResponse().getContentAsString(),
-            new TypeReference<>() {
-            }
-        );
-        for (ExtendedCourthouse extendedCourthouse : courthouseList) {
-            extendedCourthouse.setCreatedDateTime(extendedCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
-            extendedCourthouse.setLastModifiedDateTime(extendedCourthouse.getLastModifiedDateTime().truncatedTo(
-                ChronoUnit.MILLIS));
-        }
-        assertTrue(
-            courthouseList.contains(haverfordwestCourthouse),
-            haverfordwestResponse.getResponse().getContentAsString()
-        );
-        assertTrue(courthouseList.contains(swanseaCourthouse), swanseaResponse.getResponse().getContentAsString());
-    }
-
-    @Test
-    void courthousesPost() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
-        mockMvc.perform(requestBuilder).andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id", is(notNullValue())))
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
-    }
-
-    @Test
-    void courthousesPostTwoCourthousesWithSameCode() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
-
-        mockMvc.perform(requestBuilder).andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id", is(notNullValue())))
-            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
-            .andExpect(jsonPath("$.code", is(761)))
-            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
-            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
-
-        mockMvc.perform(requestBuilder).andExpect(status().isConflict());
-
-    }
-
-    @Test
-    void courthousesPostWithMissingCourthouseName() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        assertEquals(
-            "{\"violations\":[{\"field\":\"courthouseName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
-            response.getResponse().getContentAsString()
-        );
-    }
-
-    @Test
-    void courthousesPostWithMissingCourthouseDisplayName() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        assertEquals(
-            "{\"violations\":[{\"field\":\"displayName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
-            response.getResponse().getContentAsString()
-        );
-    }
-
-    @Test
-    void courthousesDelete() throws Exception {
+        // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
 
-        Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME);
+        CourthouseEntity anotherCourthouseEntity = dartsDatabase.createCourthouseUnlessExists(ANOTHER_COURTHOUSE_NAME);
 
-        MockHttpServletRequestBuilder requestBuilder = delete("/courthouses/{courthouse_id}", addedEntityId)
+        MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
-        requestBuilder = get("/admin/courthouses/{courthouse_id}", addedEntityId)
-            .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isOk())
+
+            .andExpect(jsonPath("$.*", hasSize(2)))
+
+            .andExpect(jsonPath("$[0].id", is(courtHouseEntity.getId())))
+            .andExpect(jsonPath("$[0].courthouse_name", is(COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$[0].display_name", is(COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$[0].created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$[0].last_modified_date_time", is(notNullValue())))
+
+            .andExpect(jsonPath("$[1].id", is(anotherCourthouseEntity.getId())))
+            .andExpect(jsonPath("$[1].courthouse_name", is(ANOTHER_COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$[1].display_name", is(ANOTHER_COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$[1].created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$[1].last_modified_date_time", is(notNullValue())));
+    }
+
+    @Test
+    void courthousesPostShouldCreateExpectedApproverAndRequesterGroupsAndCourthouse() throws Exception {
+        // Given
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id", is(notNullValue())))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$.display_name", is(COURTHOUSE_DISPLAY_NAME)))
+            .andExpect(jsonPath("$.security_group_ids", is(notNullValue())))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andReturn();
+
+        var extendedCourthousePost = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ExtendedCourthousePost.class);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            List<SecurityGroupEntity> securityGroups = extendedCourthousePost.getSecurityGroupIds().stream()
+                .map(id -> dartsDatabase.getSecurityGroupRepository().findById(id))
+                .flatMap(Optional::stream)
+                .toList();
+
+            assertEquals(2, securityGroups.size());
+            List<SecurityGroupEntity> approverGroups = securityGroups.stream()
+                .filter(securityGroup -> securityGroup.getSecurityRoleEntity().getRoleName().equals(APPROVER.name()))
+                .toList();
+            assertEquals(1, approverGroups.size());
+            SecurityGroupEntity approverGroup = approverGroups.get(0);
+            assertEquals("INT-TEST_HAVERFORDWEST_APPROVER", approverGroup.getGroupName());
+            assertEquals("Haverfordwest Approver", approverGroup.getDisplayName());
+
+            List<SecurityGroupEntity> requesterGroups = securityGroups.stream()
+                .filter(securityGroup -> securityGroup.getSecurityRoleEntity().getRoleName().equals(REQUESTER.name()))
+                .toList();
+            assertEquals(1, requesterGroups.size());
+            SecurityGroupEntity requesterGroup = requesterGroups.get(0);
+            assertEquals("INT-TEST_HAVERFORDWEST_REQUESTER", requesterGroup.getGroupName());
+            assertEquals("Haverfordwest Requestor", requesterGroup.getDisplayName());
+
+            verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+            verifyNoMoreInteractions(mockUserIdentity);
+        });
+    }
+
+    @Test
+    void courthousesPostShouldFailWhenNonTranscriberSecurityGroupIsProvided() throws Exception {
+        // Given
+        final SecurityGroupEntity standingApproverGroup = transactionTemplate.execute(status -> {
+            Optional<SecurityGroupEntity> standingApproverGroupOptional = dartsDatabase.getSecurityGroupRepository()
+                .findAll()
+                .stream()
+                .filter(securityGroupEntity -> securityGroupEntity.getSecurityRoleEntity().getRoleName().equals(APPROVER.name()))
+                .findFirst();
+            assertTrue(standingApproverGroupOptional.isPresent(), "Precondition failed: Expected a standing approver group to be available");
+
+            return standingApproverGroupOptional.get();
+        });
+
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+        courthousePost.setSecurityGroupIds(Collections.singletonList(standingApproverGroup.getId()));
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        /// When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("COURTHOUSE_104"))
+            .andExpect(jsonPath("$.title").value("Only TRANSCRIBER roles may be assigned"));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesPostShouldSucceedWhenTranscriberSecurityGroupIsProvided() throws Exception {
+        // Given
+        final SecurityGroupEntity standingTranscriberGroup = transactionTemplate.execute(status -> {
+            Optional<SecurityGroupEntity> standingTranscriberGroupOptional = dartsDatabase.getSecurityGroupRepository()
+                .findAll()
+                .stream()
+                .filter(securityGroupEntity -> securityGroupEntity.getSecurityRoleEntity().getRoleName().equals(SecurityRoleEnum.TRANSCRIBER.name()))
+                .findFirst();
+            assertTrue(standingTranscriberGroupOptional.isPresent(), "Precondition failed: Expected a standing transcriber group to be available");
+
+            return standingTranscriberGroupOptional.get();
+        });
+
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+        courthousePost.setSecurityGroupIds(Collections.singletonList(standingTranscriberGroup.getId()));
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id", is(notNullValue())))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$.display_name", is(COURTHOUSE_DISPLAY_NAME)))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.security_group_ids", hasItems(TRANSCRIBER_GROUP_ID)))
+            .andExpect(jsonPath("$.security_group_ids", hasSize(3)));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesPostShouldFailWhenCourthouseWithSameNameAlreadyExists() throws Exception {
+        // Given
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME);
+        courtHouseEntity.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+        dartsDatabase.save(courtHouseEntity);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(UUID.randomUUID().toString()); // just some unique string
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("COURTHOUSE_100"))
+            .andExpect(jsonPath("$.title").value("Provided courthouse name already exists."));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesPostShouldFailWhenCourthouseWithSameDisplayNameAlreadyExists() throws Exception {
+        // Given
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthouseEntity courtHouseEntity = dartsDatabase.createCourthouseUnlessExists(COURTHOUSE_NAME);
+        courtHouseEntity.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+        dartsDatabase.save(courtHouseEntity);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(UUID.randomUUID().toString()); // just some unique string
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("COURTHOUSE_103"))
+            .andExpect(jsonPath("$.title").value("Provided courthouse display name already exists."));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesPostShouldSucceedWhenRegionIsProvided() throws Exception {
+        // Given
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+
+        RegionEntity southWalesRegion = regionStub.createRegionsUnlessExists("South Wales");
+        regionStub.createRegionsUnlessExists("North Wales");
+        Integer regionId = southWalesRegion.getId();
+        courthousePost.setRegionId(regionId);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id", is(notNullValue())))
+            .andExpect(jsonPath("$.courthouse_name", is(COURTHOUSE_NAME)))
+            .andExpect(jsonPath("$.display_name", is(COURTHOUSE_DISPLAY_NAME)))
+            .andExpect(jsonPath("$.region_id", is(regionId)))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesPostShouldFailIfProvidedRegionDoesNotExist() throws Exception {
+        // Given
+        final int nonExistingRegionId = 999_999;
+        assertFalse(dartsDatabase.getRegionRepository().existsById(nonExistingRegionId), "Precondition failed: Expected this group to not exist");
+
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+        courthousePost.setRegionId(nonExistingRegionId);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("COURTHOUSE_105"))
+            .andExpect(jsonPath("$.title").value("Region ID does not exist"));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void courthousesPostShouldFailIfMissingCourthouseName() throws Exception {
+        // Given
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(null);
+        courthousePost.setDisplayName(COURTHOUSE_DISPLAY_NAME);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
+            .andExpect(jsonPath("$.title").value("Constraint Violation"))
+            .andExpect(jsonPath("$.violations.*.field").value("courthouseName"))
+            .andExpect(jsonPath("$.violations.*.message").value("must not be null"));
+    }
+
+    @Test
+    void courthousesPostShouldFailIfMissingDisplayName() throws Exception {
+        // Given
+        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        CourthousePost courthousePost = new CourthousePost();
+        courthousePost.setCourthouseName(COURTHOUSE_NAME);
+        courthousePost.setDisplayName(null);
+
+        String jsonRequestBody = objectMapper.writeValueAsString(courthousePost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/admin/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(jsonRequestBody);
+
+        // When
+        mockMvc.perform(requestBuilder)
+            // Then
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
+            .andExpect(jsonPath("$.title").value("Constraint Violation"))
+            .andExpect(jsonPath("$.violations.*.field").value("displayName"))
+            .andExpect(jsonPath("$.violations.*.message").value("must not be null"));
     }
 
     @Test
@@ -416,6 +690,8 @@ class CourthouseApiTest extends IntegrationBase {
 
         assertEquals(200, response.getResponse().getStatus());
 
+        regionRepository.deleteAll();
+
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
@@ -427,24 +703,6 @@ class CourthouseApiTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andDo(print()).andReturn();
 
         assertEquals(403, response.getResponse().getStatus());
-    }
-
-    /**
-     * Test utility method used to add courthouse to database.
-     *
-     * @param fileLocation location of file that contains courthouse to be added.
-     * @return response for successful add
-     */
-    private MvcResult makeRequestToAddCourthouseToDatabase(String fileLocation) throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(fileLocation));
-        return mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andDo(print()).andReturn();
-    }
-
-    private Integer addCourthouseAndGetId(String fileLocation) throws Exception {
-        MvcResult addedCourthouseResponse = makeRequestToAddCourthouseToDatabase(fileLocation);
-        return JsonPath.read(addedCourthouseResponse.getResponse().getContentAsString(), "$.id");
     }
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {

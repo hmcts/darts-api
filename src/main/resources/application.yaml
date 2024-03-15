@@ -218,8 +218,8 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
-    delete:
-      timeout: 60
+      delete:
+        timeout: 60
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:
