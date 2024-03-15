@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.mapper.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
@@ -128,8 +129,10 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private String getFileTag(String filename) {
         String fileTag = null;
-        if (nonNull(filename) && filename.contains(".") && filename.lastIndexOf(".") + 1 < filename.length()) {
-            fileTag = filename.substring(filename.lastIndexOf(".") + 1);
+        try {
+            fileTag = FilenameUtils.getExtension(filename);
+        } catch (IllegalArgumentException e) {
+            log.error("Unable to obtain case file extension from filename {}", filename);
         }
         return fileTag;
     }
