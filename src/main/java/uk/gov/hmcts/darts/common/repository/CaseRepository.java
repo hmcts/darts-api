@@ -39,7 +39,8 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         SELECT case FROM CourtCaseEntity case
         WHERE case.createdDateTime < :cutoffDate
         AND case.closed = false
+        AND NOT EXISTS (select 1 from CaseRetentionEntity cre
+            where (cre.courtCase.id = case.id))
         """)
-    //AND case.caseRetentionEntities is null
     List<CourtCaseEntity> findOpenCaseNumbersToClose(OffsetDateTime cutoffDate);
 }

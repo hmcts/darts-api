@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
@@ -128,7 +130,6 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
         assertEquals(closeDate.toLocalDate().atStartOfDay(), updatedCourtCaseEntity.getCaseClosedTimestamp().toLocalDateTime());
-
     }
 
     @Test
@@ -144,6 +145,38 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
         assertEquals(closeDate, updatedCourtCaseEntity.getCaseClosedTimestamp());
+    }
 
+    @Test
+    void givenRetentionPolicyDoNotClose() {
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("a_courthouse", "019278");
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(7));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        dartsDatabase.getCaseRetentionStub().createCaseRetentionObject(courtCaseEntity, CaseRetentionStatus.COMPLETE,
+                                                                       OffsetDateTime.now().plusYears(7), false);
+
+        closeOldCasesProcessor.closeCases();
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertFalse(updatedCourtCaseEntity.getClosed());
+        assertNull(updatedCourtCaseEntity.getCaseClosedTimestamp());
+    }
+
+    @Test
+    void givenNotSixYearsOldDoNotClose() {
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("a_courthouse", "019278");
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(5).minusDays(360));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases();
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertFalse(updatedCourtCaseEntity.getClosed());
+        assertNull(updatedCourtCaseEntity.getCaseClosedTimestamp());
     }
 }
