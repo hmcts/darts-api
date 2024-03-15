@@ -38,7 +38,7 @@ import java.util.Map;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("!intTest")
+@Profile({"!intTest", "!intAtsTest"})
 public class SecurityConfig {
 
     private final AuthStrategySelector locator;
@@ -101,15 +101,15 @@ public class SecurityConfig {
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
             createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
-                externalAuthProviderConfigurationProperties.getJwkSetUri()),
+                                      externalAuthProviderConfigurationProperties.getJwkSetUri()),
             createAuthenticationEntry(internalAuthConfigurationProperties.getIssuerUri(),
-                internalAuthProviderConfigurationProperties.getJwkSetUri())
+                                      internalAuthProviderConfigurationProperties.getJwkSetUri())
         );
         return new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
     }
 
     private Map.Entry<String, AuthenticationManager> createAuthenticationEntry(String issuer,
-        String jwkSetUri) {
+                                                                               String jwkSetUri) {
         var jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
             .jwsAlgorithm(SignatureAlgorithm.RS256)
             .build();

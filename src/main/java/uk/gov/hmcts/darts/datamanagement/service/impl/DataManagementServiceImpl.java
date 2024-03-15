@@ -36,7 +36,7 @@ import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
-@Profile("!intTest")
+@Profile({"!intTest", "!intAtsTest"})
 @RequiredArgsConstructor
 @SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementServiceImpl implements DataManagementService {
