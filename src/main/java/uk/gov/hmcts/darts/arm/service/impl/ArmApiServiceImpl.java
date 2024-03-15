@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
@@ -9,12 +10,19 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
+import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ArmApiServiceImpl implements ArmApiService {
 
     private final ArmApiConfigurationProperties armApiConfigurationProperties;
@@ -23,11 +31,6 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
-        ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
-            armApiConfigurationProperties.getArmUsername(),
-            armApiConfigurationProperties.getArmPassword(),
-            "password"
-        ));
 
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
@@ -38,9 +41,39 @@ public class ArmApiServiceImpl implements ArmApiService {
             .build();
 
         return armApiClient.updateMetadata(
-            String.format("Bearer %s", armTokenResponse.getAccessToken()),
+            getArmBearerToken(),
             armUpdateMetadataRequest
-        ).getBody();
+        );
+    }
+
+    @Override
+    public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
+        DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
+        feign.Response response = armApiClient.downloadArmData(
+            getArmBearerToken(),
+            armApiConfigurationProperties.getCabinetId(),
+            externalRecordId,
+            externalFileId
+        );
+
+        responseMetaData.setContainerTypeUsedToDownload(DatastoreContainerType.ARM);
+        try {
+            responseMetaData.markInputStream(response.body().asInputStream());
+        } catch (IOException e) {
+            throw new FileNotDownloadedException("Arm file failed to download, externalRecordId:" + externalRecordId + ", externalFileId:" + externalFileId, e);
+        }
+
+        log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
+        return responseMetaData;
+    }
+
+    private String getArmBearerToken() {
+        ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
+            armApiConfigurationProperties.getArmUsername(),
+            armApiConfigurationProperties.getArmPassword(),
+            GrantType.PASSWORD.getValue()
+        ));
+        return String.format("Bearer %s", armTokenResponse.getAccessToken());
     }
 
 }

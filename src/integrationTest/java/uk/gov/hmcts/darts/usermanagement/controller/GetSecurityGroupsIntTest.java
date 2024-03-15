@@ -14,8 +14,8 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourthouseStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
 import java.util.Comparator;
@@ -31,7 +31,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/security-groups";
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @Autowired
     CourthouseStub courthouseStub;
@@ -47,30 +47,32 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     @Test
     void shouldReturnAllSecurityGroupsWithCourthouseIds() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isOk())
             .andReturn();
 
         List<SecurityGroupWithIdAndRole> groups = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+                                                                         new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+                                                                         });
 
         assertFalse(groups.isEmpty());
 
         groups.sort(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed());
 
-        checkGroup(groups.get(0), "ADMIN", true, 11, true);
-        checkGroup(groups.get(1), "Test Approver", false, 1, true);
-        checkGroup(groups.get(2), "Test Requestor", false, 2, true);
-        checkGroup(groups.get(3), "Test Judge", false, 3, true);
-        checkGroup(groups.get(4), "Test Transcriber", false, 4, true);
-        checkGroup(groups.get(5), "Test Language Shop", false, 5, true);
-        checkGroup(groups.get(6), "Test RCJ Appeals", false, 6, true);
-        checkGroup(groups.get(7), "Xhibit Group", true, 7, true);
-        checkGroup(groups.get(8), "Cpp Group", true, 8, true);
-        checkGroup(groups.get(9), "Dar Pc Group", true, 9, true);
-        checkGroup(groups.get(10), "Mid Tier Group", true, 10, true);
+        checkGroup(groups.get(0), "SUPER_USER", true, 12, true);
+        checkGroup(groups.get(1), "SUPER_ADMIN", true, 11, true);
+        checkGroup(groups.get(2), "Test Approver", false, 1, true);
+        checkGroup(groups.get(3), "Test Requestor", false, 2, true);
+        checkGroup(groups.get(4), "Test Judge", false, 3, true);
+        checkGroup(groups.get(5), "Test Transcriber", false, 4, true);
+        checkGroup(groups.get(6), "Test Language Shop", true, 5, true);
+        checkGroup(groups.get(7), "Test RCJ Appeals", true, 6, true);
+        checkGroup(groups.get(8), "Xhibit Group", true, 7, true);
+        checkGroup(groups.get(9), "Cpp Group", true, 8, true);
+        checkGroup(groups.get(10), "Dar Pc Group", true, 9, true);
+        checkGroup(groups.get(11), "Mid Tier Group", true, 10, true);
     }
 
     private void checkGroup(SecurityGroupWithIdAndRole group, String name, boolean globalAccess, Integer roleId, boolean displayState) {
@@ -82,7 +84,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
 
     @Test
     void givenAUserNotAuthorisedThenReturnA403() throws Exception {
-        adminUserStub.givenUserIsNotAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("int-test-courthouse");
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity);
@@ -99,4 +101,4 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
     }
 
 
-    }
+}

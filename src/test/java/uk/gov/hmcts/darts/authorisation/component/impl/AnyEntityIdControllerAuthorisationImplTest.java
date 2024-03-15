@@ -72,6 +72,8 @@ class AnyEntityIdControllerAuthorisationImplTest {
             new TranscriptionIdControllerAuthorisationImpl(authorisation);
         TransformedMediaIdControllerAuthorisationImpl transformedMediaIdControllerAuthorisation =
             new TransformedMediaIdControllerAuthorisationImpl(authorisation);
+        AnnotationIdControllerAuthorisationImpl annotationIdControllerAuthorisation =
+            new AnnotationIdControllerAuthorisationImpl(authorisation);
         controllerAuthorisation = new AnyEntityIdControllerAuthorisationImpl(
             authorisation,
             caseIdControllerAuthorisation,
@@ -79,7 +81,8 @@ class AnyEntityIdControllerAuthorisationImplTest {
             mediaIdControllerAuthorisation,
             mediaRequestIdControllerAuthorisation,
             transcriptionIdControllerAuthorisation,
-            transformedMediaIdControllerAuthorisation
+            transformedMediaIdControllerAuthorisation,
+            annotationIdControllerAuthorisation
         );
     }
 
@@ -116,7 +119,8 @@ class AnyEntityIdControllerAuthorisationImplTest {
               "media_id": 3,
               "media_request_id": 4,
               "transcription_id": 5,
-              "transformed_media_id": 6
+              "transformed_media_id": 6,
+              "annotation_id": 7
             }
             """;
 
@@ -129,7 +133,7 @@ class AnyEntityIdControllerAuthorisationImplTest {
         verify(authorisation).authoriseByMediaRequestId(4, roles);
         verify(authorisation).authoriseByTranscriptionId(5, roles);
         verify(authorisation).authoriseByTransformedMediaId(6, roles);
-
+        verify(authorisation).authoriseByAnnotationId(7, roles);
     }
 
     @Test

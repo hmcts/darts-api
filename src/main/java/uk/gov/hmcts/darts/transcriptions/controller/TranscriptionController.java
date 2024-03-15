@@ -1,16 +1,14 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
@@ -44,13 +42,15 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;
@@ -61,8 +61,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, REQUESTER, APPROVER},
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
         transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
 
@@ -77,11 +77,13 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER})
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        securityRoles = {APPROVER, TRANSCRIBER},
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 
-        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription));
+        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription, false));
     }
 
     @Override
@@ -95,8 +97,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -104,10 +106,6 @@ public class TranscriptionController implements TranscriptionApi {
             .header(
                 CONTENT_DISPOSITION,
                 String.format("attachment; filename=\"%s\"", downloadTranscriptResponse.getFileName())
-            )
-            .header(
-                "external_location",
-                downloadTranscriptResponse.getExternalLocation().toString()
             )
             .header(
                 "transcription_document_id",
@@ -150,12 +148,9 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
-        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
-            in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
-    ) {
+        securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER},
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS})
+    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(Integer transcriptionId) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),
             HttpStatus.OK
@@ -174,7 +169,7 @@ public class TranscriptionController implements TranscriptionApi {
         // we authorise the transcription ids
         authorisation.authoriseWithIdsForTranscription(request,
                                                        e -> e.getTranscriptionId().toString(),
-                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER},
                                                        executeOnAuth
         );
 

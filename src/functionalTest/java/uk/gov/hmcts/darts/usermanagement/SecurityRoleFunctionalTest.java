@@ -17,7 +17,7 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void shouldCreateSecurityGroup() {
+    void shouldGetSecurityRoles() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-roles"))
             .get()
@@ -30,57 +30,74 @@ class SecurityRoleFunctionalTest extends FunctionalTest {
                 [
                   {
                     "id": 1,
+                    "role_name": "APPROVER",
                     "display_name": "Approver",
                     "display_state": true
                   },
                   {
                     "id": 2,
+                    "role_name": "REQUESTER",
                     "display_name": "Requestor",
                     "display_state": true
                   },
                   {
                     "id": 3,
+                    "role_name": "JUDGE",
                     "display_name": "Judge",
                     "display_state": true
                   },
                   {
                     "id": 4,
+                    "role_name": "TRANSCRIBER",
                     "display_name": "Transcriber",
                     "display_state": true
                   },
                   {
                     "id": 5,
+                    "role_name": "TRANSLATION_QA",
                     "display_name": "Translation QA",
                     "display_state": true
                   },
                   {
                     "id": 6,
+                    "role_name": "RCJ_APPEALS",
                     "display_name": "RCJ Appeals",
                     "display_state": true
                   },
                   {
                     "id": 7,
+                    "role_name": "XHIBIT",
                     "display_name": "XHIBIT",
                     "display_state": true
                   },
                   {
                     "id": 8,
+                    "role_name": "CPP",
                     "display_name": "CPP",
                     "display_state": true
                   },
                   {
                     "id": 9,
+                    "role_name": "DAR_PC",
                     "display_name": "DAR PC",
                     "display_state": true
                   },
                   {
                     "id": 10,
+                    "role_name": "MID_TIER",
                     "display_name": "Mid Tier",
                     "display_state": true
                   },
                   {
                     "id": 11,
-                    "display_name": "Admin",
+                    "role_name": "SUPER_ADMIN",
+                    "display_name": "Super Admin",
+                    "display_state": true
+                  },
+                  {
+                    "id": 12,
+                    "role_name": "SUPER_USER",
+                    "display_name": "Super User",
                     "display_state": true
                   }
                 ]

@@ -1,6 +1,6 @@
 # ARG must be before all "FROM"s
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-ARG APP_INSIGHTS_AGENT_VERSION=3.4.19
+ARG APP_INSIGHTS_AGENT_VERSION=3.5.1
 
 FROM openjdk:17.0.2-jdk-slim-bullseye AS build-env
 WORKDIR /usr/local/bin
@@ -10,7 +10,7 @@ ADD lib/ffmpeg-release-amd64-static.tar.xz /usr/local/bin
 RUN cp -p ffmpeg*/ffmpeg /usr/bin
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-FROM hmctspublic.azurecr.io/base/java:17-distroless-debug
+FROM hmctspublic.azurecr.io/base/java:17-distroless
 COPY --from=build-env /usr/bin/ffmpeg /usr/bin
 
 COPY lib/applicationinsights.json /opt/app/

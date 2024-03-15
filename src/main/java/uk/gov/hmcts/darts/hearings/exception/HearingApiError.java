@@ -4,15 +4,17 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
+import uk.gov.hmcts.darts.hearings.model.HearingsErrorCode;
+import uk.gov.hmcts.darts.hearings.model.HearingsTitleErrors;
 
 @Getter
 @RequiredArgsConstructor
 public enum HearingApiError implements DartsApiError {
 
     HEARING_NOT_FOUND(
-        "100",
+        HearingsErrorCode.HEARING_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested hearing cannot be found"
+        HearingsTitleErrors.HEARING_NOT_FOUND.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "HEARING";

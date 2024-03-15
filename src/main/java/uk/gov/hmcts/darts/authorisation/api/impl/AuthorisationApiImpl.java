@@ -54,4 +54,10 @@ public class AuthorisationApiImpl implements AuthorisationApi {
         Set<SecurityGroupEntity> securityGroupEntities = userIdentity.getUserAccount().getSecurityGroupEntities();
         return SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles);
     }
+
+    @Override
+    public List<Integer> getListOfCourthouseIdsUserHasAccessTo() {
+        return userIdentity.getListOfCourthouseIdsUserHasAccessTo();
+    }
+
 }

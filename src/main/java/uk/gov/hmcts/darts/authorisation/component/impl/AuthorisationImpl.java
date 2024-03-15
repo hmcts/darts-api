@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.darts.annotation.errors.AnnotationApiError.ANNOTATION_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
@@ -48,6 +50,7 @@ public class AuthorisationImpl implements Authorisation {
     private final MediaRepository mediaRepository;
     private final TranscriptionRepository transcriptionRepository;
     private final TransformedMediaRepository transformedMediaRepository;
+    private final AnnotationRepository annotationRepository;
     private final AuthorisationApi authorisationApi;
     private final UserIdentity userIdentity;
 
@@ -164,6 +167,21 @@ public class AuthorisationImpl implements Authorisation {
     @Override
     public void authoriseTransformedMediaAgainstUser(Integer transformedMediaId) {
         checkMediaRequestIsRequestedByUser(transformedMediaRepository.getReferenceById(transformedMediaId).getMediaRequest());
+    }
+
+    @Override
+    public void authoriseByAnnotationId(Integer annotationId, Set<SecurityRoleEnum> securityRoles) {
+        var annotation = annotationRepository.findById(annotationId).orElseThrow(this::logAndThrowAnnotationNotFound);
+        var courthouses = annotation.getHearingList().stream()
+            .map(hea -> hea.getCourtroom().getCourthouse())
+            .toList();
+
+        authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
+    }
+
+    private EntityNotFoundException logAndThrowAnnotationNotFound() {
+        log.error("Unable to find Annotation-Hearing-Courtroom-Courthouse for checkAuthorisation");
+        throw new DartsApiException(ANNOTATION_NOT_FOUND);
     }
 
     private void checkMediaRequestIsRequestedByUser(MediaRequestEntity mediaRequest) {

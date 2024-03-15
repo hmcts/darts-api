@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -55,18 +56,22 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${darts.notification.max_retry_attempts}")
     private int maxRetry;
 
+    private final LogApi logApi;
+
     @Override
     @Transactional
     public void scheduleNotification(SaveNotificationToDbRequest request) {
         List<String> emailAddresses = getEmailAddresses(request);
         String templateParamsString = getTemplateParamsString(request);
         for (String emailAddress : emailAddresses) {
-            saveNotificationToDb(
+            NotificationEntity notificationEntity = saveNotificationToDb(
                 request.getEventId(),
                 request.getCaseId(),
                 StringUtils.trim(emailAddress),
                 templateParamsString
             );
+            logApi.scheduleNotification(notificationEntity, request.getCaseId());
+
         }
     }
 
@@ -102,7 +107,6 @@ public class NotificationServiceImpl implements NotificationService {
                 emailAddressList,
                 request.getUserAccountsToEmail().stream()
                     .map(UserAccountEntity::getEmailAddress)
-                    .filter(emailAddress -> EmailValidator.getInstance().isValid(emailAddress))
                     .toList()
             );
         }
@@ -111,10 +115,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private NotificationEntity saveNotificationToDb(String eventId, Integer caseId, String emailAddress, String templateValues) {
-        if (!emailValidator.isValid(emailAddress)) {
-            log.warn("The supplied email address, {}, is not valid, and so has been ignored.", emailAddress);
-            return null;
-        }
         NotificationEntity dbNotification = new NotificationEntity();
         dbNotification.setEventId(eventId);
         dbNotification.setCourtCase(caseRepository.getReferenceById(caseId));
@@ -157,18 +157,21 @@ public class NotificationServiceImpl implements NotificationService {
 
             GovNotifyRequest govNotifyRequest = null;
             try {
+                logApi.sendingNotification(notification, templateId, notification.getAttempts());
+
                 govNotifyRequest = govNotifyRequestHelper.map(notification, templateId);
                 govNotifyService.sendNotification(govNotifyRequest);
                 updateNotificationStatus(notification, NotificationStatus.SENT);
+
+                logApi.sentNotification(notification, templateId, notification.getAttempts());
             } catch (JsonProcessingException e) {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
-                log.error(
-                    "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
-                    notification.getId(),
-                    govNotifyRequest,
-                    e.getMessage()
-                );
+                if (notification.getAttempts() < maxRetry) {
+                    logApi.errorRetryingNotification(notification, templateId, e);
+                } else {
+                    logApi.failedNotification(notification, templateId, e);
+                }
                 incrementNotificationFailureCount(notification);
             }
         }

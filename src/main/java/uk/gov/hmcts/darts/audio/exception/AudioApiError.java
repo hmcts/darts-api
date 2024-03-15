@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.audio.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.audio.model.AddAudioErrorCode;
+import uk.gov.hmcts.darts.audio.model.AddAudioTitleErrors;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
@@ -10,29 +12,29 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum AudioApiError implements DartsApiError {
 
     FAILED_TO_PROCESS_AUDIO_REQUEST(
-        "100",
+        AddAudioErrorCode.FAILED_TO_PROCESS_AUDIO_REQUEST.getValue(),
         null,
-        "Failed to process audio request"
+        AddAudioTitleErrors.FAILED_TO_PROCESS_AUDIO_REQUEST.toString()
     ),
     REQUESTED_DATA_CANNOT_BE_LOCATED(
-        "101",
+        AddAudioErrorCode.REQUESTED_DATA_CANNOT_BE_LOCATED.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,
-        "The requested data cannot be located"
+        AddAudioTitleErrors.REQUESTED_DATA_CANNOT_BE_LOCATED.toString()
     ),
     MEDIA_NOT_FOUND(
-        "102",
+        AddAudioErrorCode.MEDIA_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested media cannot be found"
+        AddAudioTitleErrors.MEDIA_NOT_FOUND.toString()
     ),
     FAILED_TO_UPLOAD_AUDIO_FILE(
-        "103",
+        AddAudioErrorCode.FAILED_TO_UPLOAD_AUDIO_FILE.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to store uploaded audio file"
+        AddAudioTitleErrors.FAILED_TO_UPLOAD_AUDIO_FILE.toString()
     ),
     MISSING_SYSTEM_USER(
-        "104",
+        AddAudioErrorCode.MISSING_SYSTEM_USER.getValue(),
         null,
-        "Failed to mark audio(s) for deletion as system user was not found"
+        AddAudioTitleErrors.MISSING_SYSTEM_USER.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO";

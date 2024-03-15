@@ -10,15 +10,14 @@ import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundExternalObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -26,58 +25,43 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalOutboundDataStoreDeleterImplTest {
 
     @Mock
-    ObjectRecordStatusRepository objectRecordStatusRepository;
+    private UserAccountRepository userAccountRepository;
     @Mock
-    UserAccountRepository userAccountRepository;
-    @Mock
-    TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-
-    ExternalOutboundDataStoreDeleter deleter;
-
+    private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    private ExternalOutboundDataStoreDeleter deleter;
     private ObjectRecordStatusEntity markedForDeletionStatus;
-
-
     @Mock
     private OutboundExternalObjectDirectoryDeletedFinder finder;
-
     @Mock
     private OutboundDataStoreDeleter outboundDataStoreDeleter;
-
     @Mock
-    private SystemUserHelper systemUserHelper;
-
+    private TransformedMediaRepository transformedMediaRepository;
 
     @BeforeEach
     void setUp() {
+        SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository);
+        HashMap<String, String> systemUserGuidMap = new HashMap<>();
+        systemUserGuidMap.put("housekeeping", "123");
+        systemUserHelper.setSystemUserGuidMap(systemUserGuidMap);
+
         this.deleter = new ExternalOutboundDataStoreDeleter(
-            objectRecordStatusRepository,
-            userAccountRepository,
             transientObjectDirectoryRepository,
             finder,
-            outboundDataStoreDeleter, systemUserHelper
+            outboundDataStoreDeleter,
+            transformedMediaRepository
         );
     }
 
     private void mockStatus() {
-        this.markedForDeletionStatus = new ObjectRecordStatusEntity();
-        markedForDeletionStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
-        when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
-            markedForDeletionStatus);
+        markedForDeletionStatus = new ObjectRecordStatusEntity();
+        markedForDeletionStatus.setId(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
     }
-
-    private void mockSystemUser() {
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("");
-        when(userAccountRepository.findSystemUser(anyString())).thenReturn(new UserAccountEntity());
-    }
-
 
     private List<TransientObjectDirectoryEntity> createOutboundData() {
         TransientObjectDirectoryEntity outboundAudio = new TransientObjectDirectoryEntity();
@@ -98,8 +82,6 @@ class ExternalOutboundDataStoreDeleterImplTest {
     void deleteFromOutboundDataStore() {
         mockStatus();
 
-        mockSystemUser();
-
         List<TransientObjectDirectoryEntity> outboundData = createOutboundData();
 
         when(finder.findMarkedForDeletion()).thenReturn(outboundData);
@@ -114,11 +96,4 @@ class ExternalOutboundDataStoreDeleterImplTest {
 
     }
 
-
-    @Test
-    void testDeleteWhenSystemUserDoesNotExist() {
-        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("");
-        when(userAccountRepository.findSystemUser(anyString())).thenReturn(null);
-        assertThrows(DartsApiException.class, () -> deleter.delete());
-    }
 }

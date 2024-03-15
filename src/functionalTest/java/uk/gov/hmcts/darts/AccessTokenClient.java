@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import uk.gov.hmcts.darts.enums.GrantType;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -33,7 +34,7 @@ public class AccessTokenClient {
         Map<String, String> params = Map.of("client_id", clientId,
                                             "client_secret", clientSecret,
                                             "scope", scope,
-                                            "grant_type", "password",
+                                            "grant_type", GrantType.PASSWORD.getValue(),
                                             "username", username,
                                             "password", password
         );

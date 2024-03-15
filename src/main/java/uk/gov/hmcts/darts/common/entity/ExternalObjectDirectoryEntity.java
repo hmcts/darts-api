@@ -17,11 +17,8 @@ import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
-
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
 @Table(name = "external_object_directory")
@@ -39,11 +36,11 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @JoinColumn(name = "med_id", foreignKey = @ForeignKey(name = "eod_media_fk"))
     private MediaEntity media;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trd_id", foreignKey = @ForeignKey(name = "eod_transcription_document_fk"))
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ado_id", foreignKey = @ForeignKey(name = "eod_annotation_document_fk"))
     private AnnotationDocumentEntity annotationDocumentEntity;
 
@@ -51,7 +48,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @JoinColumn(name = "cad_id", foreignKey = @ForeignKey(name = "eod_case_document_fk"))
     private CaseDocumentEntity caseDocument;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ors_id", foreignKey = @ForeignKey(name = "eod_object_record_status_fk"), nullable = false)
     private ObjectRecordStatusEntity status;
 
@@ -82,7 +79,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private String manifestFile;
 
     @Column(name = "event_date_ts")
-    private LocalDateTime eventDateTs;
+    private OffsetDateTime eventDateTs;
 
     @Column(name = "error_code")
     private String errorCode;

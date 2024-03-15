@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -29,11 +30,11 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
-import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
-import java.time.Instant;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -135,6 +136,9 @@ class AudioTransformationServiceImplTest {
     @Mock
     private DefendantEntity mockDefendantEntity;
 
+    @Mock
+    LogApi logApi;
+
     @Captor
     private ArgumentCaptor<SaveNotificationToDbRequest> dbNotificationRequestCaptor;
 
@@ -201,7 +205,12 @@ class AudioTransformationServiceImplTest {
         when(mockTransientObjectDirectoryEntity.getTransformedMedia(
         )).thenReturn(transformedMediaEntity);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(Instant.now(), Instant.now(), 0, null, false);
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(TIME_12_00.toInstant())
+            .endTime(TIME_12_20.toInstant())
+            .channel(0)
+            .path(Path.of("test/b6b51cb7-9ff8-44de-bf53-62c2bd2e13f3.zip"))
+            .build();
 
         transformedMediaHelper.saveToStorage(
             mediaRequestEntity,

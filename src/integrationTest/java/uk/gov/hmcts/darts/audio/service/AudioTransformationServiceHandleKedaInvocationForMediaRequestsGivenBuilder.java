@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.LocalDate;
@@ -19,7 +20,6 @@ import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Transactional
 @Service
@@ -38,6 +38,8 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     private static final OffsetDateTime TIME_13_01 = OffsetDateTime.parse("2023-01-01T13:01Z");
     private static final OffsetDateTime TIME_13_30 = OffsetDateTime.parse("2023-01-01T13:30Z");
     private static final OffsetDateTime TIME_14_00 = OffsetDateTime.parse("2023-01-01T14:00Z");
+    private static final OffsetDateTime TIME_20_00 = OffsetDateTime.parse("2023-01-01T20:00Z");
+    private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
 
 
     private final DartsDatabaseStub dartsDatabaseStub;
@@ -48,9 +50,9 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
 
     public void aMediaEntityGraph() {
 
-        var externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
-            ExternalLocationTypeEnum.UNSTRUCTURED);
-        var objectRecordStatusEntity = dartsDatabaseStub.getObjectRecordStatusEntity(STORED);
+        var inboundExternalLocationTypeEnum = ExternalLocationTypeEnum.INBOUND;
+        var unstructuredExternalLocationTypeEnum = ExternalLocationTypeEnum.UNSTRUCTURED;
+        var objectRecordStatusEnum = ObjectRecordStatusEnum.STORED;
 
         for (int channelNumber = 1; channelNumber <= 4; channelNumber++) {
 
@@ -76,48 +78,93 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
                                                                    TIME_14_00,
                                                                    channelNumber
             );
+            var mediaEntity5 = dartsDatabaseStub.createMediaEntity("testCourthouse", "testCourtroom",
+                                                                   TIME_20_00,
+                                                                   TIME_20_30,
+                                                                   channelNumber
+            );
 
             hearingEntity.addMedia(mediaEntity);
             hearingEntity.addMedia(mediaEntity2);
             hearingEntity.addMedia(mediaEntity3);
             hearingEntity.addMedia(mediaEntity4);
+            hearingEntity.addMedia(mediaEntity5);
             dartsDatabaseStub.getHearingRepository().saveAndFlush(hearingEntity);
 
-
-            var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
+            var inboundExternalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
+                    objectRecordStatusEnum,
+                    inboundExternalLocationTypeEnum,
                     UUID.randomUUID()
                 );
-            var externalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+            var inboundExternalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity2,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
+                    objectRecordStatusEnum,
+                    inboundExternalLocationTypeEnum,
                     UUID.randomUUID()
                 );
-            var externalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+            var inboundExternalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity3,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
+                    objectRecordStatusEnum,
+                    inboundExternalLocationTypeEnum,
                     UUID.randomUUID()
                 );
-
-            var externalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+            var inboundExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity4,
-                    objectRecordStatusEntity,
-                    externalLocationTypeEntity,
+                    objectRecordStatusEnum,
+                    inboundExternalLocationTypeEnum,
+                    UUID.randomUUID()
+                );
+            var inboundExternalObjectDirectoryEntity5 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity5,
+                    objectRecordStatusEnum,
+                    inboundExternalLocationTypeEnum,
+                    UUID.randomUUID()
+                );
+            var unstructuredExternalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity,
+                    objectRecordStatusEnum,
+                    unstructuredExternalLocationTypeEnum,
+                    UUID.randomUUID()
+                );
+            var unstructuredExternalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity2,
+                    objectRecordStatusEnum,
+                    unstructuredExternalLocationTypeEnum,
+                    UUID.randomUUID()
+                );
+            var unstructuredExternalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity3,
+                    objectRecordStatusEnum,
+                    unstructuredExternalLocationTypeEnum,
                     UUID.randomUUID()
                 );
 
-            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity);
-            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity2);
-            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity3);
-            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity4);
+            var unstructuredExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity4,
+                    objectRecordStatusEnum,
+                    unstructuredExternalLocationTypeEnum,
+                    UUID.randomUUID()
+                );
+
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity2);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity3);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity4);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(inboundExternalObjectDirectoryEntity5);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity2);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity3);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity4);
         }
     }
 

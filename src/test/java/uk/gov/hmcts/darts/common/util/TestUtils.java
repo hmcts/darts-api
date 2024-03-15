@@ -81,6 +81,7 @@ public final class TestUtils {
         for (String tagToRemove : tagsToRemove) {
             output = output.replaceAll("\"" + tagToRemove + "\".+?,", "");
             output = output.replaceAll("\"" + tagToRemove + "\".+?}", "}");
+            output = output.replaceAll("\"" + tagToRemove + "\".+?\n", "\n");
         }
         return output;
     }
@@ -88,7 +89,7 @@ public final class TestUtils {
     /**
      * Search byte array for the byte pattern.
      *
-     * @param array to look into
+     * @param array   to look into
      * @param pattern to search
      * @return index of first occurrence of the pattern, -1 otherwise
      */

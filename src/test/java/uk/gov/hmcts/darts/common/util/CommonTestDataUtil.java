@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.common.util;
 import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -38,7 +40,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 @UtilityClass
 public class CommonTestDataUtil {
 
@@ -194,10 +196,18 @@ public class CommonTestDataUtil {
     }
 
     public HearingEntity createHearing(String caseNumber, LocalTime time) {
+        return createHearing(caseNumber, LocalDate.of(2023, 6, 20), time);
+    }
+
+    public HearingEntity createHearing(String caseNumber, LocalDate date) {
+        return createHearing(caseNumber, date, LocalTime.NOON);
+    }
+
+    public HearingEntity createHearing(String caseNumber, LocalDate date, LocalTime time) {
         HearingEntity hearing1 = new HearingEntity();
         hearing1.setCourtCase(createCase(caseNumber));
         hearing1.setCourtroom(createCourtroom("1"));
-        hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
+        hearing1.setHearingDate(date);
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
         hearing1.setTranscriptions(createTranscriptionList(hearing1));
@@ -432,4 +442,33 @@ public class CommonTestDataUtil {
         return transcriptionUrgencyEntity;
     }
 
+    public static AnnotationEntity createAnnotationEntity(Integer id) {
+        AnnotationEntity annotationEntity = new AnnotationEntity();
+        annotationEntity.setId(id);
+        annotationEntity.setTimestamp(OffsetDateTime.now());
+        annotationEntity.setText("Some text");
+        annotationEntity.setAnnotationDocuments(createAnnotationDocumentEntityList());
+        return annotationEntity;
+    }
+
+    public static List<AnnotationDocumentEntity> createAnnotationDocumentEntityList() {
+        List<AnnotationDocumentEntity> annotationDocumentEntityList =
+                new ArrayList<>();
+        annotationDocumentEntityList.add(createAnnotationDocumentEntity(1));
+        annotationDocumentEntityList.add(createAnnotationDocumentEntity(2));
+        return annotationDocumentEntityList;
+    }
+
+    public static AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
+        AnnotationDocumentEntity annotationDocumentEntity =
+                new AnnotationDocumentEntity();
+        annotationDocumentEntity.setId(id);
+        annotationDocumentEntity.setFileName("filename");
+        annotationDocumentEntity.setFileType("filetype");
+        UserAccountEntity userAccountEntity = createUserAccount("annotator");
+        userAccountEntity.setUserFullName("annotator user");
+        annotationDocumentEntity.setUploadedBy(userAccountEntity);
+        annotationDocumentEntity.setUploadedDateTime(OffsetDateTime.now());
+        return annotationDocumentEntity;
+    }
 }

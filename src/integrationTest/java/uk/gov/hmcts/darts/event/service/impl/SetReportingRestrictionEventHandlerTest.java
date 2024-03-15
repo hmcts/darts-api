@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -12,6 +16,7 @@ import java.util.List;
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
     public static final String SOME_COURTHOUSE = "some-courthouse";
@@ -22,6 +27,16 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
 
     @Autowired
     EventDispatcher eventDispatcher;
+
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    public void setupStubs() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
 
     @Test
     void handleSetReportingRestrictionEventHandler() {

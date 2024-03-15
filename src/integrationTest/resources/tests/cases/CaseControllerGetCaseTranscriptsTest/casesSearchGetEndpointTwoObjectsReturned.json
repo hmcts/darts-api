@@ -7,7 +7,7 @@
     "hearing_date": "2023-01-01",
     "type": "SENTENCING_REMARKS",
     "requested_on": "2023-06-20T10:00:00Z",
-    "requested_by_name": "IntegrationTest User",
+    "requested_by_name": "integrationtest.user@example.comUsername",
     "status": "APPROVED"
   },
   {
@@ -18,7 +18,7 @@
     "hearing_date": "2023-01-01",
     "type": "SENTENCING_REMARKS",
     "requested_on": "2023-06-20T10:00:00Z",
-    "requested_by_name": "IntegrationTest User",
+    "requested_by_name": "integrationtest.user@example.comUsername",
     "status": "APPROVED"
   }
 ]

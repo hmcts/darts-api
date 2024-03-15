@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
-import uk.gov.hmcts.darts.audio.mapper.GetAudioRequestResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
-import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.TransformedMediaDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -57,7 +55,6 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -236,24 +233,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setLastModifiedBy(requestor);
 
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
-    }
-
-    @Override
-    public List<GetAudioRequestResponseV1> getAudioRequestsV1(Integer userId, Boolean expired) {
-        List<GetAudioRequestResponseV1> response = new ArrayList<>();
-        List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList = getEnhancedMediaRequestInfo(userId, expired);
-        for (EnhancedMediaRequestInfo enhancedMediaRequestInfo : enhancedMediaRequestInfoList) {
-            List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findByMediaRequestId(enhancedMediaRequestInfo.getMediaRequestId());
-            if (!transformedMediaList.isEmpty()) {
-                TransformedMediaEntity transformedMedia = transformedMediaList.get(0);
-                GetAudioRequestResponseV1 getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
-                    enhancedMediaRequestInfo,
-                    transformedMedia
-                );
-                response.add(getAudioRequestResponseItem);
-            }
-        }
-        return response;
     }
 
     @Override

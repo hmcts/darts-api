@@ -87,7 +87,9 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(validatable));
 
         // Then
-        assertEquals(URI.create("TRANSCRIPTION_110"), actualException.getError().getType());
+        assertEquals("TRANSCRIPTION_110", actualException.getError().getErrorTypeNumeric());
+        assertEquals("TRANSCRIPTION", actualException.getError().getErrorTypePrefix());
+
     }
 
     @Test
@@ -105,6 +107,7 @@ class TranscriptionRequestDetailsValidatorTest {
 
         // Then
         assertEquals(URI.create("CASE_104"), actualException.getError().getType());
+        assertEquals("CASE", actualException.getError().getErrorTypePrefix());
     }
 
     @ParameterizedTest
@@ -121,6 +124,8 @@ class TranscriptionRequestDetailsValidatorTest {
 
         // Then
         assertEquals(URI.create("TRANSCRIPTION_111"), actualException.getError().getType());
+
+
     }
 
     private static Stream<Arguments> requestsWithInvalidTimings() {
@@ -145,7 +150,8 @@ class TranscriptionRequestDetailsValidatorTest {
     void validateShouldThrowExceptionWhenTranscriptTypeRequiresDatesAndDatesAreNotPresent(TranscriptionRequestDetails requestDetails) {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(requestDetails));
 
-        assertEquals(URI.create("TRANSCRIPTION_100"), actualException.getError().getType());
+        assertEquals("TRANSCRIPTION_100", actualException.getError().getErrorTypeNumeric());
+        assertEquals("TRANSCRIPTION", actualException.getError().getErrorTypePrefix());
     }
 
     private static Stream<Arguments> requestsThatRequireDatesButNoDatesArePresent() {

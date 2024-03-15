@@ -130,7 +130,7 @@ class AuthenticationServiceImplTest {
             () -> authenticationService.handleOauthCode(DUMMY_CODE)
         );
 
-        assertEquals("100", exception.getError().getErrorTypeNumeric());
+        assertEquals("AUTHENTICATION_100", exception.getError().getErrorTypeNumeric());
     }
 
     @Test
@@ -151,7 +151,7 @@ class AuthenticationServiceImplTest {
             () -> authenticationService.handleOauthCode(DUMMY_CODE)
         );
 
-        assertEquals("101", exception.getError().getErrorTypeNumeric());
+        assertEquals("AUTHENTICATION_101", exception.getError().getErrorTypeNumeric());
     }
 
     @Test

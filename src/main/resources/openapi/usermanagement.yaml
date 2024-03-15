@@ -122,9 +122,19 @@ paths:
       summary: Get security groups
       parameters:
         - in: query
-          name: courthouse_id
+          name: role_ids
+          description: Filter by list of role ids
+          style: form
+          explode: false
           schema:
-            $ref: "#/components/schemas/CourthouseId"
+            type: array
+            items:
+              $ref: '#/components/schemas/RoleId'
+        - in: query
+          name: courthouse_id
+          description: Filter by Courthouse Id
+          schema:
+            $ref: '#/components/schemas/CourthouseId'
       tags:
         - SecurityGroup
       responses:
@@ -316,14 +326,13 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
-      pattern: ^\S$|^\S[a-zA-Z '-]*\S$
       type: string
     UserEmailAddress:
       minLength: 1
       maxLength: 256
       type: string
     UserDescription:
-      minLength: 1
+      minLength: 0
       maxLength: 256
       type: string
     UserActive:
@@ -350,13 +359,14 @@ components:
 
     RoleId:
       type: integer
+    RoleName:
+      type: string
     RoleDisplayName:
       type: string
       minLength: 1
       maxLength: 256
     RoleDisplayState:
       type: boolean
-
     CourthouseId:
       type: integer
 
@@ -468,12 +478,47 @@ components:
         - name
         - display_name
 
+    UserManagementErrorCode:
+      type: string
+      enum:
+        - "USER_MANAGEMENT_100"
+        - "USER_MANAGEMENT_101"
+        - "USER_NOT_TRANSCRIBER_110"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+
+    UserManagementTitleErrors:
+      type: string
+      enum:
+        - "The provided user does not exist"
+        - "The provided email already exists"
+        - "Duplicate security group names are not permitted"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+
+
     Role:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/RoleId'
+        role_name:
+          $ref: '#/components/schemas/RoleName'
         display_name:
           $ref: '#/components/schemas/RoleDisplayName'
         display_state:
           $ref: '#/components/schemas/RoleDisplayState'
+
+        UserManagementsErrorCode:
+            type: string
+            enum:
+              - "USER_100"
+              - "USER_101"
+              - "USER_110"
+            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+
+        UserManagementsTitleErrors:
+            type: string
+            enum:
+              - "The provided user does not exist"
+              - "The provided email already exists"
+              - "Duplicate security group names are not permitted"
+            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]

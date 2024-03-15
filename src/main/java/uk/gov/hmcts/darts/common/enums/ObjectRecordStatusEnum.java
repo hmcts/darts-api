@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.common.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Getter
 @RequiredArgsConstructor
 public enum ObjectRecordStatusEnum {
@@ -20,11 +23,25 @@ public enum ObjectRecordStatusEnum {
     DELETED(11),
     ARM_INGESTION(12),
     ARM_DROP_ZONE(13),
-    FAILURE_ARM_RAW_DATA_FAILED(14),
-    FAILURE_ARM_MANIFEST_FILE_FAILED(15),
+    ARM_RAW_DATA_FAILED(14),
+    ARM_MANIFEST_FAILED(15),
     ARM_PROCESSING_RESPONSE_FILES(16),
-    FAILURE_ARM_RESPONSE_PROCESSING(17);
+    ARM_RESPONSE_PROCESSING_FAILED(17),
+    ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED(18),
+    ARM_RESPONSE_MANIFEST_FAILED(19);
+
+    private static final Map<Integer, ObjectRecordStatusEnum> BY_ID = new ConcurrentHashMap<>();
+
+    static {
+        for (ObjectRecordStatusEnum e : values()) {
+            BY_ID.put(e.id, e);
+        }
+    }
 
     private final Integer id;
+
+    public static ObjectRecordStatusEnum valueOfId(Integer id) {
+        return BY_ID.get(id);
+    }
 
 }

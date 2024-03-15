@@ -52,7 +52,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
         boolean isNotBlankFullName = isNotBlank(fullName);
         if (isNotBlankFullName) {
             wherePredicates.add(criteriaBuilder.like(
-                criteriaBuilder.lower(root.get(UserAccountEntity_.userName)),
+                criteriaBuilder.lower(root.get(UserAccountEntity_.userFullName)),
                 criteriaBuilder.lower(paramFullName)
             ));
         }

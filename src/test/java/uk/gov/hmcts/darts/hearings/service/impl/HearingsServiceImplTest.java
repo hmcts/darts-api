@@ -6,12 +6,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -41,6 +43,12 @@ class HearingsServiceImplTest {
     @Mock
     TranscriptionRepository transcriptionRepository;
 
+    @Mock
+    AnnotationRepository annotationRepository;
+
+    @Mock
+    AuthorisationApi authorisationApi;
+
     HearingsServiceImpl service;
 
     GetHearingResponseMapper getHearingResponseMapper;
@@ -51,7 +59,9 @@ class HearingsServiceImplTest {
             getHearingResponseMapper,
             hearingRepository,
             transcriptionRepository,
-            eventRepository
+            eventRepository,
+            annotationRepository,
+            authorisationApi
         );
     }
 

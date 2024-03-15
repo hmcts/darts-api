@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +24,14 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         and upper(case.courthouse.courthouseName) = upper(:courthouseName)
         """)
     List<String> findOpenCaseNumbers(String courthouseName, List<String> caseNumbers);
+
+    @Query("""
+        select exists(
+        SELECT cc.id FROM CourtCaseEntity cc
+        WHERE cc.courthouse.id = :courthouseId)
+        """)
+    boolean caseExistsForCourthouse(Integer courthouseId);
+
+    boolean existsByCourthouse(CourthouseEntity courthouse);
 
 }

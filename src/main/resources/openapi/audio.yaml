@@ -38,6 +38,8 @@ paths:
                     - id: 1
                       media_start_timestamp: '2023-07-31T14:32:24.620Z'
                       media_end_timestamp: '2023-07-31T14:32:24.620Z'
+                      is_archived: true
+                      is_available: true
                 media-not-found:
                   summary: No media metadata exists for the given hearing id
                   value:
@@ -78,7 +80,7 @@ paths:
         - Audio
       summary: Preview audio
       operationId: preview
-      description: Preview audio
+      description: Preview audio. Use text/event-stream accept type to use send server events.
       parameters:
         - in: path
           name: media_id
@@ -181,12 +183,17 @@ components:
         id:
           type: integer
           example: 1
+          description: med_id
         media_start_timestamp:
           type: string
           format: date-time
         media_end_timestamp:
           type: string
           format: date-time
+        is_archived:
+          type: boolean
+        is_available:
+          type: boolean
     AddAudioMetadataRequest:
       type: object
       required:
@@ -252,9 +259,23 @@ components:
           description: 'List of associated case numbers'
           minItems: 1
           maxLength: 255
+
     AddAudioErrorCode:
       type: string
       enum:
-        - "COMMON_100"
-      x-enum-varnames: [ ADD_AUDIO_COURT_HOUSE_NOT_FOUND ]
+        - "AUDIO_100"
+        - "AUDIO_101"
+        - "AUDIO_102"
+        - "AUDIO_103"
+        - "AUDIO_104"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]
 
+    AddAudioTitleErrors:
+      type: string
+      enum:
+        - "Failed to process audio request"
+        - "The requested data cannot be located"
+        - "The requested media cannot be found"
+        - "Failed to store uploaded audio file"
+        - "Failed to mark audio(s) for deletion as system user was not found"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]

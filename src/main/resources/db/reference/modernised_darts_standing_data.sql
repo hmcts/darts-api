@@ -29,6 +29,7 @@ INSERT INTO audit_activity (aua_id, activity_name, activity_description, created
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (10, 'Reject Transcription', 'Reject Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (11, 'Accept Transcription', 'Accept Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (12, 'Complete Transcription', 'Complete Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (13, 'Import Annotation', 'Import Annotation', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (1, '1000', '1002', 'Proceedings in chambers', 'StandardEventHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (2, '1000', '1001', 'Offences put to defendant', 'StandardEventHandler', true,false,0,current_timestamp);
@@ -417,8 +418,8 @@ INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handl
 INSERT INTO external_location_type (elt_id, elt_description) VALUES (1, 'inbound');
 INSERT INTO external_location_type (elt_id, elt_description) VALUES (2, 'unstructured');
 INSERT INTO external_location_type (elt_id, elt_description) VALUES (3, 'arm');
-INSERT INTO external_location_type (elt_id, elt_description) VALUES (4, 'tempstore');
 INSERT INTO external_location_type (elt_id, elt_description) VALUES (5, 'vodafone');
+INSERT INTO external_location_type (elt_id, elt_description) VALUES (4, 'dets');
 
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (1, 'New');
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (2, 'Stored');
@@ -435,6 +436,10 @@ INSERT INTO object_record_status (ors_id, ors_description) VALUES (12, 'Arm Inge
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (13, 'Arm Drop Zone');
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (14, 'Arm Raw Data Failed');
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (15, 'Arm Manifest Failed');
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (16, 'Arm Processing Response Files');
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (17, 'Arm Response Process Failed');
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (18, 'Arm Response Checksum Verification Failed');
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (19, 'Arm Response Manifest Failed');
 
 INSERT INTO security_permission (per_id, permission_name) VALUES (1, 'ACCEPT_TRANSCRIPTION_JOB_REQUEST');
 INSERT INTO security_permission (per_id, permission_name) VALUES (2, 'APPROVE_REJECT_TRANSCRIPTION_REQUEST');
@@ -470,7 +475,8 @@ INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUE
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (8, 'CPP', 'CPP', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (9, 'DAR_PC', 'DAR PC', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (10, 'MID_TIER', 'Mid Tier', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (11, 'ADMIN', 'Admin', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (11, 'SUPER_ADMIN', 'Super Admin', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (12, 'SUPER_USER', 'Super User', true);
 
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 2);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 4);
@@ -539,8 +545,39 @@ INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 18);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 19);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 20);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 21);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 3);  -- LISTEN_TO_AUDIO_FOR_DOWNLOAD
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 4);  -- LISTEN_TO_AUDIO_FOR_PLAYBACK
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 5);  -- READ_JUDGES_NOTES
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 6);  -- READ_TRANSCRIBED_DOCUMENT
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 7);  -- REQUEST_AUDIO
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 8);  -- REQUEST_TRANSCRIPTION
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 9);  -- RETENTION_ADMINISTRATION
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 10); -- SEARCH_CASES
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 11); -- UPLOAD_JUDGES_NOTES
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 12); -- UPLOAD_TRANSCRIPTION
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 13); -- VIEW_DARTS_INBOX
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 14); -- VIEW_MY_AUDIOS
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 15); -- VIEW_MY_TRANSCRIPTIONS
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 16); -- EXPORT_PROCESSED_PLAYBACK_AUDIO
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (11, 17); -- EXPORT_PROCESSED_DOWNLOAD_AUDIO
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 3);  -- LISTEN_TO_AUDIO_FOR_DOWNLOAD
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 4);  -- LISTEN_TO_AUDIO_FOR_PLAYBACK
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 6);  -- READ_TRANSCRIBED_DOCUMENT
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 7);  -- REQUEST_AUDIO
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 8);  -- REQUEST_TRANSCRIPTION
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 9);  -- RETENTION_ADMINISTRATION
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 10); -- SEARCH_CASES
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 12); -- UPLOAD_TRANSCRIPTION
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 13); -- VIEW_DARTS_INBOX
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 14); -- VIEW_MY_AUDIOS
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 15); -- VIEW_MY_TRANSCRIPTIONS
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 16); -- EXPORT_PROCESSED_PLAYBACK_AUDIO
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (12, 17); -- EXPORT_PROCESSED_DOWNLOAD_AUDIO
 
-INSERT INTO security_group (grp_id, rol_id, group_name, group_display_name, global_access, display_state) VALUES (nextval('grp_seq'), 11, 'ADMIN', 'Admin', true, true);
+INSERT INTO security_group (grp_id, rol_id, group_name, global_access, display_state, use_interpreter, display_name, created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (nextval('grp_seq'), 11, 'SUPER_ADMIN', true, true, false, 'Super Admin', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO security_group (grp_id, rol_id, group_name, global_access, display_state, use_interpreter, display_name, created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES (nextval('grp_seq'), 12, 'SUPER_USER', true, true, false, 'Super User', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (1, 'Requested', 'Requested');
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (2, 'Awaiting Authorisation', 'Awaiting Authorisation');
@@ -568,3 +605,15 @@ INSERT INTO transcription_urgency (tru_id, description, display_state, priority_
 INSERT INTO transcription_urgency (tru_id, description, display_state, priority_order) VALUES (5, 'Up to 7 working days', true, 4);
 INSERT INTO transcription_urgency (tru_id, description, display_state, priority_order) VALUES (6, 'Up to 12 working days', true, 5);
 INSERT INTO transcription_urgency (tru_id, description, display_state, priority_order) VALUES (7, 'Up to 2 working days', true, 2);
+
+INSERT INTO region (reg_id, region_name) VALUES(1, 'London');
+INSERT INTO region (reg_id, region_name) VALUES(2, 'South East');
+INSERT INTO region (reg_id, region_name) VALUES(3, 'South West');
+INSERT INTO region (reg_id, region_name) VALUES(4, 'Midlands');
+INSERT INTO region (reg_id, region_name) VALUES(5, 'North East');
+INSERT INTO region (reg_id, region_name) VALUES(6, 'North West');
+INSERT INTO region (reg_id, region_name) VALUES(7, 'Wales');
+
+INSERT INTO courthouse_region_ae (cth_id, reg_id) VALUES (2,5);
+INSERT INTO courthouse_region_ae (cth_id, reg_id) VALUES (3,6);
+INSERT INTO courthouse_region_ae (cth_id, reg_id) VALUES (1,7);

@@ -1,14 +1,17 @@
 package uk.gov.hmcts.darts.testutils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.common.util.LogUtil;
+import uk.gov.hmcts.darts.common.util.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
-@AutoConfigureWireMock
+@AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
@@ -18,8 +21,15 @@ public class IntegrationBase {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    protected MemoryLogAppender logAppender = LogUtil.getMemoryLogger();
+
     @BeforeEach
     void clearDb() {
         dartsDatabase.clearDatabaseInThisOrder();
+    }
+
+    @AfterEach
+    void clearTestData() {
+        logAppender.reset();
     }
 }

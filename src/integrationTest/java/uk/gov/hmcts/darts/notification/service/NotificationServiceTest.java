@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
@@ -37,6 +39,9 @@ class NotificationServiceTest extends IntegrationBase {
     TemplateIdHelper templateIdHelper;
     @MockBean
     GovNotifyService govNotifyService;
+
+    @MockBean
+    LogApi logApi;
 
     @Test
     void scheduleNotificationOkConfirmEntryInDb() {
@@ -54,6 +59,8 @@ class NotificationServiceTest extends IntegrationBase {
         assertTrue(notification.getId() > 0);
         assertEquals(NotificationStatus.OPEN, notification.getStatus());
         assertEquals(caseId, notification.getCourtCase().getId());
+
+        verify(logApi, times(1)).scheduleNotification(any(), any());
     }
 
     @Test
@@ -71,21 +78,6 @@ class NotificationServiceTest extends IntegrationBase {
         assertEquals(2, resultList.size());
         assertEquals(TEST_EMAIL_ADDRESS, resultList.get(0).getEmailAddress());
         assertEquals("test2@test.com", resultList.get(1).getEmailAddress());
-    }
-
-    @Test
-    void scheduleNotificationInvalidEmail() {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
-        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId("An eventId")
-            .caseId(caseId)
-            .emailAddresses("test@test@.com")
-            .build();
-
-        service.scheduleNotification(request);
-
-        List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
-        assertEquals(0, resultList.size());
     }
 
     @Test
@@ -113,6 +105,9 @@ class NotificationServiceTest extends IntegrationBase {
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
         assertEquals(NotificationStatus.SENT, result.getStatus(), "Object may not have sent");
+
+        verify(logApi, times(1)).scheduleNotification(any(), any());
+        verify(logApi, times(1)).sentNotification(any(), any(), any());
     }
 
     @Test
@@ -135,6 +130,10 @@ class NotificationServiceTest extends IntegrationBase {
         NotificationEntity result = resultList.get(0);
         assertEquals(NotificationStatus.PROCESSING, result.getStatus());
         assertEquals(1, result.getAttempts());
+
+        verify(logApi, times(1)).scheduleNotification(any(), any());
+        verify(logApi, times(1)).sendingNotification(any(), any(), any());
+        verify(logApi, times(1)).errorRetryingNotification(any(), any(), any());
     }
 
     @Test
@@ -160,6 +159,11 @@ class NotificationServiceTest extends IntegrationBase {
         NotificationEntity result = resultList.get(0);
         assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(3, result.getAttempts());
+
+        verify(logApi, times(1)).scheduleNotification(any(), any());
+        verify(logApi, times(4)).sendingNotification(any(), any(), any());
+        verify(logApi, times(3)).errorRetryingNotification(any(), any(), any());
+        verify(logApi, times(1)).failedNotification(any(), any(), any());
     }
 
     @Test

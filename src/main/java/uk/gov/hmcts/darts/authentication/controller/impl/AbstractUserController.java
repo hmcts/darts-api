@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.service.UserAccountService;
 
 import java.net.URI;
 import java.text.ParseException;
@@ -18,12 +20,13 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public abstract class AbstractUserController implements AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final AuthorisationApi authorisationApi;
-
     protected final AuthStrategySelector locator;
+    private final UserAccountService userAccountService;
 
     abstract Optional<String> parseEmailAddressFromAccessToken(String accessToken) throws ParseException;
 
@@ -47,7 +50,11 @@ public abstract class AbstractUserController implements AuthenticationController
             Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(accessToken);
             if (emailAddressOptional.isPresent()) {
                 Optional<UserState> userStateOptional = authorisationApi.getAuthorisation(emailAddressOptional.get());
-                securityTokenBuilder.userState(userStateOptional.orElse(null));
+                if (userStateOptional.isPresent()) {
+                    var userState = userStateOptional.get();
+                    securityTokenBuilder.userState(userState);
+                    userAccountService.updateLastLoginTime(userState.getUserId());
+                }
             }
         } catch (ParseException e) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_PARSE_ACCESS_TOKEN, e);

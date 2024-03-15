@@ -3,44 +3,50 @@ package uk.gov.hmcts.darts.courthouses;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.skyscreamer.jsonassert.ArrayValueMatcher;
+import org.skyscreamer.jsonassert.Customization;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
+import org.skyscreamer.jsonassert.comparator.ArraySizeComparator;
+import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
 class CourthousesFunctionalTest extends FunctionalTest {
 
-    public static final String COURTHOUSES_URI = "/courthouses";
-    public static final String COURTHOUSE_BODY = """
-        {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham","code": 5705}""";
-    public static final String COURTHOUSE_UPDATEBODY = """
-        {"courthouse_name": "MANCHESTER","display_name": "Manchester","code": 2112}""";
-    public static final String COURTHOUSE_INVALIDBODY = """
+    private static final String COURTHOUSES_URI = "/courthouses";
+    private static final String ADMIN_COURTHOUSES_URI = "/admin/courthouses";
+    private static final String ADMIN_REGION_URI = "/admin/regions";
+    private static final String COURTHOUSE_PATCH_BODY = """
+        {"display_name": "Swansea Modified Functional Test Courthouse"}""";
+    private static final String COURTHOUSE_PATCH_INVALID_BODY = """
         {"courthouse_name": "READING","display_name": "Reading", code: "1234"}""";
-    public static final String COURTHOUSE_BAD_ID = "/99999";
-    public static final int OK = 200;
-    public static final int CREATED = 201;
-    public static final int NO_CONTENT = 204;
-    public static final int BAD_REQUEST = 400;
-    public static final int NOT_FOUND = 404;
-    public static final int RESOURCE_ALREADY_EXISTS = 409;
+    private static final String COURTHOUSE_BAD_ID = "/99999";
+    private static final int OK = 200;
+    private static final int CREATED = 201;
+    private static final int NO_CONTENT = 204;
+    private static final int BAD_REQUEST = 400;
+    private static final int NOT_FOUND = 404;
 
-    public static final int INTERNAL_SERVER_ERROR = 500;
-
-    private int testCourthouseId;
+    @AfterEach
+    void tearDown() {
+        clean();
+    }
 
     @Test
-    @Order(1)
     void getAllCourthouses() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -56,62 +62,63 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(2)
     void createCourthouse() {
-        testCourthouseId = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY)
-            .post()
-            .then()
-            .assertThat()
-            .statusCode(CREATED)
-            .extract()
-            .path("id");
+        Response response = executeCourthousesPost();
 
-        assertTrue(testCourthouseId > 0);
+        assertEquals(CREATED, response.statusCode());
+
+        JSONAssert.assertEquals(
+            """
+                {
+                    "courthouse_name": "func-swansea",
+                    "display_name": "Swansea Functional Test Courthouse",
+                    "id": 0,
+                    "security_group_ids": [ ],
+                    "created_date_time": "",
+                    "last_modified_date_time": ""
+                }
+                """,
+            response.asString(),
+            new CustomComparator(
+                JSONCompareMode.NON_EXTENSIBLE,
+                new Customization("id", new RegularExpressionValueMatcher<>("\\d+")),
+                new Customization("security_group_ids", new ArrayValueMatcher<>(new ArraySizeComparator(JSONCompareMode.STRICT), 2)),
+                new Customization("created_date_time", (actual, expected) -> isIsoDateTimeString(actual.toString())),
+                new Customization("last_modified_date_time", (actual, expected) -> isIsoDateTimeString(actual.toString()))
+            )
+        );
     }
 
     @Test
-    @Order(3)
-    void createSameCourthouse() {
-        Response response = buildRequestWithExternalAuth()
+    void patchCourthouse() {
+        Response createCourthouseResponse = executeCourthousesPost();
+        int testCourthouseId = new JSONObject(createCourthouseResponse.asString())
+            .getInt("id");
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI))
-            .body(COURTHOUSE_BODY)
-            .post()
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
+            .body(COURTHOUSE_PATCH_BODY)
+            .patch()
             .then()
             .extract().response();
 
-        assertEquals(RESOURCE_ALREADY_EXISTS, response.statusCode());
+        assertEquals(OK, response.statusCode());
     }
 
     @Test
-    @Order(4)
-    void updateCourthouse() {
+    void patchCourthouseWithInvalidBody() {
+        Response createCourthouseResponse = executeCourthousesPost();
+        int testCourthouseId = new JSONObject(createCourthouseResponse.asString())
+            .getInt("id");
+
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
-            .body(COURTHOUSE_UPDATEBODY)
-            .put()
-            .then()
-            .extract().response();
-
-        assertEquals(NO_CONTENT, response.statusCode());
-    }
-
-    @Test
-    @Order(5)
-    void updateCourthouseWithInvalidBody() {
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
-            .body(COURTHOUSE_INVALIDBODY)
-            .put()
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
+            .body(COURTHOUSE_PATCH_INVALID_BODY)
+            .patch()
             .then()
             .extract().response();
 
@@ -119,12 +126,15 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(6)
     void getExistingCourthouse() {
-        Response response = buildRequestWithExternalAuth()
+        Response createCourthouseResponse = executeCourthousesPost();
+        int testCourthouseId = new JSONObject(createCourthouseResponse.asString())
+            .getInt("id");
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + "/" + testCourthouseId))
             .get()
             .then()
             .extract().response();
@@ -134,12 +144,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
 
     @Test
-    @Order(7)
     void getCourthouseIdDoesNotExist() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_BAD_ID))
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI + COURTHOUSE_BAD_ID))
             .get()
             .then()
             .extract().response();
@@ -148,18 +157,33 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(8)
-    void deleteCourthouse() {
-        Response response = buildRequestWithExternalAuth()
+    void getAllRegions() {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
-            .delete()
+            .baseUri(getUri(ADMIN_REGION_URI))
+            .get()
             .then()
-            .statusCode(NO_CONTENT)
+            .assertThat()
+            .statusCode(OK)
             .extract().response();
 
         assertNotNull(response);
+    }
+
+    private Response executeCourthousesPost() {
+        return buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(ADMIN_COURTHOUSES_URI))
+            .body("""
+                {
+                    "courthouse_name": "func-swansea",
+                    "display_name": "Swansea Functional Test Courthouse"
+                }
+            """)
+            .post()
+            .thenReturn();
     }
 
 }

@@ -5,11 +5,20 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,6 +32,8 @@ import java.util.UUID;
 @Profile("intTest")
 public class DataManagementServiceStubImpl implements DataManagementService {
 
+    private final DataManagementConfiguration dataManagementConfiguration;
+
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
         logStubUsageWarning();
@@ -33,6 +44,15 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     public UUID saveBlobData(String containerName, BinaryData binaryData) {
+        return saveBlobData();
+    }
+
+    @Override
+    public UUID saveBlobData(String containerName, InputStream inputStream) {
+        return saveBlobData();
+    }
+
+    private UUID saveBlobData() {
         logStubUsageWarning();
 
         UUID uuid = UUID.randomUUID();
@@ -59,14 +79,32 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public Response<Void> deleteBlobData(String containerName, UUID blobId) {
+    public Response<Boolean> deleteBlobData(String containerName, UUID blobId) {
+        logStubUsageWarning();
+
         log.info("Delete blob data method executed");
         return null;
+    }
+
+    @Override
+    @SneakyThrows
+    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException {
+        logStubUsageWarning();
+
+        FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+
+
+        try (OutputStream downloadOS = fileBasedDownloadResponseMetaData.getOutputStream(dataManagementConfiguration)) {
+            Date downloadStartDate = new Date();
+            downloadOS.write(new byte[1024]);
+            Date downloadEndDate = new Date();
+            log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+        }
+        return fileBasedDownloadResponseMetaData;
     }
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
                      + " you should ask questions! ###");
     }
-
 }

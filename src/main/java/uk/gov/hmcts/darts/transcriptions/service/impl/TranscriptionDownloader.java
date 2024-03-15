@@ -6,31 +6,28 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 
-import java.util.UUID;
+import java.io.IOException;
 
 import static java.util.Comparator.comparing;
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
 public class TranscriptionDownloader {
 
     private final TranscriptionRepository transcriptionRepository;
-    private final DataManagementApi dataManagementApi;
+    private final DataManagementFacade dataManagementFacade;
     private final AuditApi auditApi;
     private final UserIdentity userIdentity;
 
@@ -44,19 +41,12 @@ public class TranscriptionDownloader {
             .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
             .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
-        var latestExternalObjectDirectory = latestTranscriptionDocument.getExternalObjectDirectoryEntities()
-            .stream()
-            .filter(dir -> nonNull(dir.getExternalLocation()))
-            .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
-            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
-
         auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         return DownloadTranscriptResponse.builder()
-            .resource(getResourceStreamFor(latestExternalObjectDirectory))
+            .resource(getResourceStreamFor(latestTranscriptionDocument))
             .contentType(latestTranscriptionDocument.getFileType())
             .fileName(latestTranscriptionDocument.getFileName())
-            .externalLocation(latestExternalObjectDirectory.getExternalLocation())
             .transcriptionDocumentId(latestTranscriptionDocument.getId()).build();
     }
 
@@ -64,17 +54,16 @@ public class TranscriptionDownloader {
         return userIdentity.getUserAccount();
     }
 
-    private InputStreamResource getResourceStreamFor(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        final UUID externalLocation = externalObjectDirectoryEntity.getExternalLocation();
-        InputStreamResource stream;
-        if (externalObjectDirectoryEntity.isForLocationType(UNSTRUCTURED)) {
-            stream = new InputStreamResource(dataManagementApi.getBlobDataFromUnstructuredContainer(externalLocation).toStream());
-        } else if (externalObjectDirectoryEntity.isForLocationType(INBOUND)) {
-            stream = new InputStreamResource(dataManagementApi.getBlobDataFromInboundContainer(externalLocation).toStream());
-        } else {
+    private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
+        try {
+            DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument);
+            return new InputStreamResource(downloadResponseMetaData.getInputStream());
+        } catch (IOException | FileNotDownloadedException e) {
+            log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",
+                      latestTranscriptionDocument.getId(),
+                      e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
         }
-        return stream;
     }
 
 }

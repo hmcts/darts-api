@@ -8,10 +8,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
@@ -19,6 +17,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +25,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
@@ -55,6 +54,8 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     public static final String TIME_12_00 = "12:00:00";
     public static final String TIME_13_00 = "13:00:00";
     public static final String NOT_AVAILABLE = "N/A";
+    private static final OffsetDateTime TIME_20_00 = OffsetDateTime.parse("2023-01-01T20:00Z");
+    private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
 
     @Autowired
     private AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder given;
@@ -73,7 +74,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         hearing = given.aHearingWith("T202304130121", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
     }
 
-    @Transactional
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForDownload() {
@@ -106,7 +106,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     }
 
     @Test
-    @Transactional
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
         given.aMediaEntityGraph();
@@ -137,9 +136,31 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
+    @Test
+    @SuppressWarnings("PMD.LawOfDemeter")
+    public void handleKedaInvocationForMediaRequestsShouldResetRequestStatusToOpen() {
+        given.aMediaEntityGraph();
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
+        given.aMediaRequestEntityForHearingWithRequestType(
+            hearing,
+            AudioRequestType.PLAYBACK,
+            userAccountEntity,
+            TIME_20_00,
+            TIME_20_30
+        );
+
+        Integer mediaRequestId = given.getMediaRequestEntity().getId();
+
+        audioTransformationService.handleKedaInvocationForMediaRequests();
+
+        var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
+            .findById(mediaRequestId)
+            .orElseThrow();
+        assertEquals(OPEN, mediaRequestEntity.getStatus());
+    }
+
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    @Transactional
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
@@ -152,12 +173,8 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioTransformationService.handleKedaInvocationForMediaRequests()
-        );
 
-        assertEquals("Failed to process audio request", exception.getMessage());
+        audioTransformationService.handleKedaInvocationForMediaRequests();
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
             .findById(mediaRequestId)
@@ -193,7 +210,6 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    @Transactional
     public void handleKedaInvocationForMediaRequestsShouldNotInvokeProcessAudioRequestWhenNoOpenMediaRequestsExist(
         AudioRequestType audioRequestType) {
         given.aUserAccount(EMAIL_ADDRESS);

@@ -50,9 +50,11 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
 
     @Query("""
         SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        JOIN tm.transientObjectDirectoryEntities tod
         WHERE tm.mediaRequest = mr
         AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
-             OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
+             OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND  mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
+        AND upper(tod.status.description) <> 'MARKED FOR DELETION' 
         """)
     List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
 

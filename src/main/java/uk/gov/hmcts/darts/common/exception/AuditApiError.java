@@ -3,25 +3,27 @@ package uk.gov.hmcts.darts.common.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.darts.audit.model.AuditErrorCode;
+import uk.gov.hmcts.darts.audit.model.AuditTitleErrors;
 
 @Getter
 @RequiredArgsConstructor
 public enum AuditApiError implements DartsApiError {
 
     FILTERS_WERE_EMPTY(
-        "100",
+        AuditErrorCode.AUDIT_FILTERS_WERE_EMPTY.getValue(),
         HttpStatus.BAD_REQUEST,
-        "All filters were empty."
+        AuditTitleErrors.AUDIT_FILTERS_WERE_EMPTY.toString()
     ),
     DATE_EMPTY(
-        "101",
+        AuditErrorCode.FILTER_EMPTY.getValue(),
         HttpStatus.BAD_REQUEST,
-        "When using date filters, both must be provided."
+        AuditTitleErrors.FILTER_EMPTY.toString()
     ),
     NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT(
-        "102",
+        AuditErrorCode.NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT.getValue(),
         HttpStatus.BAD_REQUEST,
-        "No hearing or user found when auditing 'add audio' request."
+        AuditTitleErrors.NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIT";

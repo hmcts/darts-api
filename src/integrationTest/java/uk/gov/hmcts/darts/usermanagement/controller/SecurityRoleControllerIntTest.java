@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -26,7 +26,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
     public static final String ENDPOINT_URL = "/admin/security-roles";
 
     @Autowired
-    private AdminUserStub adminUserStub;
+    private SuperAdminUserStub superAdminUserStub;
 
     @MockBean
     private UserIdentity userIdentity;
@@ -36,7 +36,7 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
 
     @Test
     void getSecurityRolesShouldSucceedAndReturnAllRoles() throws Exception {
-        adminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -48,57 +48,74 @@ class SecurityRoleControllerIntTest extends IntegrationBase {
                 [
                   {
                     "id": 1,
+                    "role_name": "APPROVER",
                     "display_name": "Approver",
                     "display_state": true
                   },
                   {
                     "id": 2,
+                    "role_name": "REQUESTER",
                     "display_name": "Requestor",
                     "display_state": true
                   },
                   {
                     "id": 3,
+                    "role_name": "JUDGE",
                     "display_name": "Judge",
                     "display_state": true
                   },
                   {
                     "id": 4,
+                    "role_name": "TRANSCRIBER",
                     "display_name": "Transcriber",
                     "display_state": true
                   },
                   {
                     "id": 5,
+                    "role_name": "TRANSLATION_QA",
                     "display_name": "Translation QA",
                     "display_state": true
                   },
                   {
                     "id": 6,
+                    "role_name": "RCJ_APPEALS",
                     "display_name": "RCJ Appeals",
                     "display_state": true
                   },
                   {
                     "id": 7,
+                    "role_name": "XHIBIT",
                     "display_name": "XHIBIT",
                     "display_state": true
                   },
                   {
                     "id": 8,
+                    "role_name": "CPP",
                     "display_name": "CPP",
                     "display_state": true
                   },
                   {
                     "id": 9,
+                    "role_name": "DAR_PC",
                     "display_name": "DAR PC",
                     "display_state": true
                   },
                   {
                     "id": 10,
+                    "role_name": "MID_TIER",
                     "display_name": "Mid Tier",
                     "display_state": true
                   },
                   {
                     "id": 11,
-                    "display_name": "Admin",
+                    "role_name": "SUPER_ADMIN",
+                    "display_name": "Super Admin",
+                    "display_state": true
+                  },
+                  {
+                    "id": 12,
+                    "role_name": "SUPER_USER",
+                    "display_name": "Super User",
                     "display_state": true
                   }
                 ]

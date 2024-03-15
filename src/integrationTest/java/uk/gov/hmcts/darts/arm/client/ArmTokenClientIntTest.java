@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
+import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -95,7 +96,7 @@ class ArmTokenClientIntTest extends IntegrationBase {
     }
 
     private static ArmTokenRequest createTokenRequest() {
-        return new ArmTokenRequest("some-username", "some-password", "password");
+        return new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
     }
 
 }

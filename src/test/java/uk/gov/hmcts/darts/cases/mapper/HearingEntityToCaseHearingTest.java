@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -55,6 +56,40 @@ class HearingEntityToCaseHearingTest {
             "Tests/cases/HearingEntityToCaseHearingTest/testWithMultipleHearings/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
+    }
+
+    @Test
+    void testMappingToHearingsWithAutomatedTranscripts() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
+        var hearingTranscripts = hearings.get(0).getTranscriptions();
+        hearingTranscripts.get(0).setIsManualTranscription(false);
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
+
+        assertEquals(0, hearingList.get(0).getTranscriptCount());
+    }
+
+    @Test
+    void testMappingToHearingsWithLegacyTranscripts() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
+        var hearingTranscripts = hearings.get(0).getTranscriptions();
+        hearingTranscripts.get(0).setLegacyObjectId("something");
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
+
+        assertEquals(1, hearingList.get(0).getTranscriptCount());
+    }
+
+    @Test
+    void testMappingToHearingsWithLegacyAutomatedTranscripts() {
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
+        var hearingTranscripts = hearings.get(0).getTranscriptions();
+        hearingTranscripts.get(0).setIsManualTranscription(false);
+        hearingTranscripts.get(0).setLegacyObjectId("something");
+
+        List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
+
+        assertEquals(1, hearingList.get(0).getTranscriptCount());
     }
 
     @Test

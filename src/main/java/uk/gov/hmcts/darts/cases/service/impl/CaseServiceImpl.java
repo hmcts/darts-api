@@ -4,38 +4,44 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
+import uk.gov.hmcts.darts.cases.mapper.CasesAnnotationMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.mapper.TranscriptionMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
+import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
-import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,16 +51,21 @@ public class CaseServiceImpl implements CaseService {
 
     private static final int MAX_RESULTS = 500;
     private final CasesMapper casesMapper;
+    private final CasesAnnotationMapper annotationMapper;
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
+    private final AnnotationRepository annotationRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
+    private final AuthorisationApi authorisationApi;
+    private final LogApi logApi;
 
     @Override
     @Transactional
     public List<ScheduledCase> getHearings(GetCasesRequest request) {
+        logApi.casesRequestedByDarPc(request);
 
         List<HearingEntity> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
             request.getCourthouse(),
@@ -62,8 +73,8 @@ public class CaseServiceImpl implements CaseService {
             request.getDate()
         );
         createCourtroomIfMissing(hearings, request);
-        return casesMapper.mapToScheduledCases(hearings);
 
+        return casesMapper.mapToScheduledCases(hearings);
     }
 
     @Override
@@ -87,12 +98,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     public CourtCaseEntity getCourtCaseById(Integer caseId) {
-        Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
-
-        if (caseEntity.isEmpty()) {
-            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-        }
-        return caseEntity.get();
+        return caseRepository.findById(caseId).orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
@@ -117,6 +123,13 @@ public class CaseServiceImpl implements CaseService {
             existingCase,
             addCaseRequest
         );
+        if (updatedCaseEntity.getCreatedBy() == null) {
+            updatedCaseEntity.setCreatedBy(authorisationApi.getCurrentUser());
+        }
+
+        updatedCaseEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
+        // set this so it's updated when no other changes are present
+        updatedCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
         caseRepository.saveAndFlush(updatedCaseEntity);
         return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }
@@ -135,24 +148,50 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
-    public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
-        CourtCaseEntity foundCase = getCourtCaseById(caseId);
-        caseRepository.save(foundCase);
-        return casesMapper.mapToSingleCase(foundCase);
+    public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
+        return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
     @Override
-    public List<Transcript> getTranscriptsByCaseId(Integer caseId) {
-        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseId(caseId);
-        List<TranscriptionEntity> filteredTranscriptionEntities = findNonAutomaticTranscripts(transcriptionEntities);
-        return TranscriptionMapper.mapResponse(filteredTranscriptionEntities);
-    }
+    public List<Annotation> getAnnotations(Integer caseId) {
+        Optional<CourtCaseEntity> courtCaseEntity = caseRepository.findById(caseId);
+        if (courtCaseEntity.isEmpty()) {
+            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
+        }
+        List<HearingEntity> hearingEntitys = courtCaseEntity.get().getHearings();
 
-    private List<TranscriptionEntity> findNonAutomaticTranscripts(List<TranscriptionEntity> transcriptionEntities) {
-        //only show manual transcriptions or ones that came from legacy. Do not show Modernised automatic transcriptions.
-        return transcriptionEntities.stream()
-            .filter(transcriptionEntity -> BooleanUtils.isTrue(transcriptionEntity.getIsManualTranscription())
-                || StringUtils.isNotBlank(transcriptionEntity.getLegacyObjectId()))
-            .toList();
+        if (authorisationApi.userHasOneOfRoles(List.of(SecurityRoleEnum.SUPER_ADMIN))) {
+            List<AnnotationEntity> annotationsEntities =
+                annotationRepository.findByListOfHearingIds(
+                    hearingEntitys
+                        .stream()
+                        .map(HearingEntity::getId)
+                        .collect(Collectors.toList()));
+
+            List<Annotation> annotations = new ArrayList<>();
+            for (AnnotationEntity annotationEntity : annotationsEntities) {
+                for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
+                    annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
+                }
+            }
+
+            return annotations;
+        } else {
+            List<AnnotationEntity> annotationsEntities =
+                annotationRepository.findByListOfHearingIdsAndUser(
+                    hearingEntitys
+                        .stream()
+                        .map(HearingEntity::getId)
+                        .collect(Collectors.toList()), authorisationApi.getCurrentUser());
+
+            List<Annotation> annotations = new ArrayList<>();
+            for (AnnotationEntity annotationEntity : annotationsEntities) {
+                for (HearingEntity hearingEntity : annotationEntity.getHearingList()) {
+                    annotations.add(annotationMapper.map(hearingEntity, annotationEntity));
+                }
+            }
+            return annotations;
+        }
     }
 }

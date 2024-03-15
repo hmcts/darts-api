@@ -4,20 +4,28 @@ import com.azure.core.util.BinaryData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -29,25 +37,37 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AudioServiceImpl implements AudioService {
+
+    private static final String AUDIO_RESPONSE_EVENT_NAME = "audio response";
 
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -64,15 +84,27 @@ public class AudioServiceImpl implements AudioService {
     private final FileContentChecksum fileContentChecksum;
     private final CourtLogEventRepository courtLogEventRepository;
     private final AudioConfigurationProperties audioConfigurationProperties;
+    private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
+    private final AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
+    private final LogApi logApi;
 
-    private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
-        return new AudioFileInfo(
-            mediaEntity.getStart().toInstant(),
-            mediaEntity.getEnd().toInstant(),
-            mediaEntity.getChannel(),
-            downloadPath,
-            false
-        );
+    private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
+        return AudioFileInfo.builder()
+            .startTime(mediaEntity.getStart().toInstant())
+            .endTime(mediaEntity.getEnd().toInstant())
+            .channel(mediaEntity.getChannel())
+            .mediaFile(mediaEntity.getMediaFile())
+            .path(downloadPath)
+            .build();
+    }
+
+    private static SseEmitter.SseEventBuilder createPreviewSse(String range, InputStream audioMediaFile) throws IOException {
+        ResponseEntity<byte[]> response;
+        response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
+
+        return SseEmitter.event()
+            .data(response)
+            .name(AUDIO_RESPONSE_EVENT_NAME);
     }
 
     @Override
@@ -86,7 +118,7 @@ public class AudioServiceImpl implements AudioService {
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
         try {
-            Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
 
             AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
 
@@ -110,13 +142,19 @@ public class AudioServiceImpl implements AudioService {
     @Override
     @Transactional
     public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
+        MessageDigest md5Digest;
+        try {
+            md5Digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+        }
+
         final UUID externalLocation;
         final String checksum;
 
-        try {
-            BinaryData binaryData = BinaryData.fromStream(audioFileStream.getInputStream());
-            checksum = fileContentChecksum.calculate(binaryData.toBytes());
-            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
+        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
+            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
+            checksum = fileContentChecksum.calculate(digestInputStream);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
@@ -132,6 +170,8 @@ public class AudioServiceImpl implements AudioService {
             userIdentity.getUserAccount(),
             savedMedia
         );
+
+        logApi.audioUploaded(addAudioMetadataRequest);
     }
 
     @Override
@@ -200,4 +240,59 @@ public class AudioServiceImpl implements AudioService {
         return externalObjectDirectoryEntity;
     }
 
+    @Override
+    public SseEmitter startStreamingPreview(Integer mediaId, String range, SseEmitter emitter) {
+        heartBeatEmitter.startHeartBeat(emitter);
+        ExecutorService previewExecutor = Executors.newSingleThreadExecutor();
+        previewExecutor.execute(() -> this.sendPreview(emitter, mediaId, range));
+
+        return emitter;
+    }
+
+    @Override
+    public void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId) {
+        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords =
+            audioBeingProcessedFromArchiveQuery.getResults(hearingId);
+
+        for (AudioMetadata audioMetadataItem : audioMetadata) {
+            if (archivedArmRecords.stream().anyMatch(archived -> audioMetadataItem.getId().equals(archived.mediaId()))) {
+                audioMetadataItem.setIsArchived(true);
+            } else {
+                audioMetadataItem.setIsArchived(false);
+            }
+        }
+    }
+
+    /*
+    Set the isAvailable flag if the media is available in the unstructured datastore.
+     */
+    @Override
+    public void setIsAvailable(List<AudioMetadata> audioMetadataList) {
+        List<Integer> mediaIdList = audioMetadataList.stream().map(AudioMetadata::getId).toList();
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        ExternalLocationTypeEntity unstructuredLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
+        List<Integer> mediaIdsStoredInUnstructured = externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(mediaIdList, storedStatus,
+                                                                                                                            unstructuredLocationType);
+
+        for (AudioMetadata audioMetadataItem : audioMetadataList) {
+            audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
+        }
+    }
+
+    private void sendPreview(SseEmitter emitter, Integer mediaId, String range) {
+        try {
+            InputStream audioMediaFile = preview(mediaId);
+            SseEmitter.SseEventBuilder event = createPreviewSse(range, audioMediaFile);
+            emitter.send(event);
+            emitter.complete();
+        } catch (IOException e) {
+            DartsApiException dartsApiException = new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
+            log.error("Error when creating preview SSE", e);
+            emitter.completeWithError(dartsApiException);
+            throw dartsApiException;
+        } catch (Exception e) {
+            emitter.completeWithError(e);
+            throw e;
+        }
+    }
 }

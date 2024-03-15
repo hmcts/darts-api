@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.List;
 import java.util.Map;
@@ -31,10 +32,13 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     private final List<EventHandler> eventHandlers;
     private final EventHandlerRepository eventHandlerRepository;
+
+    private final LogApi logApi;
     private final Map<String, EventHandlerEntity> eventHandlerCache = new ConcurrentHashMap<>();
 
     @Override
     public void receive(DartsEvent event) {
+        logApi.eventReceived(event);
         EventHandlerEntity foundHandlerEntity = findHandler(event);
         Optional<EventHandler> foundHandler = eventHandlers.stream()
             .filter(handler -> handler.isHandlerFor(foundHandlerEntity.getHandler()))

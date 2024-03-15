@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionAuthorisation403ErrorCode;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionsErrorCode;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionsTitleErrors;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription400ErrorCode;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 
@@ -12,64 +14,64 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 @RequiredArgsConstructor
 public enum TranscriptionApiError implements DartsApiError {
     FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST(
-        "100",
+        TranscriptionsErrorCode.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to validate transcription request"
+        TranscriptionsTitleErrors.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.toString()
     ),
     TRANSCRIPTION_NOT_FOUND(
-        "101",
+        TranscriptionsErrorCode.TRANSCRIPTION_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "The requested transcription cannot be found"
+        TranscriptionsTitleErrors.TRANSCRIPTION_NOT_FOUND.toString()
     ),
     BAD_REQUEST_TRANSCRIPTION_STATUS(
-        "102",
+        TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_STATUS.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Unexpected transcription status for this workflow"
+        TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_STATUS.toString()
     ),
     BAD_REQUEST_WORKFLOW_COMMENT(
-        "103",
+        TranscriptionsErrorCode.BAD_REQUEST_WORKFLOW_COMMENT.getValue(),
         HttpStatus.BAD_REQUEST,
-        "The workflow comment is required for this transcription update"
+        TranscriptionsTitleErrors.BAD_REQUEST_WORKFLOW_COMMENT.toString()
     ),
     BAD_REQUEST_TRANSCRIPTION_TYPE(
-        "104",
+        TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_TYPE.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Unexpected transcription type for this workflow"
+        TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_TYPE.toString()
     ),
     TRANSCRIPTION_WORKFLOW_ACTION_INVALID(
-        "105",
+        TranscriptionsErrorCode.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.getValue(),
         HttpStatus.CONFLICT,
-        "Transcription workflow action is not permitted"
+        TranscriptionsTitleErrors.TRANSCRIPTION_WORKFLOW_ACTION_INVALID.toString()
     ),
     BAD_REQUEST_TRANSCRIPTION_URGENCY(
-        "106",
+        TranscriptionsErrorCode.BAD_REQUEST_TRANSCRIPTION_URGENCY.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Unexpected transcription urgency for this workflow"
+        TranscriptionsTitleErrors.BAD_REQUEST_TRANSCRIPTION_URGENCY.toString()
     ),
     DUPLICATE_TRANSCRIPTION(
-        "107",
+        TranscriptionsErrorCode.DUPLICATE_TRANSCRIPTION.getValue(),
         HttpStatus.CONFLICT,
-        "A transcription already exists with these properties"
+        TranscriptionsTitleErrors.DUPLICATE_TRANSCRIPTION.toString()
     ),
     FAILED_TO_ATTACH_TRANSCRIPT(
-        "108",
+        TranscriptionsErrorCode.FAILED_TO_ATTACH_TRANSCRIPT.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to attach transcript"
+        TranscriptionsTitleErrors.FAILED_TO_ATTACH_TRANSCRIPT.toString()
     ),
     FAILED_TO_DOWNLOAD_TRANSCRIPT(
-        "109",
+        TranscriptionsErrorCode.FAILED_TO_DOWNLOAD_TRANSCRIPT.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Failed to download transcript"
+        TranscriptionsTitleErrors.FAILED_TO_DOWNLOAD_TRANSCRIPT.toString()
     ),
     AUDIO_NOT_FOUND(
-        "110",
+        TranscriptionsErrorCode.AUDIO_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
-        "Transcription could not be requested, no audio"
+        TranscriptionsTitleErrors.AUDIO_NOT_FOUND.toString()
     ),
     TIMES_OUTSIDE_OF_HEARING_TIMES(
-        "111",
+        TranscriptionsErrorCode.TIMES_OUTSIDE_OF_HEARING_TIMES.getValue(),
         HttpStatus.NOT_FOUND,
-        "Transcription could not be requested, times outside of hearing times"
+        TranscriptionsTitleErrors.TIMES_OUTSIDE_OF_HEARING_TIMES.toString()
     ),
     FAILED_TO_UPDATE_TRANSCRIPTIONS(
         UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),

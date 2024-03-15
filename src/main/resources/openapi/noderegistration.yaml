@@ -78,8 +78,8 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "NODE_REGISTRATION_100"
-                title: "Could not find the courtroom."
+                type: "COMMON_100"
+                title: "Courthouse 'SWANSEA1' not found."
                 status: 400
 components:
   schemas:
@@ -90,3 +90,16 @@ components:
           description: ID of the registered device.
           type: integer
           example: 42
+
+    NoDeregistrationErrorCode:
+      type: string
+      enum:
+        - "INVALID_COURTROOM_100"
+      x-enum-varnames: [INVALID_COURTROOM]
+
+    NoDeregistrationTitleErrors:
+      type: string
+      enum:
+        - "Could not find the courtroom."
+      x-enum-varnames: [INVALID_COURTROOM]
+

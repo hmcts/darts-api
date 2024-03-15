@@ -158,7 +158,7 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE.toString());
         assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-                    We have received your audio recording order for case Number TheCaseId.
+                    We have received your audio recording order for case ID TheCaseId.
 
                     Processing your order may take a little longer as it must be retrieved from the archives.
 

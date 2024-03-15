@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum ArchiveRecordType {
     MEDIA_ARCHIVE_TYPE("Media"),
     TRANSCRIPTION_ARCHIVE_TYPE("Transcription"),
-    ANNOTATION_ARCHIVE_TYPE("Annotation");
+    ANNOTATION_ARCHIVE_TYPE("Annotation"),
+    CASE_ARCHIVE_TYPE("Case");
 
     private String archiveTypeDescription;
 

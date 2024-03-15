@@ -22,6 +22,8 @@ spring:
             authorization-uri: http://localhost:8080/oauth2/v2.0/authorize
             token-uri: http://localhost:8080/oauth2/v2.0/token
             jwk-set-uri: http://localhost:8080/discovery/v2.0/keys
+            logout-uri: http://localhost:8080/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout
+            reset-password-uri: http://localhost:8080/B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -29,6 +31,10 @@ spring:
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 
 darts:
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  api-pod: ${API_MODE:true}
+  data-management:
+    inbound-to-unstructured-limit: 100
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8080}
   audio:
@@ -47,11 +53,10 @@ darts:
       arm-username: some-username
       arm-password: some-password
       url: http://localhost:4551
-
 logging:
   level:
     uk:
       gov:
         hmcts:
           darts: DEBUG
-
+  config: classpath:logback-test.xml

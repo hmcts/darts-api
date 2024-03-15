@@ -17,7 +17,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Component
 @RequiredArgsConstructor
 public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequestBeingProcessedFromArchiveQuery {
-
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final AudioRequestBeingProcessedFromArchiveQueryResultRowMapper rowMapper;
 
@@ -72,5 +71,4 @@ public class AudioRequestBeingProcessedFromArchiveQueryImpl implements AudioRequ
             rowMapper
         );
     }
-
 }

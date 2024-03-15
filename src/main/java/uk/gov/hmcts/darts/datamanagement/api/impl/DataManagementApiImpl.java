@@ -4,18 +4,25 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("checkstyle:SummaryJavadoc")
 public class DataManagementApiImpl implements DataManagementApi {
 
     private final DataManagementService dataManagementService;
@@ -37,14 +44,10 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
-    public UUID saveBlobDataToOutboundContainer(BinaryData binaryData) {
-        return dataManagementService.saveBlobData(getOutboundContainerName(), binaryData);
-    }
-
-    @Override
     public BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata) {
-        String containerName = getContainerName(container);
-        return dataManagementService.saveBlobData(containerName, binaryData, metadata);
+        Optional<String> containerName = getContainerName(container);
+        return containerName.map(s -> dataManagementService.saveBlobData(s, binaryData, metadata)).orElse(null);
+
     }
 
     @Override
@@ -75,8 +78,22 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
+    public UUID saveBlobDataToInboundContainer(InputStream inputStream) {
+        return dataManagementService.saveBlobData(getInboundContainerName(), inputStream);
+    }
+
+    /**
+     * @deprecated This implementation is not memory-efficient with large files, use saveBlobDataToInboundContainer(InputStream inputStream) instead.
+     */
+    @Deprecated
+    @Override
     public UUID saveBlobDataToInboundContainer(BinaryData binaryData) {
         return dataManagementService.saveBlobData(getInboundContainerName(), binaryData);
+    }
+
+    @Override
+    public UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData) {
+        return dataManagementService.saveBlobData(getUnstructuredContainerName(), binaryData);
     }
 
     private String getOutboundContainerName() {
@@ -91,20 +108,35 @@ public class DataManagementApiImpl implements DataManagementApi {
         return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
-    private String getContainerName(DatastoreContainerType datastoreContainerType) {
+    @Override
+    public DownloadResponseMetaData downloadBlobFromContainer(DatastoreContainerType container,
+                                                              ExternalObjectDirectoryEntity externalObjectDirectoryEntity) throws FileNotDownloadedException {
+        Optional<String> containerName = getContainerName(container);
+        if (containerName.isPresent()) {
+            return dataManagementService.downloadData(container, containerName.get(), externalObjectDirectoryEntity.getExternalLocation());
+        }
+        throw new FileNotDownloadedException(externalObjectDirectoryEntity.getExternalLocation(), container.name(), "Container not found.");
+    }
+
+    public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
         switch (datastoreContainerType) {
             case INBOUND -> {
-                return getInboundContainerName();
+                return Optional.of(getInboundContainerName());
             }
             case OUTBOUND -> {
-                return getOutboundContainerName();
+                return Optional.of(getOutboundContainerName());
             }
             case UNSTRUCTURED -> {
-                return getUnstructuredContainerName();
+                return Optional.of(getUnstructuredContainerName());
             }
             default -> {
-                return null;
+                return Optional.empty();
             }
         }
+    }
+
+    @Override
+    public StorageConfiguration getConfiguration() {
+        return dataManagementConfiguration;
     }
 }

@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.common.service.UserAccountService;
 
 import java.net.URI;
 import java.util.Date;
@@ -36,7 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
@@ -59,6 +62,8 @@ class AuthenticationInternalUserControllerTest {
     @Mock
     private AuthStrategySelector locator;
     @Mock
+    private UserAccountService userAccountService;
+    @Mock
     private InternalAuthConfigurationProperties internalAuthConfigurationProperties;
 
     @Test
@@ -74,8 +79,9 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
+        final String emailAddress = "test.user@example.com";
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken("test.user@example.com"));
+            .thenReturn(createDummyAccessToken(emailAddress));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
@@ -91,6 +97,7 @@ class AuthenticationInternalUserControllerTest {
                                                       .build()))
                                     .build())
         );
+        doNothing().when(userAccountService).updateLastLoginTime(-1);
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
         assertNotNull(securityToken);
@@ -98,13 +105,16 @@ class AuthenticationInternalUserControllerTest {
         assertNotNull(securityToken.getUserState());
 
         verify(authenticationService).handleOauthCode(DUMMY_CODE);
-        verify(authorisationApi).getAuthorisation("test.user@example.com");
+        verify(authorisationApi).getAuthorisation(emailAddress);
+        verify(userAccountService).updateLastLoginTime(-1);
+        verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
     }
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
+        final String emailAddress = "test.missing@example.com";
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken("test.missing@example.com"));
+            .thenReturn(createDummyAccessToken(emailAddress));
         when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
             internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
         when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
@@ -115,6 +125,8 @@ class AuthenticationInternalUserControllerTest {
         assertNull(securityToken.getUserState());
 
         verify(authenticationService).handleOauthCode(DUMMY_CODE);
+        verify(authorisationApi).getAuthorisation(emailAddress);
+        verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
     }
 
     @Test
@@ -152,6 +164,7 @@ class AuthenticationInternalUserControllerTest {
         assertNull(securityToken.getUserState());
 
         verify(authenticationService).handleOauthCode(DUMMY_CODE);
+        verifyNoMoreInteractions(authenticationService, authorisationApi, userAccountService);
     }
 
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")

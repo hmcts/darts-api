@@ -51,47 +51,6 @@ paths:
           description: Unauthorised Error
 
   /audio-requests:
-    get:
-      tags:
-        - Audio Requests
-      summary: 'Audio requests for a user to view whether Current / Expired'
-      operationId: getYourAudioV1
-      parameters:
-        - in: header
-          name: user_id
-          schema:
-            type: integer
-          description: The user_account primary key
-          required: true
-        - in: query
-          name: expired
-          schema:
-            type: boolean
-          description: if true, will retrieve expired audio requests only, if false will get current requests only
-          required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GetAudioRequestResponseV1'
-        '400':
-          description: A required parameter is missing or an invalid.
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "about:blank"
-                title: "Bad Request"
-                status: 400
-                detail: "Required parameter 'expired' is not present."
-                instance: "/audio-requests"
-        '401':
-          description: Unauthorised Error
     post:
       tags:
         - Audio Requests
@@ -687,3 +646,24 @@ components:
         - "AUTHORISATION_100"
         - "AUDIO_REQUESTS_101"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE, MEDIA_REQUEST_NOT_VALID_FOR_USER ]
+
+    AudioRequestsErrorCode:
+        type: string
+        enum:
+          - "AUDIO_REQUESTS_100"
+          - "AUDIO_REQUESTS_101"
+          - "AUDIO_REQUESTS_102"
+          - "AUDIO_REQUESTS_103"
+          - "AUDIO_REQUESTS_104"
+        x-enum-varnames: [ MEDIA_REQUEST_NOT_FOUND, MEDIA_REQUEST_NOT_VALID_FOR_USER,  MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, TRANSFORMED_MEDIA_NOT_FOUND, DUPLICATE_MEDIA_REQUEST ]
+
+    AudioRequestsTitleErrors:
+        type: string
+        enum:
+          - "The requested audio request cannot be found"
+          - "The audio request is not valid for this user"
+          - "The audio request is not valid for this action"
+          - "The requested transformed media cannot be found"
+          - "An audio request already exists with these properties"
+        x-enum-varnames: [ MEDIA_REQUEST_NOT_FOUND, MEDIA_REQUEST_NOT_VALID_FOR_USER,  MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, TRANSFORMED_MEDIA_NOT_FOUND, DUPLICATE_MEDIA_REQUEST ]
+

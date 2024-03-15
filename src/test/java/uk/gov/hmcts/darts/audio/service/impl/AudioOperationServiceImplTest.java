@@ -39,14 +39,12 @@ class AudioOperationServiceImplTest {
     private static final String T_10_30_00_Z = "2023-04-28T10:30:00Z";
     private static final String T_11_00_00_Z = "2023-04-28T11:00:00Z";
     private static final String T_11_30_00_Z = "2023-04-28T11:30:00Z";
-    private static final String T_10_30_00_Z_MS_1200 = "2023-04-28T10:30:12Z";
+    private static final String T_10_30_12_Z = "2023-04-28T10:30:12Z";
     private static final String FFMPEG = "/usr/bin/ffmpeg";
     private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
     private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
 
     private List<AudioFileInfo> inputAudioFileInfos;
-    private List<AudioFileInfo> inputAudioFileInfosWithGaps;
-    private List<AudioFileInfo> inputAudioFileInfosWithMillisecondGaps;
     private Path tempDirectory;
 
     @InjectMocks
@@ -63,55 +61,21 @@ class AudioOperationServiceImplTest {
         tempDirectory = Files.createTempDirectory("darts_api_unit_test");
 
         inputAudioFileInfos = new ArrayList<>(Arrays.asList(
-            new AudioFileInfo(
-                Instant.parse(T_09_00_00_Z),
-                Instant.parse(T_10_30_00_Z),
-                1,
-                createFile(tempDirectory, "original0.mp3"),
-                false
-            ),
-            new AudioFileInfo(
-                Instant.parse(T_10_30_00_Z),
-                Instant.parse(T_11_00_00_Z),
-                1,
-                createFile(tempDirectory, "original1.mp3"),
-                false
-            ))
-        );
-
-        inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
-            new AudioFileInfo(
-                Instant.parse(T_09_00_00_Z),
-                Instant.parse(T_10_30_00_Z),
-                1,
-                createFile(tempDirectory, "original2.mp3"),
-                false
-            ),
-            new AudioFileInfo(
-                Instant.parse(T_11_00_00_Z),
-                Instant.parse(T_11_30_00_Z),
-                1,
-                createFile(tempDirectory, "original3.mp3"),
-                false
-            ))
-        );
-
-        inputAudioFileInfosWithMillisecondGaps = new ArrayList<>(Arrays.asList(
-            new AudioFileInfo(
-                Instant.parse(T_09_00_00_Z),
-                Instant.parse(T_10_30_00_Z),
-                1,
-                createFile(tempDirectory, "original4.mp3"),
-                false
-            ),
-            new AudioFileInfo(
-                Instant.parse(T_10_30_00_Z_MS_1200),
-                Instant.parse(T_11_30_00_Z),
-                1,
-                createFile(tempDirectory, "original5.mp3"),
-                false
-            ))
-        );
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_10_30_00_Z))
+                .channel(1)
+                .mediaFile("original0.mp2")
+                .path(createFile(tempDirectory, "original0.mp2"))
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_10_30_00_Z))
+                .endTime(Instant.parse(T_11_00_00_Z))
+                .channel(1)
+                .mediaFile("original1.mp2")
+                .path(createFile(tempDirectory, "original1.mp2"))
+                .build()
+        ));
     }
 
     @Test
@@ -119,20 +83,20 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
 
         List<AudioFileInfo> inputAudioFileInfos = List.of(
-            new AudioFileInfo(
-                Instant.parse(T_09_00_00_Z),
-                Instant.parse(T_10_30_00_Z),
-                1,
-                Path.of("/path/to/audio/original0.mp3"),
-                false
-            ),
-            new AudioFileInfo(
-                Instant.parse(T_10_30_00_Z),
-                Instant.parse(T_11_00_00_Z),
-                1,
-                Path.of("/path/to/audio/original1.mp3"),
-                false
-            )
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_10_30_00_Z))
+                .channel(1)
+                .mediaFile("original0.mp2")
+                .path(Path.of("/path/to/audio/original0.mp2"))
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_10_30_00_Z))
+                .endTime(Instant.parse(T_11_00_00_Z))
+                .channel(1)
+                .mediaFile("original1.mp2")
+                .path(Path.of("/path/to/audio/original1.mp2"))
+                .build()
         );
 
         CommandLine actualCommand = audioOperationService.generateConcatenateCommand(
@@ -141,7 +105,7 @@ class AudioOperationServiceImplTest {
         );
 
         CommandLine expectedCommand = CommandLine.parse(
-            "/usr/bin/ffmpeg -i /path/to/audio/original0.mp3 -i /path/to/audio/original1.mp3"
+            "/usr/bin/ffmpeg -i /path/to/audio/original0.mp2 -i /path/to/audio/original1.mp2"
                 + " -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 /path/to/output/audio.mp2");
 
         assertNotNull(actualCommand);
@@ -193,17 +157,17 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getTrimWorkspace()).thenReturn(tempDirectory.toString());
 
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
-        Path file = Files.createFile(tempDirectory.resolve("original.mp3"));
+        Path file = Files.createFile(tempDirectory.resolve("original.mp2"));
 
         AudioFileInfo audioFileInfo = audioOperationService.trim(
             WORKSPACE_DIR,
-            new AudioFileInfo(
-                Instant.parse(T_09_00_00_Z),
-                Instant.parse(T_10_30_00_Z),
-                1,
-                file,
-                false
-            ),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_10_30_00_Z))
+                .channel(1)
+                .mediaFile("original.mp2")
+                .path(file)
+                .build(),
             Duration.of(45, MINUTES),
             Duration.of(75, MINUTES)
         );
@@ -290,6 +254,23 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
+        List<AudioFileInfo> inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_10_30_00_Z))
+                .channel(1)
+                .mediaFile("original2.mp2")
+                .path(createFile(tempDirectory, "original2.mp2"))
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_11_00_00_Z))
+                .endTime(Instant.parse(T_11_30_00_Z))
+                .channel(1)
+                .mediaFile("original3.mp2")
+                .path(createFile(tempDirectory, "original3.mp2"))
+                .build()
+        ));
+
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
             inputAudioFileInfosWithGaps,
@@ -306,14 +287,31 @@ class AudioOperationServiceImplTest {
     }
 
     @Test
-    void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGapWithMilliseconds() throws Exception {
+    void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGapWithSeconds() throws Exception {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
+        List<AudioFileInfo> inputAudioFileInfosWithSecondGaps = new ArrayList<>(Arrays.asList(
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_10_30_00_Z))
+                .channel(1)
+                .mediaFile("original4.mp2")
+                .path(createFile(tempDirectory, "original4.mp2"))
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_10_30_12_Z))
+                .endTime(Instant.parse(T_11_30_00_Z))
+                .channel(1)
+                .mediaFile("original5.mp2")
+                .path(createFile(tempDirectory, "original5.mp2"))
+                .build()
+        ));
+
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
-            inputAudioFileInfosWithMillisecondGaps,
+            inputAudioFileInfosWithSecondGaps,
             ALLOWABLE_GAP_MS
         );
 
@@ -321,7 +319,7 @@ class AudioOperationServiceImplTest {
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
-        assertEquals(Instant.parse(T_10_30_00_Z_MS_1200), audioFileInfo.get(1).getStartTime());
+        assertEquals(Instant.parse(T_10_30_12_Z), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
         assertFalse(audioFileInfo.get(0).isTrimmed());
     }

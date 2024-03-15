@@ -1,13 +1,15 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -16,19 +18,21 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
@@ -37,16 +41,19 @@ import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendan
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
+import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
-
+    @Autowired
+    SecurityGroupRepository securityGroupRepository;
+    @Autowired
+    UserAccountRepository userAccountRepository;
     @Autowired
     CaseService service;
-    @MockBean
-    private UserIdentity mockUserIdentity;
     CourthouseEntity swanseaCourthouse;
+    UserAccountEntity user;
 
     @BeforeEach
     void setupData() {
@@ -139,6 +146,14 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
         EventEntity event5b = createEventWith("eventName", "event5b", hearing5b, OffsetDateTime.now());
         dartsDatabase.saveAll(event4a, event5b);
+
+        givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
+        user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+    }
+
+    @AfterEach
+    void deleteUser() {
+        dartsDatabase.addToUserAccountTrash(INTEGRATION_TEST_USER_EMAIL);
     }
 
     @Test
@@ -156,15 +171,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
 
         compareJson(actualResponse, expectedResponse);
-    }
-
-    private static void compareJson(String actualResponse, String expectedResponse) {
-        try {
-            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-        } catch (AssertionError ae) {
-            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
-            throw ae;
-        }
     }
 
     @Test
@@ -299,33 +305,12 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void whenAdvancedSearchIsRunForUserWithGlobalAccessWithNoCourthouseAccess_thenShouldReturnResultsOk() throws IOException {
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber("sE1")
-            .build();
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(JUDGE))).thenReturn(true);
-
-        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
-        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
-
-        compareJson(actualResponse, expectedResponse);
-    }
-
-    @Test
     void whenAdvancedSearchIsRunForUserWithoutGlobalAccessWithNoCourthouseAccess_thenShouldReturnEmptyArray() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber("sE1")
             .build();
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        user.getSecurityGroupEntities().clear();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -334,10 +319,34 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         compareJson(actualResponse, expectedResponse);
     }
 
-    private void setupUserAccountAndSecurityGroup() {
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(swanseaCourthouse);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    private static void givenBearerTokenExists(String email) {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("emails", List.of(email))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
+    private void setupUserAccountAndSecurityGroup() {
+        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(APPROVER, swanseaCourthouse);
+        securityGroup.setGlobalAccess(false);
+        securityGroup.setUseInterpreter(false);
+        assignSecurityGroupToUser(user, securityGroup);
+    }
+
+    private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
+        securityGroup.getUsers().add(user);
+        user.getSecurityGroupEntities().add(securityGroup);
+        securityGroupRepository.save(securityGroup);
+        userAccountRepository.save(user);
+    }
+
+    private static void compareJson(String actualResponse, String expectedResponse) {
+        try {
+            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        } catch (AssertionError ae) {
+            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
+            throw ae;
+        }
+    }
 }

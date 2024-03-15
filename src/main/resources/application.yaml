@@ -33,7 +33,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
@@ -51,11 +51,11 @@ spring:
             provider: internal-azure-ad-provider
         provider:
           external-azure-ad-provider:
-            authorization-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/authorize
-            token-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/token
-            jwk-set-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
-            logout-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
-            reset-password-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
+            authorization-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/authorize
+            token-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/token
+            jwk-set-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI:https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
+            logout-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
+            reset-password-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
           internal-azure-ad-provider:
             authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
             token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
@@ -99,9 +99,10 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
-    out-of-order: true
 
 darts:
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
+  api-pod: ${API_MODE:true}
   audio:
     allowable-audio-gap-duration: 1s
     ffmpeg-executable: ffmpeg
@@ -121,8 +122,8 @@ darts:
     handheld-audio-courtroom-numbers:
       - 199
   azure:
-    active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com
-    active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsstgextid.onmicrosoft.com
+    active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}
+    active-directory-b2c-auth-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
     active-directory-justice-auth-uri: https://login.microsoftonline.com
@@ -133,11 +134,15 @@ darts:
       unstructured:
         arm-minimum:
           weeks: 30
+    pending-retention-days: 7
+    inbound-to-unstructured-limit: 100
   daily-list:
     housekeeping:
       enabled: true
       cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
+  dar-pc-notification:
+    url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
@@ -157,6 +162,8 @@ darts:
         transcription_available: b3378991-ad90-4430-8005-45dcb35741b8
         transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
+  retention:
+    overridable-fixed-policy-keys: 3
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
@@ -169,27 +176,52 @@ darts:
       max-blobs-per-page: 3
       publisher: DARTS
       region: GBR
-      media_record_class: DARTSMedia
-      transcription_record_class: DARTSTranscription
-      annotation_record_class: DARTSAnnotation
+      media-record-class: DARTS
+      transcription-record-class: DARTS
+      annotation-record-class: DARTS
+      case-record-class: DARTS
       temp-blob-workspace: ${user.home}/arm/tempworkspace
-      date_time_format: yyyy-MM-dd'T'HH:mm:ss
-      file_extension: a360
+      date-time-format: yyyy-MM-dd'T'HH:mm:ssX
+      date-format: yyyy-MM-dd
+      file-extension: a360
       list-blobs-timeout-duration: 60s
+
+      media-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
+      transcription-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
+      annotation-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
+      case-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+
+      response-cleanup-buffer-days: 0
+
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
+      cabinet-id: 100
       url: ${ARM_URL:}
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
+      download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+    dets:
+      sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
+      container-name: darts-dets
+      temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
-      connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+      client:
+        connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+        ## See https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-tune-upload-download-java
+        block-size-bytes: 10_000_000
+        max-single-upload-size-bytes: 10_000_000
+        max-concurrency: 5
+        timeout: 15m
+      temp-blob-workspace: ${user.home}/blob/tempworkspace
       container-name:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
-    delete:
-      timeout: 60
+      delete:
+        timeout: 60
+    search:
+      order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:
     allowed-extensions:
       - "docx"
@@ -207,6 +239,15 @@ darts:
       system-user-email: ${SYSTEM_USER_EMAIL:}
       system-user-guid-map:
         housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
+        dailylist-processor: f6f71122-ff85-4ebe-93d9-1706460dbea5
+  annotations:
+    allowed-extensions:
+      - "docx"
+      - "doc"
+    max-file-size: 10485760
+    allowed-content-types:
+      - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      - "application/msword"
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
   bank-holidays:
@@ -220,7 +261,18 @@ darts:
     ssl-enabled: ${REDIS_SSL_ENABLED:true}
   audit:
     application-server: ${CLUSTER_NAME:not available}
-
+  sse:
+    heartbeat: 5 # in seconds
+    sse-preview-timeout: 120 # in seconds
+  log:
+    events:
+      daily-test-event-text:
+        xhb: ${EVENT_LOG_XHB_DAILY_TEST_TEXT:Xhibit Daily Test}
+        cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
+    cases:
+      defendant-name-char-limit: 600
+  hikari:
+    maximum-pool-size: 50
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).

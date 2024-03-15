@@ -17,6 +17,8 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -32,6 +35,8 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -57,9 +62,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
@@ -93,6 +98,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final UserAccountRepository userAccountRepository;
 
     private final TransformedMediaHelper transformedMediaHelper;
+    private final LogApi logApi;
+    private final DataManagementFacade dataManagementFacade;
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
@@ -108,26 +115,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public BinaryData getOutboundAudioBlob(UUID location) {
-        return dataManagementApi.getBlobDataFromOutboundContainer(location);
-    }
-
-    @Override
-    public UUID saveAudioBlobData(BinaryData binaryData) {
-        return dataManagementApi.saveBlobDataToOutboundContainer(binaryData);
-    }
-
-    @Override
     public List<MediaEntity> getMediaMetadata(Integer hearingId) {
         return mediaRepository.findAllByHearingId(hearingId);
     }
 
     @Override
-    public Optional<UUID> getMediaLocation(MediaEntity media) {
+    public Optional<UUID> getMediaLocation(MediaEntity media, Integer containerLocationId) {
         Optional<UUID> externalLocation = Optional.empty();
 
         ObjectRecordStatusEntity objectRecordStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
+        ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(containerLocationId);
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
             media, objectRecordStatus, externalLocationType
         );
@@ -149,7 +146,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
+    public Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException {
 
         return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
     }
@@ -185,6 +182,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
             hearingEntity = mediaRequestEntity.getHearing();
 
+            logApi.atsProcessingUpdate(mediaRequestEntity);
+
             AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
             if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
                 audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
@@ -203,6 +202,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 mediaEntitiesForHearing,
                 mediaRequestEntity
             );
+
+            boolean hasAllMediaBeenCopiedFromInboundStorage = checkAllMediaExistsInTwoStorageLocations(filteredMediaEntities,
+                                                                                          ExternalLocationTypeEnum.INBOUND,
+                                                                                          ExternalLocationTypeEnum.UNSTRUCTURED);
+            if (!hasAllMediaBeenCopiedFromInboundStorage) {
+                mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
+                return;
+            }
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
@@ -245,7 +252,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
             }
 
-            log.debug("Completed processing for requestId {}.", requestId);
+            logApi.atsProcessingUpdate(mediaRequestEntity);
+
+            notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         } catch (Exception e) {
             log.error(
@@ -253,18 +262,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 requestId,
                 e
             );
-            mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
+            var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
-                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
+                notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
                            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
                 );
             }
 
-            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
+            logApi.atsProcessingUpdate(updatedMediaRequest);
         }
-
-        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
     }
 
     List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
@@ -280,7 +287,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
-            Path downloadPath = saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
 
             downloadedMedias.put(mediaEntity, downloadPath);
         }
@@ -288,18 +295,35 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
-        UUID id = getMediaLocation(mediaEntity).orElseThrow(
-            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-            )));
+    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
 
-        log.debug("Downloading audio blob for {} from unstructured datastore", id);
-        BinaryData binaryData = getUnstructuredAudioBlob(id);
-        log.debug("Download audio blob complete for {}", id);
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
+            UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
 
-        Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());
-        log.debug("Saved audio blob {} to {}", id, downloadPath);
-        return downloadPath;
+            var mediaData = downloadResponseMetaData.getInputStream();
+            Path downloadPath = saveBlobDataToTempWorkspace(mediaData, id.toString());
+            return downloadPath;
+        } catch (FileNotDownloadedException e) {
+            throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
+        }
+    }
+
+    private boolean checkAllMediaExistsInTwoStorageLocations(List<MediaEntity> mediaEntities,
+                                                             ExternalLocationTypeEnum location1,
+                                                             ExternalLocationTypeEnum location2) {
+
+        return mediaEntities.stream()
+            .allMatch(mediaEntity -> existsMediaInTwoStorageLocation(mediaEntity, location1, location2));
+    }
+
+    private boolean existsMediaInTwoStorageLocation(MediaEntity mediaEntity,
+                                                                   ExternalLocationTypeEnum location1,
+                                                                   ExternalLocationTypeEnum location2) {
+
+        ExternalLocationTypeEntity firstLocationEntity = externalLocationTypeRepository.getReferenceById(location1.getId());
+        ExternalLocationTypeEntity secondLocationEntity = externalLocationTypeRepository.getReferenceById(location2.getId());
+
+        return externalObjectDirectoryRepository.existsMediaFileIn2StorageLocations(mediaEntity, firstLocationEntity, secondLocationEntity);
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
@@ -328,15 +352,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity.getEndTime()
         );
 
-        AudioFileInfo zipAudioFileInfo = new AudioFileInfo(
-            mediaRequestEntity.getStartTime().toInstant(),
-            mediaRequestEntity.getEndTime().toInstant(),
-            0,
-            outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity),
-            false
+        var downloadZip = outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
+        return Collections.singletonList(
+            AudioFileInfo.builder()
+                .startTime(mediaRequestEntity.getStartTime().toInstant())
+                .endTime(mediaRequestEntity.getEndTime().toInstant())
+                .channel(0)
+                .path(downloadZip)
+                .build()
         );
-
-        return Collections.singletonList(zipAudioFileInfo);
     }
 
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)

@@ -42,6 +42,12 @@ public class AuthorisationAspect {
     public void authorisationPointcut() {
     }
 
+    @Around("authorisationPointcut() && withinControllerPointcut() && args(@RequestPart file, @RequestPart body)")
+    public Object handleRequestPartsAuthorisationAdvice(ProceedingJoinPoint joinPoint, Object file, Object body)
+        throws Throwable {
+        return handleRequestBodyAuthorisationAdvice(joinPoint, body);
+    }
+
     @Around("authorisationPointcut() && withinControllerPointcut() && args(@RequestBody body)")
     public Object handleRequestBodyAuthorisationAdvice(ProceedingJoinPoint joinPoint, Object body)
         throws Throwable {

@@ -159,7 +159,13 @@ class OutboundFileZipGeneratorImplTest {
 
     private AudioFileInfo createDummyFileAndAudioFileInfo(int channel) {
         Path path = createDummyFile();
-        return new AudioFileInfo(SOME_START_TIME, SOME_END_TIME, channel, path, false);
+        return AudioFileInfo.builder()
+            .startTime(SOME_START_TIME)
+            .endTime(SOME_END_TIME)
+            .channel(channel)
+            .mediaFile(path.getFileName().toString())
+            .path(path)
+            .build();
     }
 
     private Path createDummyFile() {

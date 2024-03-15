@@ -2,21 +2,21 @@ package uk.gov.hmcts.darts.datamanagement.api;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
+import uk.gov.hmcts.darts.common.datamanagement.api.BlobContainerDownloadable;
+import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
-import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
-public interface DataManagementApi {
+public interface DataManagementApi extends BlobContainerDownloadable {
 
     BinaryData getBlobDataFromUnstructuredContainer(UUID blobId);
 
     BinaryData getBlobDataFromOutboundContainer(UUID blobId);
 
     BinaryData getBlobDataFromInboundContainer(UUID blobId);
-
-    UUID saveBlobDataToOutboundContainer(BinaryData binaryData);
 
     BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata);
 
@@ -31,5 +31,9 @@ public interface DataManagementApi {
     void deleteBlobDataFromUnstructuredContainer(UUID blobId) throws AzureDeleteBlobException;
 
     UUID saveBlobDataToInboundContainer(BinaryData binaryData);
+
+    UUID saveBlobDataToInboundContainer(InputStream inputStream);
+
+    UUID saveBlobDataToUnstructuredContainer(BinaryData binaryData);
 
 }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -52,6 +53,7 @@ public class AuthorisationStub {
     private MediaEntity mediaEntity;
     private TransformedMediaEntity transformedMediaEntity;
     private TranscriptionEntity transcriptionEntity;
+    private AnnotationEntity annotationEntity;
     private UserAccountEntity separateIntegrationUser;
 
     @Transactional
@@ -74,8 +76,6 @@ public class AuthorisationStub {
         bristolAppr.setCourthouseEntities(Set.of(courthouseEntity));
 
         testUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
-
-
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         createCourtCase();

@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.audit.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.DataBinder;
@@ -19,8 +21,11 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class AuditController implements AuditApi {
 
     private final AuditService auditService;
@@ -28,6 +33,7 @@ public class AuditController implements AuditApi {
     private final AuditSearchQueryValidator validator;
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<SearchResult>> search(OffsetDateTime fromDate, OffsetDateTime toDate, Integer caseId, Integer auditActivityId) {
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(caseId);

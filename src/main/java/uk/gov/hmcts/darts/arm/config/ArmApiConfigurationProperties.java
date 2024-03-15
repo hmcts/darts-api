@@ -22,6 +22,10 @@ public class ArmApiConfigurationProperties {
     @NotNull
     private URL url;
     @NotEmpty
+    private String cabinetId;
+    @NotEmpty
     private String updateMetadataPath;
+    @NotEmpty
+    private String downloadDataPath;
 
 }

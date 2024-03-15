@@ -7,14 +7,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -33,8 +38,10 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,12 +51,17 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,16 +80,19 @@ class AudioServiceImplTest {
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Captor
-    ArgumentCaptor<BinaryData> inboundBlobStorageArgumentCaptor;
+    ArgumentCaptor<InputStream> inboundBlobStorageArgumentCaptor;
+    @Mock
+    SentServerEventsHeartBeatEmitter heartBeatEmitter;
+    @Captor
+    ArgumentCaptor<Throwable> exceptionCaptor;
+    @Mock
+    SseEmitter emitter;
     @Mock
     private AudioTransformationService audioTransformationService;
-
     @Mock
     private AudioOperationService audioOperationService;
-
     @Mock
     private MediaRepository mediaRepository;
-
     @Mock
     private FileOperationService fileOperationService;
     @Mock
@@ -98,7 +113,10 @@ class AudioServiceImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private DataManagementApi dataManagementApi;
-
+    @Mock
+    AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
+    @Mock
+    private LogApi logApi;
     private AudioService audioService;
 
     @BeforeEach
@@ -120,7 +138,10 @@ class AudioServiceImplTest {
             userIdentity,
             fileContentChecksum,
             courtLogEventRepository,
-            audioConfigurationProperties
+            audioConfigurationProperties,
+            heartBeatEmitter,
+            audioBeingProcessedFromArchiveQuery,
+            logApi
         );
     }
 
@@ -135,9 +156,15 @@ class AudioServiceImplTest {
 
         Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity)).thenReturn(mediaPath);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"), false);
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(START_TIME.toInstant())
+            .endTime(END_TIME.toInstant())
+            .channel(1)
+            .mediaFile("testAudio.mp2")
+            .path(Path.of("test"))
+            .build();
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
 
         byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
@@ -148,6 +175,55 @@ class AudioServiceImplTest {
             byte[] bytes = inputStream.readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
+    }
+
+
+    @SuppressWarnings("PMD.CloseResource")
+    @Test
+    void previewFluxShouldReturnError() throws IOException, ExecutionException, InterruptedException {
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
+        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity)).thenReturn(mediaPath);
+
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(START_TIME.toInstant())
+            .endTime(END_TIME.toInstant())
+            .channel(1)
+            .path(Path.of("test"))
+            .build();
+        when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
+
+        BinaryData data = mock(BinaryData.class);
+        InputStream inputStream = mock(InputStream.class);
+        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
+        when(data.toStream()).thenReturn(inputStream);
+        when(inputStream.read(any())).thenThrow(new IOException());
+
+        audioService.startStreamingPreview(
+            mediaEntity.getId(),
+            "bytes=0-1024", emitter
+        );
+        CountDownLatch latch = new CountDownLatch(1);
+        Mockito.doAnswer(invocationOnMock -> {
+            Object result = invocationOnMock.callRealMethod();
+            latch.countDown();
+            return result;
+        }).when(emitter).completeWithError(exceptionCaptor.capture());
+
+        boolean result = latch.await(2, TimeUnit.SECONDS);
+        if (result) {
+            assertEquals("Failed to process audio request", exceptionCaptor.getValue().getMessage());
+        } else {
+            fail("Emitter did not complete with errors");
+        }
+
     }
 
     @Test
@@ -174,6 +250,7 @@ class AudioServiceImplTest {
 
     @Test
     void addAudio() throws IOException {
+        // Given
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
@@ -202,15 +279,15 @@ class AudioServiceImplTest {
         );
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
 
+        // When
         audioService.addAudio(audioFile, addAudioMetadataRequest);
 
+        // Then
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
-        var binaryData = inboundBlobStorageArgumentCaptor.getValue();
-        assertEquals(BinaryData.fromStream(audioFile.getInputStream()).toString(), binaryData.toString());
-
-
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
+        verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
+
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());
@@ -329,5 +406,52 @@ class AudioServiceImplTest {
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
+    }
+
+    @Test
+    void whenAudioMetadataListContainsMediaIdsReturnedByQuery_thenIsArchivedWillBeTrue() {
+        int mediaId = 1;
+        AudioMetadata audioMetadata = new AudioMetadata();
+        audioMetadata.setId(mediaId);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2, 3);
+        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
+
+        when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
+
+        audioService.setIsArchived(audioMetadataList, 1);
+
+        assertEquals(true, audioMetadataList.get(0).getIsArchived());
+    }
+
+    @Test
+    void whenAudioMetadataListOmitsMediaIdsReturnedByQuery_thenIsArchivedWillBeFalse() {
+        int mediaId = 1;
+        AudioMetadata audioMetadata = new AudioMetadata();
+        audioMetadata.setId(mediaId);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
+
+        audioService.setIsArchived(audioMetadataList, 1);
+
+        assertEquals(false, audioMetadataList.get(0).getIsArchived());
+    }
+
+    @Test
+    void whenAudioMetadataListContainsMediaIdsStoredInUnstructured_thenIsAvailableWillBeTrue() {
+        AudioMetadata audioMetadata1 = new AudioMetadata();
+        audioMetadata1.setId(1);
+        AudioMetadata audioMetadata2 = new AudioMetadata();
+        audioMetadata2.setId(2);
+        AudioMetadata audioMetadata3 = new AudioMetadata();
+        audioMetadata3.setId(3);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata1, audioMetadata2, audioMetadata3);
+
+        when(externalObjectDirectoryRepository.findMediaIdsByInMediaIdStatusAndType(anyList(), any(), any())).thenReturn(List.of(1, 3));
+
+        audioService.setIsAvailable(audioMetadataList);
+
+        assertEquals(true, audioMetadataList.get(0).getIsAvailable());
+        assertEquals(false, audioMetadataList.get(1).getIsAvailable());
+        assertEquals(true, audioMetadataList.get(2).getIsAvailable());
     }
 }

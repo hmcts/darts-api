@@ -35,12 +35,12 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
             .body("""
-                    {
-                      "name": "ACME",
-                      "display_name": "ACME Transcription Services",
-                      "description": "A temporary group created by functional test"
-                    }
-                      """)
+                      {
+                        "name": "ACME",
+                        "display_name": "ACME Transcription Services",
+                        "description": "A temporary group created by functional test"
+                      }
+                        """)
             .post()
             .thenReturn();
 
@@ -76,7 +76,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+                                                                                              new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+                                                                                              });
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
         List<SecurityGroupWithIdAndRole> staticGroups =
@@ -87,13 +88,13 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                 .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
                 .toList();
 
-        checkGroup(staticGroups.get(0), "ADMIN", true, 11, true, null);
+        checkGroup(staticGroups.get(0), "SUPER_ADMIN", true, 11, true, null);
         checkGroup(staticGroups.get(1), "hmcts_staff_1", false, 1, true, 1);
         checkGroup(staticGroups.get(2), "hmcts_staff_2", false, 2, true, 1);
         checkGroup(staticGroups.get(3), "hmcts_staff_3", false, 3, true, 1);
         checkGroup(staticGroups.get(4), "hmcts_staff_4", false, 4, true, 1);
-        checkGroup(staticGroups.get(5), "hmcts_staff_5", false, 5, true, 1);
-        checkGroup(staticGroups.get(6), "hmcts_staff_6", false, 6, true, 1);
+        checkGroup(staticGroups.get(5), "hmcts_staff_5", true, 5, true, 1);
+        checkGroup(staticGroups.get(6), "hmcts_staff_6", true, 6, true, 1);
         checkGroup(staticGroups.get(7), "Xhibit Group", true, 7, true, 1);
         checkGroup(staticGroups.get(8), "Cpp Group", true, 8, true, 1);
         checkGroup(staticGroups.get(9), "Dar Pc Group", true, 9, true, 1);

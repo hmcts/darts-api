@@ -268,13 +268,14 @@ class OutboundFileZipGeneratorHelperImplTest {
     void generateViqFileAddsViqHeaderWhenSourceFileIsTrimmed() {
 
         Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
-        AudioFileInfo audioFileInfo = new AudioFileInfo(
-            Instant.parse("2023-04-28T09:23:11Z"),
-            Instant.parse("2023-04-28T10:30:00Z"),
-            1,
-            sourceFile,
-            true
-        );
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(Instant.parse("2023-04-28T09:23:11Z"))
+            .endTime(Instant.parse("2023-04-28T10:30:00Z"))
+            .channel(1)
+            .mediaFile("testAudio.mp2")
+            .path(sourceFile)
+            .isTrimmed(true)
+            .build();
         Path outputFile = Path.of(tempDirectory.getAbsolutePath(), "0001.a00");
 
         Path viqFile = outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile);
@@ -295,13 +296,14 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         Path outputFile = mock(Path.class);
         when(outputFile.toFile()).thenThrow(RuntimeException.class);
-        AudioFileInfo audioFileInfo = new AudioFileInfo(
-            Instant.parse("2023-04-28T09:00:00Z"),
-            Instant.parse("2023-04-28T10:30:00Z"),
-            1,
-            Paths.get("src/test/resources/Tests/audio/testAudio.mp2"),
-            true
-        );
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(Instant.parse("2023-04-28T09:00:00Z"))
+            .endTime(Instant.parse("2023-04-28T10:30:00Z"))
+            .channel(1)
+            .mediaFile("testAudio.mp2")
+            .path(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))
+            .isTrimmed(true)
+            .build();
 
         assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile));
     }
@@ -311,13 +313,14 @@ class OutboundFileZipGeneratorHelperImplTest {
     void generateViqFileRetainsSourceFileWhenNotTrimmed() {
 
         Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
-        AudioFileInfo audioFileInfo = new AudioFileInfo(
-            Instant.parse("2023-04-28T09:00:00Z"),
-            Instant.parse("2023-04-28T10:30:00Z"),
-            1,
-            sourceFile,
-            false
-        );
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(Instant.parse("2023-04-28T09:00:00Z"))
+            .endTime(Instant.parse("2023-04-28T10:30:00Z"))
+            .channel(1)
+            .mediaFile("testAudio.mp2")
+            .path(sourceFile)
+            .isTrimmed(false)
+            .build();
         Path outputFile = Path.of(tempDirectory.getAbsolutePath(), "0001.a00");
 
         Path viqFile = outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile);

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
@@ -43,13 +42,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-@Transactional
 class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
@@ -143,8 +141,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub()
-            .createAndSaveAnnotationEntityWith(testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
 
         hearing.addAnnotation(annotation);
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -195,6 +192,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
             transcriptionEntity, fileName, fileType, fileSize, uploadedBy, checksum);
+        dartsDatabase.getTranscriptionDocumentRepository().save(transcriptionDocumentEntity);
 
         when(userIdentity.getUserAccount()).thenReturn(uploadedBy);
 
@@ -204,7 +202,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
             UUID.randomUUID()
         );
-        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredEod);
+        dartsDatabase.getExternalObjectDirectoryRepository().save(unstructuredEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
@@ -246,7 +244,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_RAW_DATA_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_RAW_DATA_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -295,7 +293,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_MANIFEST_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -344,7 +342,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(FAILURE_ARM_MANIFEST_FILE_FAILED),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_MANIFEST_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -362,7 +360,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(4, foundMedia.getTransferAttempts());
     }
 
@@ -389,7 +387,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
-        armEod.setStatus(dartsDatabase.getObjectRecordStatusRepository().getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId()));
+        armEod.setStatus(dartsDatabase.getObjectRecordStatusRepository().getReferenceById(
+            ARM_RAW_DATA_FAILED.getId()));
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
@@ -405,7 +404,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_RAW_DATA_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_RAW_DATA_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(2, foundMedia.getTransferAttempts());
     }
 
@@ -449,6 +448,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_MANIFEST_FILE_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_MANIFEST_FAILED.getId(), foundMedia.getStatus().getId());
     }
 }

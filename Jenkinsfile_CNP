@@ -8,7 +8,7 @@ def type = "java"
 def product = "darts"
 def component = "api"
 
-def branchesToSync = ['demo','perftest']
+def branchesToSync = ['demo','perftest','ithc']
 
 def secrets = [
   'darts-${env}': [
@@ -42,7 +42,8 @@ def secrets = [
     secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
     secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
     secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
-    secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT')
+    secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
+    secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT')
   ],
 ]
 
@@ -124,5 +125,17 @@ withPipeline(type, product, component) {
 
   afterFailure('test') {
     junit '**/test-results/integration/*.xml'
+  }
+
+  before('dbmigrate:demo') {
+    sh("./gradlew --no-daemon --init-script init.gradle assemble")
+  }
+
+  before('dbmigrate:test') {
+    sh("./gradlew --no-daemon --init-script init.gradle assemble")
+  }
+
+  before('dbmigrate:ithc') {
+    sh("./gradlew --no-daemon --init-script init.gradle assemble")
   }
 }

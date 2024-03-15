@@ -472,3 +472,24 @@ components:
         - "ADD_DAILYLIST_102"
         - "ADD_DAILYLIST_103"
       x-enum-varnames: [DAILYLIST_COURT_HOUSE_NOT_FOUND, DAILYLIST_DOCUMENT_CANT_BE_PARSED, DAILYLIST_PROCESSOR_NOT_FOUND]
+
+    DailyListErrorCode:
+     type: string
+     enum:
+      - "DAILYLIST_100"
+      - "DAILYLIST_101"
+      - "DAILYLIST_102"
+      - "DAILYLIST_103"
+      - "DAILYLIST_104"
+     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR ]
+
+    DailyListTitleErrors:
+     type: string
+     enum:
+      - "Failed to process daily list"
+      - "Either xml_document or json_document or both needs to be provided."
+      - "If xml_document is being provided without json_document, then courthouse, hearing_date, published_ts and unique_id also need to be provided."
+      - "The provided Daily List Id could not be found."
+      - "An Internal Server Error has occurred."
+     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR ]
+

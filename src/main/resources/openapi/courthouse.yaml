@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:4550/
 paths:
-  /courthouses:
+  /admin/courthouses:
     post:
       tags:
         - Courthouses
@@ -20,13 +20,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtendedCourthouse'
+                $ref: '#/components/schemas/ExtendedCourthousePost'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '409':
-            description: Resource already exists.
+          description: Resource already exists.
         '500':
           description: Internal Server Error
+  /courthouses:
     get:
       tags:
         - Courthouses
@@ -40,8 +41,21 @@ paths:
                 $ref: '#/components/schemas/CourtList'
         '500':
           description: Internal Server Error
-
-  /courthouses/{courthouse_id}:
+  /admin/regions:
+    get:
+      tags:
+        - Courthouses
+      summary: Gets all regions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRegionList'
+        '500':
+          description: Internal Server Error
+  /admin/courthouses/{courthouse_id}:
     get:
       tags:
         - Courthouses
@@ -58,17 +72,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtendedCourthouse'
+                $ref: '#/components/schemas/AdminCourthouse'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
         '404':
           description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
-    put:
+    patch:
+      operationId: updateCourthouse
+      summary: Update an existing courthouse record.
       tags:
         - Courthouses
-      summary: Amends a courthouse record with supplied details.
       parameters:
         - in: path
           name: courthouse_id
@@ -76,18 +108,16 @@ paths:
             type: integer
           required: true
       requestBody:
-        $ref: '#/components/requestBodies/CourthousePost'
+        $ref: '#/components/requestBodies/CourthousePatch'
       responses:
-        '204':
-          description: No Content
-        '400':
-          description: A required parameter is missing or an invalid datatype or value was provided for property.
-        '409':
-          description: Returned in the case where courthouse name or code amended is not unique.
-        '404':
-            description: Resource with the provided id does not exist.
-        '500':
-          description: Internal Server Error
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCourthouse'
+        # *** error responses ***
+  /courthouses/{courthouse_id}:
     delete:
       tags:
         - Courthouses
@@ -113,7 +143,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Courthouse'
+            $ref: '#/components/schemas/CourthousePost'
+    CourthousePatch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CourthousePatch'
   schemas:
     Courthouse:
       type: object
@@ -127,6 +163,71 @@ components:
           type: integer
         display_name:
           type: string
+        region_id:
+          type: integer
+          example: 0
+    CourthousePost:
+      type: object
+      required:
+        - courthouse_name
+        - display_name
+      properties:
+        courthouse_name:
+          type: string
+        display_name:
+          type: string
+        region_id:
+          type: integer
+          example: 0
+        security_group_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
+    CourthousePatch:
+      type: object
+      properties:
+        courthouse_name:
+          type: string
+        display_name:
+          type: string
+        region_id:
+          type: integer
+          example: 0
+        security_group_ids:
+          type: array
+          items:
+            type: integer
+          example: [ 1, 2 ]
+    AdminRegion:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+    AdminRegionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/AdminRegion'
+    AdminCourthouse:
+      allOf:
+        - $ref: '#/components/schemas/ExtendedCourthouse'
+        - type: object
+          properties:
+            region_id:
+              type: integer
+              example: 0
+            security_group_ids:
+              type: array
+              items:
+                type: integer
+              example: [1, 2]
+            has_data:
+              type: boolean
+              description: Indicates whether the courthouse has related cases or hearings
+
     ExtendedCourthouse:
       allOf:
         - $ref: '#/components/schemas/Courthouse'
@@ -137,10 +238,76 @@ components:
             created_date_time:
               type: string
               format: date-time
+              example: "2024-02-09T14:26:31.118Z"
             last_modified_date_time:
               type: string
               format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+    ExtendedCourthousePost:
+      allOf:
+        - $ref: '#/components/schemas/CourthousePost'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+            last_modified_date_time:
+              type: string
+              format: date-time
+              example: "2024-02-09T14:26:31.118Z"
+
     CourtList:
       type: array
       items:
         $ref: '#/components/schemas/ExtendedCourthouse'
+
+    CourthouseErrorCode:
+      type: string
+      enum:
+        - "COURTHOUSE_100"
+        - "COURTHOUSE_101"
+        - "COURTHOUSE_102"
+        - "COURTHOUSE_103"
+        - "COURTHOUSE_104"
+        - "COURTHOUSE_105"
+        - "COURTHOUSE_106"
+        - "COURTHOUSE_107"
+      x-enum-varnames: [
+        COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_NOT_FOUND,
+        COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED,
+        REGION_ID_DOES_NOT_EXIST,
+        SECURITY_GROUP_ID_DOES_NOT_EXIST,
+        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
+
+    CourthouseTitleErrors:
+      type: string
+      enum:
+        - "Provided courthouse name already exists."
+        - "Provided courthouse code already exists."
+        - "Courthouse with provided ID does not exist."
+        - "Provided courthouse display name already exists."
+        - "Only TRANSCRIBER roles may be assigned"
+        - "Region ID does not exist"
+        - "Security group ID does not exist"
+        - "The courthouse name cannot be change because it has existing cases."
+      x-enum-varnames: [
+        COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS,
+        COURTHOUSE_NOT_FOUND,
+        COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS,
+        ONLY_TRANSCRIBER_ROLES_MAY_BE_ASSIGNED,
+        REGION_ID_DOES_NOT_EXIST,
+        SECURITY_GROUP_ID_DOES_NOT_EXIST,
+        COURTHOUSE_NAME_CANNOT_BE_CHANGED_CASES_EXISTING]
+
+    UserAuthorisation403_109ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_109"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_ENDPOINT ]

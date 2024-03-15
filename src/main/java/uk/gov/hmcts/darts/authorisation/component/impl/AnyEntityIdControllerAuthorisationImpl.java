@@ -32,6 +32,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
     private final MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation;
     private final TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation;
     private final TransformedMediaIdControllerAuthorisationImpl transformedMediaIdControllerAuthorisation;
+    private final AnnotationIdControllerAuthorisationImpl annotationIdControllerAuthorisation;
 
     @Override
     public ContextIdEnum getContextId() {
@@ -58,12 +59,16 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         Optional<String> transformedMediaIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
         transformedMediaIdControllerAuthorisation.checkAuthorisationByTransformedMediaId(transformedMediaIdParamOptional, roles);
 
+        Optional<String> annotationIdParamOptional = getEntityParamOptional(request, annotationIdControllerAuthorisation.getEntityIdParam());
+        annotationIdControllerAuthorisation.checkAuthorisationByAnnotationId(annotationIdParamOptional, roles);
+
         if (hearingIdParamOptional.isEmpty()
             && caseIdParamOptional.isEmpty()
             && mediaIdParamOptional.isEmpty()
             && mediaRequestIdParamOptional.isEmpty()
             && transcriptionIdParamOptional.isEmpty()
             && transformedMediaIdParamOptional.isEmpty()
+            && annotationIdParamOptional.isEmpty()
         ) {
             entitiesNotFound("parameters");
         }
@@ -104,6 +109,11 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
 
         if (checkEntityExists(jsonNode, transformedMediaIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByTransformedMediaId(jsonNode.path(transformedMediaIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (checkEntityExists(jsonNode, annotationIdControllerAuthorisation.getEntityIdParam())) {
+            authorisation.authoriseByAnnotationId(jsonNode.path(annotationIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
 
