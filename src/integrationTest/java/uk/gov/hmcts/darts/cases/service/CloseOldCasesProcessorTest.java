@@ -21,17 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class CloseOldCasesProcessorTest extends IntegrationBase {
-
-
-
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
 
     @Test
     void givenClosedEventsUseDateAsClosedDate() {
-        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7));
+        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7).plusMonths(3));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
+
         EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);
         eventEntity1.setCreatedDateTime(OffsetDateTime.now().minusYears(7).plusDays(10));
         EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 214);
@@ -50,11 +48,12 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
-        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES).withHour(0).withMinute(0), updatedCourtCaseEntity.getCaseClosedTimestamp());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES),
+                     updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
     }
 
     @Test
-    void givenEventsUseDateAsClosedDate() {
+    void givenEventsUseLatestDateAsClosedDate() {
         HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
@@ -62,6 +61,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         eventEntity1.setCreatedDateTime(OffsetDateTime.now().minusYears(7).minusDays(10));
         EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 3);
         eventEntity2.setCreatedDateTime(closeDate);
+        eventEntity2.getEventType().setEventName("Case closed");
         EventEntity eventEntity3 = dartsDatabase.getEventStub().createEvent(hearing, 23);
         eventEntity3.setCreatedDateTime(OffsetDateTime.now().minusYears(7).minusDays(5));
         dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3);
@@ -76,7 +76,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
-        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES).withHour(0).withMinute(0), updatedCourtCaseEntity.getCaseClosedTimestamp());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
     }
 
     @Test

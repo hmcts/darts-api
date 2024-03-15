@@ -36,28 +36,32 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
     @Transactional
     @Override
     public void closeCases() {
-        //need a query to get everything over 6 years old not set to closed and no retention
-        //what does no retention mean, entry in which table?
-        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCaseNumbersToClose(OffsetDateTime.now().minusYears(6));
-        //need a method to get the case closed date, based on criteria
+        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(6));
+
         courtCaseEntityList.forEach(this::closeCase);
     }
 
     private void closeCase(CourtCaseEntity courtCase) {
-        List<EventEntity> events = eventRepository.findAllByCaseNumberOrderByCreatedDate(courtCase.getCaseNumber());
-        if (events != null && events.size() > 1) {
-            //find latest closed event, but what are the closed events?
+        List<EventEntity> eventList = new ArrayList<>();
+        for (HearingEntity hearingEntity: courtCase.getHearings()) {
+            eventList.addAll(hearingEntity.getEventList());
+        }
+        if (eventList.size() > 1) {
+            eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
+            //find latest closed event
             Optional<EventEntity> closedEvent =
-                events.stream().filter(eventEntity -> eventEntity.getEventType().getEventName().equals("Case closed")).findFirst();
-            closedEvent.ifPresent(eventEntity -> closeCaseInDb(courtCase, eventEntity.getCreatedDateTime()));
+                eventList.stream().filter(eventEntity -> eventEntity.getEventType().getEventName().equals("Case closed")).findFirst();
 
-            //look for the last event and use that date
-            closeCaseInDb(courtCase, events.get(0).getCreatedDateTime());
-        } else if (courtCase.getHearings() != null && !courtCase.getHearings().isEmpty()) {
+            if (closedEvent.isPresent()) {
+                closeCaseInDb(courtCase, closedEvent.get().getCreatedDateTime());
+            } else {
+                //look for the last event and use that date
+                closeCaseInDb(courtCase, eventList.get(0).getCreatedDateTime());
+            }
+        } else if (!courtCase.getHearings().isEmpty()) {
             //look for the last audio and use its recorded date
             List<MediaEntity> mediaList = new ArrayList<>();
             for (HearingEntity hearingEntity: courtCase.getHearings()) {
-                //check for null
                 mediaList.addAll(hearingEntity.getMediaList());
             }
             if (!mediaList.isEmpty()) {
@@ -65,7 +69,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 closeCaseInDb(courtCase, mediaList.get(0).getCreatedDateTime());
             } else {
                 //look for the last hearing date and use that
-                if (courtCase.getHearings() != null && !courtCase.getHearings().isEmpty()) {
+                if (!courtCase.getHearings().isEmpty()) {
                     courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
                     HearingEntity lastHearingEntity = courtCase.getHearings().get(0);
                     closeCaseInDb(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC));
