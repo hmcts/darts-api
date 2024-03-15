@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 
 import java.util.concurrent.ExecutionException;
 
-//@AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
 @Slf4j
 @ActiveProfiles("intAtsTest")
@@ -22,7 +21,6 @@ class SystemCommandExecutorIntTest {
     @Test
     void executeWithFfmpegHelpCommand() throws ExecutionException, InterruptedException {
 
-        //systemCommandExecutor = new SystemCommandExecutorImpl();
         String command = "ffmpeg -h";
         CommandLine commandLine = CommandLine.parse(command);
         systemCommandExecutor.execute(commandLine);
