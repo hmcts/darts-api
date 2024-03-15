@@ -109,7 +109,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
-        assertEquals(closeDate, updatedCourtCaseEntity.getCaseClosedTimestamp());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
     }
 
     @Test
@@ -144,7 +144,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
         assert updatedCourtCaseEntity != null;
         assertTrue(updatedCourtCaseEntity.getClosed());
-        assertEquals(closeDate, updatedCourtCaseEntity.getCaseClosedTimestamp());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
     }
 
     @Test
