@@ -159,6 +159,20 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
+            SELECT COUNT(eod) > 0
+            FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+            WHERE eod.media = eod2.media
+            AND eod.externalLocationType = :location1
+            AND eod2.externalLocationType = :location2
+            AND eod.media = :media
+            """
+    )
+    boolean existsMediaFileIn2StorageLocations(MediaEntity media,
+                                                  ExternalLocationTypeEntity location1,
+                                                  ExternalLocationTypeEntity location2);
+
+    @Query(
+        """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
             WHERE eod.media is not null
             AND eod.media = eod2.media
@@ -223,10 +237,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod.id FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status 
+            WHERE eod.status = :status
             AND eod.externalLocationType = :type
-            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2 
-            where (eod2.status = :notExistsStatus or eod2.transferAttempts >= :maxTransferAttempts) 
+            AND NOT EXISTS (select 1 from ExternalObjectDirectoryEntity eod2
+            where (eod2.status = :notExistsStatus or eod2.transferAttempts >= :maxTransferAttempts)
             AND eod2.externalLocationType = :notExistsType
             and (eod.media = eod2.media
               OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity

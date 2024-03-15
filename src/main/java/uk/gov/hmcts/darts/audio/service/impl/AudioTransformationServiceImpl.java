@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -61,6 +62,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -201,6 +203,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 mediaRequestEntity
             );
 
+            boolean hasAllMediaBeenCopiedFromInboundStorage = checkAllMediaExistsInTwoStorageLocations(filteredMediaEntities,
+                                                                                          ExternalLocationTypeEnum.INBOUND,
+                                                                                          ExternalLocationTypeEnum.UNSTRUCTURED);
+            if (!hasAllMediaBeenCopiedFromInboundStorage) {
+                mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
+                return;
+            }
+
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
             List<AudioFileInfo> generatedAudioFiles;
@@ -296,6 +306,24 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         } catch (FileNotDownloadedException e) {
             throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
         }
+    }
+
+    private boolean checkAllMediaExistsInTwoStorageLocations(List<MediaEntity> mediaEntities,
+                                                             ExternalLocationTypeEnum location1,
+                                                             ExternalLocationTypeEnum location2) {
+
+        return mediaEntities.stream()
+            .allMatch(mediaEntity -> existsMediaInTwoStorageLocation(mediaEntity, location1, location2));
+    }
+
+    private boolean existsMediaInTwoStorageLocation(MediaEntity mediaEntity,
+                                                                   ExternalLocationTypeEnum location1,
+                                                                   ExternalLocationTypeEnum location2) {
+
+        ExternalLocationTypeEntity firstLocationEntity = externalLocationTypeRepository.getReferenceById(location1.getId());
+        ExternalLocationTypeEntity secondLocationEntity = externalLocationTypeRepository.getReferenceById(location2.getId());
+
+        return externalObjectDirectoryRepository.existsMediaFileIn2StorageLocations(mediaEntity, firstLocationEntity, secondLocationEntity);
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
