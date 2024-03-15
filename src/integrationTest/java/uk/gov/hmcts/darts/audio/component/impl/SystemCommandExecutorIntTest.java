@@ -4,20 +4,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 
 import java.util.concurrent.ExecutionException;
 
+//@AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
+@SpringBootTest
 @Slf4j
-@Profile({"intAtsTest"})
-class SystemCommandExecutorIntTest extends IntegrationBase {
+@ActiveProfiles("intAtsTest")
+class SystemCommandExecutorIntTest {
 
     @Autowired
-    private SystemCommandExecutorImpl systemCommandExecutor;
+    private SystemCommandExecutor systemCommandExecutor;
 
     @Test
     void executeWithFfmpegHelpCommand() throws ExecutionException, InterruptedException {
+
+        //systemCommandExecutor = new SystemCommandExecutorImpl();
         String command = "ffmpeg -h";
         CommandLine commandLine = CommandLine.parse(command);
         systemCommandExecutor.execute(commandLine);

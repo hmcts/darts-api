@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 @AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db", "in-memory-caching", "intAtsTest"})
+@ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
 
     @Autowired

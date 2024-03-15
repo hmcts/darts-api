@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
-@Profile({"intTest", "!intAtsTest"})
+@Profile("intTest")
 public class SystemCommandExecutorStubImpl implements SystemCommandExecutor {
 
     public static final int DUMMY_FILE_SIZE_BYTES = 10_240;
