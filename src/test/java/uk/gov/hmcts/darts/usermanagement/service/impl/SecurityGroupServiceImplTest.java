@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
+import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,8 @@ class SecurityGroupServiceImplTest {
     @Mock
     SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
     @Mock
+    SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
+    @Mock
     Validator<SecurityGroupModel> securityGroupCreationValidation;
 
     @BeforeEach
@@ -44,6 +47,7 @@ class SecurityGroupServiceImplTest {
             securityRoleRepository,
             securityGroupMapper,
             securityGroupCourthouseMapper,
+            securityGroupWithIdAndRoleAndUsersMapper,
             securityGroupCreationValidation
         );
     }
@@ -52,9 +56,9 @@ class SecurityGroupServiceImplTest {
     void testGetAllSecurityGroups() {
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
@@ -70,9 +74,9 @@ class SecurityGroupServiceImplTest {
         List<Integer> listOfRoleIds = List.of(10);
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
@@ -85,12 +89,12 @@ class SecurityGroupServiceImplTest {
     @Test
     void testGetSecurityGroupsFilteredByMultipleRoleIds() {
 
-        List<Integer> listOfRoleIds = List.of(10,11);
+        List<Integer> listOfRoleIds = List.of(10, 11);
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
@@ -106,9 +110,9 @@ class SecurityGroupServiceImplTest {
         List<Integer> listOfRoleIds = List.of(30);
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
@@ -124,9 +128,9 @@ class SecurityGroupServiceImplTest {
         Integer courthouseId = 20;
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
@@ -142,9 +146,9 @@ class SecurityGroupServiceImplTest {
         Integer courthouseId = 50;
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
@@ -158,12 +162,12 @@ class SecurityGroupServiceImplTest {
     void testGetSecurityGroupsFilteredByRoleIdsAndCourthouseId() {
 
         Integer courthouseId = 20;
-        List<Integer> listOfRoleIds = List.of(10,11);
+        List<Integer> listOfRoleIds = List.of(10, 11);
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
