@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.audiorequests.http.api.AudioRequestsApi;
 import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -99,6 +100,26 @@ public class AudioRequestsController implements AudioRequestsApi {
         mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
         logApi.atsProcessingUpdate(audioRequest);
         return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
+        globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
+    public ResponseEntity<AddAudioResponse> addAudioRequestPlayback(AudioRequestDetails audioRequestDetails) {
+        audioRequestDetails.setRequestType(AudioRequestType.PLAYBACK);
+        return addAudioRequest(audioRequestDetails);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
+        securityRoles = {TRANSCRIBER},
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    public ResponseEntity<AddAudioResponse> addAudioRequestDownload(AudioRequestDetails audioRequestDetails) {
+        audioRequestDetails.setRequestType(AudioRequestType.DOWNLOAD);
+        return addAudioRequest(audioRequestDetails);
     }
 
     @SneakyThrows
