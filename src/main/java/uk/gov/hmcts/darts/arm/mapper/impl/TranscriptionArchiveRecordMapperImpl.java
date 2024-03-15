@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.mapper.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
@@ -139,7 +140,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(transcriptionDocument.getFileType());
+        uploadNewFileRecordMetadata.setFileTag(FilenameUtils.getExtension(transcriptionDocument.getFileName()));
         return uploadNewFileRecordMetadata;
     }
 

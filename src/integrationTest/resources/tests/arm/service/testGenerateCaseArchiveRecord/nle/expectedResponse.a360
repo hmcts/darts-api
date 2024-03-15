@@ -7,7 +7,7 @@
     "region": "GBR",
     "recordDate": "2023-09-23T13:00:00Z",
     "event_date": "<UPLOADED_DATE_TIME>",
-    "title": "test_filename",
+    "title": "test_case_document.docx",
     "client_identifier": "<EODID>",
     "contributor": "Bristol",
     "bf_001": "Case",
@@ -26,6 +26,6 @@
   "file_metadata": {
     "publisher": "DARTS",
     "dz_file_name": "<PREFIX>",
-    "file_tag": "application/msword"
+    "file_tag": "docx"
   }
 }
