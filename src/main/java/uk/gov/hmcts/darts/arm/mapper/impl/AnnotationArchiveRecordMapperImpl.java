@@ -307,17 +307,8 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(getFileTag(annotationDocument.getFileName()));
+        uploadNewFileRecordMetadata.setFileTag(FilenameUtils.getExtension(annotationDocument.getFileName()));
         return uploadNewFileRecordMetadata;
     }
 
-    private String getFileTag(String filename) {
-        String fileTag = null;
-        try {
-            fileTag = FilenameUtils.getExtension(filename);
-        } catch (IllegalArgumentException e) {
-            log.error("Unable to obtain annotation file extension from filename {}", filename);
-        }
-        return fileTag;
-    }
 }

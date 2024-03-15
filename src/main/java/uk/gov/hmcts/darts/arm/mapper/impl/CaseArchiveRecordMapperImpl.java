@@ -123,18 +123,8 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(getFileTag(caseDocument.getFileName()));
+        uploadNewFileRecordMetadata.setFileTag(FilenameUtils.getExtension(caseDocument.getFileName()));
         return uploadNewFileRecordMetadata;
-    }
-
-    private String getFileTag(String filename) {
-        String fileTag = null;
-        try {
-            fileTag = FilenameUtils.getExtension(filename);
-        } catch (IllegalArgumentException e) {
-            log.error("Unable to obtain case file extension from filename {}", filename);
-        }
-        return fileTag;
     }
 
     private CaseCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {

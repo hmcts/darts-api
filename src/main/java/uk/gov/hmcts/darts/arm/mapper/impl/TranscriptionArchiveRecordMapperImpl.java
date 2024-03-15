@@ -140,18 +140,8 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
         UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
         uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
         uploadNewFileRecordMetadata.setDzFilename(rawFilename);
-        uploadNewFileRecordMetadata.setFileTag(getFileTag(transcriptionDocument.getFileName()));
+        uploadNewFileRecordMetadata.setFileTag(FilenameUtils.getExtension(transcriptionDocument.getFileName()));
         return uploadNewFileRecordMetadata;
-    }
-
-    private String getFileTag(String filename) {
-        String fileTag = null;
-        try {
-            fileTag = FilenameUtils.getExtension(filename);
-        } catch (IllegalArgumentException e) {
-            log.error("Unable to obtain transcription file extension from filename {}", filename);
-        }
-        return fileTag;
     }
 
     private TranscriptionCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory) {

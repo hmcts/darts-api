@@ -7,7 +7,7 @@
     "region": "GBR",
     "recordDate": "2023-01-01T10:00:00Z",
     "event_date": "2023-01-01T09:00:00Z",
-    "title": "transcription",
+    "title": "transcription.",
     "client_identifier": "1234",
     "contributor": "Swansea & Room1"
   }
@@ -17,7 +17,6 @@
   "relation_id": "1234",
   "file_metadata": {
     "publisher": "DARTS",
-    "dz_file_name": "1234_1_1",
-    "file_tag": "docx"
+    "dz_file_name": "1234_1_1"
   }
 }

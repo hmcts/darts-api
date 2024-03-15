@@ -636,7 +636,7 @@ class ArchiveRecordServiceImplTest {
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
-        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription");
+        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
@@ -1080,7 +1080,7 @@ class ArchiveRecordServiceImplTest {
 
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(caseDocumentEntity.getFileName()).thenReturn("annotation.");
+        when(caseDocumentEntity.getFileName()).thenReturn("case.");
         when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
