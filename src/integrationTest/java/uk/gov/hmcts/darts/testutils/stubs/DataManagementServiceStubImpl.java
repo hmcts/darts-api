@@ -74,6 +74,13 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
+    public void copyBlobData(String sourceContainer, String destination, UUID sourceBlobId) {
+        logStubUsageWarning();
+
+        log.warn("Dummy method in place for blob copy from two storage locations");
+    }
+
+    @Override
     public void addMetaData(BlobClient client, Map<String, String> metadata) {
 
     }
