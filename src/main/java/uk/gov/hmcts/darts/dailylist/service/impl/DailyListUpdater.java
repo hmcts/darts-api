@@ -58,7 +58,6 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
-        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
 
         for (CourtList courtList : dailyList.getCourtLists()) {
 
