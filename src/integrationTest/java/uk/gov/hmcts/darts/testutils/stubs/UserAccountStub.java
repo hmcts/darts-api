@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -209,6 +211,19 @@ public class UserAccountStub {
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
         var testUser = getIntegrationTestUserAccountEntity("Judge" + identifier);
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createRcjAppealUser(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = SecurityGroupTestData
+            .buildGroupForRoleAndCourthouse(SecurityRoleEnum.RCJ_APPEALS, courthouseEntity);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
