@@ -734,5 +734,28 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
             automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
     }
 
+    @Test
+    void givenConfiguredTaskCancelCloseOldCasesAutomatedTask() {
+        AutomatedTask automatedTask =
+            new CloseOldCasesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                closeOldCasesProcessor
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+    }
 
 }
