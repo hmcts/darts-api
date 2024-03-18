@@ -14,8 +14,6 @@ import java.util.List;
 
 public interface CourthouseService {
 
-    void deleteCourthouseById(Integer id);
-
     CourthouseEntity getCourtHouseById(Integer id);
 
     List<CourthouseEntity> getAllCourthouses();

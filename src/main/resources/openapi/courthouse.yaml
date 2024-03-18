@@ -117,25 +117,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdminCourthouse'
         # *** error responses ***
-  /courthouses/{courthouse_id}:
-    delete:
-      tags:
-        - Courthouses
-      summary: Deletes the courthouse entry with the supplied id.
-      parameters:
-        - in: path
-          name: courthouse_id
-          schema:
-            type: integer
-          required: true
-      responses:
-        '204':
-          description: OK
-        '400':
-          description: A required parameter is missing or an invalid datatype or value was provided for property.
-        '500':
-          description: Internal Server Error
-
 components:
   requestBodies:
     CourthousePost:
