@@ -12,7 +12,7 @@ plugins {
   id 'idea'
   id 'io.spring.dependency-management' version '1.1.4'
   id 'org.springframework.boot' version '3.2.2'
-  id 'org.owasp.dependencycheck' version '9.0.9'
+  id 'org.owasp.dependencycheck' version '9.0.10'
   id 'com.github.ben-manes.versions' version '0.51.0'
   id 'org.sonarqube' version '4.4.1.3373'
   id "io.freefair.lombok" version "8.6"
@@ -413,7 +413,7 @@ dependencies {
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.4'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
-  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.0'
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.1'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
