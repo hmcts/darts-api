@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 import uk.gov.hmcts.darts.common.util.CommandRunner;
@@ -19,6 +20,7 @@ public class SystemCommandExecutorImpl implements SystemCommandExecutor {
     @Override
     public Boolean execute(CommandLine command) throws ExecutionException, InterruptedException {
         try {
+            log.debug("Command line arguments {}", StringUtils.join(command.getArguments(), " "));
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<String> future = executor.submit(new CommandRunner(command));
             future.get();
