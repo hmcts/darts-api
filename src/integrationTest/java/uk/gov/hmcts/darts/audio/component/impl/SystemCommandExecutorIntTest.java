@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -27,6 +26,5 @@ class SystemCommandExecutorIntTest extends IntegrationBase {
         CommandLine commandLine = CommandLine.parse(command);
         boolean result = systemCommandExecutor.execute(commandLine);
         assertTrue(result);
-        assertFalse(true, "Force failure to see what is going on");
     }
 }
