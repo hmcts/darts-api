@@ -20,7 +20,7 @@ public class SystemCommandExecutorImpl implements SystemCommandExecutor {
     @Override
     public Boolean execute(CommandLine command) throws ExecutionException, InterruptedException {
         try {
-            log.debug("Command line arguments {}", StringUtils.join(command.getArguments(), " "));
+            log.debug("Command line {} {}", command.getExecutable(), StringUtils.join(command.getArguments(), " "));
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<String> future = executor.submit(new CommandRunner(command));
             future.get();
