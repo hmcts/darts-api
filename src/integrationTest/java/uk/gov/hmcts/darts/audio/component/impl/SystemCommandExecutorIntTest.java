@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SpringBootTest
 @Slf4j
 class SystemCommandExecutorIntTest extends IntegrationBase {
@@ -22,6 +24,7 @@ class SystemCommandExecutorIntTest extends IntegrationBase {
 
         String command = "ffmpeg -h";
         CommandLine commandLine = CommandLine.parse(command);
-        systemCommandExecutor.execute(commandLine);
+        boolean result = systemCommandExecutor.execute(commandLine);
+        assertTrue(result);
     }
 }
