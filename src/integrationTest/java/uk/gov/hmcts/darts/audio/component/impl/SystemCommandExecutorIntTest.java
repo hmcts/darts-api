@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.concurrent.ExecutionException;
 
 @SpringBootTest
 @Slf4j
-class SystemCommandExecutorIntTest {
+class SystemCommandExecutorIntTest extends IntegrationBase {
 
     @Autowired
     private SystemCommandExecutor systemCommandExecutor;
