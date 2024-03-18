@@ -136,6 +136,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
         addApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
+        addCloseOldCasesTaskRegistrar(taskRegistrar);
     }
 
     @Override

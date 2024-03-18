@@ -69,11 +69,9 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 closeCaseInDb(courtCase, mediaList.get(0).getCreatedDateTime());
             } else {
                 //look for the last hearing date and use that
-                if (!courtCase.getHearings().isEmpty()) {
-                    courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
-                    HearingEntity lastHearingEntity = courtCase.getHearings().get(0);
-                    closeCaseInDb(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC));
-                }
+                courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
+                HearingEntity lastHearingEntity = courtCase.getHearings().get(0);
+                closeCaseInDb(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC));
             }
         } else {
             //set to created date
@@ -87,6 +85,5 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         courtCase.setClosed(TRUE);
         courtCase.setCaseClosedTimestamp(caseClosedDate);
         caseRepository.save(courtCase);
-        // ?? system user ?? courtCase.setLastModifiedBy(authorisationApi.getCurrentUser());
     }
 }
