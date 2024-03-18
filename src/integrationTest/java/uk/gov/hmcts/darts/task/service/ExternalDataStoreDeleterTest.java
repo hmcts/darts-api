@@ -114,31 +114,25 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
 
         externalInboundDataStoreDeleter = new ExternalInboundDataStoreDeleter(
-            dartsDatabase.getObjectRecordStatusRepository(),
             dartsDatabase.getExternalObjectDirectoryRepository(),
             inboundExternalObjectDirectoryDeletedFinder,
             inboundDataStoreDeleter,
-            systemUserHelper,
             transformedMediaRepository
-
         );
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
-            dartsDatabase.getObjectRecordStatusRepository(),
             dartsDatabase.getExternalObjectDirectoryRepository(),
             unstructuredExternalObjectDirectoryDeletedFinder,
             unstructuredDataStoreDeleter,
-            systemUserHelper,
             transformedMediaRepository
         );
 
-        externalOutboundDataStoreDeleter =
-            new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectRecordStatusRepository(),
-                                                 dartsDatabase.getTransientObjectDirectoryRepository(),
-                                                 outboundExternalObjectDirectoryDeletedFinder,
-                                                 outboundDataStoreDeleter, systemUserHelper,
-                                                 transformedMediaRepository
-            );
+        externalOutboundDataStoreDeleter = new ExternalOutboundDataStoreDeleter(
+            dartsDatabase.getTransientObjectDirectoryRepository(),
+            outboundExternalObjectDirectoryDeletedFinder,
+            outboundDataStoreDeleter,
+            transformedMediaRepository
+        );
 
     }
 

@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -29,7 +30,6 @@ import uk.gov.hmcts.darts.dailylist.model.Sitting;
 
 import java.time.DateTimeException;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Locale;
@@ -49,11 +49,13 @@ class DailyListUpdater {
     private final HearingRepository hearingRepository;
     private final ObjectMapper objectMapper;
     private final SystemUserHelper systemUserHelper;
+    private final CurrentTimeHelper currentTimeHelper;
 
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Transactional
     public void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException, IllegalArgumentException {
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
 
@@ -70,22 +72,25 @@ class DailyListUpdater {
                     for (Hearing dailyListHearing : hearings) {
 
                         String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
+                        if (caseNumber == null) {
+                            statusType = JobStatusType.PARTIALLY_PROCESSED;
+                            continue;
+                        }
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                             courtHouseName, sitting.getCourtRoomNumber(),
                             caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
-                        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
                         hearing.setCreatedBy(dailyListSystemUser);
                         hearing.setLastModifiedBy(dailyListSystemUser);
                         // set this so it's updated when no other changes are present
-                        hearing.setLastModifiedDateTime(OffsetDateTime.now());
+                        hearing.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
                         courtCase.setCreatedBy(dailyListSystemUser);
                         courtCase.setLastModifiedBy(dailyListSystemUser);
                         // set this so it's updated when no other changes are present
-                        courtCase.setLastModifiedDateTime(OffsetDateTime.now());
+                        courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
                         updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
@@ -101,6 +106,7 @@ class DailyListUpdater {
                               + dailyListEntity.getId() + " has not been processed");
             }
         }
+        dailyListEntity.setLastModifiedBy(dailyListSystemUser);
         dailyListEntity.setStatus(statusType);
     }
 
@@ -173,8 +179,9 @@ class DailyListUpdater {
             } else {
                 String urn = hearing.getDefendants().get(0).getUrn();
                 if (StringUtils.isBlank(urn)) {
-                    dailyListEntity.setStatus(JobStatusType.PARTIALLY_PROCESSED);
-                    log.error("Hearing not added - HearingInfo does not contain a URN value");
+                    log.warn("Case number not found for hearing: daily_list_id={}, hearing_date={}",
+                             dailyListEntity.getId(), hearing.getHearingDetails().getHearingDate());
+                    return null;
                 } else {
                     return urn;
                 }

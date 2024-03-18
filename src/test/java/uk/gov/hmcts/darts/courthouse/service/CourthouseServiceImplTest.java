@@ -9,14 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
-import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.validation.CourthousePatchValidator;
 
@@ -26,10 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,79 +62,6 @@ class CourthouseServiceImplTest {
 
     @Captor
     ArgumentCaptor<Integer> captorInteger;
-
-    @Test
-    void testAddCourtHouse() {
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseEntity.setCode(CODE);
-
-        Courthouse courthouseModel = new Courthouse();
-        courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseModel.setCode((int) CODE);
-
-
-        when(courthouseMapper.mapToEntity(courthouseModel)).thenReturn(courthouseEntity);
-        when(courthouseRepository.saveAndFlush(courthouseEntity)).thenReturn(courthouseEntity);
-
-
-        CourthouseEntity returnedEntity = courthouseService.addCourtHouse(courthouseModel);
-        assertEquals("Test courthouse", returnedEntity.getCourthouseName());
-        assertEquals((short) 123, returnedEntity.getCode());
-    }
-
-    @Test
-    void addDuplicateCourtHouseName() {
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseEntity.setCode(CODE);
-
-        Courthouse courthouseModel = new Courthouse();
-        courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseModel.setCode((int) CODE);
-
-
-        when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.of(new CourthouseEntity()));
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> courthouseService.addCourtHouse(courthouseModel)
-        );
-
-        assertEquals("Provided courthouse name already exists.", exception.getMessage());
-    }
-
-    @Test
-    void addDuplicateCourtHouseCode() {
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseEntity.setCode(CODE);
-
-        Courthouse courthouseModel = new Courthouse();
-        courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
-        courthouseModel.setCode((int) CODE);
-
-
-        when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.empty());
-        when(courthouseRepository.findByCode(any(Integer.class))).thenReturn(Optional.of(new CourthouseEntity()));
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> courthouseService.addCourtHouse(courthouseModel)
-        );
-
-        assertEquals("Provided courthouse code already exists.", exception.getMessage());
-    }
-
-    @Test
-    void testDeleteCourthouseById() {
-        doNothing().when(courthouseRepository).deleteById(COURTHOUSE_ID);
-
-        courthouseService.deleteCourthouseById(COURTHOUSE_ID);
-
-        verify(courthouseRepository).deleteById(captorInteger.capture());
-        assertEquals(COURTHOUSE_ID, captorInteger.getValue());
-    }
 
     @Test
     void testGetCourtHouseByIdTest() {

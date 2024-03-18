@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
@@ -26,26 +27,35 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityGroupMapper securityGroupMapper;
     private final SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
 
-    private final Validator<SecurityGroup> securityGroupCreationValidation;
+    private final Validator<SecurityGroupModel> securityGroupCreationValidation;
 
     @Override
     @Transactional
-    public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroup) {
-        securityGroupCreationValidation.validate(securityGroup);
+    public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroupRequest) {
+        SecurityGroupModel securityGroupModel = securityGroupMapper.mapToSecurityGroupModel(securityGroupRequest);
+        securityGroupModel.setRoleId(SecurityRoleEnum.TRANSCRIBER.getId());
 
-        var securityGroupEntity = securityGroupMapper.mapToSecurityGroupEntity(securityGroup);
+        SecurityGroupEntity createdSecurityGroupEntity = createAndSaveSecurityGroup(securityGroupModel);
+
+        SecurityGroupWithIdAndRole securityGroupPostResponse = securityGroupMapper.mapToSecurityGroupWithIdAndRole(createdSecurityGroupEntity);
+        securityGroupPostResponse.setSecurityRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
+
+        return securityGroupPostResponse;
+    }
+
+    @Override
+    @Transactional
+    public SecurityGroupEntity createAndSaveSecurityGroup(SecurityGroupModel securityGroupModel) {
+        securityGroupCreationValidation.validate(securityGroupModel);
+
+        var securityGroupEntity = securityGroupMapper.mapToSecurityGroupEntity(securityGroupModel);
         securityGroupEntity.setGlobalAccess(false);
         securityGroupEntity.setDisplayState(true);
 
-        var transcriberRoleEntity = securityRoleRepository.getReferenceById(SecurityRoleEnum.TRANSCRIBER.getId());
+        var transcriberRoleEntity = securityRoleRepository.getReferenceById(securityGroupModel.getRoleId());
         securityGroupEntity.setSecurityRoleEntity(transcriberRoleEntity);
 
-        var createdSecurityGroupEntity = securityGroupRepository.save(securityGroupEntity);
-
-        var securityGroupWithIdAndRole = securityGroupMapper.mapToSecurityGroupWithIdAndRole(createdSecurityGroupEntity);
-        securityGroupWithIdAndRole.setSecurityRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
-
-        return securityGroupWithIdAndRole;
+        return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
     public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId) {

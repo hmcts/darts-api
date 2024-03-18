@@ -12,26 +12,23 @@ import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundExternalObjectDirect
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,13 +38,8 @@ class ExternalInboundDataStoreDeleterImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
+    private ObjectRecordStatusEntity markedForDeletionStatus;
 
-    private ObjectRecordStatusEntity deletedStatus;
-
-    @Mock
-    private UserAccountRepository userAccountRepository;
     @Mock
     private InboundExternalObjectDirectoryDeletedFinder finder;
     @Mock
@@ -57,82 +49,61 @@ class ExternalInboundDataStoreDeleterImplTest {
 
     @BeforeEach
     public void setUp() {
-        SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository);
-        HashMap<String, String> systemUserGuidMap = new HashMap<>();
-        systemUserGuidMap.put("housekeeping", "123");
-        systemUserHelper.setSystemUserGuidMap(systemUserGuidMap);
+        mockStatus();
+        List<ExternalObjectDirectoryEntity> inboundData = createInboundData();
+        when(finder.findMarkedForDeletion()).thenReturn(inboundData);
 
         this.deleter = new ExternalInboundDataStoreDeleter(
-                objectRecordStatusRepository,
-                externalObjectDirectoryRepository,
-                finder,
-                inboundDataStoreDeleter, systemUserHelper,
-                transformedMediaRepository
+            externalObjectDirectoryRepository,
+            finder,
+            inboundDataStoreDeleter,
+            transformedMediaRepository
         );
 
-
     }
-
-    private void mockSystemUser() {
-        when(userAccountRepository.findSystemUser(anyString())).thenReturn(new UserAccountEntity());
-    }
-
 
     private void mockStatus() {
-        this.deletedStatus = new ObjectRecordStatusEntity();
-        deletedStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
-        when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
-                deletedStatus);
+        markedForDeletionStatus = new ObjectRecordStatusEntity();
+        markedForDeletionStatus.setId(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
     }
 
     @Test
-    void deleteFromInboundAndUnstructuredDatastore() {
-        mockStatus();
-
-
-        mockSystemUser();
-
-        List<ExternalObjectDirectoryEntity> inboundData = createInboundData();
-
-
-        when(finder.findMarkedForDeletion()).thenReturn(inboundData);
-
+    void deleteFromInboundDatastore() {
         List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete();
 
         assertThat(
-                deletedItems,
-                containsInAnyOrder(
-                        allOf(
-                                Matchers.hasProperty("id", is(1))
-                        ),
-                        allOf(
-                                Matchers.hasProperty("id", is(2))
-                        )
+            deletedItems,
+            containsInAnyOrder(
+                allOf(
+                    Matchers.hasProperty("id", is(1))
+                ),
+                allOf(
+                    Matchers.hasProperty("id", is(2))
                 )
+            )
         );
         assertEquals(2, deletedItems.size());
-
-
     }
-
 
     @Test
-    void testDeleteWhenSystemUserDoesNotExist() {
-        when(userAccountRepository.findSystemUser(anyString())).thenReturn(null);
-        assertThrows(DartsApiException.class, () -> deleter.delete());
-    }
+    void deleteFromInboundDatastoreShouldNotThrowAzureDeleteBlobException() throws AzureDeleteBlobException {
+        doThrow(AzureDeleteBlobException.class).when(inboundDataStoreDeleter).delete(any(UUID.class));
 
+        assertDoesNotThrow(() -> deleter.delete());
+    }
 
     private List<ExternalObjectDirectoryEntity> createInboundData() {
         ExternalObjectDirectoryEntity inboundData1 = new ExternalObjectDirectoryEntity();
-        inboundData1.setStatus(deletedStatus);
+        inboundData1.setStatus(markedForDeletionStatus);
         inboundData1.setExternalLocationType(new ExternalLocationTypeEntity());
+        inboundData1.setExternalLocation(UUID.randomUUID());
         inboundData1.setId(1);
         inboundData1.setVerificationAttempts(1);
 
         ExternalObjectDirectoryEntity inboundData2 = new ExternalObjectDirectoryEntity();
-        inboundData2.setStatus(deletedStatus);
+        inboundData2.setStatus(markedForDeletionStatus);
         inboundData2.setExternalLocationType(new ExternalLocationTypeEntity());
+        inboundData2.setExternalLocation(UUID.randomUUID());
         inboundData2.setId(2);
         inboundData2.setVerificationAttempts(2);
 
@@ -141,4 +112,5 @@ class ExternalInboundDataStoreDeleterImplTest {
         inboundDataList.add(inboundData2);
         return inboundDataList;
     }
+
 }
