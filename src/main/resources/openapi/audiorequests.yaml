@@ -321,7 +321,7 @@ paths:
     post:
       tags:
         - Audio Requests
-      summary: Users can request audio for a hearing and date/time periods
+      summary: Users can request audio download for a hearing and date/time periods
       operationId: addAudioRequestDownload
       responses:
         '200':
@@ -420,7 +420,7 @@ paths:
     post:
       tags:
         - Audio Requests
-      summary: Users can request audio for a hearing and date/time periods
+      summary: Users can request audio playback for a hearing and date/time periods
       operationId: addAudioRequestPlayback
       responses:
         '200':
