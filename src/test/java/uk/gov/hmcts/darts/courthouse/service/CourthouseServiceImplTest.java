@@ -25,7 +25,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,16 +62,6 @@ class CourthouseServiceImplTest {
 
     @Captor
     ArgumentCaptor<Integer> captorInteger;
-
-    @Test
-    void testDeleteCourthouseById() {
-        doNothing().when(courthouseRepository).deleteById(COURTHOUSE_ID);
-
-        courthouseService.deleteCourthouseById(COURTHOUSE_ID);
-
-        verify(courthouseRepository).deleteById(captorInteger.capture());
-        assertEquals(COURTHOUSE_ID, captorInteger.getValue());
-    }
 
     @Test
     void testGetCourtHouseByIdTest() {
