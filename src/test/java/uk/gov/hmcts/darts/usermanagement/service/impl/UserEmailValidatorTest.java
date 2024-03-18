@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.model.User;
-import uk.gov.hmcts.darts.usermanagement.service.validation.DuplicateEmailValidator;
+import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,19 +18,21 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.DUPLICATE_EMAIL;
+import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.INVALID_EMAIL_FORMAT;
 
 @ExtendWith(MockitoExtension.class)
-class DuplicateEmailValidatorTest {
+class UserEmailValidatorTest {
     private static final String NEW_EMAIL_ADDRESS = "new-email@hmcts.net";
     private static final String EXISTING_EMAIL_ADDRESS = "existing-email@hmcts.net";
-
+    private static final String EMAIL_ADDRESS_NO_DOMAIN = "bad-email@";
+    private static final String EMAIL_ADDRESS_NO_USER = "@hmcts.net";
     @Mock
     private UserAccountRepository userAccountRepository;
-    private DuplicateEmailValidator duplicateEmailValidator;
+    private UserEmailValidator userEmailValidator;
 
     @BeforeEach
     void setUp() {
-        duplicateEmailValidator = new DuplicateEmailValidator(userAccountRepository);
+        userEmailValidator = new UserEmailValidator(userAccountRepository);
     }
 
     @Test
@@ -38,9 +40,9 @@ class DuplicateEmailValidatorTest {
         when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(NEW_EMAIL_ADDRESS, true))
             .thenReturn(Collections.emptyList());
 
-        duplicateEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS));
+        userEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS));
 
-        assertThatNoException().isThrownBy(() -> duplicateEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS)));
+        assertThatNoException().isThrownBy(() -> userEmailValidator.validate(someUserWithEmail(NEW_EMAIL_ADDRESS)));
     }
 
     @Test
@@ -48,10 +50,28 @@ class DuplicateEmailValidatorTest {
         when(userAccountRepository.findByEmailAddressIgnoreCaseAndActive(EXISTING_EMAIL_ADDRESS, true))
             .thenReturn(List.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
 
-        assertThatThrownBy(() -> duplicateEmailValidator.validate(someUserWithEmail(EXISTING_EMAIL_ADDRESS)))
+        assertThatThrownBy(() -> userEmailValidator.validate(someUserWithEmail(EXISTING_EMAIL_ADDRESS)))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", DUPLICATE_EMAIL)
             .hasFieldOrPropertyWithValue("detail", String.format("User with email %s already exists", EXISTING_EMAIL_ADDRESS));
+    }
+
+    @Test
+    void throwsExceptionIfEmailAddressHasNoDomain() {
+
+        assertThatThrownBy(() -> userEmailValidator.validate(someUserWithEmail(EMAIL_ADDRESS_NO_DOMAIN)))
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", INVALID_EMAIL_FORMAT)
+            .hasFieldOrPropertyWithValue("detail", String.format("Invalid email format {%s}", EMAIL_ADDRESS_NO_DOMAIN));
+    }
+
+    @Test
+    void throwsExceptionIfEmailAddressHasNoUser() {
+
+        assertThatThrownBy(() -> userEmailValidator.validate(someUserWithEmail(EMAIL_ADDRESS_NO_USER)))
+            .isInstanceOf(DartsApiException.class)
+            .hasFieldOrPropertyWithValue("error", INVALID_EMAIL_FORMAT)
+            .hasFieldOrPropertyWithValue("detail", String.format("Invalid email format {%s}", EMAIL_ADDRESS_NO_USER));
     }
 
     private UserAccountEntity someUserAccountWithEmail(String email) {

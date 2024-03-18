@@ -280,7 +280,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         courthousePatchValidator.validate(courthousePatch, courthouseId);
 
         var patchedCourthouse = courthouseUpdateMapper.mapPatchToEntity(courthousePatch, courthouseEntity);
-        courthouseRepository.save(patchedCourthouse);
+        courthouseRepository.saveAndFlush(patchedCourthouse);
 
         return courthouseUpdateMapper.mapEntityToAdminCourthouse(patchedCourthouse);
     }
