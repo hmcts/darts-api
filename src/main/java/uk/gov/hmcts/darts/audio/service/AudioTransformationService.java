@@ -20,7 +20,7 @@ public interface AudioTransformationService {
 
     Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException;
 
-    Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException;
+    Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException;
 
     void handleKedaInvocationForMediaRequests();
 

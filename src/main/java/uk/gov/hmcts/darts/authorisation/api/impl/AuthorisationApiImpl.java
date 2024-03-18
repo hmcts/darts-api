@@ -59,4 +59,5 @@ public class AuthorisationApiImpl implements AuthorisationApi {
     public List<Integer> getListOfCourthouseIdsUserHasAccessTo() {
         return userIdentity.getListOfCourthouseIdsUserHasAccessTo();
     }
+
 }

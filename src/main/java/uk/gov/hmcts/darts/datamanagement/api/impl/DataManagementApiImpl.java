@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.InputStream;
@@ -108,10 +109,13 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
-    public boolean downloadBlobFromContainer(DatastoreContainerType container, ExternalObjectDirectoryEntity blobId, DownloadResponseMetaData response) {
+    public DownloadResponseMetaData downloadBlobFromContainer(DatastoreContainerType container,
+                                                              ExternalObjectDirectoryEntity externalObjectDirectoryEntity) throws FileNotDownloadedException {
         Optional<String> containerName = getContainerName(container);
-        containerName.ifPresent(s -> dataManagementService.downloadData(container, s, blobId.getExternalLocation(), response));
-        return containerName.isPresent();
+        if (containerName.isPresent()) {
+            return dataManagementService.downloadData(container, containerName.get(), externalObjectDirectoryEntity.getExternalLocation());
+        }
+        throw new FileNotDownloadedException(externalObjectDirectoryEntity.getExternalLocation(), container.name(), "Container not found.");
     }
 
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {

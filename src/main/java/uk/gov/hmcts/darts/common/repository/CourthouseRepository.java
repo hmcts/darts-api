@@ -27,4 +27,11 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
         AND securityRole.id IN (:roleIds)
         """)
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
+
+    Optional<CourthouseEntity> findByDisplayNameIgnoreCase(String displayName);
+
+    boolean existsByCourthouseNameIgnoreCaseAndIdNot(String name, Integer id);
+
+    boolean existsByDisplayNameIgnoreCaseAndIdNot(String name, Integer id);
+
 }

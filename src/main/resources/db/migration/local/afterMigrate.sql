@@ -23,3 +23,7 @@ SELECT -1, sg.grp_id FROM darts.security_group sg
 where sg.grp_id not in (select sgua.grp_id from darts.security_group_user_account_ae sgua where sgua.usr_id = -1)
 ORDER BY 2;
 
+
+update darts.automated_task
+set cron_expression = '0 0 1 * * *';
+

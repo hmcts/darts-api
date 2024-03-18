@@ -14,15 +14,14 @@ import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -110,18 +109,17 @@ class ArmDataManagementApiImplTest {
     }
 
     @Test
-    void downloadArmData() throws IOException {
+    void downloadArmData() throws FileNotDownloadedException {
 
-        var inputStream = new ByteArrayInputStream("some file binary content".getBytes());
         DownloadResponseMetaData metaData = Mockito.mock(DownloadResponseMetaData.class);
-        when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID, metaData)).thenReturn(inputStream);
+        when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)).thenReturn(metaData);
 
         ExternalObjectDirectoryEntity entity = new ExternalObjectDirectoryEntity();
         entity.setExternalFileId(EXTERNAL_FILE_ID);
         entity.setExternalRecordId(EXTERNAL_RECORD_ID);
 
-        boolean result = armDataManagementApi.downloadBlobFromContainer(DatastoreContainerType.ARM, entity, metaData);
+        DownloadResponseMetaData response = armDataManagementApi.downloadBlobFromContainer(DatastoreContainerType.ARM, entity);
 
-        assertTrue(result);
+        assertNotNull(response);
     }
 }

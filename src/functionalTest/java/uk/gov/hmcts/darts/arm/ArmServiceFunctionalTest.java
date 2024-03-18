@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.arm.service.ArmService;
-import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -36,9 +35,6 @@ class ArmServiceFunctionalTest {
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
 
-    @Value("${darts.storage.arm.folders.collected}")
-    private String armCollectedDropZone;
-
     @Autowired
     private ArmService armService;
 
@@ -55,7 +51,7 @@ class ArmServiceFunctionalTest {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        String filename = String.format("%s_functional_test", UUID.randomUUID().toString());
+        String filename = String.format("%s_functional_test", UUID.randomUUID());
         String actualResult = armService.saveBlobData(armContainerName, filename, data);
         armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
@@ -68,7 +64,7 @@ class ArmServiceFunctionalTest {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        String filename = String.format("functional_test_%s", UUID.randomUUID().toString());
+        String filename = String.format("functional_test_%s", UUID.randomUUID());
         String blobPathAndName = armSubmissionDropZone + filename;
 
         String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
@@ -84,7 +80,7 @@ class ArmServiceFunctionalTest {
     }
 
     @AfterEach
-    void cleanupArmBlobData() throws AzureDeleteBlobException {
+    void cleanupArmBlobData() {
 
         for (String blobName : armSubmissionBlobsToBeDeleted) {
             String blobPathAndName = armSubmissionDropZone + blobName;

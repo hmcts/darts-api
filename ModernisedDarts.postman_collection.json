@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "c8d8926f-b274-4ca6-9903-7973df4343bc",
+		"_postman_id": "b8a59f7f-51bb-4b6a-a0c9-46039fc2995a",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32425403"
+		"_exporter_id": "30362290"
 	},
 	"item": [
 		{
@@ -40,76 +40,391 @@
 			]
 		},
 		{
-			"name": "EventAPI",
+			"name": "Annotations",
 			"item": [
 				{
-					"name": "POST /events",
-					"item": [
-						{
-							"name": "swansea event",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{global_access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "default"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
-								},
-								"url": {
-									"raw": "{{serverUrl}}/events",
-									"host": [
-										"{{serverUrl}}"
-									],
-									"path": [
-										"events"
-									]
+					"name": "/annotations",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
 								}
-							},
-							"response": []
+							}
 						},
-						{
-							"name": "TranscriptionRequestHandler",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "default"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"3010\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
-								},
-								"url": {
-									"raw": "{{serverUrl}}/events",
-									"host": [
-										"{{serverUrl}}"
-									],
-									"path": [
-										"events"
-									]
+						"url": {
+							"raw": "{{serverUrl}}/annotations/:annotation_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"annotations",
+								":annotation_id"
+							],
+							"variable": [
+								{
+									"key": "annotation_id",
+									"value": ""
 								}
-							},
-							"response": []
+							]
 						}
-					]
+					},
+					"response": []
+				},
+				{
+					"name": "/annotations/:annotation_id/downloads/annotation_document_id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/annotations/:annotation_id/documents/:annotation_document_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"annotations",
+								":annotation_id",
+								"documents",
+								":annotation_document_id"
+							],
+							"variable": [
+								{
+									"key": "annotation_id",
+									"value": "1"
+								},
+								{
+									"key": "annotation_document_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audio",
+			"item": [
+				{
+					"name": "/audios",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"contentType": "audio/mpeg",
+									"type": "file",
+									"src": "sample.mp2"
+								},
+								{
+									"key": "metadata",
+									"value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
+									"contentType": "application/json",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audios",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio/hearings/{hearing_id}/audios",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/audio/hearings/:hearing_id/audios",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio",
+								"hearings",
+								":hearing_id",
+								"audios"
+							],
+							"variable": [
+								{
+									"key": "hearing_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio/preview/{media_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "audio/mpeg"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/audio/preview/:media_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio",
+								"preview",
+								":media_id"
+							],
+							"variable": [
+								{
+									"key": "media_id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audio Requests",
+			"item": [
+				{
+					"name": "/audio-requests",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/download",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/download",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"download"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/playback",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"PLAYBACK\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/playback",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"playback"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/transformed_media/{transformed_media_id}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/transformed_media/:transformed_media_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"transformed_media",
+								":transformed_media_id"
+							],
+							"variable": [
+								{
+									"key": "transformed_media_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/transformed_media/{transformed_media_id}",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/transformed_media/:transformed_media_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"transformed_media",
+								":transformed_media_id"
+							],
+							"variable": [
+								{
+									"key": "transformed_media_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/download",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/download?media_request_id=-1",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"download"
+							],
+							"query": [
+								{
+									"key": "media_request_id",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"/*",
+							"INSERT INTO user_account (usr_id, user_name, user_email_address)",
+							"VALUES (-10, 'Richard B', 'Richard.B@EXAMPLE.COM');",
+							"",
+							"INSERT INTO courthouse (cth_id, courthouse_name, display_name, created_ts, last_modified_ts)",
+							"VALUES (-1, 'Bristol', 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+							"",
+							"INSERT INTO security_group_courthouse_ae (grp_id, cth_id)",
+							"VALUES (-4, -1);",
+							"",
+							"INSERT INTO security_group_user_account_ae (usr_id, grp_id)",
+							"VALUES (-10, -4);",
+							"",
+							"INSERT INTO court_case (cas_id, cth_id, case_number, case_closed, interpreter_used)",
+							"VALUES (-1, -1, 'T20231009-1', '0', '0');",
+							"",
+							"INSERT INTO courtroom (ctr_id, cth_id, courtroom_name)",
+							"VALUES (-1, -1, 'Court 1');",
+							"",
+							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date, hearing_is_actual)",
+							"VALUES (-1, -1, -1, CURRENT_DATE, '1');",
+							"",
+							"INSERT INTO media_request (mer_id, hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_modified_ts)",
+							"VALUES (-1, -1, -10, 'OPEN', 'DOWNLOAD', '2023-05-31T09:00:00Z', '2023-05-31T12:00:00Z', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+							"*/"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -163,6 +478,9 @@
 					"item": [
 						{
 							"name": "/cases/search",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
 							"request": {
 								"method": "GET",
 								"header": [
@@ -172,55 +490,23 @@
 										"type": "default"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"courthouse\": \"SWANSEA\",\n    \"courtroom\": \"1\",\n    \"date_to\": \"2023-05-20\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
-									"raw": "{{serverUrl}}/cases/search?case_number=001",
+									"raw": "{{serverUrl}}/cases/search",
 									"host": [
 										"{{serverUrl}}"
 									],
 									"path": [
 										"cases",
 										"search"
-									],
-									"query": [
-										{
-											"key": "case_number",
-											"value": "001"
-										},
-										{
-											"key": "courthouse",
-											"value": "swansea",
-											"disabled": true
-										},
-										{
-											"key": "courtroom",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "judge_name",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "defendant_name",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "date_from",
-											"value": "2022-05-20",
-											"disabled": true
-										},
-										{
-											"key": "date_to",
-											"value": "2024-05-20",
-											"disabled": true
-										},
-										{
-											"key": "event_text_contains",
-											"value": "test",
-											"disabled": true
-										}
 									]
 								}
 							},
@@ -398,112 +684,6 @@
 			]
 		},
 		{
-			"name": "Audio",
-			"item": [
-				{
-					"name": "/audios",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "accept",
-								"value": "*/*"
-							}
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "file",
-									"contentType": "audio/mpeg",
-									"type": "file",
-									"src": "sample.mp2"
-								},
-								{
-									"key": "metadata",
-									"value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
-									"contentType": "application/json",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{serverUrl}}/audios",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audios"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio/hearings/{hearing_id}/audios",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/audio/hearings/:hearing_id/audios",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio",
-								"hearings",
-								":hearing_id",
-								"audios"
-							],
-							"variable": [
-								{
-									"key": "hearing_id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio/preview/{media_id}",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "audio/mpeg"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/audio/preview/:media_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio",
-								"preview",
-								":media_id"
-							],
-							"variable": [
-								{
-									"key": "media_id",
-									"value": "3"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "DailyLists",
 			"item": [
 				{
@@ -634,6 +814,80 @@
 			]
 		},
 		{
+			"name": "EventAPI",
+			"item": [
+				{
+					"name": "POST /events",
+					"item": [
+						{
+							"name": "swansea event",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
+								},
+								"url": {
+									"raw": "{{serverUrl}}/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "TranscriptionRequestHandler",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"3010\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
+								},
+								"url": {
+									"raw": "{{serverUrl}}/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Hearings",
 			"item": [
 				{
@@ -733,392 +987,68 @@
 			]
 		},
 		{
-			"name": "Audio Requests",
+			"name": "NodeRegistration",
 			"item": [
 				{
-					"name": "/audio-requests",
+					"name": "POST register-devices",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{serverUrl}}/audio-requests",
+							"raw": "{{serverUrl}}/register-devices?node_type=DAR&courthouse=swansea&courtroom=1&host_name=XXXXX.MMM.net&mac_address=6A-5F-90-A4-2C-12&ip_address=192.0.0.1",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
-								"audio-requests"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio-requests/transformed_media/{transformed_media_id}",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests/transformed_media/:transformed_media_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests",
-								"transformed_media",
-								":transformed_media_id"
-							],
-							"variable": [
-								{
-									"key": "transformed_media_id",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio-requests/transformed_media/{transformed_media_id}",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests/transformed_media/:transformed_media_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests",
-								"transformed_media",
-								":transformed_media_id"
-							],
-							"variable": [
-								{
-									"key": "transformed_media_id",
-									"value": "2"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/audio-requests/download",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests/download?media_request_id=-1",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests",
-								"download"
+								"register-devices"
 							],
 							"query": [
 								{
-									"key": "media_request_id",
-									"value": "-1"
+									"key": "node_type",
+									"value": "DAR"
+								},
+								{
+									"key": "courthouse",
+									"value": "swansea"
+								},
+								{
+									"key": "courtroom",
+									"value": "1"
+								},
+								{
+									"key": "host_name",
+									"value": "XXXXX.MMM.net"
+								},
+								{
+									"key": "mac_address",
+									"value": "6A-5F-90-A4-2C-12"
+								},
+								{
+									"key": "ip_address",
+									"value": "192.0.0.1"
 								}
 							]
 						}
 					},
 					"response": []
-				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"/*",
-							"INSERT INTO user_account (usr_id, user_name, user_email_address)",
-							"VALUES (-10, 'Richard B', 'Richard.B@EXAMPLE.COM');",
-							"",
-							"INSERT INTO courthouse (cth_id, courthouse_name, display_name, created_ts, last_modified_ts)",
-							"VALUES (-1, 'Bristol', 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
-							"",
-							"INSERT INTO security_group_courthouse_ae (grp_id, cth_id)",
-							"VALUES (-4, -1);",
-							"",
-							"INSERT INTO security_group_user_account_ae (usr_id, grp_id)",
-							"VALUES (-10, -4);",
-							"",
-							"INSERT INTO court_case (cas_id, cth_id, case_number, case_closed, interpreter_used)",
-							"VALUES (-1, -1, 'T20231009-1', '0', '0');",
-							"",
-							"INSERT INTO courtroom (ctr_id, cth_id, courtroom_name)",
-							"VALUES (-1, -1, 'Court 1');",
-							"",
-							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date, hearing_is_actual)",
-							"VALUES (-1, -1, -1, CURRENT_DATE, '1');",
-							"",
-							"INSERT INTO media_request (mer_id, hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_modified_ts)",
-							"VALUES (-1, -1, -10, 'OPEN', 'DOWNLOAD', '2023-05-31T09:00:00Z', '2023-05-31T12:00:00Z', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
-							"*/"
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
 				}
 			]
 		},
 		{
-			"name": "Transcriptions",
+			"name": "Retention",
 			"item": [
 				{
-					"name": "/transcriptions",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-09T11:30:00Z\",\n  \"end_date_time\": \"2023-11-09T12:00:00Z\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id} 3 | Approved",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "61"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id} 4 | Rejected",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"transcription_status_id\": 4,\n  \"workflow_comment\": \"REJECTED\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "41"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id} 5 | With Transcriber",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"transcription_status_id\": 5\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "61"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id} 6 | Complete",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"transcription_status_id\": 6\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "101"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/types",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/types",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								"types"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id}",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/urgencies",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/urgencies",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								"urgencies"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id}/document",
+					"name": "/retentions",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1128,370 +1058,8 @@
 							}
 						],
 						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "transcript",
-									"contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-									"type": "file",
-									"src": "/Users/richardbull/rbull/DARTS/Test Document.docx"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id",
-								"document"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "61"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id}/document",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/*"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id",
-								"document"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "user_id",
-								"value": "{{user_id}}",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/{transcription_id}",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								":transcription_id"
-							],
-							"variable": [
-								{
-									"key": "transcription_id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/transcriber-view?assigned=false",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							},
-							{
-								"key": "user_id",
-								"value": "{{user_id}}"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=false",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								"transcriber-view"
-							],
-							"query": [
-								{
-									"key": "assigned",
-									"value": "false"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/transcriber-view?assigned=true",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							},
-							{
-								"key": "user_id",
-								"value": "{{user_id}}"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=true",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								"transcriber-view"
-							],
-							"query": [
-								{
-									"key": "assigned",
-									"value": "true"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/transcriptions/transcriber-counts",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							},
-							{
-								"key": "user_id",
-								"value": "{{user_id}}"
-							}
-						],
-						"url": {
-							"raw": "{{serverUrl}}/transcriptions/transcriber-counts",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"transcriptions",
-								"transcriber-counts"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Token",
-			"item": [
-				{
-					"name": "Generate Bearer Token - AAD_B2C_ROPC",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "grant_type",
-									"value": "password",
-									"type": "text"
-								},
-								{
-									"key": "client_id",
-									"value": "{{AAD_B2C_ROPC_CLIENT_ID}}",
-									"type": "text"
-								},
-								{
-									"key": "scope",
-									"value": "{{AAD_B2C_ROPC_SCOPE}}",
-									"type": "text"
-								},
-								{
-									"key": "username",
-									"value": "{{AAD_B2C_ROPC_USERNAME}}",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "{{AAD_B2C_ROPC_PASSWORD}}",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}",
-							"host": [
-								"{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "active-directory-b2c-auth - token",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "grant_type",
-									"value": "authorization_code",
-									"type": "default"
-								},
-								{
-									"key": "client_id",
-									"value": "{{AAD_B2C_CLIENT_ID}}",
-									"type": "default"
-								},
-								{
-									"key": "scope",
-									"value": "{{AAD_B2C_CLIENT_ID}} offline_access",
-									"type": "default"
-								},
-								{
-									"key": "code",
-									"value": "",
-									"type": "default"
-								},
-								{
-									"key": "redirect_uri",
-									"value": "{{serverUrl}}/external-user/handle-oauth-code",
-									"type": "default"
-								},
-								{
-									"key": "client_secret",
-									"value": "{{AAD_B2C_CLIENT_SECRET}}",
-									"type": "default"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{active-directory-b2c-auth-uri}}/{{active-directory-b2c-external-user-signin-policy}}/oauth2/v2.0/token",
-							"host": [
-								"{{active-directory-b2c-auth-uri}}"
-							],
-							"path": [
-								"{{active-directory-b2c-external-user-signin-policy}}",
-								"oauth2",
-								"v2.0",
-								"token"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "User",
-			"item": [
-				{
-					"name": "/users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4550/users?courthouse=-1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4550",
-							"path": [
-								"users"
-							],
-							"query": [
-								{
-									"key": "courthouse",
-									"value": "-1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "admin/users/search",
-					"protocolProfileBehavior": {
-						"disabledSystemHeaders": {}
-					},
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"full_name\": \"mi\",\n  \"email_address\": \"@hmcts\"\n}",
+							"raw": "{\n  \"case_id\": 26029,\n  \"retention_date\": \"2029-05-19\",\n  \"is_permanent_retention\": false,\n  \"comments\": \"commentstring\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1499,37 +1067,22 @@
 							}
 						},
 						"url": {
-							"raw": "{{serverUrl}}/admin/users/search",
+							"raw": "{{serverUrl}}/retentions?validate_only=false",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
-								"users",
-								"search"
+								"retentions"
+							],
+							"query": [
+								{
+									"key": "validate_only",
+									"value": "false"
+								}
 							]
 						}
 					},
 					"response": []
-				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"// V1_239__update_security_schema.sql"
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
 				}
 			]
 		},
@@ -2110,56 +1663,111 @@
 			]
 		},
 		{
-			"name": "NodeRegistration",
+			"name": "Token",
 			"item": [
 				{
-					"name": "POST register-devices",
+					"name": "Generate Bearer Token - AAD_B2C_ROPC",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
 								{
-									"key": "token",
-									"value": "{{global_access_token}}",
-									"type": "string"
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{AAD_B2C_ROPC_CLIENT_ID}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{AAD_B2C_ROPC_SCOPE}}",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{AAD_B2C_ROPC_USERNAME}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{AAD_B2C_ROPC_PASSWORD}}",
+									"type": "text"
 								}
 							]
 						},
+						"url": {
+							"raw": "{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}",
+							"host": [
+								"{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "active-directory-b2c-auth - token",
+					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "default"
+								},
+								{
+									"key": "client_id",
+									"value": "{{AAD_B2C_CLIENT_ID}}",
+									"type": "default"
+								},
+								{
+									"key": "scope",
+									"value": "{{AAD_B2C_CLIENT_ID}} offline_access",
+									"type": "default"
+								},
+								{
+									"key": "code",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{serverUrl}}/external-user/handle-oauth-code",
+									"type": "default"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{AAD_B2C_CLIENT_SECRET}}",
+									"type": "default"
+								}
+							]
+						},
 						"url": {
-							"raw": "{{serverUrl}}/register-devices?node_type=DAR&courthouse=swansea&courtroom=1&host_name=XXXXX.MMM.net&mac_address=6A-5F-90-A4-2C-12&ip_address=192.0.0.1",
+							"raw": "{{active-directory-b2c-auth-uri}}/{{active-directory-b2c-external-user-signin-policy}}/oauth2/v2.0/token",
 							"host": [
-								"{{serverUrl}}"
+								"{{active-directory-b2c-auth-uri}}"
 							],
 							"path": [
-								"register-devices"
-							],
-							"query": [
-								{
-									"key": "node_type",
-									"value": "DAR"
-								},
-								{
-									"key": "courthouse",
-									"value": "swansea"
-								},
-								{
-									"key": "courtroom",
-									"value": "1"
-								},
-								{
-									"key": "host_name",
-									"value": "XXXXX.MMM.net"
-								},
-								{
-									"key": "mac_address",
-									"value": "6A-5F-90-A4-2C-12"
-								},
-								{
-									"key": "ip_address",
-									"value": "192.0.0.1"
-								}
+								"{{active-directory-b2c-external-user-signin-policy}}",
+								"oauth2",
+								"v2.0",
+								"token"
 							]
 						}
 					},
@@ -2168,10 +1776,243 @@
 			]
 		},
 		{
-			"name": "Retention",
+			"name": "Transcriptions",
 			"item": [
 				{
-					"name": "/retentions",
+					"name": "/transcriptions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-09T11:30:00Z\",\n  \"end_date_time\": \"2023-11-09T12:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 3 | Approved",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "61"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 4 | Rejected",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 4,\n  \"workflow_comment\": \"REJECTED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "41"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 5 | With Transcriber",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "61"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 6 | Complete",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/types",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/types",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/urgencies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/urgencies",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"urgencies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}/document",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2181,27 +2022,206 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"case_id\": 26029,\n  \"retention_date\": \"2029-05-19\",\n  \"is_permanent_retention\": false,\n  \"comments\": \"commentstring\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "transcript",
+									"contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+									"type": "file",
+									"src": "/Users/richardbull/rbull/DARTS/Test Document.docx"
 								}
-							}
+							]
 						},
 						"url": {
-							"raw": "{{serverUrl}}/retentions?validate_only=false",
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
-								"retentions"
+								"transcriptions",
+								":transcription_id",
+								"document"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "61"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}/document",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/*"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id",
+								"document"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "user_id",
+								"value": "{{user_id}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-view?assigned=false",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=false",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-view"
 							],
 							"query": [
 								{
-									"key": "validate_only",
+									"key": "assigned",
 									"value": "false"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-view?assigned=true",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=true",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-view"
+							],
+							"query": [
+								{
+									"key": "assigned",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-counts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-counts",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-counts"
 							]
 						}
 					},
@@ -2210,35 +2230,32 @@
 			]
 		},
 		{
-			"name": "Annotations",
+			"name": "User",
 			"item": [
 				{
-					"name": "/annotations",
+					"name": "/users",
 					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
 							}
-						},
+						],
 						"url": {
-							"raw": "{{serverUrl}}/annotations/:annotation_id",
+							"raw": "http://localhost:4550/users?courthouse=-1",
+							"protocol": "http",
 							"host": [
-								"{{serverUrl}}"
+								"localhost"
 							],
+							"port": "4550",
 							"path": [
-								"annotations",
-								":annotation_id"
+								"users"
 							],
-							"variable": [
+							"query": [
 								{
-									"key": "annotation_id",
-									"value": ""
+									"key": "courthouse",
+									"value": "-1"
 								}
 							]
 						}
@@ -2246,16 +2263,16 @@
 					"response": []
 				},
 				{
-					"name": "/annotations/:annotation_id/downloads/annotation_document_id",
+					"name": "admin/users/search",
 					"protocolProfileBehavior": {
-						"disableBodyPruning": true
+						"disabledSystemHeaders": {}
 					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "",
+							"raw": "{\n  \"full_name\": \"mi\",\n  \"email_address\": \"@hmcts\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2263,29 +2280,37 @@
 							}
 						},
 						"url": {
-							"raw": "{{serverUrl}}/annotations/:annotation_id/downloads/:annotation_document_id",
+							"raw": "{{serverUrl}}/users/search",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
-								"annotations",
-								":annotation_id",
-								"downloads",
-								":annotation_document_id"
-							],
-							"variable": [
-								{
-									"key": "annotation_id",
-									"value": "1"
-								},
-								{
-									"key": "annotation_document_id",
-									"value": "1"
-								}
+								"users",
+								"search"
 							]
 						}
 					},
 					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// V1_239__update_security_schema.sql"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		}

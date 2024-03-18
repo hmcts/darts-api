@@ -98,12 +98,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     public CourtCaseEntity getCourtCaseById(Integer caseId) {
-        Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
-
-        if (caseEntity.isEmpty()) {
-            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-        }
-        return caseEntity.get();
+        return caseRepository.findById(caseId).orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {

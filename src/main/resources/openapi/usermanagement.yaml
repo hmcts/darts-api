@@ -359,6 +359,8 @@ components:
 
     RoleId:
       type: integer
+    RoleName:
+      type: string
     RoleDisplayName:
       type: string
       minLength: 1
@@ -498,6 +500,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/RoleId'
+        role_name:
+          $ref: '#/components/schemas/RoleName'
         display_name:
           $ref: '#/components/schemas/RoleDisplayName'
         display_state:

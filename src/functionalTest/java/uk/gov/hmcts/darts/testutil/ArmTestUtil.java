@@ -5,8 +5,10 @@ import com.azure.core.http.rest.Response;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -14,16 +16,18 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.valueOf;
+
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class ArmTestUtil {
 
-    private static final int DELETE_TIMEOUT = 60;
-    public static final int STATUS_CODE_202 = 202;
-
     private final ArmDataManagementDao armDataManagementDao;
 
+    @Value("${darts.storage.blob.delete.timeout}")
+    private int deleteTimeoutInSeconds;
 
     public void deleteBlobData(String containerName, String blobPathAndName) {
         try {
@@ -33,17 +37,23 @@ public class ArmTestUtil {
             Response<Boolean> response = blobClient.deleteIfExistsWithResponse(
                 DeleteSnapshotsOptionType.INCLUDE,
                 null,
-                Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
+                Duration.of(deleteTimeoutInSeconds, ChronoUnit.SECONDS),
                 null
             );
 
-            log.info("deleteBlobData for container {}, Blob path {}, Returned status code {}", containerName, response.getStatusCode());
-            if (STATUS_CODE_202 != response.getStatusCode()) {
-                throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
+            HttpStatus httpStatus = valueOf(response.getStatusCode());
+            if (httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus)) {
+                log.info("deleteBlobData for containerName={}, blobPathAndName={}, httpStatus={}",
+                         containerName, blobPathAndName, httpStatus);
+            } else {
+                String message = String.format("Failed to delete from storage container=%s, blobId=%s, httpStatus=%s",
+                                               containerName, blobPathAndName, httpStatus);
+                throw new AzureDeleteBlobException(message);
             }
 
         } catch (Exception e) {
-            log.error("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e.getMessage(), e);
+            log.error("Could not delete from storage container={}, blobPathAndName={}",
+                      containerName, blobPathAndName, e);
         }
     }
 }

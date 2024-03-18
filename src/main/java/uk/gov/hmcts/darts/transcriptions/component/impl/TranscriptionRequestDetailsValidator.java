@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.AUDIO_NOT_FOUND;
@@ -32,47 +33,48 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
     private final CaseService caseService;
     private final HearingsService hearingsService;
 
-    /**
-     *  TODO: This method has been lifted-and-shifted as-is from TranscriptionController and would benefit from refactoring to reduce complexity (ref DMP-2083).
-     */
     @Override
     public void validate(@NotNull TranscriptionRequestDetails transcriptionRequestDetails) {
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
-            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
-            if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
-                log.error(
-                    "Transcription could not be requested. No audio found for hearing id {}",
-                    transcriptionRequestDetails.getHearingId()
-                );
-                throw new DartsApiException(AUDIO_NOT_FOUND);
-            } else {
-                //check times
-                OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime();
-                OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
-                if (requestStartDateTime != null && requestEndDateTime != null) {
-                    boolean validTimes = hearing.getMediaList().stream().anyMatch(
-                        m -> checkStartTime(m.getStart().truncatedTo(ChronoUnit.SECONDS),
-                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS))
-                            && checkEndTime(m.getEnd().truncatedTo(ChronoUnit.SECONDS),
-                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)));
-                    if (!validTimes) {
-                        log.error(
-                            "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
-                            transcriptionRequestDetails.getHearingId()
-                        );
-                        throw new DartsApiException(TIMES_OUTSIDE_OF_HEARING_TIMES);
-                    }
-                }
-            }
+            checkHearingHasValidMedia(transcriptionRequestDetails);
         } else {
-            caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
+            checkIdExistsOrThrowCaseNotFoundException(transcriptionRequestDetails);
         }
 
-        Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
-        TranscriptionTypeEnum.fromId(transcriptionTypeId);
-        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getTranscriptionUrgencyId());
+        checkStartAndEndDatesValid(transcriptionRequestDetails);
+    }
+
+    private void checkIdExistsOrThrowCaseNotFoundException(TranscriptionRequestDetails transcriptionRequestDetails) {
+        caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
+    }
+
+    private void checkHearingHasValidMedia(TranscriptionRequestDetails transcriptionRequestDetails) {
+        final HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+        checkAudioFileExistsAndTimesValid(transcriptionRequestDetails, hearing);
+    }
+
+    private void checkAudioFileExistsAndTimesValid(TranscriptionRequestDetails transcriptionRequestDetails, HearingEntity hearing) {
+
+        if (isEmpty(hearing.getMediaList())) {
+
+            log.error(
+                "Transcription could not be requested. No audio found for hearing id {}",
+                transcriptionRequestDetails.getHearingId()
+            );
+            throw new DartsApiException(AUDIO_NOT_FOUND);
+
+        } else {
+            checkTimesValid(transcriptionRequestDetails, hearing);
+        }
+
+    }
+
+    private void checkStartAndEndDatesValid(TranscriptionRequestDetails transcriptionRequestDetails) {
+        final Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
+
+        checkEnumsIdValid(transcriptionRequestDetails, transcriptionTypeId);
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
             && !transcriptionDatesAreSet(
@@ -89,12 +91,45 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
         }
     }
 
-    private boolean checkEndTime(OffsetDateTime mediaEndDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
-        return (mediaEndDateTime.isEqual(requestEndDateTime) || mediaEndDateTime.isAfter(requestEndDateTime));
+    private void checkEnumsIdValid(TranscriptionRequestDetails transcriptionRequestDetails, Integer transcriptionTypeId) {
+        TranscriptionTypeEnum.fromId(transcriptionTypeId);
+        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getTranscriptionUrgencyId());
     }
 
-    private boolean checkStartTime(OffsetDateTime mediaStartDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
-        return (mediaStartDateTime.isEqual(requestStartDateTime) || mediaStartDateTime.isBefore(requestStartDateTime));
+    private void checkTimesValid(TranscriptionRequestDetails transcriptionRequestDetails, HearingEntity hearing) {
+
+        if (transcriptionRequestDetails.getStartDateTime() != null && transcriptionRequestDetails.getEndDateTime() != null) {
+
+        final OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime().truncatedTo(ChronoUnit.SECONDS);
+        final OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime().truncatedTo(ChronoUnit.SECONDS);
+
+            boolean validTimes = hearing.getMediaList().stream().anyMatch(
+                mediaEntity -> isStartTimeEqualOrBefore(mediaEntity.getStart(),
+                                    requestStartDateTime)
+                    && isEndTimeEqualOrAfter(mediaEntity.getEnd().truncatedTo(ChronoUnit.SECONDS),
+                                    requestEndDateTime));
+            if (!validTimes) {
+                log.error(
+                    "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
+                    transcriptionRequestDetails.getHearingId()
+                );
+                throw new DartsApiException(TIMES_OUTSIDE_OF_HEARING_TIMES);
+            }
+        }
+    }
+
+    private boolean isEndTimeEqualOrAfter(OffsetDateTime mediaEndDateTime, OffsetDateTime requestEndDateTime) {
+
+        final OffsetDateTime mediaEndDateTimeTruncated = mediaEndDateTime.truncatedTo(ChronoUnit.SECONDS);
+
+        return (mediaEndDateTimeTruncated.isEqual(requestEndDateTime) || mediaEndDateTimeTruncated.isAfter(requestEndDateTime));
+    }
+
+    private boolean isStartTimeEqualOrBefore(OffsetDateTime mediaEndDateTime, OffsetDateTime requestStartDateTime) {
+
+        final OffsetDateTime mediaEndDateTimeTruncated = mediaEndDateTime.truncatedTo(ChronoUnit.SECONDS);
+
+        return (mediaEndDateTimeTruncated.isEqual(requestStartDateTime) || mediaEndDateTimeTruncated.isBefore(requestStartDateTime));
     }
 
     private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {

@@ -9,17 +9,20 @@ import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
@@ -27,6 +30,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
@@ -117,8 +123,8 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    @SneakyThrows
-    public void downloadData(DatastoreContainerType type, String containerName, UUID blobId, DownloadResponseMetaData report) {
+    public DownloadResponseMetaData downloadData(DatastoreContainerType type, String containerName, UUID blobId) throws FileNotDownloadedException {
+        DownloadResponseMetaData downloadResponse = new FileBasedDownloadResponseMetaData();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
         BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
@@ -126,18 +132,24 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         if (!exists) {
             log.error("Blob {} does not exist in {} container", blobId, containerName);
+            throw new FileNotDownloadedException(blobId, containerName, "Blob doesn't exist in container.");
         }
 
-        try (OutputStream downloadOS = report.getOutputStream(dataManagementConfiguration)) {
+        try (OutputStream downloadOS = downloadResponse.getOutputStream(dataManagementConfiguration)) {
             Date downloadStartDate = new Date();
             blobClient.downloadStream(downloadOS);
 
             Date downloadEndDate = new Date();
             log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
-            report.markSuccess(type);
+            downloadResponse.setContainerTypeUsedToDownload(type);
+        } catch (IOException e) {
+            log.error("Error trying to download Blob {} from container{}", blobId, containerName, e);
+            throw new FileNotDownloadedException(blobId, containerName, "Error trying to download blob", e);
         }
+        return downloadResponse;
     }
+
 
     @Override
     public Response<Boolean> deleteBlobData(String containerName, UUID blobId) throws AzureDeleteBlobException {
@@ -152,13 +164,18 @@ public class DataManagementServiceImpl implements DataManagementService {
                                                                            ), null
             );
 
-            if (202 != response.getStatusCode()) {
-                throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
+            HttpStatus httpStatus = valueOf(response.getStatusCode());
+            if (httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus)) {
+                return response;
+            } else {
+                String message = String.format("Failed to delete from storage container=%s, blobId=%s, httpStatus=%s",
+                                               containerName, blobId, httpStatus);
+                throw new AzureDeleteBlobException(message);
             }
-            return response;
+
         } catch (RuntimeException e) {
             throw new AzureDeleteBlobException(
-                "Could not delete from container: " + containerName + " uuid: " + blobId, e
+                "Could not delete from storage container=" + containerName + ", blobId=" + blobId, e
             );
         }
     }

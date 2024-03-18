@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
@@ -129,6 +132,15 @@ public class FunctionalTest {
             .statusCode(200)
             .extract().response();
         return response.asString();
+    }
+
+    protected boolean isIsoDateTimeString(String string) {
+        try {
+            LocalDateTime.parse(string, DateTimeFormatter.ISO_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+        return true;
     }
 
 }

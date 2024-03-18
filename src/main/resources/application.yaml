@@ -204,7 +204,6 @@ darts:
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-dets
-      fetch-from-dets-enabled: true
       temp-blob-workspace: ${user.home}/dets/tempworkspace
     blob:
       client:
@@ -219,8 +218,10 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
-    delete:
-      timeout: 60
+      delete:
+        timeout: 60
+    search:
+      order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:
     allowed-extensions:
       - "docx"

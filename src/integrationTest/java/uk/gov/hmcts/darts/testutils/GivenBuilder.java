@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.annotation;
+package uk.gov.hmcts.darts.testutils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +19,7 @@ import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroup
 import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
 
 @Component
-public class AnnotationTestGivensBuilder {
+public class GivenBuilder {
 
     @Autowired
     private DartsDatabaseStub dartsDatabase;
@@ -35,7 +35,6 @@ public class AnnotationTestGivensBuilder {
         user.setEmailAddress(userEmail);
 
         dartsDatabase.addUserToGroup(user, securityGroup);
-        dartsDatabase.addToTrash(securityGroup);
         dartsDatabase.addToUserAccountTrash(userEmail);
 
         return user;
@@ -46,7 +45,6 @@ public class AnnotationTestGivensBuilder {
         anAuthenticatedUserFor(userEmail);
 
         var securityGroup = buildGroupForRoleAndCourthouse(JUDGE, courthouse);
-        dartsDatabase.addToTrash(securityGroup);
 
         var judge = minimalUserAccount();
         judge.setEmailAddress(userEmail);

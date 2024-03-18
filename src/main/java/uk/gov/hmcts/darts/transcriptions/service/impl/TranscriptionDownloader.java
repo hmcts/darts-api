@@ -7,11 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 
 import java.io.IOException;
@@ -54,24 +55,12 @@ public class TranscriptionDownloader {
     }
 
     private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
-        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories.getFileBasedDownload(
-            latestTranscriptionDocument.getExternalObjectDirectoryEntities());
-
-        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
-
-        var downloadResponseMetaData = downloadableExternalObjectDirectories.getResponse();
-
         try {
-            if (!downloadResponseMetaData.isSuccessfulDownload()) {
-                downloadResponseMetaData.close();
-                throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
-            }
-
+            DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument);
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
-        } catch (IOException e) {
-            log.error("Failed to download transcript file using latestTranscriptionDocument ID {}, containerTypeUsedToDownload = {}",
+        } catch (IOException | FileNotDownloadedException e) {
+            log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",
                       latestTranscriptionDocument.getId(),
-                      downloadResponseMetaData.getContainerTypeUsedToDownload(),
                       e);
             throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
         }

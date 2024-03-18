@@ -2,15 +2,18 @@ package uk.gov.hmcts.darts.common.datamanagement.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+
+import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor
 public enum DatastoreContainerType {
-    INBOUND(1),
-    OUTBOUND(-1),
-    UNSTRUCTURED(2),
-    ARM(3),
-    DETS(4);
+    INBOUND(Optional.of(ExternalLocationTypeEnum.INBOUND)),
+    OUTBOUND(Optional.empty()),
+    UNSTRUCTURED(Optional.of(ExternalLocationTypeEnum.UNSTRUCTURED)),
+    ARM(Optional.of(ExternalLocationTypeEnum.ARM)),
+    DETS(Optional.of(ExternalLocationTypeEnum.DETS));
 
-    private final Integer id;
+    private final Optional<ExternalLocationTypeEnum> externalLocationTypeEnum;
 }

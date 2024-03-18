@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.annotations.model.Annotation;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -34,7 +35,7 @@ class AnnotationPostTest extends IntegrationBase {
     private final BasicJsonTester json = new BasicJsonTester(getClass());
 
     @Autowired
-    private AnnotationTestGivensBuilder given;
+    private GivenBuilder given;
 
 
     @Autowired

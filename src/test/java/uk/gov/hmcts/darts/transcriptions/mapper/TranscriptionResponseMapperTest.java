@@ -118,13 +118,14 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
-    void mapToTranscriptionResponseWithNoHearingId() throws Exception {
+    void mapToTranscriptionResponseWithNoHearingIdAndValidCourtCase() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
         transcriptionEntity.setHearings(new ArrayList<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
-
+        transcriptionEntity.setCourtCases(List.of(CommonTestDataUtil.createCase("case1")));
+        transcriptionEntity.setCourtroom(CommonTestDataUtil.createCourtroom("1"));
         GetTranscriptionByIdResponse transcriptionResponse =
             transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
@@ -132,6 +133,22 @@ class TranscriptionResponseMapperTest {
         String expectedResponse = getContentsFromFile(
             "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityNoHearing.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void mapToTranscriptionResponseWithNoHearingsAndNoValidCourtCaseShouldFail() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        transcriptionEntity.setHearings(new ArrayList<>());
+        transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity)
+        );
+
+        assertEquals(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND, exception.getError());
     }
 
     @Test

@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.time.Duration;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -118,6 +119,17 @@ class DataManagementServiceImplTest {
     }
 
     @Test
+    void testDeleteBlobDataWithNotFoundError() {
+        when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(20);
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(responseMock.getStatusCode()).thenReturn(404);
+        when(blobClient.deleteIfExistsWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
+
+        assertDoesNotThrow(() -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
+    }
+
+    @Test
     void testDeleteBlobDataWithTimeout() {
         when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(0);
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
@@ -133,18 +145,15 @@ class DataManagementServiceImplTest {
 
             when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
             when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+            when(blobClient.exists()).thenReturn(true);
+            when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
 
-            try (DownloadResponseMetaData metaData = mock(DownloadResponseMetaData.class)) {
-                when(metaData.getOutputStream(Mockito.notNull())).thenReturn(stream);
-
-                try (DownloadResponseMetaData downloadResponseMetaData = metaData) {
-
-                    dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID, downloadResponseMetaData);
-
-                    verify(blobClient, times(1)).downloadStream(any());
-                    verify(downloadResponseMetaData, times(1)).markSuccess(DatastoreContainerType.UNSTRUCTURED);
-                }
+            try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED,
+                                                                                                        BLOB_CONTAINER_NAME,
+                                                                                                        BLOB_ID)) {
+                verify(blobClient, times(1)).downloadStream(any());
             }
+
         }
     }
 }

@@ -156,7 +156,7 @@ class AudioServiceImplTest {
 
         Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity)).thenReturn(mediaPath);
 
         AudioFileInfo audioFileInfo = AudioFileInfo.builder()
             .startTime(START_TIME.toInstant())
@@ -190,7 +190,7 @@ class AudioServiceImplTest {
 
         Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity)).thenReturn(mediaPath);
 
         AudioFileInfo audioFileInfo = AudioFileInfo.builder()
             .startTime(START_TIME.toInstant())

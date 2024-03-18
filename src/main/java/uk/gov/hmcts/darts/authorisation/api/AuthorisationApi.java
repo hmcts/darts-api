@@ -22,4 +22,5 @@ public interface AuthorisationApi {
     boolean userHasOneOfRoles(List<SecurityRoleEnum> globalSecurityRoles);
 
     List<Integer> getListOfCourthouseIdsUserHasAccessTo();
+
 }

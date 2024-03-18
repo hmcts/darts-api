@@ -18,8 +18,7 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadableExternalObjectDirectories;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -27,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -61,6 +62,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -201,6 +203,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 mediaRequestEntity
             );
 
+            boolean hasAllMediaBeenCopiedFromInboundStorage = checkAllMediaExistsInTwoStorageLocations(filteredMediaEntities,
+                                                                                          ExternalLocationTypeEnum.INBOUND,
+                                                                                          ExternalLocationTypeEnum.UNSTRUCTURED);
+            if (!hasAllMediaBeenCopiedFromInboundStorage) {
+                mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
+                return;
+            }
+
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
             List<AudioFileInfo> generatedAudioFiles;
@@ -277,7 +287,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
-            Path downloadPath = saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = retrieveFromStorageAndSaveToTempWorkspace(mediaEntity);
 
             downloadedMedias.put(mediaEntity, downloadPath);
         }
@@ -285,25 +295,35 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
+    public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
 
-        var externalObjectDirectoryEntities = externalObjectDirectoryRepository.findByMedia(mediaEntity);
-        var downloadableExternalObjectDirectories = DownloadableExternalObjectDirectories.getFileBasedDownload(externalObjectDirectoryEntities);
-        dataManagementFacade.getDataFromUnstructuredArmAndDetsBlobs(downloadableExternalObjectDirectories);
+        try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {
+            UUID id = downloadResponseMetaData.getEodEntity().getExternalLocation();
 
-        if (!downloadableExternalObjectDirectories.getResponse().isSuccessfulDownload()) {
-            throw new RuntimeException(String.format("Could not locate media: %s", mediaEntity.getId()));
+            var mediaData = downloadResponseMetaData.getInputStream();
+            Path downloadPath = saveBlobDataToTempWorkspace(mediaData, id.toString());
+            return downloadPath;
+        } catch (FileNotDownloadedException e) {
+            throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
         }
+    }
 
-        DatastoreContainerType containerType = downloadableExternalObjectDirectories.getResponse().getContainerTypeUsedToDownload();
-        UUID id = getMediaLocation(mediaEntity, containerType.getId()).orElseThrow(
-            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-            )));
+    private boolean checkAllMediaExistsInTwoStorageLocations(List<MediaEntity> mediaEntities,
+                                                             ExternalLocationTypeEnum location1,
+                                                             ExternalLocationTypeEnum location2) {
 
-        var mediaData = downloadableExternalObjectDirectories.getResponse().getInputStream();
-        Path downloadPath = saveBlobDataToTempWorkspace(mediaData, id.toString());
+        return mediaEntities.stream()
+            .allMatch(mediaEntity -> existsMediaInTwoStorageLocation(mediaEntity, location1, location2));
+    }
 
-        return downloadPath;
+    private boolean existsMediaInTwoStorageLocation(MediaEntity mediaEntity,
+                                                                   ExternalLocationTypeEnum location1,
+                                                                   ExternalLocationTypeEnum location2) {
+
+        ExternalLocationTypeEntity firstLocationEntity = externalLocationTypeRepository.getReferenceById(location1.getId());
+        ExternalLocationTypeEntity secondLocationEntity = externalLocationTypeRepository.getReferenceById(location2.getId());
+
+        return externalObjectDirectoryRepository.existsMediaFileIn2StorageLocations(mediaEntity, firstLocationEntity, secondLocationEntity);
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")

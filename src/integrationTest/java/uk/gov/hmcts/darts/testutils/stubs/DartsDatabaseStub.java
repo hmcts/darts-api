@@ -4,13 +4,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.platform.commons.JUnitException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -26,11 +27,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
-import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -84,6 +80,8 @@ import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -203,9 +201,8 @@ public class DartsDatabaseStub {
         dailyListRepository.deleteAll();
         userAccountRepository.deleteAll(userAccountBin);
         userAccountBin.clear();
-        // Look at why this doesn't work
-        // securityGroupRepository.deleteAll(securityGroupBin);
-        // securityGroupBin.clear();
+        securityGroupRepository.deleteAll(securityGroupBin);
+        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         regionRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
@@ -409,33 +406,6 @@ public class DartsDatabaseStub {
         return completedMediaRequest;
     }
 
-    public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
-                                                                     UserAccountEntity requestor,
-                                                                     AudioRequestType audioRequestType) {
-        OffsetDateTime now = OffsetDateTime.now(UTC);
-        return save(
-            AudioTestData.createExpiredMediaRequest(
-                hearing,
-                requestor,
-                now.minusDays(5),
-                now.minusDays(4),
-                audioRequestType
-            ));
-    }
-
-    public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
-                                                                       UserAccountEntity requestor,
-                                                                       AudioRequestType audioRequestType) {
-        MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
-            hearing,
-            requestor,
-            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-            audioRequestType
-        );
-        return save(completedMediaRequest);
-    }
-
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
         mediaRepository.save(mediaEntity);
         hearing.addMedia(mediaEntity);
@@ -461,50 +431,6 @@ public class DartsDatabaseStub {
         return annotationRepository.save(annotationEntity);
     }
 
-    public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
-    }
-
-    public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {
-        return caseRepository.save(courtCaseEntity);
-    }
-
-    public CaseManagementRetentionEntity save(CaseManagementRetentionEntity caseManagementRetentionEntity) {
-        return caseManagementRetentionRepository.save(caseManagementRetentionEntity);
-    }
-
-    public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
-        return caseRetentionRepository.save(caseRetentionEntity);
-    }
-
-    public CourthouseEntity save(CourthouseEntity courthouseEntity) {
-        return courthouseRepository.save(courthouseEntity);
-    }
-
-    public CourtroomEntity save(CourtroomEntity courtroom) {
-        return courtroomRepository.save(courtroom);
-    }
-
-    public EventEntity save(EventEntity eventEntity) {
-        return eventRepository.save(eventEntity);
-    }
-
-    public MediaRequestEntity save(MediaRequestEntity mediaRequestEntity) {
-        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
-    }
-
-    public MediaEntity save(MediaEntity media) {
-        return mediaRepository.save(media);
-    }
-
-    public JudgeEntity save(JudgeEntity judge) {
-        return judgeRepository.save(judge);
-    }
-
-    public TransformedMediaEntity save(TransformedMediaEntity transformedMediaEntity) {
-        return transformedMediaRepository.saveAndFlush(transformedMediaEntity);
-    }
-
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         courthouseRepository.save(hearingEntity.getCourtroom().getCourthouse());
@@ -512,40 +438,47 @@ public class DartsDatabaseStub {
         return hearingRepository.save(hearingEntity);
     }
 
-    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
-        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    @Transactional
+    public <T> T save(T entity) {
+        Method getIdInstanceMethod;
+        try {
+            getIdInstanceMethod = entity.getClass().getMethod("getId");
+            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
+            if (id == null) {
+                this.entityManager.persist(entity);
+                return entity;
+            } else {
+                return this.entityManager.merge(entity);
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new JUnitException("Failed to save entity", e);
+        }
     }
 
-    public TransientObjectDirectoryEntity save(TransientObjectDirectoryEntity transientObjectDirectory) {
-        return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectory);
-    }
+    @SneakyThrows
+    @Transactional
+    public void saveAll(Object... entities) {
+        if (entities == null || entities.length == 0) {
+            return;
+        }
 
-    public TranscriptionWorkflowEntity save(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
-        return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
-    }
+        var getIdInstanceMethod = entities[0].getClass().getMethod("getId");
 
-    public AnnotationDocumentEntity save(AnnotationDocumentEntity annotationDocumentEntity) {
-        return annotationDocumentRepository.save(annotationDocumentEntity);
-    }
+        stream(entities).forEach(entity -> {
+            Integer id;
 
-    public void save(TranscriptionWorkflowEntity... transcriptionWorkflowEntity) {
-        transcriptionWorkflowRepository.saveAllAndFlush(asList(transcriptionWorkflowEntity));
-    }
+            try {
+                id = (Integer) getIdInstanceMethod.invoke(entity);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new JUnitException("Failed to save entity", e);
+            }
 
-    public void save(TranscriptionCommentEntity... transcriptionCommentEntities) {
-        transcriptionCommentRepository.saveAllAndFlush(asList(transcriptionCommentEntities));
-    }
-
-    public void saveAll(HearingEntity... hearingEntities) {
-        hearingRepository.saveAllAndFlush(asList(hearingEntities));
-    }
-
-    public void saveAll(EventEntity... eventEntities) {
-        eventRepository.saveAll(asList(eventEntities));
-    }
-
-    public void saveAll(EventHandlerEntity... eventHandlerEntities) {
-        eventHandlerRepository.saveAll(asList(eventHandlerEntities));
+            if (id == null) {
+                this.entityManager.persist(entity);
+            } else {
+                this.entityManager.merge(entity);
+            }
+        });
     }
 
     public void saveAll(UserAccountEntity... testUsers) {
@@ -744,5 +677,14 @@ public class DartsDatabaseStub {
         annotation.addHearing(save(someMinimalHearing()));
         save(annotation);
         return annotation;
+    }
+
+    public SecurityGroupEntity getSecurityGroupRef(int id) {
+        return securityGroupRepository.getReferenceById(id);
+    }
+
+
+    public CourthouseEntity findCourthouseById(int id) {
+        return courthouseRepository.findById(id).orElseThrow();
     }
 }
