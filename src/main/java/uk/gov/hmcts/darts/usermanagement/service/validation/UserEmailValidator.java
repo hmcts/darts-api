@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.service.validation;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -10,12 +11,19 @@ import uk.gov.hmcts.darts.usermanagement.model.User;
 
 @Component("duplicateEmailValidator")
 @RequiredArgsConstructor
-public class DuplicateEmailValidator implements Validator<User> {
+public class UserEmailValidator implements Validator<User> {
 
     private final UserAccountRepository userAccountRepository;
 
     @Override
     public void validate(User user) {
+
+        if (!EmailValidator.getInstance().isValid(user.getEmailAddress())) {
+            throw new DartsApiException(
+                UserManagementError.INVALID_EMAIL_FORMAT,
+                String.format("Invalid email format {%s}", user.getEmailAddress()));
+        }
+
         userAccountRepository.findByEmailAddressIgnoreCaseAndActive(user.getEmailAddress(), true)
             .stream().findFirst()
             .ifPresent(existingUser -> {
