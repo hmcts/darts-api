@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 
-@Component("duplicateEmailValidator")
+@Component("userEmailValidator")
 @RequiredArgsConstructor
 public class UserEmailValidator implements Validator<User> {
 
