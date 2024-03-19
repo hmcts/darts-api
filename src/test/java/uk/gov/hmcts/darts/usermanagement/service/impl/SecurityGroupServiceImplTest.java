@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapp
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -59,7 +61,7 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(null, null);
+        var filteredGroups = securityGroupService.getSecurityGroups(null, null, null, null);
 
         assertEquals(3, filteredGroups.size());
     }
@@ -77,7 +79,7 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null);
+        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null, null, null);
 
         assertEquals(1, filteredGroups.size());
     }
@@ -95,7 +97,7 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null);
+        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null, null, null);
 
         assertEquals(2, filteredGroups.size());
     }
@@ -113,7 +115,7 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null);
+        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, null, null, null);
 
         assertEquals(0, filteredGroups.size());
     }
@@ -131,7 +133,7 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(null, courthouseId);
+        var filteredGroups = securityGroupService.getSecurityGroups(null, courthouseId, null, null);
 
         assertEquals(1, filteredGroups.size());
     }
@@ -149,7 +151,7 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(null, courthouseId);
+        var filteredGroups = securityGroupService.getSecurityGroups(null, courthouseId, null, null);
 
         assertEquals(0, filteredGroups.size());
     }
@@ -168,9 +170,89 @@ class SecurityGroupServiceImplTest {
 
         when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
 
-        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, courthouseId);
+        var filteredGroups = securityGroupService.getSecurityGroups(listOfRoleIds, courthouseId, null, null);
 
         assertEquals(1, filteredGroups.size());
+    }
+
+    @Test
+    void testGetSecurityGroupsFilteredByUserId() {
+
+        Integer userId = 2;
+
+        List<SecurityGroupEntity> securityGroupEntities = List.of(
+            createSecurityGroupEntity(1,10,20),
+            createSecurityGroupEntity(2,11,21),
+            createSecurityGroupEntity(3,12,22)
+        );
+
+        addUserAccountsToSecurityGroups(securityGroupEntities);
+
+        when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
+
+        var filteredGroups = securityGroupService.getSecurityGroups(null, null, userId, null);
+
+        assertEquals(1, filteredGroups.size());
+    }
+
+    @Test
+    void testGetSecurityGroupsFilteredByUserIdNoMatch() {
+
+        Integer userId = 20;
+
+        List<SecurityGroupEntity> securityGroupEntities = List.of(
+            createSecurityGroupEntity(1,10,20),
+            createSecurityGroupEntity(2,11,21),
+            createSecurityGroupEntity(3,12,22)
+        );
+
+        addUserAccountsToSecurityGroups(securityGroupEntities);
+
+        when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
+
+        var filteredGroups = securityGroupService.getSecurityGroups(null, null, userId, null);
+
+        assertEquals(0, filteredGroups.size());
+    }
+
+    @Test
+    void testGetSecurityGroupsFilteredBySingletonUser() {
+
+        Boolean singletonUser = true;
+
+        List<SecurityGroupEntity> securityGroupEntities = List.of(
+            createSecurityGroupEntity(1,10,20),
+            createSecurityGroupEntity(2,11,21),
+            createSecurityGroupEntity(3,12,22)
+        );
+
+        addUserAccountsToSecurityGroups(securityGroupEntities);
+
+        when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
+
+        var filteredGroups = securityGroupService.getSecurityGroups(null, null, null, singletonUser);
+
+        assertEquals(1, filteredGroups.size());
+    }
+
+    @Test
+    void testGetSecurityGroupsFilteredByMultiUser() {
+
+        Boolean singletonUser = false;
+
+        List<SecurityGroupEntity> securityGroupEntities = List.of(
+            createSecurityGroupEntity(1,10,20),
+            createSecurityGroupEntity(2,11,21),
+            createSecurityGroupEntity(3,12,22)
+        );
+
+        addUserAccountsToSecurityGroups(securityGroupEntities);
+
+        when(securityGroupRepository.findAll()).thenReturn(securityGroupEntities);
+
+        var filteredGroups = securityGroupService.getSecurityGroups(null, null, null, singletonUser);
+
+        assertEquals(2, filteredGroups.size());
     }
 
     private SecurityGroupEntity createSecurityGroupEntity(Integer securityGroupId, Integer roleId, Integer courthouseId) {
@@ -192,5 +274,28 @@ class SecurityGroupServiceImplTest {
         securityGroupEntity.setCourthouseEntities(courthouseEntitySet);
 
         return securityGroupEntity;
+    }
+
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    private List<SecurityGroupEntity> addUserAccountsToSecurityGroups(List<SecurityGroupEntity> securityGroupEntities) {
+
+        int userIdCounter = 1;
+
+        for (SecurityGroupEntity securityGroupEntity : securityGroupEntities) {
+            Set<UserAccountEntity> userAccountEntities = new LinkedHashSet<>();
+
+            for (int i = 1; i <= securityGroupEntity.getId(); i++) {
+                UserAccountEntity userAccountEntity = new UserAccountEntity();
+
+                userAccountEntity.setId(userIdCounter);
+                userAccountEntity.setUserName("TestUser" + userIdCounter);
+                userAccountEntities.add(userAccountEntity);
+
+                userIdCounter++;
+            }
+            securityGroupEntity.setUsers(userAccountEntities);
+        }
+
+        return securityGroupEntities;
     }
 }

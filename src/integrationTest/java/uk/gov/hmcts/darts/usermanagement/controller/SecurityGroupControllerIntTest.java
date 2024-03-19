@@ -207,6 +207,202 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void getSecurityGroupsFilterByUserIdShouldSucceedAndReturnFilteredGroups() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
+            .queryParam("user_id", "-46")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        String expectedJson = """
+                [
+                    {
+                      "id":-17,
+                      "security_role_id":10,
+                      "global_access":true,
+                      "display_state":true,
+                      "courthouse_ids":[],
+                      "name":"Mid Tier Group"
+                    },
+                    {
+                      "id":-16,
+                      "security_role_id":9,
+                      "global_access":true,
+                      "display_state":true,
+                      "courthouse_ids":[],
+                      "name":"Dar Pc Group"
+                      },
+                      {
+                        "id":-15,
+                        "security_role_id":8,
+                        "global_access":true,
+                        "display_state":true,
+                        "courthouse_ids":[],
+                        "name":"Cpp Group"
+                      },
+                      {
+                        "id":1,
+                        "security_role_id":11,
+                        "global_access":true,
+                        "display_state":true,
+                        "courthouse_ids":[],
+                        "name":"SUPER_ADMIN",
+                        "display_name":
+                        "Super Admin"
+                      },
+                      {
+                        "id":2,
+                        "security_role_id":12,
+                        "global_access":true,
+                        "display_state":true,
+                        "courthouse_ids":[],
+                        "name":"SUPER_USER",
+                        "display_name":"Super User"
+                        }
+                ]
+            """;
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getSecurityGroupsFilterBySingleUsersShouldSucceedAndReturnFilteredGroups() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
+            .queryParam("singleton_user", "true")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        String expectedJson = """
+                [
+                  {
+                    "id":-17,
+                    "security_role_id":10,
+                    "global_access":true,
+                    "display_state":true,
+                    "courthouse_ids":[],
+                    "name":"Mid Tier Group"
+                    },
+                    {"id":-16,
+                    "security_role_id":9,
+                    "global_access":true,
+                    "display_state":true,
+                    "courthouse_ids":[],
+                    "name":"Dar Pc Group"
+                    },
+                    {"id":-15,
+                    "security_role_id":8,
+                    "global_access":true,
+                    "display_state":true,
+                    "courthouse_ids":[],
+                    "name":"Cpp Group"
+                    },
+                    {"id":2,
+                    "security_role_id":12,
+                    "global_access":true,
+                    "display_state":true,
+                    "courthouse_ids":[],
+                    "name":"SUPER_USER",
+                    "display_name":"Super User"
+                    }
+                 ]
+            """;
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getSecurityGroupsFilterByMultiUsersShouldSucceedAndReturnFilteredGroups() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
+            .queryParam("singleton_user", "false")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        String expectedJson = """
+                [
+                    {
+                        "id":1,
+                        "security_role_id":11,
+                        "global_access":true,
+                        "display_state":true,
+                        "courthouse_ids":[],
+                        "name":"SUPER_ADMIN",
+                        "display_name":"Super Admin"
+                    }
+                ]
+            """;
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getSecurityGroupsFilterByUserIdAndSingleUsersShouldSucceedAndReturnFilteredGroups() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
+            .queryParam("user_id", "-46")
+            .queryParam("singleton_user", "true")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        String expectedJson = """
+                [
+                      {
+                          "id":-17,
+                          "security_role_id":10,
+                          "global_access":true,
+                          "display_state":true,
+                          "courthouse_ids":[],
+                          "name":"Mid Tier Group"
+                      },
+                      {
+                          "id":-16,
+                          "security_role_id":9,
+                          "global_access":true,
+                          "display_state":true,
+                          "courthouse_ids":[],
+                          "name":"Dar Pc Group"
+                      },
+                      {
+                          "id":-15,
+                          "security_role_id":8,
+                          "global_access":true,
+                          "display_state":true,
+                          "courthouse_ids":[],
+                          "name":"Cpp Group"
+                      },
+                      {
+                          "id":2,
+                          "security_role_id":12,
+                          "global_access":true,
+                          "display_state":true,
+                          "courthouse_ids":[],
+                          "name":"SUPER_USER",
+                          "display_name":"Super User"
+                      }
+                  ]
+            """;
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void addCourthouseToSecurityGroup(CourthouseEntity courthouseEntity, Integer securityGroupId) {
 
         var securityGroupEntity = dartsDatabase.getSecurityGroupRepository().findById(securityGroupId);
