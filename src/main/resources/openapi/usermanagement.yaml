@@ -483,16 +483,18 @@ components:
       enum:
         - "USER_MANAGEMENT_100"
         - "USER_MANAGEMENT_101"
+        - "USER_MANAGEMENT_102"
         - "USER_NOT_TRANSCRIBER_110"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 
     UserManagementTitleErrors:
       type: string
       enum:
         - "The provided user does not exist"
         - "The provided email already exists"
+        - "Invalid email format"
         - "Duplicate security group names are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
 
 
     Role:
@@ -512,13 +514,15 @@ components:
             enum:
               - "USER_100"
               - "USER_101"
+              - "USER_102"
               - "USER_110"
-            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
 
         UserManagementsTitleErrors:
             type: string
             enum:
               - "The provided user does not exist"
               - "The provided email already exists"
+              - "Invalid email format"
               - "Duplicate security group names are not permitted"
-            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]

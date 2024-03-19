@@ -44,13 +44,13 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final AuthorisationApi authorisationApi;
     private final UserSearchQuery userSearchQuery;
     private final UserManagementQuery userManagementQuery;
-    private final Validator<User> duplicateEmailValidator;
+    private final Validator<User> userEmailValidator;
     private final Validator<Integer> userAccountExistsValidator;
 
     @Override
     @Transactional
     public UserWithId createUser(User user) {
-        duplicateEmailValidator.validate(user);
+        userEmailValidator.validate(user);
 
         var userEntity = userAccountMapper.mapToUserEntity(user);
         if (isNull(userEntity.isActive())) {
@@ -136,7 +136,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     private void updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
         if (userPatch.getEmailAddress() != null && !userPatch.getEmailAddress().equals(userAccountEntity.getEmailAddress())) {
-            duplicateEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress()));
+            userEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress()));
             userAccountEntity.setEmailAddress(userPatch.getEmailAddress());
         }
 

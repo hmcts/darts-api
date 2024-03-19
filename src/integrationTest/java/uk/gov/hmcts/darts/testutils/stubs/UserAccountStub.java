@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -215,6 +217,19 @@ public class UserAccountStub {
         return testUser;
     }
 
+    @Transactional
+    public UserAccountEntity createRcjAppealUser(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = SecurityGroupTestData
+            .buildGroupForRoleAndCourthouse(SecurityRoleEnum.RCJ_APPEALS, courthouseEntity);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
     public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-14).get();
         securityGroupEntity.setGlobalAccess(true);
@@ -266,7 +281,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createSuperAdminUser() {
-        var adminGroup = securityGroupRepository.findByGroupName("SUPER_ADMIN")
+        var adminGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_ADMIN")
             .orElseThrow();
         adminGroup.setGlobalAccess(true);
         adminGroup = securityGroupRepository.saveAndFlush(adminGroup);
@@ -280,7 +295,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createSuperUser() {
-        var superUserGroup = securityGroupRepository.findByGroupName("SUPER_USER")
+        var superUserGroup = securityGroupRepository.findByGroupNameIgnoreCase("SUPER_USER")
             .orElseThrow();
         superUserGroup.setGlobalAccess(true);
         superUserGroup = securityGroupRepository.saveAndFlush(superUserGroup);

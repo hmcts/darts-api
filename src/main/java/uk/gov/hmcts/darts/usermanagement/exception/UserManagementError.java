@@ -23,7 +23,11 @@ public enum UserManagementError implements DartsApiError {
     DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED(
         UserManagementErrorCode.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED.getValue(),
         HttpStatus.CONFLICT,
-        UserManagementTitleErrors.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED.toString()
+        UserManagementTitleErrors.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED.toString()),
+    INVALID_EMAIL_FORMAT(
+        UserManagementErrorCode.INVALID_EMAIL_FORMAT.getValue(),
+        HttpStatus.BAD_REQUEST,
+        UserManagementTitleErrors.INVALID_EMAIL_FORMAT.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "USER_MANAGEMENT";

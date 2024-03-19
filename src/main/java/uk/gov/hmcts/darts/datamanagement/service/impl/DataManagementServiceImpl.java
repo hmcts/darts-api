@@ -11,6 +11,7 @@ import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -29,6 +30,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
@@ -160,13 +164,18 @@ public class DataManagementServiceImpl implements DataManagementService {
                                                                            ), null
             );
 
-            if (202 != response.getStatusCode()) {
-                throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
+            HttpStatus httpStatus = valueOf(response.getStatusCode());
+            if (httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus)) {
+                return response;
+            } else {
+                String message = String.format("Failed to delete from storage container=%s, blobId=%s, httpStatus=%s",
+                                               containerName, blobId, httpStatus);
+                throw new AzureDeleteBlobException(message);
             }
-            return response;
+
         } catch (RuntimeException e) {
             throw new AzureDeleteBlobException(
-                "Could not delete from container: " + containerName + " uuid: " + blobId, e
+                "Could not delete from storage container=" + containerName + ", blobId=" + blobId, e
             );
         }
     }
