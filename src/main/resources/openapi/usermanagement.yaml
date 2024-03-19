@@ -128,6 +128,35 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/GetSecurityGroupSuccessResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                title: Bad Request
+                status: 400
+                detail: "Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'; For input string: \"1x\""
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
         '404':
           description: Not Found Error
           content:
