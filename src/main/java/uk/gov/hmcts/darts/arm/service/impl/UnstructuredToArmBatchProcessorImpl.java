@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
+import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -54,11 +55,11 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                                                ArchiveRecordService archiveRecordService,
                                                ExternalObjectDirectoryService eodService) {
         super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi, armDataManagementApi);
-        this.eodService = eodService;
         this.userIdentity = userIdentity;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.fileOperationService = fileOperationService;
         this.archiveRecordService = archiveRecordService;
+        this.eodService = eodService;
     }
 
     @Override
@@ -79,24 +80,23 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
             for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
                 try {
-                    if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(eodService.armLocation().getId())) {
+                    if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(EodEntities.armLocation.getId())) {
                         armExternalObjectDirectory = currentExternalObjectDirectory;
                         previousStatus = armExternalObjectDirectory.getStatus();
-                        var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory, eodService.storedStatus());
+                        var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory, EodEntities.storedStatus);
                         if (matchingEntity.isPresent()) {
                             unstructuredExternalObjectDirectory = matchingEntity.get();
-                            //TODO set manifest file name also on unstructured files?
                             armExternalObjectDirectory.setManifestFile(manifestFile.getName());
-                            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+                            updateExternalObjectDirectoryStatus(armExternalObjectDirectory, EodEntities.armIngestionStatus);
                         } else {
                             log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
                             updateTransferAttempts(armExternalObjectDirectory);
-                            updateExternalObjectDirectoryStatus(armExternalObjectDirectory, eodService.failedArmRawDataStatus());
+                            updateExternalObjectDirectoryStatus(armExternalObjectDirectory, EodEntities.failedArmRawDataStatus);
                             continue;
                         }
                     } else {
                         unstructuredExternalObjectDirectory = currentExternalObjectDirectory;
-                        armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory, eodService.armIngestionStatus());
+                        armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory, EodEntities.armIngestionStatus);
                         armExternalObjectDirectory.setManifestFile(manifestFile.getName());
                         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
                     }
@@ -123,9 +123,9 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
         ExternalLocationTypeEntity sourceLocation = null;
         if (armClient.equalsIgnoreCase("darts")) {
-             sourceLocation = eodService.unstructuredLocation();
+             sourceLocation = EodEntities.unstructuredLocation;
         } else if (armClient.equalsIgnoreCase("dets")) {
-            sourceLocation = eodService.detsLocation();
+            sourceLocation = EodEntities.detsLocation;
         } else {
             log.error("unknown arm client {}", armDataManagementConfiguration.getArmClient());
             return Collections.emptyList();
@@ -133,9 +133,9 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
         var result = new ArrayList<ExternalObjectDirectoryEntity>();
         result.addAll(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
-            eodService.storedStatus(),
+            EodEntities.storedStatus,
             sourceLocation,
-            eodService.armLocation(),
+            EodEntities.armLocation,
             Pageable.ofSize(batchSize)
         ));
         var remaining = batchSize - result.size();
@@ -171,17 +171,17 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     log.info("Metadata BLOB already exists {}", e.getMessage());
                 } else {
                     log.error("Failed to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
-                    updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, eodService.failedArmManifestFileStatus());
+                    updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, EodEntities.failedArmManifestFileStatus);
                     return false;
                 }
             } catch (Exception e) {
                 log.error("Unable to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
-                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, eodService.failedArmManifestFileStatus());
+                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, EodEntities.failedArmManifestFileStatus);
                 return false;
             }
         } else {
             log.error("Failed to generate metadata file {}", archiveRecordFile.getAbsolutePath());
-            updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, eodService.failedArmManifestFileStatus());
+            updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, EodEntities.failedArmManifestFileStatus);
             return false;
         }
         return true;
