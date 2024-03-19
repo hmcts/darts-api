@@ -135,6 +135,16 @@ paths:
           description: Filter by Courthouse Id
           schema:
             $ref: '#/components/schemas/CourthouseId'
+        - in: query
+          name: user_id
+          description: Filter security groups assigned to a user id
+          schema:
+            $ref: '#/components/schemas/UserId'
+        - in: query
+          name: singleton_user
+          description: Filter groups that have single user when true
+          schema:
+            type: boolean
       tags:
         - SecurityGroup
       responses:
