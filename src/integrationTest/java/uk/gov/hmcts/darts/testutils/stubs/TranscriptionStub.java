@@ -327,6 +327,10 @@ public class TranscriptionStub {
         return BinaryData.fromString("test binary transcription document data");
     }
 
+    public static BinaryData getEmptyFile() {
+        return BinaryData.fromBytes(new byte[0]);
+    }
+
     public static String getTranscriptionDocumentChecksum() {
         return new String(encodeBase64(md5(getBinaryTranscriptionDocumentData().toBytes())));
     }

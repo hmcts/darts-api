@@ -40,6 +40,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTU
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_EMPTY_FILE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
@@ -225,6 +226,9 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         }
         if (fileSize > maxFileSize) {
             unstructured.setStatus(getStatus(FAILURE_FILE_SIZE_CHECK_FAILED));
+        }
+        if (0 == fileSize) {
+            unstructured.setStatus(getStatus(FAILURE_EMPTY_FILE));
         }
 
         setNumTransferAttempts(unstructured);

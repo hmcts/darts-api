@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTU
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_INGESTION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_EMPTY_FILE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
@@ -47,7 +48,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
             FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
             FAILURE_CHECKSUM_FAILED.getId(),
-            FAILURE_ARM_INGESTION_FAILED.getId()
+            FAILURE_ARM_INGESTION_FAILED.getId(),
+            FAILURE_EMPTY_FILE.getId()
         );
 
     @Override
