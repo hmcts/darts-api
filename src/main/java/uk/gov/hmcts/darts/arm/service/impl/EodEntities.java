@@ -2,11 +2,8 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -21,37 +18,32 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFES
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@Service
+@Component
 @Getter
 @Accessors(fluent = true)
-public class ExternalObjectDirectoryService {
+public class EodEntities {
 
     private final ExternalObjectDirectoryRepository eodRepository;
     private final ExternalLocationTypeRepository eltRepository;
     private final ObjectRecordStatusRepository orsRepository;
 
-    private final ExternalLocationTypeEntity unstructuredLocation;
-    private final ExternalLocationTypeEntity armLocation;
-    private final ExternalLocationTypeEntity detsLocation;
+    public static ExternalLocationTypeEntity unstructuredLocation;
+    public static ExternalLocationTypeEntity armLocation;
+    public static ExternalLocationTypeEntity detsLocation;
 
-    private final ObjectRecordStatusEntity failedArmRawDataStatus;
-    private final ObjectRecordStatusEntity failedArmManifestFileStatus;
-    private final ObjectRecordStatusEntity storedStatus;
-    private final ObjectRecordStatusEntity armIngestionStatus;
-    private final ObjectRecordStatusEntity armDropZoneStatus;
-    private final List<ObjectRecordStatusEntity> failedArmStatuses;
+    public static ObjectRecordStatusEntity failedArmRawDataStatus;
+    public static ObjectRecordStatusEntity failedArmManifestFileStatus;
+    public static ObjectRecordStatusEntity storedStatus;
+    public static ObjectRecordStatusEntity armIngestionStatus;
+    public static ObjectRecordStatusEntity armDropZoneStatus;
+    public static List<ObjectRecordStatusEntity> failedArmStatuses;
 
-    private final ArmDataManagementConfiguration armConfig;
-
-
-    public ExternalObjectDirectoryService(ExternalObjectDirectoryRepository eodRepository,
-                                          ExternalLocationTypeRepository eltRepository,
-                                          ObjectRecordStatusRepository orsRepository,
-                                          ArmDataManagementConfiguration armConfig) {
+    public EodEntities(ExternalObjectDirectoryRepository eodRepository,
+                       ExternalLocationTypeRepository eltRepository,
+                       ObjectRecordStatusRepository orsRepository) {
         this.eodRepository = eodRepository;
         this.eltRepository = eltRepository;
         this.orsRepository = orsRepository;
-        this.armConfig = armConfig;
 
         unstructuredLocation = eltRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         armLocation = eltRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
@@ -65,15 +57,5 @@ public class ExternalObjectDirectoryService {
         armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).get();
 
         failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus);
-    }
-
-    public List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEODs(Pageable pageable) {
-
-        return eodRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            failedArmStatuses,
-            armLocation,
-            armConfig.getMaxRetryAttempts(),
-            pageable
-        );
     }
 }

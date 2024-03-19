@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import uk.gov.hmcts.darts.arm.service.impl.ExternalObjectDirectoryService;
+import uk.gov.hmcts.darts.arm.service.impl.EodEntities;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -35,7 +35,7 @@ public class ExternalObjectDirectoryServiceMock {
     @Mock(lenient = true)
     private ExternalObjectDirectoryEntity eodArm;
 
-    public void givenServiceIsMocked(ExternalObjectDirectoryService mockEodService) {
+    public void givenServiceIsMocked(EodEntities mockEodService) {
         MockitoAnnotations.initMocks(this);
 
         when(mockEodService.armLocation()).thenReturn(armLocation);
