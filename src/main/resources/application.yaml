@@ -199,6 +199,10 @@ darts:
 
       response-cleanup-buffer-days: 0
 
+      batch-size: 10
+      manifest-file-prefix: DARTS
+      arm-client: darts
+
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
