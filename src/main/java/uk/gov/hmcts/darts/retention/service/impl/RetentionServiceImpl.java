@@ -4,10 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
+import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyMapper;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
+import uk.gov.hmcts.darts.retentions.model.GetRetentionPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +22,8 @@ import java.util.List;
 public class RetentionServiceImpl implements RetentionService {
     private final CaseRetentionRepository caseRetentionRepository;
     private final RetentionMapper retentionMapper;
+    private final RetentionPolicyMapper retentionPolicyMapper;
+    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
 
     @Override
     public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
@@ -29,5 +35,12 @@ public class RetentionServiceImpl implements RetentionService {
             caseRetentions.add(retentionMapper.mapToCaseRetention(caseRetentionEntity));
         }
         return caseRetentions;
+    }
+
+    @Override
+    public List<GetRetentionPolicy> getRetentionPolicyTypes() {
+        final List<RetentionPolicyTypeEntity> policyTypeRepositoryAll = retentionPolicyTypeRepository.findAll();
+        return retentionPolicyMapper.mapToRetentionPolicyResponse(policyTypeRepositoryAll);
+
     }
 }

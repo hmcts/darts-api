@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUser
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 
@@ -71,16 +70,16 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
-    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId) {
+    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
 
         securityGroupEntities = filterSecurityGroupEntitiesByRoleIds(securityGroupEntities, roleIds);
         securityGroupEntities = filterSecurityGroupEntitiesByCourthouseId(securityGroupEntities, courthouseId);
+        securityGroupEntities = filterSecurityGroupEntitiesByUserId(securityGroupEntities, userId);
+        securityGroupEntities = filterSecurityGroupEntitiesBySingleUser(securityGroupEntities, singletonUser);
 
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = securityGroupEntities.stream()
+        return securityGroupEntities.stream()
             .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
-
-        return securityGroupWithIdAndRoles;
     }
 
     private List<SecurityGroupEntity> filterSecurityGroupEntitiesByRoleIds(
@@ -89,7 +88,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         if (roleIds != null) {
             return securityGroupEntities.stream()
                 .filter(securityGroup -> roleIds.contains(securityGroup.getSecurityRoleEntity().getId()))
-                .collect(Collectors.toList());
+                .toList();
         }
         return securityGroupEntities;
     }
@@ -101,7 +100,31 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             return securityGroupEntities.stream()
                 .filter(securityGroupEntity -> securityGroupEntity.getCourthouseEntities().stream()
                     .anyMatch(courthouseEntity -> courthouseEntity.getId().equals(courthouseId)))
-                .collect(Collectors.toList());
+                .toList();
+        }
+        return securityGroupEntities;
+    }
+
+    private List<SecurityGroupEntity> filterSecurityGroupEntitiesByUserId(
+        List<SecurityGroupEntity> securityGroupEntities, Integer userId) {
+
+        if (userId != null) {
+            return securityGroupEntities.stream()
+                .filter(securityGroupEntity -> securityGroupEntity.getUsers().stream()
+                    .anyMatch(userAccountEntity -> userAccountEntity.getId().equals(userId)))
+                .toList();
+        }
+        return securityGroupEntities;
+    }
+
+    private List<SecurityGroupEntity> filterSecurityGroupEntitiesBySingleUser(
+        List<SecurityGroupEntity> securityGroupEntities, Boolean singletonUser) {
+
+        if (singletonUser != null) {
+            return securityGroupEntities.stream()
+                .filter(securityGroupEntity -> ((!securityGroupEntity.getUsers().isEmpty())
+                    && (securityGroupEntity.getUsers().size() == 1) == singletonUser))
+                .toList();
         }
         return securityGroupEntities;
     }

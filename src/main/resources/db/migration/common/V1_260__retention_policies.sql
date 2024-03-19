@@ -9,8 +9,8 @@ ALTER TABLE retention_policy_type ALTER COLUMN duration TYPE CHARACTER VARYING;
 ALTER TABLE retention_policy_type ALTER COLUMN policy_end_ts DROP NOT NULL;
 
 INSERT INTO darts.retention_policy_type
-(rpt_id, fixed_policy_key, policy_name, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES(1, -1, 'DARTS Permanent Retention v3', '30 years = 30y0m0d', '2024-01-01 00:00:00', '08170758956b0614', current_timestamp, 0, current_timestamp, 0);
+(rpt_id, fixed_policy_key, policy_name, duration, policy_start_ts, policy_end_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
+VALUES(1, -1, 'DARTS Permanent Retention v3', '30 years = 30y0m0d', '2024-01-01 00:00:00', '2024-03-01 00:00:00', '08170758956b0614', current_timestamp, 0, current_timestamp, 0);
 INSERT INTO darts.retention_policy_type
 (rpt_id, fixed_policy_key, policy_name, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
 VALUES(2, -2, 'DARTS Standard Retention v3', '7 years = 7y0m0d', '2024-01-01 00:00:00', '08170758956b0615', current_timestamp, 0, current_timestamp, 0);
