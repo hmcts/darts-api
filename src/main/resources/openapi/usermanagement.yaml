@@ -239,6 +239,37 @@ paths:
                 title: User is not authorised for this endpoint
                 status: 403
 
+  /admin/security-groups/{security_group_id}:
+    patch:
+      summary: Patch security group
+      tags:
+        - SecurityGroup
+      operationId: modifySecurityGroup
+      parameters:
+        - $ref: '#/components/parameters/SecurityGroupId'
+      requestBody:
+        $ref: '#/components/requestBodies/SecurityGroupPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SecurityGroupPatchResponse'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
+
 ########################################################################################################################
 # COMPONENT DEFINITIONS
 ########################################################################################################################
@@ -269,6 +300,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SecurityGroup'
+    SecurityGroupPatchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroupPatch'
 
   responses:
     UserSuccessResponseWithId:
@@ -378,6 +415,12 @@ components:
             type: "https://zalando.github.io/problem/constraint-violation"
             title: "Constraint Violation"
             status: 400
+    SecurityGroupPatchSuccess:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUserIds'
 
   parameters:
     UserId:
@@ -520,15 +563,6 @@ components:
         - "AUTHORISATION_109"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_ENDPOINT ]
 
-    SecurityGroupWithIdAndRoleAndUsers:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
-      properties:
-        user_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserId'
     SecurityGroupWithIdAndRole:
       type: object
       properties:
@@ -562,6 +596,24 @@ components:
       required:
         - name
         - display_name
+    SecurityGroupPatch:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/SecurityGroupName'
+        display_name:
+          $ref: '#/components/schemas/SecurityGroupDisplayName'
+        description:
+          $ref: '#/components/schemas/SecurityGroupDescription'
+        courthouse_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourthouseId'
+        user_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityGroupId'
+
 
     UserManagementErrorCode:
       type: string
