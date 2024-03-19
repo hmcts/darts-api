@@ -38,6 +38,8 @@ import static org.mockito.Mockito.when;
 class DataManagementServiceImplTest {
 
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
+    public static final String DEST_BLOB_CONTAINER_NAME = "destination_dummy_container";
+    public static final String DUMMY_CONNECTION_STRING = "connection-string";
     public static final UUID BLOB_ID = UUID.randomUUID();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
@@ -50,14 +52,19 @@ class DataManagementServiceImplTest {
     @InjectMocks
     private DataManagementServiceImpl dataManagementService;
     private BlobContainerClient blobContainerClient;
+    private BlobContainerClient destinationBlobContainerClient;
     private BlobClient blobClient;
+    private BlobClient destinationBlobClient;
 
     private BlobServiceClient serviceClient;
+    private BlobServiceClient destinationServiceClient;
 
     @BeforeEach
     void beforeEach() {
         blobContainerClient = mock(BlobContainerClient.class);
+        destinationBlobContainerClient = mock(BlobContainerClient.class);
         blobClient = mock(BlobClient.class);
+        destinationBlobClient = mock(BlobClient.class);
         serviceClient = mock(BlobServiceClient.class);
         when(dataManagementFactory.getBlobServiceClient(Mockito.notNull())).thenReturn(serviceClient);
         when(dataManagementConfiguration.getBlobStorageAccountConnectionString()).thenReturn("connection");
@@ -155,5 +162,17 @@ class DataManagementServiceImplTest {
             }
 
         }
+    }
+
+    @Test
+    void testCopyBlobData() {
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobContainerClient(DEST_BLOB_CONTAINER_NAME, serviceClient)).thenReturn(destinationBlobContainerClient);
+        when(dataManagementFactory.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
+        when(destinationBlobContainerClient.getBlobClient(BLOB_ID.toString())).thenReturn(destinationBlobClient);
+
+        dataManagementService.copyBlobData(BLOB_CONTAINER_NAME, DEST_BLOB_CONTAINER_NAME, BLOB_ID);
+
+        verify(destinationBlobClient, times(1)).copyFromUrl(any());
     }
 }

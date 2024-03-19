@@ -114,10 +114,10 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, sourceServiceClient);
         BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
 
-        BlobServiceClient destinationServiceClient =
-            blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        //BlobServiceClient destinationServiceClient =
+        //    blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient destinationContainerClient =
-            blobServiceFactory.getBlobContainerClient(destinationContainer, destinationServiceClient);
+            blobServiceFactory.getBlobContainerClient(destinationContainer, sourceServiceClient);
 
         destinationContainerClient.getBlobClient(sourceBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl());
     }
