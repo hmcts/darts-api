@@ -26,9 +26,10 @@ public class SecurityGroupController implements SecurityGroupApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
-    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(List<Integer> roleIds, Integer courthouseId) {
+    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(List<Integer> roleIds, Integer courthouseId,
+                                                                                   Integer userId, Boolean singletonUser) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(securityGroupService.getSecurityGroups(roleIds, courthouseId));
+            .body(securityGroupService.getSecurityGroups(roleIds, courthouseId, userId, singletonUser));
     }
 
     @Override
