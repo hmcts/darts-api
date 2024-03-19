@@ -108,10 +108,10 @@ module "armsa" {
   source                   = "git@github.com:hmcts/cnp-module-storage-account?ref=master"
   env                      = var.env
   storage_account_name     = "${var.product}-arm-{var.env}"
-  resource_group_name      = var.resource_group_name
+  resource_group_name      = local.rg_name
   location                 = var.location
   account_kind             = var.account_kind
-  account_replication_type = var.account_replication_type
+  account_replication_type = "ZRS"
   common_tags          = var.common_tags
 
   private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
