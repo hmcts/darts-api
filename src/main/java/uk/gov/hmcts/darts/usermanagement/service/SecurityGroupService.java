@@ -13,6 +13,6 @@ public interface SecurityGroupService {
 
     SecurityGroupEntity createAndSaveSecurityGroup(SecurityGroupModel securityGroupModel);
 
-    List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId);
+    List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser);
 
 }
