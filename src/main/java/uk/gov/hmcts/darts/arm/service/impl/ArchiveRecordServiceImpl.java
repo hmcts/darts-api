@@ -87,7 +87,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         CaseArchiveRecord caseArchiveRecord =
-            caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+            caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(caseArchiveRecord, archiveRecordFile, ArchiveRecordType.CASE_ARCHIVE_TYPE)
@@ -106,7 +106,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
-        MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+        MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
         );
@@ -126,7 +126,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         TranscriptionArchiveRecord transcriptionArchiveRecord =
-            transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+            transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(transcriptionArchiveRecord, archiveRecordFile, ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE)
@@ -145,7 +145,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         AnnotationArchiveRecord annotationArchiveRecord =
-            annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+            annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(annotationArchiveRecord, archiveRecordFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE)
