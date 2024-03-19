@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RetentionFunctionalTest extends FunctionalTest {
 
     public static final String CASE_RETENTION_URI = "/retentions";
+
+    public static final String RETENTION_POLICY_TYPES = "/admin/retention-policy-types";
     public static final int OK = 200;
 
     @AfterEach
@@ -37,5 +39,23 @@ class RetentionFunctionalTest extends FunctionalTest {
 
         String retentionPolicyApplied = response.jsonPath().getString("[0].retention_policy_applied");
         assertEquals("Legacy Standard", retentionPolicyApplied);
+    }
+
+    @Test
+    void testGetRetentionPolicyTypes() {
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .when()
+            .baseUri(getUri(RETENTION_POLICY_TYPES))
+            .get()
+            .then()
+            .assertThat()
+            .statusCode(OK)
+            .extract().response();
+
+        assertEquals(200, response.getStatusCode());
+
+        String retentionPolicyApplied = response.jsonPath().getString("[0].name");
+        assertEquals("DARTS Permanent Retention v3", retentionPolicyApplied);
     }
 }
