@@ -21,12 +21,9 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
@@ -40,12 +37,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @ConditionalOnExpression("${darts.storage.arm.batch-size} == 0")
 public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmProcessor {
 
-    private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final DataManagementApi dataManagementApi;
-    private final ArmDataManagementApi armDataManagementApi;
     private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -61,16 +55,18 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
 
     public UnstructuredToArmProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                           ObjectRecordStatusRepository objectRecordStatusRepository,
-                                          ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
-                                          ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
-                                          ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
+                                          ExternalLocationTypeRepository externalLocationTypeRepository,
+                                          DataManagementApi dataManagementApi,
+                                          ArmDataManagementApi armDataManagementApi,
+                                          UserIdentity userIdentity,
+                                          ArmDataManagementConfiguration armDataManagementConfiguration,
+                                          FileOperationService fileOperationService,
                                           ArchiveRecordService archiveRecordService) {
-        super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository);
+        super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi,
+              armDataManagementApi);
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.externalLocationTypeRepository = externalLocationTypeRepository;
-        this.dataManagementApi = dataManagementApi;
-        this.armDataManagementApi = armDataManagementApi;
         this.userIdentity = userIdentity;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.fileOperationService = fileOperationService;
@@ -193,72 +189,6 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
 
         return Stream.concat(pendingUnstructuredExternalObjectDirectoryEntities.stream(), failedArmExternalObjectDirectoryEntities.stream()).toList();
 
-    }
-
-    private boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-                                     ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                     String filename,
-                                     ObjectRecordStatusEntity previousStatus) {
-        try {
-            if (previousStatus == null
-                || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
-                || ARM_INGESTION.getId().equals(previousStatus.getId())) {
-                Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
-
-                BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
-                    unstructuredExternalObjectDirectory.getExternalLocation());
-                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
-                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-
-                Instant finish = Instant.now();
-                long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
-
-                armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
-                armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
-                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-            }
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("BLOB raw data already exists {}", e.getMessage());
-            } else {
-                log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
-                          e.getMessage()
-                );
-                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmRawDataStatus);
-                return false;
-            }
-        } catch (Exception e) {
-            log.error(
-                "Error moving BLOB data for file {} due to {}",
-                unstructuredExternalObjectDirectory.getExternalLocation(),
-                e.getMessage()
-            );
-
-            updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmRawDataStatus);
-            return false;
-        }
-
-        return true;
-    }
-
-    private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                                             ObjectRecordStatusEntity objectRecordStatus) {
-        log.debug(
-            "Updating ARM status from {} to {} for ID {}",
-            armExternalObjectDirectory.getStatus().getDescription(),
-            objectRecordStatus.getDescription(),
-            armExternalObjectDirectory.getId()
-        );
-        armExternalObjectDirectory.setStatus(objectRecordStatus);
-        updateTransferAttempts(armExternalObjectDirectory);
-        armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
-        armExternalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
-        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
 }

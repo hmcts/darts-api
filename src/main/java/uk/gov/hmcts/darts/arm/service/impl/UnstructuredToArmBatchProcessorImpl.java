@@ -23,16 +23,11 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 
 @Service
 @Slf4j
@@ -40,8 +35,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DAT
 public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToArmProcessor {
 
     private static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
-    private final DataManagementApi dataManagementApi;
-    private final ArmDataManagementApi armDataManagementApi;
     private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final FileOperationService fileOperationService;
@@ -52,15 +45,16 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
     public UnstructuredToArmBatchProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                ObjectRecordStatusRepository objectRecordStatusRepository,
-                                               ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
-                                               ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
-                                               ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
+                                               ExternalLocationTypeRepository externalLocationTypeRepository,
+                                               DataManagementApi dataManagementApi,
+                                               ArmDataManagementApi armDataManagementApi,
+                                               UserIdentity userIdentity,
+                                               ArmDataManagementConfiguration armDataManagementConfiguration,
+                                               FileOperationService fileOperationService,
                                                ArchiveRecordService archiveRecordService,
                                                ExternalObjectDirectoryService eodService) {
-        super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository);
+        super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi, armDataManagementApi);
         this.eodService = eodService;
-        this.dataManagementApi = dataManagementApi;
-        this.armDataManagementApi = armDataManagementApi;
         this.userIdentity = userIdentity;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.fileOperationService = fileOperationService;
@@ -91,6 +85,9 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                         var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory, eodService.storedStatus());
                         if (matchingEntity.isPresent()) {
                             unstructuredExternalObjectDirectory = matchingEntity.get();
+                            //TODO set manifest file name also on unstructured files?
+                            armExternalObjectDirectory.setManifestFile(manifestFile.getName());
+                            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
                         } else {
                             log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
                             updateTransferAttempts(armExternalObjectDirectory);
@@ -104,8 +101,18 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
                     }
 
+                    String rawFilename = generateFilename(armExternalObjectDirectory);
+                    log.info("Start of ARM Push processing for EOD {} running at: {}", armExternalObjectDirectory.getId(), OffsetDateTime.now());
+                    boolean copyRawDataToArmSuccessful = copyRawDataToArm(
+                        unstructuredExternalObjectDirectory,
+                        armExternalObjectDirectory,
+                        rawFilename,
+                        previousStatus
+                    );
+
 
                 } catch (Exception e) {
+                    //TODO fix error message
                     log.error("Unable to push EOD {} to ARM", currentExternalObjectDirectory.getId(), e);
                 }
             }
@@ -178,73 +185,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             return false;
         }
         return true;
-    }
-
-
-    private boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
-                                     ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                     String filename,
-                                     ObjectRecordStatusEntity previousStatus) {
-        try {
-            if (previousStatus == null
-                || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
-                || ARM_INGESTION.getId().equals(previousStatus.getId())) {
-                Instant start = Instant.now();
-                log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
-
-                BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
-                    unstructuredExternalObjectDirectory.getExternalLocation());
-                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
-                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-
-                Instant finish = Instant.now();
-                long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("ARM PERFORMANCE PUSH END for EOD {} ended at {}", armExternalObjectDirectory.getId(), finish);
-                log.info("ARM PERFORMANCE PUSH ELAPSED TIME for EOD {} took {} ms", armExternalObjectDirectory.getId(), timeElapsed);
-
-                armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
-                armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
-                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-            }
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("BLOB raw data already exists {}", e.getMessage());
-            } else {
-                log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
-                          e.getMessage()
-                );
-                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, eodService.failedArmRawDataStatus());
-                return false;
-            }
-        } catch (Exception e) {
-            log.error(
-                "Error moving BLOB data for file {} due to {}",
-                unstructuredExternalObjectDirectory.getExternalLocation(),
-                e.getMessage()
-            );
-
-            updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, eodService.failedArmRawDataStatus());
-            return false;
-        }
-
-        return true;
-    }
-
-    private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                                             ObjectRecordStatusEntity objectRecordStatus) {
-        log.debug(
-            "Updating ARM status from {} to {} for ID {}",
-            armExternalObjectDirectory.getStatus().getDescription(),
-            objectRecordStatus.getDescription(),
-            armExternalObjectDirectory.getId()
-        );
-        armExternalObjectDirectory.setStatus(objectRecordStatus);
-        updateTransferAttempts(armExternalObjectDirectory);
-        armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
-        armExternalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
-        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
 }
