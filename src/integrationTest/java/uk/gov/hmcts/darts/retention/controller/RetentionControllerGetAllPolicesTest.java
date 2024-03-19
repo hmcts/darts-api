@@ -38,7 +38,7 @@ class RetentionControllerGetAllPolicesTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         String expectedResponse = getContentsFromFile(
-            "Tests/retention/expectedResponse.json");
+            "tests/retention/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, response.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
