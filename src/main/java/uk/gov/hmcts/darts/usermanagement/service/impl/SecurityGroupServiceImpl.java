@@ -58,11 +58,13 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
-    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId) {
+    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
 
         securityGroupEntities = filterSecurityGroupEntitiesByRoleIds(securityGroupEntities, roleIds);
         securityGroupEntities = filterSecurityGroupEntitiesByCourthouseId(securityGroupEntities, courthouseId);
+        securityGroupEntities = filterSecurityGroupEntitiesByUserId(securityGroupEntities, userId);
+        securityGroupEntities = filterSecurityGroupEntitiesBySingleUser(securityGroupEntities, singletonUser);
 
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = securityGroupEntities.stream()
             .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
@@ -88,6 +90,30 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             return securityGroupEntities.stream()
                 .filter(securityGroupEntity -> securityGroupEntity.getCourthouseEntities().stream()
                     .anyMatch(courthouseEntity -> courthouseEntity.getId().equals(courthouseId)))
+                .collect(Collectors.toList());
+        }
+        return securityGroupEntities;
+    }
+
+    private List<SecurityGroupEntity> filterSecurityGroupEntitiesByUserId(
+        List<SecurityGroupEntity> securityGroupEntities, Integer userId) {
+
+        if (userId != null) {
+            return securityGroupEntities.stream()
+                .filter(securityGroupEntity -> securityGroupEntity.getUsers().stream()
+                    .anyMatch(userAccountEntity -> userAccountEntity.getId().equals(userId)))
+                .collect(Collectors.toList());
+        }
+        return securityGroupEntities;
+    }
+
+    private List<SecurityGroupEntity> filterSecurityGroupEntitiesBySingleUser(
+        List<SecurityGroupEntity> securityGroupEntities, Boolean singletonUser) {
+
+        if (singletonUser != null) {
+            return securityGroupEntities.stream()
+                .filter(securityGroupEntity -> ((securityGroupEntity.getUsers().size() > 0)
+                    && (securityGroupEntity.getUsers().size() == 1) == singletonUser.booleanValue()))
                 .collect(Collectors.toList());
         }
         return securityGroupEntities;
