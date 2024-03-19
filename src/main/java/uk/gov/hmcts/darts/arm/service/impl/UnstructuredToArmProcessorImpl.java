@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -27,12 +26,9 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
@@ -61,7 +57,6 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
     private ObjectRecordStatusEntity failedArmManifestFileStatus;
     private ObjectRecordStatusEntity armIngestionStatus;
     private ObjectRecordStatusEntity armDropZoneStatus;
-    private UserAccountEntity userAccount;
 
 
     public UnstructuredToArmProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
@@ -102,7 +97,7 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                 if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(armLocation.getId())) {
                     armExternalObjectDirectory = currentExternalObjectDirectory;
                     previousStatus = armExternalObjectDirectory.getStatus();
-                    var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory);
+                    var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory, storedStatus);
                     if (matchingEntity.isPresent()) {
                         unstructuredExternalObjectDirectory = matchingEntity.get();
                     } else {
@@ -113,7 +108,7 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                     }
                 } else {
                     unstructuredExternalObjectDirectory = currentExternalObjectDirectory;
-                    armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory);
+                    armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory, armIngestionStatus);
                     updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armIngestionStatus);
                 }
 
@@ -145,18 +140,6 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
         armIngestionStatus = objectRecordStatusRepository.findById(ARM_INGESTION.getId()).get();
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
 
-    }
-
-    private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
-        log.debug(
-            "Updating ARM status from {} to {} for ID {}",
-            armExternalObjectDirectory.getStatus().getDescription(),
-            armStatus.getDescription(),
-            armExternalObjectDirectory.getId()
-        );
-        armExternalObjectDirectory.setStatus(armStatus);
-        armExternalObjectDirectory.setLastModifiedBy(userAccount);
-        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
     private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory, String rawFilename) {
@@ -278,67 +261,4 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
-    private Optional<ExternalObjectDirectoryEntity> getUnstructuredExternalObjectDirectoryEntity(
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        return externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
-            storedStatus,
-            externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
-            externalObjectDirectoryEntity.getMedia(),
-            externalObjectDirectoryEntity.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntity.getAnnotationDocumentEntity(),
-            externalObjectDirectoryEntity.getCaseDocument()
-        );
-    }
-
-    private ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
-
-        ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));
-        armExternalObjectDirectoryEntity.setStatus(armIngestionStatus);
-        armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
-        armExternalObjectDirectoryEntity.setVerificationAttempts(1);
-
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            armExternalObjectDirectoryEntity.setMedia(externalObjectDirectory.getMedia());
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            armExternalObjectDirectoryEntity.setTranscriptionDocumentEntity(externalObjectDirectory.getTranscriptionDocumentEntity());
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            armExternalObjectDirectoryEntity.setAnnotationDocumentEntity(externalObjectDirectory.getAnnotationDocumentEntity());
-        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
-            armExternalObjectDirectoryEntity.setCaseDocument(externalObjectDirectory.getCaseDocument());
-        }
-        OffsetDateTime now = OffsetDateTime.now();
-        armExternalObjectDirectoryEntity.setCreatedDateTime(now);
-        armExternalObjectDirectoryEntity.setLastModifiedDateTime(now);
-        var systemUser = userIdentity.getUserAccount();
-        armExternalObjectDirectoryEntity.setCreatedBy(systemUser);
-        armExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
-        armExternalObjectDirectoryEntity.setTransferAttempts(1);
-
-        return armExternalObjectDirectoryEntity;
-    }
-
-
-    public String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        final Integer entityId = externalObjectDirectoryEntity.getId();
-        final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
-
-        Integer documentId = 0;
-        if (nonNull(externalObjectDirectoryEntity.getMedia())) {
-            documentId = externalObjectDirectoryEntity.getMedia().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
-            documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
-            documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getCaseDocument())) {
-            documentId = externalObjectDirectoryEntity.getCaseDocument().getId();
-        }
-
-        return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
-    }
-
-    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
-        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
-    }
 }

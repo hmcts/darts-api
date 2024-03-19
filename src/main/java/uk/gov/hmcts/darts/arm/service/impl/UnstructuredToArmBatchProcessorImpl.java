@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 
@@ -71,35 +70,54 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     @Override
     public void processUnstructuredToArm() {
 
-        List<ExternalObjectDirectoryEntity> pendingEODs = findPendingToArmEODs();
+        List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities = getArmExternalObjectDirectoryEntities(
+            armDataManagementConfiguration.getArmClient(), armDataManagementConfiguration.getBatchSize()
+        );
 
-        if (!pendingEODs.isEmpty()) {
+        if (!allPendingUnstructuredToArmEntities.isEmpty()) {
+
             userAccount = userIdentity.getUserAccount();
-            createEmptyManifestFile();
+            File manifestFile = createEmptyManifestFile();
+
+            ObjectRecordStatusEntity previousStatus = null;
+            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory;
+            ExternalObjectDirectoryEntity armExternalObjectDirectory;
+
+            for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
+                try {
+                    if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(eodService.armLocation().getId())) {
+                        armExternalObjectDirectory = currentExternalObjectDirectory;
+                        previousStatus = armExternalObjectDirectory.getStatus();
+                        var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory, eodService.storedStatus());
+                        if (matchingEntity.isPresent()) {
+                            unstructuredExternalObjectDirectory = matchingEntity.get();
+                        } else {
+                            log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
+                            updateTransferAttempts(armExternalObjectDirectory);
+                            updateExternalObjectDirectoryStatus(armExternalObjectDirectory, eodService.failedArmRawDataStatus());
+                            continue;
+                        }
+                    } else {
+                        unstructuredExternalObjectDirectory = currentExternalObjectDirectory;
+                        armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory, eodService.armIngestionStatus());
+                        armExternalObjectDirectory.setManifestFile(manifestFile.getName());
+                        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+                    }
 
 
-            for (var pendingEod : pendingEODs) {
-
-
+                } catch (Exception e) {
+                    log.error("Unable to push EOD {} to ARM", currentExternalObjectDirectory.getId(), e);
+                }
             }
         }
-
-
-
-
-
-
-
     }
 
-    private List<ExternalObjectDirectoryEntity> findPendingToArmEODs() {
+    private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(String armClient, int batchSize) {
 
-        var batchSize = armDataManagementConfiguration.getBatchSize();
-        var destinationLocation = eodService.armLocation();
         ExternalLocationTypeEntity sourceLocation = null;
-        if (armDataManagementConfiguration.getArmClient().equalsIgnoreCase("darts")) {
+        if (armClient.equalsIgnoreCase("darts")) {
              sourceLocation = eodService.unstructuredLocation();
-        } else if (armDataManagementConfiguration.getArmClient().equalsIgnoreCase("dets")) {
+        } else if (armClient.equalsIgnoreCase("dets")) {
             sourceLocation = eodService.detsLocation();
         } else {
             log.error("unknown arm client {}", armDataManagementConfiguration.getArmClient());
@@ -110,7 +128,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         result.addAll(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             eodService.storedStatus(),
             sourceLocation,
-            destinationLocation,
+            eodService.armLocation(),
             Pageable.ofSize(batchSize)
         ));
         var remaining = batchSize - result.size();
@@ -120,21 +138,17 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         return result;
     }
 
-    private void createEmptyManifestFile() {
-        var manifestFileName = "%s_%s";
-        String.format(manifestFileName, armDataManagementConfiguration.getManifestFilePrefix(), UUID.randomUUID());
-    }
-
-    private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
-        log.debug(
-            "Updating ARM status from {} to {} for ID {}",
-            armExternalObjectDirectory.getStatus().getDescription(),
-            armStatus.getDescription(),
-            armExternalObjectDirectory.getId()
+    @SneakyThrows
+    private File createEmptyManifestFile() {
+        var fileNameFormat = "%s_%s.%s";
+        var fileName = String.format(fileNameFormat,
+                                     armDataManagementConfiguration.getManifestFilePrefix(),
+                                     UUID.randomUUID(),
+                                     armDataManagementConfiguration.getFileExtension()
         );
-        armExternalObjectDirectory.setStatus(armStatus);
-        armExternalObjectDirectory.setLastModifiedBy(userAccount);
-        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+        var manifestFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fileName);
+//        Files.createFile(manifestFile.getParentFile().toPath());
+        return manifestFile;
     }
 
     private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory, String rawFilename) {
@@ -233,57 +247,4 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
-
-
-    private ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
-
-        ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));
-        armExternalObjectDirectoryEntity.setStatus(eodService.armIngestionStatus());
-        armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
-        armExternalObjectDirectoryEntity.setVerificationAttempts(1);
-
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            armExternalObjectDirectoryEntity.setMedia(externalObjectDirectory.getMedia());
-        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            armExternalObjectDirectoryEntity.setTranscriptionDocumentEntity(externalObjectDirectory.getTranscriptionDocumentEntity());
-        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            armExternalObjectDirectoryEntity.setAnnotationDocumentEntity(externalObjectDirectory.getAnnotationDocumentEntity());
-        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
-            armExternalObjectDirectoryEntity.setCaseDocument(externalObjectDirectory.getCaseDocument());
-        }
-        OffsetDateTime now = OffsetDateTime.now();
-        armExternalObjectDirectoryEntity.setCreatedDateTime(now);
-        armExternalObjectDirectoryEntity.setLastModifiedDateTime(now);
-        var systemUser = userIdentity.getUserAccount();
-        armExternalObjectDirectoryEntity.setCreatedBy(systemUser);
-        armExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
-        armExternalObjectDirectoryEntity.setTransferAttempts(1);
-
-        return armExternalObjectDirectoryEntity;
-    }
-
-
-    public String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        final Integer entityId = externalObjectDirectoryEntity.getId();
-        final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
-
-        Integer documentId = 0;
-        if (nonNull(externalObjectDirectoryEntity.getMedia())) {
-            documentId = externalObjectDirectoryEntity.getMedia().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
-            documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
-            documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getCaseDocument())) {
-            documentId = externalObjectDirectoryEntity.getCaseDocument().getId();
-        }
-
-        return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
-    }
-
-    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
-        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
-    }
 }
