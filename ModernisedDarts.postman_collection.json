@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b8a59f7f-51bb-4b6a-a0c9-46039fc2995a",
+		"_postman_id": "187dd4a1-e3ea-4c57-9053-e06fb5fba599",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30362290"
+		"_exporter_id": "32425403"
 	},
 	"item": [
 		{
@@ -1025,6 +1025,24 @@
 									"key": "validate_only",
 									"value": "false"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retention-policy-types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/admin/retention-policy-types",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"retention-policy-types"
 							]
 						}
 					},
