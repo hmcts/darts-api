@@ -112,6 +112,7 @@ module "armsa" {
   location                 = var.location
   account_kind             = var.account_kind
   account_replication_type = var.account_replication_type
+  common_tags          = var.common_tags
 
   private_endpoint_subnet_id = data.azurerm_subnet.private_endpoints.id
 }
