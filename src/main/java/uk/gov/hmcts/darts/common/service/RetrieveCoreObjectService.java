@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.LocalDate;
 
@@ -21,6 +22,10 @@ public interface RetrieveCoreObjectService {
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate);
+
+    @Transactional
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount);
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
@@ -34,16 +39,23 @@ public interface RetrieveCoreObjectService {
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber);
 
+    @Transactional
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount);
+
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourthouseEntity retrieveCourthouse(String courthouseName);
 
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     JudgeEntity retrieveOrCreateJudge(String judgeName);
 
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount);
+
     @Transactional
-    DefenceEntity createDefence(String defence, CourtCaseEntity courtCase);
+    DefenceEntity createDefence(String defence, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 
-    DefendantEntity createDefendant(String defendant, CourtCaseEntity courtCase);
+    DefendantEntity createDefendant(String defendant, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 
-    ProsecutorEntity createProsecutor(String prosecution, CourtCaseEntity courtCase);
+    ProsecutorEntity createProsecutor(String prosecution, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 }

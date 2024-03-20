@@ -81,7 +81,7 @@ class DailyListUpdaterTest {
         HearingEntity hearing = new HearingEntity();
         CourtCaseEntity courtCase = new CourtCaseEntity();
         hearing.setCourtCase(courtCase);
-        when(retrieveCoreObjectService.retrieveOrCreateHearing("SWANSEA", "1A", "42GD2391421", today))
+        when(retrieveCoreObjectService.retrieveOrCreateHearing("SWANSEA", "1A", "42GD2391421", today, dailyListUser))
             .thenReturn(hearing);
 
         DailyListEntity dailyList = setUpDailyList("dailyList.json");
