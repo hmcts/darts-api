@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
+import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
@@ -94,6 +96,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
+
+    @Autowired
+    private CloseOldCasesProcessor closeOldCasesProcessor;
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
@@ -695,4 +700,62 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
+
+    @Test
+    void givenConfiguredTaskCloseOldCasesAutomatedTask() {
+        AutomatedTask automatedTask =
+            new CloseOldCasesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                closeOldCasesProcessor
+            );
+
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
+                 originalAutomatedTaskEntity.get().getCronExpression()
+        );
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void givenConfiguredTaskCancelCloseOldCasesAutomatedTask() {
+        AutomatedTask automatedTask =
+            new CloseOldCasesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                closeOldCasesProcessor
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+    }
+
 }

@@ -164,6 +164,8 @@ darts:
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
   retention:
     overridable-fixed-policy-keys: 3
+    close-open-cases-older-than-years: 6
+    close-events: "Case closed,Archive case"
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}

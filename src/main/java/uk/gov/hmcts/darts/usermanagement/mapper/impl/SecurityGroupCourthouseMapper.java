@@ -17,7 +17,7 @@ public class SecurityGroupCourthouseMapper {
     public SecurityGroupWithIdAndRole mapToSecurityGroupWithIdAndRoleWithCourthouse(SecurityGroupEntity securityGroupEntity) {
         SecurityGroupWithIdAndRole securityGroupWithIdAndRole = securityGroupMapper.mapToSecurityGroupWithIdAndRole(securityGroupEntity);
         securityGroupWithIdAndRole.setSecurityRoleId(securityGroupEntity.getSecurityRoleEntity().getId());
-        List<Integer> courthouseIds = securityGroupEntity.getCourthouseEntities().stream().map(CourthouseEntity::getId).toList();
+        List<Integer> courthouseIds = securityGroupEntity.getCourthouseEntities().stream().map(CourthouseEntity::getId).sorted().toList();
         securityGroupWithIdAndRole.setCourthouseIds(courthouseIds);
         return securityGroupWithIdAndRole;
     }

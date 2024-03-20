@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b8a59f7f-51bb-4b6a-a0c9-46039fc2995a",
+		"_postman_id": "12b0ee38-9c56-4dc3-b05c-af8b7286c888",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30362290"
+		"_exporter_id": "32568371"
 	},
 	"item": [
 		{
@@ -32,6 +32,36 @@
 							"path": [
 								"admin",
 								"security-roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/security-groups/{security_group_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/admin/security-groups/:security_group_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"security-groups",
+								":security_group_id"
+							],
+							"variable": [
+								{
+									"key": "security_group_id",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -1079,6 +1109,24 @@
 									"key": "validate_only",
 									"value": "false"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retention-policy-types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/admin/retention-policy-types",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"retention-policy-types"
 							]
 						}
 					},

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.usermanagement.http.api.SecurityGroupApi;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.util.List;
@@ -26,9 +27,17 @@ public class SecurityGroupController implements SecurityGroupApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
-    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(List<Integer> roleIds, Integer courthouseId) {
+    public ResponseEntity<SecurityGroupWithIdAndRoleAndUsers> adminGetSecurityGroup(Integer securityGroupId) {
+        return ResponseEntity.ok(securityGroupService.getSecurityGroup(securityGroupId));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(List<Integer> roleIds, Integer courthouseId,
+                                                                                   Integer userId, Boolean singletonUser) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(securityGroupService.getSecurityGroups(roleIds, courthouseId));
+            .body(securityGroupService.getSecurityGroups(roleIds, courthouseId, userId, singletonUser));
     }
 
     @Override
