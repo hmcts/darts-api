@@ -17,7 +17,8 @@ public enum AutomatedTaskName {
     UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore"),
     PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles"),
     APPLY_RETENTION("ApplyRetention"),
-    CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles");
+    CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),
+    CLOSE_OLD_CASES("CloseOldCases");
 
     private final String taskName;
 

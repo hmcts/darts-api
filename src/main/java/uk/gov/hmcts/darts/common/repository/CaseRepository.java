@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +35,12 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
 
     boolean existsByCourthouse(CourthouseEntity courthouse);
 
+    @Query("""
+        SELECT case FROM CourtCaseEntity case
+        WHERE case.createdDateTime < :cutoffDate
+        AND case.closed = false
+        AND NOT EXISTS (select 1 from CaseRetentionEntity cre
+            where (cre.courtCase.id = case.id))
+        """)
+    List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate);
 }

@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "187dd4a1-e3ea-4c57-9053-e06fb5fba599",
+		"_postman_id": "12b0ee38-9c56-4dc3-b05c-af8b7286c888",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32425403"
+		"_exporter_id": "32568371"
 	},
 	"item": [
 		{
@@ -32,6 +32,36 @@
 							"path": [
 								"admin",
 								"security-roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/security-groups/{security_group_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/admin/security-groups/:security_group_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"security-groups",
+								":security_group_id"
+							],
+							"variable": [
+								{
+									"key": "security_group_id",
+									"value": "1"
+								}
 							]
 						}
 					},
