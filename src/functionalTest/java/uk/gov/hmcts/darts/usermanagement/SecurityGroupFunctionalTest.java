@@ -13,14 +13,19 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
 import java.util.Comparator;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 class SecurityGroupFunctionalTest extends FunctionalTest {
 
@@ -67,6 +72,25 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    void shouldGetSecurityGroupWithIdAndRoleAndUsers() throws JsonProcessingException {
+        buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups/1"))
+            .contentType(ContentType.JSON)
+            .get()
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .body("user_ids", notNullValue())
+            .body("id", equalTo(1))
+            .body("security_role_id", equalTo(SUPER_ADMIN.getId()))
+            .body("global_access", equalTo(true))
+            .body("display_state", equalTo(true))
+            .body("courthouse_ids", hasSize(0))
+            .body("name", equalTo("SUPER_ADMIN"))
+            .body("display_name", equalTo("Super Admin"));
+    }
+
+    @Test
     void shouldGetSecurityGroups() throws JsonProcessingException {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups"))
@@ -84,21 +108,23 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             securityGroupWithIdAndRoles.stream()
                 .filter(group -> group.getId() == 1
                     || group.getId() >= -6 && group.getId() <= -1
-                    || group.getId() >= -17 && group.getId() <= -14)
+                    || group.getId() >= -17 && group.getId() <= -14
+                    || group.getSecurityRoleId() == SecurityRoleEnum.SUPER_USER.getId())
                 .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
                 .toList();
 
-        checkGroup(staticGroups.get(0), "SUPER_ADMIN", true, 11, true, null);
-        checkGroup(staticGroups.get(1), "hmcts_staff_1", false, 1, true, 1);
-        checkGroup(staticGroups.get(2), "hmcts_staff_2", false, 2, true, 1);
-        checkGroup(staticGroups.get(3), "hmcts_staff_3", false, 3, true, 1);
-        checkGroup(staticGroups.get(4), "hmcts_staff_4", false, 4, true, 1);
-        checkGroup(staticGroups.get(5), "hmcts_staff_5", true, 5, true, 1);
-        checkGroup(staticGroups.get(6), "hmcts_staff_6", true, 6, true, 1);
-        checkGroup(staticGroups.get(7), "Xhibit Group", true, 7, true, 1);
-        checkGroup(staticGroups.get(8), "Cpp Group", true, 8, true, 1);
-        checkGroup(staticGroups.get(9), "Dar Pc Group", true, 9, true, 1);
-        checkGroup(staticGroups.get(10), "Mid Tier Group", true, 10, true, 1);
+        checkGroup(staticGroups.get(0), "SUPER_USER", true, 12, true, null);
+        checkGroup(staticGroups.get(1), "SUPER_ADMIN", true, 11, true, null);
+        checkGroup(staticGroups.get(2), "hmcts_staff_1", false, 1, true, 1);
+        checkGroup(staticGroups.get(3), "hmcts_staff_2", false, 2, true, 1);
+        checkGroup(staticGroups.get(4), "hmcts_staff_3", false, 3, true, 1);
+        checkGroup(staticGroups.get(5), "hmcts_staff_4", false, 4, true, 1);
+        checkGroup(staticGroups.get(6), "hmcts_staff_5", true, 5, true, 1);
+        checkGroup(staticGroups.get(7), "hmcts_staff_6", true, 6, true, 1);
+        checkGroup(staticGroups.get(8), "Xhibit Group", true, 7, true, 1);
+        checkGroup(staticGroups.get(9), "Cpp Group", true, 8, true, 1);
+        checkGroup(staticGroups.get(10), "Dar Pc Group", true, 9, true, 1);
+        checkGroup(staticGroups.get(11), "Mid Tier Group", true, 10, true, 1);
 
     }
 

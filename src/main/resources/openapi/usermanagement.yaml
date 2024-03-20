@@ -117,6 +117,57 @@ paths:
                 title: Failed to check authorisation
                 status: 403
 
+  /admin/security-groups/{security_group_id}:
+    get:
+      summary: Get security group
+      operationId: adminGetSecurityGroup
+      parameters:
+        - $ref: '#/components/parameters/SecurityGroupId'
+      tags:
+        - SecurityGroup
+      responses:
+        '200':
+          $ref: '#/components/responses/GetSecurityGroupSuccessResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                title: Bad Request
+                status: 400
+                detail: "Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'; For input string: \"1x\""
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "USER_MANAGEMENT_103"
+                title: "The provided security group does not exist"
+                status: 404
+
   /admin/security-groups:
     get:
       summary: Get security groups
@@ -265,6 +316,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
+    GetSecurityGroupSuccessResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUsers'
 
     BadUserRequest:
       description: Bad Request
@@ -329,7 +386,12 @@ components:
       required: true
       schema:
         type: integer
-
+    SecurityGroupId:
+      in: path
+      name: security_group_id
+      required: true
+      schema:
+        type: integer
   schemas:
     UserId:
       type: integer
@@ -458,6 +520,15 @@ components:
         - "AUTHORISATION_109"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_ENDPOINT ]
 
+    SecurityGroupWithIdAndRoleAndUsers:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
+      properties:
+        user_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserId'
     SecurityGroupWithIdAndRole:
       type: object
       properties:
@@ -473,6 +544,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CourthouseId'
+        user_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserId'
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
     SecurityGroup:
@@ -494,8 +569,9 @@ components:
         - "USER_MANAGEMENT_100"
         - "USER_MANAGEMENT_101"
         - "USER_MANAGEMENT_102"
+        - "USER_MANAGEMENT_103"
         - "USER_NOT_TRANSCRIBER_110"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 
     UserManagementTitleErrors:
       type: string
@@ -503,8 +579,9 @@ components:
         - "The provided user does not exist"
         - "The provided email already exists"
         - "Invalid email format"
+        - "The provided security group does not exist"
         - "Duplicate security group names are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 
 
     Role:
@@ -518,21 +595,3 @@ components:
           $ref: '#/components/schemas/RoleDisplayName'
         display_state:
           $ref: '#/components/schemas/RoleDisplayState'
-
-        UserManagementsErrorCode:
-            type: string
-            enum:
-              - "USER_100"
-              - "USER_101"
-              - "USER_102"
-              - "USER_110"
-            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
-
-        UserManagementsTitleErrors:
-            type: string
-            enum:
-              - "The provided user does not exist"
-              - "The provided email already exists"
-              - "Invalid email format"
-              - "Duplicate security group names are not permitted"
-            x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
