@@ -34,9 +34,12 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private String caseRecordPropertiesFile;
     private Integer responseCleanupBufferDays;
 
+    private String continuationTokenDuration;
+
     private Integer batchSize;
     private String manifestFilePrefix;
     private String armClient;
+
 
     @Getter
     @Setter

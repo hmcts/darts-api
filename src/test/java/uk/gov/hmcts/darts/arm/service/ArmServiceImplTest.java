@@ -8,7 +8,6 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,8 +20,6 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -155,10 +152,18 @@ class ArmServiceImplTest {
     }
 
     @Test
-    @Disabled
     void testListSubmissionBlobsWithMarker() {
-        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
-        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        //iterableByPage().iterator()
+        //Iterator mockIterator = mock(Iterator.class);
+        //when(mockIterator.hasNext()).thenReturn(true, false);
+        //when(mockIterator.next()).thenReturn(new BlobItem());
+
+        //BlobItem blobItem = new BlobItem();
+        PagedIterable mockPagedIterable = mock(PagedIterable.class);
+
+        //when(mockPagedIterable.iterator()).thenReturn(mockIterator);
+
+        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
 
         var foldersConfig = new ArmDataManagementConfiguration.Folders();
@@ -173,35 +178,15 @@ class ArmServiceImplTest {
         assertNotNull(continuationTokenBlobs);
     }
 
-    public static <T> void mockIterable(Iterable<T> iterable, T... values) {
-        Iterator<T> mockIterator = mock(Iterator.class);
-        when(iterable.iterator()).thenReturn(mockIterator);
-
-        if (values.length == 0) {
-            when(mockIterator.hasNext()).thenReturn(false);
-            return;
-        } else if (values.length == 1) {
-            when(mockIterator.hasNext()).thenReturn(true, false);
-            when(mockIterator.next()).thenReturn(values[0]);
-        } else {
-            // build boolean array for hasNext()
-            Boolean[] hasNextResponses = new Boolean[values.length];
-            for (int i = 0; i < hasNextResponses.length - 1; i++) {
-                hasNextResponses[i] = true;
-            }
-            hasNextResponses[hasNextResponses.length - 1] = false;
-            when(mockIterator.hasNext()).thenReturn(true, hasNextResponses);
-            T[] valuesMinusTheFirst = Arrays.copyOfRange(values, 1, values.length);
-            when(mockIterator.next()).thenReturn(values[0], valuesMinusTheFirst);
-        }
-    }
-
     @Test
-    @Disabled
     void testListResponseBlobsWithMarker() {
-        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
-        mockIterable(pagedIterable, new BlobItem());
-        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(pagedIterable);
+        //Iterator mockIterator = mock(Iterator.class);
+        //when(mockIterator.hasNext()).thenReturn(true, false);
+        //when(mockIterator.next()).thenReturn(new BlobItem());
+
+        PagedIterable mockPagedTableEntities = mock(PagedIterable.class);
+        //when(mockPagedTableEntities.iterator()).thenReturn(mockIterator);
+        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedTableEntities);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
 
         var foldersConfig = new ArmDataManagementConfiguration.Folders();

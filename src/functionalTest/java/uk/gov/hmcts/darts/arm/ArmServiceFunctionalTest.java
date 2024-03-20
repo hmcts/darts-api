@@ -85,6 +85,37 @@ class ArmServiceFunctionalTest {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
+        uploadBatchedBlobs(data);
+        Integer batchSize = 2;
+        String continuationToken = null;
+        do {
+            ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
+                armContainerName, "functional_test", batchSize, continuationToken);
+            continuationToken = continuationTokenBlobs.getContinuationToken();
+            log.info("continuationToken {]", continuationToken);
+            log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
+            assertFalse(continuationTokenBlobs.getBlobNamesWithAndPaths().isEmpty());
+        } while (nonNull(continuationToken));
+
+
+    }
+
+    @Test
+    void listBlobsUsingBatch() {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        uploadBatchedBlobs(data);
+
+        Integer batchSize = 5;
+        List<String> blobs = armService.listResponseBlobUsingBatch(armContainerName, "functional_test", batchSize);
+
+        assertFalse(blobs.isEmpty());
+
+    }
+
+    private void uploadBatchedBlobs(BinaryData data) {
         for (int counter = 0; counter < 11; counter++) {
             String filename = String.format("functional_test_%s", UUID.randomUUID());
             String blobPathAndName = armSubmissionDropZone + filename;
@@ -96,16 +127,6 @@ class ArmServiceFunctionalTest {
             assertNotNull(actualResult);
             log.info("listSubmissionBlobs - Blob filename {}", actualResult);
         }
-        Integer batchSize = 2;
-        String continuationToken = null;
-        do {
-            ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
-                armContainerName, "functional_test", batchSize, continuationToken);
-            continuationToken = continuationTokenBlobs.getContinuationToken();
-            log.info("continuationToken {]", continuationToken);
-            log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
-        } while (nonNull(continuationToken));
-
     }
 
     @AfterEach

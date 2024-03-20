@@ -9,7 +9,6 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ListBlobsOptions;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -26,21 +25,35 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.valueOf;
 
 @Service
 @Slf4j
 @Profile("!intTest")
-@RequiredArgsConstructor
 public class ArmServiceImpl implements ArmService {
 
     private static final String FILE_PATH_DELIMITER = "/";
     private static final long TIMEOUT = 60;
+    public static final String DEFAULT_CONTINUATION_TOKEN_DURATION = "PT60M";
 
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    private Duration continuationTokenDuration;
+
+    public ArmServiceImpl(ArmDataManagementDao armDataManagementDao, ArmDataManagementConfiguration armDataManagementConfiguration) {
+        this.armDataManagementDao = armDataManagementDao;
+        this.armDataManagementConfiguration = armDataManagementConfiguration;
+        if (nonNull(armDataManagementConfiguration.getContinuationTokenDuration())) {
+            continuationTokenDuration = Duration.parse(armDataManagementConfiguration.getContinuationTokenDuration());
+        } else {
+            continuationTokenDuration = Duration.parse(DEFAULT_CONTINUATION_TOKEN_DURATION);
+        }
+    }
 
     @Override
     public String saveBlobData(String containerName, String filename, BinaryData binaryData) {
@@ -107,6 +120,45 @@ public class ArmServiceImpl implements ArmService {
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
     }
 
+    public List<String> listSubmissionBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
+        return listBlobsUsingBatch(containerClient, prefix, batchSize);
+    }
+
+    public List<String> listResponseBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
+        return listBlobsUsingBatch(containerClient, prefix, batchSize);
+    }
+
+    private List<String> listBlobsUsingBatch(BlobContainerClient blobContainerClient, String prefix, Integer batchSize) {
+        List<String> files = new ArrayList<>();
+        log.debug("About to list files for {}", prefix);
+        listBlobsUsingBatch(blobContainerClient, FILE_PATH_DELIMITER, prefix, batchSize).forEach(blob -> {
+            if (Boolean.TRUE.equals(blob.isPrefix())) {
+                log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
+                listBlobsUsingBatch(blobContainerClient, FILE_PATH_DELIMITER, blob.getName(), batchSize);
+            } else {
+                log.info("Blob name: {}", blob.getName());
+                files.add(blob.getName());
+            }
+        });
+        return files;
+    }
+
+    private PagedIterable<BlobItem> listBlobsUsingBatch(BlobContainerClient blobContainerClient,
+                                                        String delimiter,
+                                                        String prefix,
+                                                        Integer batchSize) {
+
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setPrefix(prefix)
+            .setMaxResultsPerPage(batchSize);
+        Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
+        return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
+    }
+
     public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize,
                                                                 String continuationToken) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -132,31 +184,36 @@ public class ArmServiceImpl implements ArmService {
         ListBlobsOptions options = new ListBlobsOptions()
             .setPrefix(prefix)
             .setMaxResultsPerPage(batchSize);
-        Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder().build();
         try {
-            Iterator<PagedResponse<BlobItem>> response = blobContainerClient.listBlobs(options, continuationToken, timeout).iterableByPage().iterator();
+            Iterator<PagedResponse<BlobItem>> response = blobContainerClient.listBlobs(options, continuationToken, continuationTokenDuration)
+                .iterableByPage()
+                .iterator();
 
             List<BlobItem> blobs;
             List<String> blobsWithPaths;
-            try (PagedResponse<BlobItem> pagedResponse = response.next()) {
-                blobs = pagedResponse.getValue();
-                blobsWithPaths = new ArrayList<>();
-                continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
+            if (response.hasNext()) {
+                try (PagedResponse<BlobItem> pagedResponse = response.next()) {
+                    blobs = pagedResponse.getValue();
+                    blobsWithPaths = new ArrayList<>();
+                    // Along with page results, get a continuation token
+                    // which enables the client to "pick up where it left off"
+                    continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
 
-                blobs.forEach(blob -> {
-                    if (Boolean.TRUE.equals(blob.isPrefix())) {
-                        //Ignore directories
-                        log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
-                    } else {
-                        log.info("Blob name: {}", blob.getName());
-                        blobsWithPaths.add(blob.getName());
-                    }
-                });
-                continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
-            } catch (IOException ioe) {
-                log.error("Unable to get next response for prefix {}", prefix, ioe);
+                    blobs.forEach(blob -> {
+                        if (Boolean.TRUE.equals(blob.isPrefix())) {
+                            //Ignore directories
+                            log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
+                        } else {
+                            log.info("Blob name: {}", blob.getName());
+                            blobsWithPaths.add(blob.getName());
+                        }
+                    });
+                    continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
+                } catch (NoSuchElementException | IOException ioe) {
+                    log.error("Unable to get next response for prefix {}", prefix, ioe);
+                }
             }
         } catch (Exception e) {
             log.error("Unable to list blobs with marker for prefix {}", prefix, e);
