@@ -45,6 +45,20 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
+    public List<String> listSubmissionBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
+        return listedBlobs;
+    }
+
+    @Override
+    public List<String> listResponseBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
+        return listedBlobs;
+    }
+
+    @Override
     public ContinuationTokenBlobs listResponseBlobsWithMarker(String containerName, String filename, Integer batchSize, String continuationToken) {
         return ContinuationTokenBlobs.builder().build();
     }
