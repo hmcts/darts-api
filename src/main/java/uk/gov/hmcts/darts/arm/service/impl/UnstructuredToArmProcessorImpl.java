@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
@@ -22,7 +20,6 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,7 +40,6 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
     private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    private final FileOperationService fileOperationService;
     private final ArchiveRecordService archiveRecordService;
 
     private ObjectRecordStatusEntity storedStatus;
@@ -63,13 +59,12 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                                           FileOperationService fileOperationService,
                                           ArchiveRecordService archiveRecordService) {
         super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi,
-              armDataManagementApi);
+              armDataManagementApi, fileOperationService);
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.externalLocationTypeRepository = externalLocationTypeRepository;
         this.userIdentity = userIdentity;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
-        this.fileOperationService = fileOperationService;
         this.archiveRecordService = archiveRecordService;
     }
 
@@ -115,7 +110,11 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                     unstructuredExternalObjectDirectory,
                     armExternalObjectDirectory,
                     rawFilename,
-                    previousStatus
+                    previousStatus,
+                    () -> updateExternalObjectDirectoryStatusToFailed(
+                        armExternalObjectDirectory,
+                        objectRecordStatusRepository.findById(ARM_RAW_DATA_FAILED.getId()).get()
+                    )
                 );
                 if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory, rawFilename)) {
                     updateExternalObjectDirectoryStatus(armExternalObjectDirectory, armDropZoneStatus);
@@ -139,41 +138,26 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
     }
 
     private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory, String rawFilename) {
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armExternalObjectDirectory.getId(), rawFilename);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armExternalObjectDirectory.getId(), rawFilename);
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
-            try {
-                BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(archiveRecordFile.getAbsolutePath());
-                armDataManagementApi.saveBlobDataToArm(archiveRecordFileInfo.getArchiveRecordFile().getName(), metadataFileBinary);
-            } catch (BlobStorageException e) {
-                if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                    log.info("Metadata BLOB already exists {}", e.getMessage());
-                } else {
-                    log.error("Failed to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
-                    updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus);
-                    return false;
-                }
-            } catch (Exception e) {
-                log.error("Unable to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
-                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus);
-                return false;
-            }
+            var isCopySuccessful = copyMetadataToArm(
+                archiveRecordFileInfo.getArchiveRecordFile(),
+                () -> updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus)
+            );
+            return isCopySuccessful;
         } else {
             log.error("Failed to generate metadata file {}", archiveRecordFile.getAbsolutePath());
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus);
             return false;
         }
-        return true;
     }
-
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
                                                                                       ExternalLocationTypeEntity armLocation) {
 
-        List<ObjectRecordStatusEntity> failedArmStatuses = new ArrayList<>();
-        failedArmStatuses.add(failedArmRawDataStatus);
-        failedArmStatuses.add(failedArmManifestFileStatus);
+        List<ObjectRecordStatusEntity> failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus);
 
         var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             storedStatus,
@@ -188,7 +172,6 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
         );
 
         return Stream.concat(pendingUnstructuredExternalObjectDirectoryEntities.stream(), failedArmExternalObjectDirectoryEntities.stream()).toList();
-
     }
 
 }

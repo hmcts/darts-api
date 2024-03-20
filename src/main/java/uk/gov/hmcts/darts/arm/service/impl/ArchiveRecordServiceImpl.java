@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.CaseArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
@@ -46,7 +47,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
 
     @Transactional
-    public ArchiveRecordFileInfo generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename) {
+    public ArchiveRecordFileInfo generateArchiveRecordFile(Integer externalObjectDirectoryId, String rawFilename) {
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(false)
             .build();
@@ -162,6 +163,27 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
             .append(FILE_EXTENSION_PERIOD)
             .append(armDataManagementConfiguration.getFileExtension())
             .toString();
+    }
+
+//    @Transactional
+    public ArchiveRecord generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename) {
+
+        ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
+            () -> new RuntimeException("TODO")
+        );
+
+        if (nonNull(externalObjectDirectory.getMedia())) {
+            return mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
+        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
+            return transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
+        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+            return annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
+        } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
+            return caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
+        } else {
+            //TODO
+            throw new RuntimeException("");
+        }
     }
 
 }

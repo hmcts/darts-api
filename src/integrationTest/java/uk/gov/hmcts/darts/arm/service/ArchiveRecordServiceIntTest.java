@@ -133,7 +133,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -194,7 +194,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -255,7 +255,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -317,7 +317,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -382,7 +382,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -447,7 +447,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -512,7 +512,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -571,7 +571,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -632,7 +632,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -685,7 +685,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), caseDocument.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -740,7 +740,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), caseDocument.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -794,7 +794,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), caseDocument.getId());
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armEod.getId(), prefix);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armEod.getId(), prefix);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
