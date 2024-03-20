@@ -111,7 +111,7 @@ module "armsa" {
   resource_group_name      = local.rg_name
   location                 = var.location
   account_kind             = var.account_kind
-  is_hns_enabled           = true
+  enable_hns               = true
   account_replication_type = "ZRS"
   common_tags          = var.common_tags
 
