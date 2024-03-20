@@ -209,7 +209,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -268,7 +268,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/media-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -336,7 +336,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -390,7 +390,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -461,7 +461,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/transcription-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -530,7 +530,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/transcription-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -604,7 +604,7 @@ class ArchiveRecordServiceImplTest {
             "Tests/arm/properties/all_properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -650,7 +650,7 @@ class ArchiveRecordServiceImplTest {
             "Tests/arm/properties/invalidpath/transcription-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -714,7 +714,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/nle/annotation-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -777,7 +777,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/live/annotation-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -840,7 +840,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/annotation-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -892,7 +892,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/invalidpath/annotation-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -944,7 +944,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/case-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -997,7 +997,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/case-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -1049,7 +1049,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/all_properties/case-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -1093,7 +1093,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/invalidpath/case-record.properties");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(EODID, "1234_1_1");
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());

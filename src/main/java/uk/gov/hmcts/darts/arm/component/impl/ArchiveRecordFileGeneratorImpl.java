@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 
@@ -42,5 +43,20 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
             log.error("Unable to write ARM file {}, due to {}", archiveRecordFile.getAbsoluteFile(), e.getMessage());
         }
         return generatedArchiveRecord;
+    }
+
+    public void generateArchiveRecords(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
+        try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
+            for (var archiveRecord : archiveRecords) {
+                String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
+                String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
+                log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordsFile.getAbsolutePath());
+                    printWriter.print(archiveRecordOperation);
+                    printWriter.println(uploadNewFileRecord);
+            }
+        } catch (IOException e) {
+            log.error("Unable to write ARM file {}, due to {}", archiveRecordsFile.getAbsoluteFile(), e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }

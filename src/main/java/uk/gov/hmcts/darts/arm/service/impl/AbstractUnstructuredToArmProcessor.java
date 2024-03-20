@@ -13,8 +13,10 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -36,6 +38,7 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     protected final ExternalLocationTypeRepository externalLocationTypeRepository;
     protected final DataManagementApi dataManagementApi;
     protected final ArmDataManagementApi armDataManagementApi;
+    protected final FileOperationService fileOperationService;
     protected UserAccountEntity userAccount;
 
     public AbstractUnstructuredToArmProcessor(ObjectRecordStatusRepository objectRecordStatusRepository,
@@ -43,13 +46,14 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                                               ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                               ExternalLocationTypeRepository externalLocationTypeRepository,
                                               DataManagementApi dataManagementApi,
-                                              ArmDataManagementApi armDataManagementApi) {
+                                              ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService) {
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.userIdentity = userIdentity;
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
         this.externalLocationTypeRepository = externalLocationTypeRepository;
         this.dataManagementApi = dataManagementApi;
         this.armDataManagementApi = armDataManagementApi;
+        this.fileOperationService = fileOperationService;
     }
 
     protected ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity status) {
@@ -139,7 +143,8 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     protected boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
                                        ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                        String filename,
-                                       ObjectRecordStatusEntity previousStatus) {
+                                       ObjectRecordStatusEntity previousStatus,
+                                       Runnable recoveryAction) {
         try {
             if (previousStatus == null
                 || ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
@@ -168,9 +173,7 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                 log.info("BLOB raw data already exists {}", e.getMessage());
             } else {
                 log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(), e.getMessage());
-                updateExternalObjectDirectoryStatusToFailed(
-                    armExternalObjectDirectory,
-                    objectRecordStatusRepository.findById(ARM_RAW_DATA_FAILED.getId()).get());
+                recoveryAction.run();
                 return false;
             }
         } catch (Exception e) {
@@ -179,13 +182,31 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                 unstructuredExternalObjectDirectory.getExternalLocation(),
                 e.getMessage()
             );
-
-            updateExternalObjectDirectoryStatusToFailed(
-                armExternalObjectDirectory,
-                objectRecordStatusRepository.findById(ARM_RAW_DATA_FAILED.getId()).get());
+            recoveryAction.run();
             return false;
         }
 
         return true;
+    }
+
+    protected boolean copyMetadataToArm(File manifestFile, Runnable recoveryAction) {
+        boolean isSuccessful = true;
+        try {
+            BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
+            armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
+        } catch (BlobStorageException e) {
+            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                log.info("Metadata BLOB already exists {}", e.getMessage());
+            } else {
+                log.error("Failed to move BLOB metadata for file {} due to {}", manifestFile.getAbsolutePath(), e.getMessage());
+                recoveryAction.run();
+                isSuccessful = false;
+            }
+        } catch (Exception e) {
+            log.error("Unable to move BLOB metadata for file {} due to {}", manifestFile.getAbsolutePath(), e.getMessage());
+            recoveryAction.run();
+            isSuccessful = false;
+        }
+        return isSuccessful;
     }
 }
