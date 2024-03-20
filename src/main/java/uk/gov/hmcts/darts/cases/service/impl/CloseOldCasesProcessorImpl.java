@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
@@ -32,11 +33,16 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private final MediaRepository mediaRepository;
 
+    @Value("${darts.retention.close-open-cases-older-than-years}")
+    long years;
+
+    @Value("#{'${darts.retention.close-events}'.split(',')}")
+    private List<String> closeEvents;
 
     @Transactional
     @Override
     public void closeCases() {
-        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(6));
+        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findOpenCasesToClose(OffsetDateTime.now().minusYears(years));
 
         courtCaseEntityList.forEach(this::closeCase);
     }
@@ -50,7 +56,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
             eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
             //find latest closed event
             Optional<EventEntity> closedEvent =
-                eventList.stream().filter(eventEntity -> eventEntity.getEventType().getEventName().equals("Case closed")).findFirst();
+                eventList.stream().filter(eventEntity -> closeEvents.contains(eventEntity.getEventType().getEventName())).findFirst();
 
             if (closedEvent.isPresent()) {
                 closeCaseInDb(courtCase, closedEvent.get().getCreatedDateTime());
