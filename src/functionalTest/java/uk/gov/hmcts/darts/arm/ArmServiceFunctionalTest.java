@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -42,8 +44,6 @@ class ArmServiceFunctionalTest {
     private ArmTestUtil armTestUtil;
 
     private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
-
-    private final List<String> armCollectedBlobsToBeDeleted = new ArrayList<>();
 
 
     @Test
@@ -79,6 +79,35 @@ class ArmServiceFunctionalTest {
 
     }
 
+    @Test
+    void listBlobsUsingMarker() {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        for (int counter = 0; counter < 11; counter++) {
+            String filename = String.format("functional_test_%s", UUID.randomUUID());
+            String blobPathAndName = armSubmissionDropZone + filename;
+
+            String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
+
+            log.info("Saved blob {} in {}", actualResult, blobPathAndName);
+            armSubmissionBlobsToBeDeleted.add(actualResult);
+            assertNotNull(actualResult);
+            log.info("listSubmissionBlobs - Blob filename {}", actualResult);
+        }
+        Integer batchSize = 2;
+        String continuationToken = null;
+        do {
+            ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
+                armContainerName, "functional_test", batchSize, continuationToken);
+            continuationToken = continuationTokenBlobs.getContinuationToken();
+            log.info("continuationToken {]", continuationToken);
+            log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
+        } while (nonNull(continuationToken));
+
+    }
+
     @AfterEach
     void cleanupArmBlobData() {
 
@@ -88,9 +117,5 @@ class ArmServiceFunctionalTest {
         }
         armSubmissionBlobsToBeDeleted.clear();
 
-        for (String blobPathAndName : armCollectedBlobsToBeDeleted) {
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-        }
-        armCollectedBlobsToBeDeleted.clear();
     }
 }
