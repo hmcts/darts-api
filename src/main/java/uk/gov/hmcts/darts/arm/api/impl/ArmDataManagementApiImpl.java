@@ -33,11 +33,6 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public List<String> listCollectedBlobs(String prefix) {
-        return armService.listCollectedBlobs(armDataManagementConfiguration.getContainerName(), prefix);
-    }
-
-    @Override
     public List<String> listResponseBlobs(String prefix) {
         return armService.listResponseBlobs(armDataManagementConfiguration.getContainerName(), prefix);
     }

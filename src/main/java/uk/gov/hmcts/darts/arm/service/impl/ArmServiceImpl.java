@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
@@ -15,12 +16,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -64,13 +68,6 @@ public class ArmServiceImpl implements ArmService {
         return listBlobs(containerClient, prefix);
     }
 
-    public List<String> listCollectedBlobs(String containerName, String filename) {
-        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        String prefix = armDataManagementConfiguration.getFolders().getCollected() + filename;
-
-        return listBlobs(containerClient, prefix);
-    }
-
     /**
      * Returns a list of the blobs in the response dropzone containing the specified filename with full path.
      *
@@ -86,7 +83,7 @@ public class ArmServiceImpl implements ArmService {
         return listBlobs(containerClient, prefix);
     }
 
-    public List<String> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
+    private List<String> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
         List<String> files = new ArrayList<>();
         log.debug("About to list files for {}", prefix);
         listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, prefix).forEach(blob -> {
@@ -101,13 +98,70 @@ public class ArmServiceImpl implements ArmService {
         return files;
     }
 
-    public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
-                                                                String delimiter,
-                                                                String prefix) {
+    private PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
+                                                                 String delimiter,
+                                                                 String prefix) {
 
         ListBlobsOptions options = new ListBlobsOptions().setPrefix(prefix);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
+    }
+
+    public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize,
+                                                                String continuationToken) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
+
+        return listBlobsWithMarker(containerClient, prefix, batchSize, continuationToken);
+    }
+
+    public ContinuationTokenBlobs listResponseBlobsWithMarker(String containerName, String filename, Integer batchSize,
+                                                              String continuationToken) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
+
+        return listBlobsWithMarker(containerClient, prefix, batchSize, continuationToken);
+    }
+
+
+    private ContinuationTokenBlobs listBlobsWithMarker(BlobContainerClient blobContainerClient,
+                                                       String prefix,
+                                                       Integer batchSize,
+                                                       String continuationToken) {
+        log.debug("About to list files for {}", prefix);
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setPrefix(prefix)
+            .setMaxResultsPerPage(batchSize);
+        Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder().build();
+        try {
+            Iterator<PagedResponse<BlobItem>> response = blobContainerClient.listBlobs(options, continuationToken, timeout).iterableByPage().iterator();
+
+            List<BlobItem> blobs;
+            List<String> blobsWithPaths;
+            try (PagedResponse<BlobItem> pagedResponse = response.next()) {
+                blobs = pagedResponse.getValue();
+                blobsWithPaths = new ArrayList<>();
+                continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
+
+                blobs.forEach(blob -> {
+                    if (Boolean.TRUE.equals(blob.isPrefix())) {
+                        //Ignore directories
+                        log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
+                    } else {
+                        log.info("Blob name: {}", blob.getName());
+                        blobsWithPaths.add(blob.getName());
+                    }
+                });
+                continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
+            } catch (IOException ioe) {
+                log.error("Unable to get next response for prefix {}", prefix, ioe);
+            }
+        } catch (Exception e) {
+            log.error("Unable to list blobs with marker for prefix {}", prefix, e);
+        }
+        return continuationTokenBlobs;
     }
 
     public BinaryData getBlobData(String containerName, String blobPathAndName) {

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 import java.util.ArrayList;
@@ -37,17 +38,20 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
-    public List<String> listCollectedBlobs(String containerName, String filename) {
+    public List<String> listResponseBlobs(String containerName, String filename) {
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;
     }
 
     @Override
-    public List<String> listResponseBlobs(String containerName, String filename) {
-        List<String> listedBlobs = new ArrayList<>();
-        listedBlobs.add(filename);
-        return listedBlobs;
+    public ContinuationTokenBlobs listResponseBlobsWithMarker(String containerName, String filename, Integer batchSize, String continuationToken) {
+        return ContinuationTokenBlobs.builder().build();
+    }
+
+    @Override
+    public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize, String continuationToken) {
+        return ContinuationTokenBlobs.builder().build();
     }
 
     @Override
@@ -63,6 +67,6 @@ public class ArmServiceStubImpl implements ArmService {
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
-                 + " you should ask questions! ###");
+                     + " you should ask questions! ###");
     }
 }

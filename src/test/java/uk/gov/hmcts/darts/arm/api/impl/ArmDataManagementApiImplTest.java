@@ -67,21 +67,6 @@ class ArmDataManagementApiImplTest {
     }
 
     @Test
-    void listCollectedBlobs() {
-
-        String prefix = "1_1_1";
-        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        List<String> responseBlobs = new ArrayList<>();
-        responseBlobs.add(responseBlobFilename);
-
-        when(armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix)).thenReturn(responseBlobs);
-
-        List<String> blobs = armDataManagementApi.listCollectedBlobs(prefix);
-
-        assertEquals(1, blobs.size());
-    }
-
-    @Test
     void listResponseBlobs() {
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";

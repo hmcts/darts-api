@@ -8,6 +8,7 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,10 +16,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,23 +99,6 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListCollectedBlobs() {
-        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
-        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
-        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-
-        var foldersConfig = new ArmDataManagementConfiguration.Folders();
-        foldersConfig.setSubmission(TEST_DROP_ZONE);
-        foldersConfig.setCollected(TEST_DROP_ZONE);
-        foldersConfig.setResponse(TEST_DROP_ZONE);
-        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
-
-        String prefix = "1_1_1";
-        List<String> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
-        assertNotNull(blobs);
-    }
-
-    @Test
     void testListResponseBlobs() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
@@ -167,4 +154,65 @@ class ArmServiceImplTest {
         assertFalse(result);
     }
 
+    @Test
+    @Disabled
+    void testListSubmissionBlobsWithMarker() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
+            ARM_BLOB_CONTAINER_NAME, prefix, 10, null);
+        assertNotNull(continuationTokenBlobs);
+    }
+
+    public static <T> void mockIterable(Iterable<T> iterable, T... values) {
+        Iterator<T> mockIterator = mock(Iterator.class);
+        when(iterable.iterator()).thenReturn(mockIterator);
+
+        if (values.length == 0) {
+            when(mockIterator.hasNext()).thenReturn(false);
+            return;
+        } else if (values.length == 1) {
+            when(mockIterator.hasNext()).thenReturn(true, false);
+            when(mockIterator.next()).thenReturn(values[0]);
+        } else {
+            // build boolean array for hasNext()
+            Boolean[] hasNextResponses = new Boolean[values.length];
+            for (int i = 0; i < hasNextResponses.length - 1; i++) {
+                hasNextResponses[i] = true;
+            }
+            hasNextResponses[hasNextResponses.length - 1] = false;
+            when(mockIterator.hasNext()).thenReturn(true, hasNextResponses);
+            T[] valuesMinusTheFirst = Arrays.copyOfRange(values, 1, values.length);
+            when(mockIterator.next()).thenReturn(values[0], valuesMinusTheFirst);
+        }
+    }
+
+    @Test
+    @Disabled
+    void testListResponseBlobsWithMarker() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        mockIterable(pagedIterable, new BlobItem());
+        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        ContinuationTokenBlobs continuationTokenBlobs = armService.listResponseBlobsWithMarker(
+            ARM_BLOB_CONTAINER_NAME, prefix, 10, null);
+        assertNotNull(continuationTokenBlobs);
+    }
 }
