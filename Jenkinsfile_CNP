@@ -8,131 +8,131 @@ def type = "java"
 def product = "darts"
 def component = "api"
 
-def branchesToSync = ['demo','perftest','ithc']
+def branchesToSync = ['demo', 'perftest', 'ithc']
 
 def secrets = [
-  'darts-${env}': [
-    secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
-    secret('app-insights-connection-string', 'app-insights-connection-string'),
-    secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID_KEY'),
-    secret('AzureAdB2CClientId', 'AAD_B2C_CLIENT_ID_KEY'),
-    secret('AzureAdB2CClientSecret', 'AAD_B2C_CLIENT_SECRET_KEY'),
-    secret('AzureAdB2CFuncTestROPCUsername', 'FUNC_TEST_ROPC_USERNAME'),
-    secret('AzureAdB2CFuncTestROPCPassword', 'FUNC_TEST_ROPC_PASSWORD'),
-    secret('AzureAdB2CFuncTestROPCClientId', 'AAD_B2C_ROPC_CLIENT_ID_KEY'),
-    secret('AzureAdB2CFuncTestROPCClientSecret', 'AAD_B2C_ROPC_CLIENT_SECRET_KEY'),
-    secret('api-POSTGRES-SCHEMA', 'DARTS_API_DB_SCHEMA'),
-    secret('AzureStorageConnectionString', 'AZURE_STORAGE_CONNECTION_STRING'),
-    secret('AzureADTenantId', 'AAD_TENANT_ID'),
-    secret('AzureADClientId', 'AAD_CLIENT_ID'),
-    secret('AzureADClientSecret', 'AAD_CLIENT_SECRET'),
-    secret('XhibitUserName', 'XHIBIT_USER_NAME'),
-    secret('XhibitPassword','XHIBIT_PASSWORD'),
-    secret('CppUserName', 'CPP_USER_NAME'),
-    secret('CppPassword', 'CPP_PASSWORD'),
-    secret('DarPcUserName', 'DARPC_USER_NAME'),
-    secret('DarPcPassword', 'DARPC_PASSWORD'),
-    secret('DarMidTierUserName', 'DAR_MIDTIER_USER_NAME'),
-    secret('DarMidTierPassword', 'DAR_MIDTIER_PASSWORD'),
-    secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
-    secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
-    secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
-    secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
-    secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
-    secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
-    secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT')
-  ],
+        'darts-${env}': [
+                secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
+                secret('app-insights-connection-string', 'app-insights-connection-string'),
+                secret('AzureAdB2CTenantId', 'AAD_B2C_TENANT_ID'),
+                secret('AzureAdB2CClientId', 'AAD_B2C_CLIENT_ID'),
+                secret('AzureAdB2CClientSecret', 'AAD_B2C_CLIENT_SECRET'),
+                secret('AzureAdB2CFuncTestROPCUsername', 'FUNC_TEST_ROPC_USERNAME'),
+                secret('AzureAdB2CFuncTestROPCPassword', 'FUNC_TEST_ROPC_PASSWORD'),
+                secret('AzureAdB2CFuncTestROPCClientId', 'AAD_B2C_ROPC_CLIENT_ID'),
+                secret('AzureAdB2CFuncTestROPCClientSecret', 'AAD_B2C_ROPC_CLIENT_SECRET'),
+                secret('api-POSTGRES-SCHEMA', 'DARTS_API_DB_SCHEMA'),
+                secret('AzureStorageConnectionString', 'AZURE_STORAGE_CONNECTION_STRING'),
+                secret('AzureADTenantId', 'AAD_TENANT_ID'),
+                secret('AzureADClientId', 'AAD_CLIENT_ID'),
+                secret('AzureADClientSecret', 'AAD_CLIENT_SECRET'),
+                secret('XhibitUserName', 'XHIBIT_USER_NAME'),
+                secret('XhibitPassword', 'XHIBIT_PASSWORD'),
+                secret('CppUserName', 'CPP_USER_NAME'),
+                secret('CppPassword', 'CPP_PASSWORD'),
+                secret('DarPcUserName', 'DARPC_USER_NAME'),
+                secret('DarPcPassword', 'DARPC_PASSWORD'),
+                secret('DarMidTierUserName', 'DAR_MIDTIER_USER_NAME'),
+                secret('DarMidTierPassword', 'DAR_MIDTIER_PASSWORD'),
+                secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
+                secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
+                secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
+                secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
+                secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
+                secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
+                secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT')
+        ],
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
-  [$class     : 'AzureKeyVaultSecret',
-   secretType : 'Secret',
-   name       : secretName,
-   version    : '',
-   envVariable: envVar
-  ]
+    [$class     : 'AzureKeyVaultSecret',
+     secretType : 'Secret',
+     name       : secretName,
+     version    : '',
+     envVariable: envVar
+    ]
 }
 
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-  enableDbMigration(product)
-  loadVaultSecrets(secrets)
-  enableSlackNotifications('#darts-builds')
-  syncBranchesWithMaster(branchesToSync)
-  disableCleanupOfHelmReleaseOnFailure()
+    enableDbMigration(product)
+    loadVaultSecrets(secrets)
+    enableSlackNotifications('#darts-builds')
+    syncBranchesWithMaster(branchesToSync)
+    disableCleanupOfHelmReleaseOnFailure()
 
-  afterAlways('test') {
-    builder.gradle('jacocoTestReport')
+    afterAlways('test') {
+        builder.gradle('jacocoTestReport')
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/checkstyle",
-      reportFiles          : "main.html",
-      reportName           : "Checkstyle Main Report"
-    ]
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/checkstyle",
+                reportFiles          : "main.html",
+                reportName           : "Checkstyle Main Report"
+        ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/checkstyle",
-      reportFiles          : "test.html",
-      reportName           : "Checkstyle Test Report"
-    ]
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/checkstyle",
+                reportFiles          : "test.html",
+                reportName           : "Checkstyle Test Report"
+        ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/checkstyle",
-      reportFiles          : "functionalTest.html",
-      reportName           : "Checkstyle Functional Test Report"
-    ]
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/checkstyle",
+                reportFiles          : "functionalTest.html",
+                reportName           : "Checkstyle Functional Test Report"
+        ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/checkstyle",
-      reportFiles          : "integrationTest.html",
-      reportName           : "Checkstyle Integration Test Report"
-    ]
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/checkstyle",
+                reportFiles          : "integrationTest.html",
+                reportName           : "Checkstyle Integration Test Report"
+        ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/tests/test",
-      reportFiles          : "index.html",
-      reportName           : "Unit Tests Report"
-    ]
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/tests/test",
+                reportFiles          : "index.html",
+                reportName           : "Unit Tests Report"
+        ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/pmd",
-      reportFiles          : "main.html",
-      reportName           : "PMD Report"
-    ]
-  }
+        publishHTML target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : true,
+                reportDir            : "build/reports/pmd",
+                reportFiles          : "main.html",
+                reportName           : "PMD Report"
+        ]
+    }
 
-  afterFailure('test') {
-    junit '**/test-results/integration/*.xml'
-  }
+    afterFailure('test') {
+        junit '**/test-results/integration/*.xml'
+    }
 
-  before('dbmigrate:demo') {
-    sh("./gradlew --no-daemon --init-script init.gradle assemble")
-  }
+    before('dbmigrate:demo') {
+        sh("./gradlew --no-daemon --init-script init.gradle assemble")
+    }
 
-  before('dbmigrate:test') {
-    sh("./gradlew --no-daemon --init-script init.gradle assemble")
-  }
+    before('dbmigrate:test') {
+        sh("./gradlew --no-daemon --init-script init.gradle assemble")
+    }
 
-  before('dbmigrate:ithc') {
-    sh("./gradlew --no-daemon --init-script init.gradle assemble")
-  }
+    before('dbmigrate:ithc') {
+        sh("./gradlew --no-daemon --init-script init.gradle assemble")
+    }
 }

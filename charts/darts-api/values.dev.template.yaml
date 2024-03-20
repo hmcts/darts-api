@@ -22,11 +22,11 @@ java:
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
         - name: AzureAdB2CTenantId
-          alias: AAD_B2C_TENANT_ID_KEY
+          alias: AAD_B2C_TENANT_ID
         - name: AzureAdB2CClientId
-          alias: AAD_B2C_CLIENT_ID_KEY
+          alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
-          alias: AAD_B2C_CLIENT_SECRET_KEY
+          alias: AAD_B2C_CLIENT_SECRET
         - name: app-insights-connection-string
           alias: app-insights-connection-string
         - name: AzureAdB2CFuncTestROPCUsername
@@ -38,9 +38,9 @@ java:
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientId
-          alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+          alias: AAD_B2C_ROPC_CLIENT_ID
         - name: AzureAdB2CFuncTestROPCClientSecret
-          alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
+          alias: AAD_B2C_ROPC_CLIENT_SECRET
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
         - name: api-POSTGRES-CONNECTION-STRING
@@ -133,17 +133,17 @@ postgresql:
 #         - name: api-POSTGRES-SCHEMA
 #           alias: DARTS_API_DB_SCHEMA
 #         - name: AzureAdB2CTenantId
-#           alias: AAD_B2C_TENANT_ID_KEY
+#           alias: AAD_B2C_TENANT_ID
 #         - name: AzureAdB2CClientId
-#           alias: AAD_B2C_CLIENT_ID_KEY
+#           alias: AAD_B2C_CLIENT_ID
 #         - name: AzureAdB2CClientSecret
-#           alias: AAD_B2C_CLIENT_SECRET_KEY
+#           alias: AAD_B2C_CLIENT_SECRET
 #         - name: app-insights-connection-string
 #           alias: app-insights-connection-string
 #         - name: AzureAdB2CFuncTestROPCClientId
-#           alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+#           alias: AAD_B2C_ROPC_CLIENT_ID
 #         - name: AzureAdB2CFuncTestROPCClientSecret
-#           alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
+#           alias: AAD_B2C_ROPC_CLIENT_SECRET
 #         - name: AzureStorageConnectionString
 #           alias: AZURE_STORAGE_CONNECTION_STRING
 #         - name: api-POSTGRES-CONNECTION-STRING
