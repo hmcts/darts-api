@@ -26,6 +26,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -140,12 +143,17 @@ public class ArmServiceImpl implements ArmService {
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
-        blobContainerClient.listBlobs(options, timeout).forEach(blob -> {
+        blobContainerClient.listBlobs(options, timeout).forEach(withCounter((i, blob) -> {
             String blobName = blob.getName();
             files.add(blobName);
-            log.info("Found blob {}", blobName);
-        });
+            log.info("{} Found blob {}", (i + 1), blobName);
+        }));
         return files;
+    }
+
+    public static <T> Consumer<T> withCounter(BiConsumer<Integer, T> consumer) {
+        AtomicInteger counter = new AtomicInteger(0);
+        return item -> consumer.accept(counter.getAndIncrement(), item);
     }
 
     public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize,
