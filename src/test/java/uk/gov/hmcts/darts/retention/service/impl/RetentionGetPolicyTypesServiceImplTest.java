@@ -9,6 +9,7 @@ import org.mockito.quality.Strictness;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
@@ -18,10 +19,15 @@ import uk.gov.hmcts.darts.retentions.model.GetRetentionPolicy;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.retention.exception.RetentionApiError.RETENTION_POLICY_TYPE_ID_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -74,6 +80,39 @@ class RetentionGetPolicyTypesServiceImplTest {
         List<GetRetentionPolicy> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
 
         assertEquals(1, caseRetentionPolicies.get(0).getId());
+
+    }
+
+    @Test
+    void shouldSuccessfullyReturnPolicyType() {
+        setupStubs();
+
+        when(retentionPolicyTypeRepository.findById(anyInt())).thenReturn(Optional.of(getRetentionPolicyTypeEntity()));
+
+        when(retentionPolicyMapper.mapRetentionPolicy(any())).thenReturn(getRetentionPolicy());
+
+        GetRetentionPolicy caseRetentionPolicy = retentionService.getRetentionPolicyType(1);
+
+        assertEquals(1, caseRetentionPolicy.getId());
+        assertEquals("DARTS Permanent Retention v3", caseRetentionPolicy.getName());
+
+    }
+
+    @Test
+    void shouldThrowDartsExceptionWhenPolicyTypeIdNotFound() {
+        setupStubs();
+
+        when(retentionPolicyTypeRepository.findById(anyInt())).thenThrow(new DartsApiException(RETENTION_POLICY_TYPE_ID_NOT_FOUND));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> retentionService.getRetentionPolicyType(123_456)
+        );
+
+        assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND.getTitle(), exception.getMessage());
+        assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND, exception.getError());
+
+        verifyNoInteractions(retentionPolicyMapper);
 
     }
 
