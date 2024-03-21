@@ -26,11 +26,11 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | GOVUK_NOTIFY_API_KEY                     | GovukNotifyTestApiKey                     |
 | FUNC_TEST_ROPC_USERNAME                  | AzureAdB2CFuncTestROPCUsername            |
 | FUNC_TEST_ROPC_PASSWORD                  | AzureAdB2CFuncTestROPCPassword            |
-| AAD_B2C_TENANT_ID_KEY                    | AzureAdB2CTenantId                        |
-| AAD_B2C_CLIENT_ID_KEY                    | AzureAdB2CClientId                        |
-| AAD_B2C_CLIENT_SECRET_KEY                | AzureAdB2CClientSecret                    |
-| AAD_B2C_ROPC_CLIENT_ID_KEY               | AzureAdB2CFuncTestROPCClientId            |
-| AAD_B2C_ROPC_CLIENT_SECRET_KEY           | AzureAdB2CFuncTestROPCClientSecret        |
+| AAD_B2C_TENANT_ID                        | AzureAdB2CTenantId                        |
+| AAD_B2C_CLIENT_ID                        | AzureAdB2CClientId                        |
+| AAD_B2C_CLIENT_SECRET                    | AzureAdB2CClientSecret                    |
+| AAD_B2C_ROPC_CLIENT_ID                   | AzureAdB2CFuncTestROPCClientId            |
+| AAD_B2C_ROPC_CLIENT_SECRET               | AzureAdB2CFuncTestROPCClientSecret        |
 | AZURE_STORAGE_CONNECTION_STRING          | AzureStorageConnectionString              |
 | AAD_TENANT_ID                            | AzureADTenantId                           |
 | AAD_CLIENT_ID                            | AzureADClientId                           |
@@ -56,12 +56,11 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 
 There are few attributes which doesn't use Azure Keyvault secrets. Those environment variable values are controlled dynamically via Flux config
 
-| Environment Variable Name                | Value                                                            |
-|------------------------------------------|------------------------------------------------------------------|
-| ARM_PROPERTY_FILE_ENVIRONMENT            | nle                                                              |
-| ACTIVE_DIRECTORY_B2C_BASE_URI            | https://hmctsstgextid.b2clogin.com                               |
-| ACTIVE_DIRECTORY_B2C_AUTH_URI            | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
-
+| Environment Variable Name     | Value                                                            |
+|-------------------------------|------------------------------------------------------------------|
+| ARM_PROPERTY_FILE_ENVIRONMENT | nle                                                              |
+| ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
+| ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
@@ -97,11 +96,11 @@ to make the changes permanent, make a `.zshrc` file in your users folder and pop
 export GOVUK_NOTIFY_API_KEY=
 export FUNC_TEST_ROPC_USERNAME=
 export FUNC_TEST_ROPC_PASSWORD=
-export AAD_B2C_TENANT_ID_KEY=
-export AAD_B2C_CLIENT_ID_KEY=
-export AAD_B2C_CLIENT_SECRET_KEY=
-export AAD_B2C_ROPC_CLIENT_ID_KEY=
-export AAD_B2C_ROPC_CLIENT_SECRET_KEY=
+export AAD_B2C_TENANT_ID=
+export AAD_B2C_CLIENT_ID=
+export AAD_B2C_CLIENT_SECRET=
+export AAD_B2C_ROPC_CLIENT_ID=
+export AAD_B2C_ROPC_CLIENT_SECRET=
 export AAD_TENANT_ID=
 export AAD_CLIENT_ID=
 export AAD_CLIENT_SECRET=
