@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.usermanagement.http.api.SecurityGroupApi;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.util.List;
@@ -22,6 +23,13 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 public class SecurityGroupController implements SecurityGroupApi {
 
     private final SecurityGroupService securityGroupService;
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    public ResponseEntity<SecurityGroupWithIdAndRoleAndUsers> adminGetSecurityGroup(Integer securityGroupId) {
+        return ResponseEntity.ok(securityGroupService.getSecurityGroup(securityGroupId));
+    }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)

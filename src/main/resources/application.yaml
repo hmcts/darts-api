@@ -24,8 +24,8 @@ spring:
       client:
         registration:
           external-azure-ad:
-            client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}
-            client-secret: ${AAD_B2C_CLIENT_SECRET_KEY:}
+            client-id: ${AAD_B2C_CLIENT_ID:00000000-0000-0000-0000-000000000000}
+            client-secret: ${AAD_B2C_CLIENT_SECRET:}
             scope: openid
             redirect-uri: ${darts.portal.url}/auth/callback
             logout-redirect-uri: ${darts.portal.url}/auth/logout-callback
@@ -33,7 +33,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
@@ -164,6 +164,8 @@ darts:
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
   retention:
     overridable-fixed-policy-keys: 3
+    close-open-cases-older-than-years: 6
+    close-events: "Case closed,Archive case"
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}

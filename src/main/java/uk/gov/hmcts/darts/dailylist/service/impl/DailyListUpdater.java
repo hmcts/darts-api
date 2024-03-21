@@ -79,7 +79,8 @@ class DailyListUpdater {
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                             courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
+                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate(),
+                            dailyListSystemUser
                         );
                         hearing.setCreatedBy(dailyListSystemUser);
                         hearing.setLastModifiedBy(dailyListSystemUser);
@@ -194,36 +195,39 @@ class DailyListUpdater {
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate ->
                               courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                                  buildFullName(advocate.getName()), courtCase)));
+                                  buildFullName(advocate.getName()), courtCase, dailyListSystemUser)));
 
     }
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
             for (PersonalDetails personalDetails : defendant.getCounsel()) {
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(personalDetails.getName()), courtCase));
+                    buildFullName(personalDetails.getName()), courtCase, dailyListSystemUser));
             }
         }
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
             courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
                 buildFullName(defendant.getPersonalDetails().getName()),
-                courtCase
+                courtCase,
+                dailyListSystemUser
             ));
         }
-
     }
 
     private void addJudges(Sitting sitting, HearingEntity hearing) {
+        UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (CitizenName judge : sitting.getJudiciary()) {
-            JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName());
+            JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName(), dailyListSystemUser);
             hearing.addJudge(judgeEntity);
-
         }
     }
 

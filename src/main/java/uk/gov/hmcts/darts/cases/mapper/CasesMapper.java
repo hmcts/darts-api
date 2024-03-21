@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ReportingRestriction;
@@ -39,6 +40,7 @@ public class CasesMapper {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final CaseRetentionRepository caseRetentionRepository;
+    private final AuthorisationApi authorisationApi;
 
     public List<ScheduledCase> mapToScheduledCases(List<HearingEntity> hearings) {
         return emptyIfNull(hearings).stream().map(this::mapToScheduledCase)
@@ -168,6 +170,8 @@ public class CasesMapper {
         DefenceEntity defence = new DefenceEntity();
         defence.setCourtCase(caseEntity);
         defence.setName(newProsecutor);
+        defence.setCreatedBy(authorisationApi.getCurrentUser());
+        defence.setLastModifiedBy(authorisationApi.getCurrentUser());
         return defence;
     }
 
@@ -175,6 +179,8 @@ public class CasesMapper {
         ProsecutorEntity prosecutor = new ProsecutorEntity();
         prosecutor.setCourtCase(caseEntity);
         prosecutor.setName(newProsecutor);
+        prosecutor.setCreatedBy(authorisationApi.getCurrentUser());
+        prosecutor.setLastModifiedBy(authorisationApi.getCurrentUser());
         return prosecutor;
     }
 
@@ -182,6 +188,8 @@ public class CasesMapper {
         DefendantEntity defendant = new DefendantEntity();
         defendant.setCourtCase(caseEntity);
         defendant.setName(newDefendant);
+        defendant.setCreatedBy(authorisationApi.getCurrentUser());
+        defendant.setLastModifiedBy(authorisationApi.getCurrentUser());
         return defendant;
     }
 
