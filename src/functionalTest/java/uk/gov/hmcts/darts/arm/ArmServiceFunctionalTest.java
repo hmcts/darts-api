@@ -94,7 +94,7 @@ class ArmServiceFunctionalTest {
             ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
                 armContainerName, "functional_test", batchSize, continuationToken);
             continuationToken = continuationTokenBlobs.getContinuationToken();
-            log.info("continuationToken {}", continuationToken);
+            log.info("continuationToken: \n{}", continuationToken);
             log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
 
             assertFalse(continuationTokenBlobs.getBlobNamesWithAndPaths().isEmpty());
