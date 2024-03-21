@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -120,8 +121,7 @@ class ArmServiceFunctionalTest {
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         }
 
-        assertFalse(blobs.isEmpty());
-
+        assertEquals(batchSize, blobs.size());
     }
 
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
