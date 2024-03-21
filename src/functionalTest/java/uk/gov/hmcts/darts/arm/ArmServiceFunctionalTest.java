@@ -92,11 +92,6 @@ class ArmServiceFunctionalTest {
         Integer batchSize = 5;
         List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, "functional_test", batchSize);
 
-        for (String blobPathAndName : blobs) {
-            log.info("Blob about to be deleted {}", blobPathAndName);
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-        }
-
         assertEquals(batchSize, blobs.size());
     }
 
