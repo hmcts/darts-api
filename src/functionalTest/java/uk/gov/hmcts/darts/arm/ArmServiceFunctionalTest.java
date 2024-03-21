@@ -104,19 +104,17 @@ class ArmServiceFunctionalTest {
         uploadBatchedSubmissionBlobs(data);
         Integer batchSize = 2;
         String continuationToken = null;
+        List<String> allBlobs = new ArrayList<>();
         do {
             ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
                 armContainerName, "functional_test", batchSize, continuationToken);
             continuationToken = continuationTokenBlobs.getContinuationToken();
             log.info("continuationToken: \n{}", continuationToken);
-            log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
-
-            assertFalse(continuationTokenBlobs.getBlobNamesWithAndPaths().isEmpty());
-
-            for (String blobPathAndName : continuationTokenBlobs.getBlobNamesWithAndPaths()) {
-                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-            }
+            log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths().size());
+            
         } while (nonNull(continuationToken));
+
+        assertEquals(11, allBlobs.size());
     }
 
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
