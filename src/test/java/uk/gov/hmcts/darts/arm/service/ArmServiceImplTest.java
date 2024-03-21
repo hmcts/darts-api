@@ -152,6 +152,42 @@ class ArmServiceImplTest {
     }
 
     @Test
+    void testListSubmissionBlobsUsingBatch() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        Integer batchSize = 5;
+        List<String> blobs = armService.listSubmissionBlobsUsingBatch(ARM_BLOB_CONTAINER_NAME, prefix, batchSize);
+        assertNotNull(blobs);
+    }
+
+    @Test
+    void testListResponseBlobsUsingBatch() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        Integer batchSize = 5;
+        List<String> blobs = armService.listResponseBlobsUsingBatch(ARM_BLOB_CONTAINER_NAME, prefix, batchSize);
+        assertNotNull(blobs);
+    }
+
+    @Test
     void testListSubmissionBlobsWithMarker() {
         //iterableByPage().iterator()
         //Iterator mockIterator = mock(Iterator.class);
