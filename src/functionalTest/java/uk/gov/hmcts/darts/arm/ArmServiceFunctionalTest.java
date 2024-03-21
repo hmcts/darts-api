@@ -102,8 +102,6 @@ class ArmServiceFunctionalTest {
                 armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
             }
         } while (nonNull(continuationToken));
-
-
     }
 
     @Test
@@ -122,7 +120,6 @@ class ArmServiceFunctionalTest {
         for (String blobPathAndName : blobs) {
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         }
-
     }
 
     private void uploadBatchedBlobs(BinaryData data) {

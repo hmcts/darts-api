@@ -140,7 +140,11 @@ public class ArmServiceImpl implements ArmService {
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
-        blobContainerClient.listBlobs(options, timeout).forEach(blob -> files.add(blob.getName()));
+        blobContainerClient.listBlobs(options, timeout).forEach(blob -> {
+            String blobName = blob.getName();
+            files.add(blobName);
+            log.info("Found blob {}", blobName);
+        });
         return files;
     }
 
