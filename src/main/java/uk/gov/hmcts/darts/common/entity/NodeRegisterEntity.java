@@ -12,12 +12,13 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = NodeRegisterEntity.TABLE_NAME)
 @Getter
 @Setter
-public class NodeRegisterEntity {
+public class NodeRegisterEntity extends CreatedBaseEntity {
 
     public static final String TABLE_NAME = "node_register";
     public static final String NODE_GENERATOR = "nod_gen";

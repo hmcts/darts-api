@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -42,6 +43,9 @@ class RetrieveCoreObjectServiceImplTest {
     @Mock
     CourtroomRepository courtroomRepository;
 
+    @Mock
+    AuthorisationApi authorisationApi;
+
     @InjectMocks
     RetrieveCoreObjectServiceImpl retrieveCoreObjectServiceImpl;
 
@@ -78,6 +82,8 @@ class RetrieveCoreObjectServiceImplTest {
         assertEquals(COURTROOM_1, response.getCourtroom().getName());
         assertEquals(1, response.getCourtroom().getCourthouse().getId());
         assertEquals(CASE_NUMBER_1, response.getCourtCase().getCaseNumber());
+        assertEquals(response.getCreatedBy(), authorisationApi.getCurrentUser());
+        assertEquals(response.getLastModifiedBy(), authorisationApi.getCurrentUser());
     }
 
     @Test
