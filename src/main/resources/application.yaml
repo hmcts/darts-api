@@ -199,8 +199,9 @@ darts:
 
       response-cleanup-buffer-days: 0
 
-      push_batch_size: 10
-      pull_batch_size: 10
+      push-batch-size: 10
+      pull-batch-size: 10
+      continuation-token-duration: PT60M
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
