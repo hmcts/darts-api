@@ -154,7 +154,7 @@ class ArmServiceImplTest {
     @Test
     void testListSubmissionBlobsUsingBatch() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
-        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(blobContainerClient.listBlobs(any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
 
         var foldersConfig = new ArmDataManagementConfiguration.Folders();
@@ -172,7 +172,7 @@ class ArmServiceImplTest {
     @Test
     void testListResponseBlobsUsingBatch() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
-        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(blobContainerClient.listBlobs(any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
 
         var foldersConfig = new ArmDataManagementConfiguration.Folders();

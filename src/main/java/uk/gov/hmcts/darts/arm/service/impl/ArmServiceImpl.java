@@ -135,28 +135,15 @@ public class ArmServiceImpl implements ArmService {
     private List<String> listBlobsUsingBatch(BlobContainerClient blobContainerClient, String prefix, Integer batchSize) {
         List<String> files = new ArrayList<>();
         log.debug("About to list files for {}", prefix);
-        listBlobsUsingBatch(blobContainerClient, FILE_PATH_DELIMITER, prefix, batchSize).forEach(blob -> {
-            if (Boolean.TRUE.equals(blob.isPrefix())) {
-                log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
-                listBlobsUsingBatch(blobContainerClient, FILE_PATH_DELIMITER, blob.getName(), batchSize);
-            } else {
-                log.info("Blob name: {}", blob.getName());
-                files.add(blob.getName());
-            }
-        });
-        return files;
-    }
-
-    private PagedIterable<BlobItem> listBlobsUsingBatch(BlobContainerClient blobContainerClient,
-                                                        String delimiter,
-                                                        String prefix,
-                                                        Integer batchSize) {
-
         ListBlobsOptions options = new ListBlobsOptions()
             .setPrefix(prefix)
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
-        return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
+
+        blobContainerClient.listBlobs(options, timeout).forEach(blob -> {
+            files.add(blob.getName());
+        });
+        return files;
     }
 
     public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize,
@@ -202,13 +189,7 @@ public class ArmServiceImpl implements ArmService {
                     continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
 
                     blobs.forEach(blob -> {
-                        if (Boolean.TRUE.equals(blob.isPrefix())) {
-                            //Ignore directories
-                            log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
-                        } else {
-                            log.info("Blob name: {}", blob.getName());
-                            blobsWithPaths.add(blob.getName());
-                        }
+                        blobsWithPaths.add(blob.getName());
                     });
                     continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
                 } catch (NoSuchElementException | IOException ioe) {
