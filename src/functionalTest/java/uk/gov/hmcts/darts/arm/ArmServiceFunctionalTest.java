@@ -93,7 +93,7 @@ class ArmServiceFunctionalTest {
             ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
                 armContainerName, "functional_test", batchSize, continuationToken);
             continuationToken = continuationTokenBlobs.getContinuationToken();
-            log.info("continuationToken {]", continuationToken);
+            log.info("continuationToken {}", continuationToken);
             log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
 
             assertFalse(continuationTokenBlobs.getBlobNamesWithAndPaths().isEmpty());
@@ -115,7 +115,7 @@ class ArmServiceFunctionalTest {
         uploadBatchedBlobs(data);
 
         Integer batchSize = 5;
-        List<String> blobs = armService.listResponseBlobsUsingBatch(armContainerName, "functional_test", batchSize);
+        List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, "functional_test", batchSize);
 
         assertFalse(blobs.isEmpty());
 
