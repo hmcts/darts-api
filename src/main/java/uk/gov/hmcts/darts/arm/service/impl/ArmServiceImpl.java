@@ -43,7 +43,7 @@ public class ArmServiceImpl implements ArmService {
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    private Duration continuationTokenDuration;
+    private final Duration continuationTokenDuration;
 
     public ArmServiceImpl(ArmDataManagementDao armDataManagementDao, ArmDataManagementConfiguration armDataManagementConfiguration) {
         this.armDataManagementDao = armDataManagementDao;
@@ -132,17 +132,15 @@ public class ArmServiceImpl implements ArmService {
         return listBlobsUsingBatch(containerClient, prefix, batchSize);
     }
 
-    private List<String> listBlobsUsingBatch(BlobContainerClient blobContainerClient, String prefix, Integer batchSize) {
+    private List<String> listBlobsUsingBatch(BlobContainerClient blobContainerClient, String blobPathAndName, Integer batchSize) {
         List<String> files = new ArrayList<>();
-        log.debug("About to list files for {}", prefix);
+        log.debug("About to list files for {}", blobPathAndName);
         ListBlobsOptions options = new ListBlobsOptions()
-            .setPrefix(prefix)
+            .setPrefix(blobPathAndName)
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
-        blobContainerClient.listBlobs(options, timeout).forEach(blob -> {
-            files.add(blob.getName());
-        });
+        blobContainerClient.listBlobs(options, timeout).forEach(blob -> files.add(blob.getName()));
         return files;
     }
 
@@ -164,12 +162,12 @@ public class ArmServiceImpl implements ArmService {
 
 
     private ContinuationTokenBlobs listBlobsWithMarker(BlobContainerClient blobContainerClient,
-                                                       String prefix,
+                                                       String blobPathAndName,
                                                        Integer batchSize,
                                                        String continuationToken) {
-        log.debug("About to list files for {}", prefix);
+        log.debug("About to list files for {}", blobPathAndName);
         ListBlobsOptions options = new ListBlobsOptions()
-            .setPrefix(prefix)
+            .setPrefix(blobPathAndName)
             .setMaxResultsPerPage(batchSize);
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder().build();
@@ -188,16 +186,14 @@ public class ArmServiceImpl implements ArmService {
                     // which enables the client to "pick up where it left off"
                     continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
 
-                    blobs.forEach(blob -> {
-                        blobsWithPaths.add(blob.getName());
-                    });
+                    blobs.forEach(blob -> blobsWithPaths.add(blob.getName()));
                     continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
                 } catch (NoSuchElementException | IOException ioe) {
-                    log.error("Unable to get next response for prefix {}", prefix, ioe);
+                    log.error("Unable to get next response for prefix {}", blobPathAndName, ioe);
                 }
             }
         } catch (Exception e) {
-            log.error("Unable to list blobs with marker for prefix {}", prefix, e);
+            log.error("Unable to list blobs with marker for prefix {}", blobPathAndName, e);
         }
         return continuationTokenBlobs;
     }

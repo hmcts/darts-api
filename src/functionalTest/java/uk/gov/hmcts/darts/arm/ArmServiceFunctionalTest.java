@@ -45,6 +45,8 @@ class ArmServiceFunctionalTest {
 
     private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
 
+    private final List<String> armBlobsWithPathToBeDeleted = new ArrayList<>();
+
 
     @Test
     void saveBlobData() {
@@ -70,9 +72,8 @@ class ArmServiceFunctionalTest {
         String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
 
         log.info("Saved blob {} in {}", actualResult, blobPathAndName);
-        armSubmissionBlobsToBeDeleted.add(actualResult);
+        armBlobsWithPathToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
-        log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
         List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
         assertFalse(submissionBlobs.isEmpty());
@@ -94,7 +95,12 @@ class ArmServiceFunctionalTest {
             continuationToken = continuationTokenBlobs.getContinuationToken();
             log.info("continuationToken {]", continuationToken);
             log.info("Blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths());
+
             assertFalse(continuationTokenBlobs.getBlobNamesWithAndPaths().isEmpty());
+
+            for (String blobPathAndName : continuationTokenBlobs.getBlobNamesWithAndPaths()) {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            }
         } while (nonNull(continuationToken));
 
 
@@ -113,6 +119,10 @@ class ArmServiceFunctionalTest {
 
         assertFalse(blobs.isEmpty());
 
+        for (String blobPathAndName : blobs) {
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        }
+
     }
 
     private void uploadBatchedBlobs(BinaryData data) {
@@ -123,9 +133,8 @@ class ArmServiceFunctionalTest {
             String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
 
             log.info("Saved blob {} in {}", actualResult, blobPathAndName);
-            armSubmissionBlobsToBeDeleted.add(actualResult);
+            armBlobsWithPathToBeDeleted.add(actualResult);
             assertNotNull(actualResult);
-            log.info("listSubmissionBlobs - Blob filename {}", actualResult);
         }
     }
 
@@ -138,5 +147,9 @@ class ArmServiceFunctionalTest {
         }
         armSubmissionBlobsToBeDeleted.clear();
 
+        for (String blobPathAndName : armBlobsWithPathToBeDeleted) {
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        }
+        armBlobsWithPathToBeDeleted.clear();
     }
 }
