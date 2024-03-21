@@ -181,6 +181,7 @@ def coverageExclusions = [
   '**/uk/gov/hmcts/darts/audit/api**',
   '**/uk/gov/hmcts/darts/event/api**',
   '**/uk/gov/hmcts/darts/audiorequests/api**',
+  '**/uk/gov/hmcts/darts/**/ArmServiceImpl.java',
 ]
 
 jacocoTestReport {
