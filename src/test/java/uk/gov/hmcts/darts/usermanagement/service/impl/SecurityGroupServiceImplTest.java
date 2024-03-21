@@ -11,10 +11,13 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
 
 import java.util.HashSet;
@@ -34,6 +37,10 @@ class SecurityGroupServiceImplTest {
     @Mock
     SecurityRoleRepository securityRoleRepository;
     @Mock
+    CourthouseRepository courthouseRepository;
+    @Mock
+    UserAccountRepository userAccountRepository;
+    @Mock
     SecurityGroupMapper securityGroupMapper;
     @Mock
     SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
@@ -47,6 +54,8 @@ class SecurityGroupServiceImplTest {
         securityGroupService = new SecurityGroupServiceImpl(
             securityGroupRepository,
             securityRoleRepository,
+            courthouseRepository,
+            userAccountRepository,
             securityGroupMapper,
             securityGroupCourthouseMapper,
             securityGroupWithIdAndRoleAndUsersMapper,
@@ -271,11 +280,20 @@ class SecurityGroupServiceImplTest {
         Set<CourthouseEntity> courthouseEntitySet = new HashSet<>();
         courthouseEntitySet.add(courthouse);
 
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(1);
+
+        Set<UserAccountEntity> userAccountEntitySet = new HashSet<>();
+        userAccountEntitySet.add(userAccountEntity);
+
         SecurityGroupEntity securityGroupEntity = new SecurityGroupEntity();
         securityGroupEntity.setId(securityGroupId);
         securityGroupEntity.setGroupName("Test Group " + securityGroupId);
+        securityGroupEntity.setDisplayName("Display Test Group " + securityGroupId);
+        securityGroupEntity.setDescription("Description Test Group " + securityGroupId);
         securityGroupEntity.setSecurityRoleEntity(securityRoleEntity);
         securityGroupEntity.setCourthouseEntities(courthouseEntitySet);
+        securityGroupEntity.setUsers(userAccountEntitySet);
 
         return securityGroupEntity;
     }
@@ -302,4 +320,40 @@ class SecurityGroupServiceImplTest {
 
         return securityGroupEntities;
     }
+
+    @Test
+    void testUpdateNameOnly() {
+        SecurityGroupEntity securityGroupEntity = createSecurityGroupEntity(1, 1, 1);
+
+        SecurityGroupPatch securityGroupPatch = new SecurityGroupPatch();
+        String newName = "new name";
+        securityGroupPatch.setName(newName);
+        securityGroupService.updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
+
+        assertEquals(newName, securityGroupEntity.getGroupName());
+        assertEquals("Display Test Group 1", securityGroupEntity.getDisplayName());
+        assertEquals("Description Test Group 1", securityGroupEntity.getDescription());
+        assertEquals(1, securityGroupEntity.getCourthouseEntities().iterator().next().getId());
+        assertEquals(1, securityGroupEntity.getUsers().iterator().next().getId());
+    }
+
+    @Test
+    void testUpdateDisplayNameAndDescriptionOnly() {
+        SecurityGroupEntity securityGroupEntity = createSecurityGroupEntity(1, 1, 1);
+
+        SecurityGroupPatch securityGroupPatch = new SecurityGroupPatch();
+        String newDisplayName = "new name";
+        securityGroupPatch.setDisplayName(newDisplayName);
+        String newDescription = "new description";
+        securityGroupPatch.setDescription(newDescription);
+        securityGroupService.updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
+
+        assertEquals("Test Group 1", securityGroupEntity.getGroupName());
+        assertEquals(newDisplayName, securityGroupEntity.getDisplayName());
+        assertEquals(newDescription, securityGroupEntity.getDescription());
+        assertEquals(1, securityGroupEntity.getCourthouseEntities().iterator().next().getId());
+        assertEquals(1, securityGroupEntity.getUsers().iterator().next().getId());
+    }
+
+
 }

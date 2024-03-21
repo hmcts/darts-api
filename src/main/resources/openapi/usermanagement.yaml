@@ -251,7 +251,7 @@ paths:
         $ref: '#/components/requestBodies/SecurityGroupPatchRequest'
       responses:
         '200':
-          $ref: '#/components/responses/SecurityGroupPatchResponse'
+          $ref: '#/components/responses/SecurityGroupPatchSuccess'
         '403':
           description: Forbidden Error
           content:
@@ -622,8 +622,9 @@ components:
         - "USER_MANAGEMENT_101"
         - "USER_MANAGEMENT_102"
         - "USER_MANAGEMENT_103"
+        - "USER_MANAGEMENT_104"
         - "USER_NOT_TRANSCRIBER_110"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 
     UserManagementTitleErrors:
       type: string
@@ -632,8 +633,9 @@ components:
         - "The provided email already exists"
         - "Invalid email format"
         - "The provided security group does not exist"
+        - "The provided courthouse does not exist"
         - "Duplicate security group names are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
 
 
     Role:
