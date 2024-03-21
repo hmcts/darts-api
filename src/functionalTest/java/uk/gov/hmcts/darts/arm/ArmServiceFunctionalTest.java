@@ -82,6 +82,25 @@ class ArmServiceFunctionalTest {
     }
 
     @Test
+    void listBlobsUsingBatch() {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        uploadBatchedSubmissionBlobs(data);
+
+        Integer batchSize = 5;
+        List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, "functional_test", batchSize);
+
+        for (String blobPathAndName : blobs) {
+            log.info("Blob about to be deleted {}", blobPathAndName);
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        }
+
+        assertEquals(batchSize, blobs.size());
+    }
+
+    @Test
     void listBlobsUsingMarker() {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
@@ -103,25 +122,6 @@ class ArmServiceFunctionalTest {
                 armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
             }
         } while (nonNull(continuationToken));
-    }
-
-    @Test
-    void listBlobsUsingBatch() {
-
-        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
-        BinaryData data = BinaryData.fromBytes(testStringInBytes);
-
-        uploadBatchedSubmissionBlobs(data);
-
-        Integer batchSize = 5;
-        List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, "functional_test", batchSize);
-
-        for (String blobPathAndName : blobs) {
-            log.info("Blob about to be deleted {}", blobPathAndName);
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
-        }
-
-        assertEquals(batchSize, blobs.size());
     }
 
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
