@@ -111,7 +111,7 @@ class ArmServiceFunctionalTest {
             continuationToken = continuationTokenBlobs.getContinuationToken();
             log.info("continuationToken: \n{}", continuationToken);
             log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths().size());
-            
+            allBlobs.addAll(continuationTokenBlobs.getBlobNamesWithAndPaths());
         } while (nonNull(continuationToken));
 
         assertEquals(11, allBlobs.size());
