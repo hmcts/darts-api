@@ -43,6 +43,10 @@ public enum RetentionApiError implements DartsApiError {
             RetentionErrorCode.RETENTION_DATE_TOO_LATE.getValue(),
             HttpStatus.UNPROCESSABLE_ENTITY,
             RetentionTitleErrors.RETENTION_DATE_TOO_LATE.toString()
+    ), RETENTION_POLICY_TYPE_ID_NOT_FOUND(
+        RetentionErrorCode.RETENTION_POLICY_TYPE_ID_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        RetentionTitleErrors.RETENTION_POLICY_TYPE_ID_NOT_FOUND.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";

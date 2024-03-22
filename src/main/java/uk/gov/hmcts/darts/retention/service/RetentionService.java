@@ -11,4 +11,6 @@ public interface RetentionService {
 
     List<GetRetentionPolicy> getRetentionPolicyTypes();
 
+    GetRetentionPolicy getRetentionPolicyType(Integer id);
+
 }
