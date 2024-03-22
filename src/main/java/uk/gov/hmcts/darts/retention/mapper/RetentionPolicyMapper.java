@@ -16,16 +16,16 @@ public class RetentionPolicyMapper {
         return retentionPolicyTypeEntity.stream().map(this::mapRetentionPolicy).toList();
     }
 
-    public GetRetentionPolicy mapRetentionPolicy(RetentionPolicyTypeEntity o) {
+    public GetRetentionPolicy mapRetentionPolicy(RetentionPolicyTypeEntity entity) {
         GetRetentionPolicy getRetentionPolicy = new GetRetentionPolicy();
-        getRetentionPolicy.setPolicyEndAt(o.getPolicyEnd());
-        getRetentionPolicy.setPolicyStartAt(o.getPolicyStart());
-        getRetentionPolicy.setId(o.getId());
-        getRetentionPolicy.setDisplayName(o.getDisplayName());
-        getRetentionPolicy.setName(o.getPolicyName());
-        getRetentionPolicy.setDescription(o.getDescription());
-        getRetentionPolicy.setFixedPolicyKey(o.getFixedPolicyKey());
-        getRetentionPolicy.setDuration(o.getDuration());
+        getRetentionPolicy.setPolicyEndAt(entity.getPolicyEnd());
+        getRetentionPolicy.setPolicyStartAt(entity.getPolicyStart());
+        getRetentionPolicy.setId(entity.getId());
+        getRetentionPolicy.setDisplayName(entity.getDisplayName());
+        getRetentionPolicy.setName(entity.getPolicyName());
+        getRetentionPolicy.setDescription(entity.getDescription());
+        getRetentionPolicy.setFixedPolicyKey(entity.getFixedPolicyKey());
+        getRetentionPolicy.setDuration(entity.getDuration());
 
         return getRetentionPolicy;
     }

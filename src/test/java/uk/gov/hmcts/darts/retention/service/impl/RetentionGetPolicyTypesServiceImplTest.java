@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.retention.exception.RetentionApiError.RETENTION_POLICY_TYPE_ID_NOT_FOUND;
@@ -60,12 +61,9 @@ class RetentionGetPolicyTypesServiceImplTest {
         retentionPolicyTypeRepository
         );
 
-        when(retentionPolicyTypeRepository.findAll()).thenReturn(List.of());
-
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
-
 
     }
 
@@ -81,6 +79,9 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         assertEquals(1, caseRetentionPolicies.get(0).getId());
 
+        verify(retentionPolicyTypeRepository).findAll();
+        verify(retentionPolicyMapper).mapToRetentionPolicyResponse(any());
+
     }
 
     @Test
@@ -95,6 +96,9 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         assertEquals(1, caseRetentionPolicy.getId());
         assertEquals("DARTS Permanent Retention v3", caseRetentionPolicy.getName());
+
+        verify(retentionPolicyTypeRepository).findById(anyInt());
+        verify(retentionPolicyMapper).mapRetentionPolicy(any());
 
     }
 
@@ -113,6 +117,8 @@ class RetentionGetPolicyTypesServiceImplTest {
         assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND, exception.getError());
 
         verifyNoInteractions(retentionPolicyMapper);
+
+
 
     }
 
