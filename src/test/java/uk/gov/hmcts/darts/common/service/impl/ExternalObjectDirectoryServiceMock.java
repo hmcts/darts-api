@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.common.service.impl;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.mockito.Mock;
-import uk.gov.hmcts.darts.arm.service.impl.EodEntities;
+import uk.gov.hmcts.darts.arm.util.EodEntities;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;

@@ -38,14 +38,14 @@ import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.arm.service.impl.EodEntities.armDropZoneStatus;
-import static uk.gov.hmcts.darts.arm.service.impl.EodEntities.armLocation;
-import static uk.gov.hmcts.darts.arm.service.impl.EodEntities.failedArmManifestFileStatus;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.util.EodEntities.armDropZoneStatus;
+import static uk.gov.hmcts.darts.common.util.EodEntities.armLocation;
+import static uk.gov.hmcts.darts.common.util.EodEntities.failedArmManifestFileStatus;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFileFromFileSystem;
 
 @SpringBootTest
@@ -122,12 +122,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                     medias.get(3).getId(),
                     medias.get(4).getId(),
                     medias.get(5).getId()),
-            armDropZoneStatus,
-            armLocation
+            armDropZoneStatus(),
+            armLocation()
         );
         assertThat(foundMediaList.size()).isEqualTo(armDataManagementConfiguration.getBatchSize());
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(5).getId()), failedArmManifestFileStatus, armLocation)
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(5).getId()), failedArmManifestFileStatus(), armLocation())
         )
         .hasSize(1);
     }
@@ -145,7 +145,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //then
         var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
-            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus, armLocation
+            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus(), armLocation()
         );
         assertEquals(2, foundMediaList.size());
 
@@ -177,7 +177,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //then
         var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
-            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus, armLocation
+            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus(), armLocation()
         );
         assertEquals(2, foundMediaList.size());
 

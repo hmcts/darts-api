@@ -86,6 +86,7 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
 
     protected void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
         //TODO should these return the persisted entity to avoid bugs?
+        //TODO check description is not null
         log.debug(
             "Updating ARM status from {} to {} for ID {}",
             armExternalObjectDirectory.getStatus().getDescription(),
