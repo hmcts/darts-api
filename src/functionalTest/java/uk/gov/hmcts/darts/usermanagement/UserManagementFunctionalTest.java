@@ -235,7 +235,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
             .body("""
                          {
                            "name": "func-a-security-group",
-                           "display_name": "A security group"
+                           "display_name": "A security group",
                            "description": "func-test group"
                          }
                            """)
