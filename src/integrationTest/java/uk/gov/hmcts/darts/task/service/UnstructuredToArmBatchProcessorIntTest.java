@@ -78,27 +78,53 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
     @SpyBean
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
-
+    @Autowired
+    private
+    ExternalObjectDirectoryRepository eodRepository;
 
     @Autowired
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmProcessor;
 
     @BeforeEach
     void setupData() {
-//        unstructuredToArmProcessor = new UnstructuredToArmBatchProcessorImpl(
-//            externalObjectDirectoryRepository,
-//            objectRecordStatusRepository,
-//            externalLocationTypeRepository,
-//            dataManagementApi,
-//            armDataManagementApi,
-//            userIdentity,
-//            armDataManagementConfiguration,
-//            fileOperationService,
-//            archiveRecordService,
-//
-//        );
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
+    @Test
+    void testBatchSize() {
+
+        //given
+        //batch size is 5
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_RAW_DATA_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), ARM_MANIFEST_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_MANIFEST_FAILED, ARM);
+
+        // skipped
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_MANIFEST_FAILED, ARM);
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
+            List.of(medias.get(0).getId(),
+                    medias.get(1).getId(),
+                    medias.get(2).getId(),
+                    medias.get(3).getId(),
+                    medias.get(4).getId(),
+                    medias.get(5).getId()),
+            armDropZoneStatus,
+            armLocation
+        );
+        assertEquals(5, foundMediaList.size());
     }
 
     @Test
@@ -113,8 +139,9 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        var foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus, armLocation);
+        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
+            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus, armLocation
+        );
         assertEquals(2, foundMediaList.size());
 
         verify(armDataManagementApi, times(2)).saveBlobDataToArm(matches(".+_.+_1"), any());
@@ -134,7 +161,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setTransferAttempts(2));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
@@ -144,11 +171,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        var foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus, armLocation);
+        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
+            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus, armLocation
+        );
         assertEquals(2, foundMediaList.size());
 
-        verify(armDataManagementApi, times(2)).saveBlobDataToArm(matches(".+_.+_1"), any());
+        verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches(".+_.+_2"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
     }
 
