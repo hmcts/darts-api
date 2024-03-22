@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.arm.service.impl.EodEntities.armDropZoneStatus;
 import static uk.gov.hmcts.darts.arm.service.impl.EodEntities.armLocation;
+import static uk.gov.hmcts.darts.arm.service.impl.EodEntities.failedArmManifestFileStatus;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
@@ -124,7 +125,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             armDropZoneStatus,
             armLocation
         );
-        assertEquals(5, foundMediaList.size());
+        assertThat(foundMediaList.size()).isEqualTo(armDataManagementConfiguration.getBatchSize());
+        assertThat(
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(5).getId()), failedArmManifestFileStatus, armLocation)
+        )
+        .hasSize(1);
     }
 
     @Test
