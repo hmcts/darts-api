@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
+    public static final String FUNCTIONAL_TEST = "functional_test";
 
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
@@ -51,7 +52,7 @@ class ArmServiceFunctionalTest {
 
     @Test
     void saveBlobData() {
-        log.info("saveBlobData test");
+        log.info("------------------  saveBlobData test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -65,7 +66,7 @@ class ArmServiceFunctionalTest {
 
     @Test
     void listSubmissionBlobs() {
-        log.info("listSubmissionBlobs test");
+        log.info("------------------  listSubmissionBlobs test");
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String filename = String.format("functional_test_%s", UUID.randomUUID());
@@ -77,7 +78,7 @@ class ArmServiceFunctionalTest {
         armBlobsWithPathToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
 
-        List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
+        List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, FUNCTIONAL_TEST);
         assertFalse(submissionBlobs.isEmpty());
 
         cleanupArmBlobData();
@@ -85,7 +86,7 @@ class ArmServiceFunctionalTest {
 
     @Test
     void listBlobsUsingBatch() {
-        log.info("listBlobsUsingBatch test");
+        log.info("------------------  listBlobsUsingBatch test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -93,7 +94,7 @@ class ArmServiceFunctionalTest {
         uploadBatchedSubmissionBlobs(data);
 
         Integer batchSize = 5;
-        List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, "functional_test", batchSize);
+        List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, FUNCTIONAL_TEST, batchSize);
         for (String blobPathAndName : blobs) {
             log.info("Blob about to be deleted {}", blobPathAndName);
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
@@ -104,7 +105,7 @@ class ArmServiceFunctionalTest {
 
     @Test
     void listBlobsUsingMarker() {
-        log.info("listBlobsUsingMarker test");
+        log.info("------------------  listBlobsUsingMarker test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -115,7 +116,7 @@ class ArmServiceFunctionalTest {
         List<String> allBlobs = new ArrayList<>();
         do {
             ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
-                armContainerName, "functional_test", batchSize, continuationToken);
+                armContainerName, FUNCTIONAL_TEST, batchSize, continuationToken);
             continuationToken = continuationTokenBlobs.getContinuationToken();
             log.info("continuationToken: \n{}", continuationToken);
             log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths().size());
