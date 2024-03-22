@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.service.impl;
+package uk.gov.hmcts.darts.common.util;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -29,17 +29,27 @@ public class EodEntities {
     private final ExternalLocationTypeRepository eltRepository;
     private final ObjectRecordStatusRepository orsRepository;
 
-    public static ExternalLocationTypeEntity unstructuredLocation;
-    public static ExternalLocationTypeEntity armLocation;
-    public static ExternalLocationTypeEntity detsLocation;
+    @Getter
+    private static ExternalLocationTypeEntity unstructuredLocation;
+    @Getter
+    private static ExternalLocationTypeEntity armLocation;
+    @Getter
+    private static ExternalLocationTypeEntity detsLocation;
 
-    public static ObjectRecordStatusEntity failedArmRawDataStatus;
-    public static ObjectRecordStatusEntity failedArmManifestFileStatus;
-    public static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
-    public static ObjectRecordStatusEntity storedStatus;
-    public static ObjectRecordStatusEntity armIngestionStatus;
-    public static ObjectRecordStatusEntity armDropZoneStatus;
-    public static List<ObjectRecordStatusEntity> failedArmStatuses;
+    @Getter
+    private static ObjectRecordStatusEntity failedArmRawDataStatus;
+    @Getter
+    private static ObjectRecordStatusEntity failedArmManifestFileStatus;
+    @Getter
+    private static ObjectRecordStatusEntity storedStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armIngestionStatus;
+    @Getter
+    private static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armDropZoneStatus;
+    @Getter
+    private static List<ObjectRecordStatusEntity> failedArmStatuses;
 
     public EodEntities(ExternalObjectDirectoryRepository eodRepository,
                        ExternalLocationTypeRepository eltRepository,
@@ -73,4 +83,5 @@ public class EodEntities {
     public static boolean equalsAny(ObjectRecordStatusEntity ors, ObjectRecordStatusEntity... orsEntitiesToCompareTo) {
         return Arrays.stream(orsEntitiesToCompareTo).map(ObjectRecordStatusEntity::getId).anyMatch(orsToCompareTo -> orsToCompareTo.equals(ors.getId()));
     }
+
 }
