@@ -622,7 +622,7 @@ components:
         user_ids:
           type: array
           items:
-            $ref: '#/components/schemas/SecurityGroupId'
+            $ref: '#/components/schemas/UserId'
 
 
     UserManagementErrorCode:
