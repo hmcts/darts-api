@@ -137,17 +137,30 @@ public class ArmServiceImpl implements ArmService {
 
     private List<String> listBlobsUsingBatch(BlobContainerClient blobContainerClient, String blobPathAndName, Integer batchSize) {
         List<String> files = new ArrayList<>();
-        log.debug("About to list files for {}", blobPathAndName);
+        log.debug("About to list files for {} with batch size {}", blobPathAndName, batchSize);
         ListBlobsOptions options = new ListBlobsOptions()
             .setPrefix(blobPathAndName)
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
-        blobContainerClient.listBlobs(options, timeout).forEach(withCounter((i, blob) -> {
+        /*blobContainerClient.listBlobs(options, timeout).forEach(withCounter((i, blob) -> {
             String blobName = blob.getName();
             files.add(blobName);
             log.info("{} Found blob {}", (i + 1), blobName);
-        }));
+        }));*/
+        int index = 0;
+        //Iterable<PagedResponse<BlobItem>> blobPages = blobContainerClient.listBlobs(options, timeout).iterableByPage();
+        Iterable<PagedResponse<BlobItem>> blobPages = blobContainerClient.listBlobs(options, timeout).iterableByPage();
+        for (PagedResponse<BlobItem> page : blobPages) {
+            log.debug("Page {}", ++index);
+            page.getElements().forEach(withCounter((counter, blob) -> {
+                String blobName = blob.getName();
+                files.add(blobName);
+                log.debug("{} found blob {}", counter, blobName);
+            }));
+            break;
+        }
+        log.info("Total blobs found {}", files.size());
         return files;
     }
 
