@@ -27,11 +27,12 @@ import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-
-import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +98,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     @Transactional
     @Override
-    public SecurityGroupWithIdAndRoleAndUserIds modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch) {
+    public SecurityGroupWithIdAndRoleAndUsers modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch) {
 
         Optional<SecurityGroupEntity> securityGroupEntityOptional = securityGroupRepository.findById(securityGroupId);
 

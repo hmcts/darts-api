@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUserIds;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
 import java.util.List;
 import java.util.Set;
@@ -26,27 +26,27 @@ public class SecurityGroupCourthouseMapper {
         return securityGroupWithIdAndRole;
     }
 
-    public SecurityGroupWithIdAndRoleAndUserIds mapToSecurityGroupWithCourthousesAndUsers(SecurityGroupEntity securityGroupEntity) {
+    public SecurityGroupWithIdAndRoleAndUsers mapToSecurityGroupWithCourthousesAndUsers(SecurityGroupEntity securityGroupEntity) {
         if (securityGroupEntity == null) {
             return null;
         }
 
-        SecurityGroupWithIdAndRoleAndUserIds securityGroupWithIdAndRoleAndUserIds = new SecurityGroupWithIdAndRoleAndUserIds();
+        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = new SecurityGroupWithIdAndRoleAndUsers();
 
-        securityGroupWithIdAndRoleAndUserIds.setName(securityGroupEntity.getGroupName());
-        securityGroupWithIdAndRoleAndUserIds.setSecurityRoleId(securityGroupEntity.getSecurityRoleEntity().getId());
-        securityGroupWithIdAndRoleAndUserIds.setId(securityGroupEntity.getId());
-        securityGroupWithIdAndRoleAndUserIds.setGlobalAccess(securityGroupEntity.getGlobalAccess());
-        securityGroupWithIdAndRoleAndUserIds.setDisplayState(securityGroupEntity.getDisplayState());
-        securityGroupWithIdAndRoleAndUserIds.setDisplayName(securityGroupEntity.getDisplayName());
-        securityGroupWithIdAndRoleAndUserIds.setDescription(securityGroupEntity.getDescription());
+        securityGroupWithIdAndRoleAndUsers.setName(securityGroupEntity.getGroupName());
+        securityGroupWithIdAndRoleAndUsers.setSecurityRoleId(securityGroupEntity.getSecurityRoleEntity().getId());
+        securityGroupWithIdAndRoleAndUsers.setId(securityGroupEntity.getId());
+        securityGroupWithIdAndRoleAndUsers.setGlobalAccess(securityGroupEntity.getGlobalAccess());
+        securityGroupWithIdAndRoleAndUsers.setDisplayState(securityGroupEntity.getDisplayState());
+        securityGroupWithIdAndRoleAndUsers.setDisplayName(securityGroupEntity.getDisplayName());
+        securityGroupWithIdAndRoleAndUsers.setDescription(securityGroupEntity.getDescription());
 
         Set<CourthouseEntity> courthouseEntities = securityGroupEntity.getCourthouseEntities();
-        securityGroupWithIdAndRoleAndUserIds.setCourthouseIds(courthouseEntities
+        securityGroupWithIdAndRoleAndUsers.setCourthouseIds(courthouseEntities
             .stream().map(CourthouseEntity::getId).sorted().collect(Collectors.toList()));
         Set<UserAccountEntity> users = securityGroupEntity.getUsers();
-        securityGroupWithIdAndRoleAndUserIds.setUserIds(users.stream().map(UserAccountEntity::getId).sorted().collect(Collectors.toList()));
+        securityGroupWithIdAndRoleAndUsers.setUserIds(users.stream().map(UserAccountEntity::getId).sorted().collect(Collectors.toList()));
 
-        return securityGroupWithIdAndRoleAndUserIds;
+        return securityGroupWithIdAndRoleAndUsers;
     }
 }

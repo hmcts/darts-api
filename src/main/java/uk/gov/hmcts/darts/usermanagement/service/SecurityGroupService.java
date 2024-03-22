@@ -19,5 +19,5 @@ public interface SecurityGroupService {
 
     List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser);
 
-    SecurityGroupWithIdAndRoleAndUserIds modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch);
+    SecurityGroupWithIdAndRoleAndUsers modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch);
 }

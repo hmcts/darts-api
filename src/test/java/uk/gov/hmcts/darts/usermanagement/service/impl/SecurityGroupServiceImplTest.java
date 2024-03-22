@@ -17,8 +17,8 @@ import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;

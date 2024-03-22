@@ -168,6 +168,36 @@ paths:
                 title: "The provided security group does not exist"
                 status: 404
 
+    patch:
+      summary: Patch security group
+      tags:
+        - SecurityGroup
+      operationId: modifySecurityGroup
+      parameters:
+        - $ref: '#/components/parameters/SecurityGroupId'
+      requestBody:
+        $ref: '#/components/requestBodies/SecurityGroupPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SecurityGroupPatchSuccess'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
+
   /admin/security-groups:
     get:
       summary: Get security groups
@@ -239,36 +269,6 @@ paths:
                 title: User is not authorised for this endpoint
                 status: 403
 
-  /admin/security-groups/{security_group_id}:
-    patch:
-      summary: Patch security group
-      tags:
-        - SecurityGroup
-      operationId: modifySecurityGroup
-      parameters:
-        - $ref: '#/components/parameters/SecurityGroupId'
-      requestBody:
-        $ref: '#/components/requestBodies/SecurityGroupPatchRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/SecurityGroupPatchSuccess'
-        '403':
-          description: Forbidden Error
-          content:
-            application/json+problem:
-              schema:
-                allOf:
-                  - $ref: './problem.yaml'
-                  - type: object
-                    required:
-                      - type
-                    properties:
-                      type:
-                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
-              example:
-                type: AUTHORISATION_109
-                title: User is not authorised for this endpoint
-                status: 403
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -420,7 +420,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUserIds'
+            $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUsers'
 
   parameters:
     UserId:
@@ -563,6 +563,16 @@ components:
         - "AUTHORISATION_109"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_ENDPOINT ]
 
+    SecurityGroupWithIdAndRoleAndUsers:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
+      properties:
+        user_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserId'
+
     SecurityGroupWithIdAndRole:
       type: object
       properties:
@@ -635,7 +645,7 @@ components:
         - "The provided security group does not exist"
         - "The provided courthouse does not exist"
         - "Duplicate security group names are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
 
 
     Role:
