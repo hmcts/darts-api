@@ -55,6 +55,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                     printWriter.println(uploadNewFileRecord);
             }
         } catch (IOException e) {
+            //TODO log eod
             log.error("Unable to write ARM file {}, due to {}", archiveRecordsFile.getAbsoluteFile(), e.getMessage());
             throw new RuntimeException(e);
         }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -90,15 +89,15 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             var batchEntities = new BatchEntities();
 
             for (var currentEod : allPendingUnstructuredToArmEntities) {
+                BatchEntity batchEntity = new BatchEntity();
                 try {
-                    BatchEntity batchEntity;
                     ExternalObjectDirectoryEntity unstructuredEod;
                     ExternalObjectDirectoryEntity armEod;
                     if (isEqual(currentEod.getExternalLocationType(), armLocation)) {
                         armEod = currentEod;
                         var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armEod, storedStatus);
                         if (matchingEntity.isPresent()) {
-                            batchEntity = new BatchEntity(armEod);
+                            batchEntity.setArmEod(armEod);
                             batchEntities.add(batchEntity);
                             unstructuredEod = matchingEntity.get();
                             armEod.setManifestFile(archiveRecordsFile.getName());
@@ -107,7 +106,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             log.error("Unable to find matching external object directory for {}", armEod.getId());
                             updateExternalObjectDirectoryStatusToFailed(armEod, failedArmRawDataStatus);
                             //TODO this might not work, need to use the result of the previous method
-                            batchEntity = new BatchEntity(armEod);
+                            batchEntity.setArmEod(armEod);
                             batchEntities.add(batchEntity);
                             //TODO verify continue stops the current iteration
                             continue;
@@ -115,7 +114,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     } else {
                         unstructuredEod = currentEod;
                         armEod = createArmExternalObjectDirectoryEntity(currentEod, armIngestionStatus);
-                        batchEntity = new BatchEntity(armEod);
+                        batchEntity.setArmEod(armEod);
                         batchEntities.add(batchEntity);
                         armEod.setManifestFile(archiveRecordsFile.getName());
                         externalObjectDirectoryRepository.saveAndFlush(armEod);
@@ -129,26 +128,31 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             armEod,
                             rawFilename,
                             batchEntity.getPreviousStatus(),
-                            () -> {
-                                batchEntity.undoManifestFileChange();
-                                updateExternalObjectDirectoryStatusToFailed(batchEntity.getArmEod(), failedArmRawDataStatus);
-                            }
+                            () -> updateExternalObjectDirectoryStatusToFailed(batchEntity.getArmEod(), failedArmRawDataStatus)
                         );
                         if (copyRawDataToArmSuccessful) {
+                            batchEntity.setRawFilePushSuccessful(true);
                             var archiveRecord = archiveRecordService.generateArchiveRecord(batchEntity.getArmEod().getId(), rawFilename);
                             batchEntity.setArchiveRecord(archiveRecord);
-                            batchEntity.setSuccessfullyProcessed(true);
                         }
                     } else if (equalsAny(batchEntity.getPreviousStatus(), failedArmManifestFileStatus, failedArmResponseManifestFileStatus)) {
                         var archiveRecord = archiveRecordService.generateArchiveRecord(batchEntity.getArmEod().getId(), rawFilename);
                         batchEntity.setArchiveRecord(archiveRecord);
-                        batchEntity.setSuccessfullyProcessed(true);
                     }
                 } catch (Exception e) {
                     log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
+                    if (batchEntity.getArmEod() != null) {
+                        batchEntity.undoManifestFileChange();
+                        if (!batchEntity.isRawFilePushSuccessful()) {
+                            updateExternalObjectDirectoryStatusToFailed(batchEntity.getArmEod(), failedArmRawDataStatus);
+                        } else {
+                            updateExternalObjectDirectoryStatusToFailed(batchEntity.getArmEod(), failedArmManifestFileStatus);
+                        }
+                    }
                 }
             }
 
+            //TODO add try catch this can fail too
             archiveRecordFileGenerator.generateArchiveRecords(batchEntities.getArchiveRecords(), archiveRecordsFile);
 
             copyMetadataToArm(
@@ -162,6 +166,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             );
 
             for (var batchEntity : batchEntities.getSuccessful()) {
+                //TODO handle potential error
                 updateExternalObjectDirectoryStatus(batchEntity.getArmEod(), EodEntities.armDropZoneStatus);
             }
 
@@ -208,16 +213,17 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     }
 
     @Data
-    @RequiredArgsConstructor
     static class BatchEntity {
 
-        private final ExternalObjectDirectoryEntity armEod;
-        private final String previousManifestFile;
-        private final ObjectRecordStatusEntity previousStatus;
+        private ExternalObjectDirectoryEntity armEod;
+        private String previousManifestFile;
+        private ObjectRecordStatusEntity previousStatus;
+        private boolean rawFilePushSuccessful;
         private ArchiveRecord archiveRecord;
-        private boolean isSuccessfullyProcessed;
 
-        public BatchEntity(ExternalObjectDirectoryEntity armEod) {
+        public BatchEntity() {}
+
+        public void setArmEod(ExternalObjectDirectoryEntity armEod) {
             this.armEod = armEod;
             this.previousManifestFile = armEod.getManifestFile();
             this.previousStatus = armEod.getStatus();
@@ -241,7 +247,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
 
         public List<BatchEntity> getSuccessful() {
-            return batchEntities.stream().filter(batchEntity -> batchEntity.isSuccessfullyProcessed).toList();
+            return batchEntities.stream().filter(batchEntity -> batchEntity.isRawFilePushSuccessful() && batchEntity.getArchiveRecord() != null).toList();
         }
 
         public List<ArchiveRecord> getArchiveRecords() {
