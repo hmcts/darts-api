@@ -220,14 +220,14 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                       incomingChecksum, calculatedChecksum, unstructured.getId()
             );
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
-        }
-        if (!allowedMediaFormats.contains(mediaFormat)) {
+        } else if (!allowedMediaFormats.contains(mediaFormat)) {
+            log.error("Media format failed, format {} not in allowed list for unstructured EOD {}", mediaFormat, unstructured.getId());
             unstructured.setStatus(getStatus(FAILURE_FILE_TYPE_CHECK_FAILED));
-        }
-        if (fileSize > maxFileSize) {
+        } else if (fileSize > maxFileSize) {
+            log.error("File size failed, file size {} exceeds max file size {} for unstructured EOD {} ", fileSize, maxFileSize, unstructured.getId());
             unstructured.setStatus(getStatus(FAILURE_FILE_SIZE_CHECK_FAILED));
-        }
-        if (0 == fileSize) {
+        } else if (0 == fileSize) {
+            log.error("Empty file failed, the file is empty for unstructured EOD {}", unstructured.getId());
             unstructured.setStatus(getStatus(FAILURE_EMPTY_FILE));
         }
 
