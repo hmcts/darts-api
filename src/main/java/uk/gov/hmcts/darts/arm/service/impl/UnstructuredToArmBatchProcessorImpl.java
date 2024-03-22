@@ -143,7 +143,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
                     if (batchEntity.getArmEod() != null) {
                         batchEntity.undoManifestFileChange();
-                        if (!batchEntity.isRawFilePushSuccessful()) {
+                        //FIXME what would be the status if the code fails before the push is even attempted? should not be failedArmRawDataStatus
+                        if (!Boolean.TRUE.equals(batchEntity.getRawFilePushSuccessful())) {
                             updateExternalObjectDirectoryStatusToFailed(batchEntity.getArmEod(), failedArmRawDataStatus);
                         } else {
                             updateExternalObjectDirectoryStatusToFailed(batchEntity.getArmEod(), failedArmManifestFileStatus);
@@ -176,7 +177,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(String armClient, int batchSize) {
 
-        ExternalLocationTypeEntity sourceLocation = null;
+        ExternalLocationTypeEntity sourceLocation;
         if (armClient.equalsIgnoreCase("darts")) {
              sourceLocation = unstructuredLocation;
         } else if (armClient.equalsIgnoreCase("dets")) {
@@ -218,7 +219,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         private ExternalObjectDirectoryEntity armEod;
         private String previousManifestFile;
         private ObjectRecordStatusEntity previousStatus;
-        private boolean rawFilePushSuccessful;
+        private Boolean rawFilePushSuccessful;
         private ArchiveRecord archiveRecord;
 
         public BatchEntity() {}
@@ -231,6 +232,10 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
         public void undoManifestFileChange() {
             this.armEod.setManifestFile(this.previousManifestFile);
+        }
+
+        public boolean isRawFilePushAttemptedAndSuccessful() {
+            return rawFilePushSuccessful == null || rawFilePushSuccessful;
         }
     }
 
@@ -247,7 +252,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
 
         public List<BatchEntity> getSuccessful() {
-            return batchEntities.stream().filter(batchEntity -> batchEntity.isRawFilePushSuccessful() && batchEntity.getArchiveRecord() != null).toList();
+            return batchEntities.stream().filter(batchEntity -> batchEntity.isRawFilePushAttemptedAndSuccessful() && batchEntity.getArchiveRecord() != null).toList();
         }
 
         public List<ArchiveRecord> getArchiveRecords() {
