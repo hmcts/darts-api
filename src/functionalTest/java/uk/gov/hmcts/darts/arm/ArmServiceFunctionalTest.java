@@ -91,6 +91,10 @@ class ArmServiceFunctionalTest {
 
         Integer batchSize = 5;
         List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, "functional_test", batchSize);
+        for (String blobPathAndName : blobs) {
+            log.info("Blob about to be deleted {}", blobPathAndName);
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        }
 
         assertEquals(batchSize, blobs.size());
     }
@@ -112,6 +116,9 @@ class ArmServiceFunctionalTest {
             log.info("continuationToken: \n{}", continuationToken);
             log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths().size());
             allBlobs.addAll(continuationTokenBlobs.getBlobNamesWithAndPaths());
+            for (String blobPathAndName : continuationTokenBlobs.getBlobNamesWithAndPaths()) {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            }
         } while (nonNull(continuationToken));
 
         assertEquals(11, allBlobs.size());
