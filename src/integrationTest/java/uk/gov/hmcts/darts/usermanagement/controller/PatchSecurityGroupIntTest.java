@@ -47,7 +47,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String name = "security group name" + UUID.randomUUID();
-        Integer id = createSecurityGroup(name);
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
 
         String patchContent = """
                          {
@@ -91,11 +92,13 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
                            """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
-        patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
+        String newDisplayName = "Security group display name new " + UUID.randomUUID();
+        patchContent = patchContent.replace("<display_name>", newDisplayName);
         patchContent = patchContent.replace("<description>", NEW_DESCRIPTION);
 
         String name = "security group name" + UUID.randomUUID();
-        Integer id = createSecurityGroup(name);
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
             .content(patchContent);
@@ -104,7 +107,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(id))
             .andExpect(jsonPath("$.name").value(newName))
-            .andExpect(jsonPath("$.display_name").value(NEW_DISPLAY_NAME))
+            .andExpect(jsonPath("$.display_name").value(newDisplayName))
             .andExpect(jsonPath("$.description").value(NEW_DESCRIPTION))
             .andExpect(jsonPath("$.global_access").value(false))
             .andExpect(jsonPath("$.security_role_id").isNumber())
@@ -118,7 +121,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String name = "security group name" + UUID.randomUUID();
-        Integer id = createSecurityGroup(name);
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
 
         var courthouseEntity1 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_1);
         var courthouseEntity2 = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME_2);
@@ -132,7 +136,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(id))
             .andExpect(jsonPath("$.name").value(name))
-            .andExpect(jsonPath("$.display_name").value(ORIGINAL_DISPLAY_NAME))
+            .andExpect(jsonPath("$.display_name").value(displayName))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.global_access").value(false))
             .andExpect(jsonPath("$.security_role_id").isNumber())
@@ -146,7 +150,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void patchSecurityGroupShouldSucceedWhenProvidedWithUserIds() throws Exception {
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
         String name = "security group name" + UUID.randomUUID();
-        Integer id = createSecurityGroup(name);
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
 
         UserAccountEntity user1 = createEnabledUserAccountEntity(user, "email1");
         UserAccountEntity user2 = createEnabledUserAccountEntity(user, "email2");
@@ -160,7 +165,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(id))
             .andExpect(jsonPath("$.name").value(name))
-            .andExpect(jsonPath("$.display_name").value(ORIGINAL_DISPLAY_NAME))
+            .andExpect(jsonPath("$.display_name").value(displayName))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.global_access").value(false))
             .andExpect(jsonPath("$.security_role_id").isNumber())
@@ -182,10 +187,12 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
                            """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
-        patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
+        String newDisplayName = "Security group display name new " + UUID.randomUUID();
+        patchContent = patchContent.replace("<display_name>", newDisplayName);
 
         String name = "security group name" + UUID.randomUUID();
-        Integer id = createSecurityGroup(name);
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
 
         superAdminUserStub.givenUserIsNotAuthorised(userIdentity);
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
@@ -210,7 +217,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
                            """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
-        patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
+        String newDisplayName = "Security group display name new " + UUID.randomUUID();
+        patchContent = patchContent.replace("<display_name>", newDisplayName);
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
             .content(patchContent);
@@ -225,7 +233,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
 
-        Integer id = createSecurityGroup("security group name" + UUID.randomUUID());
+        Integer id = createSecurityGroup("security group name" + UUID.randomUUID(), "security group display name" + UUID.randomUUID());
 
         String patchContent = """
                          {
@@ -245,7 +253,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     void patchSecurityGroupShouldFailWithInvalidUserId() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
-        Integer id = createSecurityGroup("security group name");
+        Integer id = createSecurityGroup("security group name " + UUID.randomUUID(), "security group name" + UUID.randomUUID());
 
         String patchContent = """
                          {
@@ -266,9 +274,9 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String name1 = "security group name " + UUID.randomUUID();
-        createSecurityGroup(name1);
+        createSecurityGroup(name1, "security group name" + UUID.randomUUID());
         String name2 = "security group name " + UUID.randomUUID();
-        Integer id2 = createSecurityGroup(name2);
+        Integer id2 = createSecurityGroup(name2, "security group name" + UUID.randomUUID());
 
         String patchContent = """
                          {
@@ -278,6 +286,32 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
                            """;
         patchContent = patchContent.replace("<name>", name1);
         patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
+
+        MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id2)
+            .content(patchContent);
+
+        mockMvc.perform(patchRequest)
+            .andExpect(status().isConflict())
+            .andReturn();
+    }
+
+    @Test
+    void patchSecurityGroupShouldFailWhenProvidedWithExistingDisplayName() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        String name1 = "security group name " + UUID.randomUUID();
+        String displayName1 = "security group display name " + UUID.randomUUID();
+        createSecurityGroup(name1, displayName1);
+        String name2 = "security group name " + UUID.randomUUID();
+        String displayName2 = "security group display name " + UUID.randomUUID();
+        Integer id2 = createSecurityGroup(name2, displayName2);
+
+        String patchContent = """
+                         {
+                           "display_name": "<display_name>"
+                         }
+                           """;
+        patchContent = patchContent.replace("<display_name>", displayName1);
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id2)
             .content(patchContent);
@@ -297,7 +331,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .header("Content-Type", "application/json");
     }
 
-    private Integer createSecurityGroup(String name) throws Exception {
+    private Integer createSecurityGroup(String name, String displayName) throws Exception {
         String content = """
                          {
                            "name": "<name>",
@@ -307,7 +341,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
                          }
                            """;
         content = content.replace("<name>", name);
-        content = content.replace("<display_name>", ORIGINAL_DISPLAY_NAME);
+        content = content.replace("<display_name>", displayName);
         content = content.replace("<description>", ORIGINAL_DESCRIPTION);
 
         MockHttpServletRequestBuilder request = buildPostRequest()
@@ -317,7 +351,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").exists())
             .andExpect(jsonPath("$.name").value(name))
-            .andExpect(jsonPath("$.display_name").value(ORIGINAL_DISPLAY_NAME))
+            .andExpect(jsonPath("$.display_name").value(displayName))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.display_state").value(true))
             .andExpect(jsonPath("$.global_access").value(false))

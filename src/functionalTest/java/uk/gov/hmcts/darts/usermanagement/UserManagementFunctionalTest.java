@@ -16,11 +16,13 @@ import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 class UserManagementFunctionalTest extends FunctionalTest {
@@ -223,5 +225,72 @@ class UserManagementFunctionalTest extends FunctionalTest {
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
                                                                                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
+    }
+
+    @Test
+    void shouldPatchSecurityGroups() throws JsonProcessingException {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups"))
+            .contentType(ContentType.JSON)
+            .body("""
+                         {
+                           "name": "func-a-security-group",
+                           "display_name": "A security group"
+                           "description": "func-test group"
+                         }
+                           """)
+            .post()
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+                                                                                              new TypeReference<SecurityGroupWithIdAndRole>(){});
+
+        response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
+            .contentType(ContentType.JSON)
+            .body("""
+                         {
+                           "name": "func-a-security-group-new-name",
+                           "display_name": "A security group new name",
+                           "description": "func-test group new description",
+                           "courthouse_ids": [1,2],
+                           "user_ids": [-1,-2]
+                         }
+                           """)
+            .patch()
+            .thenReturn();
+
+        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = objectMapper.readValue(response.asString(),
+            new TypeReference<SecurityGroupWithIdAndRoleAndUsers>(){});
+
+        assertEquals("func-a-security-group-new-name", securityGroupWithIdAndRoleAndUsers.getName());
+        assertEquals("A security group new name", securityGroupWithIdAndRoleAndUsers.getDisplayName());
+        assertEquals("func-test group new description", securityGroupWithIdAndRoleAndUsers.getDescription());
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(1));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(2));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(-1));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(-2));
+
+        response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups" + securityGroupWithIdAndRoles.getId()))
+            .contentType(ContentType.JSON)
+            .get()
+            .thenReturn();
+
+        SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+                                                                                              new TypeReference<SecurityGroupWithIdAndRole>(){});
+
+        assertEquals("func-a-security-group-new-name", retrievedSecurityGroupWithIdAndRoles.getName());
+        assertEquals("A security group new name", retrievedSecurityGroupWithIdAndRoles.getDisplayName());
+        assertEquals("func-test group new description", retrievedSecurityGroupWithIdAndRoles.getDescription());
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(1));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(2));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-1));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-2));
+
+
     }
 }

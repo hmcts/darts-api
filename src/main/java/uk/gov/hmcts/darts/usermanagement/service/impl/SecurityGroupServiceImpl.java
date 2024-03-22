@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -31,8 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -105,8 +104,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         if (securityGroupEntityOptional.isPresent()) {
             SecurityGroupEntity securityGroupEntity = securityGroupEntityOptional.get();
             updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
-            securityGroupRepository.saveAndFlush(securityGroupEntity);
-            return securityGroupCourthouseMapper.mapToSecurityGroupWithCourthousesAndUsers(securityGroupEntity);
+            var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
+            return securityGroupCourthouseMapper.mapToSecurityGroupWithCourthousesAndUsers(updatedGroup);
         } else {
             //throw a 404 not found
             throw new DartsApiException(
@@ -116,16 +115,17 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     }
 
-    protected void updateSecurityGroupEntity(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
+    void updateSecurityGroupEntity(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
         validate(securityGroupPatch, securityGroupEntity);
 
         String name = securityGroupPatch.getName();
         String displayName = securityGroupPatch.getDisplayName();
 
-        if (name != null) {
+
+        if (StringUtils.isNotBlank(name)) {
             securityGroupEntity.setGroupName(name);
         }
-        if (displayName != null) {
+        if (StringUtils.isNotBlank(displayName)) {
             securityGroupEntity.setDisplayName(displayName);
         }
         String description = securityGroupPatch.getDescription();
@@ -167,14 +167,26 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private void validate(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
         Integer id = securityGroupEntity.getId();
 
-        securityGroupRepository.findByGroupNameIgnoreCaseAndIdNot(securityGroupPatch.getName(), id)
-            .ifPresent(existingGroup -> {
-                throw new DartsApiException(
-                    UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
-                    "Attempt to use name of an existing group",
-                    Collections.singletonMap("existing_group_id", existingGroup.getId())
-                );
-            });
+        if (StringUtils.isNotBlank(securityGroupPatch.getName())) {
+            securityGroupRepository.findByGroupNameIgnoreCaseAndIdNot(securityGroupPatch.getName(), id)
+                .ifPresent(existingGroup -> {
+                    throw new DartsApiException(
+                        UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
+                        "Attempt to use name of an existing group",
+                        Collections.singletonMap("existing_group_id", existingGroup.getId())
+                    );
+                });
+        }
+        if (StringUtils.isNotBlank(securityGroupPatch.getDisplayName())) {
+            securityGroupRepository.findByDisplayNameIgnoreCaseAndIdNot(securityGroupPatch.getDisplayName(), id)
+                .ifPresent(existingGroup -> {
+                    throw new DartsApiException(
+                        UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
+                        "Attempt to use display name of an existing group",
+                        Collections.singletonMap("existing_group_id", existingGroup.getId())
+                    );
+                });
+        }
     }
 
     private List<SecurityGroupEntity> filterSecurityGroupEntitiesByRoleIds(

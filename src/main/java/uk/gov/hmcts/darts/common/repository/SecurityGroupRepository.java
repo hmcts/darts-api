@@ -14,6 +14,8 @@ public interface SecurityGroupRepository extends JpaRepository<SecurityGroupEnti
 
     Optional<SecurityGroupEntity> findByGroupNameIgnoreCaseAndIdNot(String name, Integer id);
 
+    Optional<SecurityGroupEntity> findByDisplayNameIgnoreCaseAndIdNot(String name, Integer id);
+
     boolean existsAllByIdIn(Set<Integer> ids);
 
 }
