@@ -51,6 +51,7 @@ class ArmServiceFunctionalTest {
 
     @Test
     void saveBlobData() {
+        log.info("saveBlobData test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -59,12 +60,12 @@ class ArmServiceFunctionalTest {
         armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
         log.info("Blob filename {}", actualResult);
-
+        cleanupArmBlobData();
     }
 
     @Test
     void listSubmissionBlobs() {
-
+        log.info("listSubmissionBlobs test");
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String filename = String.format("functional_test_%s", UUID.randomUUID());
@@ -79,10 +80,12 @@ class ArmServiceFunctionalTest {
         List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
         assertFalse(submissionBlobs.isEmpty());
 
+        cleanupArmBlobData();
     }
 
     @Test
     void listBlobsUsingBatch() {
+        log.info("listBlobsUsingBatch test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -101,6 +104,7 @@ class ArmServiceFunctionalTest {
 
     @Test
     void listBlobsUsingMarker() {
+        log.info("listBlobsUsingMarker test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -131,7 +135,7 @@ class ArmServiceFunctionalTest {
 
             String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
 
-            log.info("Saved blob {} in {}", actualResult, blobPathAndName);
+            log.info("{} Saved blob {}", counter, actualResult);
             armBlobsWithPathToBeDeleted.add(actualResult);
         }
     }
