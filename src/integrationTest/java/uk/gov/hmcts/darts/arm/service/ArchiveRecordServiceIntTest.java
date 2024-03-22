@@ -25,10 +25,8 @@ import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,6 +39,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFileFromFileSystem;
 
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports", "VariableDeclarationUsageDistance", "PMD.AssignmentInOperand"})
@@ -138,7 +137,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/live/expectedResponse.a360");
@@ -199,7 +198,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/nle/expectedResponse.a360");
@@ -260,7 +259,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/all_properties/expectedResponse.a360");
@@ -322,7 +321,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/nle/expectedResponse.a360");
@@ -387,7 +386,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/live/expectedResponse.a360");
@@ -452,7 +451,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/all_properties/expectedResponse.a360");
@@ -517,7 +516,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/nle/expectedResponse.a360");
@@ -576,7 +575,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/live/expectedResponse.a360");
@@ -637,7 +636,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/all_properties/expectedResponse.a360");
@@ -690,7 +689,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
@@ -745,7 +744,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
@@ -799,7 +798,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals(prefix + ".a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        String actualResponse = getContentsFromFileFromFileSystem(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
         String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/all_properties/expectedResponse.a360");
@@ -814,17 +813,4 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
-
-    private static String getFileContents(File archiveFile) throws IOException {
-        StringBuilder fileContents = new StringBuilder();
-        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileContents.append(line);
-            }
-        }
-        return fileContents.toString();
-    }
-
-
 }

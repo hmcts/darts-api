@@ -165,7 +165,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
             .toString();
     }
 
-//    @Transactional
+    @Transactional
     public ArchiveRecord generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(

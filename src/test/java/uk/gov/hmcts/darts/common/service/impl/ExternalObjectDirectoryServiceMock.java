@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.service.impl;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.darts.arm.service.impl.EodEntities;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -36,18 +35,18 @@ public class ExternalObjectDirectoryServiceMock {
     private ExternalObjectDirectoryEntity eodArm;
 
     public void givenServiceIsMocked(EodEntities mockEodService) {
-        MockitoAnnotations.initMocks(this);
-
-        when(mockEodService.armLocation()).thenReturn(armLocation);
-
-        when(mockEodService.unstructuredLocation()).thenReturn(unstructuredLocation);
-        when(mockEodService.armLocation()).thenReturn(armLocation);
-
-        when(mockEodService.storedStatus()).thenReturn(storedStatus);
-        when(mockEodService.armIngestionStatus()).thenReturn(armIngestionStatus);
-        when(mockEodService.failedArmRawDataStatus()).thenReturn(failedArmRawDataStatus);
-        when(mockEodService.failedArmManifestFileStatus()).thenReturn(failedArmManifestFileStatus);
-        when(mockEodService.armDropZoneStatus()).thenReturn(armDropZoneStatus);
+//        MockitoAnnotations.initMocks(this);
+//
+//        when(mockEodService.armLocation()).thenReturn(armLocation);
+//
+//        when(mockEodService.unstructuredLocation()).thenReturn(unstructuredLocation);
+//        when(mockEodService.armLocation()).thenReturn(armLocation);
+//
+//        when(mockEodService.storedStatus()).thenReturn(storedStatus);
+//        when(mockEodService.armIngestionStatus()).thenReturn(armIngestionStatus);
+//        when(mockEodService.failedArmRawDataStatus()).thenReturn(failedArmRawDataStatus);
+//        when(mockEodService.failedArmManifestFileStatus()).thenReturn(failedArmManifestFileStatus);
+//        when(mockEodService.armDropZoneStatus()).thenReturn(armDropZoneStatus);
 
         when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
 
