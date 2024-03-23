@@ -86,7 +86,6 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
 
     protected void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
         //TODO should these return the persisted entity to avoid bugs?
-        //TODO check description is not null
         log.debug(
             "Updating ARM status from {} to {} for ID {}",
             armExternalObjectDirectory.getStatus().getDescription(),
@@ -99,10 +98,17 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
-    protected void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
+    protected void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
                                                                ObjectRecordStatusEntity objectRecordStatus) {
-        updateTransferAttempts(armExternalObjectDirectory);
-        updateExternalObjectDirectoryStatus(armExternalObjectDirectory, objectRecordStatus);
+        updateTransferAttempts(externalObjectDirectoryEntity);
+        updateExternalObjectDirectoryStatus(externalObjectDirectoryEntity, objectRecordStatus);
+    }
+
+    protected void updateExternalObjectDirectoryFailedTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        updateTransferAttempts(externalObjectDirectoryEntity);
+        externalObjectDirectoryEntity.setLastModifiedBy(userAccount);
+        externalObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
     }
 
     protected Optional<ExternalObjectDirectoryEntity> getUnstructuredExternalObjectDirectoryEntity(
@@ -120,6 +126,12 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
 
     protected void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+        log.debug(
+            "Updating failed transfer attempts from {} to {} for ID {}",
+            currentNumberOfAttempts,
+            currentNumberOfAttempts + 1,
+            externalObjectDirectoryEntity.getId()
+        );
         externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 

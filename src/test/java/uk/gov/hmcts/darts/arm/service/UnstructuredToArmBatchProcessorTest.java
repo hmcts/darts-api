@@ -44,7 +44,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UnstructuredToArmBatchProcessorImplTest {
+class UnstructuredToArmBatchProcessorTest {
 
     private static final String TEST_BINARY_DATA = "test binary data";
     private static final Integer MAX_RETRY_ATTEMPTS = 3;

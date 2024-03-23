@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -28,7 +29,6 @@ import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,8 +52,6 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFileFromFile
 @ActiveProfiles({"intTest", "h2db"})
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
-//    private UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
 
@@ -93,7 +91,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void testBatchSize() {
+    void testBatchedQuery() {
 
         //given
         //batch size is 5
@@ -183,6 +181,26 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches(".+_.+_2"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+    }
+
+    @Test
+    void movePreviousArmFailedWithNoCorrespondingUnstructuredFailsAndProcessingContinues() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_MANIFEST_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(
+            medias.get(0), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEods).hasSize(1);
+        assertThat(failedArmEods.get(0).getTransferAttempts()).isEqualTo(2);
+        assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation())).hasSize(1);
     }
 
 }

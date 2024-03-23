@@ -93,8 +93,7 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                         unstructuredExternalObjectDirectory = matchingEntity.get();
                     } else {
                         log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
-                        updateTransferAttempts(armExternalObjectDirectory);
-                        updateExternalObjectDirectoryStatus(armExternalObjectDirectory, failedArmRawDataStatus);
+                        updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmRawDataStatus);
                         continue;
                     }
                 } else {
