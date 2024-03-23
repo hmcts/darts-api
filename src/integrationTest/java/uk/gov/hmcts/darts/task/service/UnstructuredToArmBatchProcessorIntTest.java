@@ -180,13 +180,17 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
-            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus(), armLocation()
-        );
-        assertEquals(2, foundMediaList.size());
-
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches(".+_.+_2"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+
+        var armDropzoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
+        assertThat(armDropzoneEodsMedia0).hasSize(1);
+        var armDropzoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        assertThat(armDropzoneEodsMedia1).hasSize(1);
+
+        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
+        assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFileNameCaptor.getValue().getName());
+        assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFileNameCaptor.getValue().getName());
     }
 
     @Test
@@ -194,7 +198,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
-        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_MANIFEST_FAILED, ARM);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_MANIFEST_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
 
@@ -205,6 +209,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(
             medias.get(0), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEods).hasSize(1);
+        assertThat(failedArmEods.get(0).getManifestFile()).isEqualTo("existingManifestFile");
         assertThat(failedArmEods.get(0).getTransferAttempts()).isEqualTo(2);
         assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation())).hasSize(1);
 
