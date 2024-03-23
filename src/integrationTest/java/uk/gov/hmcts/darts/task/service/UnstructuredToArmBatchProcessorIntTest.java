@@ -52,6 +52,8 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFileFromFile
 @ActiveProfiles({"intTest", "h2db"})
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
+    ArgumentCaptor<File> manifestFileNameCaptor = ArgumentCaptor.forClass(File.class);
+
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
 
@@ -150,11 +152,12 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi, times(2)).saveBlobDataToArm(matches(".+_.+_1"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
 
-        var fileNameCaptor = ArgumentCaptor.forClass(File.class);
-        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), fileNameCaptor.capture());
-        var actualResponse = getContentsFromFileFromFileSystem(fileNameCaptor.getValue());
-        var totalLines = Files.lines(fileNameCaptor.getValue().toPath()).count();
+        //TODO extract method
+        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
+        var actualResponse = getContentsFromFileFromFileSystem(manifestFileNameCaptor.getValue());
+        var totalLines = Files.lines(manifestFileNameCaptor.getValue().toPath()).count();
         assertThat(totalLines).isEqualTo(2);
+        //TODO improve
         assertThat(actualResponse).contains("\"operation\":\"create_record\"").contains("\"operation\":\"upload_new_file\"");
     }
 
@@ -184,7 +187,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void movePreviousArmFailedWithNoCorrespondingUnstructuredFailsAndProcessingContinues() {
+    void movePreviousArmFailedWithNoCorrespondingUnstructuredFailsAndProcessingContinues() throws IOException {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -201,6 +204,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedArmEods).hasSize(1);
         assertThat(failedArmEods.get(0).getTransferAttempts()).isEqualTo(2);
         assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation())).hasSize(1);
+
+        verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
+        var totalLines = Files.lines(manifestFileNameCaptor.getValue().toPath()).count();
+        assertThat(totalLines).isEqualTo(1);
     }
 
 }
