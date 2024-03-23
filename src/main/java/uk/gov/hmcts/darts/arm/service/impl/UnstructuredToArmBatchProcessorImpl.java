@@ -97,12 +97,12 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             armEod.setManifestFile(archiveRecordsFile.getName());
                             updateExternalObjectDirectoryStatus(armEod, EodEntities.armIngestionStatus());
                         } else {
+                            //TODO ask Hemanta if it's ok to keep current failed status here
                             log.error("Unable to find matching external object directory for {}", armEod.getId());
-                            updateExternalObjectDirectoryStatusToFailed(armEod, EodEntities.failedArmRawDataStatus());
-                            //TODO this might not work, need to use the result of the previous method
+                            updateExternalObjectDirectoryFailedTransferAttempts(armEod);
+                            //TODO this might not work, need to use the result of the previous method? Also, this has failed. Verify manifest is not generated
                             batchEntity.setArmEod(armEod);
                             batchEntities.add(batchEntity);
-                            //TODO verify continue stops the current iteration
                             continue;
                         }
                     } else {
