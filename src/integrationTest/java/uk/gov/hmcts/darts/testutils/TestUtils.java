@@ -9,11 +9,9 @@ import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.List;
@@ -34,17 +32,6 @@ public final class TestUtils {
         File file = new File(resource.getFile());
         return FileUtils.readFileToString(file, "UTF-8");
 
-    }
-
-    public static String getContentsFromFileFromFileSystem(File archiveFile) throws IOException {
-        StringBuilder fileContents = new StringBuilder();
-        try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileContents.append(line);
-            }
-        }
-        return fileContents.toString();
     }
 
     public static String removeIds(String input) {
