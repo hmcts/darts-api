@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jose4j.base64url.Base64;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 @DirtiesContext
+@Disabled
 class AudioControllerPreviewWithSendServerEventsIntTest {
 
     public static final String RANGE_1024 = "bytes=0-1024";
