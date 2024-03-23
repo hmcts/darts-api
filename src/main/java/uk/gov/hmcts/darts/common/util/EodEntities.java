@@ -58,9 +58,9 @@ public class EodEntities {
         this.eltRepository = eltRepository;
         this.orsRepository = orsRepository;
 
-        unstructuredLocation = eltRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
-        armLocation = eltRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
-        detsLocation = eltRepository.getReferenceById(ExternalLocationTypeEnum.DETS.getId());
+        unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).get();
+        armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).get();
+        detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).get();
 
         //TODO make these getReference?
         storedStatus = orsRepository.findById(STORED.getId()).get();
