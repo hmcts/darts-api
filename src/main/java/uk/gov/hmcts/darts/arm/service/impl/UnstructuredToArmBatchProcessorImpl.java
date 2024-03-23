@@ -101,8 +101,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             log.error("Unable to find matching external object directory for {}", armEod.getId());
                             updateExternalObjectDirectoryFailedTransferAttempts(armEod);
                             //TODO this might not work, need to use the result of the previous method? Also, this has failed. Verify manifest is not generated
-                            batchEntity.setArmEod(armEod);
-                            batchEntities.add(batchEntity);
                             continue;
                         }
                     } else {
