@@ -35,8 +35,8 @@ import static java.lang.String.format;
 import static java.nio.file.Files.lines;
 import static java.nio.file.Files.readString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,6 +45,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.util.EodEntities.armDropZoneStatus;
 import static uk.gov.hmcts.darts.common.util.EodEntities.armLocation;
@@ -146,26 +147,36 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        var foundMediaList = eodRepository.findMediaIdsByInMediaIdStatusAndType(
-            List.of(medias.get(0).getId(), medias.get(1).getId()), armDropZoneStatus(), armLocation()
-        );
-        assertEquals(2, foundMediaList.size());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
+        assertThat(failedArmEodsMedia0).hasSize(1);
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        assertThat(failedArmEodsMedia1).hasSize(1);
 
-        verify(armDataManagementApi, times(2)).saveBlobDataToArm(matches(".+_.+_1"), any());
+        var rawFile0Name = format("%d_%d_1", failedArmEodsMedia0.get(0).getId(), medias.get(0).getId());
+        var rawFile1Name = format("%d_%d_1", failedArmEodsMedia1.get(0).getId(), medias.get(1).getId());
+
+        verify(armDataManagementApi, times(1)).saveBlobDataToArm(eq(rawFile0Name), any());
+        verify(armDataManagementApi, times(1)).saveBlobDataToArm(eq(rawFile1Name), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        Path generatedManifestFilePath = manifestFileNameCaptor.getValue().toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(2);
-        assertThat(readString(generatedManifestFilePath))
+        File manifestFile = manifestFileNameCaptor.getValue();
+        Path manifestFilePath = manifestFile.toPath();
+        assertThat(lines(manifestFilePath).count()).isEqualTo(2);
+        assertThat(readString(manifestFilePath))
             .contains("\"operation\":\"create_record\"",
                       "\"operation\":\"upload_new_file\"",
-                      format("_%d_", medias.get(0).getId()),
-                      format("_%d_", medias.get(1).getId()));
+                      "\"dz_file_name\":\"" + rawFile0Name,
+                      "\"dz_file_name\":\"" + rawFile1Name);
+
+        assertThat(failedArmEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(failedArmEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
     }
 
+    //TODO add tests for transcript, etc...?
+
     @Test
-    void movePreviousArmFailedBelowMaxAttemptFromUnstructuredToArmStorage() {
+    void movePreviousArmFailedFromUnstructuredToArmStorage() throws IOException {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -175,6 +186,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_MANIFEST_FAILED, ARM, eod -> eod.setTransferAttempts(5));
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(3), ARM_RESPONSE_MANIFEST_FAILED, ARM);
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm();
@@ -182,15 +195,31 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         //then
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches(".+_.+_2"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+        verify(armDataManagementApi, times(2)).saveBlobDataToArm(any(), any());
 
         var armDropzoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
         assertThat(armDropzoneEodsMedia0).hasSize(1);
         var armDropzoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
         assertThat(armDropzoneEodsMedia1).hasSize(1);
 
+        //FIXME check with Hemanta: to be able to generate manifest file entries for ARM_RESPONSE_MANIFEST_FAILED we need to fetch it
+//        var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), armDropZoneStatus(), armLocation());
+//        assertThat(armDropzoneEodsMedia3).hasSize(1);
+
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFileNameCaptor.getValue().getName());
-        assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFileNameCaptor.getValue().getName());
+        File manifestFile = manifestFileNameCaptor.getValue();
+        assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+//        assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+
+        Path generatedManifestFilePath = manifestFile.toPath();
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(3);
+        assertThat(readString(generatedManifestFilePath)).contains(
+            format("_%d_", medias.get(0).getId()),
+            format("_%d_", medias.get(1).getId())
+//            format("_%d_", medias.get(3).getId())
+        );
+        assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
 
     @Test
