@@ -177,7 +177,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         } else if (armClient.equalsIgnoreCase("dets")) {
             sourceLocation = EodEntities.detsLocation();
         } else {
-            log.error("unknown arm client {}", armDataManagementConfiguration.getArmClient());
+            log.error("unknown arm client '{}'", armDataManagementConfiguration.getArmClient());
             return Collections.emptyList();
         }
 

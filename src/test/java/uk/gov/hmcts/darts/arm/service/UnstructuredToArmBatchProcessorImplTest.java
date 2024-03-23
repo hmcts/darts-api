@@ -37,7 +37,10 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -135,13 +138,16 @@ class UnstructuredToArmBatchProcessorImplTest {
 
     @Test
     public void testDartsArmClientConfigInBatchQuery() {
+        //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEODs(any())).thenReturn(emptyList());
 
+        //when
         unstructuredToArmProcessor.processUnstructuredToArm();
 
+        //then
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
             EodEntities.storedStatus(),
             EodEntities.unstructuredLocation(),
@@ -152,13 +158,16 @@ class UnstructuredToArmBatchProcessorImplTest {
 
     @Test
     public void testDetsArmClientConfigInBatchQuery() {
+        //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEODs(any())).thenReturn(emptyList());
 
+        //when
         unstructuredToArmProcessor.processUnstructuredToArm();
 
+        //then
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
             EodEntities.storedStatus(),
             EodEntities.detsLocation(),
@@ -168,7 +177,21 @@ class UnstructuredToArmBatchProcessorImplTest {
     }
 
     @Test
-    public void testPagination() throws IOException {
+    public void testUnknownArmClientConfigInBatchQuery() {
+        //given
+        when(armDataManagementConfiguration.getArmClient()).thenReturn("unknown");
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        verifyNoInteractions(userIdentity);
+    }
+
+    @Test
+    public void testPaginatedBatchQuery() throws IOException {
+        //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
@@ -176,8 +199,10 @@ class UnstructuredToArmBatchProcessorImplTest {
 
         when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
 
+        //when
         unstructuredToArmProcessor.processUnstructuredToArm();
 
+        //then
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
             EodEntities.storedStatus(),
             EodEntities.unstructuredLocation(),
@@ -185,6 +210,26 @@ class UnstructuredToArmBatchProcessorImplTest {
             Pageable.ofSize(5)
         );
         verify(eodService).findFailedStillRetriableArmEODs(Pageable.ofSize(3));
+    }
+
+    @Test
+    void testManifestFileName() throws IOException {
+        //given
+        when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(List.of(eod1));
+        when(eodService.findFailedStillRetriableArmEODs(any())).thenReturn(emptyList());
+
+        when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        verify(fileOperationService).createFile(matches("DARTS_.+\\.a360"), eq("/temp_workspace"), eq(true));
     }
 
 }
