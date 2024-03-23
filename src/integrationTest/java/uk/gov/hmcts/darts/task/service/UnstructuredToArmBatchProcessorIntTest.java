@@ -28,9 +28,12 @@ import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
+import static java.lang.String.format;
+import static java.nio.file.Files.lines;
+import static java.nio.file.Files.readString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +49,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.util.EodEntities.armDropZoneStatus;
 import static uk.gov.hmcts.darts.common.util.EodEntities.armLocation;
 import static uk.gov.hmcts.darts.common.util.EodEntities.failedArmManifestFileStatus;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFileFromFileSystem;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -152,13 +154,14 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(armDataManagementApi, times(2)).saveBlobDataToArm(matches(".+_.+_1"), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
 
-        //TODO extract method
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        var actualResponse = getContentsFromFileFromFileSystem(manifestFileNameCaptor.getValue());
-        var totalLines = Files.lines(manifestFileNameCaptor.getValue().toPath()).count();
-        assertThat(totalLines).isEqualTo(2);
-        //TODO improve
-        assertThat(actualResponse).contains("\"operation\":\"create_record\"").contains("\"operation\":\"upload_new_file\"");
+        Path generatedManifestFilePath = manifestFileNameCaptor.getValue().toPath();
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(2);
+        assertThat(readString(generatedManifestFilePath))
+            .contains("\"operation\":\"create_record\"",
+                      "\"operation\":\"upload_new_file\"",
+                      format("_%d_", medias.get(0).getId()),
+                      format("_%d_", medias.get(1).getId()));
     }
 
     @Test
@@ -206,8 +209,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation())).hasSize(1);
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
-        var totalLines = Files.lines(manifestFileNameCaptor.getValue().toPath()).count();
-        assertThat(totalLines).isEqualTo(1);
+        Path generatedManifestFilePath = manifestFileNameCaptor.getValue().toPath();
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(1);
+        assertThat(readString(generatedManifestFilePath)).contains(format("_%d_", medias.get(1).getId()));
+        assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(0).getId()));
     }
 
 }
