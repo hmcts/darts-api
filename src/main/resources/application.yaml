@@ -122,8 +122,8 @@ darts:
     handheld-audio-courtroom-numbers:
       - 199
     preview:
-      redis-ttl-mins: 10
-      redis-failed-ttl-mins: 2
+      redis-ttl-mins: ${AUDIO_PREVIEW_REDIS_TTL:10}
+      redis-failed-ttl-mins: ${AUDIO_PREVIEW_REDIS_FAILED_TTL:2}
       redis-folder: audio-previews
   azure:
     active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}
