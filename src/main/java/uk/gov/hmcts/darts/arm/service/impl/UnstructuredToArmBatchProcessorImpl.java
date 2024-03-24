@@ -98,6 +98,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             updateExternalObjectDirectoryStatus(armEod, EodEntities.armIngestionStatus());
                         } else {
                             //TODO ask Hemanta if it's ok to keep current failed status here
+                            //TODO ask Hemanta do we need to add ARM_RESPONSE_MANIFEST_FILE to the batch query?
+                            //TODO ask Hemanta if all generation of archive records fail or there's no archive record so there's no entry then no manifest file is pushed or push and empty one?
                             log.error("Unable to find matching external object directory for {}", armEod.getId());
                             updateExternalObjectDirectoryFailedTransferAttempts(armEod);
                             continue;
@@ -116,6 +118,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                         pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename);
                     } else if (shouldAddEntryToManifestFile(batchItem)) {
                         var archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
+                        //TODO if the above is null, which state we put on the arm eod? manifest file failed?
+                        //TODO check why archive record is missing some data
                         batchItem.setArchiveRecord(archiveRecord);
                     }
                 } catch (Exception e) {
@@ -123,7 +127,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     if (batchItem.getArmEod() != null) {
                         batchItem.undoManifestFileChange();
                         //FIXME what would be the status if the code fails before the push is even attempted? should not be failedArmRawDataStatus
-                        if (!Boolean.TRUE.equals(batchItem.getRawFilePushSuccessful())) {
+                        if (!batchItem.isRawFilePushSuccessfulWhenAttempted()) {
                             updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus());
                         } else {
                             updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmManifestFileStatus());
@@ -132,10 +136,13 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                 }
             }
 
-            //TODO add try catch this can fail too
-            writeManifestFile(batchItems, archiveRecordsFile);
+            //TODO carry on here only if batch items has at least one archive record
 
-            pushManifestFileToArm(archiveRecordsFile, batchItems);
+            //TODO add try catch this can fail too
+            if (!batchItems.getSuccessful().isEmpty()) {
+                writeManifestFile(batchItems, archiveRecordsFile);
+                pushManifestFileToArm(archiveRecordsFile, batchItems);
+            }
 
             for (var batchItem : batchItems.getSuccessful()) {
                 //TODO handle potential error
@@ -246,7 +253,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             this.armEod.setManifestFile(this.previousManifestFile);
         }
 
-        public boolean isRawFilePushAttemptedAndSuccessful() {
+        public boolean isRawFilePushSuccessfulWhenAttempted() {
             return rawFilePushSuccessful == null || rawFilePushSuccessful;
         }
     }
@@ -264,7 +271,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
 
         public List<BatchItem> getSuccessful() {
-            return batchItems.stream().filter(batchItem -> batchItem.isRawFilePushAttemptedAndSuccessful() && batchItem.getArchiveRecord() != null).toList();
+            return batchItems.stream().filter(batchItem -> batchItem.isRawFilePushSuccessfulWhenAttempted() && batchItem.getArchiveRecord() != null).toList();
         }
 
         public List<ArchiveRecord> getArchiveRecords() {

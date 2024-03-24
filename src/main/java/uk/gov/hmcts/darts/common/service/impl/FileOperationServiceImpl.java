@@ -28,9 +28,8 @@ public class FileOperationServiceImpl implements FileOperationService {
             workspacePath = workspacePath.resolve(UUID.randomUUID().toString());
         }
         Path targetTempFile = workspacePath.resolve(fileName);
-        Files.createDirectories(targetTempFile.getParent());
-        Path tempFilePath = Files.createFile(targetTempFile);
-        return tempFilePath;
+        Files.createDirectories(workspacePath);
+        return Files.createFile(targetTempFile);
     }
 
     @Override
