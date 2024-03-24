@@ -137,7 +137,7 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
     }
 
     private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory, String rawFilename) {
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecordFile(armExternalObjectDirectory.getId(), rawFilename);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(armExternalObjectDirectory.getId(), rawFilename);
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
