@@ -40,24 +40,33 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 generatedArchiveRecord = true;
             }
         } catch (IOException e) {
-            log.error("Unable to write ARM file {}, due to {}", archiveRecordFile.getAbsoluteFile(), e.getMessage());
+            log.error("Unable to write ARM file {}", archiveRecordFile.getAbsoluteFile(), e);
         }
         return generatedArchiveRecord;
     }
 
     public void generateArchiveRecords(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
-        try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
-            for (var archiveRecord : archiveRecords) {
-                String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
-                String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
-                log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordsFile.getAbsolutePath());
-                    printWriter.print(archiveRecordOperation);
-                    printWriter.println(uploadNewFileRecord);
+        if (!archiveRecords.isEmpty()) {
+            try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
+                for (var archiveRecord : archiveRecords) {
+                    try {
+                        String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
+                        String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
+                        log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordsFile.getAbsolutePath());
+                        printWriter.print(archiveRecordOperation);
+                        printWriter.println(uploadNewFileRecord);
+                    } catch (Exception e) {
+                        log.error("Unable to write archive record for EOD {} to ARM file {}",
+                                  archiveRecord.getArchiveRecordOperation().getRelationId(),
+                                  archiveRecordsFile.getAbsoluteFile());
+                        //TODO is this the correct exception type?
+                        throw new RuntimeException(e);
+                    }
+                }
+            } catch (IOException e) {
+                log.error("Unable to write ARM file {}", archiveRecordsFile.getAbsoluteFile(), e);
+                throw new RuntimeException(e);
             }
-        } catch (IOException e) {
-            //TODO log eod
-            log.error("Unable to write ARM file {}, due to {}", archiveRecordsFile.getAbsoluteFile(), e.getMessage());
-            throw new RuntimeException(e);
         }
     }
 }

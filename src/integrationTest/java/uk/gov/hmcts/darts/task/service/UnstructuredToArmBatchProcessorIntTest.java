@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -38,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,7 +60,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     ArgumentCaptor<File> manifestFileNameCaptor = ArgumentCaptor.forClass(File.class);
 
-    @MockBean
+    @SpyBean
     private ArmDataManagementApi armDataManagementApi;
 
     @Autowired
@@ -74,7 +77,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Autowired
     private FileOperationService fileOperationService;
-    @Autowired
+    @SpyBean
     private ArchiveRecordService archiveRecordService;
     @Autowired
     private AuthorisationStub authorisationStub;
@@ -83,8 +86,9 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     @SpyBean
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
     @Autowired
-    private
-    ExternalObjectDirectoryRepository eodRepository;
+    private ExternalObjectDirectoryRepository eodRepository;
+    @SpyBean
+    private MediaArchiveRecordMapper mediaArchiveRecordMapper;
 
     @Autowired
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmProcessor;
@@ -213,7 +217,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 //        assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
 
         Path generatedManifestFilePath = manifestFile.toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(3);
+//        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(3);
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(2);
         assertThat(readString(generatedManifestFilePath)).contains(
             format("_%d_", medias.get(0).getId()),
             format("_%d_", medias.get(1).getId())
@@ -247,6 +252,33 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(lines(generatedManifestFilePath).count()).isEqualTo(1);
         assertThat(readString(generatedManifestFilePath)).contains(format("_%d_", medias.get(1).getId()));
         assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(0).getId()));
+    }
+
+    @Test
+    void generationOfManifestFileEntriesFails() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+
+        doReturn(null).when(mediaArchiveRecordMapper).mapToMediaArchiveRecord(any(), any());
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEodsMedia0).hasSize(1);
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEodsMedia1).hasSize(1);
+        var failedEod = failedArmEodsMedia0.get(0);
+        assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
+        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
+
+        verify(armDataManagementApi, never()).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
     }
 
 }

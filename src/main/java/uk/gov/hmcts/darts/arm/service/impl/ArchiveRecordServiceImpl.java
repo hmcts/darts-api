@@ -24,8 +24,10 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -169,20 +171,26 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     public ArchiveRecord generateArchiveRecordInfo(Integer externalObjectDirectoryId, String rawFilename) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
-            () -> new RuntimeException("TODO")
-        );
+            () -> new NoSuchElementException(format("external object directory not found with id: %d", externalObjectDirectoryId)));
+        ArchiveRecord result;
 
         if (nonNull(externalObjectDirectory.getMedia())) {
-            return mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
+            result = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            return transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
+            result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            return annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
+            result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
         } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
-            return caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
+            result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
         } else {
             //TODO
             throw new RuntimeException("");
+        }
+
+        if (result == null) {
+            throw new RuntimeException(String.format("exception generating archive record for EOD %d", externalObjectDirectoryId));
+        } else {
+            return result;
         }
     }
 
