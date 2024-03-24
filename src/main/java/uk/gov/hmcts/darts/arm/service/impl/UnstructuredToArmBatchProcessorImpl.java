@@ -115,7 +115,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     if (shouldPushRawDataToArm(batchItem)) {
                         pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename);
                     } else if (shouldAddEntryToManifestFile(batchItem)) {
-                        var archiveRecord = archiveRecordService.generateArchiveRecord(batchItem.getArmEod().getId(), rawFilename);
+                        var archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
                         batchItem.setArchiveRecord(archiveRecord);
                     }
                 } catch (Exception e) {
@@ -199,7 +199,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         );
         if (copyRawDataToArmSuccessful) {
             batchItem.setRawFilePushSuccessful(true);
-            var archiveRecord = archiveRecordService.generateArchiveRecord(batchItem.getArmEod().getId(), rawFilename);
+            var archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
             batchItem.setArchiveRecord(archiveRecord);
         }
     }

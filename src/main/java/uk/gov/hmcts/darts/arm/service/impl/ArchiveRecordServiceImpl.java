@@ -47,7 +47,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
 
     @Transactional
-    public ArchiveRecordFileInfo generateArchiveRecordFile(Integer externalObjectDirectoryId, String rawFilename) {
+    public ArchiveRecordFileInfo generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename) {
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(false)
             .build();
@@ -166,7 +166,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     }
 
     @Transactional
-    public ArchiveRecord generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename) {
+    public ArchiveRecord generateArchiveRecordInfo(Integer externalObjectDirectoryId, String rawFilename) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
             () -> new RuntimeException("TODO")
