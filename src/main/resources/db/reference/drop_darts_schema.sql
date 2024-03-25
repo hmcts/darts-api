@@ -1,3 +1,5 @@
+--v23 drop_darts_schema
+
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO DARTS;
 
@@ -23,6 +25,7 @@ DROP SEQUENCE grp_seq;
 DROP SEQUENCE rol_seq;
 DROP SEQUENCE per_seq;
 
+DROP TABLE audit_heritage;
 DROP TABLE case_judge_ae;
 DROP TABLE case_transcription_ae;
 DROP TABLE hearing_judge_ae;
@@ -38,6 +41,8 @@ DROP TABLE case_document;
 DROP TABLE object_record_status; 
 DROP TABLE external_location_type;  
 DROP TABLE annotation_document;
+
+
 DROP TABLE hearing_annotation_ae;
 DROP TABLE hearing_transcription_ae;
 DROP TABLE annotation ;
@@ -71,6 +76,7 @@ DROP TABLE court_case;
 DROP TABLE event_handler; 
 DROP TABLE transcription_status;
 DROP TABLE transcription_type;
+DROP TABLE object_hidden_reason;
 DROP TABLE courtroom; 
 DROP TABLE courthouse;   
 DROP TABLE user_account;
@@ -98,6 +104,7 @@ DROP SEQUENCE med_seq;
 DROP SEQUENCE mer_seq;
 DROP SEQUENCE nod_seq;
 DROP SEQUENCE not_seq;
+DROP SEQUENCE ohr_seq;
 DROP SEQUENCE ors_seq;
 DROP SEQUENCE prn_seq;
 DROP SEQUENCE reg_seq;
