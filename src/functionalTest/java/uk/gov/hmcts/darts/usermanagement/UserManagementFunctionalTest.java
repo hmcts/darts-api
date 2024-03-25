@@ -15,10 +15,12 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -229,6 +231,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldPatchSecurityGroups() throws JsonProcessingException {
+
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
@@ -248,18 +251,26 @@ class UserManagementFunctionalTest extends FunctionalTest {
         SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
                                                                                               new TypeReference<SecurityGroupWithIdAndRole>(){});
 
-        response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
-            .contentType(ContentType.JSON)
-            .body("""
+        Integer id1 = createCourthouse("func-a_courthouse" + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
+        Integer id2 = createCourthouse("func-a_courthouse" + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
+
+        String patchContent = """
                          {
                            "name": "func-a-security-group-new-name",
                            "display_name": "A security group new name",
                            "description": "func-test group new description",
-                           "courthouse_ids": [1,2],
+                           "courthouse_ids": [<id1>,<id2>],
                            "user_ids": [-1,-2]
                          }
-                           """)
+                           """;
+        patchContent = patchContent.replace("<id1>", id1.toString());
+        patchContent = patchContent.replace("<id2>", id2.toString());
+
+
+        response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
+            .contentType(ContentType.JSON)
+            .body(patchContent)
             .patch()
             .thenReturn();
 
@@ -292,5 +303,19 @@ class UserManagementFunctionalTest extends FunctionalTest {
         assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-2));
 
 
+    }
+
+    private Integer createCourthouse(String name, String displayName) throws JsonProcessingException {
+        String content = String.format("{\"courthouse_name\": %s, \"displ;ay_name\": %s}", name, displayName);
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/courthouses"))
+            .contentType(ContentType.JSON)
+            .body(content)
+            .post()
+            .thenReturn();
+        ObjectMapper objectMapper = new ObjectMapper();
+        ExtendedCourthousePost extendedCourthousePost = objectMapper.readValue(response.asString(),
+                                                                                    new TypeReference<ExtendedCourthousePost>(){});
+        return extendedCourthousePost.getId();
     }
 }
