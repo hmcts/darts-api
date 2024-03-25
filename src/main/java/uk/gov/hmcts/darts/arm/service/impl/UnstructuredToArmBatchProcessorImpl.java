@@ -90,7 +90,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     ExternalObjectDirectoryEntity armEod;
                     if (isEqual(currentEod.getExternalLocationType(), EodEntities.armLocation())) {
                         armEod = currentEod;
-                        //FIXME this needs to be dynamic
 
                         var matchingEntity = getExternalObjectDirectoryEntity(armEod, getEodSourceLocation(), EodEntities.storedStatus());
                         if (matchingEntity.isPresent()) {
@@ -129,7 +128,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
             try {
                 if (!batchItems.getSuccessful().isEmpty()) {
-                    //TODO confirm with Hemanta if ARM_MANIFEST_FAILED is an ok status in case of an error here
                     writeManifestFile(batchItems, archiveRecordsFile);
                     copyMetadataToArm(archiveRecordsFile);
                 }
@@ -140,7 +138,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             }
 
             for (var batchItem : batchItems.getSuccessful()) {
-                //TODO handle potential error
                 //TODO set the manifest file here rather than before and then having to undo it?
                 updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodEntities.armDropZoneStatus());
             }

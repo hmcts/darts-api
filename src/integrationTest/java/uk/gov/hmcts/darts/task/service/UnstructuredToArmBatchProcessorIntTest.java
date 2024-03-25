@@ -207,24 +207,21 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropzoneEodsMedia0).hasSize(1);
         var armDropzoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
         assertThat(armDropzoneEodsMedia1).hasSize(1);
-
-        //FIXME check with Hemanta: to be able to generate manifest file entries for ARM_RESPONSE_MANIFEST_FAILED we need to fetch it
-//        var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), armDropZoneStatus(), armLocation());
-//        assertThat(armDropzoneEodsMedia3).hasSize(1);
+        var armDropzoneEodsMedia3 = eodRepository.findByMediaStatusAndType(medias.get(3), armDropZoneStatus(), armLocation());
+        assertThat(armDropzoneEodsMedia3).hasSize(1);
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
         File manifestFile = manifestFileNameCaptor.getValue();
         assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
         assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
-//        assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
 
         Path generatedManifestFilePath = manifestFile.toPath();
-//        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(3);
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(2);
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(3);
         assertThat(readString(generatedManifestFilePath)).contains(
             format("_%d_", medias.get(0).getId()),
-            format("_%d_", medias.get(1).getId())
-//            format("_%d_", medias.get(3).getId())
+            format("_%d_", medias.get(1).getId()),
+            format("_%d_", medias.get(3).getId())
         );
         assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(2).getId()));
     }
