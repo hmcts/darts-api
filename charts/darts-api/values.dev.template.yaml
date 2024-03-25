@@ -95,6 +95,7 @@ java:
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: https://darts-gateway.staging.platform.hmcts.net
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
+    AUTOMATED_TASK_MODE: true
 
   secrets:
     DARTS_API_DB_PASSWORD:
