@@ -79,8 +79,10 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
         try {
             BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
-            final String calculatedChecksum = new String(encodeBase64(md5(inboundFile.toBytes())));
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity);
+            byte[] bytes = inboundFile.toBytes();
+            final String calculatedChecksum = new String(encodeBase64(md5(bytes)));
+
+            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, Long.valueOf(bytes.length));
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 // upload file
@@ -166,7 +168,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return externalObjectDirectoryEntity;
     }
 
-    private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
+    private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured, Long actualFileSize) {
         MediaEntity mediaEntityLazy = inbound.getMedia();
         if (mediaEntityLazy != null) {
             MediaEntity mediaEntity = mediaRepository.findById(mediaEntityLazy.getId()).orElseThrow(
@@ -178,7 +180,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 audioConfigurationProperties.getAllowedMediaFormats(),
                 mediaEntity.getMediaFormat().toLowerCase(),
                 audioConfigurationProperties.getMaxFileSize(),
-                mediaEntity.getFileSize()
+                actualFileSize
             );
         }
 
