@@ -116,6 +116,52 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+  /admin/retention-policy-types:
+    get:
+      tags:
+        - Retention
+      summary: Get retention policy types
+      description: "Retention Policy Types"
+      parameters: [ ]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRetentionPolicies'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+  /admin/retention-policy-types/{id}:
+    get:
+      tags:
+        - Retention
+      summary: Get retention policy type by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRetentionPolicy'
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 components:
   schemas:
     GetCaseRetentionsResponse:
@@ -162,6 +208,32 @@ components:
           type: string
           format: date
 
+    GetRetentionPolicies:
+        type: array
+        items:
+          $ref: '#/components/schemas/GetRetentionPolicy'
+    GetRetentionPolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        fixed_policy_key:
+          type: string
+        duration:
+          type: string
+        policy_start_at:
+          type: string
+          format: date-time
+        policy_end_at:
+          type: string
+          format: date-time
+
     NoPermissionReduceRetentionError:
       type: string
       enum:
@@ -169,27 +241,30 @@ components:
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION_ERROR ]
 
     RetentionErrorCode:
-        type: string
-        enum:
-          - "RETENTION_100"
-          - "RETENTION_101"
-          - "RETENTION_102"
-          - "RETENTION_103"
-          - "RETENTION_104"
-          - "RETENTION_105"
-          - "RETENTION_106"
-          - "RETENTION_107"
-        x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE]
+      type: string
+      enum:
+        - "RETENTION_100"
+        - "RETENTION_101"
+        - "RETENTION_102"
+        - "RETENTION_103"
+        - "RETENTION_104"
+        - "RETENTION_105"
+        - "RETENTION_106"
+        - "RETENTION_107"
+        - "RETENTION_108"
+      x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND ]
 
     RetentionTitleErrors:
-        type: string
-        enum:
-          - "You do not have permission to reduce the retention period."
-          - "The retention date being applied is too early."
-          - "The request is invalid."
-          - "The requested caseId cannot be found."
-          - "The case must be closed before the retention period can be amended."
-          - "The case must have a retention policy applied before being changed."
-          - "An Internal server error has occurred."
-          - "The retention date being applied is too late."
-        x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE]
+      type: string
+      enum:
+        - "You do not have permission to reduce the retention period."
+        - "The retention date being applied is too early."
+        - "The request is invalid."
+        - "The requested caseId cannot be found."
+        - "The case must be closed before the retention period can be amended."
+        - "The case must have a retention policy applied before being changed."
+        - "An Internal server error has occurred."
+        - "The retention date being applied is too late."
+        - "The retention policy type id does not exist."
+      x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND ]
+

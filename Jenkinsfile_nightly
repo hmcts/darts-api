@@ -1,8 +1,8 @@
 #!groovy
 
 properties([
-  // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
-  pipelineTriggers([cron('H 08 * * 1-5')])
+        // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
+        pipelineTriggers([cron('H 08 * * 1-5')])
 ])
 
 @Library("Infrastructure")
@@ -45,20 +45,19 @@ def secrets = [
     secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
     secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
     secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT')
-
-  ],
+        ],
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
-  [$class     : 'AzureKeyVaultSecret',
-   secretType : 'Secret',
-   name       : secretName,
-   version    : '',
-   envVariable: envVar
-  ]
+    [$class     : 'AzureKeyVaultSecret',
+     secretType : 'Secret',
+     name       : secretName,
+     version    : '',
+     envVariable: envVar
+    ]
 }
 
 withNightlyPipeline(type, product, component) {
-  loadVaultSecrets(secrets)
-  enableSlackNotifications('#darts-builds')
+    loadVaultSecrets(secrets)
+    enableSlackNotifications('#darts-builds')
 }

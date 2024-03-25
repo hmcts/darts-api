@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
+import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
@@ -58,6 +60,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_T
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
@@ -117,6 +120,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
+    private final CloseOldCasesProcessor closeOldCasesProcessor;
+
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         log.info("Automated tasks are loading");
@@ -131,6 +136,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
         addApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
+        addCloseOldCasesTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -206,6 +212,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcessArmResponseFilesAutomatedTask();
             case APPLY_RETENTION -> rescheduleApplyRetentionAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
+            case CLOSE_OLD_CASES -> rescheduleCloseOldCasesAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -407,6 +414,16 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(cleanupArmResponseFilesAutomatedTask, trigger);
     }
 
+    private void addCloseOldCasesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        CloseOldCasesAutomatedTask closeOldCasesAutomatedTask = new CloseOldCasesAutomatedTask(automatedTaskRepository,
+                                                                                               lockProvider,
+                                                                                               automatedTaskConfigurationProperties,
+                                                                                               closeOldCasesProcessor);
+        closeOldCasesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(closeOldCasesAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(closeOldCasesAutomatedTask);
+        taskRegistrar.addTriggerTask(closeOldCasesAutomatedTask, trigger);
+    }
+
 
     private void rescheduleProcessDailyListAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
@@ -587,6 +604,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(cleanupArmResponseFilesAutomatedTask);
             taskScheduler.schedule(cleanupArmResponseFilesAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleCloseOldCasesAutomatedTask() {
+
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(CLOSE_OLD_CASES.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            CloseOldCasesAutomatedTask closeOldCasesAutomatedTask = new CloseOldCasesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                closeOldCasesProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(closeOldCasesAutomatedTask);
+            taskScheduler.schedule(closeOldCasesAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

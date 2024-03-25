@@ -12,7 +12,7 @@ plugins {
   id 'idea'
   id 'io.spring.dependency-management' version '1.1.4'
   id 'org.springframework.boot' version '3.2.2'
-  id 'org.owasp.dependencycheck' version '9.0.9'
+  id 'org.owasp.dependencycheck' version '9.0.10'
   id 'com.github.ben-manes.versions' version '0.51.0'
   id 'org.sonarqube' version '4.4.1.3373'
   id "io.freefair.lombok" version "8.6"
@@ -349,7 +349,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
   implementation group: 'org.springframework', name: 'spring-webflux', version: '6.1.5'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.2.2'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.2.3'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.15.1'
   implementation 'org.apache.commons:commons-collections4:4.4'
@@ -413,7 +413,7 @@ dependencies {
   testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.4'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
-  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.0'
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.1'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
@@ -425,7 +425,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.107.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.108.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'

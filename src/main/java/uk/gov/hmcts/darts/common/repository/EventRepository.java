@@ -18,4 +18,11 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
            ORDER by ee.timestamp
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
+
+    @Query(value = """
+        SELECT * FROM darts.event e
+        where e.case_number = :caseNumber
+        order by e.created_ts
+        """, nativeQuery = true)
+    List<EventEntity> findAllByCaseNumberOrderByCreatedDate(String caseNumber);
 }

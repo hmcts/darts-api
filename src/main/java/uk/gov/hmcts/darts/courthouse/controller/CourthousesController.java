@@ -40,12 +40,6 @@ public class CourthousesController implements CourthousesApi {
     private final AdminRegionToRegionEntityMapper regionMapper;
 
     @Override
-    public ResponseEntity<Void> courthousesCourthouseIdDelete(Integer courthouseId) {
-        courthouseService.deleteCourthouseById(courthouseId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<AdminCourthouse> adminCourthousesCourthouseIdGet(Integer courthouseId) {
