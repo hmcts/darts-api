@@ -48,6 +48,12 @@ java:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: AzureADTenantIdJustice
+          alias: AAD_TENANT_ID_JUSTICE
+        - name: AzureADClientIdJustice
+          alias: AAD_CLIENT_ID_JUSTICE
+        - name: AzureADClientSecretJustice
+          alias: AAD_CLIENT_SECRET_JUSTICE
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
         - name: XhibitPassword
@@ -148,6 +154,12 @@ function:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: AzureADTenantIdJustice
+          alias: AAD_TENANT_ID_JUSTICE
+        - name: AzureADClientIdJustice
+          alias: AAD_CLIENT_ID_JUSTICE
+        - name: AzureADClientSecretJustice
+          alias: AAD_CLIENT_SECRET_JUSTICE
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
         - name: XhibitPassword
