@@ -19,11 +19,11 @@ java:
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
         - name: AzureAdB2CTenantId
-          alias: AAD_B2C_TENANT_ID_KEY
+          alias: AAD_B2C_TENANT_ID
         - name: AzureAdB2CClientId
-          alias: AAD_B2C_CLIENT_ID_KEY
+          alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
-          alias: AAD_B2C_CLIENT_SECRET_KEY
+          alias: AAD_B2C_CLIENT_SECRET
         - name: app-insights-connection-string
           alias: app-insights-connection-string
         - name: AzureAdB2CFuncTestROPCUsername
@@ -35,9 +35,9 @@ java:
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientId
-          alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+          alias: AAD_B2C_ROPC_CLIENT_ID
         - name: AzureAdB2CFuncTestROPCClientSecret
-          alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
+          alias: AAD_B2C_ROPC_CLIENT_SECRET
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
         - name: api-POSTGRES-CONNECTION-STRING
@@ -88,7 +88,7 @@ java:
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: http://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     DARTS_PORTAL_URL: https://darts.{{ .Values.global.environment }}.apps.hmcts.net
-    TESTING_SUPPORT_ENDPOINTS_ENABLED: true
+    TESTING_SUPPORT_ENDPOINTS_ENABLED: false
     AUTOMATED_TASK_MODE: false
     API_MODE: true
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
@@ -119,11 +119,11 @@ function:
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
         - name: AzureAdB2CTenantId
-          alias: AAD_B2C_TENANT_ID_KEY
+          alias: AAD_B2C_TENANT_ID
         - name: AzureAdB2CClientId
-          alias: AAD_B2C_CLIENT_ID_KEY
+          alias: AAD_B2C_CLIENT_ID
         - name: AzureAdB2CClientSecret
-          alias: AAD_B2C_CLIENT_SECRET_KEY
+          alias: AAD_B2C_CLIENT_SECRET
         - name: app-insights-connection-string
           alias: app-insights-connection-string
         - name: AzureAdB2CFuncTestROPCUsername
@@ -135,9 +135,9 @@ function:
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientId
-          alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+          alias: AAD_B2C_ROPC_CLIENT_ID
         - name: AzureAdB2CFuncTestROPCClientSecret
-          alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
+          alias: AAD_B2C_ROPC_CLIENT_SECRET
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
         - name: api-POSTGRES-CONNECTION-STRING
@@ -182,9 +182,11 @@ function:
           alias: ARM_PASSWORD
   environment:
     ATS_MODE: true
+    API_MODE: false
+    AUTOMATED_TASK_MODE: false
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
-    DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
+    DARTS_GATEWAY_URL: http://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com

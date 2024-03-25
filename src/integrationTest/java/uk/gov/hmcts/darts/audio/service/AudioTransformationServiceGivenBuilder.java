@@ -77,12 +77,12 @@ public class AudioTransformationServiceGivenBuilder {
 
         int channel = 1;
 
-        mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaWith(
+        mediaEntity1 = dartsDatabase.addMediaToHearingNonTransactional(hearingEntityWithMedia1, createMediaWith(
             courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
 
-        mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
+        mediaEntity2 = dartsDatabase.addMediaToHearingNonTransactional(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
 
-        mediaEntity1Hearing2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia2, createMediaWith(
+        mediaEntity1Hearing2 = dartsDatabase.addMediaToHearingNonTransactional(hearingEntityWithMedia2, createMediaWith(
             courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
 
         mediaEntity3 = createMediaFor(courtroomAtNewcastle);

@@ -232,7 +232,7 @@ public class DartsDatabaseStub {
     }
 
     public JudgeEntity createSimpleJudge(String name) {
-        return retrieveCoreObjectService.retrieveOrCreateJudge(name);
+        return retrieveCoreObjectService.retrieveOrCreateJudge(name, userAccountRepository.getReferenceById(0));
     }
 
     public EventEntity createEvent(HearingEntity hearing, int eventHandlerId) {
@@ -260,7 +260,8 @@ public class DartsDatabaseStub {
             courthouseName,
             courtroomName,
             caseNumber,
-            hearingDate
+            hearingDate,
+            userAccountRepository.getReferenceById(0)
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
@@ -277,7 +278,7 @@ public class DartsDatabaseStub {
 
     public CourtCaseEntity createCase(String courthouseName, String caseNumber) {
         courthouseStub.createCourthouseUnlessExists(courthouseName);
-        return retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
+        return retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber, userAccountRepository.getReferenceById(0));
     }
 
     public CourtroomEntity createCourtroomUnlessExists(String courthouseName, String courtroomName) {
@@ -305,7 +306,8 @@ public class DartsDatabaseStub {
             courthouseName,
             courtroomName,
             caseNumber,
-            hearingDate
+            hearingDate,
+            userAccountRepository.getReferenceById(0)
         );
     }
 
@@ -404,10 +406,24 @@ public class DartsDatabaseStub {
         return completedMediaRequest;
     }
 
+    @Transactional
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
-        mediaRepository.save(mediaEntity);
         hearing.addMedia(mediaEntity);
-        hearingRepository.save(hearing);
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
+        courtroomRepository.saveAndFlush(hearing.getCourtroom());
+        mediaRepository.saveAndFlush(mediaEntity);
+        hearingRepository.saveAndFlush(hearing);
+        return mediaEntity;
+    }
+
+    public MediaEntity addMediaToHearingNonTransactional(HearingEntity hearing, MediaEntity mediaEntity) {
+        hearing.addMedia(mediaEntity);
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        mediaRepository.saveAndFlush(mediaEntity);
+        courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
+        courtroomRepository.saveAndFlush(hearing.getCourtroom());
+        hearingRepository.saveAndFlush(hearing);
         return mediaEntity;
     }
 

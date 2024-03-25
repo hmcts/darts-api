@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -23,11 +24,14 @@ class AddAudioRequestMapperImplTest {
     @Mock
     RetrieveCoreObjectService courtroomRepository;
 
+    @Mock
+    UserIdentity userIdentity;
+
     AddAudioRequestMapperImpl addAudioRequestMapperImpl;
 
     @BeforeEach
     void setUp() {
-        addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(courtroomRepository);
+        addAudioRequestMapperImpl = new AddAudioRequestMapperImpl(courtroomRepository, userIdentity);
     }
 
     @Test
@@ -69,6 +73,8 @@ class AddAudioRequestMapperImplTest {
         Assertions.assertEquals(media.getTotalChannels(), result.getTotalChannels());
         Assertions.assertEquals(media.getCourtroom().getName(), result.getCourtroom().getName());
         Assertions.assertEquals(media.getCaseNumberList().size(), result.getCaseNumberList().size());
+        Assertions.assertEquals(media.getCreatedBy(), userIdentity.getUserAccount());
+        Assertions.assertEquals(media.getLastModifiedBy(), userIdentity.getUserAccount());
     }
 }
 

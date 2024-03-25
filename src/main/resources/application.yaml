@@ -24,8 +24,8 @@ spring:
       client:
         registration:
           external-azure-ad:
-            client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}
-            client-secret: ${AAD_B2C_CLIENT_SECRET_KEY:}
+            client-id: ${AAD_B2C_CLIENT_ID:00000000-0000-0000-0000-000000000000}
+            client-secret: ${AAD_B2C_CLIENT_SECRET:}
             scope: openid
             redirect-uri: ${darts.portal.url}/auth/callback
             logout-redirect-uri: ${darts.portal.url}/auth/logout-callback
@@ -33,7 +33,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}/${AAD_B2C_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
@@ -121,6 +121,10 @@ darts:
     post-amble-duration: 30
     handheld-audio-courtroom-numbers:
       - 199
+    preview:
+      redis-ttl-mins: ${AUDIO_PREVIEW_REDIS_TTL:10}
+      redis-failed-ttl-mins: ${AUDIO_PREVIEW_REDIS_FAILED_TTL:2}
+      redis-folder: audio-previews
   azure:
     active-directory-b2c-base-uri: ${ACTIVE_DIRECTORY_B2C_BASE_URI}
     active-directory-b2c-auth-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}
@@ -263,9 +267,6 @@ darts:
     ssl-enabled: ${REDIS_SSL_ENABLED:true}
   audit:
     application-server: ${CLUSTER_NAME:not available}
-  sse:
-    heartbeat: 5 # in seconds
-    sse-preview-timeout: 120 # in seconds
   log:
     events:
       daily-test-event-text:

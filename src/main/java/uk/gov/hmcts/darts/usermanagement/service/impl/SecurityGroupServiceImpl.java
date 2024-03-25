@@ -6,16 +6,21 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
+import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.util.List;
+
+import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +30,16 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityRoleRepository securityRoleRepository;
     private final SecurityGroupMapper securityGroupMapper;
     private final SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
-
+    private final SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
     private final Validator<SecurityGroupModel> securityGroupCreationValidation;
+
+    @Override
+    public SecurityGroupWithIdAndRoleAndUsers getSecurityGroup(Integer securityGroupId) {
+        SecurityGroupEntity securityGroup = securityGroupRepository.findById(securityGroupId)
+            .orElseThrow(() -> new DartsApiException(SECURITY_GROUP_NOT_FOUND));
+
+        return securityGroupWithIdAndRoleAndUsersMapper.mapToSecurityGroupWithIdAndRoleAndUsers(securityGroup);
+    }
 
     @Override
     @Transactional

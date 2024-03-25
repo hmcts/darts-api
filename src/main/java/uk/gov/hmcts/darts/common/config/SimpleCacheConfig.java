@@ -19,4 +19,6 @@ public class SimpleCacheConfig {
         log.debug("Using in memory caching ...");
         return new ConcurrentMapCacheManager();
     }
+
+
 }

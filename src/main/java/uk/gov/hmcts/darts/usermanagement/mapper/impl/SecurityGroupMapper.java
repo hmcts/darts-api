@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
 @Mapper(componentModel = "spring",
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
@@ -25,5 +26,10 @@ public interface SecurityGroupMapper {
         @Mapping(source = "groupName", target = "name"),
     })
     SecurityGroupWithIdAndRole mapToSecurityGroupWithIdAndRole(SecurityGroupEntity securityGroupEntity);
+
+    @Mappings({
+        @Mapping(source = "groupName", target = "name"),
+    })
+    SecurityGroupWithIdAndRoleAndUsers mapToSecurityGroupWithIdAndRoleAndUsers(SecurityGroupEntity securityGroupEntity);
 
 }

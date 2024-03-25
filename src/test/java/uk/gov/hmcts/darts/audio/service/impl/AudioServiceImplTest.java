@@ -1,24 +1,19 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
-import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -29,7 +24,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -38,30 +32,19 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,19 +57,10 @@ class AudioServiceImplTest {
     public static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     private static final String DUMMY_FILE_CONTENT = "DUMMY FILE CONTENT";
 
-    private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
-    private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
-
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Captor
     ArgumentCaptor<InputStream> inboundBlobStorageArgumentCaptor;
-    @Mock
-    SentServerEventsHeartBeatEmitter heartBeatEmitter;
-    @Captor
-    ArgumentCaptor<Throwable> exceptionCaptor;
-    @Mock
-    SseEmitter emitter;
     @Mock
     private AudioTransformationService audioTransformationService;
     @Mock
@@ -121,7 +95,7 @@ class AudioServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService);
+        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService, userIdentity);
         FileContentChecksum fileContentChecksum = new FileContentChecksum();
         audioService = new AudioServiceImpl(
             audioTransformationService,
@@ -139,123 +113,20 @@ class AudioServiceImplTest {
             fileContentChecksum,
             courtLogEventRepository,
             audioConfigurationProperties,
-            heartBeatEmitter,
             audioBeingProcessedFromArchiveQuery,
             logApi
         );
     }
 
     @Test
-    void previewShouldReturnExpectedData() throws IOException, ExecutionException, InterruptedException {
-
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
-        mediaEntity.setStart(START_TIME);
-        mediaEntity.setEnd(END_TIME);
-        mediaEntity.setChannel(1);
-
-        Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
-        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity)).thenReturn(mediaPath);
-
-        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
-            .startTime(START_TIME.toInstant())
-            .endTime(END_TIME.toInstant())
-            .channel(1)
-            .mediaFile("testAudio.mp2")
-            .path(Path.of("test"))
-            .build();
-        when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
-
-        byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
-        BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
-
-        try (InputStream inputStream = audioService.preview(mediaEntity.getId())) {
-            byte[] bytes = inputStream.readAllBytes();
-            assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
-        }
-    }
-
-
-    @SuppressWarnings("PMD.CloseResource")
-    @Test
-    void previewFluxShouldReturnError() throws IOException, ExecutionException, InterruptedException {
-
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
-        mediaEntity.setStart(START_TIME);
-        mediaEntity.setEnd(END_TIME);
-        mediaEntity.setChannel(1);
-
-        Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
-        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-        when(audioTransformationService.retrieveFromStorageAndSaveToTempWorkspace(mediaEntity)).thenReturn(mediaPath);
-
-        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
-            .startTime(START_TIME.toInstant())
-            .endTime(END_TIME.toInstant())
-            .channel(1)
-            .path(Path.of("test"))
-            .build();
-        when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
-
-        BinaryData data = mock(BinaryData.class);
-        InputStream inputStream = mock(InputStream.class);
-        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
-        when(data.toStream()).thenReturn(inputStream);
-        when(inputStream.read(any())).thenThrow(new IOException());
-
-        audioService.startStreamingPreview(
-            mediaEntity.getId(),
-            "bytes=0-1024", emitter
-        );
-        CountDownLatch latch = new CountDownLatch(1);
-        Mockito.doAnswer(invocationOnMock -> {
-            Object result = invocationOnMock.callRealMethod();
-            latch.countDown();
-            return result;
-        }).when(emitter).completeWithError(exceptionCaptor.capture());
-
-        boolean result = latch.await(2, TimeUnit.SECONDS);
-        if (result) {
-            assertEquals("Failed to process audio request", exceptionCaptor.getValue().getMessage());
-        } else {
-            fail("Emitter did not complete with errors");
-        }
-
-    }
-
-    @Test
-    void previewShouldThrowExceptionWhenMediaIdCannotBeFound() {
-
-        var mediaRequestId = 1;
-
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(mediaRequestId);
-        mediaEntity.setStart(START_TIME);
-        mediaEntity.setEnd(END_TIME);
-        mediaEntity.setChannel(1);
-
-        when(mediaRepository.findById(mediaRequestId)).thenReturn(Optional.empty());
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioService.preview(mediaRequestId)
-        );
-
-        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
-    }
-
-
-    @Test
-    void addAudio() throws IOException {
+    void addAudio() {
         // Given
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
             anyString(),
+            any(),
             any()
         )).thenReturn(hearingEntity);
 
@@ -401,6 +272,7 @@ class AudioServiceImplTest {
             anyString(),
             anyString(),
             anyString(),
+            any(),
             any()
         )).thenReturn(hearing);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);

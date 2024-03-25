@@ -1,0 +1,98 @@
+package uk.gov.hmcts.darts.audio.service;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.darts.audio.model.AudioPreview;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.service.RedisService;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.time.LocalDate;
+
+import static java.util.Objects.nonNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.ENCODING;
+import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
+import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
+import static uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData.minimalExternalObjectDirectory;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.testutils.data.MediaTestData.someMinimalMedia;
+
+class AudioPreviewTest extends IntegrationBase {
+
+    public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+
+    @Value("${darts.audio.preview.redis-folder}")
+    private String folder;
+
+    @Autowired
+    private AudioPreviewService audioPreviewService;
+
+    @Autowired
+    private RedisService<AudioPreview> binaryDataRedisService;
+
+    private HearingEntity hearing;
+    private MediaEntity mediaEntity;
+
+    @BeforeEach
+    void setUp() {
+        hearing = createSomeMinimalHearing();
+    }
+
+    @AfterEach
+    void cleanup() {
+        if (nonNull(mediaEntity)) {
+            binaryDataRedisService.deleteFromRedis(folder, mediaEntity.getId().toString());
+        }
+    }
+
+    @Test
+    void generatesAndCachesAudioPreviewOnCacheMiss() {
+        mediaEntity = givenSomeStoredMedia();
+
+        var audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaEntity.getId());
+
+        assertThat(audioPreview.getStatus()).isEqualTo(ENCODING).isNotNull();
+        assertThat(binaryDataRedisService.readFromRedis(folder, mediaEntity.getId().toString()))
+            .hasFieldOrPropertyWithValue("status", ENCODING);
+    }
+
+    @Test
+    void audioPreviewEventuallyBecomesReady() {
+        mediaEntity = givenSomeStoredMedia();
+
+        var audioPreview = audioPreviewService.getOrCreateAudioPreview(mediaEntity.getId());
+
+        assertThat(audioPreview.getStatus()).isEqualTo(ENCODING).isNotNull();
+        waitForMax10SecondsWithOneSecondPoll(() -> {
+            var cachedAudioPreview = binaryDataRedisService.readFromRedis(folder, mediaEntity.getId().toString());
+            return cachedAudioPreview.getStatus().equals(READY);
+        });
+    }
+
+    @Test
+    void audioPreviewEventuallyFailsWhenMediaDoesntExist() {
+        var audioPreview = audioPreviewService.getOrCreateAudioPreview(-1);
+
+        assertThat(audioPreview.getStatus()).isEqualTo(ENCODING).isNotNull();
+        waitForMax10SecondsWithOneSecondPoll(() -> {
+            var cachedAudioPreview = binaryDataRedisService.readFromRedis(folder, "-1");
+            return cachedAudioPreview.getStatus().equals(FAILED);
+        });
+    }
+
+    private MediaEntity givenSomeStoredMedia() {
+        var mediaEntity = dartsDatabase.addMediaToHearing(hearing, someMinimalMedia());
+        var externalObjectDirectory = minimalExternalObjectDirectory();
+        externalObjectDirectory.setMedia(mediaEntity);
+        dartsDatabase.save(externalObjectDirectory.getLastModifiedBy());
+        dartsDatabase.save(externalObjectDirectory.getCreatedBy());
+        dartsDatabase.save(externalObjectDirectory);
+        return mediaEntity;
+    }
+}

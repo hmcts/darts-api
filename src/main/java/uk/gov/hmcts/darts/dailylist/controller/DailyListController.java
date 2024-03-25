@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.dailylist.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.http.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
@@ -59,7 +61,6 @@ public class DailyListController implements DailyListsApi {
     ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
 
-    @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
@@ -74,7 +75,12 @@ public class DailyListController implements DailyListsApi {
 
         @RequestHeader(value = "json_string", required = true) String jsonString
     ) {
-        DailyListJsonObject jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
+        DailyListJsonObject jsonDocument;
+        try {
+            jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
+        } catch (JsonProcessingException e) {
+            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST);
+        }
 
         DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
         dailyListPatchRequest.setDailyListId(dalId);
@@ -84,7 +90,6 @@ public class DailyListController implements DailyListsApi {
 
     }
 
-    @SneakyThrows
     @Override
     @Operation(
         operationId = "dailylistsPost",
@@ -132,11 +137,15 @@ public class DailyListController implements DailyListsApi {
         @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the addDocument request.<p>" +
             "**Conditional mandatory** either this or xml_document needs to be provided, or both.",
             in = ParameterIn.HEADER) @RequestHeader(value = "json_string", required = false) String jsonString
-    ) {
+    )  {
         DailyListJsonObject jsonDocument = null;
         Optional<String> jsonDoc = Optional.ofNullable(jsonString);
         if (jsonDoc.isPresent()) {
-            jsonDocument = objectMapper.readValue(jsonDoc.get(), DailyListJsonObject.class);
+            try {
+                jsonDocument = objectMapper.readValue(jsonDoc.get(), DailyListJsonObject.class);
+            } catch (JsonProcessingException e) {
+                throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST);
+            }
         }
 
         DailyListPostRequest postRequest = new DailyListPostRequest();
