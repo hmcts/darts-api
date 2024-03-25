@@ -6,10 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -110,12 +110,12 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity);
     }
 
-    protected Optional<ExternalObjectDirectoryEntity> getUnstructuredExternalObjectDirectoryEntity(
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity, ObjectRecordStatusEntity status) {
+    protected Optional<ExternalObjectDirectoryEntity> getExternalObjectDirectoryEntity(
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity, ExternalLocationTypeEntity eodSourceLocation, ObjectRecordStatusEntity status) {
 
         return externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
             status,
-            externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
+            eodSourceLocation,
             externalObjectDirectoryEntity.getMedia(),
             externalObjectDirectoryEntity.getTranscriptionDocumentEntity(),
             externalObjectDirectoryEntity.getAnnotationDocumentEntity(),

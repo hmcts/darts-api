@@ -29,12 +29,11 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.common.util.EodEntities.equalsAny;
+import static uk.gov.hmcts.darts.common.util.EodEntities.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodEntities.isEqual;
 
 
@@ -75,7 +74,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     public void processUnstructuredToArm() {
 
         List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities = getArmExternalObjectDirectoryEntities(
-            armDataManagementConfiguration.getArmClient(), armDataManagementConfiguration.getBatchSize()
+            armDataManagementConfiguration.getBatchSize()
         );
 
         if (!allPendingUnstructuredToArmEntities.isEmpty()) {
@@ -92,7 +91,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     if (isEqual(currentEod.getExternalLocationType(), EodEntities.armLocation())) {
                         armEod = currentEod;
                         //FIXME this needs to be dynamic
-                        var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armEod, EodEntities.storedStatus());
+
+                        var matchingEntity = getExternalObjectDirectoryEntity(armEod, getEodSourceLocation(), EodEntities.storedStatus());
                         if (matchingEntity.isPresent()) {
                             batchItem.setArmEod(armEod);
                             batchItem.setUnstructuredEod(matchingEntity.get());
@@ -149,17 +149,20 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
     }
 
-    private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(String armClient, int batchSize) {
-
-        ExternalLocationTypeEntity sourceLocation;
+    private ExternalLocationTypeEntity getEodSourceLocation() {
+        var armClient = armDataManagementConfiguration.getArmClient();
         if (armClient.equalsIgnoreCase("darts")) {
-            sourceLocation = EodEntities.unstructuredLocation();
+            return EodEntities.unstructuredLocation();
         } else if (armClient.equalsIgnoreCase("dets")) {
-            sourceLocation = EodEntities.detsLocation();
+            return EodEntities.detsLocation();
         } else {
-            log.error("unknown arm client '{}'", armDataManagementConfiguration.getArmClient());
-            return Collections.emptyList();
+            throw new RuntimeException(String.format("Invalid arm client '%s'", armClient));
         }
+    }
+
+    private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(int batchSize) {
+
+        ExternalLocationTypeEntity sourceLocation = getEodSourceLocation();
 
         var result = new ArrayList<ExternalObjectDirectoryEntity>();
         result.addAll(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
@@ -188,7 +191,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     }
 
     private boolean shouldPushRawDataToArm(BatchItem batchItem) {
-        return equalsAny(batchItem.getPreviousStatus(), EodEntities.armIngestionStatus(), EodEntities.failedArmRawDataStatus());
+        return equalsAnyStatus(batchItem.getPreviousStatus(), EodEntities.armIngestionStatus(), EodEntities.failedArmRawDataStatus());
     }
 
     private void pushRawDataAndCreateArchiveRecordIfSuccess(BatchItem batchItem, String rawFilename) {
@@ -198,8 +201,11 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             batchItem.getArmEod(),
             rawFilename,
             batchItem.getPreviousStatus(),
-            //FIXME does this gets undone and set to successful at the end?
-            () -> updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus())
+            () -> {
+                batchItem.setRawFilePushSuccessful(false);
+                batchItem.undoManifestFileChange();
+                updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus());
+            }
         );
         if (copyRawDataToArmSuccessful) {
             batchItem.setRawFilePushSuccessful(true);
@@ -209,7 +215,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     }
 
     private boolean shouldAddEntryToManifestFile(BatchItem batchItem) {
-        return equalsAny(batchItem.getPreviousStatus(), EodEntities.failedArmManifestFileStatus(), EodEntities.failedArmResponseManifestFileStatus());
+        return equalsAnyStatus(batchItem.getPreviousStatus(), EodEntities.failedArmManifestFileStatus(), EodEntities.failedArmResponseManifestFileStatus());
     }
 
     private void writeManifestFile(BatchItems batchItems, File archiveRecordsFile) {

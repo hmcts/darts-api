@@ -79,7 +79,7 @@ public class EodEntities {
         return olt1.getId().equals(olt2.getId());
     }
 
-    public static boolean equalsAny(ObjectRecordStatusEntity ors, ObjectRecordStatusEntity... orsEntitiesToCompareTo) {
+    public static boolean equalsAnyStatus(ObjectRecordStatusEntity ors, ObjectRecordStatusEntity... orsEntitiesToCompareTo) {
         return Arrays.stream(orsEntitiesToCompareTo).map(ObjectRecordStatusEntity::getId).anyMatch(orsToCompareTo -> orsToCompareTo.equals(ors.getId()));
     }
 
