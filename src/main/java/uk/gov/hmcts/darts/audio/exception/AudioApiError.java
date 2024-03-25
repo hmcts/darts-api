@@ -13,7 +13,7 @@ public enum AudioApiError implements DartsApiError {
 
     FAILED_TO_PROCESS_AUDIO_REQUEST(
         AddAudioErrorCode.FAILED_TO_PROCESS_AUDIO_REQUEST.getValue(),
-        null,
+        HttpStatus.INTERNAL_SERVER_ERROR,
         AddAudioTitleErrors.FAILED_TO_PROCESS_AUDIO_REQUEST.toString()
     ),
     REQUESTED_DATA_CANNOT_BE_LOCATED(

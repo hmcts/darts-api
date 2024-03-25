@@ -406,10 +406,24 @@ public class DartsDatabaseStub {
         return completedMediaRequest;
     }
 
+    @Transactional
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
-        mediaRepository.save(mediaEntity);
         hearing.addMedia(mediaEntity);
-        hearingRepository.save(hearing);
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
+        courtroomRepository.saveAndFlush(hearing.getCourtroom());
+        mediaRepository.saveAndFlush(mediaEntity);
+        hearingRepository.saveAndFlush(hearing);
+        return mediaEntity;
+    }
+
+    public MediaEntity addMediaToHearingNonTransactional(HearingEntity hearing, MediaEntity mediaEntity) {
+        hearing.addMedia(mediaEntity);
+        mediaEntity.setCourtroom(hearing.getCourtroom());
+        mediaRepository.saveAndFlush(mediaEntity);
+        courthouseRepository.saveAndFlush(hearing.getCourtroom().getCourthouse());
+        courtroomRepository.saveAndFlush(hearing.getCourtroom());
+        hearingRepository.saveAndFlush(hearing);
         return mediaEntity;
     }
 
