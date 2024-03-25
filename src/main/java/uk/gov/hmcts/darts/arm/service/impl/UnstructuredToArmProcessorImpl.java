@@ -90,7 +90,10 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                 if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(armLocation.getId())) {
                     armExternalObjectDirectory = currentExternalObjectDirectory;
                     previousStatus = armExternalObjectDirectory.getStatus();
-                    var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory, storedStatus);
+                    var matchingEntity = getExternalObjectDirectoryEntity(
+                        armExternalObjectDirectory,
+                        externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
+                        storedStatus);
                     if (matchingEntity.isPresent()) {
                         unstructuredExternalObjectDirectory = matchingEntity.get();
                     } else {

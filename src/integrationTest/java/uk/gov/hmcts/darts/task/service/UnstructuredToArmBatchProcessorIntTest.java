@@ -54,6 +54,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.util.EodEntities.armDropZoneStatus;
 import static uk.gov.hmcts.darts.common.util.EodEntities.armLocation;
 import static uk.gov.hmcts.darts.common.util.EodEntities.failedArmManifestFileStatus;
+import static uk.gov.hmcts.darts.common.util.EodEntities.failedArmRawDataStatus;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -253,6 +254,36 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(lines(generatedManifestFilePath).count()).isEqualTo(1);
         assertThat(readString(generatedManifestFilePath)).contains(format("_%d_", medias.get(1).getId()));
         assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(0).getId()));
+    }
+
+    //TODO add test with a mixture of scenarios alltogether?
+
+    @Test
+    void pushRawDataFails() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> {
+            eod.setManifestFile("existingManifestFile");
+            eod.setTransferAttempts(2);
+        });
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
+
+        doThrow(RuntimeException.class).when(armDataManagementApi).saveBlobDataToArm(matches(".+_.+_2"), any());
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        List<ExternalObjectDirectoryEntity> failedArmEods = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmRawDataStatus(), armLocation());
+        assertThat(failedArmEods).hasSize(1);
+        List<ExternalObjectDirectoryEntity> ingestedArmEods = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        assertThat(ingestedArmEods).hasSize(1);
+        var failedEod = failedArmEods.get(0);
+        assertThat(failedEod.getTransferAttempts()).isEqualTo(3);
+        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
     }
 
     @Test
