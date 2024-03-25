@@ -143,13 +143,7 @@ public class ArmServiceImpl implements ArmService {
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
-        /*blobContainerClient.listBlobs(options, timeout).forEach(withCounter((i, blob) -> {
-            String blobName = blob.getName();
-            files.add(blobName);
-            log.info("{} Found blob {}", (i + 1), blobName);
-        }));*/
         int index = 0;
-        //Iterable<PagedResponse<BlobItem>> blobPages = blobContainerClient.listBlobs(options, timeout).iterableByPage();
         Iterable<PagedResponse<BlobItem>> blobPages = blobContainerClient.listBlobs(options, timeout).iterableByPage();
         for (PagedResponse<BlobItem> page : blobPages) {
             log.debug("Page {}", ++index);
