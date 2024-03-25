@@ -7,10 +7,15 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
@@ -60,8 +65,17 @@ class CourthouseServiceImplTest {
     @Mock
     CourthouseUpdateMapper courthouseUpdateMapper;
 
+    @Mock
+    AuthorisationApi authorisationApi;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     @Captor
     ArgumentCaptor<Integer> captorInteger;
+
+    @Autowired
+    private SecurityGroupRepository securityGroupRepository;
 
     @Test
     void testGetCourtHouseByIdTest() {
@@ -82,18 +96,23 @@ class CourthouseServiceImplTest {
         CourthouseEntity courthouseEntity = new CourthouseEntity();
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
+        courthouseEntity.setId(1);
 
         CourthouseEntity courthouseEntity2 = new CourthouseEntity();
         courthouseEntity2.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity2.setCode(CODE);
+        courthouseEntity2.setId(2);
+
+        List<Integer> courthouseIds = List.of(courthouseEntity.getId(), courthouseEntity2.getId());
+        when(authorisationApi.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(courthouseIds);
 
         List<CourthouseEntity> courthouseList = Arrays.asList(courthouseEntity, courthouseEntity2);
-        when(courthouseRepository.findAll()).thenReturn(courthouseList);
-
+        when(courthouseRepository.findByIdIn(courthouseIds)).thenReturn(courthouseList);
 
         List<CourthouseEntity> returnedEntities = courthouseService.getAllCourthouses();
         assertEquals(2, returnedEntities.size());
     }
+
 
     @Test
     void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
@@ -179,4 +198,5 @@ class CourthouseServiceImplTest {
     private CourthouseEntity someCourthouse() {
         return new CourthouseEntity();
     }
+
 }

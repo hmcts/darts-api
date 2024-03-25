@@ -182,9 +182,11 @@ function:
           alias: ARM_PASSWORD
   environment:
     ATS_MODE: true
+    API_MODE: false
+    AUTOMATED_TASK_MODE: false
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
-    DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
+    DARTS_GATEWAY_URL: http://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     ARM_PROPERTY_FILE_ENVIRONMENT: nle
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com

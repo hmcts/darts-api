@@ -32,10 +32,12 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_EMPTY_FILE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.getBinaryTranscriptionDocumentData;
+import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.getEmptyFile;
 
 class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
 
@@ -243,6 +245,27 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
 
         // then
         assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media, FAILURE_CHECKSUM_FAILED, UNSTRUCTURED)).hasSize(1);
+        var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
+        verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
+    }
+
+    @Test
+    void processInboundMediasFailedAsEmptyFile() {
+        // given
+        MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("testCourthouse", "testCourtroom",
+               OffsetDateTime.parse("2023-01-01T12:00:00Z"), OffsetDateTime.parse("2023-01-01T12:00:00Z"), 1);
+        media.setChecksum("1B2M2Y8AsgTpgAmY7PhCfg==");
+        media.setFileSize(0L);
+        dartsDatabase.save(media);
+        externalObjectDirectoryStub.createAndSaveEod(media, STORED, INBOUND);
+
+        when(dataManagementService.getBlobData(any(), any())).thenReturn(getEmptyFile());
+
+        // when
+        inboundToUnstructuredProcessor.processInboundToUnstructured();
+
+        // then
+        assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media, FAILURE_EMPTY_FILE, UNSTRUCTURED)).hasSize(1);
         var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
         verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
     }
