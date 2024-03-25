@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
@@ -141,16 +143,28 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
-            var isCopySuccessful = copyMetadataToArm(
-                archiveRecordFileInfo.getArchiveRecordFile(),
-                () -> updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus)
-            );
-            return isCopySuccessful;
+            try {
+                BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(archiveRecordFile.getAbsolutePath());
+                armDataManagementApi.saveBlobDataToArm(archiveRecordFileInfo.getArchiveRecordFile().getName(), metadataFileBinary);
+            } catch (BlobStorageException e) {
+                if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                    log.info("Metadata BLOB already exists {}", e.getMessage());
+                } else {
+                    log.error("Failed to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
+                    updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus);
+                    return false;
+                }
+            } catch (Exception e) {
+                log.error("Unable to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
+                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus);
+                return false;
+            }
         } else {
             log.error("Failed to generate metadata file {}", archiveRecordFile.getAbsolutePath());
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, failedArmManifestFileStatus);
             return false;
         }
+        return true;
     }
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,

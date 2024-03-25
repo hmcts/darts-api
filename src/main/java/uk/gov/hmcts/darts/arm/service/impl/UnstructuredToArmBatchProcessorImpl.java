@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +91,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     ExternalObjectDirectoryEntity armEod;
                     if (isEqual(currentEod.getExternalLocationType(), EodEntities.armLocation())) {
                         armEod = currentEod;
+                        //FIXME this needs to be dynamic
                         var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armEod, EodEntities.storedStatus());
                         if (matchingEntity.isPresent()) {
                             batchItem.setArmEod(armEod);
@@ -97,9 +100,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             armEod.setManifestFile(archiveRecordsFile.getName());
                             updateExternalObjectDirectoryStatus(armEod, EodEntities.armIngestionStatus());
                         } else {
-                            //TODO ask Hemanta if it's ok to keep current failed status here
-                            //TODO ask Hemanta do we need to add ARM_RESPONSE_MANIFEST_FILE to the batch query?
-                            //TODO ask Hemanta if all generation of archive records fail or there's no archive record so there's no entry then no manifest file is pushed or push and empty one?
                             log.error("Unable to find matching external object directory for {}", armEod.getId());
                             updateExternalObjectDirectoryFailedTransferAttempts(armEod);
                             continue;
@@ -118,34 +118,30 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                         pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename);
                     } else if (shouldAddEntryToManifestFile(batchItem)) {
                         var archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
-                        //TODO if the above is null, which state we put on the arm eod? manifest file failed?
                         //TODO check why archive record is missing some data
                         batchItem.setArchiveRecord(archiveRecord);
                     }
                 } catch (Exception e) {
                     log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
-                    if (batchItem.getArmEod() != null) {
-                        batchItem.undoManifestFileChange();
-                        //FIXME what would be the status if the code fails before the push is even attempted? should not be failedArmRawDataStatus
-                        if (!batchItem.isRawFilePushSuccessfulWhenAttempted()) {
-                            updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus());
-                        } else {
-                            updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmManifestFileStatus());
-                        }
-                    }
+                    recoverByUpdatingEodToFailedArmStatus(batchItem);
                 }
             }
 
-            //TODO carry on here only if batch items has at least one archive record
-
-            //TODO add try catch this can fail too
-            if (!batchItems.getSuccessful().isEmpty()) {
-                writeManifestFile(batchItems, archiveRecordsFile);
-                pushManifestFileToArm(archiveRecordsFile, batchItems);
+            try {
+                if (!batchItems.getSuccessful().isEmpty()) {
+                    //TODO confirm with Hemanta if ARM_MANIFEST_FAILED is an ok status in case of an error here
+                    writeManifestFile(batchItems, archiveRecordsFile);
+                    copyMetadataToArm(archiveRecordsFile);
+                }
+            } catch (Exception e) {
+                log.error("Error during generation of batch manifest file {}", archiveRecordsFile.getName(), e);
+                batchItems.getSuccessful().forEach(this::recoverByUpdatingEodToFailedArmStatus);
+                return;
             }
 
             for (var batchItem : batchItems.getSuccessful()) {
                 //TODO handle potential error
+                //TODO set the manifest file here rather than before and then having to undo it?
                 updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodEntities.armDropZoneStatus());
             }
 
@@ -202,6 +198,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             batchItem.getArmEod(),
             rawFilename,
             batchItem.getPreviousStatus(),
+            //FIXME does this gets undone and set to successful at the end?
             () -> updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus())
         );
         if (copyRawDataToArmSuccessful) {
@@ -219,18 +216,38 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         archiveRecordFileGenerator.generateArchiveRecords(batchItems.getArchiveRecords(), archiveRecordsFile);
     }
 
-    private void pushManifestFileToArm(File archiveRecordsFile, BatchItems batchItems) {
-        copyMetadataToArm(
-            archiveRecordsFile,
-            () -> {
-                for (var batchItem : batchItems.getSuccessful()) {
-                    batchItem.undoManifestFileChange();
-                    updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmManifestFileStatus());
-                }
+    protected void copyMetadataToArm(File manifestFile) {
+        try {
+            BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
+            armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
+        } catch (BlobStorageException e) {
+            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                log.info("Metadata BLOB already exists", e);
+            } else {
+                log.error("Failed to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
+                throw e;
             }
-        );
+        } catch (Exception e) {
+            log.error("Unable to move BLOB metadata for file {}", manifestFile.getAbsolutePath(), e);
+            throw e;
+        }
     }
 
+    private void recoverByUpdatingEodToFailedArmStatus(BatchItem batchItem) {
+        if (batchItem.getArmEod() != null) {
+            batchItem.undoManifestFileChange();
+            //TODO ask Hemanta: what would be the status if the code fails before the push is even attempted? should not be failedArmRawDataStatus
+            if (!batchItem.isRawFilePushSuccessfulWhenAttempted()) {
+                updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus());
+            } else {
+                updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmManifestFileStatus());
+            }
+        }
+    }
+
+    /**
+     * Contains info related to the processing of a batch item
+     */
     @Data
     static class BatchItem {
 

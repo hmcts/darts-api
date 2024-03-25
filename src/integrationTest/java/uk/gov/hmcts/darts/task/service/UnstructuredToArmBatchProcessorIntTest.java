@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -255,7 +256,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void generationOfManifestFileEntriesFails() {
+    void generationOfManifestFileEntryFails() {
 
         //given
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
@@ -279,6 +280,58 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
 
         verify(armDataManagementApi, never()).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+    }
+
+    @Test
+    void writingManifestFileFails() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+
+        doThrow(RuntimeException.class).when(archiveRecordFileGenerator).generateArchiveRecords(any(), any());
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEodsMedia0).hasSize(1);
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEodsMedia1).hasSize(1);
+        var failedEod = failedArmEodsMedia0.get(0);
+        assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
+        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
+
+        verify(armDataManagementApi, never()).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+    }
+
+    @Test
+    void pushingManifestFileFails() {
+
+        //given
+        List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(0), ARM_RAW_DATA_FAILED, ARM, eod -> eod.setManifestFile("existingManifestFile"));
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
+        externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_MANIFEST_FAILED, ARM);
+
+        doThrow(RuntimeException.class).when(armDataManagementApi).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
+
+        //when
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        //then
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEodsMedia0).hasSize(1);
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), failedArmManifestFileStatus(), armLocation());
+        assertThat(failedArmEodsMedia1).hasSize(1);
+        var failedEod = failedArmEodsMedia0.get(0);
+        assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
+        assertThat(failedEod.getManifestFile()).isEqualTo("existingManifestFile");
     }
 
 }

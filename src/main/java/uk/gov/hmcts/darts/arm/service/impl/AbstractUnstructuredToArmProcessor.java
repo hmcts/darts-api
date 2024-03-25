@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
-import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -202,24 +201,4 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         return true;
     }
 
-    protected boolean copyMetadataToArm(File manifestFile, Runnable recoveryAction) {
-        boolean isSuccessful = true;
-        try {
-            BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(manifestFile.getAbsolutePath());
-            armDataManagementApi.saveBlobDataToArm(manifestFile.getName(), metadataFileBinary);
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("Metadata BLOB already exists {}", e.getMessage());
-            } else {
-                log.error("Failed to move BLOB metadata for file {} due to {}", manifestFile.getAbsolutePath(), e.getMessage());
-                recoveryAction.run();
-                isSuccessful = false;
-            }
-        } catch (Exception e) {
-            log.error("Unable to move BLOB metadata for file {} due to {}", manifestFile.getAbsolutePath(), e.getMessage());
-            recoveryAction.run();
-            isSuccessful = false;
-        }
-        return isSuccessful;
-    }
 }
