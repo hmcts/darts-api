@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
+import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -160,6 +161,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         } else {
             openRequests.ifPresent(openMediaRequests -> processAudioRequest(openMediaRequests.getId()));
         }
+
+        UnstructuredDataHelper.waitForAllJobsToFinish();
     }
 
     /**
