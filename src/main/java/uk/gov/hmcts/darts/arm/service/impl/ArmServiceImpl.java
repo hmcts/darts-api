@@ -7,6 +7,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobListDetails;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.extern.slf4j.Slf4j;
@@ -184,10 +185,11 @@ public class ArmServiceImpl implements ArmService {
                                                        String blobPathAndName,
                                                        Integer batchSize,
                                                        String continuationToken) {
-        log.debug("About to list files for {}", blobPathAndName);
+        log.debug("About to list files for {} with continuationToken {}", blobPathAndName, continuationToken);
         ListBlobsOptions options = new ListBlobsOptions()
             .setPrefix(blobPathAndName)
-            .setMaxResultsPerPage(batchSize);
+            .setMaxResultsPerPage(batchSize)
+            .setDetails(new BlobListDetails().setRetrieveDeletedBlobs(false));
 
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder().build();
         try {
