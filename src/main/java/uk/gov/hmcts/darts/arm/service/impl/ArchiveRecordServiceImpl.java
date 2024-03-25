@@ -172,6 +172,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
             () -> new NoSuchElementException(format("external object directory not found with id: %d", externalObjectDirectoryId)));
+
         ArchiveRecord result;
 
         if (nonNull(externalObjectDirectory.getMedia())) {
@@ -183,8 +184,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
             result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
         } else {
-            //TODO
-            throw new RuntimeException("");
+            throw new RuntimeException(String.format("unknown archive record type for EOD %d", externalObjectDirectoryId));
         }
 
         if (result == null) {
