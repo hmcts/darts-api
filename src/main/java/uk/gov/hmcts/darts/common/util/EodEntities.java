@@ -62,7 +62,6 @@ public class EodEntities {
         armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).get();
         detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).get();
 
-        //TODO make these getReference?
         storedStatus = orsRepository.findById(STORED.getId()).get();
         failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).get();
         failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).get();
@@ -70,7 +69,7 @@ public class EodEntities {
         armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).get();
         armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).get();
 
-        failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus);
+        failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
     }
 
     public static boolean isEqual(ObjectRecordStatusEntity ors1, ObjectRecordStatusEntity ors2) {
