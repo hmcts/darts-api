@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.time.OffsetDateTime;
 
+import static java.time.OffsetDateTime.now;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
@@ -22,15 +23,24 @@ public class MediaTestData {
     }
 
     public static MediaEntity someMinimalMedia() {
-        return new MediaEntity();
+        var media = new MediaEntity();
+        media.setChannel(1);
+        media.setTotalChannels(1);
+        media.setStart(now());
+        media.setEnd(now());
+        media.setMediaFile("a-media-file");
+        media.setFileSize(1000L);
+        media.setMediaFormat("mp2");
+        media.setMediaType(MEDIA_TYPE_DEFAULT);
+        return media;
     }
 
     public static MediaEntity createMediaFor(CourtroomEntity courtroomEntity) {
         MediaEntity media = new MediaEntity();
         media.setChannel(1);
         media.setTotalChannels(2);
-        media.setStart(OffsetDateTime.now());
-        media.setEnd(OffsetDateTime.now());
+        media.setStart(now());
+        media.setEnd(now());
         media.setCourtroom(courtroomEntity);
         media.setMediaFile("a-media-file");
         media.setChecksum(getChecksum());

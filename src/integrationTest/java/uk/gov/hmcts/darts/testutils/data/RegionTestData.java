@@ -9,7 +9,6 @@ public class RegionTestData {
 
     private static final Random RANDOM = new Random();
 
-
     public static RegionEntity minimalRegion() {
         var postfix = RANDOM.nextInt(1000, 9999);
         var regionEntity = new RegionEntity();

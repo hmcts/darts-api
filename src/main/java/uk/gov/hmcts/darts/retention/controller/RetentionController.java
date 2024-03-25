@@ -56,6 +56,16 @@ public class RetentionController implements RetentionApi {
     }
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(
+        contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<GetRetentionPolicy> adminRetentionPolicyTypesIdGet(Integer id) {
+
+        return new ResponseEntity<>(retentionService.getRetentionPolicyType(id), HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID, bodyAuthorisation = true,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
         globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})

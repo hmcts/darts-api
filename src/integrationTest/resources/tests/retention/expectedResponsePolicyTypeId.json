@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "name": "DARTS Permanent Retention v3",
+  "display_name": "Legacy Permanent",
+  "description": "DARTS Permanent retention policy",
+  "fixed_policy_key": "-1",
+  "duration": "30Y0M0D",
+  "policy_start_at": "2024-01-01T00:00:00Z"
+}

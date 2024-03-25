@@ -440,6 +440,7 @@ INSERT INTO object_record_status (ors_id, ors_description) VALUES (16, 'Arm Proc
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (17, 'Arm Response Process Failed');
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (18, 'Arm Response Checksum Verification Failed');
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (19, 'Arm Response Manifest Failed');
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (20, 'Empty File Failed');
 
 INSERT INTO security_permission (per_id, permission_name) VALUES (1, 'ACCEPT_TRANSCRIPTION_JOB_REQUEST');
 INSERT INTO security_permission (per_id, permission_name) VALUES (2, 'APPROVE_REJECT_TRANSCRIPTION_REQUEST');

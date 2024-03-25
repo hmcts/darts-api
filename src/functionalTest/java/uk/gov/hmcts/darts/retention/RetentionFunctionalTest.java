@@ -13,6 +13,9 @@ class RetentionFunctionalTest extends FunctionalTest {
     public static final String CASE_RETENTION_URI = "/retentions";
 
     public static final String RETENTION_POLICY_TYPES = "/admin/retention-policy-types";
+
+    public static final String RETENTION_POLICY_TYPE_BY_ID = "/admin/retention-policy-types/1";
+
     public static final int OK = 200;
 
     @AfterEach
@@ -57,5 +60,23 @@ class RetentionFunctionalTest extends FunctionalTest {
 
         String retentionPolicyApplied = response.jsonPath().getString("[0].name");
         assertEquals("DARTS Permanent Retention v3", retentionPolicyApplied);
+    }
+
+    @Test
+    void testGetRetentionPolicyTypeById() {
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .when()
+            .baseUri(getUri(RETENTION_POLICY_TYPE_BY_ID))
+            .get()
+            .then()
+            .assertThat()
+            .statusCode(OK)
+            .extract().response();
+
+        assertEquals(200, response.getStatusCode());
+
+        String retentionPolicyApplied = response.jsonPath().getString("id");
+        assertEquals("1", retentionPolicyApplied);
     }
 }
