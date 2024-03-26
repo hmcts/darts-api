@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Component
 @Getter
 @Accessors(fluent = true)
-public class EodEntities {
+public class EodHelper {
 
     private final ExternalObjectDirectoryRepository eodRepository;
     private final ExternalLocationTypeRepository eltRepository;
@@ -51,9 +51,9 @@ public class EodEntities {
     @Getter
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
 
-    public EodEntities(ExternalObjectDirectoryRepository eodRepository,
-                       ExternalLocationTypeRepository eltRepository,
-                       ObjectRecordStatusRepository orsRepository) {
+    public EodHelper(ExternalObjectDirectoryRepository eodRepository,
+                     ExternalLocationTypeRepository eltRepository,
+                     ObjectRecordStatusRepository orsRepository) {
         this.eodRepository = eodRepository;
         this.eltRepository = eltRepository;
         this.orsRepository = orsRepository;
@@ -75,6 +75,7 @@ public class EodEntities {
     public static boolean isEqual(ObjectRecordStatusEntity ors1, ObjectRecordStatusEntity ors2) {
         return ors1.getId().equals(ors2.getId());
     }
+
     public static boolean isEqual(ExternalLocationTypeEntity olt1, ExternalLocationTypeEntity olt2) {
         return olt1.getId().equals(olt2.getId());
     }

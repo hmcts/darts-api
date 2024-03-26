@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.util.EodEntities;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.util.List;
 
@@ -18,11 +18,11 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     private final ExternalObjectDirectoryRepository eodRepository;
     private final ArmDataManagementConfiguration armConfig;
 
-    public List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEODs(Pageable pageable) {
+    public List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable) {
 
         return eodRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            EodEntities.failedArmStatuses(),
-            EodEntities.armLocation(),
+            EodHelper.failedArmStatuses(),
+            EodHelper.armLocation(),
             armConfig.getMaxRetryAttempts(),
             pageable
         );
