@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.usermanagement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONArray;
@@ -220,7 +221,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
             .get()
             .thenReturn();
 
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
                                                                                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
     }

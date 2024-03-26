@@ -1,8 +1,5 @@
 package uk.gov.hmcts.darts;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -10,7 +7,6 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,18 +57,11 @@ public class FunctionalTest {
     @Value("${deployed-application-uri}")
     private URI baseUri;
 
-    public static final ObjectMapper MAPPER = new ObjectMapper();
-
     @BeforeEach
     void setUp() {
         configureRestAssured();
     }
 
-    @BeforeAll
-    static void beforeAll() {
-        MAPPER.registerModule(new JavaTimeModule());
-        MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
 
     @SneakyThrows
     public String getUri(String endpoint) {
