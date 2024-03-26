@@ -179,8 +179,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(failedArmEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
     }
 
-    //TODO add tests for transcript, etc...?
-
     @Test
     void movePreviousArmFailedFromUnstructuredToArmStorage() throws IOException {
 
