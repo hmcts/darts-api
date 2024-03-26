@@ -3,12 +3,12 @@ appVersion: "1.0"
 description: A Helm chart for darts-api App
 name: darts-api
 home: https://github.com/hmcts/darts-api
-version: 0.0.68
+version: 0.0.69
 maintainers:
   - name: HMCTS darts team
 dependencies:
   - name: java
-    version: 5.0.4
+    version: 5.2.0
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
   - name: function
     version: 2.5.1
