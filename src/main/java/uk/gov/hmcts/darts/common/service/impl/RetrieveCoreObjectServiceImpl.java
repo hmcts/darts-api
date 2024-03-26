@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private final DefendantRepository defendantRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final AuthorisationApi authorisationApi;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
@@ -59,7 +62,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
             caseNumber,
             hearingDate
         );
-        return foundHearing.orElseGet(() -> createHearing(
+
+        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount)).orElseGet(()  -> createHearing(
             courthouseName,
             courtroomName,
             caseNumber,
@@ -69,9 +73,10 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount) {
-        CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
-        CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
+        final CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        final CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
         HearingEntity hearing = new HearingEntity();
+
         hearing.setCourtCase(courtCase);
         hearing.setCourtroom(courtroom);
         hearing.setHearingDate(hearingDate);
@@ -79,7 +84,11 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         hearing.setHearingIsActual(false);
         hearing.setCreatedBy(userAccount);
         hearing.setLastModifiedBy(userAccount);
+        hearing.setCreatedDateTime(OffsetDateTime.now());
+        hearing.setLastModifiedDateTime(OffsetDateTime.now());
+
         hearingRepository.saveAndFlush(hearing);
+
         return hearing;
     }
 
@@ -127,10 +136,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
             caseNumber,
             courthouseName
         );
-        return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
+
+        return foundCase.map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
+            .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
+
     }
 
     private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
+
+        final OffsetDateTime now = OffsetDateTime.now();
+
         CourthouseEntity foundCourthouse = retrieveCourthouse(courthouseName);
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
@@ -139,8 +154,32 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         courtCase.setInterpreterUsed(false);
         courtCase.setCreatedBy(userAccount);
         courtCase.setLastModifiedBy(userAccount);
+        courtCase.setLastModifiedDateTime(now);
+        courtCase.setCreatedDateTime(now);
+        courtCase.setCreatedBy(userAccount);
+        courtCase.setLastModifiedBy(userAccount);
         caseRepository.saveAndFlush(courtCase);
         return courtCase;
+    }
+
+    private CourtCaseEntity setCourtCaseLastDateModifiedBy(final CourtCaseEntity courtCaseEntity, final UserAccountEntity userAccountEntity) {
+
+        courtCaseEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        courtCaseEntity.setLastModifiedBy(userAccountEntity);
+
+        caseRepository.saveAndFlush(courtCaseEntity);
+
+        return courtCaseEntity;
+    }
+
+    private HearingEntity setHearingLastDateModifiedBy(final HearingEntity hearingEntity, final UserAccountEntity userAccountEntity) {
+
+        hearingEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        hearingEntity.setLastModifiedBy(userAccountEntity);
+
+        hearingRepository.saveAndFlush(hearingEntity);
+
+        return hearingEntity;
     }
 
     @Override

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
@@ -17,13 +18,17 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createOffsetDateTime;
 
 @ExtendWith(MockitoExtension.class)
 class RetrieveCoreObjectServiceImplTest {
@@ -31,6 +36,7 @@ class RetrieveCoreObjectServiceImplTest {
     private static final String COURTHOUSE_1 = "courthouse1";
     private static final String COURTROOM_1 = "courtroom1";
     private static final String CASE_NUMBER_1 = "caseNumber1";
+    private static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 3, 25, 10, 0, 0, 0, ZoneOffset.UTC);
     @Mock
     HearingRepository hearingRepository;
 
@@ -46,6 +52,9 @@ class RetrieveCoreObjectServiceImplTest {
     @Mock
     AuthorisationApi authorisationApi;
 
+    @Mock
+    CurrentTimeHelper currentTimeHelper;
+
     @InjectMocks
     RetrieveCoreObjectServiceImpl retrieveCoreObjectServiceImpl;
 
@@ -53,6 +62,8 @@ class RetrieveCoreObjectServiceImplTest {
     void hearingExists() {
         HearingEntity hearingToBeFound = new HearingEntity();
         hearingToBeFound.setId(123);
+        hearingToBeFound.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
+
         when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
             Optional.of(hearingToBeFound));
 
@@ -64,6 +75,8 @@ class RetrieveCoreObjectServiceImplTest {
         );
 
         assertEquals(123, response.getId());
+        assertEquals(createOffsetDateTime("2024-03-25T10:00:00"), response.getCreatedDateTime());
+        assertTrue(response.getLastModifiedDateTime().isAfter(createOffsetDateTime("2024-03-25T10:00:00")));
     }
 
     @Test
@@ -82,8 +95,10 @@ class RetrieveCoreObjectServiceImplTest {
         assertEquals(COURTROOM_1, response.getCourtroom().getName());
         assertEquals(1, response.getCourtroom().getCourthouse().getId());
         assertEquals(CASE_NUMBER_1, response.getCourtCase().getCaseNumber());
-        assertEquals(response.getCreatedBy(), authorisationApi.getCurrentUser());
-        assertEquals(response.getLastModifiedBy(), authorisationApi.getCurrentUser());
+        assertEquals(authorisationApi.getCurrentUser(), response.getCreatedBy());
+        assertEquals(authorisationApi.getCurrentUser(), response.getLastModifiedBy());
+        assertTrue(response.getCreatedDateTime().isAfter(FIXED_DATETIME));
+        assertTrue(response.getLastModifiedDateTime().isAfter(FIXED_DATETIME));
     }
 
     @Test
