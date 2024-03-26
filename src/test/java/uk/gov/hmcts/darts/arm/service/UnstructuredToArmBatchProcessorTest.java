@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.arm.service;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,16 +75,11 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     File manifestFile;
 
-    private static EodHelperMocks eodHelperMocks;
-
-    @BeforeAll
-    static void setup() {
-        eodHelperMocks = new EodHelperMocks();
-    }
+    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
     @AfterAll
-    public static void close() {
-        eodHelperMocks.close();
+    static void close() {
+        EOD_HELPER_MOCKS.close();
     }
 
     @BeforeEach
@@ -118,7 +112,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
         doReturn(EodHelper.armLocation()).when(eod1).getExternalLocationType();
-        eodHelperMocks.givenIsEqualLocationReturns(true);
+        EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm();
@@ -148,7 +142,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
         doReturn(EodHelper.armLocation()).when(eod1).getExternalLocationType();
-        eodHelperMocks.givenIsEqualLocationReturns(true);
+        EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm();
