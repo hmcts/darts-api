@@ -50,18 +50,6 @@ public class EodEntitiesMock {
         mockedEodEntities.when(EodEntities::failedArmManifestFileStatus).thenReturn(failedArmManifestFileStatus);
         mockedEodEntities.when(EodEntities::armDropZoneStatus).thenReturn(armDropZoneStatus);
 
-
-//        when(EodEntities.armLocation()).thenReturn(armLocation);
-//
-//        when(EodEntities.unstructuredLocation()).thenReturn(unstructuredLocation);
-//        when(EodEntities.armLocation()).thenReturn(armLocation);
-//
-//        when(EodEntities.storedStatus()).thenReturn(storedStatus);
-//        when(EodEntities.armIngestionStatus()).thenReturn(armIngestionStatus);
-//        when(EodEntities.failedArmRawDataStatus()).thenReturn(failedArmRawDataStatus);
-//        when(EodEntities.failedArmManifestFileStatus()).thenReturn(failedArmManifestFileStatus);
-//        when(EodEntities.armDropZoneStatus()).thenReturn(armDropZoneStatus);
-
         when(armLocation.getId()).thenReturn(ExternalLocationTypeEnum.ARM.getId());
         when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
 
@@ -73,7 +61,6 @@ public class EodEntitiesMock {
 
         when(eodUnstructured.getExternalLocationType()).thenReturn(unstructuredLocation);
         when(eodArm.getExternalLocationType()).thenReturn(armLocation);
-
     }
 
     public void givenIsEqualLocationReturns(boolean result) {
