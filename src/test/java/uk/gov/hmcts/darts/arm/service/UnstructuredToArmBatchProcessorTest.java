@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -171,7 +172,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
 
         //then
-        Assertions.assertThrows(RuntimeException.class, () -> unstructuredToArmProcessor.processUnstructuredToArm());
+        Assertions.assertThrows(DartsException.class, () -> unstructuredToArmProcessor.processUnstructuredToArm());
     }
 
     @Test

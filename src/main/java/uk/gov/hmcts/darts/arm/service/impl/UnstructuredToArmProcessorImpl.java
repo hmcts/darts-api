@@ -36,10 +36,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @ConditionalOnExpression("${darts.storage.arm.batch-size} == 0")
 public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmProcessor {
 
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private final ArchiveRecordService archiveRecordService;
@@ -62,10 +58,6 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                                           ArchiveRecordService archiveRecordService) {
         super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi,
               armDataManagementApi, fileOperationService);
-        this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
-        this.objectRecordStatusRepository = objectRecordStatusRepository;
-        this.externalLocationTypeRepository = externalLocationTypeRepository;
-        this.userIdentity = userIdentity;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.archiveRecordService = archiveRecordService;
     }

@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.arm.model.record.operation.CaseCreateArchiveRecordOper
 import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -174,7 +175,7 @@ class ArchiveRecordFileGeneratorImplTest {
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
 
-        assertThrows(RuntimeException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile));
+        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile));
     }
 
     @Test
@@ -186,7 +187,7 @@ class ArchiveRecordFileGeneratorImplTest {
         var archiveRecord = createMediaArchiveRecord(relationId);
         List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
 
-        assertThrows(RuntimeException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, invalidFile));
+        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, invalidFile));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {
