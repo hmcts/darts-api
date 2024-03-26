@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.common.util.EodEntities;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -35,20 +35,20 @@ public class EodEntitiesMock {
     @Mock(lenient = true)
     private ExternalObjectDirectoryEntity eodArm;
 
-    private MockedStatic<EodEntities> mockedEodEntities;
+    private MockedStatic<EodHelper> mockedEodEntities;
 
     public void givenEodEntitiesAreMocked() {
         MockitoAnnotations.initMocks(this);
 
-        mockedEodEntities = Mockito.mockStatic(EodEntities.class);
-        mockedEodEntities.when(EodEntities::armLocation).thenReturn(armLocation);
-        mockedEodEntities.when(EodEntities::unstructuredLocation).thenReturn(unstructuredLocation);
+        mockedEodEntities = Mockito.mockStatic(EodHelper.class);
+        mockedEodEntities.when(EodHelper::armLocation).thenReturn(armLocation);
+        mockedEodEntities.when(EodHelper::unstructuredLocation).thenReturn(unstructuredLocation);
 
-        mockedEodEntities.when(EodEntities::storedStatus).thenReturn(storedStatus);
-        mockedEodEntities.when(EodEntities::armIngestionStatus).thenReturn(armIngestionStatus);
-        mockedEodEntities.when(EodEntities::failedArmRawDataStatus).thenReturn(failedArmRawDataStatus);
-        mockedEodEntities.when(EodEntities::failedArmManifestFileStatus).thenReturn(failedArmManifestFileStatus);
-        mockedEodEntities.when(EodEntities::armDropZoneStatus).thenReturn(armDropZoneStatus);
+        mockedEodEntities.when(EodHelper::storedStatus).thenReturn(storedStatus);
+        mockedEodEntities.when(EodHelper::armIngestionStatus).thenReturn(armIngestionStatus);
+        mockedEodEntities.when(EodHelper::failedArmRawDataStatus).thenReturn(failedArmRawDataStatus);
+        mockedEodEntities.when(EodHelper::failedArmManifestFileStatus).thenReturn(failedArmManifestFileStatus);
+        mockedEodEntities.when(EodHelper::armDropZoneStatus).thenReturn(armDropZoneStatus);
 
         when(armLocation.getId()).thenReturn(ExternalLocationTypeEnum.ARM.getId());
         when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
@@ -64,12 +64,12 @@ public class EodEntitiesMock {
     }
 
     public void givenIsEqualLocationReturns(boolean result) {
-        mockedEodEntities.when(() -> EodEntities.isEqual(any(ExternalLocationTypeEntity.class), any(ExternalLocationTypeEntity.class)))
+        mockedEodEntities.when(() -> EodHelper.isEqual(any(ExternalLocationTypeEntity.class), any(ExternalLocationTypeEntity.class)))
             .thenReturn(result);
     }
 
     public void givenIsEqualStatusReturns(boolean result) {
-        mockedEodEntities.when(() -> EodEntities.isEqual(any(ObjectRecordStatusEntity.class), any(ObjectRecordStatusEntity.class)))
+        mockedEodEntities.when(() -> EodHelper.isEqual(any(ObjectRecordStatusEntity.class), any(ObjectRecordStatusEntity.class)))
             .thenReturn(result);
     }
 

@@ -55,7 +55,8 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         this.fileOperationService = fileOperationService;
     }
 
-    protected ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity status) {
+    protected ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                                   ObjectRecordStatusEntity status) {
 
         ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));

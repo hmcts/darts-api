@@ -51,10 +51,10 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFES
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.common.util.EodEntities.armDropZoneStatus;
-import static uk.gov.hmcts.darts.common.util.EodEntities.armLocation;
-import static uk.gov.hmcts.darts.common.util.EodEntities.failedArmManifestFileStatus;
-import static uk.gov.hmcts.darts.common.util.EodEntities.failedArmRawDataStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
+import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmManifestFileStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmRawDataStatus;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -297,9 +297,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmManifestFileStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(
+            medias.get(0), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEodsMedia0).hasSize(1);
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), failedArmManifestFileStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(
+            medias.get(1), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
@@ -324,9 +326,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmManifestFileStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(
+            medias.get(0), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEodsMedia0).hasSize(1);
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), failedArmManifestFileStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(
+            medias.get(1), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);
@@ -351,9 +355,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), failedArmManifestFileStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(
+            medias.get(0), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEodsMedia0).hasSize(1);
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), failedArmManifestFileStatus(), armLocation());
+        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(
+            medias.get(1), failedArmManifestFileStatus(), armLocation());
         assertThat(failedArmEodsMedia1).hasSize(1);
         var failedEod = failedArmEodsMedia0.get(0);
         assertThat(failedEod.getTransferAttempts()).isEqualTo(2);

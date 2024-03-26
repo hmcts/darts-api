@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface ExternalObjectDirectoryService {
 
-    List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEODs(Pageable pageable);
+    List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable);
 
 }
