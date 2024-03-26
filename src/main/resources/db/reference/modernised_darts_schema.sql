@@ -2094,6 +2094,10 @@ ADD CONSTRAINT transcription_document_object_hidden_reason_fk
 FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
 ALTER TABLE transcription_document
+ADD CONSTRAINT transcription_document_object_hidden_reason_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
+
+ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_hidden_by_fk
 FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
 

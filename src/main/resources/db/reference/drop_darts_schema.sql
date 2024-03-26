@@ -34,6 +34,7 @@ DROP TABLE defendant;
 DROP TABLE prosecutor;
 DROP TABLE judge;
 DROP TABLE node_register;
+DROP TABLE object_hidden_reason;
 DROP TABLE transient_object_directory;
 DROP TABLE transformed_media;
 DROP TABLE external_object_directory; 
