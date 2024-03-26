@@ -59,7 +59,6 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                         log.error("Unable to write archive record for EOD {} to ARM file {}",
                                   archiveRecord.getArchiveRecordOperation().getRelationId(),
                                   archiveRecordsFile.getAbsoluteFile());
-                        //TODO is this the correct exception type?
                         throw new RuntimeException(e);
                     }
                 }
