@@ -35,7 +35,9 @@ import java.util.List;
 import static java.lang.String.format;
 import static java.nio.file.Files.lines;
 import static java.nio.file.Files.readString;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -91,13 +93,14 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     private ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
+    private UserAccountEntity testUser;
 
     @Autowired
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmProcessor;
 
     @BeforeEach
     void setupData() {
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
     }
 
@@ -153,13 +156,13 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
-        assertThat(failedArmEodsMedia0).hasSize(1);
-        List<ExternalObjectDirectoryEntity> failedArmEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
-        assertThat(failedArmEodsMedia1).hasSize(1);
+        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
+        assertThat(armDropZoneEodsMedia0).hasSize(1);
+        List<ExternalObjectDirectoryEntity> armDropZoneEodsMedia1 = eodRepository.findByMediaStatusAndType(medias.get(1), armDropZoneStatus(), armLocation());
+        assertThat(armDropZoneEodsMedia1).hasSize(1);
 
-        var rawFile0Name = format("%d_%d_1", failedArmEodsMedia0.get(0).getId(), medias.get(0).getId());
-        var rawFile1Name = format("%d_%d_1", failedArmEodsMedia1.get(0).getId(), medias.get(1).getId());
+        var rawFile0Name = format("%d_%d_1", armDropZoneEodsMedia0.get(0).getId(), medias.get(0).getId());
+        var rawFile1Name = format("%d_%d_1", armDropZoneEodsMedia1.get(0).getId(), medias.get(1).getId());
 
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(eq(rawFile0Name), any());
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(eq(rawFile1Name), any());
@@ -175,8 +178,10 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
                       "\"dz_file_name\":\"" + rawFile0Name,
                       "\"dz_file_name\":\"" + rawFile1Name);
 
-        assertThat(failedArmEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
-        assertThat(failedArmEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropZoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropZoneEodsMedia0.get(0).getLastModifiedBy().getId()).isEqualTo(testUser.getId());
+        assertThat(armDropZoneEodsMedia0.get(0).getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
+        assertThat(armDropZoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
     }
 
     @Test
@@ -211,6 +216,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
         File manifestFile = manifestFileNameCaptor.getValue();
         assertThat(armDropzoneEodsMedia0.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
+        assertThat(armDropzoneEodsMedia0.get(0).getLastModifiedBy().getId()).isEqualTo(testUser.getId());
+        assertThat(armDropzoneEodsMedia0.get(0).getLastModifiedDateTime()).isCloseToUtcNow(within(1, SECONDS));
         assertThat(armDropzoneEodsMedia1.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
         assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
 
