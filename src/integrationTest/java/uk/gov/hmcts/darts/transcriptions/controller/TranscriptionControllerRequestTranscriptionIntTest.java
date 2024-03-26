@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -82,6 +82,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private AuditRepository auditRepository;
 
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
@@ -167,13 +170,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     private void assertAudit(int expected) {
-        AuditSearchQuery searchQuery = new AuditSearchQuery();
-        searchQuery.setCaseId(courtCase.getId());
-        searchQuery.setFromDate(now().minusDays(1));
-        searchQuery.setToDate(now().plusDays(1));
-        searchQuery.setAuditActivityId(REQUEST_TRANSCRIPTION.getId());
 
-        List<AuditEntity> auditEntities = auditService.search(searchQuery);
+        Integer courtCaseId = courtCase.getId();
+        OffsetDateTime fromDate = now().minusDays(1);
+        OffsetDateTime toDate = now().plusDays(1);
+        List<AuditEntity> auditEntities = auditRepository.getAuditEntitiesByCaseAndActivityForDateRange(courtCaseId,
+                                                                                                        REQUEST_TRANSCRIPTION.getId(),
+                                                                                                        fromDate, toDate);
+
         assertEquals(expected, auditEntities.size());
         if (expected == 1) {
             assertEquals(testUser, auditEntities.get(0).getUser());
