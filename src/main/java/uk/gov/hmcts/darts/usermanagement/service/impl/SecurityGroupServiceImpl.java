@@ -149,18 +149,16 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         }
         List<Integer> userIds = securityGroupPatch.getUserIds();
         if (userIds != null) {
-            Set<UserAccountEntity> userAccountEntities = new HashSet<>();
             for (Integer userId: userIds) {
                 Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
                 if (userAccountEntity.isPresent()) {
-                    userAccountEntities.add(userAccountEntity.get());
+                    userAccountEntity.get().getSecurityGroupEntities().add(securityGroupEntity);
                 } else {
                     throw new DartsApiException(
                         UserManagementError.USER_NOT_FOUND,
                         String.format("User account id %d not found", userId));
                 }
             }
-            securityGroupEntity.setUsers(userAccountEntities);
         }
     }
 

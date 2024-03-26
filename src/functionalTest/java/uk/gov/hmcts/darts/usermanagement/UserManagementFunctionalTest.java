@@ -3,11 +3,14 @@ package uk.gov.hmcts.darts.usermanagement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -31,6 +34,13 @@ class UserManagementFunctionalTest extends FunctionalTest {
     private static final String EMAIL_ADDRESS = "Email-Address";
     private static final String COURTHOUSE_ID = "courthouse_id";
     private static final String ADMIN_USERS = "/admin/users";
+    static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @BeforeAll
+    static void beforeAll() {
+        MAPPER.registerModule(new JavaTimeModule());
+        MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     @AfterEach
     void tearDown() {
@@ -223,8 +233,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
             .get()
             .thenReturn();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
                                                                                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
     }
@@ -232,40 +241,45 @@ class UserManagementFunctionalTest extends FunctionalTest {
     @Test
     void shouldPatchSecurityGroups() throws JsonProcessingException {
 
+        String postContent = """
+                         {
+                           "name": "<func-a-security-group>",
+                           "display_name": "<A security group>",
+                           "description": "func-test group"
+                         }
+                           """;
+        postContent = postContent.replace("<func-a-security-group>", "func-a-security-group " + UUID.randomUUID());
+        postContent = postContent.replace("<A security group>", "A security group " + UUID.randomUUID());
+
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
-            .body("""
-                         {
-                           "name": "func-a-security-group",
-                           "display_name": "A security group",
-                           "description": "func-test group"
-                         }
-                           """)
+            .body(postContent)
             .post()
             .thenReturn();
 
         assertEquals(201, response.getStatusCode());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<SecurityGroupWithIdAndRole>(){});
-
-        Integer id1 = createCourthouse("func-a_courthouse" + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
-        Integer id2 = createCourthouse("func-a_courthouse" + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
-
         String patchContent = """
                          {
-                           "name": "func-a-security-group-new-name",
-                           "display_name": "A security group new name",
+                           "name": "<func-a-security-group-new-name>",
+                           "display_name": "<A security group new name>",
                            "description": "func-test group new description",
                            "courthouse_ids": [<id1>,<id2>],
                            "user_ids": [-1,-2]
                          }
                            """;
+        String newName = "func-a-security-group-new-name " + UUID.randomUUID();
+        patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
+        String newDisplayName = "A security group new name " + UUID.randomUUID();
+        patchContent = patchContent.replace("<A security group new name>", newDisplayName);
+        Integer id1 = createCourthouse("func-a_courthouse " + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
+        Integer id2 = createCourthouse("func-a_courthouse " + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
         patchContent = patchContent.replace("<id1>", id1.toString());
         patchContent = patchContent.replace("<id2>", id2.toString());
 
+        SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
+                                                                                  new TypeReference<SecurityGroupWithIdAndRole>(){});
 
         response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
@@ -274,31 +288,31 @@ class UserManagementFunctionalTest extends FunctionalTest {
             .patch()
             .thenReturn();
 
-        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = objectMapper.readValue(response.asString(),
+        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = MAPPER.readValue(response.asString(),
             new TypeReference<SecurityGroupWithIdAndRoleAndUsers>(){});
 
-        assertEquals("func-a-security-group-new-name", securityGroupWithIdAndRoleAndUsers.getName());
-        assertEquals("A security group new name", securityGroupWithIdAndRoleAndUsers.getDisplayName());
+        assertEquals(newName, securityGroupWithIdAndRoleAndUsers.getName());
+        assertEquals(newDisplayName, securityGroupWithIdAndRoleAndUsers.getDisplayName());
         assertEquals("func-test group new description", securityGroupWithIdAndRoleAndUsers.getDescription());
-        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(1));
-        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(2));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(id1));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(id2));
         assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(-1));
         assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(-2));
 
         response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/security-groups" + securityGroupWithIdAndRoles.getId()))
+            .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
             .contentType(ContentType.JSON)
             .get()
             .thenReturn();
 
-        SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+        SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
                                                                                               new TypeReference<SecurityGroupWithIdAndRole>(){});
 
-        assertEquals("func-a-security-group-new-name", retrievedSecurityGroupWithIdAndRoles.getName());
-        assertEquals("A security group new name", retrievedSecurityGroupWithIdAndRoles.getDisplayName());
+        assertEquals(newName, retrievedSecurityGroupWithIdAndRoles.getName());
+        assertEquals(newDisplayName, retrievedSecurityGroupWithIdAndRoles.getDisplayName());
         assertEquals("func-test group new description", retrievedSecurityGroupWithIdAndRoles.getDescription());
-        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(1));
-        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(2));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(id1));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(id2));
         assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-1));
         assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-2));
 
@@ -306,15 +320,15 @@ class UserManagementFunctionalTest extends FunctionalTest {
     }
 
     private Integer createCourthouse(String name, String displayName) throws JsonProcessingException {
-        String content = String.format("{\"courthouse_name\": %s, \"displ;ay_name\": %s}", name, displayName);
+        String content = String.format("{\"courthouse_name\": \"%s\", \"display_name\": \"%s\"}", name, displayName);
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/courthouses"))
             .contentType(ContentType.JSON)
             .body(content)
             .post()
             .thenReturn();
-        ObjectMapper objectMapper = new ObjectMapper();
-        ExtendedCourthousePost extendedCourthousePost = objectMapper.readValue(response.asString(),
+
+        ExtendedCourthousePost extendedCourthousePost = MAPPER.readValue(response.asString(),
                                                                                     new TypeReference<ExtendedCourthousePost>(){});
         return extendedCourthousePost.getId();
     }
