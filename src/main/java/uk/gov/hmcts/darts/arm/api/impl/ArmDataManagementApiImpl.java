@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
@@ -35,6 +36,21 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     @Override
     public List<String> listResponseBlobs(String prefix) {
         return armService.listResponseBlobs(armDataManagementConfiguration.getContainerName(), prefix);
+    }
+
+    @Override
+    public List<String> listResponseBlobsUsingBatch(String prefix) {
+        return armService.listResponseBlobsUsingBatch(armDataManagementConfiguration.getContainerName(),
+                                                      prefix,
+                                                      armDataManagementConfiguration.getBatchSize());
+    }
+
+    @Override
+    public ContinuationTokenBlobs listResponseBlobsUsingMarker(String prefix, String continuationToken) {
+        return armService.listResponseBlobsWithMarker(armDataManagementConfiguration.getContainerName(),
+                                                      prefix,
+                                                      armDataManagementConfiguration.getBatchSize(),
+                                                      continuationToken);
     }
 
     public BinaryData getBlobData(String blobPathAndName) {
