@@ -85,7 +85,6 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(caseDocument, externalObjectDirectory.getId(), rawFilename);
             return createCaseArchiveRecord(caseCreateArchiveRecordOperation, uploadNewFileRecord);
         } catch (IOException e) {
-            //FIXME should we re-throw the exception here?
             log.error(
                 "Unable to read case property file {} - {}",
                 armDataManagementConfiguration.getCaseRecordPropertiesFile(),
