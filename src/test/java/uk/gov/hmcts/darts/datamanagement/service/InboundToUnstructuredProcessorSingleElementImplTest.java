@@ -195,6 +195,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         assertEquals(STORED.getId(), savedStatusUnstructured.getId());
     }
 
+    @SuppressWarnings("java:S4790")
     @Test
     void processInboundToUnstructuredTranscription() {
 
