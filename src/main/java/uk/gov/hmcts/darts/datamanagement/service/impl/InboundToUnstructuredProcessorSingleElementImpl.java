@@ -65,6 +65,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final MediaRepository mediaRepository;
 
+    @SuppressWarnings("java:S4790")
     @Override
     @Transactional
     public void processSingleElement(Integer inboundObjectId) {
@@ -177,7 +178,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return externalObjectDirectoryEntity;
     }
 
-    private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
+    private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured, Long actualFileSize) {
         MediaEntity mediaEntityLazy = inbound.getMedia();
         if (mediaEntityLazy != null) {
             MediaEntity mediaEntity = mediaRepository.findById(mediaEntityLazy.getId()).orElseThrow(
@@ -189,7 +190,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 audioConfigurationProperties.getAllowedMediaFormats(),
                 mediaEntity.getMediaFormat().toLowerCase(),
                 audioConfigurationProperties.getMaxFileSize(),
-                mediaEntity.getFileSize()
+                actualFileSize
             );
         }
 

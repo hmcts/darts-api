@@ -135,7 +135,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
 
         when(mediaEntity.getMediaFormat()).thenReturn(MP2);
-        when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(mediaEntity));
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
@@ -171,7 +170,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
             .thenReturn(objectRecordStatusEntityStored);
 
         when(mediaEntity.getMediaFormat()).thenReturn(MP2);
-        when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(mediaEntity));
 
@@ -201,6 +199,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         assertEquals(STORED.getId(), savedStatusUnstructured.getId());
     }
+
 
     @Test
     void processInboundToUnstructuredTranscription() {
@@ -269,7 +268,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(mediaEntity.getMediaFormat()).thenReturn(MP2);
-        when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn("invalid-checksum");
         when(mediaRepository.findById(any())).thenReturn(Optional.of(mediaEntity));
 
@@ -323,7 +321,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(mediaEntity.getMediaFormat()).thenReturn(MP2);
-        when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(mediaEntity));
 
@@ -355,7 +352,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(mediaEntity.getMediaFormat()).thenReturn(MP2);
-        when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(mediaRepository.findById(any())).thenReturn(Optional.of(mediaEntity));
 

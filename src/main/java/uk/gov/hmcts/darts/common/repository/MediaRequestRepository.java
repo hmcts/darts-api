@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity, Integer> {
 
-    Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(MediaRequestStatus status);
+    Optional<MediaRequestEntity> findTopByStatusOrderByLastModifiedDateTimeAsc(MediaRequestStatus status);
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm

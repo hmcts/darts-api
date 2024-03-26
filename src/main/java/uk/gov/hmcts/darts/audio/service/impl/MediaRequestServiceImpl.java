@@ -44,6 +44,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
@@ -86,10 +87,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final TransformedMediaDetailsMapper transformedMediaDetailsMapper;
     private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
     private final AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
-        return mediaRequestRepository.findTopByStatusOrderByCreatedDateTimeAsc(status);
+        return mediaRequestRepository.findTopByStatusOrderByLastModifiedDateTimeAsc(status);
     }
 
     @Override
@@ -110,7 +112,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus status) {
         MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
         mediaRequestEntity.setStatus(status);
-
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
 
@@ -305,7 +306,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
         TransformedMediaEntity foundEntity = getTransformedMediaById(transformedMediaId);
-        foundEntity.setLastAccessed(OffsetDateTime.now());
+        foundEntity.setLastAccessed(currentTimeHelper.currentOffsetDateTime());
         transformedMediaRepository.saveAndFlush(foundEntity);
     }
 
@@ -317,7 +318,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
         }
         for (TransformedMediaEntity transformedMedia : foundEntityList) {
-            transformedMedia.setLastAccessed(OffsetDateTime.now());
+            transformedMedia.setLastAccessed(currentTimeHelper.currentOffsetDateTime());
             transformedMediaRepository.saveAndFlush(transformedMedia);
         }
     }

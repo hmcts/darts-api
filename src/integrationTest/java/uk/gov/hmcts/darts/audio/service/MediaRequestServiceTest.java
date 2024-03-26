@@ -3,11 +3,13 @@ package uk.gov.hmcts.darts.audio.service;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.time.OffsetDateTime;
@@ -31,6 +33,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private MediaRequestService mediaRequestService;
+
+    @MockBean
+    private CurrentTimeHelper currentTimeHelper;
 
     private AudioRequestDetails requestDetails;
 
@@ -128,7 +133,6 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-
     void shouldUpdateStatusToProcessing() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(1, PROCESSING);
 
