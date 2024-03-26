@@ -144,16 +144,18 @@ public class ArmServiceImpl implements ArmService {
             .setMaxResultsPerPage(batchSize);
         Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
 
-        int index = 0;
+        int pageNumber = 0;
         Iterable<PagedResponse<BlobItem>> blobPages = blobContainerClient.listBlobs(options, timeout).iterableByPage();
         for (PagedResponse<BlobItem> page : blobPages) {
-            log.debug("Page {}", ++index);
+            log.debug("Page {}", ++pageNumber);
             page.getElements().forEach(withCounter((counter, blob) -> {
                 String blobName = blob.getName();
                 files.add(blobName);
                 log.debug("{} found blob {}", counter, blobName);
             }));
-            break;
+            if (pageNumber == 1) {
+                break;
+            }
         }
         log.info("Total blobs found {}", files.size());
         return files;
@@ -200,23 +202,30 @@ public class ArmServiceImpl implements ArmService {
             List<BlobItem> blobs;
             List<String> blobsWithPaths;
             if (response.hasNext()) {
-                try (PagedResponse<BlobItem> pagedResponse = response.next()) {
-                    blobs = pagedResponse.getValue();
-                    blobsWithPaths = new ArrayList<>();
-                    // Along with page results, get a continuation token
-                    // which enables the client to "pick up where it left off"
-                    continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
-
-                    blobs.forEach(blob -> blobsWithPaths.add(blob.getName()));
-                    continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
-                } catch (NoSuchElementException | IOException ioe) {
-                    log.error("Unable to get next response for prefix {}", blobPathAndName, ioe);
-                }
+                extractBlobsUsingContinuationToken(blobPathAndName, response, continuationTokenBlobs);
             }
         } catch (Exception e) {
             log.error("Unable to list blobs with marker for prefix {}", blobPathAndName, e);
         }
         return continuationTokenBlobs;
+    }
+
+    private static void extractBlobsUsingContinuationToken(String blobPathAndName, Iterator<PagedResponse<BlobItem>> response,
+                                                           ContinuationTokenBlobs continuationTokenBlobs) {
+        List<BlobItem> blobs;
+        List<String> blobsWithPaths;
+        try (PagedResponse<BlobItem> pagedResponse = response.next()) {
+            blobs = pagedResponse.getValue();
+            blobsWithPaths = new ArrayList<>();
+            // Along with page results, get a continuation token
+            // which enables the client to "pick up where it left off"
+            continuationTokenBlobs.setContinuationToken(pagedResponse.getContinuationToken());
+
+            blobs.forEach(blob -> blobsWithPaths.add(blob.getName()));
+            continuationTokenBlobs.setBlobNamesWithAndPaths(blobsWithPaths);
+        } catch (NoSuchElementException | IOException ioe) {
+            log.error("Unable to get next response for prefix {}", blobPathAndName, ioe);
+        }
     }
 
     public BinaryData getBlobData(String containerName, String blobPathAndName) {

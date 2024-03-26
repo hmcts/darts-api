@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRec
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.service.ArmBatchProcessResponseFiles;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
-import uk.gov.hmcts.darts.arm.util.ArmConstants;
 import uk.gov.hmcts.darts.arm.util.files.BatchMetadataFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
@@ -46,6 +45,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_INVALID_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.ArmConstants.ArmBatching.PROCESS_SINGLE_RECORD_BATCH_SIZE;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper.generateSuffix;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
@@ -80,7 +80,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
 
     @Override
     public void batchProcessResponseFiles() {
-        if (armDataManagementConfiguration.getBatchSize() == ArmConstants.ArmBatching.PROCESS_SINGLE_RECORD_BATCH_SIZE) {
+        if (PROCESS_SINGLE_RECORD_BATCH_SIZE.equals(armDataManagementConfiguration.getBatchSize())) {
             armResponseFilesProcessor.processResponseFiles();
         } else {
             batchProcessResponseFilesFromAzure();
