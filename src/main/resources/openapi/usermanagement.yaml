@@ -209,7 +209,7 @@ paths:
                 $ref: './problem.yaml'
               example:
                 type: "USER_MANAGEMENT_104"
-                title: "The provided security group does not exist"
+                title: "The provided courthouse does not exist"
                 status: 404
         '409':
           description: Conflict Error
