@@ -66,6 +66,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final MediaRepository mediaRepository;
 
+    @SuppressWarnings("java:S4790")
     @Override
     @Transactional
     public void processSingleElement(Integer inboundObjectId) {
