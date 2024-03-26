@@ -42,7 +42,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         MAPPER.registerModule(new JavaTimeModule());
         MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
-    
+
     @AfterEach
     void tearDown() {
         clean();

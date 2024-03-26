@@ -28,8 +28,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
     private static final String COURTHOUSE_ID = "courthouse_id";
     private static final String ADMIN_USERS = "/admin/users";
 
-
-
     @AfterEach
     void tearDown() {
         clean();
@@ -226,5 +224,4 @@ class UserManagementFunctionalTest extends FunctionalTest {
                                                                                               new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
     }
-
 }
