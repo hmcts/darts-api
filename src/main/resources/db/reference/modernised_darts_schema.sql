@@ -210,7 +210,27 @@
 --    add error_code and is_response_cleaned to external_object_directory
 --    add clip_id to media, annotation_document, transcription_document
 --    amend event_ts to not null on event
---
+--v63 add PK constraints to case_transcription_ae & hearing_transcription_ae
+--    add courthouse_code to daily_list
+--    amend transcription_commment.tra_id to be not null
+--v64 add retain_until_ts to annotation_document, case_document, media, transcription_document
+--    add last_modified_by/ts to annotation_document, case_document, transcription_document
+--    add is_deleted to court_case, media, transcription
+--    add update_retention to external_object_directory
+--    add is_retention_updated to court_case
+--    amend user_full_name and user_name on user_account to nullable
+--    amend checksum on annotation_document, case_document, transcription_document to nullable
+--    add retention_retries to court_case
+--    amend retain_until_ts on annotation_document, case_document, media, transcription_document to nullable
+--    add marked_for_manual_deletion to annotation_document, case_document, media, transcription_document
+--    add table object_hidden_reason 
+--    add fk and column ohr_id to annotation_document, case_document, media, transcription_document
+--    amend is_hidden to default to false on annotation_document, case_document, media, transcription_document
+--    amend is_deleted to default to false on annotation, court_case, media, transcription
+--    add osr_uuid on external_object_directory
+--    amend external_location on external_object_directory to nullable
+--    add enhanced_auditing to audit table
+--v65 add table audit_heritage
 
 
 -- List of Table Aliases
@@ -218,6 +238,7 @@
 -- annotation_document         ADO
 -- audit                       AUD
 -- audit_activity              AUA
+-- audit_heritage              AUH
 -- automated_task              AUT
 -- case_document               CAD
 -- case_judge_ae               CAJ
@@ -245,6 +266,7 @@
 -- media_request               MER
 -- node_register               NOD
 -- notification                NOT
+-- object_hidden_reason        OHR
 -- object_record_status        ORS
 -- prosecutor                  PRN
 -- region                      REG
@@ -295,7 +317,7 @@ CREATE TABLE annotation
 ,annotation_object_id        CHARACTER VARYING(16)
 ,version_label               CHARACTER VARYING(32)
 ,current_owner               INTEGER                       NOT NULL
-,is_deleted                  BOOLEAN                       NOT NULL
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -320,15 +342,20 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 CREATE TABLE annotation_document
 (ado_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
+,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content 
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING             NOT NULL
-,is_hidden                   BOOLEAN                       NOT NULL
+,checksum                    CHARACTER VARYING             
+,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN annotation_document.ado_id
@@ -342,6 +369,7 @@ CREATE TABLE audit
 ,cas_id                      INTEGER                       
 ,aua_id                      INTEGER                       NOT NULL
 ,usr_id                      INTEGER                       NOT NULL
+,enhanced_auditing           BOOLEAN                       NOT NULL DEFAULT false
 ,additional_data             CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -377,6 +405,56 @@ CREATE TABLE audit_activity
 COMMENT ON COLUMN audit.aua_id
 IS 'primary key of audit_activity';
 
+CREATE TABLE audit_heritage
+(R_OBJECT_ID                  CHARACTER VARYING      
+,EVENT_NAME                   CHARACTER VARYING      
+,EVENT_SOURCE                 CHARACTER VARYING      
+,R_GEN_SOURCE                 INTEGER                 
+,USER_NAME                    CHARACTER VARYING
+,AUDITED_OBJ_ID               CHARACTER VARYING
+,TIME_STAMP                   TIMESTAMP WITH TIME ZONE
+,STRING_1                     CHARACTER VARYING
+,STRING_2                     CHARACTER VARYING
+,STRING_3                     CHARACTER VARYING
+,STRING_4                     CHARACTER VARYING
+,STRING_5                     CHARACTER VARYING
+,ID_1                         CHARACTER VARYING
+,ID_2                         CHARACTER VARYING
+,ID_3                         CHARACTER VARYING
+,ID_4                         CHARACTER VARYING
+,ID_5                         CHARACTER VARYING
+,CHRONICLE_ID                 CHARACTER VARYING
+,OBJECT_NAME                  CHARACTER VARYING
+,VERSION_LABEL                CHARACTER VARYING
+,OBJECT_TYPE                  CHARACTER VARYING
+,EVENT_DESCRIPTION            CHARACTER VARYING
+,POLICY_ID                    CHARACTER VARYING
+,CURRENT_STATE                CHARACTER VARYING
+,WORKFLOW_ID                  CHARACTER VARYING
+,SESSION_ID                   CHARACTER VARYING
+,USER_ID                      CHARACTER VARYING
+,OWNER_NAME                   CHARACTER VARYING
+,ACL_NAME                     CHARACTER VARYING
+,ACL_DOMAIN                   CHARACTER VARYING
+,APPLICATION_CODE             CHARACTER VARYING
+,CONTROLLING_APP              CHARACTER VARYING
+,ATTRIBUTE_LIST               CHARACTER VARYING
+,ATTRIBUTE_LIST_ID            CHARACTER VARYING
+,AUDIT_SIGNATURE              CHARACTER VARYING
+,AUDIT_VERSION                INTEGER
+,HOST_NAME                    CHARACTER VARYING
+,TIME_STAMP_UTC               TIMESTAMP WITH TIME ZONE
+,I_AUDITED_OBJ_CLASS          INTEGER
+,REGISTRY_ID                  CHARACTER VARYING
+,I_IS_ARCHIVED                INTEGER
+,AUDITED_OBJ_VSTAMP           INTEGER
+,ATTRIBUTE_LIST_OLD           CHARACTER VARYING
+,I_IS_REPLICA                 INTEGER
+,I_VSTAMP                     INTEGER
+,ATTRIBUTE_LIST_ASPECT_ID     CHARACTER VARYING
+,R_OBJECT_SEQUENCE            INTEGER
+ ) TABLESPACE darts_tables;
+
 
 CREATE TABLE automated_task
 (aut_id                      INTEGER                       NOT NULL
@@ -397,13 +475,18 @@ IS 'primary key of automated_task';
 CREATE TABLE case_document 
 (cad_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
+,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING             NOT NULL
-,is_hidden                   BOOLEAN                       NOT NULL
+,checksum                    CHARACTER VARYING             
+,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE darts_tables;
 
 
@@ -452,7 +535,10 @@ CREATE TABLE court_case
 ,case_closed                 BOOLEAN                       NOT NULL
 ,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
+,is_retention_updated        BOOLEAN                       NOT NULL  -- flag to indicate retention has been updated
+,retention_retries           INTEGER
 ,version_label               CHARACTER VARYING(32)
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -525,6 +611,7 @@ IS 'foreign key to courthouse';
 
 CREATE TABLE daily_list
 (dal_id                      INTEGER                       NOT NULL
+,courthouse_code             INTEGER                       
 ,listing_courthouse          CHARACTER VARYING             NOT NULL
 ,daily_list_object_id        CHARACTER VARYING(16)
 ,unique_id                   CHARACTER VARYING
@@ -701,8 +788,9 @@ CREATE TABLE external_object_directory
 ,cad_id                      INTEGER                                 -- FK to case_document
 ,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
+,osr_uuid                    CHARACTER VARYING                       -- logical FK to object_state_record
 -- additional optional FKs to other relevant internal objects would require columns here
-,external_location           UUID                          NOT NULL
+,external_location           UUID                                    -- for use where address of Ext Obj requires 1 field
 ,external_file_id            CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,checksum                    CHARACTER VARYING                       
@@ -711,7 +799,8 @@ CREATE TABLE external_object_directory
 ,event_date_ts               TIMESTAMP WITH TIME ZONE                -- date upon which the retention date in ARM is derived
 ,verification_attempts       INTEGER
 ,error_code                  CHARACTER VARYING
-,is_response_cleaned         BOOLEAN                       NOT NULL  DEFAULT false
+,is_response_cleaned         BOOLEAN                       NOT NULL DEFAULT false
+,update_retention            BOOLEAN                       NOT NULL  -- flag to indicate a change that requires retention to be updated has occurred
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -873,6 +962,7 @@ IS 'primary key of judge';
 CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
+,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
 ,clip_id                     CHARACTER VARYING(54)
@@ -886,12 +976,15 @@ CREATE TABLE media
 ,media_type                  CHAR(1)                       NOT NULL DEFAULT 'A'
 ,file_size                   BIGINT                        NOT NULL
 ,checksum                    CHARACTER VARYING
-,is_hidden                   BOOLEAN                       NOT NULL
+,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,media_status                CHARACTER VARYING             NOT NULL
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
+,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -967,7 +1060,7 @@ IS 'end time in the search criteria for request, possibly migrated from moj_cach
 CREATE TABLE node_register
 (node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not nod_id
 ,ctr_id                      INTEGER                       NOT NULL
-,node_type                   CHARACTER VARYING             NOT NULL   DEFAULT 'DAR'
+,node_type                   CHARACTER VARYING             NOT NULL DEFAULT 'DAR'
 ,hostname                    CHARACTER VARYING             NOT NULL
 ,ip_address                  CHARACTER VARYING             NOT NULL
 ,mac_address                 CHARACTER VARYING             NOT NULL
@@ -1019,6 +1112,17 @@ IS 'number of outgoing requests to gov.uk';
 COMMENT ON COLUMN notification.template_values
 IS 'any extra fields not already covered or inferred from the case, in JSON format';
 
+CREATE TABLE object_hidden_reason
+(ohr_id                      INTEGER                       NOT NULL
+,ohr_reason                  CHARACTER VARYING             NOT NULL
+,display_name                CHARACTER VARYING             NOT NULL
+,display_state               BOOLEAN                       NOT NULL DEFAULT true
+,display_order               INTEGER                       NOT NULL
+,marked_for_deletion         BOOLEAN                       NOT NULL DEFAULT false
+) TABLESPACE darts_tables;
+
+COMMENT ON TABLE object_hidden_reason
+IS 'used to record acceptable reasons for data to be hidden in tables ADO,CAD, MED, TRD';
 
 CREATE TABLE object_record_status
 (ors_id                      INTEGER                       NOT NULL
@@ -1102,6 +1206,7 @@ CREATE TABLE transcription
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
 ,is_manual_transcription     BOOLEAN                       NOT NULL
 ,hide_request_from_requestor BOOLEAN                       NOT NULL 
+,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
@@ -1143,7 +1248,7 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_transcription';
 
 CREATE TABLE transcription_comment
 (trc_id                      INTEGER                       NOT NULL
-,tra_id                      INTEGER
+,tra_id                      INTEGER                       NOT NULL
 ,trw_id                      INTEGER
 ,transcription_object_id     CHARACTER VARYING(16)         -- this is a placeholder for moj_transcription_s.r_object_id
 ,transcription_comment       CHARACTER VARYING
@@ -1176,15 +1281,20 @@ IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 CREATE TABLE transcription_document
 (trd_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
+,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content object
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
-,checksum                    CHARACTER VARYING             NOT NULL
-,is_hidden                   BOOLEAN                       NOT NULL
+,checksum                    CHARACTER VARYING             
+,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN transcription_document.trd_id
@@ -1287,8 +1397,8 @@ CREATE TABLE transient_object_directory
 CREATE TABLE user_account
 (usr_id                      INTEGER                       NOT NULL
 ,dm_user_s_object_id         CHARACTER VARYING(16)
-,user_name                   CHARACTER VARYING             NOT NULL
-,user_full_name              CHARACTER VARYING             NOT NULL
+,user_name                   CHARACTER VARYING            
+,user_full_name              CHARACTER VARYING            
 ,user_email_address          CHARACTER VARYING
 ,description                 CHARACTER VARYING
 ,is_active                   BOOLEAN                       NOT NULL
@@ -1331,6 +1441,9 @@ ALTER TABLE case_document        ADD PRIMARY KEY USING INDEX case_document_pk;
 
 CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE darts_indexes;
 ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
+
+CREATE UNIQUE INDEX case_transcription_ae_pk ON case_transcription_ae(cas_id,tra_id) TABLESPACE darts_indexes;
+ALTER TABLE case_transcription_ae        ADD PRIMARY KEY USING INDEX case_transcription_ae_pk;
 
 CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE darts_indexes; 
 ALTER TABLE case_overflow              ADD PRIMARY KEY USING INDEX case_overflow_pk;
@@ -1386,6 +1499,9 @@ ALTER TABLE hearing_judge_ae        ADD PRIMARY KEY USING INDEX hearing_judge_ae
 CREATE UNIQUE INDEX hearing_media_ae_pk ON hearing_media_ae(hea_id,med_id) TABLESPACE darts_indexes;
 ALTER TABLE hearing_media_ae        ADD PRIMARY KEY USING INDEX hearing_media_ae_pk;
 
+CREATE UNIQUE INDEX hearing_transcription_ae_pk ON hearing_transcription_ae(hea_id,tra_id) TABLESPACE darts_indexes;
+ALTER TABLE hearing_transcription_ae        ADD PRIMARY KEY USING INDEX hearing_transcription_ae_pk;
+
 CREATE UNIQUE INDEX judge_pk     ON judge(jud_id) TABLESPACE darts_indexes;
 ALTER TABLE judge                ADD PRIMARY KEY USING INDEX judge_pk;
 
@@ -1400,6 +1516,9 @@ ALTER TABLE node_register         ADD PRIMARY KEY USING INDEX node_register_pk;
 
 CREATE UNIQUE INDEX notification_pk ON notification(not_id) TABLESPACE darts_indexes;
 ALTER TABLE notification            ADD PRIMARY KEY USING INDEX notification_pk;
+
+CREATE UNIQUE INDEX object_hidden_reason_pk ON object_hidden_reason(ohr_id) TABLESPACE darts_indexes;
+ALTER TABLE object_hidden_reason ADD PRIMARY KEY USING INDEX object_hidden_reason_pk;
 
 CREATE UNIQUE INDEX object_record_status_pk ON object_record_status(ors_id) TABLESPACE darts_indexes;
 ALTER TABLE object_record_status ADD PRIMARY KEY USING INDEX object_record_status_pk;
@@ -1469,6 +1588,7 @@ CREATE SEQUENCE med_seq CACHE 20;
 CREATE SEQUENCE mer_seq CACHE 20;
 CREATE SEQUENCE nod_seq CACHE 20 START WITH 50000;   -- sequence for node_register.node_id
 CREATE SEQUENCE not_seq CACHE 20;
+CREATE SEQUENCE ohr_seq CACHE 20;
 CREATE SEQUENCE ors_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
 CREATE SEQUENCE reg_seq CACHE 20;
@@ -1499,6 +1619,10 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE annotation_document
 ADD CONSTRAINT annotation_document_annotation_fk
 FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
+
+ALTER TABLE annotation_document
+ADD CONSTRAINT annotation_document_object_hidden_reason_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
 ALTER TABLE audit                
 ADD CONSTRAINT audit_case_fk
@@ -1539,6 +1663,10 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE case_document            
 ADD CONSTRAINT case_document_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE case_document
+ADD CONSTRAINT case_document_object_hidden_reason_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
 ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_case_fk
@@ -1768,6 +1896,10 @@ ALTER TABLE media
 ADD CONSTRAINT media_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE media
+ADD CONSTRAINT media_object_hidden_reason_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
+
 ALTER TABLE media_request               
 ADD CONSTRAINT media_request_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
@@ -1875,6 +2007,10 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
+
+ALTER TABLE transcription_document
+ADD CONSTRAINT transcription_document_object_hidden_reason_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
 ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_transcription_fk
