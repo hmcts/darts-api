@@ -96,7 +96,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                             batchItem.setArmEod(armEod);
                             batchItem.setUnstructuredEod(matchingEntity.get());
                             batchItems.add(batchItem);
-                            armEod.setManifestFile(archiveRecordsFile.getName());
                             updateExternalObjectDirectoryStatus(armEod, EodEntities.armIngestionStatus());
                         } else {
                             log.error("Unable to find matching external object directory for {}", armEod.getId());
@@ -108,7 +107,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                         batchItem.setArmEod(armEod);
                         batchItem.setUnstructuredEod(currentEod);
                         batchItems.add(batchItem);
-                        armEod.setManifestFile(archiveRecordsFile.getName());
                         externalObjectDirectoryRepository.saveAndFlush(armEod);
                     }
 
@@ -138,7 +136,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             }
 
             for (var batchItem : batchItems.getSuccessful()) {
-                //TODO set the manifest file here rather than before and then having to undo it?
+                //TODO ask Hemanta if it's ok to set the manifest file here rather than before and then having to undo it?
+                batchItem.getArmEod().setManifestFile(archiveRecordsFile.getName());
                 updateExternalObjectDirectoryStatus(batchItem.getArmEod(), EodEntities.armDropZoneStatus());
             }
 
@@ -200,7 +199,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             batchItem.getPreviousStatus(),
             () -> {
                 batchItem.setRawFilePushSuccessful(false);
-                batchItem.undoManifestFileChange();
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus());
             }
         );
@@ -238,9 +236,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
     private void recoverByUpdatingEodToFailedArmStatus(BatchItem batchItem) {
         if (batchItem.getArmEod() != null) {
-            batchItem.undoManifestFileChange();
             //TODO ask Hemanta: what would be the status if the code fails before the push is even attempted? should not be failedArmRawDataStatus
-            if (!batchItem.isRawFilePushSuccessfulWhenAttempted()) {
+            if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmRawDataStatus());
             } else {
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodEntities.failedArmManifestFileStatus());
@@ -268,12 +265,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             this.previousManifestFile = armEod.getManifestFile();
             this.previousStatus = armEod.getStatus();
         }
-
-        public void undoManifestFileChange() {
-            this.armEod.setManifestFile(this.previousManifestFile);
-        }
-
-        public boolean isRawFilePushSuccessfulWhenAttempted() {
+        public boolean isRawFilePushNotNeededOrSuccessfulWhenNeeded() {
             return rawFilePushSuccessful == null || rawFilePushSuccessful;
         }
     }
@@ -291,7 +283,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
 
         public List<BatchItem> getSuccessful() {
-            return batchItems.stream().filter(batchItem -> batchItem.isRawFilePushSuccessfulWhenAttempted() && batchItem.getArchiveRecord() != null).toList();
+            return batchItems.stream().filter(
+                batchItem -> batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null).toList();
         }
 
         public List<ArchiveRecord> getArchiveRecords() {
