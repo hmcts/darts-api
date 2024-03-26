@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.common.service.impl.EodEntitiesMock;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -76,17 +76,16 @@ class UnstructuredToArmBatchProcessorTest {
     @Mock
     File manifestFile;
 
-    private static EodEntitiesMock eodEntitiesMock;
+    private static EodHelperMocks eodHelperMocks;
 
     @BeforeAll
     static void setup() {
-        eodEntitiesMock = new EodEntitiesMock();
-        eodEntitiesMock.givenEodEntitiesAreMocked();
+        eodHelperMocks = new EodHelperMocks();
     }
 
     @AfterAll
     public static void close() {
-        eodEntitiesMock.close();
+        eodHelperMocks.close();
     }
 
     @BeforeEach
@@ -119,7 +118,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
         doReturn(EodHelper.armLocation()).when(eod1).getExternalLocationType();
-        eodEntitiesMock.givenIsEqualLocationReturns(true);
+        eodHelperMocks.givenIsEqualLocationReturns(true);
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm();
@@ -149,7 +148,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
         doReturn(EodHelper.armLocation()).when(eod1).getExternalLocationType();
-        eodEntitiesMock.givenIsEqualLocationReturns(true);
+        eodHelperMocks.givenIsEqualLocationReturns(true);
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm();
