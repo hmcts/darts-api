@@ -58,16 +58,16 @@ public class EodHelper {
         this.eltRepository = eltRepository;
         this.orsRepository = orsRepository;
 
-        unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).get();
-        armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).get();
-        detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).get();
+        unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
+        armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).orElseThrow();
+        detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).orElseThrow();
 
-        storedStatus = orsRepository.findById(STORED.getId()).get();
-        failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).get();
-        failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).get();
-        failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).get();
-        armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).get();
-        armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).get();
+        storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
+        failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
+        failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
+        failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
+        armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
+        armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
 
         failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
     }

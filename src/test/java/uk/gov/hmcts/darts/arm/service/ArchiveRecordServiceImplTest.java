@@ -45,6 +45,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -1152,7 +1153,7 @@ class ArchiveRecordServiceImplTest {
         // when
         ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
 
-        // them
+        // then
         assertThat(archiveRecord).isInstanceOf(MediaArchiveRecord.class);
         verify(mediaArchiveRecordMapperMock).mapToMediaArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
         verifyNoInteractions(annotationArchiveRecordMapperMock);
@@ -1180,7 +1181,7 @@ class ArchiveRecordServiceImplTest {
         // when
         ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
 
-        // them
+        // then
         assertThat(archiveRecord).isInstanceOf(TranscriptionArchiveRecord.class);
         verify(transcriptionArchiveRecordMapperMock).mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
         verifyNoInteractions(annotationArchiveRecordMapperMock);
@@ -1208,7 +1209,7 @@ class ArchiveRecordServiceImplTest {
         // when
         ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
 
-        // them
+        // then
         assertThat(archiveRecord).isInstanceOf(AnnotationArchiveRecord.class);
         verify(annotationArchiveRecordMapperMock).mapToAnnotationArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
         verifyNoInteractions(transcriptionArchiveRecordMapperMock);
@@ -1236,7 +1237,7 @@ class ArchiveRecordServiceImplTest {
         // when
         ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
 
-        // them
+        // then
         assertThat(archiveRecord).isInstanceOf(CaseArchiveRecord.class);
         verify(caseArchiveRecordMapperMock).mapToCaseArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
         verifyNoInteractions(transcriptionArchiveRecordMapperMock);
@@ -1261,7 +1262,7 @@ class ArchiveRecordServiceImplTest {
         );
 
         // then
-        assertThrows(RuntimeException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
     }
 
     @Test
@@ -1280,7 +1281,7 @@ class ArchiveRecordServiceImplTest {
         );
 
         // then
-        assertThrows(RuntimeException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
     }
 
     @Test
@@ -1299,7 +1300,7 @@ class ArchiveRecordServiceImplTest {
         );
 
         // then
-        assertThrows(RuntimeException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {

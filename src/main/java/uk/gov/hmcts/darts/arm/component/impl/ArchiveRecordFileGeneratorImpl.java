@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -59,12 +60,12 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                         log.error("Unable to write archive record for EOD {} to ARM file {}",
                                   archiveRecord.getArchiveRecordOperation().getRelationId(),
                                   archiveRecordsFile.getAbsoluteFile());
-                        throw new RuntimeException(e);
+                        throw new DartsException(e);
                     }
                 }
             } catch (IOException e) {
                 log.error("Unable to write ARM file {}", archiveRecordsFile.getAbsoluteFile(), e);
-                throw new RuntimeException(e);
+                throw new DartsException(e);
             }
         }
     }

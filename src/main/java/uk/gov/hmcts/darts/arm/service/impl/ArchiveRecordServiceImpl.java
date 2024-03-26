@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.io.File;
@@ -184,11 +185,11 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
             result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
         } else {
-            throw new RuntimeException(String.format("unknown archive record type for EOD %d", externalObjectDirectoryId));
+            throw new DartsException(String.format("unknown archive record type for EOD %d", externalObjectDirectoryId));
         }
 
         if (result == null) {
-            throw new RuntimeException(String.format("exception generating archive record for EOD %d", externalObjectDirectoryId));
+            throw new DartsException(String.format("exception generating archive record for EOD %d", externalObjectDirectoryId));
         } else {
             return result;
         }

@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -29,7 +30,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,7 +126,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                     }
                 } catch (Exception e) {
                     log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
-                    //TODO revert to whathever the previous status was here
                     recoverByUpdatingEodToFailedArmStatus(batchItem);
                 }
             }
@@ -157,7 +156,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         } else if (armClient.equalsIgnoreCase("dets")) {
             return EodHelper.detsLocation();
         } else {
-            throw new RuntimeException(String.format("Invalid arm client '%s'", armClient));
+            throw new DartsException(String.format("Invalid arm client '%s'", armClient));
         }
     }
 
@@ -244,7 +243,6 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     private void recoverByUpdatingEodToFailedArmStatus(BatchItem batchItem) {
         if (batchItem.getArmEod() != null) {
             batchItem.undoManifestFileChange();
-            //TODO ask Hemanta: what would be the status if the code fails before the push is even attempted? should not be failedArmRawDataStatus
             if (!batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded()) {
                 updateExternalObjectDirectoryStatusToFailed(batchItem.getArmEod(), EodHelper.failedArmRawDataStatus());
             } else {
@@ -281,21 +279,16 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
     }
 
-    static class BatchItems implements Iterable<BatchItem> {
+    static class BatchItems {
 
-        private final List<BatchItem> batchItems = new ArrayList<>();
+        private final List<BatchItem> items = new ArrayList<>();
 
         public void add(BatchItem batchItem) {
-            batchItems.add(batchItem);
-        }
-
-        @Override
-        public Iterator<BatchItem> iterator() {
-            return batchItems.iterator();
+            items.add(batchItem);
         }
 
         public List<BatchItem> getSuccessful() {
-            return batchItems.stream().filter(
+            return items.stream().filter(
                 batchItem -> batchItem.isRawFilePushNotNeededOrSuccessfulWhenNeeded() && batchItem.getArchiveRecord() != null).toList();
         }
 

@@ -40,7 +40,7 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     protected final FileOperationService fileOperationService;
     protected UserAccountEntity userAccount;
 
-    public AbstractUnstructuredToArmProcessor(ObjectRecordStatusRepository objectRecordStatusRepository,
+    protected AbstractUnstructuredToArmProcessor(ObjectRecordStatusRepository objectRecordStatusRepository,
                                               UserIdentity userIdentity,
                                               ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                               ExternalLocationTypeRepository externalLocationTypeRepository,
@@ -85,7 +85,6 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     }
 
     protected void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEntity armStatus) {
-        //TODO should these return the persisted entity to avoid bugs?
         log.debug(
             "Updating ARM status from {} to {} for ID {}",
             armExternalObjectDirectory.getStatus().getDescription(),
