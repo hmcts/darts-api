@@ -231,6 +231,15 @@
 --    amend external_location on external_object_directory to nullable
 --    add enhanced_auditing to audit table
 --v65 add table audit_heritage
+--v66 amend uploaded_by/ts to created_by/ts on case_document 
+--    add hidden_by/ts to annotation_document, case_document, media, transcription_document
+--    add deleted_by/ts to annotation, court_case, media, transcription
+--    add marked_for_manual_del_by/ts to annotation_document, case_document, media, transcription_document
+--    add FK on case_document for created_by and last_modified_by
+--    add FK on hidden_by to annotation_document, case_document, media, transcription_document
+--    add FK on marked_for_manual_del_by to annotation_document, case_document, media, transcription_document
+--    add FK on deleted_by to annotation, court_case, media, transcription
+--    add FK on created_by, last_modified_by on transformed_media
 
 
 -- List of Table Aliases
@@ -318,6 +327,8 @@ CREATE TABLE annotation
 ,version_label               CHARACTER VARYING(32)
 ,current_owner               INTEGER                       NOT NULL
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -350,7 +361,11 @@ CREATE TABLE annotation_document
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,hidden_by                   INTEGER
+,hidden_ts                   TIMESTAMP WITH TIME ZONE
 ,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_del_by    INTEGER
+,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -481,10 +496,14 @@ CREATE TABLE case_document
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,hidden_by                   INTEGER
+,hidden_ts                   TIMESTAMP WITH TIME ZONE
 ,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_del_by    INTEGER
+,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      
-,uploaded_by                 INTEGER                       NOT NULL
-,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL 
 ) TABLESPACE darts_tables;
@@ -539,6 +558,8 @@ CREATE TABLE court_case
 ,retention_retries           INTEGER
 ,version_label               CHARACTER VARYING(32)
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -977,8 +998,14 @@ CREATE TABLE media
 ,file_size                   BIGINT                        NOT NULL
 ,checksum                    CHARACTER VARYING
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,hidden_by                   INTEGER
+,hidden_ts                   TIMESTAMP WITH TIME ZONE
 ,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_del_by    INTEGER
+,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,media_status                CHARACTER VARYING             NOT NULL
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
@@ -1207,6 +1234,8 @@ CREATE TABLE transcription
 ,is_manual_transcription     BOOLEAN                       NOT NULL
 ,hide_request_from_requestor BOOLEAN                       NOT NULL 
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
+,deleted_by                  INTEGER
+,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
@@ -1289,7 +1318,11 @@ CREATE TABLE transcription_document
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
+,hidden_by                   INTEGER
+,hidden_ts                   TIMESTAMP WITH TIME ZONE
 ,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_del_by    INTEGER
+,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1616,6 +1649,10 @@ ALTER TABLE annotation
 ADD CONSTRAINT annotation_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE annotation   
+ADD CONSTRAINT annotation_deleted_by_fk
+FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE annotation_document
 ADD CONSTRAINT annotation_document_annotation_fk
 FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
@@ -1623,6 +1660,14 @@ FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
 ALTER TABLE annotation_document
 ADD CONSTRAINT annotation_document_object_hidden_reason_fk
 FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
+
+ALTER TABLE annotation_document
+ADD CONSTRAINT annotation_document_hidden_by_fk
+FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE annotation_document
+ADD CONSTRAINT annotation_document_marked_for_manual_del_by_fk
+FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE audit                
 ADD CONSTRAINT audit_case_fk
@@ -1668,6 +1713,22 @@ ALTER TABLE case_document
 ADD CONSTRAINT case_document_object_hidden_reason_fk
 FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
+ALTER TABLE case_document            
+ADD CONSTRAINT case_document_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE case_document            
+ADD CONSTRAINT case_document_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE case_document
+ADD CONSTRAINT case_document_hidden_by_fk
+FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE case_document
+ADD CONSTRAINT case_document_marked_for_manual_del_by_fk
+FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -1703,6 +1764,10 @@ FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 ALTER TABLE court_case   
 ADD CONSTRAINT court_case_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE court_case  
+ADD CONSTRAINT court_case_deleted_by_fk
+FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE courthouse
 ADD CONSTRAINT courthouse_created_by_fk
@@ -1900,6 +1965,18 @@ ALTER TABLE media
 ADD CONSTRAINT media_object_hidden_reason_fk
 FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
+ALTER TABLE media
+ADD CONSTRAINT media_hidden_by_fk
+FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE media
+ADD CONSTRAINT media_marked_for_manual_del_by_fk
+FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE media   
+ADD CONSTRAINT media_deleted_by_fk
+FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE media_request               
 ADD CONSTRAINT media_request_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
@@ -1984,6 +2061,10 @@ ALTER TABLE transcription
 ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
+ALTER TABLE transcription   
+ADD CONSTRAINT transcription_deleted_by_fk
+FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE transcription_comment       
 ADD CONSTRAINT transcription_comment_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
@@ -2012,6 +2093,18 @@ ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_object_hidden_reason_fk
 FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
+ALTER TABLE transcription_document
+ADD CONSTRAINT transcription_document_object_hidden_reason_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
+
+ALTER TABLE transcription_document
+ADD CONSTRAINT transcription_document_hidden_by_fk
+FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE transcription_document
+ADD CONSTRAINT transcription_document_marked_for_manual_del_by_fk
+FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
@@ -2027,6 +2120,14 @@ FOREIGN KEY (workflow_actor) REFERENCES user_account(usr_id);
 ALTER TABLE transformed_media  
 ADD CONSTRAINT trm_media_request_fk
 FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
+
+ALTER TABLE transformed_media  
+ADD CONSTRAINT transformed_media_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE transformed_media  
+ADD CONSTRAINT transformed_media_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transient_object_directory
 ADD CONSTRAINT transient_object_directory_created_by_fk
