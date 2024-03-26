@@ -23,6 +23,7 @@ DROP SEQUENCE grp_seq;
 DROP SEQUENCE rol_seq;
 DROP SEQUENCE per_seq;
 
+DROP TABLE audit_heritage;
 DROP TABLE case_judge_ae;
 DROP TABLE case_transcription_ae;
 DROP TABLE hearing_judge_ae;
@@ -31,6 +32,7 @@ DROP TABLE defendant;
 DROP TABLE prosecutor;
 DROP TABLE judge;
 DROP TABLE node_register;
+DROP TABLE object_hidden_reason;
 DROP TABLE transient_object_directory;
 DROP TABLE transformed_media;
 DROP TABLE external_object_directory; 
