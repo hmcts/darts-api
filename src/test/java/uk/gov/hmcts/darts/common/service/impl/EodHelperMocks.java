@@ -13,6 +13,9 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+/**
+ * Helper test class that mocks {@link EodHelper} entities and methods so that they can be used in unit tests.
+ */
 public class EodHelperMocks {
 
     @Mock(lenient = true)
@@ -38,7 +41,7 @@ public class EodHelperMocks {
         mockEodHelper();
     }
 
-    public void mockEodHelper() {
+    public final void mockEodHelper() {
         MockitoAnnotations.initMocks(this);
 
         mockedEodHelper = Mockito.mockStatic(EodHelper.class);
