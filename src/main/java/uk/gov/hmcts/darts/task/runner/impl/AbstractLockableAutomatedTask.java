@@ -15,12 +15,12 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
-import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import javax.validation.constraints.NotNull;
 
 
 @Slf4j

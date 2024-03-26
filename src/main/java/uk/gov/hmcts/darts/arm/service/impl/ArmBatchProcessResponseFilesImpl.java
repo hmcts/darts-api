@@ -372,21 +372,20 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                     processInvalidLineFileObject(invalidLineFileFilenameProcessor, armResponseInvalidLineRecord);
                 } else {
                     log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
-
                 }
             } catch (IOException e) {
                 log.error("Unable to write invalid line file to temporary workspace {} - {}",
                           invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
 
             } catch (Exception e) {
-                log.error("Unable to process arm response invalid line file {} - {}",
+                log.error("Unable to process ARM response invalid line file {} - {}",
                           invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
 
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
-
+            log.error("Unable to read ARM response invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
         }
     }
 
@@ -440,10 +439,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         userAccount = userIdentity.getUserAccount();
     }
 
-    private void updateExternalObjectDirectoryStatus(String eodIdString, ObjectRecordStatusEntity objectRecordStatus) {
-        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntityById(eodIdString);
-        updateExternalObjectDirectoryStatus(externalObjectDirectory, objectRecordStatus);
-    }
 
     private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntityById(String eodIdString) {
         if (StringUtils.isNotEmpty(eodIdString)) {
