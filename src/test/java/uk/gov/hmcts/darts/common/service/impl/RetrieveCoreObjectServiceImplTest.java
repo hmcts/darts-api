@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createOffsetDateTime;
 
 @ExtendWith(MockitoExtension.class)
 class RetrieveCoreObjectServiceImplTest {
@@ -31,6 +32,7 @@ class RetrieveCoreObjectServiceImplTest {
     private static final String COURTHOUSE_1 = "courthouse1";
     private static final String COURTROOM_1 = "courtroom1";
     private static final String CASE_NUMBER_1 = "caseNumber1";
+
     @Mock
     HearingRepository hearingRepository;
 
@@ -53,6 +55,8 @@ class RetrieveCoreObjectServiceImplTest {
     void hearingExists() {
         HearingEntity hearingToBeFound = new HearingEntity();
         hearingToBeFound.setId(123);
+        hearingToBeFound.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
+
         when(hearingRepository.findHearing(anyString(), anyString(), anyString(), any(LocalDate.class))).thenReturn(
             Optional.of(hearingToBeFound));
 
@@ -82,8 +86,8 @@ class RetrieveCoreObjectServiceImplTest {
         assertEquals(COURTROOM_1, response.getCourtroom().getName());
         assertEquals(1, response.getCourtroom().getCourthouse().getId());
         assertEquals(CASE_NUMBER_1, response.getCourtCase().getCaseNumber());
-        assertEquals(response.getCreatedBy(), authorisationApi.getCurrentUser());
-        assertEquals(response.getLastModifiedBy(), authorisationApi.getCurrentUser());
+        assertEquals(authorisationApi.getCurrentUser(), response.getCreatedBy());
+        assertEquals(authorisationApi.getCurrentUser(), response.getLastModifiedBy());
     }
 
     @Test

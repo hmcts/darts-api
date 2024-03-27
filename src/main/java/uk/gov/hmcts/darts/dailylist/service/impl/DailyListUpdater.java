@@ -82,16 +82,8 @@ class DailyListUpdater {
                             caseNumber, dailyListHearing.getHearingDetails().getHearingDate(),
                             dailyListSystemUser
                         );
-                        hearing.setCreatedBy(dailyListSystemUser);
-                        hearing.setLastModifiedBy(dailyListSystemUser);
-                        // set this so it's updated when no other changes are present
-                        hearing.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
-                        courtCase.setCreatedBy(dailyListSystemUser);
-                        courtCase.setLastModifiedBy(dailyListSystemUser);
-                        // set this so it's updated when no other changes are present
-                        courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
                         updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());

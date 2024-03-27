@@ -42,6 +42,8 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +66,7 @@ class CaseServiceImplTest {
 
     public static final String SWANSEA = "SWANSEA";
     public static final String TEST_COURT_CASE = "case_courthouse";
+    public static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 3, 25, 10, 0, 0, 0, ZoneOffset.UTC);
 
     CaseServiceImpl service;
 
@@ -222,12 +225,16 @@ class CaseServiceImplTest {
             "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
+        verify(caseRepository, times(1)).saveAndFlush(caseEntityArgumentCaptor.capture());
         verifyNoInteractions(hearingRepository);
 
         CourtCaseEntity savedCaseEntity = caseEntityArgumentCaptor.getValue();
 
         assertEquals(TEST_COURT_CASE, savedCaseEntity.getCourthouse().getCourthouseName());
+        assertEquals(FIXED_DATETIME, savedCaseEntity.getCreatedDateTime());
+        assertEquals(FIXED_DATETIME, savedCaseEntity.getLastModifiedDateTime());
+        assertEquals("testUsername", savedCaseEntity.getCreatedBy().getUserName());
+        assertEquals("testUsername", savedCaseEntity.getLastModifiedBy().getUserName());
         assertEquals("testAddCase", savedCaseEntity.getCaseNumber());
         assertNotNull(savedCaseEntity.getDefendantList());
         assertNotNull(savedCaseEntity.getProsecutorList());
