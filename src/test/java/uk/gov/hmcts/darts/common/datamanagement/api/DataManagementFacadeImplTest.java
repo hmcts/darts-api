@@ -1,11 +1,15 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
+import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.BlobClient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
@@ -21,14 +25,20 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,14 +57,25 @@ class DataManagementFacadeImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private StorageOrderHelper storageOrderHelper;
+    @Mock
+    private UnstructuredDataHelper unstructuredDataHelper;
+    @Mock
+    private DataManagementApi dataManagementApi;
+    @Mock
+    private UserAccountRepository userAccountRepository;
+    @Mock
+    private BlobClient blobClient;
 
     private ExternalLocationTypeEntity inboundLocationEntity;
     private ExternalLocationTypeEntity unstructuredLocationEntity;
     private ExternalLocationTypeEntity detsLocationEntity;
     private ExternalLocationTypeEntity armLocationEntity;
+    FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
+    DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
 
     @BeforeEach
     void setup() {
+
         List<DatastoreContainerType> datastoreOrder = new ArrayList<>();
         datastoreOrder.add(DatastoreContainerType.UNSTRUCTURED);
         datastoreOrder.add(DatastoreContainerType.DETS);
@@ -87,6 +108,12 @@ class DataManagementFacadeImplTest {
 
     }
 
+    @AfterEach
+    public void teardown() throws IOException {
+        fileBasedDownloadResponseMetaData.close();
+        downloadResponseMetaData.close();
+    }
+
     @Test
     void testDownloadOfFacadeWithArm() throws Exception {
         final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
@@ -102,7 +129,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
@@ -125,7 +152,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
@@ -147,7 +174,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -173,7 +200,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         try (DownloadResponseMetaData downloadResponseMetaData = dmFacade.retrieveFileFromStorage(entitiesToDownload)) {
@@ -197,7 +224,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -222,7 +249,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -242,7 +269,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -262,7 +289,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -286,7 +313,7 @@ class DataManagementFacadeImplTest {
             .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         assertThrows(
             FileNotDownloadedException.class,
@@ -303,7 +330,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -327,7 +354,7 @@ class DataManagementFacadeImplTest {
             .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         assertThrows(
             FileNotDownloadedException.class,
@@ -345,7 +372,7 @@ class DataManagementFacadeImplTest {
 
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         // make the assertion on the response
         var exception = assertThrows(
@@ -369,7 +396,7 @@ class DataManagementFacadeImplTest {
             .thenReturn(List.of(inboundEntity));
         // execute the code
         final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
-                                                                               objectRecordStatusRepository, storageOrderHelper);
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
 
         assertThrows(
             FileNotDownloadedException.class,
@@ -377,16 +404,101 @@ class DataManagementFacadeImplTest {
         );
     }
 
+    @Test
+    void testUnstructuredDataHelperCreate() throws Exception {
+
+        when(dataManagementApi.saveBlobDataToContainer(any(), any(), any())).thenReturn(blobClient);
+        when(blobClient.getBlobName()).thenReturn(UUID.randomUUID().toString());
+
+        UnstructuredDataHelper unstructuredDataHelperTest = new UnstructuredDataHelper(
+            externalObjectDirectoryRepository,
+            dataManagementApi,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            userAccountRepository
+        );
+
+        MediaEntity mediaEntity = new MediaEntity();
+        ExternalObjectDirectoryEntity eodEntity = createEodEntity(unstructuredLocationEntity);
+        eodEntity.setMedia(mediaEntity);
+        ExternalObjectDirectoryEntity eodEntityToDelete = createEodEntity(unstructuredLocationEntity);
+        eodEntityToDelete.setMedia(mediaEntity);
+        BinaryData data = BinaryData.fromString("Test String");
+
+        boolean created = unstructuredDataHelperTest.createUnstructured(
+            eodEntityToDelete,
+            eodEntity,
+            data
+        );
+
+        assertTrue(created);
+    }
+
+    @Test
+    void testUnstructuredDataHelperCreateFailed() throws Exception {
+
+        when(dataManagementApi.saveBlobDataToContainer(any(), any(), any())).thenReturn(blobClient);
+
+        UnstructuredDataHelper unstructuredDataHelperTest = new UnstructuredDataHelper(
+            externalObjectDirectoryRepository,
+            dataManagementApi,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            userAccountRepository
+        );
+
+        MediaEntity mediaEntity = new MediaEntity();
+        ExternalObjectDirectoryEntity eodEntity = createEodEntity(unstructuredLocationEntity);
+        eodEntity.setMedia(mediaEntity);
+        ExternalObjectDirectoryEntity eodEntityToDelete = createEodEntity(unstructuredLocationEntity);
+        eodEntityToDelete.setMedia(mediaEntity);
+        BinaryData data = BinaryData.fromString("Test String");
+
+        boolean created = unstructuredDataHelperTest.createUnstructured(
+            eodEntityToDelete,
+            eodEntity,
+            data
+        );
+
+        assertFalse(created);
+    }
+
+    @Test
+    void testDownloadOfFacadeCreatesUnstructuredWhenUnstructuredNotFound() throws Exception {
+        UnstructuredDataHelper.waitForAllJobsToFinish();
+        ExternalObjectDirectoryEntity inboundEntity = createEodEntity(inboundLocationEntity);
+        ExternalObjectDirectoryEntity unstructuredEntity = createEodEntity(unstructuredLocationEntity);
+        ExternalObjectDirectoryEntity detsEntity = createEodEntity(detsLocationEntity);
+
+        when(externalObjectDirectoryRepository.findByEntityAndStatus(any(MediaEntity.class), any(ObjectRecordStatusEntity.class)))
+            .thenReturn(List.of(inboundEntity, unstructuredEntity, detsEntity));
+
+        MediaEntity mediaEntity = new MediaEntity();
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.DETS, true));
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper);
+
+        downloadResponseMetaData = dmFacade.retrieveFileFromStorage(mediaEntity);
+        assertEquals(DatastoreContainerType.DETS, downloadResponseMetaData.getContainerTypeUsedToDownload());
+        assertNotEquals(0, UnstructuredDataHelper.getJobsList().size());
+    }
 
     private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
                                                                  boolean processSuccess) throws Exception {
         BlobContainerDownloadable downloadable = Mockito.mock(BlobContainerDownloadable.class);
 
+        BinaryData data = BinaryData.fromString("Test String");
+
+        fileBasedDownloadResponseMetaData.markInputStream(data.toStream());
+
         Mockito.lenient().when(downloadable.getContainerName(containerType)).thenReturn(Optional.of("test"));
         if (processSuccess) {
             when(downloadable
                      .downloadBlobFromContainer(eq(containerType),
-                                                Mockito.notNull())).thenReturn(new FileBasedDownloadResponseMetaData());
+                                                Mockito.notNull())).thenReturn(fileBasedDownloadResponseMetaData);
         } else {
             Mockito.lenient().when(downloadable
                                        .downloadBlobFromContainer(eq(containerType),
