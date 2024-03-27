@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -181,17 +182,25 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                            "display_name": "<A security group new name>",
                            "description": "func-test group new description",
                            "courthouse_ids": [<id1>,<id2>],
-                           "user_ids": [-1,-2]
+                           "user_ids": [<userId1>,<userId2>]
                          }
                            """;
         String newName = "func-a-security-group-new-name " + UUID.randomUUID();
         patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
         String newDisplayName = "A security group new name " + UUID.randomUUID();
         patchContent = patchContent.replace("<A security group new name>", newDisplayName);
-        Integer id1 = createCourthouse("func-a_courthouse " + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
-        Integer id2 = createCourthouse("func-a_courthouse " + UUID.randomUUID(), "func-a_courthouse" + UUID.randomUUID());
+        Integer id1 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
+        Integer id2 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
         patchContent = patchContent.replace("<id1>", id1.toString());
         patchContent = patchContent.replace("<id2>", id2.toString());
+        Response createUserResponse = createUser();
+        int userId1 = new JSONObject(createUserResponse.asString())
+            .getInt("id");
+        createUserResponse = createUser();
+        int userId2 = new JSONObject(createUserResponse.asString())
+            .getInt("id");
+        patchContent = patchContent.replace("<userId1>", Integer.toString(userId1));
+        patchContent = patchContent.replace("<userId2>", Integer.toString(userId2));
 
         SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
                                                                                   new TypeReference<SecurityGroupWithIdAndRole>(){});
@@ -211,8 +220,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         assertEquals("func-test group new description", securityGroupWithIdAndRoleAndUsers.getDescription());
         assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(id1));
         assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(id2));
-        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(-1));
-        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(-2));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(userId1));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(userId2));
 
         response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
@@ -228,8 +237,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         assertEquals("func-test group new description", retrievedSecurityGroupWithIdAndRoles.getDescription());
         assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(id1));
         assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(id2));
-        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-1));
-        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(-2));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(userId1));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(userId2));
 
 
     }
@@ -246,5 +255,24 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         ExtendedCourthousePost extendedCourthousePost = MAPPER.readValue(response.asString(),
                                                                          new TypeReference<ExtendedCourthousePost>(){});
         return extendedCourthousePost.getId();
+    }
+
+    private Response createUser() {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/users"))
+            .contentType(ContentType.JSON)
+            .body("""
+                      {
+                           "full_name": "James Smith",
+                           "email_address": "james.smith@hmcts.net",
+                           "description": "A temporary user created by functional test"
+                      }
+                      """)
+            .post()
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        return response;
     }
 }
