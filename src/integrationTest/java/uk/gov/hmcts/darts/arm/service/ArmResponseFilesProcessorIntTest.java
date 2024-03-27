@@ -88,8 +88,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
             externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
             userIdentity,
             armResponseFilesProcessSingleElement
         );

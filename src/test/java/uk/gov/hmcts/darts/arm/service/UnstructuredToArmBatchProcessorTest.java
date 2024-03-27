@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
-import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
@@ -29,6 +27,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -38,6 +37,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
+import static uk.gov.hmcts.darts.common.util.EodHelper.detsLocation;
+import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmBatchProcessorTest {
@@ -112,7 +115,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
-        doReturn(EodHelper.armLocation()).when(eod1).getExternalLocationType();
+        doReturn(armLocation()).when(eod1).getExternalLocationType();
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
         //when
@@ -120,14 +123,14 @@ class UnstructuredToArmBatchProcessorTest {
 
         //then
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
-            EodHelper.storedStatus(),
-            EodHelper.unstructuredLocation(),
-            EodHelper.armLocation(),
+            storedStatus(),
+            unstructuredLocation(),
+            armLocation(),
             Pageable.ofSize(5)
         );
         verify(externalObjectDirectoryRepository).findMatchingExternalObjectDirectoryEntityByLocation(
-            EodHelper.storedStatus(),
-            EodHelper.unstructuredLocation(),
+            storedStatus(),
+            unstructuredLocation(),
             null,
             null,
             null,
@@ -142,7 +145,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
-        doReturn(EodHelper.armLocation()).when(eod1).getExternalLocationType();
+        doReturn(armLocation()).when(eod1).getExternalLocationType();
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
         //when
@@ -150,14 +153,14 @@ class UnstructuredToArmBatchProcessorTest {
 
         //then
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
-            EodHelper.armLocation(),
+            storedStatus(),
+            detsLocation(),
+            armLocation(),
             Pageable.ofSize(5)
         );
         verify(externalObjectDirectoryRepository).findMatchingExternalObjectDirectoryEntityByLocation(
-            EodHelper.storedStatus(),
-            EodHelper.detsLocation(),
+            storedStatus(),
+            detsLocation(),
             null,
             null,
             null,
@@ -172,7 +175,7 @@ class UnstructuredToArmBatchProcessorTest {
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
 
         //then
-        Assertions.assertThrows(DartsException.class, () -> unstructuredToArmProcessor.processUnstructuredToArm());
+        assertThrows(DartsException.class, () -> unstructuredToArmProcessor.processUnstructuredToArm());
     }
 
     @Test
@@ -190,9 +193,9 @@ class UnstructuredToArmBatchProcessorTest {
 
         //then
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
-            EodHelper.storedStatus(),
-            EodHelper.unstructuredLocation(),
-            EodHelper.armLocation(),
+            storedStatus(),
+            unstructuredLocation(),
+            armLocation(),
             Pageable.ofSize(5)
         );
         verify(eodService).findFailedStillRetriableArmEods(Pageable.ofSize(3));
