@@ -258,8 +258,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(0).getId()));
     }
 
-    //TODO add test with a mixture of scenarios alltogether?
-
     @Test
     void pushRawDataFails() {
 
