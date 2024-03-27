@@ -25,7 +25,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -172,7 +171,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     public ArchiveRecord generateArchiveRecordInfo(Integer externalObjectDirectoryId, String rawFilename) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
-            () -> new NoSuchElementException(format("external object directory not found with id: %d", externalObjectDirectoryId)));
+            () -> new DartsException(format("external object directory not found with id: %d", externalObjectDirectoryId)));
 
         ArchiveRecord result;
 
