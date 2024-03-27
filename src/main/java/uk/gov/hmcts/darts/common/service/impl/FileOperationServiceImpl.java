@@ -22,40 +22,41 @@ public class FileOperationServiceImpl implements FileOperationService {
     private final AudioConfigurationProperties audioConfigurationProperties;
 
     @Override
+    public Path createFile(String fileName, String workspace, boolean appendUuidToWorkspace) throws IOException {
+        Path workspacePath = Path.of(workspace);
+        if (appendUuidToWorkspace) {
+            workspacePath = workspacePath.resolve(UUID.randomUUID().toString());
+        }
+        Path targetTempFile = workspacePath.resolve(fileName);
+        Files.createDirectories(workspacePath);
+        return Files.createFile(targetTempFile);
+    }
+
+    @Override
     public Path saveFileToTempWorkspace(InputStream mediaFile, String fileName) throws IOException {
 
-        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace())
-            .resolve(UUID.randomUUID().toString());
-        Path targetTempFile = targetTempDirectory.resolve(fileName);
+        Path tempFilePath;
 
         try (InputStream audioInputStream = mediaFile) {
-            Files.createDirectories(targetTempDirectory);
-            Path tempFilePath = Files.createFile(targetTempFile);
+            tempFilePath = createFile(fileName, audioConfigurationProperties.getTempBlobWorkspace(), true);
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
-
         } catch (IOException e) {
             log.error("IOException. Unable to copy Blob Data to temporary workspace");
             throw new IOException(e);
         }
 
-        return targetTempFile;
+        return tempFilePath;
     }
 
     @Override
     public Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUuidToWorkspace)
         throws IOException {
 
-        Path workspacePath = Path.of(workspace);
-        if (appendUuidToWorkspace) {
-            workspacePath = workspacePath.resolve(UUID.randomUUID().toString());
-        }
-        Path targetTempFile = workspacePath.resolve(fileName);
+        Path targetTempFile;
 
         try (InputStream audioInputStream = binaryData.toStream()) {
-            Files.createDirectories(targetTempFile.getParent());
-            Path tempFilePath = Files.createFile(targetTempFile);
-            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
-
+            targetTempFile = createFile(fileName, workspace, appendUuidToWorkspace);
+            Files.copy(audioInputStream, targetTempFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("Unable to copy binary data to workspace {} - {}", workspace, e.getMessage());
             throw new IOException(e);

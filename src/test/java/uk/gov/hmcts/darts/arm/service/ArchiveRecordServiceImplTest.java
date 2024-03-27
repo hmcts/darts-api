@@ -21,7 +21,12 @@ import uk.gov.hmcts.darts.arm.mapper.impl.AnnotationArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.CaseArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.MediaArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
+import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -40,6 +45,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -55,6 +61,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
@@ -76,7 +87,7 @@ class ArchiveRecordServiceImplTest {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
 
-    @Mock
+    @Mock(lenient = true)
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
@@ -127,6 +138,17 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
+    @Mock
+    private MediaArchiveRecordMapper mediaArchiveRecordMapperMock;
+    @Mock
+    private TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapperMock;
+    @Mock
+    private AnnotationArchiveRecordMapper annotationArchiveRecordMapperMock;
+    @Mock
+    private CaseArchiveRecordMapper caseArchiveRecordMapperMock;
+
+    private ArchiveRecordFileGenerator archiveRecordFileGenerator;
+
     @TempDir
     private File tempDirectory;
 
@@ -135,7 +157,7 @@ class ArchiveRecordServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ArchiveRecordFileGenerator archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
+        archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
 
         MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
         TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(
@@ -1109,6 +1131,176 @@ class ArchiveRecordServiceImplTest {
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forMedia_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
+        when(mediaArchiveRecordMapperMock.mapToMediaArchiveRecord(any(), any())).thenReturn(MediaArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(MediaArchiveRecord.class);
+        verify(mediaArchiveRecordMapperMock).mapToMediaArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(annotationArchiveRecordMapperMock);
+        verifyNoInteractions(caseArchiveRecordMapperMock);
+        verifyNoInteractions(transcriptionArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forTranscription_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+        when(transcriptionArchiveRecordMapperMock.mapToTranscriptionArchiveRecord(any(), any())).thenReturn(TranscriptionArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(TranscriptionArchiveRecord.class);
+        verify(transcriptionArchiveRecordMapperMock).mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(annotationArchiveRecordMapperMock);
+        verifyNoInteractions(caseArchiveRecordMapperMock);
+        verifyNoInteractions(mediaArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forAnnotation_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(annotationArchiveRecordMapperMock.mapToAnnotationArchiveRecord(any(), any())).thenReturn(AnnotationArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(AnnotationArchiveRecord.class);
+        verify(annotationArchiveRecordMapperMock).mapToAnnotationArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(transcriptionArchiveRecordMapperMock);
+        verifyNoInteractions(caseArchiveRecordMapperMock);
+        verifyNoInteractions(mediaArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forCaseDocument_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(caseArchiveRecordMapperMock.mapToCaseArchiveRecord(any(), any())).thenReturn(CaseArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(CaseArchiveRecord.class);
+        verify(caseArchiveRecordMapperMock).mapToCaseArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(transcriptionArchiveRecordMapperMock);
+        verifyNoInteractions(annotationArchiveRecordMapperMock);
+        verifyNoInteractions(mediaArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_throwsError_whenMapperReturnsNoResult() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // then
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+    }
+
+    @Test
+    void generateArchiveRecordInfo_throwsError_whenCannotFindEod() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.empty());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // then
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+    }
+
+    @Test
+    void generateArchiveRecordInfo_throwsError_whenUnknownArchiveRecordType() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // then
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {

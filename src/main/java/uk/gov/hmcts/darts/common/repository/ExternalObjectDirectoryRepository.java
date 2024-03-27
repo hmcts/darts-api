@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -89,7 +90,16 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
                                                                                   ExternalLocationTypeEntity location1,
-                                                                                  ExternalLocationTypeEntity location2);
+                                                                                  ExternalLocationTypeEntity location2,
+                                                                                  Pageable pageable);
+
+
+    default List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
+                                                                                  ExternalLocationTypeEntity location1,
+                                                                                  ExternalLocationTypeEntity location2) {
+        return findExternalObjectsNotIn2StorageLocations(status, location1, location2, Pageable.unpaged());
+    }
+
 
 
     @Query(
@@ -120,7 +130,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                             ExternalLocationTypeEntity type,
-                                                                                            Integer transferAttempts);
+                                                                                            Integer transferAttempts,
+                                                                                            Pageable pageable);
+
+    default List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
+                                                                                            ExternalLocationTypeEntity type,
+                                                                                            Integer transferAttempts) {
+        return findNotFinishedAndNotExceededRetryInStorageLocation(failedStatuses, type, transferAttempts, Pageable.unpaged());
+    }
 
     List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
