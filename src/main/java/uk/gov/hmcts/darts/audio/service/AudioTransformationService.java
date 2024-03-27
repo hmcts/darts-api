@@ -24,4 +24,6 @@ public interface AudioTransformationService {
 
     void handleKedaInvocationForMediaRequests();
 
+    void processAudioRequest(Integer requestId);
+
 }

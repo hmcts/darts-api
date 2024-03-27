@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -27,6 +28,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -45,6 +47,8 @@ class TestSupportControllerTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
     @MockBean
     private BankHolidaysService mockBankHolidaysService;
+    @MockBean
+    private AudioTransformationService audioTransformationService;
 
     @MockBean
     private UserAccountEntity mockUserAccountEntity;
@@ -154,5 +158,15 @@ class TestSupportControllerTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful());
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNull();
+    }
+
+    @Test
+    void handleKedaInvocationForMediaRequests() throws Exception {
+        Integer mediaRequestId = 1;
+        MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/handleKedaInvocationForMediaRequests/" + mediaRequestId))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertTrue(response.getResponse().getContentAsString().isEmpty());
     }
 }
