@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
+import static java.lang.Boolean.TRUE;
+
 
 @Slf4j
 public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
@@ -69,7 +71,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 String dbCronExpression = automatedTask.getCronExpression();
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
                 if (getLastCronExpression().equals(dbCronExpression)) {
-                    if (automatedTask.getTaskEnabled()) {
+                    if (TRUE.equals(automatedTask.getTaskEnabled())) {
                         lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
