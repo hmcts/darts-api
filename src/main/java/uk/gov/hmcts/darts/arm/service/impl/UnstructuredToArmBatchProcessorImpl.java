@@ -181,7 +181,8 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         return armEod;
     }
 
-    private ExternalObjectDirectoryEntity createArmEodWithArmIngestionStatus(ExternalObjectDirectoryEntity currentEod, BatchItem batchItem, BatchItems batchItems,
+    private ExternalObjectDirectoryEntity createArmEodWithArmIngestionStatus(ExternalObjectDirectoryEntity currentEod, BatchItem batchItem,
+                                                                             BatchItems batchItems,
                                                                              File archiveRecordsFile) {
         ExternalObjectDirectoryEntity armEod;
         armEod = createArmExternalObjectDirectoryEntity(currentEod, EodHelper.armIngestionStatus());
