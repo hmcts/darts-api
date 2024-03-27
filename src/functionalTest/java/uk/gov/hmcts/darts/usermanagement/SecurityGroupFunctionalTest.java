@@ -3,9 +3,13 @@ package uk.gov.hmcts.darts.usermanagement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -14,10 +18,13 @@ import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -28,6 +35,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 class SecurityGroupFunctionalTest extends FunctionalTest {
+
+    public static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @BeforeAll
+    static void beforeAll() {
+        MAPPER.registerModule(new JavaTimeModule());
+        MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     @AfterEach
     void tearDown() {
@@ -137,5 +152,130 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         if (courtroomId != null) {
             assertTrue(group.getCourthouseIds().contains(courtroomId));
         }
+    }
+
+    @Test
+    void shouldPatchSecurityGroups() throws JsonProcessingException {
+
+        String postContent = """
+                         {
+                           "name": "<func-a-security-group>",
+                           "display_name": "<A security group>",
+                           "description": "func-test group"
+                         }
+                           """;
+        postContent = postContent.replace("<func-a-security-group>", "func-a-security-group " + UUID.randomUUID());
+        postContent = postContent.replace("<A security group>", "A security group " + UUID.randomUUID());
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups"))
+            .contentType(ContentType.JSON)
+            .body(postContent)
+            .post()
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        String patchContent = """
+                         {
+                           "name": "<func-a-security-group-new-name>",
+                           "display_name": "<A security group new name>",
+                           "description": "func-test group new description",
+                           "courthouse_ids": [<id1>,<id2>],
+                           "user_ids": [<userId1>,<userId2>]
+                         }
+                           """;
+        String newName = "func-a-security-group-new-name " + UUID.randomUUID();
+        patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
+        String newDisplayName = "A security group new name " + UUID.randomUUID();
+        patchContent = patchContent.replace("<A security group new name>", newDisplayName);
+        Integer id1 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
+        Integer id2 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
+        patchContent = patchContent.replace("<id1>", id1.toString());
+        patchContent = patchContent.replace("<id2>", id2.toString());
+        Response createUserResponse = createUser("user1@email.com");
+        int userId1 = new JSONObject(createUserResponse.asString())
+            .getInt("id");
+        createUserResponse = createUser("user2@email.com");
+        int userId2 = new JSONObject(createUserResponse.asString())
+            .getInt("id");
+        patchContent = patchContent.replace("<userId1>", Integer.toString(userId1));
+        patchContent = patchContent.replace("<userId2>", Integer.toString(userId2));
+
+        SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
+                                                                                  new TypeReference<SecurityGroupWithIdAndRole>(){});
+
+        response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
+            .contentType(ContentType.JSON)
+            .body(patchContent)
+            .patch()
+            .thenReturn();
+
+        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = MAPPER.readValue(response.asString(),
+                                                                                                 new TypeReference<SecurityGroupWithIdAndRoleAndUsers>(){});
+
+        assertEquals(newName, securityGroupWithIdAndRoleAndUsers.getName());
+        assertEquals(newDisplayName, securityGroupWithIdAndRoleAndUsers.getDisplayName());
+        assertEquals("func-test group new description", securityGroupWithIdAndRoleAndUsers.getDescription());
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(id1));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getCourthouseIds().contains(id2));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(userId1));
+        assertTrue(securityGroupWithIdAndRoleAndUsers.getUserIds().contains(userId2));
+
+        response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
+            .contentType(ContentType.JSON)
+            .get()
+            .thenReturn();
+
+        SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
+                                                                                           new TypeReference<SecurityGroupWithIdAndRole>(){});
+
+        assertEquals(newName, retrievedSecurityGroupWithIdAndRoles.getName());
+        assertEquals(newDisplayName, retrievedSecurityGroupWithIdAndRoles.getDisplayName());
+        assertEquals("func-test group new description", retrievedSecurityGroupWithIdAndRoles.getDescription());
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(id1));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getCourthouseIds().contains(id2));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(userId1));
+        assertTrue(retrievedSecurityGroupWithIdAndRoles.getUserIds().contains(userId2));
+
+
+    }
+
+    private Integer createCourthouse(String name, String displayName) throws JsonProcessingException {
+        String content = String.format("{\"courthouse_name\": \"%s\", \"display_name\": \"%s\"}", name, displayName);
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/courthouses"))
+            .contentType(ContentType.JSON)
+            .body(content)
+            .post()
+            .thenReturn();
+
+        ExtendedCourthousePost extendedCourthousePost = MAPPER.readValue(response.asString(),
+                                                                         new TypeReference<ExtendedCourthousePost>(){});
+        return extendedCourthousePost.getId();
+    }
+
+    private Response createUser(String email) {
+        String request = """
+              {
+                   "full_name": "James Smith",
+                   "email_address": "<email>",
+                   "description": "A temporary user created by functional test"
+              }
+              """;
+        request = request.replace("<email>", email);
+
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/users"))
+            .contentType(ContentType.JSON)
+            .body(request)
+            .post()
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        return response;
     }
 }
