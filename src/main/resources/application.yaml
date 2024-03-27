@@ -173,11 +173,11 @@ darts:
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
-      container-name: darts-arm
+      container-name: dropzone
       folders:
-        submission: dropzone/DARTS/submission/
-        collected: dropzone/DARTS/collected/
-        response: dropzone/DARTS/response/
+        submission: DARTS/submission/
+        collected: DARTS/collected/
+        response: DARTS/response/
       max-retry-attempts: 3
       max-blobs-per-page: 3
       publisher: DARTS
