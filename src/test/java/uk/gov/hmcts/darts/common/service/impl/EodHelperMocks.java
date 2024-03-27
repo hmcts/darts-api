@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
+import lombok.SneakyThrows;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -11,38 +12,39 @@ import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Helper test class that mocks {@link EodHelper} entities and methods so that they can be used in unit tests.
  */
 public class EodHelperMocks {
 
-    @Mock(lenient = true)
+    @Mock
     private ExternalLocationTypeEntity armLocation;
-    @Mock(lenient = true)
+    @Mock
     private ExternalLocationTypeEntity unstructuredLocation;
-    @Mock(lenient = true)
+    @Mock
     private ExternalLocationTypeEntity detsLocation;
-    @Mock(lenient = true)
+    @Mock
     private ObjectRecordStatusEntity storedStatus;
-    @Mock(lenient = true)
+    @Mock
     private ObjectRecordStatusEntity armIngestionStatus;
-    @Mock(lenient = true)
+    @Mock
     private ObjectRecordStatusEntity armDropZoneStatus;
-    @Mock(lenient = true)
+    @Mock
     private ObjectRecordStatusEntity failedArmRawDataStatus;
-    @Mock(lenient = true)
+    @Mock
     private ObjectRecordStatusEntity failedArmManifestFileStatus;
 
     private MockedStatic<EodHelper> mockedEodHelper;
+    private AutoCloseable closeable;
 
     public EodHelperMocks() {
         mockEodHelper();
     }
 
     public final void mockEodHelper() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         mockedEodHelper = Mockito.mockStatic(EodHelper.class);
 
@@ -50,12 +52,12 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::unstructuredLocation).thenReturn(unstructuredLocation);
         mockedEodHelper.when(EodHelper::detsLocation).thenReturn(detsLocation);
 
-        when(armLocation.getId()).thenReturn(ExternalLocationTypeEnum.ARM.getId());
-        when(armLocation.getDescription()).thenReturn("arm");
-        when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
-        when(unstructuredLocation.getDescription()).thenReturn("unstructured");
-        when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.DETS.getId());
-        when(unstructuredLocation.getDescription()).thenReturn("dets");
+        lenient().when(armLocation.getId()).thenReturn(ExternalLocationTypeEnum.ARM.getId());
+        lenient().when(armLocation.getDescription()).thenReturn("arm");
+        lenient().when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+        lenient().when(unstructuredLocation.getDescription()).thenReturn("unstructured");
+        lenient().when(unstructuredLocation.getId()).thenReturn(ExternalLocationTypeEnum.DETS.getId());
+        lenient().when(unstructuredLocation.getDescription()).thenReturn("dets");
 
         mockedEodHelper.when(EodHelper::storedStatus).thenReturn(storedStatus);
         mockedEodHelper.when(EodHelper::armIngestionStatus).thenReturn(armIngestionStatus);
@@ -63,16 +65,16 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::failedArmManifestFileStatus).thenReturn(failedArmManifestFileStatus);
         mockedEodHelper.when(EodHelper::armDropZoneStatus).thenReturn(armDropZoneStatus);
 
-        when(storedStatus.getId()).thenReturn(ObjectRecordStatusEnum.STORED.getId());
-        when(storedStatus.getDescription()).thenReturn("Stored");
-        when(armIngestionStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_INGESTION.getId());
-        when(armIngestionStatus.getDescription()).thenReturn("Arm Ingestion");
-        when(armDropZoneStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_DROP_ZONE.getId());
-        when(armDropZoneStatus.getDescription()).thenReturn("Arm Drop Zone");
-        when(failedArmRawDataStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED.getId());
-        when(failedArmRawDataStatus.getDescription()).thenReturn("Arm Raw Data Failed");
-        when(failedArmManifestFileStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_MANIFEST_FAILED.getId());
-        when(failedArmManifestFileStatus.getDescription()).thenReturn("Arm Manifest Failed");
+        lenient().when(storedStatus.getId()).thenReturn(ObjectRecordStatusEnum.STORED.getId());
+        lenient().when(storedStatus.getDescription()).thenReturn("Stored");
+        lenient().when(armIngestionStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_INGESTION.getId());
+        lenient().when(armIngestionStatus.getDescription()).thenReturn("Arm Ingestion");
+        lenient().when(armDropZoneStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_DROP_ZONE.getId());
+        lenient().when(armDropZoneStatus.getDescription()).thenReturn("Arm Drop Zone");
+        lenient().when(failedArmRawDataStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED.getId());
+        lenient().when(failedArmRawDataStatus.getDescription()).thenReturn("Arm Raw Data Failed");
+        lenient().when(failedArmManifestFileStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_MANIFEST_FAILED.getId());
+        lenient().when(failedArmManifestFileStatus.getDescription()).thenReturn("Arm Manifest Failed");
     }
 
     public void givenIsEqualLocationReturns(boolean result) {
@@ -85,7 +87,9 @@ public class EodHelperMocks {
             .thenReturn(result);
     }
 
+    @SneakyThrows
     public void close() {
         mockedEodHelper.close();
+        closeable.close();
     }
 }

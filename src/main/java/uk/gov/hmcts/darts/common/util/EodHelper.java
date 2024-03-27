@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.common.util;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -23,6 +25,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Component
 @Getter
 @Accessors(fluent = true)
+@RequiredArgsConstructor
 public class EodHelper {
 
     private final ExternalObjectDirectoryRepository eodRepository;
@@ -51,25 +54,20 @@ public class EodHelper {
     @Getter
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
 
-    public EodHelper(ExternalObjectDirectoryRepository eodRepository,
-                     ExternalLocationTypeRepository eltRepository,
-                     ObjectRecordStatusRepository orsRepository) {
-        this.eodRepository = eodRepository;
-        this.eltRepository = eltRepository;
-        this.orsRepository = orsRepository;
+    @PostConstruct
+    public void init() {
+        EodHelper.unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
+        EodHelper.armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).orElseThrow();
+        EodHelper.detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).orElseThrow();
 
-        unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
-        armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).orElseThrow();
-        detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).orElseThrow();
+        EodHelper.storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
+        EodHelper.failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
+        EodHelper.failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
+        EodHelper.failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
+        EodHelper.armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
+        EodHelper.armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
 
-        storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
-        failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
-        failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
-        failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
-        armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
-        armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
-
-        failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
+        EodHelper.failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
     }
 
     public static boolean isEqual(ObjectRecordStatusEntity ors1, ObjectRecordStatusEntity ors2) {
