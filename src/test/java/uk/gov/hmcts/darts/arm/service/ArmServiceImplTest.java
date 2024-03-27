@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
 import java.time.Duration;
@@ -95,23 +96,6 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testListCollectedBlobs() {
-        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
-        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
-        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-
-        var foldersConfig = new ArmDataManagementConfiguration.Folders();
-        foldersConfig.setSubmission(TEST_DROP_ZONE);
-        foldersConfig.setCollected(TEST_DROP_ZONE);
-        foldersConfig.setResponse(TEST_DROP_ZONE);
-        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
-
-        String prefix = "1_1_1";
-        List<String> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
-        assertNotNull(blobs);
-    }
-
-    @Test
     void testListResponseBlobs() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
@@ -167,4 +151,89 @@ class ArmServiceImplTest {
         assertFalse(result);
     }
 
+    @Test
+    void testListSubmissionBlobsUsingBatch() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobs(any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "functional";
+        Integer batchSize = 5;
+        List<String> blobs = armService.listSubmissionBlobsUsingBatch(ARM_BLOB_CONTAINER_NAME, prefix, batchSize);
+        assertNotNull(blobs);
+    }
+
+    @Test
+    void testListResponseBlobsUsingBatch() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobs(any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "functional";
+        Integer batchSize = 5;
+        List<String> blobs = armService.listResponseBlobsUsingBatch(ARM_BLOB_CONTAINER_NAME, prefix, batchSize);
+        assertNotNull(blobs);
+    }
+
+    @Test
+    void testListSubmissionBlobsWithMarker() {
+        //iterableByPage().iterator()
+        //Iterator mockIterator = mock(Iterator.class);
+        //when(mockIterator.hasNext()).thenReturn(true, false);
+        //when(mockIterator.next()).thenReturn(new BlobItem());
+
+        //BlobItem blobItem = new BlobItem();
+        PagedIterable mockPagedIterable = mock(PagedIterable.class);
+
+        //when(mockPagedIterable.iterator()).thenReturn(mockIterator);
+
+        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "functional";
+        ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
+            ARM_BLOB_CONTAINER_NAME, prefix, 10, null);
+        assertNotNull(continuationTokenBlobs);
+    }
+
+    @Test
+    void testListResponseBlobsWithMarker() {
+        //Iterator mockIterator = mock(Iterator.class);
+        //when(mockIterator.hasNext()).thenReturn(true, false);
+        //when(mockIterator.next()).thenReturn(new BlobItem());
+
+        PagedIterable mockPagedTableEntities = mock(PagedIterable.class);
+        //when(mockPagedTableEntities.iterator()).thenReturn(mockIterator);
+        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(mockPagedTableEntities);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "functional";
+        ContinuationTokenBlobs continuationTokenBlobs = armService.listResponseBlobsWithMarker(
+            ARM_BLOB_CONTAINER_NAME, prefix, 10, null);
+        assertNotNull(continuationTokenBlobs);
+    }
 }

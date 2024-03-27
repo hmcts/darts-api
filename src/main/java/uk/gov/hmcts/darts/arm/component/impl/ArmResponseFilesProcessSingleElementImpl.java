@@ -327,10 +327,13 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                 processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
             } else {
                 //Read the upload file and log the error code and description with EOD
+                String errorDescription = org.apache.commons.lang3.StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
+                    ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
+
                 log.warn(
                     "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
                     externalObjectDirectory.getId(),
-                    armResponseUploadFileRecord.getExceptionDescription(),
+                    errorDescription,
                     armResponseUploadFileRecord.getErrorStatus()
                 );
                 externalObjectDirectory = updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus);
@@ -424,7 +427,6 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseChecksumVerificationFailedStatus);
         }
-
     }
 
     private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory, String input) {
