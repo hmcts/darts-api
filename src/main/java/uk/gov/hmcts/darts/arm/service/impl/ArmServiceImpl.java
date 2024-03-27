@@ -199,8 +199,6 @@ public class ArmServiceImpl implements ArmService {
                 .iterableByPage()
                 .iterator();
 
-            List<BlobItem> blobs;
-            List<String> blobsWithPaths;
             if (response.hasNext()) {
                 extractBlobsUsingContinuationToken(blobPathAndName, response, continuationTokenBlobs);
             }
