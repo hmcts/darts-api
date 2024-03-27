@@ -193,10 +193,10 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         Integer id2 = createCourthouse("func-a-courthouse " + UUID.randomUUID(), "func-a-courthouse" + UUID.randomUUID());
         patchContent = patchContent.replace("<id1>", id1.toString());
         patchContent = patchContent.replace("<id2>", id2.toString());
-        Response createUserResponse = createUser();
+        Response createUserResponse = createUser("user1@email.com");
         int userId1 = new JSONObject(createUserResponse.asString())
             .getInt("id");
-        createUserResponse = createUser();
+        createUserResponse = createUser("user2@email.com");
         int userId2 = new JSONObject(createUserResponse.asString())
             .getInt("id");
         patchContent = patchContent.replace("<userId1>", Integer.toString(userId1));
@@ -257,17 +257,20 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         return extendedCourthousePost.getId();
     }
 
-    private Response createUser() {
+    private Response createUser(String email) {
+        String request = """
+              {
+                   "full_name": "James Smith",
+                   "email_address": "<email>",
+                   "description": "A temporary user created by functional test"
+              }
+              """;
+        request = request.replace("<email>", email);
+
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/users"))
             .contentType(ContentType.JSON)
-            .body("""
-                      {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net",
-                           "description": "A temporary user created by functional test"
-                      }
-                      """)
+            .body(request)
             .post()
             .thenReturn();
 
