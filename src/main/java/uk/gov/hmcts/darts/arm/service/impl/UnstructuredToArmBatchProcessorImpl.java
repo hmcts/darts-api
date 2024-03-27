@@ -94,27 +94,12 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                 try {
                     ExternalObjectDirectoryEntity armEod;
                     if (isEqual(currentEod.getExternalLocationType(), EodHelper.armLocation())) {
-                        armEod = currentEod;
-
-                        var matchingEntity = getExternalObjectDirectoryEntity(armEod, getEodSourceLocation(), EodHelper.storedStatus());
-                        if (matchingEntity.isPresent()) {
-                            batchItem.setArmEod(armEod);
-                            batchItem.setSourceEod(matchingEntity.get());
-                            batchItems.add(batchItem);
-                            armEod.setManifestFile(archiveRecordsFile.getName());
-                            updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus());
-                        } else {
-                            log.error("Unable to find matching external object directory for {}", armEod.getId());
-                            updateExternalObjectDirectoryFailedTransferAttempts(armEod);
+                        armEod = updateArmEodToArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile);
+                        if (armEod == null) {
                             continue;
                         }
                     } else {
-                        armEod = createArmExternalObjectDirectoryEntity(currentEod, EodHelper.armIngestionStatus());
-                        batchItem.setArmEod(armEod);
-                        batchItem.setSourceEod(currentEod);
-                        batchItems.add(batchItem);
-                        armEod.setManifestFile(archiveRecordsFile.getName());
-                        externalObjectDirectoryRepository.saveAndFlush(armEod);
+                        armEod = createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile);
                     }
 
                     String rawFilename = generateFilename(armEod);
@@ -176,6 +161,36 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
             result.addAll(eodService.findFailedStillRetriableArmEods(Pageable.ofSize(remaining)));
         }
         return result;
+    }
+
+    private ExternalObjectDirectoryEntity updateArmEodToArmIngestionStatus(ExternalObjectDirectoryEntity armEod, BatchItem batchItem, BatchItems batchItems,
+                                                                           File archiveRecordsFile) {
+
+        var matchingEntity = getExternalObjectDirectoryEntity(armEod, getEodSourceLocation(), EodHelper.storedStatus());
+        if (matchingEntity.isPresent()) {
+            batchItem.setArmEod(armEod);
+            batchItem.setSourceEod(matchingEntity.get());
+            batchItems.add(batchItem);
+            armEod.setManifestFile(archiveRecordsFile.getName());
+            updateExternalObjectDirectoryStatus(armEod, EodHelper.armIngestionStatus());
+        } else {
+            log.error("Unable to find matching external object directory for {}", armEod.getId());
+            updateExternalObjectDirectoryFailedTransferAttempts(armEod);
+            return null;
+        }
+        return armEod;
+    }
+
+    private ExternalObjectDirectoryEntity createArmEodWithArmIngestionStatus(ExternalObjectDirectoryEntity currentEod, BatchItem batchItem, BatchItems batchItems,
+                                                                             File archiveRecordsFile) {
+        ExternalObjectDirectoryEntity armEod;
+        armEod = createArmExternalObjectDirectoryEntity(currentEod, EodHelper.armIngestionStatus());
+        batchItem.setArmEod(armEod);
+        batchItem.setSourceEod(currentEod);
+        batchItems.add(batchItem);
+        armEod.setManifestFile(archiveRecordsFile.getName());
+        externalObjectDirectoryRepository.saveAndFlush(armEod);
+        return armEod;
     }
 
     @SneakyThrows
