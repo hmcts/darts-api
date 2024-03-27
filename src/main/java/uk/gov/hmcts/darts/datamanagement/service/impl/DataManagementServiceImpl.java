@@ -108,6 +108,20 @@ public class DataManagementServiceImpl implements DataManagementService {
         return client;
     }
 
+    @Override
+    public void copyBlobData(String sourceContainer, String destinationContainer, UUID sourceBlobId) {
+        BlobServiceClient sourceServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, sourceServiceClient);
+        BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
+
+        //BlobServiceClient destinationServiceClient =
+        //    blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient destinationContainerClient =
+            blobServiceFactory.getBlobContainerClient(destinationContainer, sourceServiceClient);
+
+        destinationContainerClient.getBlobClient(sourceBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl());
+    }
+
     private ParallelTransferOptions createCommonTransferOptions() {
         return new ParallelTransferOptions()
             .setBlockSizeLong(dataManagementConfiguration.getBlobClientBlockSizeBytes())
