@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.BiValidator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
@@ -63,6 +64,9 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     private final uk.gov.hmcts.darts.common.util.StringUtils stringUtils;
 
+    private final AuthorisationApi authorisationApi;
+
+
     // TODO: needs to be removed. Only used in test
     @Override
     public CourthouseEntity getCourtHouseById(Integer id) {
@@ -115,8 +119,10 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     @Override
     public List<CourthouseEntity> getAllCourthouses() {
-        return courthouseRepository.findAll();
+        List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
+        return courthouseRepository.findByIdIn(courthouseIdsUserHasAccessTo);
     }
+
 
     @Override
     @Transactional

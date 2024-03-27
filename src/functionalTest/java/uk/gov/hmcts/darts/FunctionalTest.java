@@ -62,6 +62,7 @@ public class FunctionalTest {
         configureRestAssured();
     }
 
+
     @SneakyThrows
     public String getUri(String endpoint) {
         return baseUri + endpoint;

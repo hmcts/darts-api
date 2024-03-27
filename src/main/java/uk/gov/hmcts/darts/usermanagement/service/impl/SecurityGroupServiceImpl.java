@@ -2,23 +2,34 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 
@@ -28,6 +39,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     private final SecurityGroupRepository securityGroupRepository;
     private final SecurityRoleRepository securityRoleRepository;
+    private final CourthouseRepository courthouseRepository;
+    private final UserAccountRepository userAccountRepository;
     private final SecurityGroupMapper securityGroupMapper;
     private final SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
     private final SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
@@ -80,6 +93,98 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         return securityGroupEntities.stream()
             .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
+    }
+
+    @Transactional
+    @Override
+    public SecurityGroupWithIdAndRoleAndUsers modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch) {
+
+        Optional<SecurityGroupEntity> securityGroupEntityOptional = securityGroupRepository.findById(securityGroupId);
+
+        if (securityGroupEntityOptional.isPresent()) {
+            SecurityGroupEntity securityGroupEntity = securityGroupEntityOptional.get();
+            updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
+            var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
+            return securityGroupCourthouseMapper.mapToSecurityGroupWithCourthousesAndUsers(updatedGroup);
+        } else {
+            //throw a 404 not found
+            throw new DartsApiException(
+                UserManagementError.SECURITY_GROUP_NOT_FOUND,
+                String.format("Security group id %d not found", securityGroupId));
+        }
+
+    }
+
+    void updateSecurityGroupEntity(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
+        validate(securityGroupPatch, securityGroupEntity);
+
+        String name = securityGroupPatch.getName();
+        String displayName = securityGroupPatch.getDisplayName();
+
+
+        if (StringUtils.isNotBlank(name)) {
+            securityGroupEntity.setGroupName(name);
+        }
+        if (StringUtils.isNotBlank(displayName)) {
+            securityGroupEntity.setDisplayName(displayName);
+        }
+        String description = securityGroupPatch.getDescription();
+        if (description != null) {
+            securityGroupEntity.setDescription(description);
+        }
+        List<Integer> courthouseIds = securityGroupPatch.getCourthouseIds();
+        if (courthouseIds != null) {
+            Set<CourthouseEntity> courthouseEntities = new HashSet<>();
+            for (Integer courthouseId: courthouseIds) {
+                Optional<CourthouseEntity> courthouseEntity = courthouseRepository.findById(courthouseId);
+                if (courthouseEntity.isPresent()) {
+                    courthouseEntities.add(courthouseEntity.get());
+                } else {
+                    throw new DartsApiException(
+                        UserManagementError.COURTHOUSE_NOT_FOUND,
+                        String.format("Courthouse id %d not found", courthouseId));
+                }
+            }
+            securityGroupEntity.setCourthouseEntities(courthouseEntities);
+        }
+        List<Integer> userIds = securityGroupPatch.getUserIds();
+        if (userIds != null) {
+            for (Integer userId: userIds) {
+                Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
+                if (userAccountEntity.isPresent()) {
+                    userAccountEntity.get().getSecurityGroupEntities().add(securityGroupEntity);
+                } else {
+                    throw new DartsApiException(
+                        UserManagementError.USER_NOT_FOUND,
+                        String.format("User account id %d not found", userId));
+                }
+            }
+        }
+    }
+
+    private void validate(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
+        Integer id = securityGroupEntity.getId();
+
+        if (StringUtils.isNotBlank(securityGroupPatch.getName())) {
+            securityGroupRepository.findByGroupNameIgnoreCaseAndIdNot(securityGroupPatch.getName(), id)
+                .ifPresent(existingGroup -> {
+                    throw new DartsApiException(
+                        UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
+                        "Attempt to use name of an existing group",
+                        Collections.singletonMap("existing_group_id", existingGroup.getId())
+                    );
+                });
+        }
+        if (StringUtils.isNotBlank(securityGroupPatch.getDisplayName())) {
+            securityGroupRepository.findByDisplayNameIgnoreCaseAndIdNot(securityGroupPatch.getDisplayName(), id)
+                .ifPresent(existingGroup -> {
+                    throw new DartsApiException(
+                        UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
+                        "Attempt to use display name of an existing group",
+                        Collections.singletonMap("existing_group_id", existingGroup.getId())
+                    );
+                });
+        }
     }
 
     private List<SecurityGroupEntity> filterSecurityGroupEntitiesByRoleIds(

@@ -290,7 +290,7 @@ repositories {
 
 ext {
   log4JVersion = "2.23.1"
-  tomcatEmbedVersion = "10.1.19"
+  tomcatEmbedVersion = "10.1.20"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -377,7 +377,7 @@ dependencies {
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-  implementation platform('com.azure:azure-sdk-bom:1.2.21')
+  implementation platform('com.azure:azure-sdk-bom:1.2.22')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
@@ -418,6 +418,7 @@ dependencies {
   // https://mvnrepository.com/artifact/org.awaitility/awaitility-proxy
   testImplementation group: 'org.awaitility', name: 'awaitility-proxy', version: '3.1.6'
   testImplementation 'io.github.hakky54:logcaptor:2.9.2'
+  testImplementation 'org.testcontainers:testcontainers:1.19.7'
 
   compileJava.dependsOn = openApiGenerateTaskList
 }

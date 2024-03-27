@@ -34,4 +34,6 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
 
     boolean existsByDisplayNameIgnoreCaseAndIdNot(String name, Integer id);
 
+    List<CourthouseEntity> findByIdIn(List<Integer> courthouseIds);
+
 }

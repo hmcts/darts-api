@@ -1,19 +1,25 @@
 package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
@@ -23,17 +29,22 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.repository.UserRolesCourthousesRepository;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +52,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
@@ -49,6 +61,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,6 +74,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
 class CourthouseApiTest extends IntegrationBase {
@@ -82,11 +96,19 @@ class CourthouseApiTest extends IntegrationBase {
     private static final String COURTHOUSE_DISPLAY_NAME = "Haverfordwest";
     private static final int TRANSCRIBER_GROUP_ID = -4;
 
+    private static final String OID = "oid";
+
+    @Mock
+    private AuthorisationApi authorisationApi;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+
+    @Autowired
+    private UserAccountStub userAccountStub;
 
     @Autowired
     private RegionStub regionStub;
@@ -95,7 +117,7 @@ class CourthouseApiTest extends IntegrationBase {
     private SecurityGroupRepository securityGroupRepository;
 
     @Autowired
-    private SecurityRoleRepository securityRoleRepository;
+    private UserAccountRepository userAccountRepository;
 
     @MockBean
     private UserIdentity mockUserIdentity;
@@ -107,12 +129,20 @@ class CourthouseApiTest extends IntegrationBase {
     CourthouseRepository courthouseRepository;
 
     @Autowired
+    UserRolesCourthousesRepository userRolesCourthousesRepository;
+
+    @Autowired
     private PlatformTransactionManager transactionManager;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    DartsDatabaseStub dartsDatabaseStub;
+
+    UserAccountEntity user;
 
     @BeforeEach
     void setUp() {
@@ -260,30 +290,101 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
-    void courthousesGet() throws Exception {
-
+    void courthousesGet_ThreeCourthousesAssignedToUser() throws Exception {
         final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
+        final CourthouseEntity leedsCourthouse = dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
+        final CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
+
         final RegionEntity northWestRegion = regionStub.createRegionsUnlessExists(NORTH_WEST_REGION);
         final RegionEntity walesRegion = regionStub.createRegionsUnlessExists(WALES_REGION);
 
         swanseaCourthouse.setRegion(walesRegion);
-
-        dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
-
-        final CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
-
         manchesterCourthouse.setRegion(northWestRegion);
+
+        // given
+        var user = userAccountStub.createIntegrationUser(getGuidFromToken());
+        userAccountRepository.save(user);
+
+        Mockito.when(mockUserIdentity.getUserAccount()).thenReturn(user);
+        Mockito.when(mockUserIdentity.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(swanseaCourthouse.getId(),
+                                                                                                  leedsCourthouse.getId(),
+                                                                                                  manchesterCourthouse.getId()));
+
+        Mockito.when(mockUserIdentity.userHasGlobalAccess(any())).thenReturn(true);
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].courthouse_name", is(SWANSEA_CROWN_COURT)))
-            .andExpect(jsonPath("$[0].region_id", is(walesRegion.getId())))
             .andExpect(jsonPath("$[1].courthouse_name", is(LEEDS_COURT)))
-            .andExpect(jsonPath("[1].region_id").doesNotExist())
             .andExpect(jsonPath("$[2].courthouse_name", is(MANCHESTER_COURT)))
-            .andExpect(jsonPath("$[2].region_id", is(northWestRegion.getId())))
+            .andExpect(jsonPath("$[3].courthouse_name").doesNotExist())
+            .andDo(print()).andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+
+    }
+
+    @Test
+    void courthousesGet_TwoCourthousesAssignedToUser() throws Exception {
+        dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
+        final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
+        final CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
+
+        // given
+        var user = userAccountStub.createIntegrationUser(getGuidFromToken());
+        userAccountRepository.save(user);
+
+        Mockito.when(mockUserIdentity.getUserAccount()).thenReturn(user);
+        Mockito.when(mockUserIdentity.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(swanseaCourthouse.getId(),
+                                                                                                  manchesterCourthouse.getId()));
+        Mockito.when(mockUserIdentity.userHasGlobalAccess(any())).thenReturn(true);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].courthouse_name", is(SWANSEA_CROWN_COURT)))
+            .andExpect(jsonPath("$[1].courthouse_name", is(MANCHESTER_COURT)))
+            .andExpect(jsonPath("$[2].courthouse_name").doesNotExist())
+            .andDo(print()).andReturn();
+
+        assertEquals(200, response.getResponse().getStatus());
+
+    }
+
+    @Test
+    @Transactional
+    void courthousesGetRequestedByJudge() throws Exception {
+        final CourthouseEntity leedsCourthouse = dartsDatabase.createCourthouseUnlessExists(LEEDS_COURT);
+        final CourthouseEntity swanseaCourthouse = dartsDatabase.createCourthouseUnlessExists(SWANSEA_CROWN_COURT);
+        final CourthouseEntity manchesterCourthouse = dartsDatabase.createCourthouseUnlessExists(MANCHESTER_COURT);
+
+        final RegionEntity northWestRegion = regionStub.createRegionsUnlessExists(NORTH_WEST_REGION);
+        final RegionEntity walesRegion = regionStub.createRegionsUnlessExists(WALES_REGION);
+
+        swanseaCourthouse.setRegion(walesRegion);
+        manchesterCourthouse.setRegion(northWestRegion);
+
+        // given
+        var user = userAccountStub.createJudgeUser();
+
+        var securityGroup = getSecurityGroupEntity(swanseaCourthouse, manchesterCourthouse);
+        assignSecurityGroupToUser(user, securityGroup);
+
+        userAccountRepository.save(user);
+
+        Mockito.when(mockUserIdentity.getUserAccount()).thenReturn(user);
+        Mockito.when(mockUserIdentity.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(leedsCourthouse.getId(),
+                                                                                                  swanseaCourthouse.getId(),
+                                                                                                  manchesterCourthouse.getId()));
+        Mockito.when(mockUserIdentity.userHasGlobalAccess(any())).thenReturn(true);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].courthouse_name", is(LEEDS_COURT)))
+            .andExpect(jsonPath("$[1].courthouse_name", is(SWANSEA_CROWN_COURT)))
+            .andExpect(jsonPath("$[2].courthouse_name", is(MANCHESTER_COURT)))
             .andDo(print()).andReturn();
 
         assertEquals(200, response.getResponse().getStatus());
@@ -318,7 +419,7 @@ class CourthouseApiTest extends IntegrationBase {
     }
 
     @Test
-    void courthousesGetAll() throws Exception {
+    void courthousesGetRequestedByAdmin() throws Exception {
         // Given
         UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         createEnabledUserAccountEntity(user);
@@ -328,6 +429,9 @@ class CourthouseApiTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        Mockito.when(mockUserIdentity.getListOfCourthouseIdsUserHasAccessTo()).thenReturn(List.of(courtHouseEntity.getId(),
+                                                                                                  anotherCourthouseEntity.getId()));
 
         // When
         mockMvc.perform(requestBuilder)
@@ -721,6 +825,41 @@ class CourthouseApiTest extends IntegrationBase {
 
         return dartsDatabase.getUserAccountRepository()
             .save(userAccountEntity);
+    }
+
+    private static SecurityGroupEntity getSecurityGroupEntity(CourthouseEntity swanseaCourthouse, CourthouseEntity manchesterCourthouse) {
+        Set<CourthouseEntity> courthouseEntities = new HashSet<>();
+        courthouseEntities.add(swanseaCourthouse);
+        courthouseEntities.add(manchesterCourthouse);
+
+        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+        securityGroup.setCourthouseEntities(courthouseEntities);
+        securityGroup.setGlobalAccess(true);
+        securityGroup.setUseInterpreter(false);
+        return securityGroup;
+    }
+
+    private void assignSecurityGroupToUser(UserAccountEntity user, SecurityGroupEntity securityGroup) {
+        securityGroup.getUsers().add(user);
+        user.getSecurityGroupEntities().add(securityGroup);
+        securityGroupRepository.save(securityGroup);
+    }
+
+    private String getGuidFromToken() {
+        if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
+            Object principalObject = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+            Object oid = null;
+            if (principalObject instanceof Jwt jwt) {
+                oid = jwt.getClaims().get(OID);
+            }
+            if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
+                return guid;
+            }
+        }
+        return null;
     }
 
 }

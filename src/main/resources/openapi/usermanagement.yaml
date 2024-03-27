@@ -168,6 +168,60 @@ paths:
                 title: "The provided security group does not exist"
                 status: 404
 
+    patch:
+      summary: Patch security group
+      tags:
+        - SecurityGroup
+      operationId: modifySecurityGroup
+      parameters:
+        - $ref: '#/components/parameters/SecurityGroupId'
+      requestBody:
+        $ref: '#/components/requestBodies/SecurityGroupPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SecurityGroupPatchSuccess'
+        '400':
+          $ref: '#/components/responses/SecurityGroupBadRequest'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403_109ErrorCode'
+              example:
+                type: AUTHORISATION_109
+                title: User is not authorised for this endpoint
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "USER_MANAGEMENT_104"
+                title: "The provided courthouse does not exist"
+                status: 404
+        '409':
+          description: Conflict Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "USER_MANAGEMENT_105"
+                title: "Duplicate security group names are not permitted"
+                status: 409
+
   /admin/security-groups:
     get:
       summary: Get security groups
@@ -239,6 +293,7 @@ paths:
                 title: User is not authorised for this endpoint
                 status: 403
 
+
 ########################################################################################################################
 # COMPONENT DEFINITIONS
 ########################################################################################################################
@@ -269,6 +324,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SecurityGroup'
+    SecurityGroupPatchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroupPatch'
 
   responses:
     UserSuccessResponseWithId:
@@ -378,6 +439,12 @@ components:
             type: "https://zalando.github.io/problem/constraint-violation"
             title: "Constraint Violation"
             status: 400
+    SecurityGroupPatchSuccess:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUsers'
 
   parameters:
     UserId:
@@ -418,7 +485,7 @@ components:
       maxLength: 256
     SecurityGroupDescription:
       type: string
-      minLength: 1
+      minLength: 0
       maxLength: 256
     SecurityGroupDisplayName:
       type: string
@@ -529,6 +596,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserId'
+
     SecurityGroupWithIdAndRole:
       type: object
       properties:
@@ -562,6 +630,24 @@ components:
       required:
         - name
         - display_name
+    SecurityGroupPatch:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/SecurityGroupName'
+        display_name:
+          $ref: '#/components/schemas/SecurityGroupDisplayName'
+        description:
+          $ref: '#/components/schemas/SecurityGroupDescription'
+        courthouse_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourthouseId'
+        user_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserId'
+
 
     UserManagementErrorCode:
       type: string
@@ -570,8 +656,9 @@ components:
         - "USER_MANAGEMENT_101"
         - "USER_MANAGEMENT_102"
         - "USER_MANAGEMENT_103"
-        - "USER_NOT_TRANSCRIBER_110"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+        - "USER_MANAGEMENT_104"
+        - "USER_MANAGEMENT_105"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 
     UserManagementTitleErrors:
       type: string
@@ -580,8 +667,9 @@ components:
         - "The provided email already exists"
         - "Invalid email format"
         - "The provided security group does not exist"
+        - "The provided courthouse does not exist"
         - "Duplicate security group names are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
 
 
     Role:

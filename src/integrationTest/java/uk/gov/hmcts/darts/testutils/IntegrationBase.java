@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 import uk.gov.hmcts.darts.common.util.LogUtil;
 import uk.gov.hmcts.darts.common.util.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -15,6 +17,14 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
+
+    static {
+        GenericContainer<?> redis =
+            new GenericContainer<>(DockerImageName.parse("redis:5.0.3-alpine")).withExposedPorts(6379);
+        redis.start();
+        System.setProperty("spring.data.redis.host", redis.getHost());
+        System.setProperty("spring.data.redis.port", redis.getMappedPort(6379).toString());
+    }
 
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
