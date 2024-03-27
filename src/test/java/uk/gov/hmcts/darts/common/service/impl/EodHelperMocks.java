@@ -23,12 +23,14 @@ public class EodHelperMocks {
     @Mock private ExternalLocationTypeEntity unstructuredLocation;
     @Mock private ExternalLocationTypeEntity inboundLocation;
     @Mock private ExternalLocationTypeEntity detsLocation;
+
     @Mock private ObjectRecordStatusEntity storedStatus;
+    @Mock private ObjectRecordStatusEntity markForDeletionStatus;
     @Mock private ObjectRecordStatusEntity armIngestionStatus;
+    @Mock private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
     @Mock private ObjectRecordStatusEntity armDropZoneStatus;
     @Mock private ObjectRecordStatusEntity failedArmRawDataStatus;
     @Mock private ObjectRecordStatusEntity failedArmManifestFileStatus;
-    @Mock private ObjectRecordStatusEntity markForDeletionStatus;
 
     private MockedStatic<EodHelper> mockedEodHelper;
     private AutoCloseable closeable;
@@ -58,6 +60,12 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::storedStatus).thenReturn(storedStatus);
         lenient().when(storedStatus.getId()).thenReturn(ObjectRecordStatusEnum.STORED.getId());
         lenient().when(storedStatus.getDescription()).thenReturn("Stored");
+        mockedEodHelper.when(EodHelper::markForDeletionStatus).thenReturn(markForDeletionStatus);
+        lenient().when(markForDeletionStatus.getId()).thenReturn(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
+        lenient().when(markForDeletionStatus.getDescription()).thenReturn("marked for Deletion");
+        mockedEodHelper.when(EodHelper::armProcessingResponseFilesStatus).thenReturn(armProcessingResponseFilesStatus);
+        lenient().when(armProcessingResponseFilesStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES.getId());
+        lenient().when(armProcessingResponseFilesStatus.getDescription()).thenReturn("Arm Processing Response Files");
         mockedEodHelper.when(EodHelper::armIngestionStatus).thenReturn(armIngestionStatus);
         lenient().when(armIngestionStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_INGESTION.getId());
         lenient().when(armIngestionStatus.getDescription()).thenReturn("Arm Ingestion");
@@ -70,9 +78,6 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::failedArmManifestFileStatus).thenReturn(failedArmManifestFileStatus);
         lenient().when(failedArmManifestFileStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_MANIFEST_FAILED.getId());
         lenient().when(failedArmManifestFileStatus.getDescription()).thenReturn("Arm Manifest Failed");
-        mockedEodHelper.when(EodHelper::markForDeletionStatus).thenReturn(markForDeletionStatus);
-        lenient().when(markForDeletionStatus.getId()).thenReturn(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
-        lenient().when(markForDeletionStatus.getDescription()).thenReturn("marked for Deletion");
     }
 
     public void givenIsEqualLocationReturns(boolean result) {

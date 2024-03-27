@@ -18,6 +18,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
@@ -38,12 +39,13 @@ public class EodHelper {
     @Getter private static ExternalLocationTypeEntity detsLocation;
     @Getter private static ExternalLocationTypeEntity inboundLocation;
 
+    @Getter private static ObjectRecordStatusEntity armIngestionStatus;
+    @Getter private static ObjectRecordStatusEntity armDropZoneStatus;
+    @Getter private static ObjectRecordStatusEntity armProcessingResponseFilesStatus;
     @Getter private static ObjectRecordStatusEntity failedArmRawDataStatus;
     @Getter private static ObjectRecordStatusEntity failedArmManifestFileStatus;
-    @Getter private static ObjectRecordStatusEntity storedStatus;
-    @Getter private static ObjectRecordStatusEntity armIngestionStatus;
     @Getter private static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
-    @Getter private static ObjectRecordStatusEntity armDropZoneStatus;
+    @Getter private static ObjectRecordStatusEntity storedStatus;
     @Getter private static ObjectRecordStatusEntity markForDeletionStatus;
 
     @Getter private static List<ObjectRecordStatusEntity> failedArmStatuses;
@@ -56,12 +58,13 @@ public class EodHelper {
         EodHelper.inboundLocation = eltRepository.findById(ExternalLocationTypeEnum.INBOUND.getId()).orElseThrow();
 
         EodHelper.storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
+        EodHelper.markForDeletionStatus = orsRepository.findById(MARKED_FOR_DELETION.getId()).orElseThrow();
         EodHelper.failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
+        EodHelper.armProcessingResponseFilesStatus = orsRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();
         EodHelper.failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
         EodHelper.failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
         EodHelper.armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
         EodHelper.armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
-        EodHelper.markForDeletionStatus = orsRepository.findById(MARKED_FOR_DELETION.getId()).orElseThrow();
 
         EodHelper.failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
     }
