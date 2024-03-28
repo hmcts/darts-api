@@ -7,14 +7,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
-import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
-import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyMapper;
-import uk.gov.hmcts.darts.retentions.model.GetRetentionPolicy;
+import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyTypeMapper;
+import uk.gov.hmcts.darts.retention.service.RetentionPolicyService;
+import uk.gov.hmcts.darts.retention.validation.CreateOrRevisePolicyTypeValidator;
+import uk.gov.hmcts.darts.retentions.model.RetentionPolicy;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -34,31 +35,35 @@ import static uk.gov.hmcts.darts.retention.exception.RetentionApiError.RETENTION
 @MockitoSettings(strictness = Strictness.LENIENT)
 class RetentionGetPolicyTypesServiceImplTest {
 
-
     @Mock
-    private CaseRetentionRepository caseRetentionRepository;
-
-    @Mock
-    private RetentionMapper retentionMapper;
-
-    @Mock
-    private RetentionPolicyMapper retentionPolicyMapper;
+    private RetentionPolicyTypeMapper retentionPolicyTypeMapper;
 
     @Mock
     private RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     @Mock
     private AuthorisationApi authorisationApi;
+    @Mock
+    private Validator<String> policyDurationValidator;
+    @Mock
+    private CreateOrRevisePolicyTypeValidator createOrRevisePolicyTypeValidator;
+    @Mock
+    private Validator<String> policyTypeRevisionValidator;
+    @Mock
+    private Validator<String> policyTypeCreationValidator;
 
-    private RetentionServiceImpl retentionService;
+    private RetentionPolicyService retentionService;
 
 
     private void setupStubs() {
 
-        retentionService = new RetentionServiceImpl(
-        caseRetentionRepository,
-        retentionMapper,
-        retentionPolicyMapper,
-        retentionPolicyTypeRepository
+        retentionService = new RetentionPolicyServiceImpl(
+            retentionPolicyTypeMapper,
+        retentionPolicyTypeRepository,
+        authorisationApi,
+        createOrRevisePolicyTypeValidator,
+        policyDurationValidator,
+        policyTypeRevisionValidator,
+        policyTypeCreationValidator
         );
 
         UserAccountEntity userAccount = new UserAccountEntity();
@@ -73,14 +78,14 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         when(retentionPolicyTypeRepository.findAll()).thenReturn(List.of(getRetentionPolicyTypeEntity()));
 
-        when(retentionPolicyMapper.mapToRetentionPolicyResponse(any())).thenReturn(List.of(getRetentionPolicy()));
+        when(retentionPolicyTypeMapper.mapToModelList(any())).thenReturn(List.of(getRetentionPolicy()));
 
-        List<GetRetentionPolicy> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
+        List<RetentionPolicy> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
 
         assertEquals(1, caseRetentionPolicies.get(0).getId());
 
         verify(retentionPolicyTypeRepository).findAll();
-        verify(retentionPolicyMapper).mapToRetentionPolicyResponse(any());
+        verify(retentionPolicyTypeMapper).mapToModelList(any());
 
     }
 
@@ -90,15 +95,15 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         when(retentionPolicyTypeRepository.findById(anyInt())).thenReturn(Optional.of(getRetentionPolicyTypeEntity()));
 
-        when(retentionPolicyMapper.mapRetentionPolicy(any())).thenReturn(getRetentionPolicy());
+        when(retentionPolicyTypeMapper.mapToModel(any())).thenReturn(getRetentionPolicy());
 
-        GetRetentionPolicy caseRetentionPolicy = retentionService.getRetentionPolicyType(1);
+        RetentionPolicy caseRetentionPolicy = retentionService.getRetentionPolicyType(1);
 
         assertEquals(1, caseRetentionPolicy.getId());
         assertEquals("DARTS Permanent Retention v3", caseRetentionPolicy.getName());
 
         verify(retentionPolicyTypeRepository).findById(anyInt());
-        verify(retentionPolicyMapper).mapRetentionPolicy(any());
+        verify(retentionPolicyTypeMapper).mapToModel(any());
 
     }
 
@@ -116,7 +121,7 @@ class RetentionGetPolicyTypesServiceImplTest {
         assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND.getTitle(), exception.getMessage());
         assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND, exception.getError());
 
-        verifyNoInteractions(retentionPolicyMapper);
+        verifyNoInteractions(retentionPolicyTypeMapper);
 
 
 
@@ -138,19 +143,19 @@ class RetentionGetPolicyTypesServiceImplTest {
         return retentionPolicyTypeEntity;
     }
 
-    private GetRetentionPolicy getRetentionPolicy() {
+    private RetentionPolicy getRetentionPolicy() {
 
-        GetRetentionPolicy getRetentionPolicy = new GetRetentionPolicy();
-        getRetentionPolicy.setId(1);
-        getRetentionPolicy.setDisplayName("Legacy Permanent");
-        getRetentionPolicy.setName("DARTS Permanent Retention v3");
-        getRetentionPolicy.setPolicyStartAt(OffsetDateTime.of(2024, 3, 1, 10, 0, 0, 0, ZoneOffset.UTC));
-        getRetentionPolicy.setPolicyEndAt(OffsetDateTime.of(2024, 4, 1, 10, 0, 0, 0, ZoneOffset.UTC));
-        getRetentionPolicy.setFixedPolicyKey("-1");
-        getRetentionPolicy.setDuration("30Y0M0D");
-        getRetentionPolicy.setDescription("DARTS Permanent retention policy");
+        RetentionPolicy retentionPolicy = new RetentionPolicy();
+        retentionPolicy.setId(1);
+        retentionPolicy.setDisplayName("Legacy Permanent");
+        retentionPolicy.setName("DARTS Permanent Retention v3");
+        retentionPolicy.setPolicyStartAt(OffsetDateTime.of(2024, 3, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        retentionPolicy.setPolicyEndAt(OffsetDateTime.of(2024, 4, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        retentionPolicy.setFixedPolicyKey("-1");
+        retentionPolicy.setDuration("30Y0M0D");
+        retentionPolicy.setDescription("DARTS Permanent retention policy");
 
-        return getRetentionPolicy;
+        return retentionPolicy;
     }
 
 }
