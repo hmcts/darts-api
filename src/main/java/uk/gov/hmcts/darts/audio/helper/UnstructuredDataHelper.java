@@ -1,12 +1,9 @@
 package uk.gov.hmcts.darts.audio.helper;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -19,70 +16,79 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
-import java.time.OffsetDateTime;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.MEDIA_REQUEST_ID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class UnstructuredDataHelper {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final DataManagementApi dataManagementApi;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserAccountRepository userAccountRepository;
+    private final DataManagementService dataManagementService;
+    private final DataManagementConfiguration dataManagementConfiguration;
 
     private static final List<CompletableFuture> jobsList = new ArrayList<>();
 
-    public static List<CompletableFuture> getJobsList() {
+    public  List<CompletableFuture> getJobsList() {
         return jobsList;
     }
 
-    public boolean createUnstructured(ExternalObjectDirectoryEntity eodEntityToDelete, ExternalObjectDirectoryEntity eodEntity, BinaryData binaryData) {
+    @Transactional
+    public boolean createUnstructured(
+        ExternalObjectDirectoryEntity eodEntityToDelete,
+        ExternalObjectDirectoryEntity eodEntity,
+        InputStream inputStream,
+        File targetFile) {
         boolean returnVal = true;
-        UUID uuid = saveToUnstructuredDataStore(eodEntity, binaryData);
+        UUID uuid = saveToUnstructuredDataStore(eodEntity, inputStream);
         if (uuid == null) {
             returnVal = false;
         } else {
             saveToDatabase(eodEntity, uuid);
             removeFromDatabase(eodEntityToDelete);
         }
+        try {
+            Files.delete(targetFile.toPath());
+        } catch (IOException e) {
+            log.error("Unable to delete temporary file {}", targetFile.getPath(), e);
+        }
         return returnVal;
     }
 
-    private UUID saveToUnstructuredDataStore(ExternalObjectDirectoryEntity eodEntity, BinaryData binaryData) {
+    private UUID saveToUnstructuredDataStore(ExternalObjectDirectoryEntity eodEntity, InputStream inputStream) {
         UUID uuid = null;
         try {
-            Map<String, String> metadata = new HashMap<>();
-            metadata.put(MEDIA_REQUEST_ID, String.valueOf(eodEntity.getMedia().getId()));
-            BlobClient blobClient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.UNSTRUCTURED, metadata);
-            uuid = UUID.fromString(blobClient.getBlobName());
+            uuid = dataManagementService.saveBlobData(dataManagementConfiguration.getUnstructuredContainerName(), inputStream);
             log.debug(
-                "Completed upload to unstructured data store for mediaRequestId {}. Successfully uploaded with blobId: {}",
-                eodEntity.getMedia().getId(),
+                "Completed upload to unstructured data store for EOD {}. Successfully uploaded with blobId: {}",
+                eodEntity.getId(),
                 uuid
             );
         } catch (Exception e) {
             log.error(
-                "Upload to unstructured data store failed for mediaRequestId {}.",
-                eodEntity.getMedia().getId()
+                "Upload to unstructured data store failed for EOD {}.",
+                eodEntity.getId(),
+                e
             );
         }
         return uuid;
     }
 
-    @Transactional
     private void saveToDatabase(ExternalObjectDirectoryEntity eod, UUID uuid) {
         ExternalObjectDirectoryEntity eodUnstructured = new ExternalObjectDirectoryEntity();
 
@@ -103,9 +109,6 @@ public class UnstructuredDataHelper {
             eodUnstructured.setCaseDocument(caseDocumentEntity);
         }
         eodUnstructured.setExternalLocation(uuid);
-        OffsetDateTime now = OffsetDateTime.now();
-        eodUnstructured.setCreatedDateTime(now);
-        eodUnstructured.setLastModifiedDateTime(now);
         eodUnstructured.setChecksum(eod.getChecksum());
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity unstructuredType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
@@ -117,29 +120,28 @@ public class UnstructuredDataHelper {
         eodUnstructured.setLastModifiedBy(systemUser);
         externalObjectDirectoryRepository.save(eodUnstructured);
         log.debug(
-            "Created new record in EOD mediaRequestId {}. External location: {}",
-            eodUnstructured.getMedia().getId(),
+            "Created new record in EOD {}. External location: {}",
+            eodUnstructured.getId(),
             eodUnstructured.getExternalLocation()
         );
     }
 
-    @Transactional
     private void removeFromDatabase(ExternalObjectDirectoryEntity eodEntityToDelete) {
         if (eodEntityToDelete != null) {
             externalObjectDirectoryRepository.delete(eodEntityToDelete);
             log.debug(
-                "Deleted old unstructured EOD mediaRequestId {}. External location: {}",
-                eodEntityToDelete.getMedia().getId(),
+                "Deleted old unstructured EOD {}. External location: {}",
+                eodEntityToDelete.getId(),
                 eodEntityToDelete.getExternalLocation()
             );
         }
     }
 
-    public static void addToJobsList(CompletableFuture<Void> saveToUnstructuredFuture) {
+    public void addToJobsList(CompletableFuture<Void> saveToUnstructuredFuture) {
         jobsList.add(saveToUnstructuredFuture);
     }
 
-    public static void waitForAllJobsToFinish() {
+    public void waitForAllJobsToFinish() {
         jobsList.forEach(CompletableFuture::join);
         jobsList.clear();
     }

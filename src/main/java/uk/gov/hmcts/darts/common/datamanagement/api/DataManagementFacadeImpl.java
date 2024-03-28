@@ -1,13 +1,14 @@
 package uk.gov.hmcts.darts.common.datamanagement.api;
 
-import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
+import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.datamanagement.helper.StorageOrderHelper;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -18,13 +19,19 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -39,6 +46,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final StorageOrderHelper storageOrderHelper;
     private final UnstructuredDataHelper unstructuredDataHelper;
+    private final DataManagementConfiguration dataManagementConfiguration;
 
     @Override
     public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException {
@@ -154,8 +162,21 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 DownloadResponseMetaData downloadResponseMetaData = retrieveFileFromStorage(datastoreContainerType, eodEntity, container.get());
                 downloadResponseMetaData.setEodEntity(eodEntity);
                 downloadResponseMetaData.setContainerTypeUsedToDownload(datastoreContainerType);
-                if (!datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
-                    createUnstructuredData(downloadResponseMetaData, eodEntityToDelete);
+                if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
+
+                    String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
+                    File targetFile = new File(tempBlobPath);
+                    FileUtils.copyInputStreamToFile(downloadResponseMetaData.getInputStream(), targetFile);
+
+                    InputStream inputStreamOriginal = new FileInputStream(targetFile);
+                    downloadResponseMetaData.markInputStream(inputStreamOriginal);
+
+                    InputStream inputStreamUnstructured = new FileInputStream(targetFile);
+                    DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
+                    downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
+                    downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
+                    downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
+                    createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
                 }
                 return downloadResponseMetaData;
             } catch (FileNotDownloadedException | IOException e) {
@@ -169,18 +190,19 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
 
     private void createUnstructuredData(
         DownloadResponseMetaData downloadResponseMetaData,
-        ExternalObjectDirectoryEntity eodEntityToDelete
-    ) throws IOException {
-        if (downloadResponseMetaData.getInputStream() != null) {
-            BinaryData binaryData = BinaryData.fromStream(downloadResponseMetaData.getInputStream());
-            CompletableFuture<Void> createUnstructuredJob = CompletableFuture.runAsync(() -> {
-                unstructuredDataHelper.createUnstructured(
-                    eodEntityToDelete,
-                    downloadResponseMetaData.getEodEntity(),
-                    binaryData);
-            });
-            UnstructuredDataHelper.addToJobsList(createUnstructuredJob);
-        }
+        ExternalObjectDirectoryEntity eodEntityToDelete,
+        File targetFile) throws IOException {
+        InputStream inputStream =  new BufferedInputStream(downloadResponseMetaData.getInputStream());
+        CompletableFuture<Void> createUnstructuredJob = CompletableFuture.runAsync(() -> {
+            unstructuredDataHelper.createUnstructured(
+                eodEntityToDelete,
+                downloadResponseMetaData.getEodEntity(),
+                inputStream,
+                targetFile
+            );
+        });
+        unstructuredDataHelper.addToJobsList(createUnstructuredJob);
+
     }
 
     private ExternalObjectDirectoryEntity findCorrespondingEodEntityForStorageLocation(List<ExternalObjectDirectoryEntity> storedEodEntities,
