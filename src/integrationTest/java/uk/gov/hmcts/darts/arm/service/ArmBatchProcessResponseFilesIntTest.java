@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -36,8 +35,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
+@SuppressWarnings("VariableDeclarationUsageDistance")
 class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
@@ -131,8 +132,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media1,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
         armEod1.setTransferAttempts(1);
@@ -141,8 +142,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media2,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
         armEod2.setTransferAttempts(1);
@@ -151,8 +152,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media3,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
         armEod3.setTransferAttempts(1);
@@ -185,7 +186,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armBatchProcessResponseFiles.batchProcessResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
