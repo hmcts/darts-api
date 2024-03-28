@@ -34,3 +34,6 @@ export ARM_URL="$(az keyvault secret show --vault-name darts-stg --name ArmUrl |
 export ARM_USERNAME="$(az keyvault secret show --vault-name darts-stg --name ArmUsername | jq .value -r)"
 export ARM_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name ArmPassword | jq .value -r)"
 export DETS_SAS_URL_ENDPOINT="$(az keyvault secret show --vault-name darts-stg --name DETSSasURLEndpoint | jq .value -r)"
+export AAD_TENANT_ID_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADTenantIdJustice | jq .value -r)"
+export AAD_CLIENT_ID_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADClientIdJustice | jq .value -r)"
+export AAD_CLIENT_SECRET_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADClientSecretJustice | jq .value -r)"
