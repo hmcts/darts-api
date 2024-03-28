@@ -194,7 +194,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         File targetFile) throws IOException {
         InputStream inputStream =  new BufferedInputStream(downloadResponseMetaData.getInputStream());
         CompletableFuture<Void> createUnstructuredJob = CompletableFuture.runAsync(() -> {
-            unstructuredDataHelper.createUnstructured(
+            unstructuredDataHelper.createUnstructuredDataFromEod(
                 eodEntityToDelete,
                 downloadResponseMetaData.getEodEntity(),
                 inputStream,

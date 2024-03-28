@@ -451,7 +451,7 @@ class DataManagementFacadeImplTest {
         String fileLocation = tempDirectory.getAbsolutePath();
         File targetFile = new File(fileLocation, UUID.randomUUID().toString());
 
-        boolean created = unstructuredDataHelperTest.createUnstructured(
+        boolean created = unstructuredDataHelperTest.createUnstructuredDataFromEod(
             eodEntityToDelete,
             eodEntity,
             data.toStream(),
@@ -474,7 +474,7 @@ class DataManagementFacadeImplTest {
         String fileLocation = tempDirectory.getAbsolutePath();
         File targetFile = new File(fileLocation, UUID.randomUUID().toString());
 
-        boolean created = unstructuredDataHelperTest.createUnstructured(
+        boolean created = unstructuredDataHelperTest.createUnstructuredDataFromEod(
             eodEntityToDelete,
             eodEntity,
             data.toStream(),
