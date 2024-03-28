@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ContinuationTokenBlobs {
-    private List<String> blobNamesWithAndPaths;
+    private List<String> blobNamesAndPaths;
     private String continuationToken;
 
 }

@@ -91,7 +91,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         initialisePreloadedObjects();
         ContinuationTokenBlobs continuationTokenBlobs = null;
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
-        armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
 
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
@@ -100,8 +99,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }
-        if (nonNull(continuationTokenBlobs) && CollectionUtils.isNotEmpty(continuationTokenBlobs.getBlobNamesWithAndPaths())) {
-            for (String manifestBlobFilenameAndPath : continuationTokenBlobs.getBlobNamesWithAndPaths()) {
+        if (nonNull(continuationTokenBlobs) && CollectionUtils.isNotEmpty(continuationTokenBlobs.getBlobNamesAndPaths())) {
+            for (String manifestBlobFilenameAndPath : continuationTokenBlobs.getBlobNamesAndPaths()) {
                 processManifestBlob(manifestBlobFilenameAndPath);
             }
         } else {

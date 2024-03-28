@@ -119,9 +119,9 @@ class ArmServiceFunctionalTest {
                 armContainerName, FUNCTIONAL_TEST, batchSize, continuationToken);
             continuationToken = continuationTokenBlobs.getContinuationToken();
             log.info("continuationToken: \n{}", continuationToken);
-            log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesWithAndPaths().size());
-            allBlobs.addAll(continuationTokenBlobs.getBlobNamesWithAndPaths());
-            for (String blobPathAndName : continuationTokenBlobs.getBlobNamesWithAndPaths()) {
+            log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesAndPaths().size());
+            allBlobs.addAll(continuationTokenBlobs.getBlobNamesAndPaths());
+            for (String blobPathAndName : continuationTokenBlobs.getBlobNamesAndPaths()) {
                 armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
             }
         } while (nonNull(continuationToken));
