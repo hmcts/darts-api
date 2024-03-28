@@ -126,8 +126,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
                 3
             ));
 
-        String manifest1UUID = UUID.randomUUID().toString();
-        String manifest2UUID = UUID.randomUUID().toString();
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifest2Uuid = UUID.randomUUID().toString();
 
 
         ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -137,7 +137,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod1.setTransferAttempts(1);
-        armEod1.setManifestFile(manifest1UUID);
+        armEod1.setManifestFile(manifest1Uuid);
         dartsDatabase.save(armEod1);
 
         ExternalObjectDirectoryEntity armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -147,7 +147,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod2.setTransferAttempts(1);
-        armEod1.setManifestFile(manifest1UUID);
+        armEod1.setManifestFile(manifest1Uuid);
         dartsDatabase.save(armEod2);
 
         ExternalObjectDirectoryEntity armEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -157,7 +157,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod3.setTransferAttempts(1);
-        armEod1.setManifestFile(manifest1UUID);
+        armEod1.setManifestFile(manifest1Uuid);
         dartsDatabase.save(armEod3);
 
         String prefix = "DARTS";
@@ -171,8 +171,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
 
         List<String> blobNamesAndPaths = new ArrayList<>();
-        String blobNameAndPath1 = String.format("dropzone/DARTS/submission/DARTS_%s.a360", manifest1UUID);
-        String blobNameAndPath2 = String.format("dropzone/DARTS/submission/DARTS_%s.a360", manifest2UUID);
+        String blobNameAndPath1 = String.format("dropzone/DARTS/submission/DARTS_%s.a360", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/submission/DARTS_%s.a360", manifest2Uuid);
         blobNamesAndPaths.add(blobNameAndPath1);
         blobNamesAndPaths.add(blobNameAndPath2);
 
