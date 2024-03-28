@@ -134,7 +134,7 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 
-    public String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+    public String generateRawFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         final Integer entityId = externalObjectDirectoryEntity.getId();
         final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
 

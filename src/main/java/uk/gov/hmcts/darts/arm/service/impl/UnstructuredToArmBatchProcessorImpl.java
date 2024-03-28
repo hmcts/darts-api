@@ -102,12 +102,12 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                         armEod = createArmEodWithArmIngestionStatus(currentEod, batchItem, batchItems, archiveRecordsFile);
                     }
 
-                    String rawFilename = generateFilename(armEod);
+                    String rawFilename = generateRawFilename(armEod);
+
                     if (shouldPushRawDataToArm(batchItem)) {
                         pushRawDataAndCreateArchiveRecordIfSuccess(batchItem, rawFilename);
                     } else if (shouldAddEntryToManifestFile(batchItem)) {
-                        var archiveRecord = archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename);
-                        batchItem.setArchiveRecord(archiveRecord);
+                        batchItem.setArchiveRecord(archiveRecordService.generateArchiveRecordInfo(batchItem.getArmEod().getId(), rawFilename));
                     }
                 } catch (Exception e) {
                     log.error("Unable to batch push EOD {} to ARM", currentEod.getId(), e);
