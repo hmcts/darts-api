@@ -20,6 +20,8 @@
 --    amend fixed_policy_key from integer to character varying
 --    amend eve_id on case_management_retention to not null
 --    remove event_ts from case_management_retention 
+-- v8 amend case_retention.retain_until_applied_on_ts to be nullable
+--
 
 
 SET ROLE DARTS_OWNER;
@@ -46,7 +48,7 @@ CREATE TABLE case_retention
 ,cmr_id                      INTEGER            
 ,total_sentence              CHARACTER VARYING                       -- < is this integer or the nYnMnD >
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      NOT NULL 
-,retain_until_applied_on_ts  TIMESTAMP WITH TIME ZONE      NOT NULL 
+,retain_until_applied_on_ts  TIMESTAMP WITH TIME ZONE       
 ,current_state               CHARACTER VARYING             NOT NULL  -- can we agree on single chars, eg P-pending, E-expired, A-active
 ,comments                    CHARACTER VARYING 
 ,retention_object_id         CHARACTER VARYING                       -- PK of legacy source migration table 

@@ -35,6 +35,11 @@ public enum UserManagementError implements DartsApiError {
         UserManagementErrorCode.SECURITY_GROUP_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
         UserManagementTitleErrors.SECURITY_GROUP_NOT_FOUND.toString()
+    ),
+    COURTHOUSE_NOT_FOUND(
+        UserManagementErrorCode.COURTHOUSE_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        UserManagementTitleErrors.COURTHOUSE_NOT_FOUND.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "USER_MANAGEMENT";

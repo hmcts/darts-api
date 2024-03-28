@@ -59,7 +59,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
             caseNumber,
             hearingDate
         );
-        return foundHearing.orElseGet(() -> createHearing(
+
+        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount)).orElseGet(()  -> createHearing(
             courthouseName,
             courtroomName,
             caseNumber,
@@ -69,9 +70,10 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount) {
-        CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
-        CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
+        final CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
+        final CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
         HearingEntity hearing = new HearingEntity();
+
         hearing.setCourtCase(courtCase);
         hearing.setCourtroom(courtroom);
         hearing.setHearingDate(hearingDate);
@@ -79,7 +81,9 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         hearing.setHearingIsActual(false);
         hearing.setCreatedBy(userAccount);
         hearing.setLastModifiedBy(userAccount);
+
         hearingRepository.saveAndFlush(hearing);
+
         return hearing;
     }
 
@@ -127,10 +131,14 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
             caseNumber,
             courthouseName
         );
-        return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
+
+        return foundCase.map(entity -> setCourtCaseLastDateModifiedBy(entity, userAccount))
+            .orElseGet(() -> createCase(courthouseName, caseNumber, userAccount));
+
     }
 
     private CourtCaseEntity createCase(String courthouseName, String caseNumber, UserAccountEntity userAccount) {
+
         CourthouseEntity foundCourthouse = retrieveCourthouse(courthouseName);
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
@@ -141,6 +149,24 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         courtCase.setLastModifiedBy(userAccount);
         caseRepository.saveAndFlush(courtCase);
         return courtCase;
+    }
+
+    private CourtCaseEntity setCourtCaseLastDateModifiedBy(final CourtCaseEntity courtCaseEntity, final UserAccountEntity userAccountEntity) {
+
+        courtCaseEntity.setLastModifiedBy(userAccountEntity);
+
+        caseRepository.saveAndFlush(courtCaseEntity);
+
+        return courtCaseEntity;
+    }
+
+    private HearingEntity setHearingLastDateModifiedBy(final HearingEntity hearingEntity, final UserAccountEntity userAccountEntity) {
+
+        hearingEntity.setLastModifiedBy(userAccountEntity);
+
+        hearingRepository.saveAndFlush(hearingEntity);
+
+        return hearingEntity;
     }
 
     @Override

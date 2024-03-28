@@ -136,6 +136,7 @@ public class CommonTestDataUtil {
     }
 
     public CourtCaseEntity createCaseWithId(String caseNumber, Integer id) {
+
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
         courtCase.setDefenceList(createDefenceList(courtCase));
@@ -143,7 +144,11 @@ public class CommonTestDataUtil {
         courtCase.setProsecutorList(createProsecutorList(courtCase));
         courtCase.setCourthouse(createCourthouse("case_courthouse"));
         courtCase.setJudges(createJudges(2));
+        courtCase.setCreatedBy(createUserAccount());
+        courtCase.setLastModifiedBy(createUserAccount());
         courtCase.setId(id);
+        courtCase.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
+        courtCase.setLastModifiedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
         return courtCase;
     }
 
@@ -192,6 +197,7 @@ public class CommonTestDataUtil {
         hearing1.setCourtCase(courtcase);
         hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
+        hearing1.setCreatedDateTime(createOffsetDateTime("2024-03-25T10:00:00"));
         return hearing1;
     }
 
