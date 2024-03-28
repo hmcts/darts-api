@@ -150,15 +150,14 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         ExternalLocationTypeEntity sourceLocation = getEodSourceLocation();
 
         var result = new ArrayList<ExternalObjectDirectoryEntity>();
-        result.addAll(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
-            EodHelper.storedStatus(),
-            sourceLocation,
-            EodHelper.armLocation(),
-            Pageable.ofSize(batchSize)
-        ));
+        result.addAll(eodService.findFailedStillRetriableArmEods(Pageable.ofSize(batchSize)));
         var remaining = batchSize - result.size();
         if (remaining > 0) {
-            result.addAll(eodService.findFailedStillRetriableArmEods(Pageable.ofSize(remaining)));
+            result.addAll(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
+                EodHelper.storedStatus(),
+                sourceLocation,
+                EodHelper.armLocation(),
+                Pageable.ofSize(remaining)));
         }
         return result;
     }

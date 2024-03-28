@@ -57,6 +57,8 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmManifestFileStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmRawDataStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -110,7 +112,11 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         //given
         //batch size is 5
         List<MediaEntity> medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+
+        // skipped
         externalObjectDirectoryStub.createAndSaveEod(medias.get(0), STORED, UNSTRUCTURED);
+
+        // processed
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(2), ARM_RAW_DATA_FAILED, ARM);
@@ -119,7 +125,6 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(4), ARM_MANIFEST_FAILED, ARM);
 
-        // skipped
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(5), ARM_MANIFEST_FAILED, ARM);
 
@@ -139,7 +144,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         );
         assertThat(foundMediaList.size()).isEqualTo(armDataManagementConfiguration.getBatchSize());
         assertThat(
-            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(5).getId()), failedArmManifestFileStatus(), armLocation())
+            eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
         )
         .hasSize(1);
     }

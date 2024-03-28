@@ -113,8 +113,8 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         doReturn(armLocation()).when(eod1).getExternalLocationType();
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
@@ -126,7 +126,7 @@ class UnstructuredToArmBatchProcessorTest {
             storedStatus(),
             unstructuredLocation(),
             armLocation(),
-            Pageable.ofSize(5)
+            Pageable.ofSize(4)
         );
         verify(externalObjectDirectoryRepository).findMatchingExternalObjectDirectoryEntityByLocation(
             storedStatus(),
@@ -143,8 +143,8 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         doReturn(armLocation()).when(eod1).getExternalLocationType();
         EOD_HELPER_MOCKS.givenIsEqualLocationReturns(true);
 
@@ -156,7 +156,7 @@ class UnstructuredToArmBatchProcessorTest {
             storedStatus(),
             detsLocation(),
             armLocation(),
-            Pageable.ofSize(5)
+            Pageable.ofSize(4)
         );
         verify(externalObjectDirectoryRepository).findMatchingExternalObjectDirectoryEntityByLocation(
             storedStatus(),
@@ -183,8 +183,8 @@ class UnstructuredToArmBatchProcessorTest {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(List.of(eod1, eod2));
-        when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(emptyList());
+        when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1, eod2));
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
 
         when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
 
@@ -192,13 +192,13 @@ class UnstructuredToArmBatchProcessorTest {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
+        verify(eodService).findFailedStillRetriableArmEods(Pageable.ofSize(5));
         verify(externalObjectDirectoryRepository).findExternalObjectsNotIn2StorageLocations(
             storedStatus(),
             unstructuredLocation(),
             armLocation(),
-            Pageable.ofSize(5)
+            Pageable.ofSize(3)
         );
-        verify(eodService).findFailedStillRetriableArmEods(Pageable.ofSize(3));
     }
 
     @Test
