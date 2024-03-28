@@ -173,7 +173,11 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         throw new FileNotDownloadedException(logBuilder.toString());
     }
 
-    private void processUnstructuredData(DatastoreContainerType datastoreContainerType, DownloadResponseMetaData downloadResponseMetaData, ExternalObjectDirectoryEntity eodEntity, ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
+    private void processUnstructuredData(
+        DatastoreContainerType datastoreContainerType,
+        DownloadResponseMetaData downloadResponseMetaData,
+        ExternalObjectDirectoryEntity eodEntity,
+        ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
         if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
 
             String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
