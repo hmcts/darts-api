@@ -49,7 +49,7 @@ public class UnstructuredDataHelper {
     }
 
     @Transactional
-    public boolean createUnstructured(
+    public boolean createUnstructuredDataFromEod(
         ExternalObjectDirectoryEntity eodEntityToDelete,
         ExternalObjectDirectoryEntity eodEntity,
         InputStream inputStream,
