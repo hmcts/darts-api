@@ -841,6 +841,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         automatedTaskService.updateAutomatedTaskCronExpression(
             automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+
+        assertEquals(AutomatedTaskStatus.NOT_STARTED, automatedTask.getAutomatedTaskStatus());
     }
 
     @Test
