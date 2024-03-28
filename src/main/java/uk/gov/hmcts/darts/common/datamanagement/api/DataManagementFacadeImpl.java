@@ -162,22 +162,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 DownloadResponseMetaData downloadResponseMetaData = retrieveFileFromStorage(datastoreContainerType, eodEntity, container.get());
                 downloadResponseMetaData.setEodEntity(eodEntity);
                 downloadResponseMetaData.setContainerTypeUsedToDownload(datastoreContainerType);
-                if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
-
-                    String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
-                    File targetFile = new File(tempBlobPath);
-                    FileUtils.copyInputStreamToFile(downloadResponseMetaData.getInputStream(), targetFile);
-
-                    InputStream inputStreamOriginal = new FileInputStream(targetFile);
-                    downloadResponseMetaData.markInputStream(inputStreamOriginal);
-
-                    InputStream inputStreamUnstructured = new FileInputStream(targetFile);
-                    DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
-                    downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
-                    downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
-                    downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
-                    createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
-                }
+                processUnstructuredData(datastoreContainerType, downloadResponseMetaData, eodEntity, eodEntityToDelete);
                 return downloadResponseMetaData;
             } catch (FileNotDownloadedException | IOException e) {
                 String logMessage = MessageFormat.format("Could not download file for eodEntity ''{0,number,#}''", eodEntity.getId());
@@ -186,6 +171,25 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             }
         }
         throw new FileNotDownloadedException(logBuilder.toString());
+    }
+
+    private void processUnstructuredData(DatastoreContainerType datastoreContainerType, DownloadResponseMetaData downloadResponseMetaData, ExternalObjectDirectoryEntity eodEntity, ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
+        if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
+
+            String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
+            File targetFile = new File(tempBlobPath);
+            FileUtils.copyInputStreamToFile(downloadResponseMetaData.getInputStream(), targetFile);
+
+            InputStream inputStreamOriginal = new FileInputStream(targetFile);
+            downloadResponseMetaData.markInputStream(inputStreamOriginal);
+
+            InputStream inputStreamUnstructured = new FileInputStream(targetFile);
+            DownloadResponseMetaData downloadResponseMetaDataUnstructured = new FileBasedDownloadResponseMetaData();
+            downloadResponseMetaDataUnstructured.setEodEntity(eodEntity);
+            downloadResponseMetaDataUnstructured.setContainerTypeUsedToDownload(downloadResponseMetaData.getContainerTypeUsedToDownload());
+            downloadResponseMetaDataUnstructured.markInputStream(inputStreamUnstructured);
+            createUnstructuredData(downloadResponseMetaDataUnstructured, eodEntityToDelete, targetFile);
+        }
     }
 
     private void createUnstructuredData(
