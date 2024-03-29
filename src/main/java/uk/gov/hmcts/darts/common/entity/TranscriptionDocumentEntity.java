@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ import java.util.List;
 @Table(name = "transcription_document")
 @Getter
 @Setter
-public class TranscriptionDocumentEntity {
+public class TranscriptionDocumentEntity extends ModifiedBaseEntity {
 
     @Id
     @Column(name = "trd_id")
@@ -35,6 +36,10 @@ public class TranscriptionDocumentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tra_id", nullable = false, foreignKey = @ForeignKey(name = "transcription_document_transcription_fk"))
     private TranscriptionEntity transcription;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ohr_id")
+    private ObjectHiddenReasonEntity objectHiddenReason;
 
     @Column(name = "clip_id")
     private String clipId;
@@ -59,7 +64,7 @@ public class TranscriptionDocumentEntity {
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.TRANSCRIPTION_DOCUMENT_ENTITY)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
-    @Column(name = "checksum", nullable = false)
+    @Column(name = "checksum")
     private String checksum;
 
     @Column(name = "content_object_id")
@@ -68,5 +73,10 @@ public class TranscriptionDocumentEntity {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 
+    @Column(name = "marked_for_manual_deletion", nullable = false)
+    private boolean markedForManualDeletion;
+
+    @Column(name = "retain_until_ts")
+    private OffsetDateTime retainUntilTs;
 
 }

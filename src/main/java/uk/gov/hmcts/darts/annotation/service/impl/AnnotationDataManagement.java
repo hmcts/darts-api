@@ -56,6 +56,7 @@ public class AnnotationDataManagement {
     public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
         try {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities);
+
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",

@@ -36,6 +36,10 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ohr_id")
+    private ObjectHiddenReasonEntity objectHiddenReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"), nullable = false)
     private CourtroomEntity courtroom;
 
@@ -93,10 +97,19 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted;
+
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
 
     @ManyToMany(mappedBy = HearingEntity_.MEDIA_LIST)
     private List<HearingEntity> hearingList = new ArrayList<>();
+
+    @Column(name = "marked_for_manual_deletion", nullable = false)
+    private boolean markedForManualDeletion;
+
+    @Column(name = "retain_until_ts")
+    private OffsetDateTime retainUntilTs;
 
 }
