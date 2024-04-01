@@ -93,6 +93,13 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTs;
+
     @Column(name = "chronicle_id")
     private String chronicleId;
 

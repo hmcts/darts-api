@@ -55,14 +55,28 @@ public class CaseDocumentEntity extends ModifiedBaseEntity {
     private boolean hidden;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uploaded_by", nullable = false)
-    private UserAccountEntity uploadedBy;
+    @JoinColumn(name = "hidden_by")
+    private UserAccountEntity hiddenBy;
 
-    @Column(name = "uploaded_ts", nullable = false)
-    private OffsetDateTime uploadedTs;
+    @Column(name = "hidden_ts")
+    private OffsetDateTime hiddenTs;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private UserAccountEntity createdBy;
+
+    @Column(name = "created_ts", nullable = false)
+    private OffsetDateTime createdTs;
 
     @Column(name = "marked_for_manual_deletion", nullable = false)
     private boolean markedForManualDeletion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "marked_for_manual_del_by")
+    private UserAccountEntity markedForManualDelBy;
+
+    @Column(name = "marked_for_manual_del_ts")
+    private OffsetDateTime markedForManualDelTs;
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;

@@ -98,6 +98,13 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = IS_DELETED)
     private boolean isDeleted;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTs;
+
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 

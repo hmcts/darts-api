@@ -35,8 +35,8 @@ public class CaseDocumentStub {
         caseDocumentEntity.setFileSize(1234);
         caseDocumentEntity.setChecksum("xC3CCA7021CF79B42F245AF350601C284");
         caseDocumentEntity.setHidden(false);
-        caseDocumentEntity.setUploadedBy(uploadedBy);
-        caseDocumentEntity.setUploadedTs(OffsetDateTime.now(UTC));
+        caseDocumentEntity.setCreatedBy(uploadedBy);
+        caseDocumentEntity.setCreatedTs(OffsetDateTime.now(UTC));
         return caseDocumentEntity;
     }
 }
