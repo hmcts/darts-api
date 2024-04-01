@@ -28,6 +28,14 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
         """)
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
 
+    @Query("""
+        SELECT DISTINCT ch.id
+        FROM CourthouseEntity ch
+        WHERE upper(ch.courthouseName) like upper(%:name%)
+        or upper(ch.displayName) like upper(%:name%)
+        """)
+    List<Integer> findAllIdByDisplayNameOrNameLike(String name);
+
     Optional<CourthouseEntity> findByDisplayNameIgnoreCase(String displayName);
 
     boolean existsByCourthouseNameIgnoreCaseAndIdNot(String name, Integer id);

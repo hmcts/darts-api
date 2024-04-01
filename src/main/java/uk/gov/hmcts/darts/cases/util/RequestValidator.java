@@ -13,9 +13,7 @@ public class RequestValidator {
     public void validate(GetCasesSearchRequest request) {
         checkNoCriteriaProvided(request);
 
-        checkOnlyCourthouse(request);
-
-        checkOnlyCourtroom(request);
+        checkComplexity(request);
 
         checkDates(request);
     }
@@ -28,35 +26,26 @@ public class RequestValidator {
         }
     }
 
-    private static void checkOnlyCourtroom(GetCasesSearchRequest request) {
-        if (BooleanUtils.and(new boolean[]{
-            StringUtils.isBlank(request.getCaseNumber()),
-            StringUtils.isBlank(request.getCourthouse()),
-            StringUtils.isNotBlank(request.getCourtroom()),
-            StringUtils.isBlank(request.getJudgeName()),
-            StringUtils.isBlank(request.getDefendantName()),
-            request.getDateFrom() == null,
-            request.getDateTo() == null,
-            StringUtils.isBlank(request.getEventTextContains())
-        })) {
+    /*
+    This is to try to calculate if the search terms are too broad. E.g. adding a judge name with just 2 letters is too broad,
+    and doesn't get counted.
+     */
+    private static void checkComplexity(GetCasesSearchRequest request) {
+        int totalPoints = 0;
+        //give a point for every letter more than 3
+        totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - 3);
+        totalPoints += (StringUtils.length(request.getCourthouse()) >= 3 || request.getCourthouseId() != null) ? 1 : 0;
+        totalPoints += (request.getCourtroom() != null || request.getCourthouseId() != null) ? 1 : 0;
+        totalPoints += StringUtils.length(request.getJudgeName()) >= 3 ? 1 : 0;
+        totalPoints += StringUtils.length(request.getDefendantName()) >= 3 ? 1 : 0;
+        totalPoints += (request.getDateFrom() != null || request.getDateTo() != null) ? 1 : 0;
+        totalPoints += StringUtils.length(request.getEventTextContains()) >= 3 ? 1 : 0;
+
+        if (totalPoints < 3) {
             throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }
     }
 
-    private static void checkOnlyCourthouse(GetCasesSearchRequest request) {
-        if (BooleanUtils.and(new boolean[]{
-            StringUtils.isBlank(request.getCaseNumber()),
-            StringUtils.isNotBlank(request.getCourthouse()),
-            StringUtils.isBlank(request.getCourtroom()),
-            StringUtils.isBlank(request.getJudgeName()),
-            StringUtils.isBlank(request.getDefendantName()),
-            request.getDateFrom() == null,
-            request.getDateTo() == null,
-            StringUtils.isBlank(request.getEventTextContains())
-        })) {
-            throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
-        }
-    }
 
     private static void checkNoCriteriaProvided(GetCasesSearchRequest request) {
         if (BooleanUtils.and(new boolean[]{
