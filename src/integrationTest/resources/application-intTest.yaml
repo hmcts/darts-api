@@ -49,6 +49,8 @@ darts:
     api:
       baseurl: http://localhost:8080
   storage:
+    arm:
+      batch-size: 5
     arm-api:
       arm-username: some-username
       arm-password: some-password

@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -97,6 +98,14 @@ class FileOperationServiceTest extends IntegrationBase {
             true
         );
         assertNotNull(filePath);
+    }
+
+    @Test
+    @DisplayName("Test-7: createFile")
+    void createFile() throws IOException {
+        filePath = fileOperationService.createFile(fileName, tempDirectory.getAbsolutePath(), true);
+        assertTrue(Files.exists(filePath));
+        assertEquals(0L, Files.size(filePath));
     }
 
     @AfterEach
