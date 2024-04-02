@@ -76,6 +76,7 @@ class HearingsGetControllerTest extends IntegrationBase {
         String expectedJson = """
             {
                "hearing_id": <hearing-id>,
+               "courthouse_id": <courthouse-id>,
                "courthouse": "some-courthouse",
                "courtroom": "some-courtroom",
                "hearing_date": "<hearing-date>",
@@ -90,6 +91,7 @@ class HearingsGetControllerTest extends IntegrationBase {
             """;
         log.info(actualJson);
         expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
+        expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
         expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
         expectedJson = expectedJson.replace("<hearing-date>", hearingEntity.getHearingDate().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
