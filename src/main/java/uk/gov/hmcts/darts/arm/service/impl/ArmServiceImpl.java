@@ -120,13 +120,13 @@ public class ArmServiceImpl implements ArmService {
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
     }
 
-    public List<String> listSubmissionBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+    public List<String> listSubmissionBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
         return listBlobsUsingBatch(containerClient, prefix, batchSize);
     }
 
-    public List<String> listResponseBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+    public List<String> listResponseBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
         return listBlobsUsingBatch(containerClient, prefix, batchSize);

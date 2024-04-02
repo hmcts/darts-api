@@ -45,14 +45,14 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
-    public List<String> listSubmissionBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+    public List<String> listSubmissionBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;
     }
 
     @Override
-    public List<String> listResponseBlobUsingBatch(String containerName, String filename, Integer batchSize) {
+    public List<String> listResponseBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
         List<String> listedBlobs = new ArrayList<>();
         listedBlobs.add(filename);
         return listedBlobs;

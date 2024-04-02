@@ -14,9 +14,9 @@ public interface ArmService {
 
     List<String> listResponseBlobs(String containerName, String filename);
 
-    List<String> listSubmissionBlobUsingBatch(String containerName, String filename, Integer batchSize);
+    List<String> listSubmissionBlobsUsingBatch(String containerName, String filename, Integer batchSize);
 
-    List<String> listResponseBlobUsingBatch(String containerName, String filename, Integer batchSize);
+    List<String> listResponseBlobsUsingBatch(String containerName, String filename, Integer batchSize);
 
     ContinuationTokenBlobs listResponseBlobsWithMarker(String containerName, String filename, Integer batchSize, String continuationToken);
 
