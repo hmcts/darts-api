@@ -49,7 +49,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
 
-            caseRetentionEntity.getCourtCase().setIsRetentionUpdated(true);
+            caseRetentionEntity.getCourtCase().setRetentionUpdated(true);
             caseRetentionEntity.getCourtCase().setRetentionRetries(0);
 
             caseRetentionRepository.save(caseRetentionEntity);
