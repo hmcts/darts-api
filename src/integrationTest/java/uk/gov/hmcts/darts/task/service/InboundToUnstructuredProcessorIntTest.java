@@ -79,9 +79,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         //does not match because unstructured failed with max attempts reached
         var media4 = medias.get(3);
         externalObjectDirectoryStub.createAndSaveEod(media4, STORED, INBOUND);
-        var failed = externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED);
-        failed.setTransferAttempts(10);
-        eodRepository.save(failed);
+        externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED, eod -> eod.setTransferAttempts(10));
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(MediaTestData.getBinaryData());
 

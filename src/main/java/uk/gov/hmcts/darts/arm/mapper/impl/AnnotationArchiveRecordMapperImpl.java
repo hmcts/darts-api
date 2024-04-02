@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -79,7 +78,6 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     @Override
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                File archiveRecordFile,
                                                                 String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());

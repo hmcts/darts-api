@@ -33,6 +33,11 @@ public final class TestUtils {
         return FileUtils.readFileToString(file, "UTF-8");
     }
 
+    public static File getFile(String filelocation) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        return new File(classLoader.getResource(filelocation).getFile());
+    }
+
     public static ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
