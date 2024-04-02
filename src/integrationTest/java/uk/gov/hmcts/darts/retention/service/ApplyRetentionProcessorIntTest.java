@@ -53,18 +53,19 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
     @Test
     void testCaseRetentionChangeState() {
         List<CaseRetentionEntity> caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
-        assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntities.get(0).getCurrentState());
+        CaseRetentionEntity caseRetentionEntity = caseRetentionEntities.get(0);
+        assertEquals(CaseRetentionStatus.PENDING.name(), caseRetentionEntity.getCurrentState());
         applyRetentionProcessor.processApplyRetention();
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
 
         assertEquals(1, caseRetentionEntities.size());
-        assertTrue(caseRetentionEntities.get(0).getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
-        assertEquals(caseRetentionEntities.get(0).getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntities.get(0).getCurrentState());
+        assertTrue(caseRetentionEntity.getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
+        assertEquals(caseRetentionEntity.getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
+        assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntity.getCurrentState());
 
-        assertTrue(caseRetentionEntities.get(0).getCourtCase().isRetentionUpdated());
-        assertEquals(0, caseRetentionEntities.get(0).getCourtCase().getRetentionRetries());
+        assertTrue(caseRetentionEntity.getCourtCase().isRetentionUpdated());
+        assertEquals(0, caseRetentionEntity.getCourtCase().getRetentionRetries());
     }
 
     @Test
