@@ -112,13 +112,15 @@ public class DataManagementServiceImpl implements DataManagementService {
     public void copyBlobData(String sourceContainer, String destinationContainer, UUID sourceBlobId) {
         BlobServiceClient sourceServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, sourceServiceClient);
+
+        log.info("FETCHING BLOB {}", sourceBlobId);
         BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
 
-        //BlobServiceClient destinationServiceClient =
-        //    blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+
         BlobContainerClient destinationContainerClient =
             blobServiceFactory.getBlobContainerClient(destinationContainer, sourceServiceClient);
 
+        log.info("COPYING BLOB {}", sourceBlobId);
         destinationContainerClient.getBlobClient(sourceBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl());
     }
 
