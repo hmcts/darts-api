@@ -954,7 +954,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
         when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -1007,7 +1007,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
         when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -1059,7 +1059,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
         when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -1103,7 +1103,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
         when(caseDocumentEntity.getFileName()).thenReturn("case.");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);

@@ -43,6 +43,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     public static final String DAILY_LIST_CONTENT_JSON = "daily_list_content_json";
     public static final String DAILY_LIST_CONTENT_XML = "daily_list_content_xml";
     public static final String MESSAGE_ID = "message_id";
+    public static final String COURTHOUSE_CODE = "courthouse_code";
 
     @Id
     @Column(name = ID)
@@ -52,6 +53,9 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = LISTING_COURTHOUSE)
     private String listingCourthouse;
+
+    @Column(name = COURTHOUSE_CODE)
+    private Integer courthouseCode;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
     private String legacyObjectId;

@@ -139,7 +139,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getCaseRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(caseDocument.getUploadedTs()))
+            .eventDate(formatDateTime(caseDocument.getCreatedTs()))
             .region(armDataManagementConfiguration.getRegion())
             .title(caseDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -220,7 +220,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             case FILE_TYPE_KEY -> caseDocument.getFileType();
             case HEARING_DATE_KEY -> getHearingDate(caseDocument);
             case CHECKSUM_KEY -> caseDocument.getChecksum();
-            case CREATED_DATE_TIME_KEY -> formatDateTime(caseDocument.getUploadedTs());
+            case CREATED_DATE_TIME_KEY -> formatDateTime(caseDocument.getCreatedTs());
             case COURTHOUSE_KEY -> getCourthouse(caseDocument);
             default -> null;
         };

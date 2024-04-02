@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
+import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -100,6 +101,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final TransformedMediaHelper transformedMediaHelper;
     private final LogApi logApi;
     private final DataManagementFacade dataManagementFacade;
+    private final UnstructuredDataHelper unstructuredDataHelper;
 
     private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
         if (media1.getStart().equals(media2.getStart())) {
@@ -160,6 +162,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         } else {
             openRequests.ifPresent(openMediaRequests -> processAudioRequest(openMediaRequests.getId()));
         }
+
+        unstructuredDataHelper.waitForAllJobsToFinish();
     }
 
     /**
