@@ -63,7 +63,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         assertEquals(caseRetentionEntities.get(0).getRetainUntilAppliedOn().truncatedTo(ChronoUnit.DAYS), OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS));
         assertEquals(CaseRetentionStatus.COMPLETE.name(), caseRetentionEntities.get(0).getCurrentState());
 
-        assertEquals(true, caseRetentionEntities.get(0).getCourtCase().isRetentionUpdated());
+        assertTrue(caseRetentionEntities.get(0).getCourtCase().isRetentionUpdated());
         assertEquals(0, caseRetentionEntities.get(0).getCourtCase().getRetentionRetries());
     }
 
