@@ -51,6 +51,12 @@ java:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: AzureADTenantIdJustice
+          alias: AAD_TENANT_ID_JUSTICE
+        - name: AzureADClientIdJustice
+          alias: AAD_CLIENT_ID_JUSTICE
+        - name: AzureADClientSecretJustice
+          alias: AAD_CLIENT_SECRET_JUSTICE
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
         - name: XhibitPassword
@@ -154,6 +160,12 @@ postgresql:
 #           alias: AAD_CLIENT_ID
 #         - name: AzureADClientSecret
 #           alias: AAD_CLIENT_SECRET
+#         - name: AzureADTenantIdJustice
+#           alias: AAD_TENANT_ID_JUSTICE
+#         - name: AzureADClientIdJustice
+#           alias: AAD_CLIENT_ID_JUSTICE
+#         - name: AzureADClientSecretJustice
+#           alias: AAD_CLIENT_SECRET_JUSTICE
 #   environment:
 #     ATS_MODE: true
 #     POSTGRES_SSL_MODE: require

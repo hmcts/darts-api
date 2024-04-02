@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 
@@ -39,8 +41,32 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 generatedArchiveRecord = true;
             }
         } catch (IOException e) {
-            log.error("Unable to write ARM file {}, due to {}", archiveRecordFile.getAbsoluteFile(), e.getMessage());
+            log.error("Unable to write ARM file {}", archiveRecordFile.getAbsoluteFile(), e);
         }
         return generatedArchiveRecord;
+    }
+
+    public void generateArchiveRecords(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
+        if (!archiveRecords.isEmpty()) {
+            try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
+                for (var archiveRecord : archiveRecords) {
+                    try {
+                        String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
+                        String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
+                        log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordsFile.getAbsolutePath());
+                        printWriter.print(archiveRecordOperation);
+                        printWriter.println(uploadNewFileRecord);
+                    } catch (Exception e) {
+                        log.error("Unable to write archive record for EOD {} to ARM file {}",
+                                  archiveRecord.getArchiveRecordOperation().getRelationId(),
+                                  archiveRecordsFile.getAbsoluteFile());
+                        throw new DartsException(e);
+                    }
+                }
+            } catch (IOException e) {
+                log.error("Unable to write ARM file {}", archiveRecordsFile.getAbsoluteFile(), e);
+                throw new DartsException(e);
+            }
+        }
     }
 }

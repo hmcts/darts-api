@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +36,19 @@ public class ExternalObjectDirectoryStub {
                                                           ExternalLocationTypeEnum externalLocationTypeEnum) {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
+        return eodRepository.save(eod);
+    }
+
+    /**
+     * Creates an ExternalObjectDirectoryEntity. Passes the created EOD to the client for further customisations before saving
+     */
+    public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
+                                                          ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                          ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                          Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
+        UUID uuid = UUID.randomUUID();
+        var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
+        createdEodConsumer.accept(eod);
         return eodRepository.save(eod);
     }
 
