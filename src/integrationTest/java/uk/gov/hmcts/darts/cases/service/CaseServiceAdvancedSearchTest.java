@@ -255,6 +255,23 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
+    void getWithCourthouseCourtroom() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouse(swanseaCourthouse.getCourthouseName())
+            .courtroom("roOm2")
+            .build();
+
+        setupUserAccountAndSecurityGroup();
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroom/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
     void getWithCourtroom() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()

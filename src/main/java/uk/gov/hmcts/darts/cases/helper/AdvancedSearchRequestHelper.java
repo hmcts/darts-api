@@ -95,7 +95,6 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addCourtCaseCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addCourthouseCourtroomCriteria(request, criteriaBuilder, courtCaseJoin));
-        //CollectionUtils.addAll(predicates, addCourtroomCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, courtCaseJoin));
@@ -121,20 +120,6 @@ public class AdvancedSearchRequestHelper {
 
     private String surroundValue(String value, String surroundWith) {
         return surroundWith + value + surroundWith;
-    }
-
-    private List<Predicate> addCourtroomCriteria(GetCasesSearchRequest request,
-                                                 CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
-        List<Predicate> predicateList = new ArrayList<>();
-        if (StringUtils.isNotBlank(request.getCourtroom())) {
-            Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(courtCaseJoin);
-
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(courtroomJoin.get(CourtroomEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getCourtroom())
-            ));
-        }
-        return predicateList;
     }
 
     private List<Predicate> addDefendantCriteria(GetCasesSearchRequest request,
@@ -186,7 +171,6 @@ public class AdvancedSearchRequestHelper {
                                                    CriteriaBuilder criteriaBuilder,
                                                    Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) throws AdvancedSearchNoResultsException {
         List<Predicate> predicateList = new ArrayList<>();
-        //Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(courtCaseJoin);
         Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(courtCaseJoin);
         if (request.getCourtroomId() != null) {
             CourtroomEntity courtroomReference = courtroomRepository.getReferenceById(request.getCourtroomId());
@@ -211,6 +195,9 @@ public class AdvancedSearchRequestHelper {
         }
 
         List<Integer> courtroomIdList = courtroomRepository.findAllIdByCourtroomNameLike(request.getCourtroom());
+        if (courtroomIdList.isEmpty()) {
+            throw new AdvancedSearchNoResultsException();
+        }
         List<CourtroomEntity> courtroomEntityList = courtroomIdList.stream().map(id -> courtroomRepository.getReferenceById(id)).toList();
         predicateList.add(
             hearingJoin.get(HearingEntity_.COURTROOM).in(

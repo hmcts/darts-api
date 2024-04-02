@@ -24,8 +24,8 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
 
     @Query("""
         SELECT cr.id FROM CourthouseEntity ch, CourtroomEntity cr
-        WHERE upper(ch.courthouseName) like upper(%:courthouse%)
-        AND upper(cr.name) like upper(%:courtroom%)
+        WHERE upper(ch.courthouseName) like upper(CONCAT('%', :courthouse, '%'))
+        AND upper(cr.name) like upper(CONCAT('%', :courtroom, '%'))
         AND cr.courthouse = ch
         """
     )
@@ -33,7 +33,7 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
 
     @Query("""
         SELECT cr.id FROM CourtroomEntity cr
-        WHERE upper(cr.name) like upper(%:courtroom%)
+        WHERE upper(cr.name) like upper(CONCAT('%', :courtroom, '%'))
         """
     )
     List<Integer> findAllIdByCourtroomNameLike(String courtroom);
