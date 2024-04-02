@@ -1,5 +1,6 @@
 {
   "case_id": 101,
+  "courthouse_id": 1001,
   "courthouse": "case_courthouse",
   "case_number": "1",
   "defendants": [

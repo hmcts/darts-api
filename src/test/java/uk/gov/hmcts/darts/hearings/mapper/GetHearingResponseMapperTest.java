@@ -40,6 +40,7 @@ class GetHearingResponseMapperTest {
 
         GetHearingResponse response = getHearingResponseMapper.map(hearing);
         assertEquals(response.getHearingId(), 102);
+        assertEquals(response.getCourthouseId(), 1001);
         assertEquals(response.getCourthouse(), "SWANSEA");
         assertEquals(response.getCourtroom(), "1");
         assertEquals(response.getHearingDate(), LocalDate.of(2023, 6, 20));

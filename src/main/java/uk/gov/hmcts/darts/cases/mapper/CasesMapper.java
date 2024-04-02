@@ -124,6 +124,7 @@ public class CasesMapper {
         singleCase.setCaseClosedDateTime(caseEntity.getCaseClosedTimestamp());
         singleCase.setCaseId(caseEntity.getId());
         singleCase.setCaseNumber(caseEntity.getCaseNumber());
+        singleCase.setCourthouseId(caseEntity.getCourthouse().getId());
         singleCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
         singleCase.setDefendants(caseEntity.getDefendantStringList());
         singleCase.setDefenders(caseEntity.getDefenceStringList());
