@@ -35,7 +35,7 @@ public class RequestValidator {
         //give a point for every letter more than 3
         totalPoints += Math.max(0, StringUtils.length(request.getCaseNumber()) - 3);
         totalPoints += (StringUtils.length(request.getCourthouse()) >= 3 || request.getCourthouseId() != null) ? 1 : 0;
-        totalPoints += (request.getCourtroom() != null || request.getCourthouseId() != null) ? 1 : 0;
+        totalPoints += (request.getCourtroom() != null || request.getCourtroomId() != null) ? 1 : 0;
         totalPoints += StringUtils.length(request.getJudgeName()) >= 3 ? 1 : 0;
         totalPoints += StringUtils.length(request.getDefendantName()) >= 3 ? 1 : 0;
         totalPoints += (request.getDateFrom() != null || request.getDateTo() != null) ? 1 : 0;

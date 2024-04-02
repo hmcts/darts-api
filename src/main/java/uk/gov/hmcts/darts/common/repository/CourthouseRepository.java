@@ -31,8 +31,8 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
     @Query("""
         SELECT DISTINCT ch.id
         FROM CourthouseEntity ch
-        WHERE upper(ch.courthouseName) like upper(%:name%)
-        or upper(ch.displayName) like upper(%:name%)
+        WHERE upper(ch.courthouseName) like upper(CONCAT('%', :name, '%'))
+        or upper(ch.displayName) like upper(CONCAT('%', :name, '%'))
         """)
     List<Integer> findAllIdByDisplayNameOrNameLike(String name);
 

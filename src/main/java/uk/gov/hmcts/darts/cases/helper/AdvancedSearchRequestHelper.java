@@ -56,8 +56,6 @@ public class AdvancedSearchRequestHelper {
     private final CourthouseRepository courthouseRepository;
 
     public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
-        //first figure out if we can identify a courthouse/courtroom, as the postgres optimiser doesn't seem to work correctly.
-
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
         Root<UserAccountCourtCaseEntity> caseRoot = criteriaQuery.from(UserAccountCourtCaseEntity.class);
@@ -154,7 +152,7 @@ public class AdvancedSearchRequestHelper {
                                                            CriteriaBuilder criteriaBuilder,
                                                            Join<UserAccountCourtCaseEntity,
                                                                CourtCaseEntity> courtCaseJoin) throws AdvancedSearchNoResultsException {
-        boolean courtroomProvided = StringUtils.isNotBlank(request.getCourtroom()) || request.getCourthouseId() != null;
+        boolean courtroomProvided = StringUtils.isNotBlank(request.getCourtroom()) || request.getCourtroomId() != null;
         List<Predicate> predicateList = new ArrayList<>();
         if (courtroomProvided) {
             return addCourtroomIdCriteria(request, criteriaBuilder, courtCaseJoin);
@@ -175,7 +173,7 @@ public class AdvancedSearchRequestHelper {
         if (request.getCourtroomId() != null) {
             CourtroomEntity courtroomReference = courtroomRepository.getReferenceById(request.getCourtroomId());
             predicateList.add(criteriaBuilder.equal(
-                hearingJoin.get(CourtroomEntity_.ID),
+                hearingJoin.get(HearingEntity_.COURTROOM),
                 courtroomReference)
             );
             return predicateList;
