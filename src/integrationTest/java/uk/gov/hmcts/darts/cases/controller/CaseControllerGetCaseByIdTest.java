@@ -3,10 +3,13 @@ package uk.gov.hmcts.darts.cases.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -33,12 +36,14 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
 
+    private HearingEntity hearingEntity;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
     @BeforeEach
     void setUp() {
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
@@ -70,7 +75,25 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {"case_id":<case-id>,
+            "courthouse_id":<courthouse-id>,
+            "courthouse":"some-courthouse",
+            "case_number":"1",
+            "defendants":["aDefendant"],
+            "judges":["1judge1"],
+            "prosecutors":["aProsecutor"],
+            "defenders":["aDefence"],
+            "reporting_restrictions":[]
+            }
+            """;
+
+       expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
+       expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
