@@ -59,7 +59,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     private UserAccountEntity deletedBy;
 
     @Column(name = "deleted_ts")
-    private OffsetDateTime deletedTs;
+    private OffsetDateTime deletedTimestamp;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = AnnotationDocumentEntity_.ANNOTATION)
     private List<AnnotationDocumentEntity> annotationDocuments = new ArrayList<>();

@@ -103,7 +103,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     private UserAccountEntity deletedBy;
 
     @Column(name = "deleted_ts")
-    private OffsetDateTime deletedTs;
+    private OffsetDateTime deletedTimestamp;
 
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();

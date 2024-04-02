@@ -19,7 +19,7 @@ public class ModifiedBaseEntity {
 
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
-    private OffsetDateTime lastModifiedDateTime;
+    private OffsetDateTime lastModifiedTimestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by")

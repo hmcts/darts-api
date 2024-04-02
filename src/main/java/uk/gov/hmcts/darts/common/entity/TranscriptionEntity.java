@@ -98,7 +98,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private UserAccountEntity deletedBy;
 
     @Column(name = "deleted_ts")
-    private OffsetDateTime deletedTs;
+    private OffsetDateTime deletedTimestamp;
 
     @Column(name = "chronicle_id")
     private String chronicleId;

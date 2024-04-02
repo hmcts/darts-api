@@ -122,7 +122,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     private UserAccountEntity deletedBy;
 
     @Column(name = "deleted_ts")
-    private OffsetDateTime deletedTs;
+    private OffsetDateTime deletedTimestamp;
 
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;

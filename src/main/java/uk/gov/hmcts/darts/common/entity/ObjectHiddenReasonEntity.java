@@ -21,7 +21,7 @@ public class ObjectHiddenReasonEntity {
     private Integer id;
 
     @Column(name = "ohr_reason")
-    private String description;
+    private String reason;
 
     @Column(name = "display_name")
     private String displayName;
