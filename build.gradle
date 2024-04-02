@@ -167,8 +167,6 @@ def coverageExclusions = [
   '**/uk/gov/hmcts/darts/common/entity/**',
   '**/uk/gov/hmcts/darts/**/model/**',
   '**/uk/gov/hmcts/darts/**/config/**',
-  '**/uk/gov/hmcts/darts/**/arm/**',
-  '**/uk/gov/hmcts/darts/**/task/**',
   '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java',
   '**/uk/gov/hmcts/darts/notification/NotificationConstants.java',
   '**/uk/gov/hmcts/darts/cases/CasesConstants.java',
