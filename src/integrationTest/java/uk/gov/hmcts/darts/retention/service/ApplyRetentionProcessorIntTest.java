@@ -58,6 +58,7 @@ class ApplyRetentionProcessorIntTest extends IntegrationBase {
         applyRetentionProcessor.processApplyRetention();
 
         caseRetentionEntities = caseRetentionRepository.findAllByCourtCase(courtCase);
+        caseRetentionEntity = caseRetentionEntities.get(0);
 
         assertEquals(1, caseRetentionEntities.size());
         assertTrue(caseRetentionEntity.getCreatedDateTime().isBefore(OffsetDateTime.now().minusDays(7)));
