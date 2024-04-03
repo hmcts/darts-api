@@ -13,12 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
+import uk.gov.hmcts.darts.authorisation.model.Courthouse;
 import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
 import uk.gov.hmcts.darts.authorisation.model.Permission;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.HashSet;
@@ -50,6 +53,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     private final CourthouseRepository courthouseRepository;
     private final UserAccountRepository userAccountRepository;
     private final UserIdentity userIdentity;
+    private final SecurityGroupRepository securityGroupRepository;
 
     @Override
     public Optional<UserState> getAuthorisation(String emailAddress) {
@@ -61,10 +65,19 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             UserAccountEntity_.securityGroupEntities,
             JoinType.LEFT
         );
+
+        Join<SecurityGroupEntity, CourthouseEntity> courthouses = securityGroup.join(
+            SecurityGroupEntity_.courthouseEntities,
+            JoinType.LEFT
+        );
+        List<CourthouseEntity> courthouseEntities = courthouseRepository.findAll();
+        List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
+
         Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
             SecurityGroupEntity_.securityRoleEntity,
             JoinType.LEFT
         );
+
         Join<SecurityRoleEntity, SecurityPermissionEntity> securityPermission = securityRole.join(
             SecurityRoleEntity_.securityPermissionEntities,
             JoinType.LEFT
@@ -74,6 +87,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                                  GetAuthorisationResult.class,
                                  root.get(UserAccountEntity_.id),
                                  root.get(UserAccountEntity_.userName),
+                                 securityGroup.get(SecurityGroupEntity_.globalAccess),
+                                 courthouses.get(CourthouseEntity_.id),
                                  securityRole.get(SecurityRoleEntity_.id),
                                  securityRole.get(SecurityRoleEntity_.roleName),
                                  securityPermission.get(SecurityPermissionEntity_.id),
@@ -109,6 +124,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
         Integer tmpRoleId = 0;
         Set<Permission> permissions = new LinkedHashSet<>();
+        Set<Courthouse> courthouses = new LinkedHashSet<>();
+
         for (GetAuthorisationResult result : getAuthorisationResultList) {
             userStateBuilder.userId(result.userId());
             userStateBuilder.userName(result.userName());
@@ -116,9 +133,13 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             Integer roleId = result.roleId();
             if (roleId != null && !tmpRoleId.equals(roleId)) {
                 permissions = new LinkedHashSet<>();
+                courthouses = new LinkedHashSet<>();
+
                 roles.add(Role.builder()
                               .roleId(roleId)
                               .roleName(result.roleName())
+                              .globalAccess(result.globalAccess())
+                              .courthouses(courthouses)
                               .permissions(permissions)
                               .build());
 
@@ -128,9 +149,17 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             Integer permissionId = result.permissionId();
             if (permissionId != null) {
                 permissions.add(Permission.builder()
-                                    .permissionId(permissionId)
                                     .permissionName(result.permissionName())
                                     .build());
+            }
+            List<CourthouseEntity> courthouseEntities = courthouseRepository.findAll();
+            for (CourthouseEntity courthouseEntity: courthouseEntities) {
+                log.info("courthouseEntity.getCourthouseName()" + courthouseEntity.getCourthouseName());
+            }
+
+            Integer courthouseId = result.courthouseId();
+            if (courthouseId != null) {
+                courthouses.add(Courthouse.builder().courthouseId(courthouseId).build());
             }
         }
 

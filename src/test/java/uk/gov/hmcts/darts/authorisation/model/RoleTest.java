@@ -18,13 +18,12 @@ class RoleTest {
         Role role = Role.builder()
             .roleId(APPROVER.getId())
             .roleName(APPROVER.toString())
+            .globalAccess(false)
             .permissions(Set.of(
                 Permission.builder()
-                    .permissionId(2)
                     .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                     .build(),
                 Permission.builder()
-                    .permissionId(4)
                     .permissionName("LISTEN_TO_AUDIO_FOR_PLAYBACK")
                     .build()
             ))
@@ -40,10 +39,11 @@ class RoleTest {
         Role role = Role.builder()
             .roleId(JUDGE.getId())
             .roleName(JUDGE.toString())
+            .globalAccess(false)
             .permissions(Collections.emptySet())
             .build();
 
-        assertEquals(role, new Role(JUDGE.getId(), JUDGE.toString(), Collections.emptySet()));
+        assertEquals(role, new Role(JUDGE.getId(), JUDGE.toString(), false, Collections.emptySet(),  Collections.emptySet()));
     }
 
     @Test
@@ -51,10 +51,11 @@ class RoleTest {
         Role role = Role.builder()
             .roleId(JUDGE.getId())
             .roleName(JUDGE.toString())
+            .globalAccess(false)
             .permissions(Collections.emptySet())
             .build();
 
-        assertNotEquals(role, new Role(REQUESTER.getId(), REQUESTER.toString(), Collections.emptySet()));
+        assertNotEquals(role, new Role(REQUESTER.getId(), REQUESTER.toString(),false, Collections.emptySet(), Collections.emptySet()));
     }
 
 }

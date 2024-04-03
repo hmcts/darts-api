@@ -19,6 +19,10 @@ public class Role {
     @Include
     @NonNull
     private String roleName;
+    @NonNull
+    private Boolean globalAccess;
+    @Exclude
+    private Set<Courthouse> courthouses;
     @Exclude
     @NonNull
     private Set<Permission> permissions;
