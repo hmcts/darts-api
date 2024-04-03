@@ -14,12 +14,17 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.List.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
 class PatchSecurityGroupIntTest extends IntegrationBase {
@@ -51,11 +56,11 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         Integer id = createSecurityGroup(name, displayName);
 
         String patchContent = """
-                         {
-                           "name": "<name>",
-                           "display_name": "<display_name>"
-                         }
-                           """;
+            {
+              "name": "<name>",
+              "display_name": "<display_name>"
+            }
+              """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
         patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
@@ -77,19 +82,18 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     }
 
 
-
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
 
         String patchContent = """
-                         {
-                           "name": "<name>",
-                           "display_name": "<display_name>",
-                           "description": "<description>"
-                         }
-                           """;
+            {
+              "name": "<name>",
+              "display_name": "<display_name>",
+              "description": "<description>"
+            }
+              """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
         String newDisplayName = "Security group display name new " + UUID.randomUUID();
@@ -158,7 +162,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
         String patchContent = String.format("{\"user_ids\": [%s, %s]}", user1.getId(), user2.getId());
 
-            MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
+        MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
             .content(patchContent);
 
         mockMvc.perform(patchRequest)
@@ -180,11 +184,11 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         String patchContent = """
-                         {
-                           "name": "<name>",
-                           "display_name": "<display_name>"
-                         }
-                           """;
+            {
+              "name": "<name>",
+              "display_name": "<display_name>"
+            }
+              """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
         String newDisplayName = "Security group display name new " + UUID.randomUUID();
@@ -210,11 +214,11 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         Integer id = -1000;
 
         String patchContent = """
-                         {
-                           "name": "<name>",
-                           "display_name": "<display_name>"
-                         }
-                           """;
+            {
+              "name": "<name>",
+              "display_name": "<display_name>"
+            }
+              """;
         String newName = "security group name" + UUID.randomUUID();
         patchContent = patchContent.replace("<name>", newName);
         String newDisplayName = "Security group display name new " + UUID.randomUUID();
@@ -236,10 +240,10 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         Integer id = createSecurityGroup("security group name" + UUID.randomUUID(), "security group display name" + UUID.randomUUID());
 
         String patchContent = """
-                         {
-                           "courthouse_ids": [-100]
-                         }
-                           """;
+            {
+              "courthouse_ids": [-100]
+            }
+              """;
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
             .content(patchContent);
@@ -256,10 +260,10 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         Integer id = createSecurityGroup("security group name " + UUID.randomUUID(), "security group name" + UUID.randomUUID());
 
         String patchContent = """
-                         {
-                           "user_ids": [-100]
-                         }
-                           """;
+            {
+              "user_ids": [-100]
+            }
+              """;
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
             .content(patchContent);
@@ -279,11 +283,11 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         Integer id2 = createSecurityGroup(name2, "security group name" + UUID.randomUUID());
 
         String patchContent = """
-                         {
-                           "name": "<name>",
-                           "display_name": "<display_name>"
-                         }
-                           """;
+            {
+              "name": "<name>",
+              "display_name": "<display_name>"
+            }
+              """;
         patchContent = patchContent.replace("<name>", name1);
         patchContent = patchContent.replace("<display_name>", NEW_DISPLAY_NAME);
 
@@ -307,10 +311,10 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         Integer id2 = createSecurityGroup(name2, displayName2);
 
         String patchContent = """
-                         {
-                           "display_name": "<display_name>"
-                         }
-                           """;
+            {
+              "display_name": "<display_name>"
+            }
+              """;
         patchContent = patchContent.replace("<display_name>", displayName1);
 
         MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id2)
@@ -320,6 +324,45 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isConflict())
             .andReturn();
     }
+
+    @Test
+    void removeAllUsersGivenEmptyUserPatchList() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        var securityGroupEntity = buildGroupForRole(APPROVER);
+        dartsDatabase.addUserToGroup(minimalUserAccount(), securityGroupEntity);
+        dartsDatabase.addUserToGroup(minimalUserAccount(), securityGroupEntity);
+
+        mockMvc.perform(
+                buildPatchRequest(securityGroupEntity.getId())
+                    .content("""
+                                 {"user_ids": []}
+                             """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.user_ids").isEmpty())
+            .andReturn();
+    }
+
+    @Test
+    void removesOnlyAbsentUsersGivenPatchWithSubsetOfCurrentUsers() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        var securityGroupEntity = buildGroupForRole(APPROVER);
+        var userAccount1 = minimalUserAccount();
+        var userAccount2 = minimalUserAccount();
+        dartsDatabase.addUserToGroup(userAccount1, securityGroupEntity);
+        dartsDatabase.addUserToGroup(userAccount2, securityGroupEntity);
+
+        mockMvc.perform(
+                buildPatchRequest(securityGroupEntity.getId())
+                    .content("""
+                                 {"user_ids": [%s]}
+                             """.formatted(userAccount1.getId())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.user_ids[0]").value(userAccount1.getId()))
+            .andReturn();
+    }
+
 
     private MockHttpServletRequestBuilder buildPostRequest() {
         return post("/admin/security-groups")
@@ -333,13 +376,13 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     private Integer createSecurityGroup(String name, String displayName) throws Exception {
         String content = """
-                         {
-                           "name": "<name>",
-                           "display_name": "<display_name>",
-                           "description": "<description>"
-                           
-                         }
-                           """;
+            {
+              "name": "<name>",
+              "display_name": "<display_name>",
+              "description": "<description>"
+              
+            }
+              """;
         content = content.replace("<name>", name);
         content = content.replace("<display_name>", displayName);
         content = content.replace("<description>", ORIGINAL_DESCRIPTION);
