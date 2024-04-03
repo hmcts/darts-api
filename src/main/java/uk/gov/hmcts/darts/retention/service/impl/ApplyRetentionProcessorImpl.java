@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
@@ -20,6 +22,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
     private final CaseRetentionRepository caseRetentionRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final CaseRepository caseRepository;
 
 
     @Value("${darts.data-management.pending-retention-days: 7}")
@@ -38,7 +41,8 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
         //List is ordered in createdDateTime desc order
         for (CaseRetentionEntity caseRetentionEntity: caseRetentionEntities) {
-            if (processedCases.contains(caseRetentionEntity.getCourtCase().getId())) {
+            CourtCaseEntity courtCaseEntity = caseRetentionEntity.getCourtCase();
+            if (processedCases.contains(courtCaseEntity.getId())) {
                 caseRetentionEntity.setCurrentState(CaseRetentionStatus.IGNORED.name());
                 caseRetentionRepository.save(caseRetentionEntity);
                 continue;
@@ -46,8 +50,14 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
 
             caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
             caseRetentionEntity.setCurrentState(CaseRetentionStatus.COMPLETE.name());
+
+            courtCaseEntity.setRetentionUpdated(true);
+            courtCaseEntity.setRetentionRetries(0);
+
             caseRetentionRepository.save(caseRetentionEntity);
-            processedCases.add(caseRetentionEntity.getCourtCase().getId());
+            caseRepository.save(courtCaseEntity);
+
+            processedCases.add(courtCaseEntity.getId());
         }
     }
 }
