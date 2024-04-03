@@ -71,6 +71,4 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         """)
     void updateLastLoginTime(Integer userId);
 
-    List<UserAccountEntity> findAllByIdIn(List<Integer> userIds);
-
 }
