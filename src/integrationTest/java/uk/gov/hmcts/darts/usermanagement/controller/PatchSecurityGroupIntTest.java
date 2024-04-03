@@ -14,10 +14,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
-import java.util.List;
 import java.util.UUID;
 
-import static java.util.List.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,9 +26,7 @@ import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserA
 
 @AutoConfigureMockMvc
 class PatchSecurityGroupIntTest extends IntegrationBase {
-    private static final String ORIGINAL_DISPLAY_NAME = "Security group display name original";
     private static final String ORIGINAL_DESCRIPTION = "Security group description original";
-    private static final String NEW_NAME = "Security group name new";
     private static final String NEW_DISPLAY_NAME = "Security group display name new";
 
     private static final String TEST_COURTHOUSE_NAME_1 = "Courthouse name 1";
