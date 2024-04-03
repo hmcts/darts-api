@@ -126,7 +126,7 @@ class ArmBatchProcessResponseFilesImplTest {
     }
 
     @Test
-    @Disabled
+    @Disabled("Broken")
     void batchProcessResponseFilesWithBatchSizeTwo() {
 
         // given
