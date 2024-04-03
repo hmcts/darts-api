@@ -153,7 +153,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void downloadTranscriptShouldReturnBadRequestError() throws Exception {
+    void downloadTranscriptShouldReturnNotFoundError() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
                 "accept",
@@ -161,13 +161,13 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             );
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_109","title":"Failed to download transcript","status":400}
+            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
