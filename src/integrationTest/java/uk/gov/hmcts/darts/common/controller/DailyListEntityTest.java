@@ -34,6 +34,7 @@ class DailyListEntityTest extends IntegrationBase {
 
     public static final String DAILYLISTS = "/dailylists";
     public static final String SOURCE_SYSTEM = "source_system";
+    public static final String MESSAGE_ID = "message_id";
     public static final String JSON_STRING = "json_string";
     public static final String DAL_ID = "dal_id";
     @Autowired
@@ -52,6 +53,7 @@ class DailyListEntityTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam(SOURCE_SYSTEM, "CPP")
+            .queryParam(MESSAGE_ID, "some-message-id")
             .header(JSON_STRING, jsonDocument);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
@@ -68,6 +70,7 @@ class DailyListEntityTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam(SOURCE_SYSTEM, "CPP")
+            .queryParam(MESSAGE_ID, "some-message-id")
             .header(JSON_STRING, jsonDocument);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is5xxServerError()).andReturn();
 
@@ -83,6 +86,7 @@ class DailyListEntityTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam(SOURCE_SYSTEM, "CPP")
+            .queryParam(MESSAGE_ID, "some-message-id")
             .header("xml_document", xmlString);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
@@ -98,6 +102,7 @@ class DailyListEntityTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam(SOURCE_SYSTEM, "CPP")
+            .queryParam(MESSAGE_ID, "some-message-id")
             .header("xml_document", xmlString);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
@@ -122,6 +127,7 @@ class DailyListEntityTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam(SOURCE_SYSTEM, "CPP")
+            .queryParam(MESSAGE_ID, "some-message-id")
             .header(JSON_STRING, jsonDocument1);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 

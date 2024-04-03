@@ -53,6 +53,12 @@ paths:
             format: date-time
           description: "The date that the dailyList was published. <p>
                         **Conditional mandatory**, required if json_document not provided"
+        - in: query
+          name: message_id
+          schema:
+            type: string
+          description: "The message id of the event. <p>
+                      **Conditional mandatory**"
         - in: header
           name: xml_document
           schema:
