@@ -204,7 +204,6 @@ darts:
       manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}
       arm-client: ${ARM_CLIENT:darts}
       continuation-token-duration: PT60M
-      
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
