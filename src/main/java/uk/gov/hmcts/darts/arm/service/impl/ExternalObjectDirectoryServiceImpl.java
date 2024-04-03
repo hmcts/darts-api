@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
@@ -18,6 +19,7 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     private final ExternalObjectDirectoryRepository eodRepository;
     private final ArmDataManagementConfiguration armConfig;
 
+    @Override
     public List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable) {
 
         return eodRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
@@ -26,6 +28,15 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
             armConfig.getMaxRetryAttempts(),
             pageable
         );
+    }
+
+    @Override
+    public boolean hasNotAllMediaBeenCopiedFromInboundStorageForAtsProcessing(List<MediaEntity> mediaRequestFiles) {
+        return mediaRequestFiles.stream()
+            .anyMatch(mediaEntity -> eodRepository.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(
+                mediaEntity, EodHelper.storedStatus(), EodHelper.inboundLocation(),
+                EodHelper.awaitingVerificationStatus(), List.of(EodHelper.unstructuredLocation(), EodHelper.armLocation()))
+            );
     }
 
 }

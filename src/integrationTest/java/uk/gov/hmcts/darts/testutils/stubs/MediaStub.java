@@ -45,4 +45,8 @@ public class MediaStub {
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_2_START_TIME, MEDIA_2_END_TIME, 4)
        );
     }
+
+    public MediaEntity createAndSaveAMedia() {
+        return createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 1);
+    }
 }
