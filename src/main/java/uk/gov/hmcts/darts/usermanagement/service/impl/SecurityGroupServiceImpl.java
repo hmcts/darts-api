@@ -147,12 +147,20 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
             }
             securityGroupEntity.setCourthouseEntities(courthouseEntities);
         }
+
+        patchSecurityGroupUsers(securityGroupPatch, securityGroupEntity);
+    }
+
+    private void patchSecurityGroupUsers(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
         List<Integer> userIds = securityGroupPatch.getUserIds();
         if (userIds != null) {
+            securityGroupEntity.getUsers().forEach(userAccountEntity -> userAccountEntity.getSecurityGroupEntities().remove(securityGroupEntity));
+            securityGroupEntity.getUsers().clear();
             for (Integer userId: userIds) {
                 Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
                 if (userAccountEntity.isPresent()) {
                     userAccountEntity.get().getSecurityGroupEntities().add(securityGroupEntity);
+                    securityGroupEntity.getUsers().add(userAccountEntity.get());
                 } else {
                     throw new DartsApiException(
                         UserManagementError.USER_NOT_FOUND,
