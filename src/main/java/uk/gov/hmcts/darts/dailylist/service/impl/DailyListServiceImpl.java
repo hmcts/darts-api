@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.dailylist.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +8,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
@@ -33,6 +33,7 @@ public class DailyListServiceImpl implements DailyListService {
     private final DailyListRepository dailyListRepository;
     private final DailyListMapper dailyListMapper;
     private final ObjectMapper objectMapper;
+    private final UserIdentity userIdentity;
 
     @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
     private int housekeepingDays;
@@ -59,6 +60,7 @@ public class DailyListServiceImpl implements DailyListService {
             //update the record
             savedDailyListEntity = existingRecordOpt.get();
             dailyListMapper.updateDailyListEntity(postRequest, listingCourthouse, savedDailyListEntity);
+            savedDailyListEntity.setLastModifiedBy(userIdentity.getUserAccount());
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         } else {
             //insert new record
@@ -66,6 +68,8 @@ public class DailyListServiceImpl implements DailyListService {
                 postRequest,
                 listingCourthouse
             );
+            savedDailyListEntity.setCreatedBy(userIdentity.getUserAccount());
+            savedDailyListEntity.setLastModifiedBy(userIdentity.getUserAccount());
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         }
         PostDailyListResponse postDailyListResponse = new PostDailyListResponse();
@@ -85,6 +89,10 @@ public class DailyListServiceImpl implements DailyListService {
         dailyListEntity.setStartDate(postRequest.getHearingDate());
         dailyListEntity.setUniqueId(postRequest.getUniqueId());
         dailyListEntity.setPublishedTimestamp(postRequest.getPublishedDateTime());
+        if (dailyListEntity.getCreatedBy() == null) {
+            dailyListEntity.setCreatedBy(userIdentity.getUserAccount());
+        }
+        dailyListEntity.setLastModifiedBy(userIdentity.getUserAccount());
         dailyListRepository.saveAndFlush(dailyListEntity);
 
         PostDailyListResponse postDailyListResponse = new PostDailyListResponse();
@@ -102,17 +110,7 @@ public class DailyListServiceImpl implements DailyListService {
 
         DailyListEntity foundDailyList = foundDailyListOpt.get();
         dailyListMapper.updateDailyListEntity(patchRequest, foundDailyList);
-        dailyListRepository.saveAndFlush(foundDailyList);
-        try {
-            foundDailyList.setContent(objectMapper.writeValueAsString(patchRequest.getDailyListJson()));
-        } catch (JsonProcessingException e) {
-            log.error(
-                "An Error has occurred trying to save the json for id {} to the database",
-                patchRequest.getDailyListId(),
-                e
-            );
-            throw new DartsApiException(DailyListError.INTERNAL_ERROR);
-        }
+        foundDailyList.setLastModifiedBy(userIdentity.getUserAccount());
         dailyListRepository.saveAndFlush(foundDailyList);
 
         PostDailyListResponse postDailyListResponse = new PostDailyListResponse();
