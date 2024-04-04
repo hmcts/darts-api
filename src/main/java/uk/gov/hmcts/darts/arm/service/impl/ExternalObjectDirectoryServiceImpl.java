@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,11 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
             EodHelper.inboundLocation(),
             EodHelper.awaitingVerificationStatus(),
             List.of(EodHelper.unstructuredLocation(), EodHelper.armLocation()));
+    }
+	
+    @Transactional
+    public Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Integer externalObjectDirectoryId) {
+        return eodRepository.findById(externalObjectDirectoryId);
     }
 
 }

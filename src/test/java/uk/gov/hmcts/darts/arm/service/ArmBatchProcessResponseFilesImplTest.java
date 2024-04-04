@@ -36,6 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZO
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("VariableDeclarationUsageDistance")
 class ArmBatchProcessResponseFilesImplTest {
 
     @Mock
@@ -57,6 +58,9 @@ class ArmBatchProcessResponseFilesImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private ArmResponseFilesProcessor armResponseFilesProcessor;
+    @Mock
+    private ExternalObjectDirectoryService externalObjectDirectoryService;
+
 
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
@@ -90,14 +94,14 @@ class ArmBatchProcessResponseFilesImplTest {
 
         armBatchProcessResponseFiles = new ArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
             armDataManagementApi,
             fileOperationService,
             armDataManagementConfiguration,
             objectMapper,
             userIdentity,
             currentTimeHelper,
-            armResponseFilesProcessor
+            armResponseFilesProcessor,
+            externalObjectDirectoryService
         );
 
     }

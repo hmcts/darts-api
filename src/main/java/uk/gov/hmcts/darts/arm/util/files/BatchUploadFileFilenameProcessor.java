@@ -12,22 +12,24 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 
 @Getter
 @Slf4j
-public class BatchMetadataFilenameProcessor {
+public class BatchUploadFileFilenameProcessor {
 
-    private static final int NUMBER_OF_TOKENS = 2;
+    private static final int NUMBER_OF_TOKENS = 5;
     public static final String FILE_EXTENSION_SEPARATOR = ".";
     private String batchMetadataFilenameAndPath;
     private String batchMetadataFilename;
     private String prefix;
     private String uuidString;
+    private String hashcode;
+    private String status;
 
-    public BatchMetadataFilenameProcessor(String batchMetadataFilenameAndPath) {
+    public BatchUploadFileFilenameProcessor(String batchMetadataFilenameAndPath) {
         this.batchMetadataFilenameAndPath = batchMetadataFilenameAndPath;
         processFilename();
     }
 
     private void processFilename() {
-        //Expected filename dropzone/DARTS/submission/DARTS_UUID.a360
+        //Expected filename dropzone/DARTS/response/DARTS_uuid_hashcode_1_iu.rsp
         batchMetadataFilename = FilenameUtils.getName(batchMetadataFilenameAndPath);
         if (nonNull(batchMetadataFilename) && batchMetadataFilename.contains(FILE_EXTENSION_SEPARATOR)) {
             String filename = batchMetadataFilename.substring(0, batchMetadataFilename.indexOf(FILE_EXTENSION_SEPARATOR));
@@ -36,6 +38,8 @@ public class BatchMetadataFilenameProcessor {
             if (tokens.size() == NUMBER_OF_TOKENS) {
                 prefix = tokens.get(0);
                 uuidString = tokens.get(1);
+                hashcode = tokens.get(2);
+                status = tokens.get(3);
             } else {
                 log.error("Expected {} tokens in filename {} but found {}", NUMBER_OF_TOKENS, batchMetadataFilenameAndPath, tokens.size());
                 throw new IllegalArgumentException("Invalid filename " + batchMetadataFilenameAndPath);
