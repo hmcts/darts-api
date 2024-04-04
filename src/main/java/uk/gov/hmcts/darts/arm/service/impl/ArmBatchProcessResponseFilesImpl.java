@@ -68,6 +68,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponseFiles {
 
+    public static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementApi armDataManagementApi;
     private final FileOperationService fileOperationService;
@@ -214,7 +215,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
 
                         updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus());
                     } catch (Exception e) {
-                        log.error("Unable to update EOD", e);
+                        log.error(UNABLE_TO_UPDATE_EOD, e);
                     }
                 }
             }
@@ -365,7 +366,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                 log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
             }
         } catch (Exception e) {
-            log.error("Unable to update EOD", e);
+            log.error(UNABLE_TO_UPDATE_EOD, e);
         }
     }
 
@@ -568,7 +569,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
             }
         } catch (Exception e) {
-            log.error("Unable to update EOD", e);
+            log.error(UNABLE_TO_UPDATE_EOD, e);
         }
     }
 
