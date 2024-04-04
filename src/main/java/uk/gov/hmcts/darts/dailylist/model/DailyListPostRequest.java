@@ -19,4 +19,5 @@ public class DailyListPostRequest {
     String uniqueId;
     OffsetDateTime publishedDateTime;
     DailyListJsonObject dailyListJson;
+    String messageId;
 }

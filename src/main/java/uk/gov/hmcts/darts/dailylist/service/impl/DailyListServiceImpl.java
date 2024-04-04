@@ -89,6 +89,7 @@ public class DailyListServiceImpl implements DailyListService {
         dailyListEntity.setStartDate(postRequest.getHearingDate());
         dailyListEntity.setUniqueId(postRequest.getUniqueId());
         dailyListEntity.setPublishedTimestamp(postRequest.getPublishedDateTime());
+        dailyListEntity.setMessageId(postRequest.getMessageId());
         UserAccountEntity user = userIdentity.getUserAccount();
         if (dailyListEntity.getCreatedBy() == null) {
             dailyListEntity.setCreatedBy(user);
