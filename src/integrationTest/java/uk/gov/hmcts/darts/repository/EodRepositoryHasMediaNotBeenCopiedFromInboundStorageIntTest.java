@@ -40,18 +40,18 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
 
     @BeforeEach
     void setup() {
-        media = dartsDatabase.getMediaStub().createAndSaveAMedia();
-        anotherMedia = dartsDatabase.getMediaStub().createAndSaveAMedia();
+        media = dartsDatabase.getMediaStub().createAndSaveMedia();
+        anotherMedia = dartsDatabase.getMediaStub().createAndSaveMedia();
     }
 
     @Test
     void testMediaInInboundStored() {
         eodStub.createAndSaveEod(media, STORED, INBOUND);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isTrue();
     }
@@ -61,10 +61,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, INBOUND);
         eodStub.createAndSaveEod(media, STORED, UNSTRUCTURED);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isFalse();
     }
@@ -74,10 +74,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, INBOUND);
         eodStub.createAndSaveEod(media, FAILURE, UNSTRUCTURED);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation()));
 
         assertThat(result).isFalse();
     }
@@ -87,10 +87,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, INBOUND);
         eodStub.createAndSaveEod(media, ARM_INGESTION, ARM);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isFalse();
     }
@@ -100,10 +100,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, DELETED, INBOUND);
         eodStub.createAndSaveEod(media, ARM_INGESTION, ARM);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isFalse();
     }
@@ -114,10 +114,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, UNSTRUCTURED);
         eodStub.createAndSaveEod(media, ARM_INGESTION, ARM);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isFalse();
     }
@@ -127,10 +127,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, INBOUND);
         eodStub.createAndSaveEod(media, AWAITING_VERIFICATION, UNSTRUCTURED);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isTrue();
     }
@@ -141,10 +141,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, AWAITING_VERIFICATION, UNSTRUCTURED);
         eodStub.createAndSaveEod(media, ARM_INGESTION, ARM);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isFalse();
     }
@@ -154,10 +154,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, INBOUND);
         eodStub.createAndSaveEod(media, STORED, DETS);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isTrue();
     }
@@ -166,10 +166,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
     void testMediaInInboundButNotStored() {
         eodStub.createAndSaveEod(media, NEW, INBOUND);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isFalse();
     }
@@ -179,10 +179,10 @@ class EodRepositoryHasMediaNotBeenCopiedFromInboundStorageIntTest extends Integr
         eodStub.createAndSaveEod(media, STORED, INBOUND);
         eodStub.createAndSaveEod(anotherMedia, STORED, UNSTRUCTURED);
 
-        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(media,
-                                                                                     storedStatus(), inboundLocation(),
-                                                                                     awaitingVerificationStatus(),
-                                                                                     List.of(unstructuredLocation(), armLocation()));
+        var result = eodRepo.hasMediaNotBeenCopiedFromInboundStorage(media,
+                                                                     storedStatus(), inboundLocation(),
+                                                                     awaitingVerificationStatus(),
+                                                                     List.of(unstructuredLocation(), armLocation()));
 
         assertThat(result).isTrue();
     }

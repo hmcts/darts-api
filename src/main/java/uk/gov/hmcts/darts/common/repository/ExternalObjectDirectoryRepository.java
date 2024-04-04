@@ -303,8 +303,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
               )
             """
     )
-    boolean hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(MediaEntity media, ObjectRecordStatusEntity inboundStatus,
-                                                                    ExternalLocationTypeEntity inboundLocation,
-                                                                    ObjectRecordStatusEntity ignoredUnstructuredStatus,
-                                                                    List<ExternalLocationTypeEntity> destinationLocations);
+    boolean hasMediaNotBeenCopiedFromInboundStorage(MediaEntity media, ObjectRecordStatusEntity inboundStatus,
+                                                    ExternalLocationTypeEntity inboundLocation,
+                                                    ObjectRecordStatusEntity ignoredUnstructuredStatus,
+                                                    List<ExternalLocationTypeEntity> destinationLocations);
 }

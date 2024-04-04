@@ -31,9 +31,9 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     }
 
     @Override
-    public boolean hasNotAllMediaBeenCopiedFromInboundStorageForAtsProcessing(List<MediaEntity> mediaRequestFiles) {
-        return mediaRequestFiles.stream()
-            .anyMatch(mediaEntity -> eodRepository.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(
+    public boolean hasNotAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities) {
+        return mediaEntities.stream()
+            .anyMatch(mediaEntity -> eodRepository.hasMediaNotBeenCopiedFromInboundStorage(
                 mediaEntity, EodHelper.storedStatus(), EodHelper.inboundLocation(),
                 EodHelper.awaitingVerificationStatus(), List.of(EodHelper.unstructuredLocation(), EodHelper.armLocation()))
             );

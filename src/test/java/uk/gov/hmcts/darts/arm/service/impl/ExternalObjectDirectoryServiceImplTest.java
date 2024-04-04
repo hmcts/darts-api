@@ -82,13 +82,13 @@ class ExternalObjectDirectoryServiceImplTest {
     })
     void testHasAllMediaNotBeenCopied(boolean isMedia1NotCopied, boolean isMedia2NotCopied, boolean expectedResult) {
         var medias = List.of(media1, media2);
-        when(eodRepository.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(eq(media1), any(), any(), any(), any())).thenReturn(isMedia1NotCopied);
-        when(eodRepository.hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(eq(media2), any(), any(), any(), any())).thenReturn(isMedia2NotCopied);
+        when(eodRepository.hasMediaNotBeenCopiedFromInboundStorage(eq(media1), any(), any(), any(), any())).thenReturn(isMedia1NotCopied);
+        when(eodRepository.hasMediaNotBeenCopiedFromInboundStorage(eq(media2), any(), any(), any(), any())).thenReturn(isMedia2NotCopied);
 
-        var result = eodService.hasNotAllMediaBeenCopiedFromInboundStorageForAtsProcessing(medias);
+        var result = eodService.hasNotAllMediaBeenCopiedFromInboundStorage(medias);
 
         assertThat(result).isEqualTo(expectedResult);
-        verify(eodRepository).hasMediaNotBeenCopiedFromInboundStorageForAtsProcessing(
+        verify(eodRepository).hasMediaNotBeenCopiedFromInboundStorage(
             media1,
             storedStatus(),
             inboundLocation(),
