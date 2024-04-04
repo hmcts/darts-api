@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -323,7 +322,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
@@ -414,7 +413,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
             dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
