@@ -18,9 +18,13 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 
 import java.util.ArrayList;
@@ -60,7 +64,14 @@ class ArmBatchProcessResponseFilesImplTest {
     private ArmResponseFilesProcessor armResponseFilesProcessor;
     @Mock
     private ExternalObjectDirectoryService externalObjectDirectoryService;
-
+    @Mock
+    private MediaRepository mediaRepository;
+    @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+    @Mock
+    private AnnotationDocumentRepository annotationDocumentRepository;
+    @Mock
+    private CaseDocumentRepository caseDocumentRepository;
 
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
@@ -101,7 +112,11 @@ class ArmBatchProcessResponseFilesImplTest {
             userIdentity,
             currentTimeHelper,
             armResponseFilesProcessor,
-            externalObjectDirectoryService
+            externalObjectDirectoryService,
+            mediaRepository,
+            transcriptionDocumentRepository,
+            annotationDocumentRepository,
+            caseDocumentRepository
         );
 
     }

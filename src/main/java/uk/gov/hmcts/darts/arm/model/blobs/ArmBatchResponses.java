@@ -46,7 +46,9 @@ public class ArmBatchResponses {
 
     private void createArmBatchResponseIfNotExists(Integer externalObjectDirectoryId) {
         if (!armBatchResponses.containsKey(externalObjectDirectoryId)) {
-            ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder().build();
+            ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
+                .externalObjectDirectoryId(externalObjectDirectoryId)
+                .build();
             armBatchResponses.put(externalObjectDirectoryId, armResponseBatchData);
         }
     }

@@ -27,12 +27,19 @@ import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
@@ -40,7 +47,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
@@ -65,6 +71,10 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     private final CurrentTimeHelper currentTimeHelper;
     private final ArmResponseFilesProcessor armResponseFilesProcessor;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
+    private final MediaRepository mediaRepository;
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final CaseDocumentRepository caseDocumentRepository;
     private UserAccountEntity userAccount;
 
     @Override
@@ -101,11 +111,11 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         log.debug("Found ARM Input Upload file {}", inputUploadBlob);
         try {
             BatchUploadFileFilenameProcessor batchUploadFileFilenameProcessor = new BatchUploadFileFilenameProcessor(inputUploadBlob);
-            String manifestName = batchUploadFileFilenameProcessor.getUuidString();
+            String manifestName = generateManifestName(batchUploadFileFilenameProcessor.getUuidString());
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
             if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
-                externalObjectDirectoryRepository.updateStatus(
+                externalObjectDirectoryService.updateStatus(
                     EodHelper.armProcessingResponseFilesStatus(),
                     userAccount,
                     externalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList(),
@@ -125,11 +135,20 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         }
     }
 
+    private String generateManifestName(String uuid) {
+        var fileNameFormat = "%s_%s.%s";
+        return String.format(fileNameFormat,
+                             armDataManagementConfiguration.getManifestFilePrefix(),
+                             uuid,
+                             armDataManagementConfiguration.getFileExtension()
+        );
+    }
+
     private void resetArmStatusForUnprocessedEods(String manifestName) {
         List<ExternalObjectDirectoryEntity> unprocessedExternalObjectDirectoryEntities = externalObjectDirectoryRepository
             .findAllByStatusAndManifestFile(EodHelper.armProcessingResponseFilesStatus(), manifestName);
         if (CollectionUtils.isNotEmpty(unprocessedExternalObjectDirectoryEntities)) {
-            externalObjectDirectoryRepository.updateStatus(
+            externalObjectDirectoryService.updateStatus(
                 EodHelper.armDropZoneStatus(),
                 userAccount,
                 unprocessedExternalObjectDirectoryEntities.stream().map(ExternalObjectDirectoryEntity::getId).toList(),
@@ -178,11 +197,14 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                                             armResponseBatchData.getArmResponseUploadFileRecord());
                 } else {
                     log.info("Unable to find response files for external object {}", armResponseBatchData.getExternalObjectDirectoryId());
+                    try {
+                        ExternalObjectDirectoryEntity externalObjectDirectory =
+                            getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
 
-                    ExternalObjectDirectoryEntity externalObjectDirectory =
-                        getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
-
-                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus());
+                        updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armDropZoneStatus());
+                    } catch (Exception e) {
+                        log.error("Unable to update EOD", e);
+                    }
                 }
             }
         );
@@ -213,7 +235,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                     appendUuidToWorkspace
                 );
 
-                if (jsonPath.toFile().exists()) {
+                if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
                     ArmResponseCreateRecord armResponseCreateRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
@@ -300,35 +322,39 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
 
     private void processUploadFileObject(int externalObjectDirectoryId, UploadFileFilenameProcessor uploadFileFilenameProcessor,
                                          ArmResponseUploadFileRecord armResponseUploadFileRecord) {
-        if (nonNull(armResponseUploadFileRecord)) {
+        try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+            if (nonNull(armResponseUploadFileRecord)) {
 
-            //If the filename contains 1
-            if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                if (nonNull(externalObjectDirectory)) {
-                    processUploadFileDataSuccess(externalObjectDirectory, armResponseUploadFileRecord);
+                //If the filename contains 1
+                if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
+                    if (nonNull(externalObjectDirectory)) {
+                        processUploadFileDataSuccess(externalObjectDirectory, armResponseUploadFileRecord);
+                    } else {
+                        log.warn(
+                            "Unable to process upload file {} with EOD record {}, file Id {}", uploadFileFilenameProcessor.getUploadFileFilename(),
+                            armResponseUploadFileRecord.getA360RecordId(), armResponseUploadFileRecord.getA360FileId());
+                    }
                 } else {
+                    //Read the upload file and log the error code and description with EOD
+                    String errorDescription = StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
+                        ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
+
                     log.warn(
-                        "Unable to process upload file {} with EOD record {}, file Id {}", uploadFileFilenameProcessor.getUploadFileFilename(),
-                        armResponseUploadFileRecord.getA360RecordId(), armResponseUploadFileRecord.getA360FileId());
+                        "ARM status is failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
+                        uploadFileFilenameProcessor.getUploadFileFilename(),
+                        errorDescription,
+                        armResponseUploadFileRecord.getErrorStatus(),
+                        armResponseUploadFileRecord.getA360RecordId(),
+                        armResponseUploadFileRecord.getA360FileId()
+                    );
+                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
-                //Read the upload file and log the error code and description with EOD
-                String errorDescription = StringUtils.isNotEmpty(armResponseUploadFileRecord.getExceptionDescription())
-                    ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
-
-                log.warn(
-                    "ARM status is failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
-                    uploadFileFilenameProcessor.getUploadFileFilename(),
-                    errorDescription,
-                    armResponseUploadFileRecord.getErrorStatus(),
-                    armResponseUploadFileRecord.getA360RecordId(),
-                    armResponseUploadFileRecord.getA360FileId()
-                );
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
             }
-        } else {
-            log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
+        } catch (Exception e) {
+            log.error("Unable to update EOD", e);
         }
     }
 
@@ -338,22 +364,34 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         // Validate the upload file checksum against the external object directory tables object Media, TranscriptionDocument, AnnotationDocument
         // or CaseDocument
         if (nonNull(externalObjectDirectory.getMedia())) {
-            MediaEntity media = externalObjectDirectory.getMedia();
-            if (nonNull(media.getChecksum())) {
-                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, media.getChecksum());
+
+            int mediaId = externalObjectDirectory.getMedia().getId();
+            MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow();
+            if (nonNull(mediaEntity.getChecksum())) {
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, mediaEntity.getChecksum());
             } else {
                 log.warn("Unable to verify media checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
             }
+
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
-                                          externalObjectDirectory.getTranscriptionDocumentEntity().getChecksum());
+
+            int transcriptionDocumentId = externalObjectDirectory.getTranscriptionDocumentEntity().getId();
+            TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocumentEntity.getChecksum());
+
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
-                                          externalObjectDirectory.getAnnotationDocumentEntity().getChecksum());
+
+            int annotationDocumentId = externalObjectDirectory.getAnnotationDocumentEntity().getId();
+            AnnotationDocumentEntity annotationDocumentEntity = annotationDocumentRepository.findById(annotationDocumentId).orElseThrow();
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocumentEntity.getChecksum());
+
         } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory,
-                                          externalObjectDirectory.getCaseDocument().getChecksum());
+
+            int caseDocumentId = externalObjectDirectory.getCaseDocument().getId();
+            CaseDocumentEntity caseDocumentEntity = caseDocumentRepository.findById(caseDocumentId).orElseThrow();
+            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, caseDocumentEntity.getChecksum());
+
         } else {
             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
         }
@@ -494,12 +532,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
 
     private void processInvalidLineFileObject(int externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
                                               ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
-        if (nonNull(armResponseInvalidLineRecord)) {
+        try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
+            if (nonNull(armResponseInvalidLineRecord)) {
 
-            //If the filename contains 0
-            if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
-                if (nonNull(externalObjectDirectory)) {
+                //If the filename contains 0
+                if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
+
                     //Read the invalid lines file and log the error code and description with EOD
                     log.warn(
                         "ARM invalid line for external object id {}. ARM error description: {} ARM error status: {}",
@@ -507,22 +546,19 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                         armResponseInvalidLineRecord.getExceptionDescription(),
                         armResponseInvalidLineRecord.getErrorStatus()
                     );
-                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.failedArmManifestFileStatus());
-                } else {
-                    log.warn(
-                        "Unable to process invalid line file {} with EOD record {}",
-                        invalidLineFileFilenameProcessor.getInvalidLineFileFilename(),
-                        armResponseInvalidLineRecord.getA360RecordId()
-                    );
-                }
+                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
 
+                } else {
+                    log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
+                             invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                    updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
+                }
             } else {
-                log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
-                         invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
             }
-        } else {
-            log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+        } catch (Exception e) {
+            log.error("Unable to update EOD", e);
         }
     }
 
@@ -531,11 +567,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     }
 
     private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
-        Optional<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityOptional = externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId);
-        if (externalObjectDirectoryEntityOptional.isPresent()) {
-            return externalObjectDirectoryEntityOptional.get();
-        }
-        return null;
+        return externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId).orElseThrow();
     }
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
