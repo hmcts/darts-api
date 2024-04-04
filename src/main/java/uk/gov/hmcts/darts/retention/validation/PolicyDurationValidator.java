@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  *  Validates that a duration, provided in the DARTS-specific format nYnMnD (where n can be one or many digits) exceeds the specified number of days.
+ *  It is assumed the format of the input string matches this pattern through prior validation checks (e.g. at openapi layer).
  *  As the duration of a month (or a year) is ambiguous, this implementation only supports durations less than 28 days.
  */
 @Component

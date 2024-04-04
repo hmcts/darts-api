@@ -11,9 +11,9 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyTypeMapper;
-import uk.gov.hmcts.darts.retention.service.RetentionPolicyService;
+import uk.gov.hmcts.darts.retention.service.RetentionPolicyTypeService;
 import uk.gov.hmcts.darts.retentions.model.AdminPostRetentionRequest;
-import uk.gov.hmcts.darts.retentions.model.RetentionPolicy;
+import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.retention.exception.RetentionApiError.RETENTION
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RetentionPolicyServiceImpl implements RetentionPolicyService {
+public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeService {
 
     private final RetentionPolicyTypeMapper retentionPolicyTypeMapper;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
@@ -33,7 +33,7 @@ public class RetentionPolicyServiceImpl implements RetentionPolicyService {
     private final Validator<String> revisePolicyTypeValidator;
 
     @Override
-    public List<RetentionPolicy> getRetentionPolicyTypes() {
+    public List<RetentionPolicyType> getRetentionPolicyTypes() {
         List<RetentionPolicyTypeEntity> policyTypeRepositoryAll = retentionPolicyTypeRepository.findAll();
 
         return retentionPolicyTypeMapper.mapToModelList(policyTypeRepositoryAll);
@@ -41,7 +41,7 @@ public class RetentionPolicyServiceImpl implements RetentionPolicyService {
     }
 
     @Override
-    public RetentionPolicy getRetentionPolicyType(Integer id) {
+    public RetentionPolicyType getRetentionPolicyType(Integer id) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = retentionPolicyTypeRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(RETENTION_POLICY_TYPE_ID_NOT_FOUND));
 
@@ -50,7 +50,7 @@ public class RetentionPolicyServiceImpl implements RetentionPolicyService {
 
     @Override
     @Transactional
-    public RetentionPolicy createOrReviseRetentionPolicyType(AdminPostRetentionRequest adminPostRetentionRequest, Boolean isRevision) {
+    public RetentionPolicyType createOrReviseRetentionPolicyType(AdminPostRetentionRequest adminPostRetentionRequest, Boolean isRevision) {
         policyDurationValidator.validate(adminPostRetentionRequest.getDuration());
         createOrRevisePolicyTypeValidator.validate(adminPostRetentionRequest);
 

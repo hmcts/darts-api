@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
-import uk.gov.hmcts.darts.retention.service.RetentionPolicyService;
+import uk.gov.hmcts.darts.retention.service.RetentionPolicyTypeService;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retention.validation.RetentionsPostRequestValidator;
@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.retentions.model.AdminPostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
-import uk.gov.hmcts.darts.retentions.model.RetentionPolicy;
+import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class RetentionController implements RetentionApi {
 
     private final RetentionService retentionService;
     private final RetentionPostService retentionPostService;
-    private final RetentionPolicyService retentionPolicyService;
+    private final RetentionPolicyTypeService retentionPolicyTypeService;
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = CASE_ID,
@@ -65,8 +65,8 @@ public class RetentionController implements RetentionApi {
         contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     @Override
-    public ResponseEntity<List<RetentionPolicy>> adminRetentionPolicyTypesGet() {
-        return new ResponseEntity<>(retentionPolicyService.getRetentionPolicyTypes(), HttpStatus.OK);
+    public ResponseEntity<List<RetentionPolicyType>> adminRetentionPolicyTypesGet() {
+        return new ResponseEntity<>(retentionPolicyTypeService.getRetentionPolicyTypes(), HttpStatus.OK);
     }
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -74,9 +74,9 @@ public class RetentionController implements RetentionApi {
         contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     @Override
-    public ResponseEntity<RetentionPolicy> adminRetentionPolicyTypesIdGet(Integer id) {
+    public ResponseEntity<RetentionPolicyType> adminRetentionPolicyTypesIdGet(Integer id) {
 
-        return new ResponseEntity<>(retentionPolicyService.getRetentionPolicyType(id), HttpStatus.OK);
+        return new ResponseEntity<>(retentionPolicyTypeService.getRetentionPolicyType(id), HttpStatus.OK);
     }
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -84,8 +84,8 @@ public class RetentionController implements RetentionApi {
         contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
     @Override
-    public ResponseEntity<RetentionPolicy> adminRetentionPolicyTypesPost(AdminPostRetentionRequest adminPostRetentionRequest, Boolean isRevision) {
-        return new ResponseEntity<>(retentionPolicyService.createOrReviseRetentionPolicyType(adminPostRetentionRequest, isRevision), HttpStatus.CREATED);
+    public ResponseEntity<RetentionPolicyType> adminRetentionPolicyTypesPost(AdminPostRetentionRequest adminPostRetentionRequest, Boolean isRevision) {
+        return new ResponseEntity<>(retentionPolicyTypeService.createOrReviseRetentionPolicyType(adminPostRetentionRequest, isRevision), HttpStatus.CREATED);
     }
 
 }

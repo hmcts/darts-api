@@ -6,7 +6,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.retentions.model.AdminPostRetentionRequest;
-import uk.gov.hmcts.darts.retentions.model.RetentionPolicy;
+import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 
 import java.util.List;
 
@@ -20,9 +20,9 @@ public interface RetentionPolicyTypeMapper {
         @Mapping(source = "policyStart", target = "policyStartAt"),
         @Mapping(source = "policyEnd", target = "policyEndAt"),
     })
-    RetentionPolicy mapToModel(RetentionPolicyTypeEntity entity);
+    RetentionPolicyType mapToModel(RetentionPolicyTypeEntity entity);
 
-    List<RetentionPolicy> mapToModelList(List<RetentionPolicyTypeEntity> entities);
+    List<RetentionPolicyType> mapToModelList(List<RetentionPolicyTypeEntity> entities);
 
     @Mappings({
         @Mapping(source = "name", target = "policyName"),

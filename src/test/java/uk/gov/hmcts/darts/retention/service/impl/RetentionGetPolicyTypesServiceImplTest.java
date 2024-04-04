@@ -13,9 +13,9 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyTypeMapper;
-import uk.gov.hmcts.darts.retention.service.RetentionPolicyService;
+import uk.gov.hmcts.darts.retention.service.RetentionPolicyTypeService;
 import uk.gov.hmcts.darts.retention.validation.CreateOrRevisePolicyTypeValidator;
-import uk.gov.hmcts.darts.retentions.model.RetentionPolicy;
+import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -51,12 +51,12 @@ class RetentionGetPolicyTypesServiceImplTest {
     @Mock
     private Validator<String> policyTypeCreationValidator;
 
-    private RetentionPolicyService retentionService;
+    private RetentionPolicyTypeService retentionService;
 
 
     private void setupStubs() {
 
-        retentionService = new RetentionPolicyServiceImpl(
+        retentionService = new RetentionPolicyTypeServiceImpl(
             retentionPolicyTypeMapper,
         retentionPolicyTypeRepository,
         authorisationApi,
@@ -78,9 +78,9 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         when(retentionPolicyTypeRepository.findAll()).thenReturn(List.of(getRetentionPolicyTypeEntity()));
 
-        when(retentionPolicyTypeMapper.mapToModelList(any())).thenReturn(List.of(getRetentionPolicy()));
+        when(retentionPolicyTypeMapper.mapToModelList(any())).thenReturn(List.of(new RetentionPolicyType[]{createRetentionPolicyType()}));
 
-        List<RetentionPolicy> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
+        List<RetentionPolicyType> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
 
         assertEquals(1, caseRetentionPolicies.get(0).getId());
 
@@ -95,9 +95,9 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         when(retentionPolicyTypeRepository.findById(anyInt())).thenReturn(Optional.of(getRetentionPolicyTypeEntity()));
 
-        when(retentionPolicyTypeMapper.mapToModel(any())).thenReturn(getRetentionPolicy());
+        when(retentionPolicyTypeMapper.mapToModel(any())).thenReturn(createRetentionPolicyType());
 
-        RetentionPolicy caseRetentionPolicy = retentionService.getRetentionPolicyType(1);
+        RetentionPolicyType caseRetentionPolicy = retentionService.getRetentionPolicyType(1);
 
         assertEquals(1, caseRetentionPolicy.getId());
         assertEquals("DARTS Permanent Retention v3", caseRetentionPolicy.getName());
@@ -143,9 +143,9 @@ class RetentionGetPolicyTypesServiceImplTest {
         return retentionPolicyTypeEntity;
     }
 
-    private RetentionPolicy getRetentionPolicy() {
+    private RetentionPolicyType createRetentionPolicyType() {
 
-        RetentionPolicy retentionPolicy = new RetentionPolicy();
+        RetentionPolicyType retentionPolicy = new RetentionPolicyType();
         retentionPolicy.setId(1);
         retentionPolicy.setDisplayName("Legacy Permanent");
         retentionPolicy.setName("DARTS Permanent Retention v3");
