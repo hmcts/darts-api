@@ -118,6 +118,9 @@ public class TestSupportController {
 
         log.info("Cleaned users and groups");
 
+        removeRetentionPolicyTypes(session);
+        log.info("Cleaned retention policy types");
+
         session.getTransaction().commit();
         session.close();
 
@@ -377,6 +380,14 @@ public class TestSupportController {
                                           """, Integer.class)
                 .executeUpdate();
     }
+
+    private void removeRetentionPolicyTypes(Session session) {
+        session.createNativeQuery("""
+                                      delete from darts.retention_policy_type where description like '%func-%'
+                                      """, Integer.class)
+            .executeUpdate();
+    }
+
 
     @GetMapping(value = "/bank-holidays/{year}")
     public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {

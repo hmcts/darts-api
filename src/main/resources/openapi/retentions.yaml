@@ -129,7 +129,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetRetentionPolicies'
+                type: array
+                items:
+                  $ref: '#/components/schemas/RetentionPolicyType'
         '401':
           description: Unauthorised Error
         '403':
@@ -138,6 +140,31 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+    post:
+      summary: Create or revise a retention policy
+      tags:
+        - Retention
+      parameters:
+        - in: query
+          name: is_revision
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPostRetentionRequest'
+      responses:
+        '201':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionPolicyType'
+
   /admin/retention-policy-types/{id}:
     get:
       tags:
@@ -155,7 +182,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetRetentionPolicy'
+                $ref: '#/components/schemas/RetentionPolicyType'
         '404':
           description: Not Found
           content:
@@ -208,31 +235,78 @@ components:
           type: string
           format: date
 
-    GetRetentionPolicies:
-        type: array
-        items:
-          $ref: '#/components/schemas/GetRetentionPolicy'
-    GetRetentionPolicy:
+    RetentionPolicyType:
       type: object
       properties:
         id:
-          type: integer
+          $ref: '#/components/schemas/PolicyId'
         name:
-          type: string
+          $ref: '#/components/schemas/PolicyName'
         display_name:
-          type: string
+          $ref: '#/components/schemas/PolicyDisplayName'
         description:
-          type: string
+          $ref: '#/components/schemas/PolicyDescription'
         fixed_policy_key:
-          type: string
+          $ref: '#/components/schemas/FixedPolicyKey'
         duration:
-          type: string
+          $ref: '#/components/schemas/PolicyDuration'
         policy_start_at:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/Timestamp'
         policy_end_at:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/Timestamp'
+
+    AdminPostRetentionRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/PolicyName'
+        display_name:
+          $ref: '#/components/schemas/PolicyDisplayName'
+        description:
+          $ref: '#/components/schemas/PolicyDescription'
+        fixed_policy_key:
+          $ref: '#/components/schemas/FixedPolicyKey'
+        duration:
+          $ref: '#/components/schemas/PolicyDuration'
+        policy_start_at:
+          $ref: '#/components/schemas/Timestamp'
+      required:
+        - name
+        - display_name
+        - fixed_policy_key
+        - duration
+        - policy_start_at
+
+    PolicyId:
+      type: integer
+
+    PolicyName:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    PolicyDisplayName:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    PolicyDescription:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    FixedPolicyKey:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    PolicyDuration:
+      type: string
+      pattern: '^\d{1,2}Y\d{1,2}M\d{1,2}D$'
+
+    Timestamp:
+      type: string
+      format: date-time
 
     NoPermissionReduceRetentionError:
       type: string
@@ -252,7 +326,17 @@ components:
         - "RETENTION_106"
         - "RETENTION_107"
         - "RETENTION_108"
-      x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND ]
+        - "RETENTION_109"
+        - "RETENTION_110"
+        - "RETENTION_111"
+        - "RETENTION_112"
+        - "RETENTION_113"
+        - "RETENTION_114"
+        - "RETENTION_115"
+      x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
+                         NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
+                         NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
+                         POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND]
 
     RetentionTitleErrors:
       type: string
@@ -266,5 +350,14 @@ components:
         - "An Internal server error has occurred."
         - "The retention date being applied is too late."
         - "The retention policy type id does not exist."
-      x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED, NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND ]
-
+        - "Policy name must be unique"
+        - "Display name must be unique"
+        - "Duration too short"
+        - "To create or revise a policy, the provided start date must be in the future"
+        - "To revise a policy, the start date of the prior revision must be in the past"
+        - "Fixed policy key must be unique"
+        - "Fixed policy key not recognised"
+      x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
+                         NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
+                         NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
+                         POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND ]
