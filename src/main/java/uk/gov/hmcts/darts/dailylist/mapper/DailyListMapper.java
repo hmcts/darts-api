@@ -55,8 +55,8 @@ public class DailyListMapper {
             dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList));
         } catch (JsonProcessingException e) {
             log.error(
-                "An Error has occurred trying to save the json for courthouse {} to the database",
-                listingCourthouse,
+                "An error occurred trying to parse and save the JSON for dal_id={}",
+                dailyListEntity.getId(),
                 e
             );
             throw new DartsApiException(DailyListError.INTERNAL_ERROR);
