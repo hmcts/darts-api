@@ -86,10 +86,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     @Override
     public void batchProcessResponseFiles() {
         userAccount = userIdentity.getUserAccount();
-        if (PROCESS_SINGLE_RECORD_BATCH_SIZE.equals(armDataManagementConfiguration.getBatchSize())) {
+        Integer batchSize = armDataManagementConfiguration.getBatchSize();
+        if (PROCESS_SINGLE_RECORD_BATCH_SIZE.equals(batchSize)) {
             armResponseFilesProcessor.processResponseFiles();
-        } else {
+        } else if (batchSize > PROCESS_SINGLE_RECORD_BATCH_SIZE) {
             batchProcessResponseFilesFromAzure();
+        } else {
+            log.warn("Invalid batch size {}. Unable to process ARM pull responses");
         }
     }
 
