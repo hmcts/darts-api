@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ResponseFilenames;
 import uk.gov.hmcts.darts.arm.model.blobs.ArmBatchResponses;
+import uk.gov.hmcts.darts.arm.model.blobs.ArmResponseBatchData;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseCreateRecord;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -46,6 +48,7 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -56,6 +59,9 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArmConstants.ArmBatching.PROCESS_SINGLE_RECORD_BATCH_SIZE;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper.generateSuffix;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -170,7 +176,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                     processCreateRecordResponseFiles(responseFilenames.getCreateRecordResponses(), armBatchResponses);
                     processUploadResponseFiles(responseFilenames.getUploadFileResponses(), armBatchResponses);
                     processInvalidFiles(responseFilenames.getInvalidLineResponses(), armBatchResponses);
-                    //
+                    //Process the final results
                     processResponseFiles(armBatchResponses);
                 }
             }
@@ -189,12 +195,14 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                     processInvalidLineFileObject(armResponseBatchData.getExternalObjectDirectoryId(),
                                                  armResponseBatchData.getInvalidLineFileFilenameProcessor(),
                                                  armResponseBatchData.getArmResponseInvalidLineRecord());
+                    deleteResponseBlobs(armResponseBatchData);
                 } else if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
                     && nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
 
                     processUploadFileObject(armResponseBatchData.getExternalObjectDirectoryId(),
                                             armResponseBatchData.getUploadFileFilenameProcessor(),
                                             armResponseBatchData.getArmResponseUploadFileRecord());
+                    deleteResponseBlobs(armResponseBatchData);
                 } else {
                     log.info("Unable to find response files for external object {}", armResponseBatchData.getExternalObjectDirectoryId());
                     try {
@@ -529,7 +537,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         }
     }
 
-
     private void processInvalidLineFileObject(int externalObjectDirectoryId, InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
                                               ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
         try {
@@ -561,6 +568,43 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
             log.error("Unable to update EOD", e);
         }
     }
+
+    void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
+        List<Boolean> deletedResponseBlobStatuses = new ArrayList<>();
+        List<String> responseBlobsToBeDeleted = getResponseBlobsToBeDeleted(armResponseBatchData);
+        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
+        if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
+            ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
+            if (STORED.equals(status) || ARM_RESPONSE_PROCESSING_FAILED.equals(status) || ARM_RESPONSE_MANIFEST_FAILED.equals(status)) {
+
+                deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
+                    .map(armDataManagementApi::deleteBlobData)
+                    .toList();
+
+                if (deletedResponseBlobStatuses.size() == 2 && !deletedResponseBlobStatuses.contains(false)) {
+                    externalObjectDirectory.setResponseCleaned(true);
+                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                } else {
+                    log.warn("Unable to successfully delete the response files for EOD {} ", externalObjectDirectory.getId());
+                }
+            }
+        }
+    }
+
+    private static List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
+        List<String> responseBlobsToBeDeleted = new ArrayList<>();
+        if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())) {
+            responseBlobsToBeDeleted.add(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilename());
+        }
+        if (nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
+            responseBlobsToBeDeleted.add(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilename());
+        }
+        if (nonNull(armResponseBatchData.getInvalidLineFileFilenameProcessor())) {
+            responseBlobsToBeDeleted.add(armResponseBatchData.getInvalidLineFileFilenameProcessor().getInvalidLineFileFilename());
+        }
+        return responseBlobsToBeDeleted;
+    }
+
 
     private String getContinuationToken() {
         return null;

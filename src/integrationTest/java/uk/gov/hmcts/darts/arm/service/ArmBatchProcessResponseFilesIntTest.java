@@ -39,6 +39,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
@@ -175,7 +176,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String prefix = "DARTS";
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        //String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
         String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
@@ -209,6 +209,13 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
+        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -229,7 +236,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(STORED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
-        assertFalse(foundMedia.isResponseCleaned());
+        assertTrue(foundMedia.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList2 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
@@ -238,7 +245,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia2.getStatus().getId());
         assertEquals(1, foundMedia2.getVerificationAttempts());
-        assertFalse(foundMedia2.isResponseCleaned());
+        assertTrue(foundMedia2.isResponseCleaned());
 
 
         List<ExternalObjectDirectoryEntity> foundMediaList3 = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -248,7 +255,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
         assertEquals(ARM_RESPONSE_MANIFEST_FAILED.getId(), foundMedia3.getStatus().getId());
         assertEquals(1, foundMedia3.getVerificationAttempts());
-        assertFalse(foundMedia3.isResponseCleaned());
+        assertTrue(foundMedia3.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList4 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media4, dartsDatabase.getExternalLocationTypeEntity(ARM));
@@ -306,7 +313,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    void batchProcessResponseFiles_ThrowsExceptionWhenlistingPrefix() {
+    void batchProcessResponseFiles_ThrowsExceptionWhenListingPrefix() {
 
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
@@ -328,7 +335,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String continuationToken = null;
         String prefix = "DARTS";
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenThrow(new AzureException());
-        
+
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
 
         // when
