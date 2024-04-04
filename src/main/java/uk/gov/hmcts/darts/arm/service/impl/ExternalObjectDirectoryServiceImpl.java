@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 
@@ -46,7 +48,7 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
             EodHelper.awaitingVerificationStatus(),
             List.of(EodHelper.unstructuredLocation(), EodHelper.armLocation()));
     }
-	
+
     @Transactional
     public Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Integer externalObjectDirectoryId) {
         return eodRepository.findById(externalObjectDirectoryId);
