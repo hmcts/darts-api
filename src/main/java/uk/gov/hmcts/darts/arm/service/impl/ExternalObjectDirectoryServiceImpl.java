@@ -31,12 +31,12 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
     }
 
     @Override
-    public boolean hasNotAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities) {
-        return mediaEntities.stream().anyMatch(this::hasMediaNotBeenCopiedFromInboundStorage);
+    public boolean hasAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities) {
+        return mediaEntities.stream().allMatch(this::hasMediaBeenCopiedFromInboundStorage);
     }
 
-    private boolean hasMediaNotBeenCopiedFromInboundStorage(MediaEntity mediaEntity) {
-        return eodRepository.hasMediaNotBeenCopiedFromInboundStorage(
+    private boolean hasMediaBeenCopiedFromInboundStorage(MediaEntity mediaEntity) {
+        return !eodRepository.hasMediaNotBeenCopiedFromInboundStorage(
             mediaEntity,
             EodHelper.storedStatus(),
             EodHelper.inboundLocation(),

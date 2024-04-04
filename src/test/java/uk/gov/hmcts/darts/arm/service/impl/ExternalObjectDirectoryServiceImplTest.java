@@ -75,17 +75,17 @@ class ExternalObjectDirectoryServiceImplTest {
 
     @ParameterizedTest
     @CsvSource({
-        "false,false,false",
-        "false,true,true",
-        "true,false,true",
-        "true,true,true",
+        "false,false,true",
+        "false,true,false",
+        "true,false,false",
+        "true,true,false",
     })
-    void testHasAllMediaNotBeenCopied(boolean isMedia1NotCopied, boolean isMedia2NotCopied, boolean expectedResult) {
+    void testHasAllMediaBeenCopied(boolean isMedia1NotCopied, boolean isMedia2NotCopied, boolean expectedResult) {
         var medias = List.of(media1, media2);
         when(eodRepository.hasMediaNotBeenCopiedFromInboundStorage(eq(media1), any(), any(), any(), any())).thenReturn(isMedia1NotCopied);
         when(eodRepository.hasMediaNotBeenCopiedFromInboundStorage(eq(media2), any(), any(), any(), any())).thenReturn(isMedia2NotCopied);
 
-        var result = eodService.hasNotAllMediaBeenCopiedFromInboundStorage(medias);
+        var result = eodService.hasAllMediaBeenCopiedFromInboundStorage(medias);
 
         assertThat(result).isEqualTo(expectedResult);
         verify(eodRepository).hasMediaNotBeenCopiedFromInboundStorage(

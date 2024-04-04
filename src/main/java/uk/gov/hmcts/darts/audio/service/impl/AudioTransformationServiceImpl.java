@@ -208,9 +208,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 mediaRequestEntity
             );
 
-            boolean hasNotAllMediaBeenCopiedFromInboundStorage = eodService.hasNotAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
+            boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
 
-            if (hasNotAllMediaBeenCopiedFromInboundStorage) {
+            if (!hasAllMediaBeenCopiedFromInboundStorage) {
                 mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
                 return;
             }

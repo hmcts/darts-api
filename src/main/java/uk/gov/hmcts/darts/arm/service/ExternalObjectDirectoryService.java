@@ -10,5 +10,5 @@ public interface ExternalObjectDirectoryService {
 
     List<ExternalObjectDirectoryEntity> findFailedStillRetriableArmEods(Pageable pageable);
 
-    boolean hasNotAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities);
+    boolean hasAllMediaBeenCopiedFromInboundStorage(List<MediaEntity> mediaEntities);
 }
