@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class SystemCommandExecutorImplTest2 {
+class SystemCommandExecutorImplFfmpegTest {
 
     private SystemCommandExecutor systemCommandExecutor;
 
