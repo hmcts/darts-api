@@ -53,6 +53,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
@@ -302,7 +303,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    void batchProcessResponseFiles_WithInvalidFilenameStatusReturns() throws IOException {
+    void batchProcessResponseFiles_WithInvalidFilenameStatus() throws IOException {
 
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
@@ -370,7 +371,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
 
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(armEod2.getEventDateTs());
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -388,18 +389,18 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
-        assertFalse(foundMedia.isResponseCleaned());
+        assertTrue(foundMedia.isResponseCleaned());
 
         List<ExternalObjectDirectoryEntity> foundMediaList2 = dartsDatabase.getExternalObjectDirectoryRepository()
             .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList2.size());
         ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
-        assertEquals(ARM_DROP_ZONE.getId(), foundMedia2.getStatus().getId());
+        assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia2.getStatus().getId());
         assertEquals(1, foundMedia2.getVerificationAttempts());
-        assertFalse(foundMedia2.isResponseCleaned());
+        assertTrue(foundMedia2.isResponseCleaned());
 
     }
 

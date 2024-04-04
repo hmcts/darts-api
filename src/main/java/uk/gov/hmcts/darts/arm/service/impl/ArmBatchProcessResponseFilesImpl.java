@@ -423,8 +423,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
                      externalObjectDirectory.getId(),
-                     armResponseUploadFileRecord.getMd5(), objectChecksum
-            );
+                     armResponseUploadFileRecord.getMd5(), objectChecksum);
             externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
         }
