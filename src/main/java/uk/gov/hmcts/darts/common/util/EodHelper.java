@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFES
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -47,6 +48,7 @@ public class EodHelper {
     @Getter private static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
     @Getter private static ObjectRecordStatusEntity storedStatus;
     @Getter private static ObjectRecordStatusEntity markForDeletionStatus;
+    @Getter private static ObjectRecordStatusEntity awaitingVerificationStatus;
 
     @Getter private static List<ObjectRecordStatusEntity> failedArmStatuses;
 
@@ -65,6 +67,7 @@ public class EodHelper {
         EodHelper.failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
         EodHelper.armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
         EodHelper.armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
+        EodHelper.awaitingVerificationStatus = orsRepository.findById(AWAITING_VERIFICATION.getId()).orElseThrow();
 
         EodHelper.failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
     }
