@@ -12,7 +12,7 @@ public interface AuthenticationCommonController {
             "This allows the screen to refresh the roles and permissions of a user easily.",
         tags = {"Authentication"}
     )
-    @GetMapping("/userstate")
+    @GetMapping(value = "/userstate", produces = "application/json")
     UserState getUserState();
 
 }
