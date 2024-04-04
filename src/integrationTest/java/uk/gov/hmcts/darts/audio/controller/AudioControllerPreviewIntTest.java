@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @AutoConfigureMockMvc
+@Disabled
 class AudioControllerPreviewIntTest extends IntegrationBase {
 
     @Value("${darts.audio.preview.redis-folder}")

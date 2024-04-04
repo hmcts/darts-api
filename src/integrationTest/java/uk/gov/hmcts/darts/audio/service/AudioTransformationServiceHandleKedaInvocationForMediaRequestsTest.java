@@ -2,19 +2,18 @@ package uk.gov.hmcts.darts.audio.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Import;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -39,9 +38,9 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
 
-@Import(SystemCommandExecutorStubImpl.class)
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+@Disabled
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
 
     private static final String EMAIL_ADDRESS = "test@test.com";

@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 import uk.gov.hmcts.darts.common.util.CommandRunner;
@@ -14,7 +13,6 @@ import java.util.concurrent.Future;
 
 @Slf4j
 @Component
-@Profile("!intTest")
 public class SystemCommandExecutorImpl implements SystemCommandExecutor {
 
     @SuppressWarnings("PMD.DoNotUseThreads")
