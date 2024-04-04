@@ -284,7 +284,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     ExternalObjectDirectoryEntity findByIdsAndFailure(Integer mediaId, Integer caseDocumentId, Integer annotationDocumentId, Integer transcriptionDocumentId,
                                                       List<Integer> failureStatesList);
 
-    
+
     @Query(
         """
             SELECT COUNT(eod) > 0
@@ -305,15 +305,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                     ExternalLocationTypeEntity inboundLocation,
                                                     ObjectRecordStatusEntity ignoredUnstructuredStatus,
                                                     List<ExternalLocationTypeEntity> destinationLocations);
-													
-	
-	@Query(
+
+    @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status = :status and
             eod.manifestFile = :manifestFile
             order by eod.lastModifiedDateTime
             """
-    )												
+    )
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
 }
