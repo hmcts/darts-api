@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "12b0ee38-9c56-4dc3-b05c-af8b7286c888",
+		"_postman_id": "261224d4-4b31-40ba-830c-ef29bc312e2c",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32568371"
+		"_exporter_id": "30362290"
 	},
 	"item": [
 		{
@@ -2361,6 +2361,40 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "/userstate",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:4550/userstate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4550",
+					"path": [
+						"userstate"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"auth": {

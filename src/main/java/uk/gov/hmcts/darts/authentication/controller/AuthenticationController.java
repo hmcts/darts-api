@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +16,9 @@ public interface AuthenticationController {
         @RequestParam(value = "redirect_uri", required = false) String redirectUri
     );
 
+    @Operation(
+        tags = {"Authentication"}
+    )
     @PostMapping("/handle-oauth-code")
     SecurityToken handleOauthCode(@RequestParam("code") String code);
 

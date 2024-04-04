@@ -9,13 +9,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 
 import java.io.IOException;
@@ -44,6 +45,9 @@ class DailyListServiceImpSaveDailyListTest {
     @Mock
     DailyListMapper dailyListMapper;
 
+    @Mock
+    UserIdentity userIdentity;
+
     @Captor
     private ArgumentCaptor<DailyListEntity> dailyListEntityArgumentCaptor;
 
@@ -55,17 +59,15 @@ class DailyListServiceImpSaveDailyListTest {
     }
 
     @Test
-    void ok_WhenCodeNotMatchExceptionThrown() throws IOException, CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+    void ok_WhenCodeNotMatchExceptionThrown() throws IOException {
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
         when(dailyListMapper.createDailyListEntity(
             any(DailyListPostRequest.class),
             any(String.class)
         )).thenReturn(new DailyListEntity());
-        String dailyListJson = getContentsFromFile(
-            "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
-        DailyListJsonObject dailyList = objectMapper.readValue(dailyListJson, DailyListJsonObject.class);
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null,
+                                                                null, null, getDailyListJson(), "some-message-id");
         service.saveDailyListToDatabase(request);
 
         //make sure an exception is not thrown.
@@ -75,17 +77,19 @@ class DailyListServiceImpSaveDailyListTest {
 
     @Test
     void ok_Xml() {
+        UserAccountEntity user = new UserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(user);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
-                                                                null
+                                                                null,
+                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
         verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
-
 
         DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
         assertThat(savedDailyList.getUniqueId()).isEqualTo("uniqueId");
@@ -94,6 +98,83 @@ class DailyListServiceImpSaveDailyListTest {
         assertThat(savedDailyList.getListingCourthouse()).isNotNull();
         assertThat(savedDailyList.getXmlContent()).isEqualTo("Thexml");
         assertThat(savedDailyList.getContent()).isNull();
+        assertThat(savedDailyList.getCreatedBy()).isEqualTo(user);
+        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(user);
+    }
+
+    @Test
+    void ok_JsonCreateDailyList() throws IOException {
+        UserAccountEntity user = new UserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(user);
+        when(dailyListMapper.createDailyListEntity(
+            any(DailyListPostRequest.class),
+            any(String.class)
+        )).thenReturn(new DailyListEntity());
+        when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
+
+        DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
+                                                                "uniqueId",
+                                                                OffsetDateTime.now(),
+                                                                getDailyListJson(),
+                                                                "some-message-id"
+        );
+        service.saveDailyListToDatabase(request);
+
+        verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
+
+        DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
+        assertThat(savedDailyList.getCreatedBy()).isEqualTo(user);
+        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(user);
+    }
+
+    @Test
+    void ok_JsonUpdateDailyList() throws IOException {
+        UserAccountEntity createdByUser = new UserAccountEntity();
+        UserAccountEntity updatedByUser = new UserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(updatedByUser);
+        var dailyListEntity = new DailyListEntity();
+        dailyListEntity.setCreatedBy(createdByUser);
+        when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.of(dailyListEntity));
+
+        DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
+                                                                "uniqueId",
+                                                                OffsetDateTime.now(),
+                                                                getDailyListJson(),
+                                                                "some-message-id"
+        );
+        service.saveDailyListToDatabase(request);
+
+        verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
+
+        DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
+        assertThat(savedDailyList.getCreatedBy()).isEqualTo(createdByUser);
+        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(updatedByUser);
+    }
+
+    @Test
+    void ok_PatchDailyList() throws IOException {
+        UserAccountEntity createdByUser = new UserAccountEntity();
+        UserAccountEntity updatedByUser = new UserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(updatedByUser);
+        var dailyListEntity = new DailyListEntity();
+        dailyListEntity.setCreatedBy(createdByUser);
+
+        when(dailyListRepository.findById(1)).thenReturn(Optional.of(dailyListEntity));
+
+        DailyListPatchRequest request = new DailyListPatchRequest(1, getDailyListJson());
+        service.updateDailyListInDatabase(request);
+
+        verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
+
+        DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();
+        assertThat(savedDailyList.getCreatedBy()).isEqualTo(createdByUser);
+        assertThat(savedDailyList.getLastModifiedBy()).isEqualTo(updatedByUser);
+    }
+
+    private DailyListJsonObject getDailyListJson() throws IOException {
+        String dailyListJson = getContentsFromFile(
+            "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
+        return objectMapper.readValue(dailyListJson, DailyListJsonObject.class);
     }
 
 }
