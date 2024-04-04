@@ -115,7 +115,8 @@ class DailyListServiceImpSaveDailyListTest {
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
-                                                                getDailyListJson()
+                                                                getDailyListJson(),
+                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
@@ -138,7 +139,8 @@ class DailyListServiceImpSaveDailyListTest {
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
-                                                                getDailyListJson()
+                                                                getDailyListJson(),
+                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
