@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.noderegistration.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
@@ -16,6 +17,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
 
     private final NodeRegisterRepository nodeRegisterRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final UserIdentity userIdentity;
 
     @Override
     public Integer registerDevices(String nodeType, String courthouse, String courtRoom, String hostName, String ipAddress, String macAddress) {
@@ -26,7 +28,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
         nodeRegisterEntity.setHostname(hostName);
         nodeRegisterEntity.setIpAddress(ipAddress);
         nodeRegisterEntity.setMacAddress(macAddress);
-
+        nodeRegisterEntity.setCreatedBy(userIdentity.getUserAccount());
         return nodeRegisterRepository.saveAndFlush(nodeRegisterEntity).getNodeId();
     }
 }

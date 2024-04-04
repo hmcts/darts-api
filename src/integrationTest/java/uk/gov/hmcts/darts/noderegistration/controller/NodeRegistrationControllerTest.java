@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.noderegistration.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,10 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,7 +48,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
     @Test
     void testPostRegisterDevices() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
-        setupExternalUserForCourthouse(null);
+        UserAccountEntity userCreated = setupExternalUserForCourthouse(null);
 
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
@@ -53,6 +57,11 @@ class NodeRegistrationControllerTest extends IntegrationBase {
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("node_id"));
+
+        PostNodeRegistrationResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PostNodeRegistrationResponse.class);
+        Optional<NodeRegisterEntity> nodeRegisterEntity = dartsDatabase.findByNodeId(response.getNodeId());
+
+        Assertions.assertEquals(userCreated.getId(), nodeRegisterEntity.get().getCreatedBy().getId());
     }
 
     @Test
@@ -151,10 +160,11 @@ class NodeRegistrationControllerTest extends IntegrationBase {
             .param("mac_address", "6A-5F-90-A4-2C-12");
     }
 
-    private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {
+    private UserAccountEntity setupExternalUserForCourthouse(CourthouseEntity courthouse) {
         String guid = UUID.randomUUID().toString();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createDarPcExternalUser(guid, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER, DAR_PC))).thenReturn(true);
+        return testUser;
     }
 }

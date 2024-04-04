@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -700,5 +701,9 @@ public class DartsDatabaseStub {
 
     public CourthouseEntity findCourthouseById(int id) {
         return courthouseRepository.findById(id).orElseThrow();
+    }
+
+    public Optional<NodeRegisterEntity> findByNodeId(int id) {
+        return nodeRegisterRepository.findById(id);
     }
 }
