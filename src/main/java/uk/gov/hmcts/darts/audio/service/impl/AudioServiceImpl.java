@@ -129,12 +129,19 @@ public class AudioServiceImpl implements AudioService {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
 
-        final UUID externalLocation;
-        final String checksum;
+        UUID externalLocation = null;
+        String checksum = null;
 
+        ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
         try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
-            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
-            checksum = fileContentChecksum.calculate(digestInputStream);
+            if (audioFileStream.isEmpty()) {
+                objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
+            } else if (audioFileStream.getSize() != addAudioMetadataRequest.getFileSize()) {
+                objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED.getId());
+            } else {
+                externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
+                checksum = fileContentChecksum.calculate(digestInputStream);
+            }
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
         }
@@ -148,7 +155,8 @@ public class AudioServiceImpl implements AudioService {
             externalLocation,
             checksum,
             userIdentity.getUserAccount(),
-            savedMedia
+            savedMedia,
+            objectRecordStatusEntity
         );
 
         logApi.audioUploaded(addAudioMetadataRequest);
@@ -206,11 +214,11 @@ public class AudioServiceImpl implements AudioService {
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
                                                                       String checksum,
                                                                       UserAccountEntity userAccountEntity,
-                                                                      MediaEntity mediaEntity) {
+                                                                      MediaEntity mediaEntity,
+                                                                      ObjectRecordStatusEntity objectRecordStatusEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
-        externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
-            ObjectRecordStatusEnum.STORED.getId()));
+        externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
