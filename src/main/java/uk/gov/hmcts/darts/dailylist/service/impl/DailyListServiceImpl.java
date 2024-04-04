@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -56,22 +57,21 @@ public class DailyListServiceImpl implements DailyListService {
         Optional<DailyListEntity> existingRecordOpt = dailyListRepository.findByUniqueId(uniqueId);
         DailyListEntity savedDailyListEntity;
         String listingCourthouse = dailyList.getCrownCourt().getCourtHouseName();
+        UserAccountEntity user = userIdentity.getUserAccount();
         if (existingRecordOpt.isPresent()) {
             //update the record
             savedDailyListEntity = existingRecordOpt.get();
             dailyListMapper.updateDailyListEntity(postRequest, listingCourthouse, savedDailyListEntity);
-            savedDailyListEntity.setLastModifiedBy(userIdentity.getUserAccount());
-            dailyListRepository.saveAndFlush(savedDailyListEntity);
         } else {
             //insert new record
             savedDailyListEntity = dailyListMapper.createDailyListEntity(
                 postRequest,
                 listingCourthouse
             );
-            savedDailyListEntity.setCreatedBy(userIdentity.getUserAccount());
-            savedDailyListEntity.setLastModifiedBy(userIdentity.getUserAccount());
-            dailyListRepository.saveAndFlush(savedDailyListEntity);
+            savedDailyListEntity.setCreatedBy(user);
         }
+        savedDailyListEntity.setLastModifiedBy(user);
+        dailyListRepository.saveAndFlush(savedDailyListEntity);
         PostDailyListResponse postDailyListResponse = new PostDailyListResponse();
         postDailyListResponse.setDalId(savedDailyListEntity.getId());
         return postDailyListResponse;
@@ -89,10 +89,11 @@ public class DailyListServiceImpl implements DailyListService {
         dailyListEntity.setStartDate(postRequest.getHearingDate());
         dailyListEntity.setUniqueId(postRequest.getUniqueId());
         dailyListEntity.setPublishedTimestamp(postRequest.getPublishedDateTime());
+        UserAccountEntity user = userIdentity.getUserAccount();
         if (dailyListEntity.getCreatedBy() == null) {
-            dailyListEntity.setCreatedBy(userIdentity.getUserAccount());
+            dailyListEntity.setCreatedBy(user);
         }
-        dailyListEntity.setLastModifiedBy(userIdentity.getUserAccount());
+        dailyListEntity.setLastModifiedBy(user);
         dailyListRepository.saveAndFlush(dailyListEntity);
 
         PostDailyListResponse postDailyListResponse = new PostDailyListResponse();
