@@ -301,7 +301,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String prefix = "DARTS";
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
 
+        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
 
         // when
         armBatchProcessResponseFiles.batchProcessResponseFiles();
@@ -316,6 +318,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix, continuationToken);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -342,7 +346,10 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String prefix = "DARTS";
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenThrow(new AzureException());
 
+        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+
 
         // when
         armBatchProcessResponseFiles.batchProcessResponseFiles();
@@ -357,6 +364,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix, continuationToken);
+        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -432,6 +441,19 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
+        verifyNoMoreInteractions(armDataManagementApi);
+
+    }
+
+    @Test
+    void batchProcessResponseFiles_ForBatchSizeMinusOne() throws IOException {
+        // given
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(-1);
+
+        // when
+        armBatchProcessResponseFiles.batchProcessResponseFiles();
+
+        // then
         verifyNoMoreInteractions(armDataManagementApi);
 
     }
