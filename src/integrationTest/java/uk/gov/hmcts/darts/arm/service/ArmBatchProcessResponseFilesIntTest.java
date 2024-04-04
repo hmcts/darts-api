@@ -302,6 +302,108 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
+    void batchProcessResponseFiles_WithInvalidFilenameStatusReturns() throws IOException {
+
+        // given
+        HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
+
+        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
+        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
+
+        MediaEntity media2 = createMediaEntity(hearing, startTime, endTime, 2);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+
+        ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod1.setTransferAttempts(1);
+        armEod1.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod1);
+
+        ExternalObjectDirectoryEntity armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media2, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod2.setTransferAttempts(1);
+        armEod2.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod2);
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+
+        String continuationToken = null;
+        String prefix = "DARTS";
+        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp", hashcode1);
+        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_il.rsp", hashcode1);
+
+        List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
+                                                 createRecordFilename2, invalidLineFileFilename2);
+
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
+
+        String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
+        String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
+        String createRecordFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
+        String invalidLineFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
+
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod1.getId()));
+        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest1, armEod1.getId(), media1.getChecksum()));
+        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest2, armEod2.getId()));
+        BinaryData invalidLineFileBinaryDataTest2 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest2, armEod2.getId()));
+
+        when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
+        when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
+        when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
+
+        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(armEod2.getEventDateTs());
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+
+        // when
+        armBatchProcessResponseFiles.batchProcessResponseFiles();
+
+        // then
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(1, foundMedia.getVerificationAttempts());
+        assertFalse(foundMedia.isResponseCleaned());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList2 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList2.size());
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia2.getStatus().getId());
+        assertEquals(1, foundMedia2.getVerificationAttempts());
+        assertFalse(foundMedia2.isResponseCleaned());
+
+    }
+
+    @Test
     void batchProcessResponseFiles_WithTranscriptionReturnsSuccess() throws IOException {
 
         // given
