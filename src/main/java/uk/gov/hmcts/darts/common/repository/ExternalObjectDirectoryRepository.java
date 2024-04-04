@@ -284,4 +284,25 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     ExternalObjectDirectoryEntity findByIdsAndFailure(Integer mediaId, Integer caseDocumentId, Integer annotationDocumentId, Integer transcriptionDocumentId,
                                                       List<Integer> failureStatesList);
+
+    @Query(
+        """
+            SELECT COUNT(eod) > 0
+            FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :inboundStatus
+            AND eod.media = :media
+            AND eod.externalLocationType = :inboundLocation
+            AND NOT EXISTS
+              (
+              SELECT eod2 FROM ExternalObjectDirectoryEntity eod2
+              WHERE eod.media = eod2.media
+              AND eod2.status != :ignoredUnstructuredStatus
+              AND eod2.externalLocationType IN :destinationLocations
+              )
+            """
+    )
+    boolean hasMediaNotBeenCopiedFromInboundStorage(MediaEntity media, ObjectRecordStatusEntity inboundStatus,
+                                                    ExternalLocationTypeEntity inboundLocation,
+                                                    ObjectRecordStatusEntity ignoredUnstructuredStatus,
+                                                    List<ExternalLocationTypeEntity> destinationLocations);
 }

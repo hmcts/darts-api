@@ -67,7 +67,7 @@ class DailyListServiceImpSaveDailyListTest {
         )).thenReturn(new DailyListEntity());
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null,
-                                                                null, null, getDailyListJson());
+                                                                null, null, getDailyListJson(), "some-message-id");
         service.saveDailyListToDatabase(request);
 
         //make sure an exception is not thrown.
@@ -84,7 +84,8 @@ class DailyListServiceImpSaveDailyListTest {
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
-                                                                null
+                                                                null,
+                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
@@ -114,7 +115,8 @@ class DailyListServiceImpSaveDailyListTest {
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
-                                                                getDailyListJson()
+                                                                getDailyListJson(),
+                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
@@ -137,7 +139,8 @@ class DailyListServiceImpSaveDailyListTest {
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
-                                                                getDailyListJson()
+                                                                getDailyListJson(),
+                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
