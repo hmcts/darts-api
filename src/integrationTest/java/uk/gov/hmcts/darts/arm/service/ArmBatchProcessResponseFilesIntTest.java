@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,6 +107,10 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             annotationDocumentRepository,
             caseDocumentRepository
         );
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
     }
 
     @Test
@@ -156,17 +161,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod4.setManifestFile(manifestFile2);
         dartsDatabase.save(armEod4);
 
-        String prefix = "DARTS";
-        List<String> responseBlobs = new ArrayList<>();
-        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        when(userIdentity.getUserAccount()).thenReturn(testUser);
-
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
-
         List<String> blobNamesAndPaths = new ArrayList<>();
         String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
         String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
@@ -178,6 +172,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .build();
 
         String continuationToken = null;
+        String prefix = "DARTS";
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         //String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
@@ -219,6 +214,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
         armBatchProcessResponseFiles.batchProcessResponseFiles();
@@ -260,6 +258,92 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia4.getStatus().getId());
         assertEquals(1, foundMedia4.getVerificationAttempts());
         assertFalse(foundMedia4.isResponseCleaned());
+    }
+
+    @Test
+    void batchProcessResponseFiles_ReturnsNoRecordsToProcess() {
+
+        // given
+        HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
+
+        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
+        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+
+        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+
+        ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod1.setTransferAttempts(1);
+        armEod1.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod1);
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+        String continuationToken = null;
+        String prefix = "DARTS";
+        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+
+        // when
+        armBatchProcessResponseFiles.batchProcessResponseFiles();
+
+        // then
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(1, foundMedia.getVerificationAttempts());
+        assertFalse(foundMedia.isResponseCleaned());
+
+    }
+
+    @Test
+    void batchProcessResponseFiles_ThrowsExceptionWhenlistingPrefix() {
+
+        // given
+        HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
+
+        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
+        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+
+        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+
+        ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod1.setTransferAttempts(1);
+        armEod1.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod1);
+
+        String continuationToken = null;
+        String prefix = "DARTS";
+        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenThrow(new AzureException());
+        
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+
+        // when
+        armBatchProcessResponseFiles.batchProcessResponseFiles();
+
+        // then
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(1, foundMedia.getVerificationAttempts());
+        assertFalse(foundMedia.isResponseCleaned());
+
     }
 
     private MediaEntity createMediaEntity(HearingEntity hearing, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
