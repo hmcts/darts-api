@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
@@ -41,6 +43,9 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Autowired
     DailyListRepository dailyListRepository;
+
+    @MockBean
+    UserIdentity mockUserIdentity;
 
     @BeforeAll
     static void beforeAll() {
