@@ -287,17 +287,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT COUNT(eo) > 0
-            FROM ExternalObjectDirectoryEntity eo
-            WHERE eo.status = :inboundStatus
-            AND eo.media = :media
-            AND eo.externalLocationType = :inboundLocation
-            AND eo.id NOT IN
+            SELECT COUNT(eod) > 0
+            FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :inboundStatus
+            AND eod.media = :media
+            AND eod.externalLocationType = :inboundLocation
+            AND NOT EXISTS
               (
-              SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+              SELECT eod2 FROM ExternalObjectDirectoryEntity eod2
               WHERE eod.media = eod2.media
-              AND eod.status = :inboundStatus
-              AND eod.externalLocationType = :inboundLocation
               AND eod2.status != :ignoredUnstructuredStatus
               AND eod2.externalLocationType IN :destinationLocations
               )
