@@ -6,8 +6,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
@@ -18,7 +18,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -33,7 +32,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     private CurrentTimeHelper currentTimeHelper;
 
     @Test
-    void addedToArmMoreThan30WeeksAgo() {
+    void storedInArmAndLastUpdatedInUnstructuredMoreThan30WeeksAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(35));
         HearingEntity hearing = dartsDatabase.createHearing(
@@ -53,18 +52,18 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
         UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
 
-        ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
+            EodHelper.storedStatus(),
+            EodHelper.unstructuredLocation(),
             uuid
         );
-        dartsDatabase.save(inboundEod);
+        dartsDatabase.save(unstructuredEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            EodHelper.storedStatus(),
+            EodHelper.armLocation(),
             uuid
         );
         dartsDatabase.save(armEod);
@@ -73,7 +72,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
+            EodHelper.unstructuredLocation()
         );
 
         assertEquals(1, foundMediaList.size());
@@ -82,7 +81,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void addedToArmLessThan30WeeksAgo() {
+    void storedInArmAndLastUpdatedInUnstructuredLessThan30WeeksAgo() {
         when(currentTimeHelper.currentOffsetDateTime())
             .thenReturn(OffsetDateTime.now().plusWeeks(25));
         HearingEntity hearing = dartsDatabase.createHearing(
@@ -102,18 +101,18 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
         UUID uuid = UUID.fromString("075987ea-b34d-49c7-b8db-439bfbe2496c");
 
-        ExternalObjectDirectoryEntity inboundEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
+            EodHelper.storedStatus(),
+            EodHelper.unstructuredLocation(),
             uuid
         );
-        dartsDatabase.save(inboundEod);
+        dartsDatabase.save(unstructuredEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            EodHelper.storedStatus(),
+            EodHelper.armLocation(),
             uuid
         );
         dartsDatabase.save(armEod);
@@ -122,7 +121,7 @@ class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
             savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
+            EodHelper.unstructuredLocation()
         );
 
         assertEquals(1, foundMediaList.size());

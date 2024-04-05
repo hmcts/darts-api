@@ -197,7 +197,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.status = :status2
             AND eod.externalLocationType = :location1
             AND eod2.externalLocationType = :location2
-            AND eod2.lastModifiedDateTime < :lastModifiedBefore
+            AND eod.lastModifiedDateTime < :lastModifiedBefore
             """
     )
     List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,

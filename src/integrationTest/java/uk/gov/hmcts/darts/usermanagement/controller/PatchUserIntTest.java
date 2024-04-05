@@ -155,6 +155,8 @@ class PatchUserIntTest extends IntegrationBase {
             );
             assertEquals(ORIGINAL_SYSTEM_USER_FLAG, latestUserAccountEntity.getIsSystemUser());
 
+            assertEquals(existingAccount.getCreatedDateTime(), latestUserAccountEntity.getCreatedDateTime());
+            assertThat(latestUserAccountEntity.getLastModifiedDateTime(), greaterThan(existingAccount.getLastModifiedDateTime()));
             assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
             assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedBy().getId());
             assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());

@@ -51,7 +51,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -221,54 +220,6 @@ class AudioServiceImplTest {
         assertEquals(null, externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(null, externalObjectDirectoryEntity.getChecksum());
         assertEquals(FAILURE_FILE_NOT_FOUND.getId(), externalObjectDirectoryEntity.getStatus().getId());
-    }
-
-    @Test
-    void addAudioWillNotSaveBlobToDataStoreWhenAudioFileSizeMismatch() {
-        // Given
-        HearingEntity hearingEntity = new HearingEntity();
-        when(retrieveCoreObjectService.retrieveOrCreateHearing(
-            anyString(),
-            anyString(),
-            anyString(),
-            any(),
-            any()
-        )).thenReturn(hearingEntity);
-
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("SWANSEA");
-        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(retrieveCoreObjectService.retrieveOrCreateCourtroom("SWANSEA", "1"))
-            .thenReturn(courtroomEntity);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
-        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
-
-        ObjectRecordStatusEntity failedStatus = new ObjectRecordStatusEntity();
-        failedStatus.setId(5);
-        when(objectRecordStatusRepository.getReferenceById(any())).thenReturn(failedStatus);
-
-        MockMultipartFile audioFile = new MockMultipartFile(
-            "addAudio",
-            "audio_sample.mp2",
-            "audio/mpeg",
-            DUMMY_FILE_CONTENT.getBytes()
-        );
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
-        addAudioMetadataRequest.setFileSize((long) (DUMMY_FILE_CONTENT.length() * 2));
-        // When
-        audioService.addAudio(audioFile, addAudioMetadataRequest);
-
-        // Then
-        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
-
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
-        assertEquals(null, externalObjectDirectoryEntity.getExternalLocation());
-        assertEquals(null, externalObjectDirectoryEntity.getChecksum());
-        assertEquals(FAILURE_FILE_SIZE_CHECK_FAILED.getId(), externalObjectDirectoryEntity.getStatus().getId());
     }
 
     @Test

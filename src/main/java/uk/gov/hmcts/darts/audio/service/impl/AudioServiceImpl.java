@@ -136,8 +136,6 @@ public class AudioServiceImpl implements AudioService {
         try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
             if (audioFileStream.isEmpty()) {
                 objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
-            } else if (audioFileStream.getSize() != addAudioMetadataRequest.getFileSize()) {
-                objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED.getId());
             } else {
                 externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
                 checksum = fileContentChecksum.calculate(digestInputStream);
