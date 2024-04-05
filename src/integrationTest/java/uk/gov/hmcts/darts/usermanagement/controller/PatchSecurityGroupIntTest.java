@@ -332,8 +332,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         mockMvc.perform(
                 buildPatchRequest(securityGroupEntity.getId())
                     .content("""
-                                 {"user_ids": []}
-                             """))
+                                     {"user_ids": []}
+                                 """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.user_ids").isEmpty())
             .andReturn();
@@ -352,8 +352,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         mockMvc.perform(
                 buildPatchRequest(securityGroupEntity.getId())
                     .content("""
-                                 {"user_ids": [%s]}
-                             """.formatted(userAccount1.getId())))
+                                     {"user_ids": [%s]}
+                                 """.formatted(userAccount1.getId())))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.user_ids[0]").value(userAccount1.getId()))
             .andReturn();
@@ -375,8 +375,8 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             {
               "name": "<name>",
               "display_name": "<display_name>",
-              "description": "<description>"
-              
+              "description": "<description>",
+              "security_role_id": 4
             }
               """;
         content = content.replace("<name>", name);
