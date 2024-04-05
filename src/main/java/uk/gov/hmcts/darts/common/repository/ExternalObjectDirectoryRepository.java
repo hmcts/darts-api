@@ -138,8 +138,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         return findNotFinishedAndNotExceededRetryInStorageLocation(failedStatuses, type, transferAttempts, Pageable.unpaged());
     }
 
-    List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
-
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod

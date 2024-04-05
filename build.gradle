@@ -393,6 +393,8 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.4'
   implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.4'
 
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
+
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.4.Final')

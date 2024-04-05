@@ -171,6 +171,7 @@ darts:
     overridable-fixed-policy-keys: 3
     close-open-cases-older-than-years: 6
     close-events: "Case closed,Archive case"
+    max-retention-retries: 3
   storage:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
