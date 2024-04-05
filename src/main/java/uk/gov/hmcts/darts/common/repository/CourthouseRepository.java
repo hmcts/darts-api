@@ -29,7 +29,7 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
 
     @Query("""
-        SELECT DISTINCT ch.id
+        SELECT ch.id
         FROM CourthouseEntity ch
         WHERE upper(ch.courthouseName) like upper(CONCAT('%', :name, '%'))
         or upper(ch.displayName) like upper(CONCAT('%', :name, '%'))
