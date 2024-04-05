@@ -48,6 +48,8 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +61,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArmConstants.ArmBatching.PROCESS_SINGLE_RECORD_BATCH_SIZE;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper.generateSuffix;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -110,7 +113,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         }
         if (nonNull(continuationTokenBlobs) && CollectionUtils.isNotEmpty(continuationTokenBlobs.getBlobNamesAndPaths())) {
             for (String inputUploadBlob : continuationTokenBlobs.getBlobNamesAndPaths()) {
+                Instant start = Instant.now();
+                log.info("ARM PERFORMANCE PULL START for manifest {} started at {}", inputUploadBlob, start);
                 processInputUploadBlob(inputUploadBlob);
+                Instant finish = Instant.now();
+                long timeElapsed = Duration.between(start, finish).toMillis();
+                log.info("ARM PERFORMANCE PULL END for manifest {} ended at {}", inputUploadBlob, finish);
+                log.info("ARM PERFORMANCE PULL ELAPSED TIME for manifest {} took {} ms", inputUploadBlob, timeElapsed);
             }
         } else {
             log.warn("No response files found with prefix: {}", prefix);
@@ -353,7 +362,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                         ? armResponseUploadFileRecord.getExceptionDescription() : "No error details found in response file";
 
                     log.warn(
-                        "ARM status is failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
+                        "ARM status reports failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
                         uploadFileFilenameProcessor.getUploadFileFilename(),
                         errorDescription,
                         armResponseUploadFileRecord.getErrorStatus(),
@@ -578,8 +587,11 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
         if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
             ObjectRecordStatusEnum status = ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
-            if (STORED.equals(status) || ARM_RESPONSE_PROCESSING_FAILED.equals(status) || ARM_RESPONSE_MANIFEST_FAILED.equals(status)) {
-
+            if (STORED.equals(status)
+                || ARM_RESPONSE_PROCESSING_FAILED.equals(status)
+                || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
+                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
+                log.info("About to  delete ARM responses for EOD {}", externalObjectDirectory.getId());
                 deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
                     .map(armDataManagementApi::deleteBlobData)
                     .toList();
