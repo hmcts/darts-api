@@ -29,9 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -105,18 +105,18 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userWithIdAndLastLoginList;
     }
 
+    @SuppressWarnings("Convert2MethodRef")
     @Override
-    public List<UserWithIdAndTimestamps> getUsers(String emailAddress) {
-        List<UserWithIdAndTimestamps> userWithIdAndLastLoginList = new ArrayList<>();
+    public List<UserWithIdAndTimestamps> getUsers(String emailAddress, List<Integer> userIds) {
+        return userManagementQuery.getUsers(emailAddress, userIds).stream()
+            .map(userAccountEntity -> toUserWithIdAndTimestamps(userAccountEntity))
+            .toList();
+    }
 
-        userManagementQuery.getUsers(emailAddress)
-            .forEach(userAccountEntity -> {
-                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
-                userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
-            });
-
-        return userWithIdAndLastLoginList;
+    private UserWithIdAndTimestamps toUserWithIdAndTimestamps(UserAccountEntity userAccountEntity) {
+        var userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+        userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+        return userWithIdAndLastLogin;
     }
 
     public UserWithIdAndTimestamps getUserById(Integer userId) {
@@ -170,7 +170,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             Set<SecurityGroupEntity> securityGroupEntities = securityGroups.stream()
                 .map(securityGroupRepository::findById)
                 .map(Optional::orElseThrow)
-                .collect(Collectors.toSet());
+                .collect(toSet());
             userAccountEntity.setSecurityGroupEntities(securityGroupEntities);
         }
     }

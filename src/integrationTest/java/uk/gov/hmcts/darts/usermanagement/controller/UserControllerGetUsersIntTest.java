@@ -55,7 +55,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
     void usersGetShouldReturnForbiddenError() throws Exception {
         superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isForbidden())
             .andReturn();
 
@@ -102,8 +102,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                                                 .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
-                                                 .queryParam(COURTHOUSE_ID, "21"))
+                                                 .header(EMAIL_ADDRESS, "james.smith@hmcts.com"))
             .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.com"));
