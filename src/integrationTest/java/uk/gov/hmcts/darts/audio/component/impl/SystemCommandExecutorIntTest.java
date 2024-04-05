@@ -19,11 +19,11 @@ class SystemCommandExecutorIntTest extends IntegrationBase {
 
     @Autowired
     private SystemCommandExecutor systemCommandExecutor;
-
-
+    
     @Test
     void executeWithFfmpegHelpCommand() throws ExecutionException, InterruptedException {
-        String command = "/usr/bin/ffmpeg -h";
+
+        String command = "ffmpeg -h";
         CommandLine commandLine = CommandLine.parse(command);
         boolean result = systemCommandExecutor.execute(commandLine);
         assertTrue(result);
@@ -31,17 +31,46 @@ class SystemCommandExecutorIntTest extends IntegrationBase {
 
     @Test
     void executeWithFfmpegVersionCommand() throws ExecutionException, InterruptedException {
-        String command = "/usr/bin/ffmpeg -version";
+        String command = "ffmpeg -version";
+        CommandLine commandLine = CommandLine.parse(command);
+        boolean result = systemCommandExecutor.execute(commandLine);
+        assertTrue(result);
+    }
+
+
+    @Test
+    void executeWithFfmpegAudioCommand() {
+        String command = "ffmpeg -i original0.mp2 -i original1.mp2"
+            + " -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 audio.mp2";
+        CommandLine commandLine = CommandLine.parse(command);
+        assertThrows(ExecutionException.class, () -> systemCommandExecutor.execute(commandLine));
+
+    }
+
+    @Test
+    void executeWithFfmpegHelpCommandWithFullPath() throws ExecutionException, InterruptedException {
+
+        String command = "/usr/bin/ffmpeg -h";
         CommandLine commandLine = CommandLine.parse(command);
         boolean result = systemCommandExecutor.execute(commandLine);
         assertTrue(result);
     }
 
     @Test
-    void executeWithFfmpegAudioCommand() {
-        String command = "/usr/bin/ffmpeg -i original0.mp2 -i original1.mp2"
-            + " -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 audio.mp2";
+    void executeWithFfmpegVersionCommandWithFullPath() throws ExecutionException, InterruptedException {
+        String command = "/usr/bin/ffmpeg -version";
+        CommandLine commandLine = CommandLine.parse(command);
+        boolean result = systemCommandExecutor.execute(commandLine);
+        assertTrue(result);
+    }
+
+
+    @Test
+    void executeWithFfmpegAudioCommandWithFullPath() {
+        String command = "/usr/bin/ffmpeg -i /path/to/audio/original0.mp2 -i /path/to/audio/original1.mp2"
+            + " -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 /path/to/output/audio.mp2";
         CommandLine commandLine = CommandLine.parse(command);
         assertThrows(ExecutionException.class, () -> systemCommandExecutor.execute(commandLine));
+
     }
 }
