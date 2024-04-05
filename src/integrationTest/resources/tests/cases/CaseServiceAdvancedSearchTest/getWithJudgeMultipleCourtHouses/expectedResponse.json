@@ -1,0 +1,56 @@
+[
+  {
+    "case_number": "Case3",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "Judge3a",
+      "aJudge"
+    ],
+    "hearings": [
+      {
+        "date": "2023-07-20",
+        "courtroom": "courtroom1",
+        "judges": [
+          "aJudge",
+          "Judge3a"
+        ]
+      },
+      {
+        "date": "2023-07-21",
+        "courtroom": "courtroom1",
+        "judges": [
+          "aJudge"
+        ]
+      },
+      {
+        "date": "2023-07-22",
+        "courtroom": "courtroom1",
+        "judges": [
+          "aJudge"
+        ]
+      }
+    ]
+  },
+  {
+    "case_number": "Case9",
+    "courthouse": "LONDON",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "Judge3a"
+    ],
+    "hearings": [
+      {
+        "date": "2023-05-20",
+        "courtroom": "courtroomLondon",
+        "judges": [
+          "Judge3a"
+        ]
+      }
+    ]
+  }
+]
