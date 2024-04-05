@@ -11,15 +11,16 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.exception.AdvancedSearchNoResultsException;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity_;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -32,24 +33,29 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountCourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountCourtCaseEntity_;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import static uk.gov.hmcts.darts.cases.service.impl.CaseServiceImpl.MAX_RESULTS;
+
 @Component
 @SuppressWarnings({"PMD.TooManyMethods"})
 @RequiredArgsConstructor
+@Slf4j
 public class AdvancedSearchRequestHelper {
     @PersistenceContext
     private final EntityManager entityManager;
 
     private final UserIdentity userIdentity;
+    private final CourtroomRepository courtroomRepository;
+    private final CourthouseRepository courthouseRepository;
 
-    public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) {
+    public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) throws AdvancedSearchNoResultsException {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
         Root<UserAccountCourtCaseEntity> caseRoot = criteriaQuery.from(UserAccountCourtCaseEntity.class);
@@ -66,27 +72,27 @@ public class AdvancedSearchRequestHelper {
         criteriaQuery.select(namePath).distinct(true);
 
         TypedQuery<Integer> query = entityManager.createQuery(criteriaQuery);
+        query.setMaxResults(MAX_RESULTS + 1);
         return query.getResultList();
     }
 
     private List<Predicate> createUserPredicates(CriteriaBuilder criteriaBuilder, Root<UserAccountCourtCaseEntity> caseRoot) {
         List<Predicate> predicates = new ArrayList<>();
-        Join<UserAccountCourtCaseEntity, UserAccountEntity> userJoin = caseRoot.join(UserAccountCourtCaseEntity_.USER_ACCOUNT);
         predicates.add(
-            criteriaBuilder.equal(userJoin.get(UserAccountEntity_.ID),
-            userIdentity.getUserAccount().getId()
+            criteriaBuilder.equal(caseRoot.get(UserAccountCourtCaseEntity_.userAccount),
+                                  userIdentity.getUserAccount()
             )
         );
         return predicates;
     }
 
     private List<Predicate> createCourtCasePredicates(GetCasesSearchRequest request,
-                                                      CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
+                                                      CriteriaBuilder criteriaBuilder,
+                                                      Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) throws AdvancedSearchNoResultsException {
         List<Predicate> predicates = new ArrayList<>();
         CollectionUtils.addAll(predicates, addCourtCaseCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, courtCaseJoin));
-        CollectionUtils.addAll(predicates, addCourthouseCriteria(request, criteriaBuilder, courtCaseJoin));
-        CollectionUtils.addAll(predicates, addCourtroomCriteria(request, criteriaBuilder, courtCaseJoin));
+        CollectionUtils.addAll(predicates, addCourthouseCourtroomCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, courtCaseJoin));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, courtCaseJoin));
@@ -94,7 +100,7 @@ public class AdvancedSearchRequestHelper {
         return predicates;
     }
 
-    private List<Predicate> addCourtCaseCriteria(GetCasesSearchRequest request, 
+    private List<Predicate> addCourtCaseCriteria(GetCasesSearchRequest request,
                                                  CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
@@ -114,21 +120,7 @@ public class AdvancedSearchRequestHelper {
         return surroundWith + value + surroundWith;
     }
 
-    private List<Predicate> addCourtroomCriteria(GetCasesSearchRequest request, 
-                                                 CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
-        List<Predicate> predicateList = new ArrayList<>();
-        if (StringUtils.isNotBlank(request.getCourtroom())) {
-            Join<HearingEntity, CourtroomEntity> courtroomJoin = joinCourtroom(courtCaseJoin);
-
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(courtroomJoin.get(CourtroomEntity_.NAME)),
-                surroundWithPercentagesUpper(request.getCourtroom())
-            ));
-        }
-        return predicateList;
-    }
-
-    private List<Predicate> addDefendantCriteria(GetCasesSearchRequest request, 
+    private List<Predicate> addDefendantCriteria(GetCasesSearchRequest request,
                                                  CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getDefendantName())) {
@@ -142,7 +134,7 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addEventCriteria(GetCasesSearchRequest request, 
+    private List<Predicate> addEventCriteria(GetCasesSearchRequest request,
                                              CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getEventTextContains())) {
@@ -156,20 +148,91 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addCourthouseCriteria(GetCasesSearchRequest request, 
-                                                  CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
+    private List<Predicate> addCourthouseCourtroomCriteria(GetCasesSearchRequest request,
+                                                           CriteriaBuilder criteriaBuilder,
+                                                           Join<UserAccountCourtCaseEntity,
+                                                               CourtCaseEntity> courtCaseJoin) throws AdvancedSearchNoResultsException {
+        boolean courtroomProvided = StringUtils.isNotBlank(request.getCourtroom()) || request.getCourtroomId() != null;
         List<Predicate> predicateList = new ArrayList<>();
+        if (courtroomProvided) {
+            return addCourtroomIdCriteria(request, criteriaBuilder, courtCaseJoin);
+        }
+        boolean courthouseProvided = StringUtils.isNotBlank(request.getCourthouse()) || request.getCourthouseId() != null;
+        if (courthouseProvided) {
+            return addCourthouseIdCriteria(request, criteriaBuilder, courtCaseJoin);
+        }
+
+        return predicateList;
+    }
+
+    private List<Predicate> addCourtroomIdCriteria(GetCasesSearchRequest request,
+                                                   CriteriaBuilder criteriaBuilder,
+                                                   Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) throws AdvancedSearchNoResultsException {
+        List<Predicate> predicateList = new ArrayList<>();
+        Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(courtCaseJoin);
+        if (request.getCourtroomId() != null) {
+            CourtroomEntity courtroomReference = courtroomRepository.getReferenceById(request.getCourtroomId());
+            predicateList.add(criteriaBuilder.equal(
+                hearingJoin.get(HearingEntity_.COURTROOM),
+                courtroomReference)
+            );
+            return predicateList;
+        }
         if (StringUtils.isNotBlank(request.getCourthouse())) {
-            Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(courtCaseJoin);
-            predicateList.add(criteriaBuilder.like(
-                criteriaBuilder.upper(courthouseJoin.get(CourthouseEntity_.COURTHOUSE_NAME)),
-                surroundWithPercentagesUpper(request.getCourthouse())
-            ));
+            List<Integer> courtroomIdList = courtroomRepository.findAllIdByCourthouseNameAndCourtroomNameLike(
+                request.getCourthouse(), request.getCourtroom());
+            if (courtroomIdList.isEmpty()) {
+                throw new AdvancedSearchNoResultsException();
+            }
+            List<CourtroomEntity> courtroomEntityList = courtroomIdList.stream().map(id -> courtroomRepository.getReferenceById(id)).toList();
+            predicateList.add(
+                hearingJoin.get(HearingEntity_.COURTROOM).in(
+                    courtroomEntityList)
+            );
+            return predicateList;
+        }
+
+        List<Integer> courtroomIdList = courtroomRepository.findAllIdByCourtroomNameLike(request.getCourtroom());
+        if (courtroomIdList.isEmpty()) {
+            throw new AdvancedSearchNoResultsException();
+        }
+        List<CourtroomEntity> courtroomEntityList = courtroomIdList.stream().map(id -> courtroomRepository.getReferenceById(id)).toList();
+        predicateList.add(
+            hearingJoin.get(HearingEntity_.COURTROOM).in(
+                courtroomEntityList)
+        );
+        return predicateList;
+    }
+
+    private List<Predicate> addCourthouseIdCriteria(GetCasesSearchRequest request,
+                                                    CriteriaBuilder criteriaBuilder,
+                                                    Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) throws AdvancedSearchNoResultsException {
+        List<Predicate> predicateList = new ArrayList<>();
+        if (request.getCourthouseId() != null) {
+            CourthouseEntity courthouseReference = courthouseRepository.getReferenceById(request.getCourthouseId());
+            predicateList.add(criteriaBuilder.equal(
+                courtCaseJoin.get(CourtCaseEntity_.COURTHOUSE),
+                courthouseReference)
+            );
+            return predicateList;
+        }
+        if (StringUtils.isNotBlank(request.getCourthouse())) {
+            List<Integer> courthouseIdList = courthouseRepository.findAllIdByDisplayNameOrNameLike(
+                request.getCourthouse());
+            log.debug("Matching list of courthouse IDs for search = {}", courthouseIdList);
+            if (courthouseIdList.isEmpty()) {
+                throw new AdvancedSearchNoResultsException();
+            }
+            List<CourthouseEntity> courthouseRefList = courthouseIdList.stream().map(id -> courthouseRepository.getReferenceById(id)).toList();
+            predicateList.add(
+                courtCaseJoin.get(CourtCaseEntity_.COURTHOUSE).in(
+                    courthouseRefList)
+            );
         }
         return predicateList;
     }
 
-    private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, 
+    private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request,
                                              CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getJudgeName())) {
@@ -182,7 +245,7 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addHearingDateCriteria(GetCasesSearchRequest request, 
+    private List<Predicate> addHearingDateCriteria(GetCasesSearchRequest request,
                                                    CriteriaBuilder criteriaBuilder, Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getDateFrom() != null || request.getDateTo() != null) {
@@ -204,7 +267,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    private Join<CourtCaseEntity, HearingEntity> joinHearing(Join<UserAccountCourtCaseEntity, CourtCaseEntity>  caseRoot) {
+    private Join<CourtCaseEntity, HearingEntity> joinHearing(Join<UserAccountCourtCaseEntity, CourtCaseEntity> caseRoot) {
         Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
             CourtCaseEntity_.HEARINGS)).findAny();
         return foundJoin.map(courtCaseEntityJoin -> (Join<CourtCaseEntity, HearingEntity>) courtCaseEntityJoin)
@@ -227,7 +290,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Join<UserAccountCourtCaseEntity, CourtCaseEntity>  caseRoot) {
+    private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Join<UserAccountCourtCaseEntity, CourtCaseEntity> caseRoot) {
         Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
             CourtroomEntity_.COURTHOUSE)).findAny();
         return foundJoin.map(join -> (Join<CourtCaseEntity, CourthouseEntity>) join)

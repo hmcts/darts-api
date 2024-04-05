@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
-import uk.gov.hmcts.darts.cases.model.AdvancedSearchDetails;
+import uk.gov.hmcts.darts.cases.model.AdvancedSearchRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.Annotation;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -94,16 +94,18 @@ public class CaseController implements CasesApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
-        AdvancedSearchDetails advancedSearchDetails
+        AdvancedSearchRequest advancedSearchRequest
     ) {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber(StringUtils.trimToNull(advancedSearchDetails.getCaseNumber()))
-            .courthouse(StringUtils.trimToNull(advancedSearchDetails.getCourthouse()))
-            .courtroom(StringUtils.trimToNull(advancedSearchDetails.getCourtroom()))
-            .judgeName(StringUtils.trimToNull(advancedSearchDetails.getJudgeName()))
-            .defendantName(StringUtils.trimToNull(advancedSearchDetails.getDefendantName()))
-            .dateFrom(advancedSearchDetails.getDateFrom()).dateTo(advancedSearchDetails.getDateTo())
-            .eventTextContains(StringUtils.trimToNull(advancedSearchDetails.getEventTextContains()))
+            .caseNumber(StringUtils.trimToNull(advancedSearchRequest.getCaseNumber()))
+            .courthouse(StringUtils.trimToNull(advancedSearchRequest.getCourthouse()))
+            .courthouseId(advancedSearchRequest.getCourthouseId())
+            .courtroom(StringUtils.trimToNull(advancedSearchRequest.getCourtroom()))
+            .courtroomId(advancedSearchRequest.getCourtroomId())
+            .judgeName(StringUtils.trimToNull(advancedSearchRequest.getJudgeName()))
+            .defendantName(StringUtils.trimToNull(advancedSearchRequest.getDefendantName()))
+            .dateFrom(advancedSearchRequest.getDateFrom()).dateTo(advancedSearchRequest.getDateTo())
+            .eventTextContains(StringUtils.trimToNull(advancedSearchRequest.getEventTextContains()))
             .build();
 
         RequestValidator.validate(request);

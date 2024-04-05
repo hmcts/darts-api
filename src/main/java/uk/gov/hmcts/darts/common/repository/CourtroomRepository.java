@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.entity.CourtroomEntity.TABLE_NAME;
@@ -13,13 +14,29 @@ import static uk.gov.hmcts.darts.common.entity.CourtroomEntity.TABLE_NAME;
 public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Integer> {
 
     @Query("""
-        SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr\s
-        WHERE upper(ch.courthouseName) = upper(:courthouse)\s
-        AND upper(cr.name) = upper(:courtroom)\s
+        SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr
+        WHERE upper(ch.courthouseName) = upper(:courthouse)
+        AND upper(cr.name) = upper(:courtroom)
         AND cr.courthouse = ch
         """
     )
     Optional<CourtroomEntity> findByCourthouseNameAndCourtroomName(String courthouse, String courtroom);
+
+    @Query("""
+        SELECT cr.id FROM CourthouseEntity ch, CourtroomEntity cr
+        WHERE upper(ch.courthouseName) like upper(CONCAT('%', :courthouse, '%'))
+        AND upper(cr.name) like upper(CONCAT('%', :courtroom, '%'))
+        AND cr.courthouse = ch
+        """
+    )
+    List<Integer> findAllIdByCourthouseNameAndCourtroomNameLike(String courthouse, String courtroom);
+
+    @Query("""
+        SELECT cr.id FROM CourtroomEntity cr
+        WHERE upper(cr.name) like upper(CONCAT('%', :courtroom, '%'))
+        """
+    )
+    List<Integer> findAllIdByCourtroomNameLike(String courtroom);
 
     @Query(value = "SELECT * FROM {h-schema}" + TABLE_NAME + " cr " +
         "WHERE upper(cr." + CourtroomEntity.COURTROOM_NAME + ") = upper(:courtroom) " +

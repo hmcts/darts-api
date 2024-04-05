@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class RequestValidatorTest {
 
     @Test
-    void ok() {
+    void okCaseNumberLongEnough() {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber("gfdgfd")
             .build();
@@ -52,6 +52,24 @@ class RequestValidatorTest {
     }
 
     @Test
+    void raiseNotEnoughCriteriaException2() {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouse("swansea")
+            .courtroom("1")
+            .caseNumber("1")
+            .build();
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertEquals(
+            "Search criteria is too broad, please add at least 1 more criteria to search for.",
+            exception.getMessage()
+        );
+    }
+
+    @Test
     void raiseNotEnoughCriteria2Exception() {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courtroom("3")
@@ -72,6 +90,7 @@ class RequestValidatorTest {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .dateFrom(LocalDate.of(2023, 6, 20))
             .dateTo(LocalDate.of(2023, 6, 19))
+            .caseNumber("123456")
             .build();
 
         var exception = assertThrows(
@@ -89,6 +108,7 @@ class RequestValidatorTest {
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .dateFrom(LocalDate.of(2023, 6, 20))
             .dateTo(LocalDate.of(2023, 6, 20))
+            .caseNumber("123456")
             .build();
 
         RequestValidator.validate(request);
