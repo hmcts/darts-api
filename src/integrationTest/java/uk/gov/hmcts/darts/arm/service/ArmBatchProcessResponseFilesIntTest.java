@@ -386,13 +386,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
-        String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
-        String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
-        String createRecordFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
-        String invalidLineFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
-        String validUploadFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
-        String invalidLineFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
-
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenThrow(new RuntimeException());
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenThrow(new RuntimeException());
         when(armDataManagementApi.getBlobData(createRecordFilename2)).thenThrow(new RuntimeException());
