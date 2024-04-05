@@ -75,6 +75,14 @@ public enum RetentionApiError implements DartsApiError {
         RetentionErrorCode.FIXED_POLICY_KEY_NOT_FOUND.getValue(),
         HttpStatus.BAD_REQUEST,
         RetentionTitleErrors.FIXED_POLICY_KEY_NOT_FOUND.toString()
+    ), LIVE_POLICIES_CANNOT_BE_EDITED(
+        RetentionErrorCode.LIVE_POLICIES_CANNOT_BE_EDITED.getValue(),
+        HttpStatus.CONFLICT,
+        RetentionTitleErrors.LIVE_POLICIES_CANNOT_BE_EDITED.toString()
+    ), TARGET_POLICY_HAS_PENDING_REVISION(
+        RetentionErrorCode.TARGET_POLICY_HAS_PENDING_REVISION.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.TARGET_POLICY_HAS_PENDING_REVISION.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";
