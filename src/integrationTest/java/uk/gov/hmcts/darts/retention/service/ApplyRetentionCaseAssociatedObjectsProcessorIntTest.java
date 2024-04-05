@@ -14,8 +14,8 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.service.impl.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.data.CaseTestData;
 import uk.gov.hmcts.darts.testutils.stubs.CaseRetentionStub;
-import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
@@ -58,8 +58,6 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     ExternalObjectDirectoryRepository eodRepository;
     @SpyBean
     ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
-    @Autowired
-    CourtCaseStub caseStub;
 
     @Autowired
     ApplyRetentionCaseAssociatedObjectsProcessor processor;
@@ -84,16 +82,18 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         */
 
         // given
-        caseA = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(1);
-            courtCase.setClosed(true);
-        });
-        caseB = caseStub.createAndSaveCourtCase(courtCase -> {
-            courtCase.setRetentionUpdated(true);
-            courtCase.setRetentionRetries(2);
-            courtCase.setClosed(true);
-        });
+        caseA = CaseTestData.createSomeMinimalCase();
+        caseA.setRetentionUpdated(true);
+        caseA.setRetentionRetries(1);
+        caseA.setClosed(true);
+        caseB = CaseTestData.createSomeMinimalCase();
+        caseB.setRetentionUpdated(true);
+        caseB.setRetentionRetries(2);
+        caseB.setClosed(true);
+        caseRepository.save(caseA);
+        caseRepository.save(caseB);
+
+        medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
 
         var hearA1 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom", caseA.getCaseNumber(), D_2020_10_1);
         var hearA2 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom2", caseA.getCaseNumber(), D_2020_10_1);
@@ -104,7 +104,6 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         caseRepository.save(caseA);
         caseRepository.save(caseB);
 
-        medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         hearA1.addMedia(medias.get(0));
         hearA1.addMedia(medias.get(1));
         hearA2.addMedia(medias.get(2));
