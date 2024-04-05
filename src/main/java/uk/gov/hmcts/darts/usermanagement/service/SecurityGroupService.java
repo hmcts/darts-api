@@ -17,7 +17,7 @@ public interface SecurityGroupService {
 
     SecurityGroupEntity createAndSaveSecurityGroup(SecurityGroupModel securityGroupModel);
 
-    List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser);
+    List<SecurityGroupWithIdAndRoleAndUsers> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser);
 
     SecurityGroupWithIdAndRoleAndUsers modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch);
 }

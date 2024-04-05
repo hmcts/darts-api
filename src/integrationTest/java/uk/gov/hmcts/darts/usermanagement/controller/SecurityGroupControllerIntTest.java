@@ -65,6 +65,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = """
                 [
                   {
+                    "user_ids":[],
                     "id":-1,
                     "security_role_id":1,
                     "global_access":false,
@@ -93,6 +94,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = """
                 [
                    {
+                     "user_ids":[],
                      "id":-6,
                      "security_role_id":6,
                      "global_access":true,
@@ -101,6 +103,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                      "name":"Test RCJ Appeals"
                    },
                    {
+                     "user_ids":[],
                      "id":-3,
                      "security_role_id":3,
                      "global_access":false,
@@ -147,6 +150,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = String.format("""
                 [
                   {
+                    "user_ids":[-46],
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
@@ -194,6 +198,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = String.format("""
                 [
                   {
+                    "user_ids":[-46],
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
@@ -222,6 +227,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = """
                 [
                     {
+                      "user_ids":[],
                       "id":-17,
                       "security_role_id":10,
                       "global_access":true,
@@ -230,6 +236,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       "name":"Mid Tier Group"
                     },
                     {
+                      "user_ids":[],
                       "id":-16,
                       "security_role_id":9,
                       "global_access":true,
@@ -238,6 +245,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       "name":"Dar Pc Group"
                       },
                       {
+                        "user_ids":[],
                         "id":-15,
                         "security_role_id":8,
                         "global_access":true,
@@ -246,6 +254,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                         "name":"Cpp Group"
                       },
                       {
+                        "user_ids":[],
                         "id":1,
                         "security_role_id":11,
                         "global_access":true,
@@ -256,6 +265,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                         "Super Admin"
                       },
                       {
+                        "user_ids":[],
                         "id":2,
                         "security_role_id":12,
                         "global_access":true,
@@ -285,6 +295,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = """
                 [
                   {
+                    "user_ids":[],
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
@@ -292,21 +303,27 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "courthouse_ids":[],
                     "name":"Mid Tier Group"
                     },
-                    {"id":-16,
+                    {
+                    "user_ids":[],
+                    "id":-16,
                     "security_role_id":9,
                     "global_access":true,
                     "display_state":true,
                     "courthouse_ids":[],
                     "name":"Dar Pc Group"
                     },
-                    {"id":-15,
+                    {
+                    "user_ids":[],
+                    "id":-15,
                     "security_role_id":8,
                     "global_access":true,
                     "display_state":true,
                     "courthouse_ids":[],
                     "name":"Cpp Group"
                     },
-                    {"id":2,
+                    {
+                    "user_ids":[],
+                    "id":2,
                     "security_role_id":12,
                     "global_access":true,
                     "display_state":true,
@@ -335,6 +352,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = """
                 [
                     {
+                        "user_ids":[],
                         "id":1,
                         "security_role_id":11,
                         "global_access":true,
@@ -365,6 +383,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = """
                 [
                       {
+                          "user_ids":[],
                           "id":-17,
                           "security_role_id":10,
                           "global_access":true,
@@ -373,6 +392,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                           "name":"Mid Tier Group"
                       },
                       {
+                          "user_ids":[],
                           "id":-16,
                           "security_role_id":9,
                           "global_access":true,
@@ -381,6 +401,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                           "name":"Dar Pc Group"
                       },
                       {
+                          "user_ids":[],
                           "id":-15,
                           "security_role_id":8,
                           "global_access":true,
@@ -389,6 +410,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                           "name":"Cpp Group"
                       },
                       {
+                          "user_ids":[],
                           "id":2,
                           "security_role_id":12,
                           "global_access":true,

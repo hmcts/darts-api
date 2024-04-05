@@ -359,7 +359,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
+              $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUsers'
     RoleArraySuccessResponse:
       description: 'Success'
       content:

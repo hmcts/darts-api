@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 
 @Service
@@ -83,7 +84,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
-    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
+    public List<SecurityGroupWithIdAndRoleAndUsers> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
+
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
 
         securityGroupEntities = filterSecurityGroupEntitiesByRoleIds(securityGroupEntities, roleIds);
@@ -91,8 +93,14 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupEntities = filterSecurityGroupEntitiesByUserId(securityGroupEntities, userId);
         securityGroupEntities = filterSecurityGroupEntitiesBySingleUser(securityGroupEntities, singletonUser);
 
+        if (isNull(courthouseId)) {
+            securityGroupEntities.forEach(entity -> entity.getUsers().clear());
+        }
+
         return securityGroupEntities.stream()
-            .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
+            .map(securityGroupWithIdAndRoleAndUsersMapper::mapToSecurityGroupWithIdAndRoleAndUsers).toList();
+
+
     }
 
     @Transactional
