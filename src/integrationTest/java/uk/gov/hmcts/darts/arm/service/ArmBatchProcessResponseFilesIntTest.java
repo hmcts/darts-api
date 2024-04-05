@@ -103,7 +103,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     private File tempDirectory;
 
     private ArmBatchProcessResponseFiles armBatchProcessResponseFiles;
-    private String continuationToken = null;
+    private String continuationToken;
 
 
     @BeforeEach
