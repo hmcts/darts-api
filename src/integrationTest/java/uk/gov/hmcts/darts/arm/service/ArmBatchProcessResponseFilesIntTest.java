@@ -62,6 +62,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "ExcessiveImports"})
 class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
+    public static final String HASHCODE_2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
     private static final String PREFIX = "DARTS";
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     public static final String T_13_00_00_Z = "2023-06-10T13:00:00Z";
@@ -393,10 +394,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenThrow(new RuntimeException());
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenThrow(new RuntimeException());
 
-        String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
-        String createRecordFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
+        String createRecordFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", HASHCODE_2);
         List<String> hashcodeResponses2 = List.of(createRecordFilename4);
-        when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(hashcodeResponses2);
+        when(armDataManagementApi.listResponseBlobs(HASHCODE_2)).thenReturn(hashcodeResponses2);
         String createRecordFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
         BinaryData createRecordBinaryDataTest4 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest4, armEod4.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename4)).thenReturn(createRecordBinaryDataTest4);
