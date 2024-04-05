@@ -582,7 +582,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     }
 
     void deleteResponseBlobs(ArmResponseBatchData armResponseBatchData) {
-        List<Boolean> deletedResponseBlobStatuses = new ArrayList<>();
         List<String> responseBlobsToBeDeleted = getResponseBlobsToBeDeleted(armResponseBatchData);
         ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(armResponseBatchData.getExternalObjectDirectoryId());
         if (nonNull(externalObjectDirectory) && responseBlobsToBeDeleted.size() == 2) {
@@ -592,7 +591,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(status)
                 || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(status)) {
                 log.info("About to  delete ARM responses for EOD {}", externalObjectDirectory.getId());
-                deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
+                List<Boolean> deletedResponseBlobStatuses = responseBlobsToBeDeleted.stream()
                     .map(armDataManagementApi::deleteBlobData)
                     .toList();
 

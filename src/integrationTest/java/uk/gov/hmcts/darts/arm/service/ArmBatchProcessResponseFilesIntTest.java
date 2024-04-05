@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service;
 import com.azure.core.exception.AzureException;
 import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -61,7 +62,10 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "ExcessiveImports"})
 class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
+    private static final String PREFIX = "DARTS";
     private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    public static final String T_13_00_00_Z = "2023-06-10T13:00:00Z";
+    public static final String T_13_45_00_Z = "2023-06-10T13:45:00Z";
 
     @Autowired
     private ArmResponseFilesProcessor armResponseFilesProcessor;
@@ -99,6 +103,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     private File tempDirectory;
 
     private ArmBatchProcessResponseFiles armBatchProcessResponseFiles;
+    private String continuationToken = null;
 
 
     @BeforeEach
@@ -131,8 +136,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
 
-        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
-        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
         MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
 
         MediaEntity media2 = createMediaEntity(hearing, startTime, endTime, 2);
@@ -191,9 +196,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -304,13 +307,189 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
+    void batchProcessResponseFiles_WithInvalidJson() throws IOException {
+
+        // given
+        HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
+
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
+        MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
+
+        MediaEntity media2 = createMediaEntity(hearing, startTime, endTime, 2);
+
+        MediaEntity media3 = createMediaEntity(hearing, startTime, endTime, 3);
+
+        MediaEntity media4 = createMediaEntity(hearing, startTime, endTime, 4);
+
+        OffsetDateTime startTime2 = OffsetDateTime.parse("2023-06-10T14:00:00Z");
+        OffsetDateTime endTime2 = OffsetDateTime.parse("2023-06-10T14:45:00Z");
+        MediaEntity media5 = createMediaEntity(hearing, startTime2, endTime2, 1);
+
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifest2Uuid = UUID.randomUUID().toString();
+
+        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+
+        ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media1, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod1.setTransferAttempts(1);
+        armEod1.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod1);
+
+        ExternalObjectDirectoryEntity armEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media2, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod2.setTransferAttempts(1);
+        armEod2.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod2);
+
+        ExternalObjectDirectoryEntity armEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media3, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod3.setTransferAttempts(1);
+        armEod3.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod3);
+
+        ExternalObjectDirectoryEntity armEod4 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media4, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod4.setTransferAttempts(1);
+        armEod4.setManifestFile(manifestFile1);
+        dartsDatabase.save(armEod4);
+
+        String manifestFile2 = "DARTS_" + manifest2Uuid + ".a360";
+        ExternalObjectDirectoryEntity armEod5 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media5, ARM_DROP_ZONE, ARM, UUID.randomUUID());
+        armEod5.setTransferAttempts(1);
+        armEod5.setManifestFile(manifestFile2);
+        dartsDatabase.save(armEod5);
+
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+        blobNamesAndPaths.add(blobNameAndPath2);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
+        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
+        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
+        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
+        List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
+                                                 createRecordFilename2, invalidLineFileFilename2,
+                                                 uploadFileFilename3, invalidLineFileFilename3);
+
+        when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
+
+        String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/InvalidResponses/CreateRecord.rsp";
+        String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/InvalidResponses/UploadFile.rsp";
+        String createRecordFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/InvalidResponses/CreateRecord.rsp";
+        String invalidLineFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/InvalidResponses/InvalidLineFile.rsp";
+        String validUploadFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/InvalidResponses/UploadFile.rsp";
+        String invalidLineFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/InvalidResponses/InvalidLineFile.rsp";
+
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod1.getId()));
+        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest1, armEod1.getId(), media1.getChecksum()));
+        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest2, armEod2.getId()));
+        BinaryData invalidLineFileBinaryDataTest2 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest2, armEod2.getId()));
+        BinaryData uploadFileBinaryDataTest3 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest3, armEod3.getId(), media3.getChecksum()));
+        BinaryData invalidLineFileBinaryDataTest3 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest3, armEod3.getId()));
+
+        when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
+        when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
+        when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
+        when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
+
+        String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
+        String createRecordFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
+        List<String> hashcodeResponses2 = List.of(createRecordFilename4);
+        when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(hashcodeResponses2);
+        String createRecordFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
+        BinaryData createRecordBinaryDataTest4 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest4, armEod4.getId()));
+        when(armDataManagementApi.getBlobData(createRecordFilename4)).thenReturn(createRecordBinaryDataTest4);
+
+        when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(createRecordFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename2)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(uploadFileFilename3)).thenReturn(true);
+        when(armDataManagementApi.deleteBlobData(invalidLineFileFilename3)).thenReturn(true);
+
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(endTime2);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
+        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+
+        // when
+        armBatchProcessResponseFiles.batchProcessResponseFiles();
+
+        // then
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media1, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(1, foundMedia.getVerificationAttempts());
+        assertFalse(foundMedia.isResponseCleaned());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList2 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media2, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList2.size());
+        ExternalObjectDirectoryEntity foundMedia2 = foundMediaList2.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia2.getStatus().getId());
+        assertEquals(1, foundMedia2.getVerificationAttempts());
+        assertFalse(foundMedia2.isResponseCleaned());
+
+
+        List<ExternalObjectDirectoryEntity> foundMediaList3 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media3, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList3.size());
+        ExternalObjectDirectoryEntity foundMedia3 = foundMediaList3.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia3.getStatus().getId());
+        assertEquals(1, foundMedia3.getVerificationAttempts());
+        assertFalse(foundMedia3.isResponseCleaned());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList4 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media4, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList4.size());
+        ExternalObjectDirectoryEntity foundMedia4 = foundMediaList4.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia4.getStatus().getId());
+        assertEquals(1, foundMedia4.getVerificationAttempts());
+        assertFalse(foundMedia4.isResponseCleaned());
+
+        List<ExternalObjectDirectoryEntity> foundMediaList5 = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(media5, dartsDatabase.getExternalLocationTypeEntity(ARM));
+
+        assertEquals(1, foundMediaList5.size());
+        ExternalObjectDirectoryEntity foundMedia5 = foundMediaList5.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia5.getStatus().getId());
+        assertEquals(1, foundMedia5.getVerificationAttempts());
+        assertFalse(foundMedia5.isResponseCleaned());
+    }
+
+    @Test
     void batchProcessResponseFiles_WithInvalidFilenameStatus() throws IOException {
 
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
 
-        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
-        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
         MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
 
         MediaEntity media2 = createMediaEntity(hearing, startTime, endTime, 2);
@@ -338,9 +517,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp", hashcode1);
@@ -444,19 +621,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
-        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
-        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
-        List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
-                                                 createRecordFilename2, invalidLineFileFilename2,
-                                                 uploadFileFilename3, invalidLineFileFilename3);
+        List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
@@ -479,7 +648,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
@@ -492,6 +661,18 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals("A360230516_TestIngestion_1.docx", foundTranscriptionEod.getExternalFileId());
         assertEquals(String.valueOf(armEod.getId()), foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
+    }
+
+    @NotNull
+    private static List<String> getHashcodeResponses(String hashcode1, String createRecordFilename1, String uploadFileFilename1) {
+        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
+        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
+        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
+        return List.of(createRecordFilename1, uploadFileFilename1,
+                       createRecordFilename2, invalidLineFileFilename2,
+                       uploadFileFilename3, invalidLineFileFilename3);
+
     }
 
     @Test
@@ -533,19 +714,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
-        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
-        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
-        List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
-                                                 createRecordFilename2, invalidLineFileFilename2,
-                                                 uploadFileFilename3, invalidLineFileFilename3);
+        List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
@@ -568,7 +741,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
@@ -622,19 +795,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
-        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
-        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
-        List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
-                                                 createRecordFilename2, invalidLineFileFilename2,
-                                                 uploadFileFilename3, invalidLineFileFilename3);
+        List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
@@ -657,7 +822,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
@@ -707,19 +872,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
-        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
-        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
-        List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
-                                                 createRecordFilename2, invalidLineFileFilename2,
-                                                 uploadFileFilename3, invalidLineFileFilename3);
+        List<String> hashcodeResponses = getHashcodeResponses(hashcode1, createRecordFilename1, uploadFileFilename1);
 
         when(armDataManagementApi.listResponseBlobs(hashcode1)).thenReturn(hashcodeResponses);
 
@@ -742,7 +899,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
@@ -792,14 +949,12 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_invalid_1_cr.rsp", hashcode1);
-        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895__invalid_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_il.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_invalid_1_uf.rsp", hashcode1);
+        String createRecordFilename2 = String.format("%s__a17b9015-e6ad-77c5-8d1e-13259aae1896_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("%s__a17b9015-e6ad-77c5-8d1e-13259aae1896_il.rsp", hashcode1);
         String uploadFileFilename3 = String.format("%s_1_uf.rsp", hashcode1);
         String invalidLineFileFilename3 = String.format("%s_0_il.rsp", hashcode1);
         List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
@@ -810,13 +965,25 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         String createRecordFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
         String validUploadFileTest1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
+        String createRecordFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
+        String invalidLineFileTest2 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
+        String validUploadFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
+        String invalidLineFileTest3 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/InvalidLineFile.rsp";
 
         BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest1, armEod.getId()));
         BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(
             getUploadFileContents(validUploadFileTest1, armEod.getId(), caseDocument.getChecksum()));
+        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTest2, 1234));
+        BinaryData invalidLineFileBinaryDataTest2 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest2, 234));
+        BinaryData uploadFileBinaryDataTest3 = convertStringToBinaryData(getUploadFileContents(validUploadFileTest3, 2233, "123"));
+        BinaryData invalidLineFileBinaryDataTest3 = convertStringToBinaryData(getInvalidLineFileContents(invalidLineFileTest3, 7788));
 
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
+        when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn(invalidLineFileBinaryDataTest2);
+        when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
@@ -827,7 +994,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         // when
@@ -846,8 +1013,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
 
-        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
-        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
         MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
 
         String manifest1Uuid = UUID.randomUUID().toString();
@@ -864,13 +1031,12 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
+
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
 
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
 
         // when
         armBatchProcessResponseFiles.batchProcessResponseFiles();
@@ -885,7 +1051,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -895,8 +1061,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         // given
         HearingEntity hearing = dartsDatabase.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", HEARING_DATE);
 
-        OffsetDateTime startTime = OffsetDateTime.parse("2023-06-10T13:00:00Z");
-        OffsetDateTime endTime = OffsetDateTime.parse("2023-06-10T13:45:00Z");
+        OffsetDateTime startTime = OffsetDateTime.parse(T_13_00_00_Z);
+        OffsetDateTime endTime = OffsetDateTime.parse(T_13_45_00_Z);
         MediaEntity media1 = createMediaEntity(hearing, startTime, endTime, 1);
 
         String manifest1Uuid = UUID.randomUUID().toString();
@@ -909,14 +1075,11 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod1.setManifestFile(manifestFile1);
         dartsDatabase.save(armEod1);
 
-        String continuationToken = null;
-        String prefix = "DARTS";
-        when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenThrow(new AzureException());
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenThrow(new AzureException());
 
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
-
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
 
         // when
         armBatchProcessResponseFiles.batchProcessResponseFiles();
@@ -931,7 +1094,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(prefix, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -1013,7 +1176,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    void batchProcessResponseFiles_ForBatchSizeMinusOne() throws IOException {
+    void batchProcessResponseFiles_ForBatchSizeMinusOne() {
         // given
         when(armDataManagementConfiguration.getBatchSize()).thenReturn(-1);
 
