@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
@@ -62,6 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
@@ -124,6 +127,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final ApplyRetentionProcessor applyRetentionProcessor;
 
+    private final ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
+
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
     private final CloseOldCasesProcessor closeOldCasesProcessor;
@@ -145,6 +150,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addUnstructuredToArmTaskRegistrar(taskRegistrar);
         addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
         addApplyRetentionToTaskRegistrar(taskRegistrar);
+        addCaseObjectApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
         addCloseOldCasesTaskRegistrar(taskRegistrar);
 
@@ -224,6 +230,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
             case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcessArmResponseFilesAutomatedTask();
             case APPLY_RETENTION_TASK_NAME -> rescheduleApplyRetentionAutomatedTask();
+            case APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME -> rescheduleCaseObjectApplyRetentionAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
             case CLOSE_OLD_CASES_TASK_NAME -> rescheduleCloseOldCasesAutomatedTask();
 
@@ -416,6 +423,20 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         applyRetentionAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(applyRetentionAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(applyRetentionAutomatedTask);
         taskRegistrar.addTriggerTask(applyRetentionAutomatedTask, trigger);
+    }
+
+    private void addCaseObjectApplyRetentionToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var applyRetentionCaseAssociatedObjectsAutomatedTask = new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            applyRetentionCaseAssociatedObjectsProcessor
+        );
+        applyRetentionCaseAssociatedObjectsAutomatedTask.setLastCronExpression(
+            getAutomatedTaskCronExpression(applyRetentionCaseAssociatedObjectsAutomatedTask)
+        );
+        Trigger trigger = createAutomatedTaskTrigger(applyRetentionCaseAssociatedObjectsAutomatedTask);
+        taskRegistrar.addTriggerTask(applyRetentionCaseAssociatedObjectsAutomatedTask, trigger);
     }
 
     private void addCleanupArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
@@ -625,6 +646,22 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(applyRetentionAutomatedTask);
             taskScheduler.schedule(applyRetentionAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleCaseObjectApplyRetentionAutomatedTask() {
+        var triggerAndAutomatedTask = getTriggerAndAutomatedTask(APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var applyRetentionCaseAssociatedObjectsAutomatedTask = new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                applyRetentionCaseAssociatedObjectsProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(applyRetentionCaseAssociatedObjectsAutomatedTask);
+            taskScheduler.schedule(applyRetentionCaseAssociatedObjectsAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
