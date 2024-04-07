@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -20,8 +21,8 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final
 
+    private final ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
     private final boolean UPDATE_RETENTION = true;
 
     @Override
@@ -30,7 +31,7 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
             externalObjectDirectoryRepository.findAllByExternalLocationTypeAndUpdateRetention(EodHelper.armLocation(), UPDATE_RETENTION);
 
         for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
-
+            armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectory.getId());
         }
     }
 
