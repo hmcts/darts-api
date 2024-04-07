@@ -23,12 +23,12 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     private final ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
-    private final boolean UPDATE_RETENTION = true;
 
     @Override
     public void calculateEventDates() {
+        boolean updateRetention = true;
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities =
-            externalObjectDirectoryRepository.findAllByExternalLocationTypeAndUpdateRetention(EodHelper.armLocation(), UPDATE_RETENTION);
+            externalObjectDirectoryRepository.findAllByExternalLocationTypeAndUpdateRetention(EodHelper.armLocation(), updateRetention);
 
         for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
             armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectory.getId());
