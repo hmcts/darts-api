@@ -109,11 +109,9 @@ class AuthorisationServiceTest extends IntegrationBase {
         Set<Permission> judgePermissions = judgeRole.getPermissions();
         assertEquals(12, judgePermissions.size());
         assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionId(5)
                                                  .permissionName("READ_JUDGES_NOTES")
                                                  .build()));
         assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionId(11)
                                                  .permissionName("UPLOAD_JUDGES_NOTES")
                                                  .build()));
     }
@@ -131,7 +129,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         Set<Permission> approverPermissions = approverRole.getPermissions();
         assertEquals(11, approverPermissions.size());
         assertTrue(approverPermissions.contains(Permission.builder()
-                                                    .permissionId(2)
                                                     .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                                                     .build()));
 
@@ -140,7 +137,6 @@ class AuthorisationServiceTest extends IntegrationBase {
         Set<Permission> requesterPermissions = requesterRole.getPermissions();
         assertEquals(10, requesterPermissions.size());
         assertFalse(requesterPermissions.contains(Permission.builder()
-                                                      .permissionId(2)
                                                       .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                                                       .build()));
     }

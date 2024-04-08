@@ -20,11 +20,9 @@ class RoleTest {
             .roleName(APPROVER.toString())
             .permissions(Set.of(
                 Permission.builder()
-                    .permissionId(2)
                     .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                     .build(),
                 Permission.builder()
-                    .permissionId(4)
                     .permissionName("LISTEN_TO_AUDIO_FOR_PLAYBACK")
                     .build()
             ))
