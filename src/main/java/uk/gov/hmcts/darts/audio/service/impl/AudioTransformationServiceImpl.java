@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -27,7 +28,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -93,6 +93,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final ExternalObjectDirectoryService eodService;
 
     private final DataManagementApi dataManagementApi;
     private final NotificationApi notificationApi;
@@ -207,9 +208,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 mediaRequestEntity
             );
 
-            boolean hasAllMediaBeenCopiedFromInboundStorage = checkAllMediaExistsInTwoStorageLocations(filteredMediaEntities,
-                                                                                          ExternalLocationTypeEnum.INBOUND,
-                                                                                          ExternalLocationTypeEnum.UNSTRUCTURED);
+            boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
+
             if (!hasAllMediaBeenCopiedFromInboundStorage) {
                 mediaRequestService.updateAudioRequestStatus(requestId, OPEN);
                 return;
@@ -310,24 +310,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         } catch (FileNotDownloadedException e) {
             throw new RuntimeException("Retrieval from storage failed for MediaId " + mediaEntity.getId(), e);
         }
-    }
-
-    private boolean checkAllMediaExistsInTwoStorageLocations(List<MediaEntity> mediaEntities,
-                                                             ExternalLocationTypeEnum location1,
-                                                             ExternalLocationTypeEnum location2) {
-
-        return mediaEntities.stream()
-            .allMatch(mediaEntity -> existsMediaInTwoStorageLocation(mediaEntity, location1, location2));
-    }
-
-    private boolean existsMediaInTwoStorageLocation(MediaEntity mediaEntity,
-                                                                   ExternalLocationTypeEnum location1,
-                                                                   ExternalLocationTypeEnum location2) {
-
-        ExternalLocationTypeEntity firstLocationEntity = externalLocationTypeRepository.getReferenceById(location1.getId());
-        ExternalLocationTypeEntity secondLocationEntity = externalLocationTypeRepository.getReferenceById(location2.getId());
-
-        return externalObjectDirectoryRepository.existsMediaFileIn2StorageLocations(mediaEntity, firstLocationEntity, secondLocationEntity);
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")

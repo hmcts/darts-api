@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.usermanagement.service;
 
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPostRequest;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
@@ -13,7 +13,7 @@ public interface SecurityGroupService {
 
     SecurityGroupWithIdAndRoleAndUsers getSecurityGroup(Integer securityGroupId);
 
-    SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroup);
+    SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroupPostRequest securityGroup);
 
     SecurityGroupEntity createAndSaveSecurityGroup(SecurityGroupModel securityGroupModel);
 

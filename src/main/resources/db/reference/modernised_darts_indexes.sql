@@ -5,7 +5,8 @@
 -- v2 additional indexes to accommodate initial access to driving site table
 -- adding storage clauses to all indexes
 -- v3 remove indexes on hea_id and cas_id from transcription
-
+-- v4 amend a number of the indexes on character columns to be case-insenstive upper() function based
+--
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -181,13 +182,13 @@ CREATE INDEX rpt_lst_mod_by_fk  ON RETENTION_POLICY_TYPE(last_modified_by) TABLE
 
 
 --v2 
-CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number) TABLESPACE darts_indexes;
-CREATE INDEX cth_cn_idx         ON COURTHOUSE(courthouse_name) TABLESPACE darts_indexes;  
-CREATE INDEX ctr_cn_idx         ON COURTROOM(courtroom_name) TABLESPACE darts_indexes;
-CREATE INDEX dfc_dn_idx         ON DEFENCE(defence_name) TABLESPACE darts_indexes;
-CREATE INDEX dfd_dn_idx         ON DEFENDANT(defendant_name) TABLESPACE darts_indexes;
-CREATE INDEX hea_hd_idx         ON HEARING(hearing_date) TABLESPACE darts_indexes;
-CREATE INDEX jud_jn_idx         ON JUDGE(judge_name) TABLESPACE darts_indexes;
-CREATE INDEX prn_pn_idx         ON PROSECUTOR(prosecutor_name) TABLESPACE darts_indexes;
-CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name) TABLESPACE darts_indexes;
+CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)            TABLESPACE darts_indexes;
+CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name)) TABLESPACE darts_indexes;  
+CREATE INDEX ctr_cn_idx         ON COURTROOM(UPPER(courtroom_name))   TABLESPACE darts_indexes;
+CREATE INDEX dfc_dn_idx         ON DEFENCE(UPPER(defence_name))       TABLESPACE darts_indexes;
+CREATE INDEX dfd_dn_idx         ON DEFENDANT(UPPER(defendant_name))   TABLESPACE darts_indexes;
+CREATE INDEX hea_hd_idx         ON HEARING(hearing_date)              TABLESPACE darts_indexes;
+CREATE INDEX jud_jn_idx         ON JUDGE(UPPER(judge_name))           TABLESPACE darts_indexes;
+CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name)) TABLESPACE darts_indexes;
+CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name)            TABLESPACE darts_indexes;
 
