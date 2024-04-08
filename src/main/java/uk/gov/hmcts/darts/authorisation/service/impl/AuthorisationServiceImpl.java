@@ -128,6 +128,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             Integer permissionId = result.permissionId();
             if (permissionId != null) {
                 permissions.add(Permission.builder()
+                                    .permissionId(permissionId)
                                     .permissionName(result.permissionName())
                                     .build());
             }

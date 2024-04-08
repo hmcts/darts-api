@@ -9,6 +9,8 @@ import lombok.Value;
 public class Permission {
 
     @NonNull
+    private Integer permissionId;
+    @NonNull
     private String permissionName;
 
 }
