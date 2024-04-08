@@ -33,6 +33,7 @@ public class DailyListMapper {
         dailyListEntity.setListingCourthouse(listingCourthouse);
         dailyListEntity.setSource(postRequest.getSourceSystem());
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
+        dailyListEntity.setMessageId(postRequest.getMessageId());
         updateDailyListEntity(dailyListEntity, postRequest.getDailyListJson(), listingCourthouse);
     }
 

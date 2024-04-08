@@ -6,7 +6,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPostRequest;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
@@ -20,7 +20,10 @@ public interface SecurityGroupMapper {
     })
     SecurityGroupEntity mapToSecurityGroupEntity(SecurityGroupModel securityGroupModel);
 
-    SecurityGroupModel mapToSecurityGroupModel(SecurityGroup securityGroup);
+    @Mappings({
+        @Mapping(source = "securityRoleId", target = "roleId"),
+    })
+    SecurityGroupModel mapToSecurityGroupModel(SecurityGroupPostRequest securityGroupPostRequest);
 
     @Mappings({
         @Mapping(source = "groupName", target = "name"),

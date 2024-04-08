@@ -22,8 +22,10 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -48,6 +50,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -56,11 +59,14 @@ class AudioServiceImplTest {
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
     public static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     private static final String DUMMY_FILE_CONTENT = "DUMMY FILE CONTENT";
+    private static final String DUMMY_FILE_CONTENT_EMPTY = "";
 
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Captor
     ArgumentCaptor<InputStream> inboundBlobStorageArgumentCaptor;
+    @Captor
+    ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityArgumentCaptor;
     @Mock
     private AudioTransformationService audioTransformationService;
     @Mock
@@ -169,6 +175,54 @@ class AudioServiceImplTest {
     }
 
     @Test
+    void addAudioWillNotSaveBlobToDataStoreWhenAudioFileIsEmpty() {
+        // Given
+        HearingEntity hearingEntity = new HearingEntity();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(hearingEntity);
+
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom("SWANSEA", "1"))
+            .thenReturn(courtroomEntity);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
+
+        ObjectRecordStatusEntity failedStatus = new ObjectRecordStatusEntity();
+        failedStatus.setId(4);
+        when(objectRecordStatusRepository.getReferenceById(any())).thenReturn(failedStatus);
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "addAudio",
+            "audio_sample.mp2",
+            "audio/mpeg",
+            DUMMY_FILE_CONTENT_EMPTY.getBytes()
+        );
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+
+        // When
+        audioService.addAudio(audioFile, addAudioMetadataRequest);
+
+        // Then
+        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
+        assertEquals(null, externalObjectDirectoryEntity.getExternalLocation());
+        assertEquals(null, externalObjectDirectoryEntity.getChecksum());
+        assertEquals(FAILURE_FILE_NOT_FOUND.getId(), externalObjectDirectoryEntity.getStatus().getId());
+    }
+
+    @Test
     void handheldAudioShouldNotLinkAudioToHearingByEvent() {
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
@@ -259,6 +313,7 @@ class AudioServiceImplTest {
         addAudioMetadataRequest.courthouse("SWANSEA");
         addAudioMetadataRequest.courtroom("1");
         addAudioMetadataRequest.cases(List.of("1", "2", "3"));
+        addAudioMetadataRequest.setFileSize((long) DUMMY_FILE_CONTENT.length());
         return addAudioMetadataRequest;
     }
 
