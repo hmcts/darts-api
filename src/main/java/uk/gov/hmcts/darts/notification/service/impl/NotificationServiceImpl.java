@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Service
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
@@ -49,23 +48,31 @@ public class NotificationServiceImpl implements NotificationService {
     private final TemplateIdHelper templateIdHelper;
     private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final LogApi logApi;
+    private final boolean notificationsEnabled;
+    private final boolean atsMode;
+    private final int maxRetry;
 
-    @Value("${darts.notification.disabled}")
-    private boolean notificationDisabled;
+    public NotificationServiceImpl(
+        NotificationRepository notificationRepo,
+        CaseRepository caseRepository,
+        GovNotifyService govNotifyService,
+        TemplateIdHelper templateIdHelper,
+        GovNotifyRequestHelper govNotifyRequestHelper,
+        LogApi logApi,
+        @Value("${darts.notification.enabled}") boolean notificationsEnabled,
+        @Value("${darts.automated-tasks-pod}") boolean atsMode,
+        @Value("${darts.notification.max_retry_attempts}") int maxRetry) {
 
-    @Value("${darts.notification.max_retry_attempts}")
-    private int maxRetry;
-
-    public NotificationServiceImpl(NotificationRepository notificationRepo, CaseRepository caseRepository, GovNotifyService govNotifyService,
-                                   TemplateIdHelper templateIdHelper, GovNotifyRequestHelper govNotifyRequestHelper, LogApi logApi) {
         this.notificationRepo = notificationRepo;
         this.caseRepository = caseRepository;
         this.govNotifyService = govNotifyService;
         this.templateIdHelper = templateIdHelper;
         this.govNotifyRequestHelper = govNotifyRequestHelper;
         this.logApi = logApi;
+        this.notificationsEnabled = notificationsEnabled;
+        this.atsMode = atsMode;
+        this.maxRetry = maxRetry;
     }
-
 
     @Override
     @Transactional
@@ -140,7 +147,7 @@ public class NotificationServiceImpl implements NotificationService {
         lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
-        if (!notificationDisabled) {
+        if (notificationsEnabled && !atsMode) {
             sendNotificationToGovNotifyNow();
         }
     }
