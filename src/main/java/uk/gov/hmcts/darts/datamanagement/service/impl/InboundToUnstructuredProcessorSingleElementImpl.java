@@ -105,8 +105,8 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                          unstructuredExternalObjectDirectoryEntity.getId(), timeElapsed);
             }
         } catch (BlobStorageException e) {
-            log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
-                      getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId()
+            log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}. Error Stack {}",
+                      getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId(), e.toString()
             );
             unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
             setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
