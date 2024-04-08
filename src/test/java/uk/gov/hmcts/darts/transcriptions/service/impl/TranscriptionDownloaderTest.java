@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionDownloaderTest {
@@ -78,7 +78,7 @@ class TranscriptionDownloaderTest {
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(random.nextInt()))
             .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+            .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
 
         verifyNoInteractions(dataManagementFacade);
     }
@@ -90,7 +90,7 @@ class TranscriptionDownloaderTest {
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
             .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+            .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
 
         verifyNoInteractions(dataManagementFacade);
     }
@@ -107,7 +107,7 @@ class TranscriptionDownloaderTest {
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
             .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+            .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
 
         verify(dataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);
@@ -127,7 +127,7 @@ class TranscriptionDownloaderTest {
 
         assertThatThrownBy(() -> transcriptionDownloader.downloadTranscript(transcription.getId()))
             .isExactlyInstanceOf(DartsApiException.class)
-            .hasFieldOrPropertyWithValue("error", FAILED_TO_DOWNLOAD_TRANSCRIPT);
+            .hasFieldOrPropertyWithValue("error", TRANSCRIPTION_NOT_FOUND);
 
         verify(dataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
         verifyNoMoreInteractions(dataManagementFacade, fileBasedDownloadResponseMetaData);

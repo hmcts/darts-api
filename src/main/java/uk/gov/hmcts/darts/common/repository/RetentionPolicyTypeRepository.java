@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPolicyTypeEntity, Integer> {
@@ -20,5 +21,11 @@ public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPo
         """
     )
     List<RetentionPolicyTypeEntity> findCurrentWithFixedPolicyKey(String fixedPolicyKey, OffsetDateTime currentTime);
+
+    Optional<RetentionPolicyTypeEntity> findFirstByFixedPolicyKeyOrderByPolicyStartDesc(String fixedPolicyKey);
+
+    Optional<RetentionPolicyTypeEntity> findFirstByPolicyNameAndFixedPolicyKeyNot(String policyName, String excludingFixedPolicyKey);
+
+    Optional<RetentionPolicyTypeEntity> findFirstByDisplayNameAndFixedPolicyKeyNot(String displayName, String excludingFixedPolicyKey);
 
 }

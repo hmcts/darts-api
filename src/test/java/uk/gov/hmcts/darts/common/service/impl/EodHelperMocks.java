@@ -31,6 +31,7 @@ public class EodHelperMocks {
     @Mock private ObjectRecordStatusEntity armDropZoneStatus;
     @Mock private ObjectRecordStatusEntity failedArmRawDataStatus;
     @Mock private ObjectRecordStatusEntity failedArmManifestFileStatus;
+    @Mock private ObjectRecordStatusEntity awaitingVerificationStatus;
 
     private MockedStatic<EodHelper> mockedEodHelper;
     private AutoCloseable closeable;
@@ -39,6 +40,17 @@ public class EodHelperMocks {
         mockEodHelper();
     }
 
+    /**
+     * Please note.
+     * When mocking an EOD to return a certain location or status entity use the form
+     * <pre>
+     * doReturn(armLocation()).when(eod).getExternalLocationType();
+     * </pre>
+     * rather than the classic form
+     * <pre>
+     * when(eod.getExternalLocationType()).thenReturn(armLocation())
+     * </pre>
+     */
     public final void mockEodHelper() {
         closeable = MockitoAnnotations.openMocks(this);
 
@@ -78,6 +90,9 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::failedArmManifestFileStatus).thenReturn(failedArmManifestFileStatus);
         lenient().when(failedArmManifestFileStatus.getId()).thenReturn(ObjectRecordStatusEnum.ARM_MANIFEST_FAILED.getId());
         lenient().when(failedArmManifestFileStatus.getDescription()).thenReturn("Arm Manifest Failed");
+        mockedEodHelper.when(EodHelper::awaitingVerificationStatus).thenReturn(awaitingVerificationStatus);
+        lenient().when(awaitingVerificationStatus.getId()).thenReturn(ObjectRecordStatusEnum.AWAITING_VERIFICATION.getId());
+        lenient().when(awaitingVerificationStatus.getDescription()).thenReturn("Awaiting Verification");
     }
 
     public void givenIsEqualLocationReturns(boolean result) {

@@ -105,6 +105,7 @@ public class CommonTestDataUtil {
 
     public CourthouseEntity createCourthouse(String name) {
         CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setId(1001);
         courthouse.setCourthouseName(name);
         return courthouse;
     }

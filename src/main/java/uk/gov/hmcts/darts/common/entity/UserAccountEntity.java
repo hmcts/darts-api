@@ -34,7 +34,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "dm_user_s_object_id", length = 16)
     private String dmObjectId;
 
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "user_name")
     private String userName;
 
     @Column(name = "user_full_name")

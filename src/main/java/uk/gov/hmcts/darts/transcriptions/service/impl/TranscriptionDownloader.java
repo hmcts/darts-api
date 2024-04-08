@@ -19,7 +19,7 @@ import java.io.IOException;
 
 import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
@@ -34,12 +34,12 @@ public class TranscriptionDownloader {
 
     public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
         var userAccountEntity = getUserAccount();
-        var transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
+        var transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
         var latestTranscriptionDocument = transcriptionEntity.getTranscriptionDocumentEntities()
             .stream()
             .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
-            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
+            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
         auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
@@ -62,7 +62,7 @@ public class TranscriptionDownloader {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",
                       latestTranscriptionDocument.getId(),
                       e);
-            throw new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT);
+            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND);
         }
     }
 

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -22,9 +24,13 @@ import uk.gov.hmcts.darts.common.util.TestUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PARTIALLY_PROCESSED;
@@ -45,6 +51,9 @@ class DailyListUpdaterTest {
     private CurrentTimeHelper currentTimeHelper;
 
     private DailyListUpdater dailyListUpdater;
+
+    @Captor
+    private ArgumentCaptor<HearingEntity> hearingEntityCaptor;
 
     LocalDate today = LocalDate.now();
 
@@ -69,6 +78,7 @@ class DailyListUpdaterTest {
         dailyListUpdater.processDailyList(dailyList);
 
         verifyNoInteractions(retrieveCoreObjectService);
+
         assertThat(dailyList.getStatus()).isEqualTo(PARTIALLY_PROCESSED);
     }
 
@@ -76,6 +86,8 @@ class DailyListUpdaterTest {
     void handlesCaseNumberForCpp() throws IOException {
 
         var dailyListUser = new UserAccountEntity();
+        OffsetDateTime testTime = OffsetDateTime.of(2024, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
         when(systemUserHelper.getDailyListProcessorUser()).thenReturn(dailyListUser);
         when(courthouseRepository.findByCourthouseNameIgnoreCase("SWANSEA")).thenReturn(Optional.of(new CourthouseEntity()));
         HearingEntity hearing = new HearingEntity();
@@ -83,9 +95,14 @@ class DailyListUpdaterTest {
         hearing.setCourtCase(courtCase);
         when(retrieveCoreObjectService.retrieveOrCreateHearing("SWANSEA", "1A", "42GD2391421", today, dailyListUser))
             .thenReturn(hearing);
-
         DailyListEntity dailyList = setUpDailyList("dailyList.json");
         dailyListUpdater.processDailyList(dailyList);
+
+        verify(hearingRepository, times(1)).saveAndFlush(hearingEntityCaptor.capture());
+
+        HearingEntity hearingEntityCaptorValue = hearingEntityCaptor.getValue();
+        assertThat(hearingEntityCaptorValue.getLastModifiedDateTime()).isEqualTo(testTime);
+        assertThat(hearingEntityCaptorValue.getCourtCase().getLastModifiedDateTime()).isEqualTo(testTime);
 
         assertThat(dailyList.getStatus()).isEqualTo(PROCESSED);
     }

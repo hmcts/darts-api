@@ -18,10 +18,14 @@ paths:
       operationId: getUsers
       parameters:
         - in: query
-          name: courthouse_id
+          name: user_ids
           required: false
+          style: form
+          explode: false
           schema:
-            $ref: "#/components/schemas/CourthouseId"
+            type: array
+            items:
+              $ref: '#/components/schemas/UserId'
         - in: header
           name: Email-Address
           required: false
@@ -323,7 +327,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SecurityGroup'
+            $ref: '#/components/schemas/SecurityGroupPostRequest'
     SecurityGroupPatchRequest:
       required: true
       content:
@@ -602,8 +606,6 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
-        security_role_id:
-          $ref: '#/components/schemas/RoleId'
         global_access:
           $ref: '#/components/schemas/SecurityGroupGlobalAccess'
         display_state:
@@ -618,6 +620,9 @@ components:
             $ref: '#/components/schemas/UserId'
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
+    SecurityGroupPostRequest:
+      allOf:
+        - $ref: '#/components/schemas/SecurityGroup'
     SecurityGroup:
       type: object
       properties:
@@ -627,9 +632,12 @@ components:
           $ref: '#/components/schemas/SecurityGroupDisplayName'
         description:
           $ref: '#/components/schemas/SecurityGroupDescription'
+        security_role_id:
+          $ref: '#/components/schemas/RoleId'
       required:
         - name
         - display_name
+        - security_role_id
     SecurityGroupPatch:
       type: object
       properties:
@@ -658,7 +666,9 @@ components:
         - "USER_MANAGEMENT_103"
         - "USER_MANAGEMENT_104"
         - "USER_MANAGEMENT_105"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
+        - "USER_MANAGEMENT_106"
+        - "USER_MANAGEMENT_107"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED, SECURITY_GROUP_NOT_ALLOWED, DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED ]
 
     UserManagementTitleErrors:
       type: string
@@ -669,7 +679,9 @@ components:
         - "The provided security group does not exist"
         - "The provided courthouse does not exist"
         - "Duplicate security group names are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
+        - "A Security Group of this type is not allowed to be created"
+        - "Duplicate security group display name are not permitted"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED, SECURITY_GROUP_NOT_ALLOWED, DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED ]
 
 
     Role:

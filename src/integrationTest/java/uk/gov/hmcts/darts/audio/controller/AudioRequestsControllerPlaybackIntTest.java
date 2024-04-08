@@ -10,12 +10,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
-import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -74,6 +74,9 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private AuditRepository auditRepository;
+
     @BeforeEach
     void setUp() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -116,13 +119,13 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
 
-        AuditSearchQuery searchQuery = new AuditSearchQuery();
-        searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
-        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
-        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
-        searchQuery.setAuditActivityId(PLAYBACK_AUDIT_ACTIVITY_ID);
+        Integer courtCaseId = mediaRequestEntity.getHearing().getCourtCase().getId();
+        OffsetDateTime fromDate = OffsetDateTime.now().minusDays(1);
+        OffsetDateTime toDate = OffsetDateTime.now().plusDays(1);
+        List<AuditEntity> auditEntities = auditRepository.getAuditEntitiesByCaseAndActivityForDateRange(courtCaseId,
+                                                                                                        PLAYBACK_AUDIT_ACTIVITY_ID,
+                                                                                                        fromDate, toDate);
 
-        List<AuditEntity> auditEntities = auditService.search(searchQuery);
         assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
         assertEquals(1, auditEntities.size());
     }

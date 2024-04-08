@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.10.0")
+    classpath("org.flywaydb:flyway-database-postgresql:10.11.0")
   }
 }
 
@@ -17,13 +17,13 @@ plugins {
   id 'org.sonarqube' version '4.4.1.3373'
   id "io.freefair.lombok" version "8.6"
   id "org.openapi.generator" version "7.4.0"
-  id "org.flywaydb.flyway" version "10.10.0"
+  id "org.flywaydb.flyway" version "10.11.0"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "2.1.1"
 }
 
 jacoco {
-  toolVersion = "0.8.11"
+  toolVersion = "0.8.12"
   reportsDirectory.set(layout.buildDirectory.dir("jacocoHtml"))
 }
 
@@ -360,12 +360,12 @@ dependencies {
   implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.4.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.5.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.1'
   implementation 'org.springframework.retry:spring-retry:2.0.5'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.12.0'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.12.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.13.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.13.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.4'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -381,8 +381,8 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.10.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.10.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.11.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.11.0'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.7.3'
 
   //database

@@ -41,6 +41,9 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     public static final String EVH_ID = "evh_id";
     public static final String CAS_ID = "cas_id";
     public static final String TABLE_NAME = "court_case";
+    public static final String IS_RETENTION_UPDATED = "is_retention_updated";
+    public static final String RETENTION_RETRIES = "retention_retries";
+    public static final String IS_DELETED = "is_deleted";
 
     @Id
     @Column(name = CAS_ID)
@@ -74,6 +77,12 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = CASE_CLOSED_TS)
     private OffsetDateTime caseClosedTimestamp;
 
+    @Column(name = IS_RETENTION_UPDATED)
+    private boolean isRetentionUpdated;
+
+    @Column(name = RETENTION_RETRIES)
+    private Integer retentionRetries;
+
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefendantEntity> defendantList = new ArrayList<>();
 
@@ -85,6 +94,16 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = VERSION_LABEL, length = 32)
     private String legacyVersionLabel;
+
+    @Column(name = IS_DELETED)
+    private boolean isDeleted;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTimestamp;
 
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();

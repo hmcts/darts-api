@@ -50,9 +50,9 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
 
     public void aMediaEntityGraph() {
 
-        var inboundExternalLocationTypeEnum = ExternalLocationTypeEnum.INBOUND;
-        var unstructuredExternalLocationTypeEnum = ExternalLocationTypeEnum.UNSTRUCTURED;
-        var objectRecordStatusEnum = ObjectRecordStatusEnum.STORED;
+        var inboundLocation = ExternalLocationTypeEnum.INBOUND;
+        var unstructuredLocation = ExternalLocationTypeEnum.UNSTRUCTURED;
+        var storedStatus = ObjectRecordStatusEnum.STORED;
 
         for (int channelNumber = 1; channelNumber <= 4; channelNumber++) {
 
@@ -94,65 +94,65 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             var inboundExternalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity,
-                    objectRecordStatusEnum,
-                    inboundExternalLocationTypeEnum,
+                    storedStatus,
+                    inboundLocation,
                     UUID.randomUUID()
                 );
             var inboundExternalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity2,
-                    objectRecordStatusEnum,
-                    inboundExternalLocationTypeEnum,
+                    storedStatus,
+                    inboundLocation,
                     UUID.randomUUID()
                 );
             var inboundExternalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity3,
-                    objectRecordStatusEnum,
-                    inboundExternalLocationTypeEnum,
+                    storedStatus,
+                    inboundLocation,
                     UUID.randomUUID()
                 );
             var inboundExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity4,
-                    objectRecordStatusEnum,
-                    inboundExternalLocationTypeEnum,
+                    storedStatus,
+                    inboundLocation,
                     UUID.randomUUID()
                 );
             var inboundExternalObjectDirectoryEntity5 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity5,
-                    objectRecordStatusEnum,
-                    inboundExternalLocationTypeEnum,
+                    storedStatus,
+                    inboundLocation,
                     UUID.randomUUID()
                 );
             var unstructuredExternalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity,
-                    objectRecordStatusEnum,
-                    unstructuredExternalLocationTypeEnum,
+                    storedStatus,
+                    unstructuredLocation,
                     UUID.randomUUID()
                 );
             var unstructuredExternalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity2,
-                    objectRecordStatusEnum,
-                    unstructuredExternalLocationTypeEnum,
+                    storedStatus,
+                    unstructuredLocation,
                     UUID.randomUUID()
                 );
             var unstructuredExternalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity3,
-                    objectRecordStatusEnum,
-                    unstructuredExternalLocationTypeEnum,
+                    storedStatus,
+                    unstructuredLocation,
                     UUID.randomUUID()
                 );
 
             var unstructuredExternalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity4,
-                    objectRecordStatusEnum,
-                    unstructuredExternalLocationTypeEnum,
+                    storedStatus,
+                    unstructuredLocation,
                     UUID.randomUUID()
                 );
 
