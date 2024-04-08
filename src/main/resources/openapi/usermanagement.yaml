@@ -18,10 +18,14 @@ paths:
       operationId: getUsers
       parameters:
         - in: query
-          name: courthouse_id
+          name: user_ids
           required: false
+          style: form
+          explode: false
           schema:
-            $ref: "#/components/schemas/CourthouseId"
+            type: array
+            items:
+              $ref: '#/components/schemas/UserId'
         - in: header
           name: Email-Address
           required: false
