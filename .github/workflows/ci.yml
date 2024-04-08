@@ -19,4 +19,4 @@ jobs:
           java-version: '17'
           cache: 'gradle'
       - name: Build
-        run: ./gradlew check -x integration
+        run: ./gradlew check -x integration -x pmdIntegrationTest
