@@ -4,7 +4,6 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
@@ -120,12 +119,10 @@ public class DataManagementServiceImpl implements DataManagementService {
             log.error("Blob {} does not exist in {} container", sourceBlobId, sourceContainer);
         }
 
-        BlobContainerClient destinationContainerClient = new BlobContainerClientBuilder()
-            .connectionString(dataManagementConfiguration.getBlobStorageAccountConnectionString())
-            .buildClient();
+        var uniqueBlobId = UUID.randomUUID();
+        BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, sourceServiceClient);
 
         log.info("COPYING BLOB from {} ", blobClient.getBlobUrl());
-        var uniqueBlobId = UUID.randomUUID();
         destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(blobClient.getBlobUrl());
     }
 
