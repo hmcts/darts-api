@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -165,6 +167,47 @@ class AutomatedTaskServiceImplTest {
         automatedTaskService.reloadTaskByName("ApplyRetention");
 
         verify(taskScheduler).schedule(automatedTask, trigger);
+    }
+
+    @Test
+    void reloadByTaskNameDailyListHouseKeeping() {
+        ScheduledTask scheduledTask = mock(ScheduledTask.class);
+        Set<ScheduledTask> scheduledTaskList = new HashSet<>();
+        scheduledTaskList.add(scheduledTask);
+
+        var automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public String getTaskName() {
+                return "DailyListHousekeeping";
+            }
+        };
+        Trigger trigger = triggerContext -> null;
+        TriggerTask task = new TriggerTask(automatedTask, trigger);
+        when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
+        when(scheduledTask.getTask()).thenReturn(task);
+
+        automatedTaskService.reloadTaskByName("DailyListHousekeeping");
+
+        verify(taskScheduler).schedule(automatedTask, trigger);
+    }
+
+    @Test
+    void createsNewTaskOnReloadWhenNonExists() {
+        when(scheduledTaskHolder.getScheduledTasks()).thenReturn(new HashSet<>());
+        automatedTaskService.reloadTaskByName("DailyListHousekeeping");
+
+        verify(taskScheduler).schedule(any(DailyListAutomatedTask.class), any(Trigger.class));
     }
 
 

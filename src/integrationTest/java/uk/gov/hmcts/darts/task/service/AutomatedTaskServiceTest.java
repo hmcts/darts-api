@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
@@ -99,6 +101,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private CloseOldCasesProcessor closeOldCasesProcessor;
+
+    @Autowired
+    private DailyListService dailyListService;
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
@@ -742,6 +747,50 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 closeOldCasesProcessor
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+    }
+
+    @Test
+    void canUpdatedCronForDailyListHouseKeepingTask() {
+        var automatedTask = new DailyListAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                dailyListService
+            );
+        var originalAutomatedTaskEntity = automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        var updatedAutomatedTaskEntity = automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void canCancelDailyListAutomatedTask() {
+        AutomatedTask automatedTask =
+            new DailyListAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                dailyListService
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
