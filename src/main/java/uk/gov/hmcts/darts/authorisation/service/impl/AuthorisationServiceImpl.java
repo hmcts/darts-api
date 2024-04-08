@@ -70,8 +70,6 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             SecurityGroupEntity_.courthouseEntities,
             JoinType.LEFT
         );
-        List<CourthouseEntity> courthouseEntities = courthouseRepository.findAll();
-        List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
 
         Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
             SecurityGroupEntity_.securityRoleEntity,
