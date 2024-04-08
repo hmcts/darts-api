@@ -4,6 +4,7 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
@@ -114,14 +115,18 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, sourceServiceClient);
 
         log.info("FETCHING BLOB {}", sourceBlobId);
-        BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
+        if (!blobClient.exists()) {
+            log.error("Blob {} does not exist in {} container", sourceBlobId, sourceContainer);
+        }
 
+        BlobContainerClient destinationContainerClient = new BlobContainerClientBuilder()
+            .connectionString(dataManagementConfiguration.getBlobStorageAccountConnectionString())
+            .buildClient();
 
-        BlobContainerClient destinationContainerClient =
-            blobServiceFactory.getBlobContainerClient(destinationContainer, sourceServiceClient);
-
-        log.info("COPYING BLOB {}", sourceBlobId);
-        destinationContainerClient.getBlobClient(sourceBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl());
+        log.info("COPYING BLOB from {} ", blobClient.getBlobUrl());
+        var uniqueBlobId = UUID.randomUUID();
+        destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(blobClient.getBlobUrl());
     }
 
     private ParallelTransferOptions createCommonTransferOptions() {
