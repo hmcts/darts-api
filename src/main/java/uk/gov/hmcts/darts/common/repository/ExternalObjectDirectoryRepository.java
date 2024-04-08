@@ -309,9 +309,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     @Query(
         """
             SELECT eod FROM ExternalObjectDirectoryEntity eod
-            WHERE eod.status = :status and
-            eod.manifestFile = :manifestFile
-            order by eod.lastModifiedDateTime
+            WHERE eod.status = :status 
+            AND eod.manifestFile = :manifestFile
+            ORDER BY eod.lastModifiedDateTime
             """
     )
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);

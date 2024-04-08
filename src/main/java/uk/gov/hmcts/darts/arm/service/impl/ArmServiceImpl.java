@@ -42,7 +42,7 @@ public class ArmServiceImpl implements ArmService {
 
     private static final String FILE_PATH_DELIMITER = "/";
     private static final long TIMEOUT = 60;
-    public static final String DEFAULT_CONTINUATION_TOKEN_DURATION = "PT60M";
+    private static final String DEFAULT_CONTINUATION_TOKEN_DURATION = "PT60M";
 
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;

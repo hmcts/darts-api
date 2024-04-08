@@ -15,7 +15,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 public class BatchUploadFileFilenameProcessor {
 
     private static final int NUMBER_OF_TOKENS = 5;
-    public static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
     private String batchMetadataFilenameAndPath;
     private String batchMetadataFilename;
     private String prefix;
