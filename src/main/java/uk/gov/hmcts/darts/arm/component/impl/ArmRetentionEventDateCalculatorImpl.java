@@ -2,9 +2,11 @@ package uk.gov.hmcts.darts.arm.component.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -35,11 +37,17 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(100);
                 if (!armRetentionDate.equals(externalObjectDirectory.getEventDateTs())) {
-                    armDataManagementApi.updateMetadata(String.valueOf(externalObjectDirectoryId), armRetentionDate);
-                    externalObjectDirectory.setEventDateTs(armRetentionDate);
-                    externalObjectDirectory.setUpdateRetention(false);
-                    externalObjectDirectory.setLastModifiedBy(userAccount);
-                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                    UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
+                        String.valueOf(externalObjectDirectoryId), armRetentionDate);
+                    if (!updateMetadataResponse.isError()) {
+                        externalObjectDirectory.setEventDateTs(armRetentionDate);
+                        externalObjectDirectory.setUpdateRetention(false);
+                        externalObjectDirectory.setLastModifiedBy(userAccount);
+                        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                    } else {
+                        log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
+                                  externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
+                    }
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
