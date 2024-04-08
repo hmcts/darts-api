@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class UserQuerySpecifications {
 
@@ -23,7 +24,7 @@ public class UserQuerySpecifications {
     }
 
     public static Specification<UserAccountEntity> isInIds(List<Integer> userIds) {
-        if (userIds == null || userIds.isEmpty()) {
+        if (isEmpty(userIds)) {
             return null;
         }
         return (root, query, builder) -> root.get(UserAccountEntity_.id).in(userIds);
