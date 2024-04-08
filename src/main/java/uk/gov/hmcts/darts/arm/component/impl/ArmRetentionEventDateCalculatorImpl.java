@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.time.OffsetDateTime;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Objects.nonNull;
 
 @Component
@@ -35,8 +36,9 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
             OffsetDateTime retentionDate = getObjectRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
-                OffsetDateTime armRetentionDate = retentionDate.minusYears(100);
-                if (!armRetentionDate.equals(externalObjectDirectory.getEventDateTs())) {
+                OffsetDateTime armRetentionDate = retentionDate.minusDays(100);
+                if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) != 0) {
+                    log.debug("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
                         String.valueOf(externalObjectDirectoryId), armRetentionDate);
                     if (!updateMetadataResponse.isError()) {
@@ -48,6 +50,10 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                         log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
                                   externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
                     }
+                } else {
+                    externalObjectDirectory.setUpdateRetention(false);
+                    externalObjectDirectory.setLastModifiedBy(userAccount);
+                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
