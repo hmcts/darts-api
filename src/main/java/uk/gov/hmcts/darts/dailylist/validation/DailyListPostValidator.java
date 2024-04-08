@@ -18,8 +18,7 @@ public class DailyListPostValidator {
                 || request.getHearingDate() == null
                 || StringUtils.isBlank(request.getUniqueId())
                 || request.getPublishedDateTime() == null
-                // Will uncomment when gateway is ready
-                //  || request.getMessageId() == null
+                || request.getMessageId() == null
                 || StringUtils.isBlank(request.getSourceSystem())) {
                 throw new DartsApiException(DailyListError.XML_EXTRA_PARAMETERS_MISSING);
             }
