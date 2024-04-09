@@ -36,7 +36,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
             String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
             log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordFile.getAbsolutePath());
             try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
-                printWriter.print(archiveRecordOperation);
+                printWriter.println(archiveRecordOperation);
                 printWriter.println(uploadNewFileRecord);
                 generatedArchiveRecord = true;
             }
@@ -54,7 +54,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                         String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
                         String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
                         log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordsFile.getAbsolutePath());
-                        printWriter.print(archiveRecordOperation);
+                        printWriter.println(archiveRecordOperation);
                         printWriter.println(uploadNewFileRecord);
                     } catch (Exception e) {
                         log.error("Unable to write archive record for EOD {} to ARM file {}",
