@@ -129,7 +129,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final CloseOldCasesProcessor closeOldCasesProcessor;
 
     private final DailyListService dailyListService;
-	
+
     private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
     @Override
@@ -682,7 +682,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
     }
-	
+
     private void rescheduleArmRetentionEventDateCalculatorAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {

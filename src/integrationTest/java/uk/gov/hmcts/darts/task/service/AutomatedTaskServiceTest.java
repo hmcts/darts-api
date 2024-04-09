@@ -106,7 +106,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private DailyListService dailyListService;
-	
+
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
@@ -813,7 +813,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
-	
+
     @Test
     void givenConfiguredTasksUpdateCronAndResetCronForArmRetentionEventDateCalculatorAutomatedTask() {
         AutomatedTask automatedTask =
