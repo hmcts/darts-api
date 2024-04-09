@@ -8,6 +8,8 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
@@ -114,18 +117,25 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         log.info("FETCHING BLOB {}", sourceBlobId);
         BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, serviceClient);
-        BlobClient sourceBlob = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
+        BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
 
-        if (!sourceBlob.exists()) {
+        if (!sourceBlobClient.exists()) {
             log.error("Blob {} does not exist in {} container", sourceBlobId, sourceContainer);
         }
 
-        BlobClient destinationBlob = blobServiceFactory
-            .getBlobContainerClient(destinationContainer, serviceClient)
-            .getBlobClient(sourceBlobId.toString());
+        // create sas token with write permission
+        var expiryTime = OffsetDateTime.now().plusDays(1);
+        var permission = new BlobSasPermission().setWritePermission(true);
+        var sasSignatureValues = new BlobServiceSasSignatureValues(expiryTime, permission);
+        var sasToken = sourceBlobClient.generateSas(sasSignatureValues);
 
-        log.info("COPYING BLOB from {} ", sourceBlob.getBlobUrl());
-        destinationBlob.getBlockBlobClient().uploadFromUrl(sourceBlob.getBlobUrl());
+        // create dest blob
+        var uniqueBlobId = UUID.randomUUID();
+        BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, serviceClient);
+
+        log.info("COPYING BLOB from {} ", sourceBlobClient.getBlobUrl());
+        destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl() + "?" + sasToken);
+
     }
 
     private ParallelTransferOptions createCommonTransferOptions() {
