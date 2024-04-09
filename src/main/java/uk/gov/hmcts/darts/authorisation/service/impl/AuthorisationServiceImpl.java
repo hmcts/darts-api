@@ -32,7 +32,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
-import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.HashSet;
@@ -53,7 +52,6 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     private final CourthouseRepository courthouseRepository;
     private final UserAccountRepository userAccountRepository;
     private final UserIdentity userIdentity;
-    private final SecurityGroupRepository securityGroupRepository;
 
     @Override
     public Optional<UserState> getAuthorisation(String emailAddress) {
@@ -150,11 +148,6 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                                     .permissionName(result.permissionName())
                                     .build());
             }
-            List<CourthouseEntity> courthouseEntities = courthouseRepository.findAll();
-            for (CourthouseEntity courthouseEntity: courthouseEntities) {
-                log.info("courthouseEntity.getCourthouseName()" + courthouseEntity.getCourthouseName());
-            }
-
             Integer courthouseId = result.courthouseId();
             if (courthouseId != null) {
                 courthouses.add(Courthouse.builder().courthouseId(courthouseId).build());
