@@ -133,7 +133,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         var uniqueBlobId = UUID.randomUUID();
         BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, serviceClient);
 
-        log.info("COPYING BLOB from {} ", sourceBlobClient.getBlobUrl());
+        log.info("COPYING BLOB from {} ", sourceBlobClient.getBlobUrl() + "?" + sasToken);
         destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl() + "?" + sasToken);
 
     }
