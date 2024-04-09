@@ -121,8 +121,9 @@ public class DataManagementServiceImpl implements DataManagementService {
             log.info("Blob {} present in {} container", sourceBlobId, sourceContainer);
         }
 
+        BlobServiceClient targetServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
         var uniqueBlobId = UUID.randomUUID();
-        BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, sourceServiceClient);
+        BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, targetServiceClient);
 
         log.info("COPYING BLOB from {} ", blobClient.getBlobUrl());
         destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(blobClient.getBlobUrl());
