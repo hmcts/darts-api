@@ -226,7 +226,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case APPLY_RETENTION -> rescheduleApplyRetentionAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
             case CLOSE_OLD_CASES -> rescheduleCloseOldCasesAutomatedTask();
-
             case DAILY_LIST_HOUSEKEEPING_TASK_NAME -> rescheduleDailyListHousekeepingAutomatedTask();
             case BATCH_PROCESS_ARM_RESPONSE_FILES -> rescheduleBatchProcessArmResponseFilesAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
