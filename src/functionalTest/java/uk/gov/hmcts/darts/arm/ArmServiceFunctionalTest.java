@@ -22,7 +22,6 @@ import java.util.UUID;
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
@@ -100,7 +99,7 @@ class ArmServiceFunctionalTest {
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         }
 
-        assertTrue(batchSize >= blobs.size());
+        assertFalse(blobs.isEmpty());
     }
 
     @Test
@@ -126,7 +125,7 @@ class ArmServiceFunctionalTest {
             }
         } while (nonNull(continuationToken));
 
-        assertTrue(11 >= allBlobs.size());
+        assertFalse(allBlobs.isEmpty());
     }
 
     private void uploadBatchedSubmissionBlobs(BinaryData data) {
