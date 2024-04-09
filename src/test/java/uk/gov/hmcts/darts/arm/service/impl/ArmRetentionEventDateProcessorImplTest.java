@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,15 +45,13 @@ class ArmRetentionEventDateProcessorImplTest {
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
 
-    private MediaEntity media;
-
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
 
     @BeforeEach
     void setupData() {
 
-        media = new MediaEntity();
+        MediaEntity media = new MediaEntity();
         media.setId(123);
         media.setRetainUntilTs(MEDIA_RETENTION_DATE_TIME);
 
@@ -82,6 +81,24 @@ class ArmRetentionEventDateProcessorImplTest {
         // then
         verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true);
         verify(armRetentionEventDateCalculator).calculateRetentionEventDate(TEST_EXTERNAL_OBJECT_DIRECTORY_ID);
+
+        verifyNoMoreInteractions(
+            externalObjectDirectoryRepository,
+            armRetentionEventDateCalculator
+        );
+    }
+
+    @Test
+    void calculateEventDates_NoRowsToProcess() {
+        // given
+        List<ExternalObjectDirectoryEntity> eods = new ArrayList<>();
+        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(armLocation(), true)).thenReturn(eods);
+
+        // when
+        armRetentionEventDateProcessor.calculateEventDates();
+
+        // then
+        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndUpdateRetention(armLocation(), true);
 
         verifyNoMoreInteractions(
             externalObjectDirectoryRepository,
