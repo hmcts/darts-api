@@ -117,6 +117,8 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobClient blobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
         if (!blobClient.exists()) {
             log.error("Blob {} does not exist in {} container", sourceBlobId, sourceContainer);
+        } else {
+            log.info("Blob {} present in {} container", sourceBlobId, sourceContainer);
         }
 
         var uniqueBlobId = UUID.randomUUID();
