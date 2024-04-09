@@ -19,7 +19,9 @@ public enum AutomatedTaskName {
     APPLY_RETENTION("ApplyRetention"),
     CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),
     CLOSE_OLD_CASES("CloseOldCases"),
-    DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping");
+
+    DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping"),
+    BATCH_PROCESS_ARM_RESPONSE_FILES("BatchProcessArmResponseFiles");
 
     private final String taskName;
 

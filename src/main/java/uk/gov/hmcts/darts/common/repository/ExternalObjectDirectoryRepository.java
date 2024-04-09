@@ -185,8 +185,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     boolean existsMediaFileIn2StorageLocations(MediaEntity media,
-                                                  ExternalLocationTypeEntity location1,
-                                                  ExternalLocationTypeEntity location2);
+                                               ExternalLocationTypeEntity location1,
+                                               ExternalLocationTypeEntity location2);
 
     @Query(
         """
@@ -246,10 +246,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             set eod.status = :newStatus,
             eod.lastModifiedBy = :userAccount,
             eod.lastModifiedDateTime = :timestamp
-            where eod.id in :idsToDelete
+            where eod.id in :idsToUpdate
             """
     )
-    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
+    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
     @Query(
         """
@@ -305,4 +305,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                     ExternalLocationTypeEntity inboundLocation,
                                                     ObjectRecordStatusEntity ignoredUnstructuredStatus,
                                                     List<ExternalLocationTypeEntity> destinationLocations);
+													
+													
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
 }

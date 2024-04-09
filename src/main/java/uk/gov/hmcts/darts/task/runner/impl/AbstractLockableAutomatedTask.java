@@ -15,12 +15,12 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
+import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.validation.constraints.NotNull;
 
 
 @Slf4j
@@ -65,10 +65,16 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
             Optional<AutomatedTaskEntity> automatedTaskEntity = automatedTaskRepository.findByTaskName(getTaskName());
             if (automatedTaskEntity.isPresent()) {
-                String dbCronExpression = automatedTaskEntity.get().getCronExpression();
+                AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
+                String dbCronExpression = automatedTask.getCronExpression();
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
                 if (getLastCronExpression().equals(dbCronExpression)) {
-                    lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());
+                    if (automatedTask.getTaskEnabled()) {
+                        lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());
+                    } else {
+                        setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
+                        log.warn("Not running task {} now as it has been disabled", getTaskName());
+                    }
                 } else {
                     setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
                     log.warn("Not running task {} now as cron expression has been changed in the database from '{}' to '{}'",
@@ -142,7 +148,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
         log.info("Task : {} finished running at: {}", getTaskName(), LocalDateTime.now());
-        log.debug("Task : {} time elapsed: {} ms",getTaskName(), timeElapsed);
+        log.debug("Task : {} time elapsed: {} ms", getTaskName(), timeElapsed);
     }
 
     class LockedTask implements Runnable {
