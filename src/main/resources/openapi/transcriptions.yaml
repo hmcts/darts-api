@@ -721,6 +721,34 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /admin/transcriptions/search:
+    post:
+      tags:
+        - Transcription
+      summary: |-
+        Search for transcriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranscriptionSearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranscriptionSearchResponse'
+        # todo
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '409':
+          description: Resource already exists.
+        '500':
+          description: Internal Server Error
 components:
   schemas:
     TranscriptionStatus:
@@ -735,6 +763,66 @@ components:
         display_name:
           type: string
           example: "Requested"
+    TranscriptionSearchRequest:
+      type: object
+      properties:
+        transcription_id:
+          type: integer
+          example: 1234
+        case_number:
+          type: string
+          example: C123
+        courthouse_display_name:
+          type: string
+          example: some_courthouse
+        hearing_date:
+          type: string
+          format: date
+          example: '2023-07-31'
+        owner:
+          type: string
+          example: 'some-user-name'
+        requested_by:
+          type: string
+          example: 'some-user-name'
+        requested_at_from:
+          type: string
+          format: date
+          example: '2023-07-31'
+        requested_at_to:
+          type: string
+          format: date
+          example: '2023-07-31'
+        is_manual_transcription:
+          type: boolean
+          example: true
+    TranscriptionSearchResponse:
+      type: object
+      properties:
+        transcription_id:
+          type: integer
+          example: 1234
+        case_number:
+          type: string
+          example: C123
+        courthouse_id:
+          type: integer
+          example: 1
+        hearing_date:
+          type: string
+          format: date
+          example: '2023-07-31'
+        requested_at:
+          type: string
+          format: date-time
+          example: '2023-07-31T14:32:24.000Z'
+        transcription_status_id:
+          type: integer
+          example: 1
+        is_manual_transcription:
+          type: boolean
+          example: true
+
     TranscriptionRequestDetails:
       type: object
       required:

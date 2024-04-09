@@ -422,6 +422,8 @@ dependencies {
   testImplementation 'io.github.hakky54:logcaptor:2.9.2'
   testImplementation 'org.testcontainers:testcontainers:1.19.7'
 
+  implementation 'org.openjdk.jol:jol-core:0.17'
+
   compileJava.dependsOn = openApiGenerateTaskList
 }
 

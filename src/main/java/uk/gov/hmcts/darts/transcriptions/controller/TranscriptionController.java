@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -57,7 +59,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;
     private final AuthorisationUnitOfWork authorisation;
-
+    private final AdminTranscriptionSearchService adminTranscriptionSearchService;
     private final Validator<TranscriptionRequestDetails> transcriptionRequestDetailsValidator;
 
     @Override
@@ -196,6 +198,7 @@ public class TranscriptionController implements TranscriptionApi {
         return ResponseEntity.ok(transcriptionService.getTranscriptionTranscriberCounts(userId));
     }
 
+
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(
         contextId = ANY_ENTITY_ID,
@@ -205,4 +208,11 @@ public class TranscriptionController implements TranscriptionApi {
         return ResponseEntity.ok(transcriptionService.getTranscriptionStatuses());
     }
 
+    @Override
+    public ResponseEntity<List<TranscriptionSearchResponse>> adminTranscriptionsSearchPost(TranscriptionSearchRequest transcriptionSearchRequest) {
+        return new ResponseEntity<>(
+            adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest),
+            HttpStatus.OK
+        );
+    }
 }

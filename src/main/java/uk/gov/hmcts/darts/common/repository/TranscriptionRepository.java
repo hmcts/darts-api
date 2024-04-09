@@ -1,17 +1,20 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
+import uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public interface TranscriptionRepository extends JpaRepository<TranscriptionEntity, Integer> {
+public interface TranscriptionRepository extends JpaRepository<TranscriptionEntity, Integer>, JpaSpecificationExecutor<TranscriptionEntity> {
 
     @Query(value = """
         SELECT *
@@ -75,4 +78,39 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
     );
 
     List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
+
+    @Query("""
+            SELECT new uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult(
+                t.id,
+                cc.caseNumber,
+                cth.id,
+                h.hearingDate,
+                t.createdDateTime,
+                ts.id,
+                t.isManualTranscription)
+            FROM TranscriptionEntity t
+            JOIN t.hearings h
+            JOIN h.courtCase cc
+            JOIN h.courtroom cr
+            JOIN cr.courthouse cth
+            JOIN t.transcriptionStatus ts
+            JOIN t.createdBy ua
+            WHERE (:ids IS NULL OR t.id IN :ids)
+                AND (:caseNumber IS NULL OR :caseNumber = cc.caseNumber)
+                AND (cth.displayName LIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
+                AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = h.hearingDate)
+                AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
+                AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
+                AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
+                AND (ua.userFullName LIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+           """)
+    List<TranscriptionSearchResult> searchFilteringOn(
+        List<Integer> ids,
+        String caseNumber,
+        String courthouseDisplayNamePattern,
+        LocalDate hearingDate,
+        OffsetDateTime createdFrom,
+        OffsetDateTime createdTo,
+        Boolean isManual,
+        String requestedBy);
 }
