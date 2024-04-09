@@ -6,12 +6,12 @@ import uk.gov.hmcts.darts.arm.service.ArmBatchProcessResponseFiles;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_PROCESS_ARM_RESPONSE_FILES;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 
 @Slf4j
 public class BatchProcessArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask {
 
-    protected String taskName = BATCH_PROCESS_ARM_RESPONSE_FILES.getTaskName();
+    private String taskName = BATCH_PROCESS_ARM_RESPONSE_FILES_TASK_NAME.getTaskName();
 
     private final ArmBatchProcessResponseFiles armBatchProcessResponseFiles;
 

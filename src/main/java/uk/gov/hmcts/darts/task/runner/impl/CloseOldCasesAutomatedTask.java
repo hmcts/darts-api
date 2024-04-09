@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.cases.service.CloseOldCasesProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 
 @Slf4j
 public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask {
@@ -23,7 +23,7 @@ public class CloseOldCasesAutomatedTask extends AbstractLockableAutomatedTask {
 
     @Override
     public String getTaskName() {
-        return CLOSE_OLD_CASES.getTaskName();
+        return CLOSE_OLD_CASES_TASK_NAME.getTaskName();
     }
 
     @Override

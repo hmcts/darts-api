@@ -6,16 +6,17 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
 
 @Slf4j
 public class ApplyRetentionAutomatedTask extends AbstractLockableAutomatedTask {
 
-    protected String taskName = APPLY_RETENTION.getTaskName();
+    protected String taskName = APPLY_RETENTION_TASK_NAME.getTaskName();
     ApplyRetentionProcessor applyRetentionProcessor;
 
     public ApplyRetentionAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-        AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, ApplyRetentionProcessor applyRetentionProcessor) {
+                                       AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                       ApplyRetentionProcessor applyRetentionProcessor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.applyRetentionProcessor = applyRetentionProcessor;
     }

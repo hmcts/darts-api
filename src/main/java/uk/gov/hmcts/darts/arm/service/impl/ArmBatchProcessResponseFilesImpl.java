@@ -71,7 +71,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponseFiles {
 
-    public static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
+    private static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementApi armDataManagementApi;
     private final FileOperationService fileOperationService;
@@ -272,7 +272,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                 log.error("Unable to write create record file to temporary workspace {} - {}", createRecordFilenameProcessor.getCreateRecordFilename(),
                           e.getMessage());
             } catch (Exception e) {
-                log.error("Unable to process arm response create record file {} - {}", createRecordFilenameProcessor.getCreateRecordFilename(), e.getMessage());
+                log.error("Unable to process arm response create record file {}", createRecordFilenameProcessor.getCreateRecordFilename(), e);
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
@@ -288,7 +288,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                 BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFileFilenameProcessor.getUploadFileFilename());
                 readUploadFile(uploadFileBinary, uploadFileFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
+                log.error("Unable to process upload file {}", uploadFileFilenameProcessor.getUploadFileFilename(), e);
             }
         }
     }
@@ -320,7 +320,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
             } catch (IOException e) {
                 log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
             } catch (Exception e) {
-                log.error("Unable to process arm response upload file {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
+                log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilename(), e);
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
@@ -462,10 +462,10 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
             try {
                 uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
             } catch (JsonMappingException e) {
-                log.error("Unable to map the upload record file input field");
+                log.error("Unable to map the upload record file input field - {}", e.getMessage());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
             } catch (JsonProcessingException e) {
-                log.error("Unable to parse the upload record file ");
+                log.error("Unable to parse the upload record file - {}", e.getMessage());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
             }
         } else {
@@ -505,7 +505,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                 BinaryData invalidLineFileBinary = armDataManagementApi.getBlobData(invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
                 readInvalidLineFile(invalidLineFileBinary, invalidLineFileFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process ARM invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                log.error("Unable to process ARM invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e);
             }
         }
     }
@@ -538,8 +538,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                           invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
 
             } catch (Exception e) {
-                log.error("Unable to process ARM response invalid line file {} - {}",
-                          invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
+                log.error("Unable to process ARM response invalid line file {}",
+                          invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e);
 
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);

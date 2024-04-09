@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDa
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
 
 @Slf4j
 public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutomatedTask {
@@ -18,7 +18,7 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
     private final ExternalOutboundDataStoreDeleter outboundDeleter;
 
 
-    protected String taskName = EXTERNAL_DATASTORE_DELETER.getTaskName();
+    protected String taskName = EXTERNAL_DATASTORE_DELETER_TASK_NAME.getTaskName();
 
     public ExternalDataStoreDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                                  AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
