@@ -126,7 +126,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final CloseOldCasesProcessor closeOldCasesProcessor;
 
     private final DailyListService dailyListService;
-	
+
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         log.info("Automated tasks are loading");
@@ -142,7 +142,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
         addCloseOldCasesTaskRegistrar(taskRegistrar);
-
         addDailyListHouseKeepingToTaskRegistrar(taskRegistrar);
     }
 
@@ -430,16 +429,16 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         closeOldCasesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(closeOldCasesAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(closeOldCasesAutomatedTask);
         taskRegistrar.addTriggerTask(closeOldCasesAutomatedTask, trigger);
+    }
+
     private void addDailyListHouseKeepingToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         DailyListAutomatedTask dailyListTask = new DailyListAutomatedTask(automatedTaskRepository,
-                                                                                     lockProvider,
-                                                                                     automatedTaskConfigurationProperties,
-                                                                                     dailyListService);
+                                                                          lockProvider,
+                                                                          automatedTaskConfigurationProperties,
+                                                                          dailyListService);
         dailyListTask.setLastCronExpression(getAutomatedTaskCronExpression(dailyListTask));
         Trigger trigger = createAutomatedTaskTrigger(dailyListTask);
         taskRegistrar.addTriggerTask(dailyListTask, trigger);
-    }
-	
     }
 
 
@@ -661,7 +660,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
     }
-	
+
     private TriggerAndAutomatedTask getTriggerAndAutomatedTask(String taskName) {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
