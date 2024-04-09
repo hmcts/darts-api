@@ -10,6 +10,4 @@ public interface DailyListService {
     PostDailyListResponse updateDailyListInDatabase(DailyListPatchRequest patchRequest);
 
     void runHouseKeeping();
-
-    void runHouseKeepingNow();
 }

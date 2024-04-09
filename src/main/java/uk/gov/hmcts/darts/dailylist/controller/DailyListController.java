@@ -115,7 +115,7 @@ public class DailyListController implements DailyListsApi {
     }
 
     public ResponseEntity<Void> dailylistsHousekeepingPost() {
-        dailyListService.runHouseKeepingNow();
+        dailyListService.runHouseKeeping();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
