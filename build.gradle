@@ -19,7 +19,7 @@ plugins {
   id "org.openapi.generator" version "7.4.0"
   id "org.flywaydb.flyway" version "10.11.0"
   id 'maven-publish'
-  id("com.dorongold.task-tree") version "2.1.1"
+  id("com.dorongold.task-tree") version "3.0.0"
 }
 
 jacoco {
