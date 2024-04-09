@@ -13,7 +13,6 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.service.ArmBatchProcessResponseFiles;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
@@ -128,8 +127,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final DailyListService dailyListService;
 	
-    private final ArmBatchProcessResponseFiles armBatchProcessResponseFiles;
-
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         log.info("Automated tasks are loading");
@@ -394,7 +391,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            armBatchProcessResponseFiles
+            armResponseFilesProcessor
         );
         processArmResponseFilesTask.setLastCronExpression(getAutomatedTaskCronExpression(processArmResponseFilesTask));
         Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
@@ -588,7 +585,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
+                armResponseFilesProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
             taskScheduler.schedule(processArmResponseFilesTask, trigger);

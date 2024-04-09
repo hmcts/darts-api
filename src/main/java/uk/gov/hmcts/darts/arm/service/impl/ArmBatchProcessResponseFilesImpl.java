@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -20,7 +21,6 @@ import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseCreateRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
-import uk.gov.hmcts.darts.arm.service.ArmBatchProcessResponseFiles;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.util.files.BatchUploadFileFilenameProcessor;
@@ -59,7 +59,6 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_INVALID_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_RESPONSE_SUCCESS_STATUS_CODE;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_UPLOAD_FILE_FILENAME_KEY;
-import static uk.gov.hmcts.darts.arm.util.ArmConstants.ArmBatching.PROCESS_SINGLE_RECORD_BATCH_SIZE;
 import static uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper.generateSuffix;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
@@ -69,7 +68,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponseFiles {
+@ConditionalOnExpression("${darts.storage.arm.batch-size} > 0")
+public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcessor {
 
     private static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -79,7 +79,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     private final ObjectMapper objectMapper;
     private final UserIdentity userIdentity;
     private final CurrentTimeHelper currentTimeHelper;
-    private final ArmResponseFilesProcessor armResponseFilesProcessor;
     private final ExternalObjectDirectoryService externalObjectDirectoryService;
     private final MediaRepository mediaRepository;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
@@ -88,19 +87,10 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     private UserAccountEntity userAccount;
 
     @Override
-    public void batchProcessResponseFiles() {
+    public void processResponseFiles() {
         userAccount = userIdentity.getUserAccount();
         Integer batchSize = armDataManagementConfiguration.getBatchSize();
-        if (PROCESS_SINGLE_RECORD_BATCH_SIZE.equals(batchSize)) {
-            armResponseFilesProcessor.processResponseFiles();
-        } else if (batchSize > PROCESS_SINGLE_RECORD_BATCH_SIZE) {
-            batchProcessResponseFilesFromAzure();
-        } else {
-            log.warn("Invalid batch size {}. Unable to process ARM pull responses");
-        }
-    }
 
-    private void batchProcessResponseFilesFromAzure() {
         ContinuationTokenBlobs continuationTokenBlobs = null;
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
 
@@ -190,7 +180,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
                     processUploadResponseFiles(responseFilenames.getUploadFileResponses(), armBatchResponses);
                     processInvalidFiles(responseFilenames.getInvalidLineResponses(), armBatchResponses);
                     //Process the final results
-                    processResponseFiles(armBatchResponses);
+                    processBatchResponseFiles(armBatchResponses);
                 }
             }
         } catch (Exception e) {
@@ -198,7 +188,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
         }
     }
 
-    private void processResponseFiles(ArmBatchResponses armBatchResponses) {
+    private void processBatchResponseFiles(ArmBatchResponses armBatchResponses) {
         armBatchResponses.getArmBatchResponses().values().forEach(
             armResponseBatchData -> {
                 if (nonNull(armResponseBatchData.getInvalidLineFileFilenameProcessor())

@@ -60,8 +60,7 @@ class ArmBatchProcessResponseFilesImplTest {
     private UserIdentity userIdentity;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
-    @Mock
-    private ArmResponseFilesProcessor armResponseFilesProcessor;
+
     @Mock
     private ExternalObjectDirectoryService externalObjectDirectoryService;
     @Mock
@@ -84,7 +83,7 @@ class ArmBatchProcessResponseFilesImplTest {
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
 
 
-    private ArmBatchProcessResponseFiles armBatchProcessResponseFiles;
+    private ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
 
     @BeforeEach
     void setupData() {
@@ -111,7 +110,6 @@ class ArmBatchProcessResponseFilesImplTest {
             objectMapper,
             userIdentity,
             currentTimeHelper,
-            armResponseFilesProcessor,
             externalObjectDirectoryService,
             mediaRepository,
             transcriptionDocumentRepository,
@@ -119,25 +117,6 @@ class ArmBatchProcessResponseFilesImplTest {
             caseDocumentRepository
         );
 
-    }
-
-    @Test
-    void batchProcessResponseFilesWithBatchSizeZero() {
-        // given
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(0);
-
-        // when
-        armBatchProcessResponseFiles.batchProcessResponseFiles();
-
-        // then
-        verify(armResponseFilesProcessor).processResponseFiles();
-
-        verifyNoMoreInteractions(
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            externalObjectDirectoryRepository,
-            armResponseFilesProcessor
-        );
     }
 
     @Test
@@ -160,7 +139,7 @@ class ArmBatchProcessResponseFilesImplTest {
             .thenReturn(inboundList);
 
         // when
-        armBatchProcessResponseFiles.batchProcessResponseFiles();
+        armBatchProcessResponseFiles.processResponseFiles();
 
         // then
         verify(objectRecordStatusRepository).findById(ARM_DROP_ZONE.getId());
@@ -172,8 +151,7 @@ class ArmBatchProcessResponseFilesImplTest {
         verifyNoMoreInteractions(
             objectRecordStatusRepository,
             externalLocationTypeRepository,
-            externalObjectDirectoryRepository,
-            armResponseFilesProcessor
+            externalObjectDirectoryRepository
         );
     }
 }

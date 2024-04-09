@@ -11,7 +11,6 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
-import uk.gov.hmcts.darts.arm.service.ArmBatchProcessResponseFiles;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
@@ -106,8 +105,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private DailyListService dailyListService;
 	
-    @Autowired
-    private ArmBatchProcessResponseFiles armBatchProcessResponseFiles;
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
@@ -604,7 +601,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
+                armResponseFilesProcessor
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -635,7 +632,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
+                armResponseFilesProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

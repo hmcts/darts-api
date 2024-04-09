@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
@@ -17,6 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnExpression("${darts.storage.arm.batch-size} == 0")
 public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
