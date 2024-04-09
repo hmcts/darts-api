@@ -1,12 +1,9 @@
 package uk.gov.hmcts.darts.dailylist.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -33,7 +30,6 @@ public class DailyListServiceImpl implements DailyListService {
 
     private final DailyListRepository dailyListRepository;
     private final DailyListMapper dailyListMapper;
-    private final ObjectMapper objectMapper;
     private final UserIdentity userIdentity;
 
     @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
@@ -120,17 +116,9 @@ public class DailyListServiceImpl implements DailyListService {
         return postDailyListResponse;
     }
 
-    @Override
-    @SchedulerLock(name = "DailyListService_Housekeeping",
-        lockAtLeastFor = "PT20S", lockAtMostFor = "PT5M")
-    @Scheduled(cron = "${darts.daily-list.housekeeping.cron}")
-    public void runHouseKeeping() {
-        runHouseKeepingNow();
-    }
-
     @Transactional
     @Override
-    public void runHouseKeepingNow() {
+    public void runHouseKeeping() {
         if (housekeepingEnabled) {
             LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
             log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
