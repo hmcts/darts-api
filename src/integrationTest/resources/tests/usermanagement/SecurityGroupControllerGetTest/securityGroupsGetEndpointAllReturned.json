@@ -1,5 +1,6 @@
 [
   {
+    "user_ids":[],
     "id": -17,
     "security_role_id": 10,
     "global_access": true,
@@ -8,6 +9,7 @@
     "name": "Mid Tier Group"
   },
   {
+    "user_ids":[],
     "id": -16,
     "security_role_id": 9,
     "global_access": true,
@@ -16,6 +18,7 @@
     "name": "Dar Pc Group"
   },
   {
+    "user_ids":[],
     "id": -15,
     "security_role_id": 8,
     "global_access": true,
@@ -24,6 +27,7 @@
     "name": "Cpp Group"
   },
   {
+    "user_ids":[],
     "id": -14,
     "security_role_id": 7,
     "global_access": true,
@@ -32,6 +36,7 @@
     "name": "Xhibit Group"
   },
   {
+    "user_ids":[],
     "id": -6,
     "security_role_id": 6,
     "global_access": true,
@@ -40,6 +45,7 @@
     "name": "Test RCJ Appeals"
   },
   {
+    "user_ids":[],
     "id": -5,
     "security_role_id": 5,
     "global_access": true,
@@ -48,6 +54,7 @@
     "name": "Test Language Shop"
   },
   {
+    "user_ids":[],
     "id": -4,
     "security_role_id": 4,
     "global_access": false,
@@ -56,6 +63,7 @@
     "name": "Test Transcriber"
   },
   {
+    "user_ids":[],
     "id": -3,
     "security_role_id": 3,
     "global_access": false,
@@ -64,6 +72,7 @@
     "name": "Test Judge"
   },
   {
+    "user_ids":[],
     "id": -2,
     "security_role_id": 2,
     "global_access": false,
@@ -72,6 +81,7 @@
     "name": "Test Requestor"
   },
   {
+    "user_ids":[],
     "id": -1,
     "security_role_id": 1,
     "global_access": false,
@@ -80,6 +90,7 @@
     "name": "Test Approver"
   },
   {
+    "user_ids":[],
     "id": 1,
     "security_role_id": 11,
     "global_access": true,
@@ -89,6 +100,7 @@
     "display_name": "Super Admin"
   },
   {
+    "user_ids":[],
     "id": 2,
     "security_role_id": 12,
     "global_access": true,
