@@ -99,12 +99,11 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             }
 
             if (dailyLists.size() > 1) {
-                dailyLists.subList(1, dailyLists.size())
-                    .forEach(dl -> {
-                        dailyLists.get(0).setStatus(JobStatusType.IGNORED);
-                        dl.setStatus(JobStatusType.IGNORED);
-                        report.registerResult(JobStatusType.IGNORED);
-                    });
+                List<DailyListEntity> dailyListsToBeIgnored = dailyLists.subList(1, dailyLists.size());
+                for (DailyListEntity dailyList : dailyListsToBeIgnored) {
+                    dailyList.setStatus(JobStatusType.IGNORED);
+                    report.registerResult(JobStatusType.IGNORED);
+                }
             }
             dailyListRepository.saveAll(dailyLists);
         }
