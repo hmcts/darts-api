@@ -30,7 +30,6 @@ import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.BatchProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
@@ -605,7 +604,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armResponseFilesProcessor
+                armBatchProcessResponseFiles
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -636,7 +635,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armResponseFilesProcessor
+                armBatchProcessResponseFiles
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -810,96 +809,5 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-    }
-	
-    @Test
-    void givenConfiguredTasksUpdateCronAndResetCronForBatchProcessArmResponseFilesAutomatedTask() {
-        AutomatedTask automatedTask =
-            new BatchProcessArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
-            );
-
-        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-
-        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-                 updatedAutomatedTaskEntity.get().getCronExpression()
-        );
-        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
-        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
-
-        automatedTaskService.updateAutomatedTaskCronExpression(
-            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-
-        assertEquals(AutomatedTaskStatus.NOT_STARTED, automatedTask.getAutomatedTaskStatus());
-    }
-
-    @Test
-    void givenConfiguredTaskCancelBatchProcessArmResponseFilesAutomatedTask() {
-        AutomatedTask automatedTask =
-            new BatchProcessArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
-            );
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        boolean mayInterruptIfRunning = false;
-        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
-            automatedTask.getTaskName(),
-            mayInterruptIfRunning
-        );
-        assertTrue(taskCancelled);
-
-        log.info("About to reload task {}", automatedTask.getTaskName());
-        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
-
-    }
-
-    @Test
-    void givenConfiguredTasksDisableBatchProcessArmResponseFilesAutomatedTask() {
-        AutomatedTask automatedTask =
-            new BatchProcessArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
-            );
-
-        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-
-        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
-
-        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
-        displayTasks(scheduledTasks);
-
-        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
-            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
-        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
-                 updatedAutomatedTaskEntity.get().getCronExpression()
-        );
-        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
-        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
-
-        automatedTaskService.updateAutomatedTaskCronExpression(
-            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
-
-        assertEquals(AutomatedTaskStatus.NOT_STARTED, automatedTask.getAutomatedTaskStatus());
     }
 }

@@ -37,7 +37,6 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
-import uk.gov.hmcts.darts.task.runner.impl.BatchProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
@@ -63,7 +62,6 @@ import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
@@ -149,7 +147,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addCloseOldCasesTaskRegistrar(taskRegistrar);
 
         addDailyListHouseKeepingToTaskRegistrar(taskRegistrar);
-        addBatchProcessArmResponseFilesTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -227,7 +224,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
             case CLOSE_OLD_CASES_TASK_NAME -> rescheduleCloseOldCasesAutomatedTask();
             case DAILY_LIST_HOUSEKEEPING_TASK_NAME -> rescheduleDailyListHousekeepingAutomatedTask();
-            case BATCH_PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleBatchProcessArmResponseFilesAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -398,7 +394,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            armResponseFilesProcessor
+            armBatchProcessResponseFiles
         );
         processArmResponseFilesTask.setLastCronExpression(getAutomatedTaskCronExpression(processArmResponseFilesTask));
         Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
@@ -437,8 +433,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         closeOldCasesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(closeOldCasesAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(closeOldCasesAutomatedTask);
         taskRegistrar.addTriggerTask(closeOldCasesAutomatedTask, trigger);
-    }
-
     private void addDailyListHouseKeepingToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         DailyListAutomatedTask dailyListTask = new DailyListAutomatedTask(automatedTaskRepository,
                                                                                      lockProvider,
@@ -449,16 +443,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(dailyListTask, trigger);
     }
 	
-    private void addBatchProcessArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
-        BatchProcessArmResponseFilesAutomatedTask batchProcessArmResponseFilesAutomatedTask = new BatchProcessArmResponseFilesAutomatedTask(
-            automatedTaskRepository,
-            lockProvider,
-            automatedTaskConfigurationProperties,
-            armBatchProcessResponseFiles
-        );
-        batchProcessArmResponseFilesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(batchProcessArmResponseFilesAutomatedTask));
-        Trigger trigger = createAutomatedTaskTrigger(batchProcessArmResponseFilesAutomatedTask);
-        taskRegistrar.addTriggerTask(batchProcessArmResponseFilesAutomatedTask, trigger);
     }
 
 
@@ -604,7 +588,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armResponseFilesProcessor
+                armBatchProcessResponseFiles
             );
             Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
             taskScheduler.schedule(processArmResponseFilesTask, trigger);
@@ -681,23 +665,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         }
     }
 	
-    private void rescheduleBatchProcessArmResponseFilesAutomatedTask() {
-
-        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(BATCH_PROCESS_ARM_RESPONSE_FILES_TASK_NAME.getTaskName());
-        if (triggerAndAutomatedTask == null) {
-            BatchProcessArmResponseFilesAutomatedTask batchProcessArmResponseFilesAutomatedTask = new BatchProcessArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                armBatchProcessResponseFiles
-            );
-            Trigger trigger = createAutomatedTaskTrigger(batchProcessArmResponseFilesAutomatedTask);
-            taskScheduler.schedule(batchProcessArmResponseFilesAutomatedTask, trigger);
-        } else {
-            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
-        }
-    }
-
     private TriggerAndAutomatedTask getTriggerAndAutomatedTask(String taskName) {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
