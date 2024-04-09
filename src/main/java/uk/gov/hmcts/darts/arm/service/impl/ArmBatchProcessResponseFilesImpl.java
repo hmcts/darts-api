@@ -218,7 +218,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     private void processUploadFileObject(UploadFileFilenameProcessor uploadFileFilenameProcessor,
                                          ArmResponseUploadFileRecord armResponseUploadFileRecord) {
         if (nonNull(armResponseUploadFileRecord)) {
-            ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntityById(armResponseUploadFileRecord.getA360RecordId());
+            ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntityById(armResponseUploadFileRecord.getRelationId());
 
             //If the filename contains 1
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
@@ -391,7 +391,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmBatchProcessResponse
     private void processInvalidLineFileObject(InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
                                               ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
         if (nonNull(armResponseInvalidLineRecord)) {
-            ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntityById(armResponseInvalidLineRecord.getA360RecordId());
+            ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntityById(armResponseInvalidLineRecord.getRelationId());
 
             //If the filename contains 0
             if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {

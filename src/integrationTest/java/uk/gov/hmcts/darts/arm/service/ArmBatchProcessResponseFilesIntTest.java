@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
@@ -93,7 +96,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     }
 
     @Test
-    void batchProcessResponseFiles() {
+    void batchProcessResponseFiles() throws IOException {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -126,9 +129,16 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
                 3
             ));
 
+        MediaEntity media4 = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-06-10T14:00:00Z"),
+                OffsetDateTime.parse("2023-06-10T14:45:00Z"),
+                1
+            ));
+
         String manifest1Uuid = UUID.randomUUID().toString();
         String manifest2Uuid = UUID.randomUUID().toString();
-
 
         ExternalObjectDirectoryEntity armEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             media1,
@@ -147,7 +157,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod2.setTransferAttempts(1);
-        armEod1.setManifestFile(manifest1Uuid);
+        armEod2.setManifestFile(manifest1Uuid);
         dartsDatabase.save(armEod2);
 
         ExternalObjectDirectoryEntity armEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -157,8 +167,18 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         armEod3.setTransferAttempts(1);
-        armEod1.setManifestFile(manifest1Uuid);
+        armEod3.setManifestFile(manifest1Uuid);
         dartsDatabase.save(armEod3);
+
+        ExternalObjectDirectoryEntity armEod4 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            media4,
+            ARM_DROP_ZONE,
+            ARM,
+            UUID.randomUUID()
+        );
+        armEod4.setTransferAttempts(1);
+        armEod4.setManifestFile(manifest2Uuid);
+        dartsDatabase.save(armEod4);
 
         String prefix = "DARTS";
         List<String> responseBlobs = new ArrayList<>();
@@ -183,6 +203,30 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String continuationToken = null;
         when(armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken)).thenReturn(continuationTokenBlobs);
 
+        String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", manifest1Uuid);
+        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", manifest1Uuid);
+        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", manifest1Uuid);
+        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", manifest1Uuid);
+        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", manifest1Uuid);
+        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", manifest1Uuid);
+        List<String> hashcodeResponses = new ArrayList<>();
+        hashcodeResponses.add(createRecordFilename1);
+        hashcodeResponses.add(uploadFileFilename1);
+        hashcodeResponses.add(createRecordFilename2);
+        hashcodeResponses.add(invalidLineFileFilename2);
+        hashcodeResponses.add(uploadFileFilename3);
+        hashcodeResponses.add(invalidLineFileFilename3);
+
+        when(armDataManagementApi.listResponseBlobs(manifest1Uuid)).thenReturn(hashcodeResponses);
+
+        String validUploadFile1 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/validResponses/validUfFile.a360";
+
+        BinaryData uploadFileBinaryData = convertStringToBinaryData(getUploadFileContents(validUploadFile1, armEod1.getId(), media1.getChecksum()));
+        when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryData);
+        /*when(armDataManagementApi.getBlobData(invalidLineFileFilename2)).thenReturn();
+        when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn();
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn();*/
+
         armBatchProcessResponseFiles.batchProcessResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -194,5 +238,16 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
+    }
+
+    private BinaryData convertStringToBinaryData(String contents) {
+        return BinaryData.fromString(contents);
+    }
+
+    private String getUploadFileContents(String filename, int externalObjectDirectoryId, String checksum) throws IOException {
+        String expectedResponse = getContentsFromFile(filename);
+        expectedResponse = expectedResponse.replaceAll("<CHECKSUM>", checksum);
+        expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(externalObjectDirectoryId));
+        return expectedResponse;
     }
 }

@@ -870,4 +870,36 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     }
 
+    @Test
+    void givenConfiguredTasksDisableBatchProcessArmResponseFilesAutomatedTask() {
+        AutomatedTask automatedTask =
+            new BatchProcessArmResponseFilesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                armBatchProcessResponseFiles
+            );
+
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+
+        assertEquals(AutomatedTaskStatus.NOT_STARTED, automatedTask.getAutomatedTaskStatus());
+    }
 }
