@@ -110,23 +110,22 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     @Override
     public void copyBlobData(String sourceContainer, String destinationContainer, UUID sourceBlobId) {
-        BlobServiceClient sourceServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
-        BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, sourceServiceClient);
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
 
         log.info("FETCHING BLOB {}", sourceBlobId);
-        BlobClient blobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
-        if (!blobClient.exists()) {
+        BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, serviceClient);
+        BlobClient sourceBlob = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
+
+        if (!sourceBlob.exists()) {
             log.error("Blob {} does not exist in {} container", sourceBlobId, sourceContainer);
-        } else {
-            log.info("Blob {} present in {} container", sourceBlobId, sourceContainer);
         }
 
-        BlobServiceClient targetServiceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
-        var uniqueBlobId = UUID.randomUUID();
-        BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, targetServiceClient);
+        BlobClient destinationBlob = blobServiceFactory
+            .getBlobContainerClient(destinationContainer, serviceClient)
+            .getBlobClient(sourceBlobId.toString());
 
-        log.info("COPYING BLOB from {} ", blobClient.getBlobUrl());
-        destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(blobClient.getBlobUrl());
+        log.info("COPYING BLOB from {} ", sourceBlob.getBlobUrl());
+        destinationBlob.getBlockBlobClient().uploadFromUrl(sourceBlob.getBlobUrl());
     }
 
     private ParallelTransferOptions createCommonTransferOptions() {
