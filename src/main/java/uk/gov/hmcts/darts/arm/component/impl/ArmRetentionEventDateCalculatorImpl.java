@@ -34,7 +34,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         userAccount = userIdentity.getUserAccount();
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
-            OffsetDateTime retentionDate = getObjectRetentionDate(externalObjectDirectory);
+            OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusDays(100);
                 if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) != 0) {
@@ -63,7 +63,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         }
     }
 
-    private OffsetDateTime getObjectRetentionDate(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+    private OffsetDateTime getDocumentRetentionDate(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         OffsetDateTime retentionDate = null;
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             retentionDate = externalObjectDirectoryEntity.getMedia().getRetainUntilTs();
