@@ -61,7 +61,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                         "description": "A temporary group created by functional test",
                         "security_role_id": 4
                       }
-                        """)
+                      """)
             .post()
             .thenReturn();
 
@@ -115,18 +115,18 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .thenReturn();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+        List<SecurityGroupWithIdAndRoleAndUsers> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+                                                                                              new TypeReference<List<SecurityGroupWithIdAndRoleAndUsers>>() {
                                                                                               });
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
-        List<SecurityGroupWithIdAndRole> staticGroups =
+        List<SecurityGroupWithIdAndRoleAndUsers> staticGroups =
             securityGroupWithIdAndRoles.stream()
                 .filter(group -> group.getId() == 1
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= -17 && group.getId() <= -14
                     || group.getSecurityRoleId() == SecurityRoleEnum.SUPER_USER.getId())
-                .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
+                .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRoleAndUsers::getId).reversed())
                 .toList();
 
         checkGroup(staticGroups.get(0), "SUPER_USER", true, 12, true, null);
@@ -144,7 +144,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
 
     }
 
-    private void checkGroup(SecurityGroupWithIdAndRole group, String name, boolean globalAccess, Integer roleId, boolean displayState,
+    private void checkGroup(SecurityGroupWithIdAndRoleAndUsers group, String name, boolean globalAccess, Integer roleId, boolean displayState,
                             Integer courtroomId) {
         assertEquals(name, group.getName());
         assertEquals(globalAccess, group.getGlobalAccess());
@@ -165,7 +165,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
               "description": "func-test group",
               "security_role_id": 4
             }
-              """;
+            """;
         postContent = postContent.replace("<func-a-security-group>", "func-a-security-group " + UUID.randomUUID());
         postContent = postContent.replace("<A security group>", "A security group " + UUID.randomUUID());
 
@@ -186,7 +186,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
               "courthouse_ids": [<id1>,<id2>],
               "user_ids": [<userId1>,<userId2>]
             }
-              """;
+            """;
         String newName = "func-a-security-group-new-name " + UUID.randomUUID();
         patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
         String newDisplayName = "A security group new name " + UUID.randomUUID();
