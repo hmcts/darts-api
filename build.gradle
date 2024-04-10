@@ -1,232 +1,231 @@
 buildscript {
-  dependencies {
+    dependencies {
     classpath("org.flywaydb:flyway-database-postgresql:10.11.0")
-  }
+    }
 }
 
 plugins {
-  id 'application'
-  id 'checkstyle'
-  id 'pmd'
-  id 'jacoco'
-  id 'idea'
-  id 'io.spring.dependency-management' version '1.1.4'
-  id 'org.springframework.boot' version '3.2.2'
+    id 'application'
+    id 'checkstyle'
+    id 'pmd'
+    id 'jacoco'
+    id 'idea'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.springframework.boot' version '3.2.2'
   id 'org.owasp.dependencycheck' version '9.1.0'
-  id 'com.github.ben-manes.versions' version '0.51.0'
+    id 'com.github.ben-manes.versions' version '0.51.0'
   id 'org.sonarqube' version '5.0.0.4638'
-  id "io.freefair.lombok" version "8.6"
-  id "org.openapi.generator" version "7.4.0"
+    id "io.freefair.lombok" version "8.6"
+    id "org.openapi.generator" version "7.4.0"
   id "org.flywaydb.flyway" version "10.11.0"
-  id 'maven-publish'
+    id 'maven-publish'
   id("com.dorongold.task-tree") version "3.0.0"
 }
 
 jacoco {
   toolVersion = "0.8.12"
-  reportsDirectory.set(layout.buildDirectory.dir("jacocoHtml"))
+    reportsDirectory.set(layout.buildDirectory.dir("jacocoHtml"))
 }
 
 group = 'uk.gov.hmcts'
 version = '0.0.1'
 
 compileJava {
-  sourceCompatibility = '17'
-  targetCompatibility = '17'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
-  }
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 sourceSets {
-  main {
-    java.srcDir "$buildDir/generated/openapi/src/main/java"
-  }
-
-  functionalTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/functionalTest/java')
+    main {
+        java.srcDir "$buildDir/generated/openapi/src/main/java"
     }
-    resources.srcDir file('src/functionalTest/resources')
-  }
 
-  integrationTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/integrationTest/java')
+    functionalTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/functionalTest/java')
+        }
+        resources.srcDir file('src/functionalTest/resources')
     }
-    resources.srcDir file('src/integrationTest/resources')
-  }
 
-  smokeTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/smokeTest/java')
+    integrationTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/integrationTest/java')
+        }
+        resources.srcDir file('src/integrationTest/resources')
     }
-    resources.srcDir file('src/smokeTest/resources')
-  }
+
+    smokeTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/smokeTest/java')
+        }
+        resources.srcDir file('src/smokeTest/resources')
+    }
 }
 
 idea {
-  module {
-    testSources.from(sourceSets.integrationTest.allSource.srcDirs)
-    testResources.from(sourceSets.integrationTest.resources.srcDirs)
-    testSources.from(sourceSets.functionalTest.allSource.srcDirs)
-    testResources.from(sourceSets.functionalTest.resources.srcDirs)
-    testSources.from(sourceSets.smokeTest.allSource.srcDirs)
-    testResources.from(sourceSets.smokeTest.resources.srcDirs)
-  }
+    module {
+        testSources.from(sourceSets.integrationTest.allSource.srcDirs)
+        testResources.from(sourceSets.integrationTest.resources.srcDirs)
+        testSources.from(sourceSets.functionalTest.allSource.srcDirs)
+        testResources.from(sourceSets.functionalTest.resources.srcDirs)
+        testSources.from(sourceSets.smokeTest.allSource.srcDirs)
+        testResources.from(sourceSets.smokeTest.resources.srcDirs)
+    }
 }
 
 configurations.configureEach {
-  exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on' // bcprov-jdk18on-1.73.jar CVE-2023-33201
+    exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on' // bcprov-jdk18on-1.73.jar CVE-2023-33201
 }
 
 configurations {
-  functionalTestImplementation.extendsFrom testImplementation
-  functionalTestRuntimeOnly.extendsFrom runtimeOnly
+    functionalTestImplementation.extendsFrom testImplementation
+    functionalTestRuntimeOnly.extendsFrom runtimeOnly
 
-  integrationTestImplementation.extendsFrom testImplementation
-  integrationTestRuntimeOnly.extendsFrom runtimeOnly
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom runtimeOnly
 
-  smokeTestImplementation.extendsFrom testImplementation
-  smokeTestRuntimeOnly.extendsFrom runtimeOnly
+    smokeTestImplementation.extendsFrom testImplementation
+    smokeTestRuntimeOnly.extendsFrom runtimeOnly
 
-  openapispecifications
+    openapispecifications
 }
 
 tasks.withType(JavaCompile).configureEach {
-  options.compilerArgs << "-Xlint:unchecked" << "-Werror"
+    options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
 // https://github.com/gradle/gradle/issues/16791
 tasks.withType(JavaExec).configureEach {
-  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
 tasks.withType(Test).configureEach {
-  useJUnitPlatform()
+    useJUnitPlatform()
 
-  testLogging {
-    exceptionFormat = 'full'
-  }
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 tasks.register('functional', Test) {
-  description = "Runs functional tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.functionalTest.output.classesDirs
-  classpath = sourceSets.functionalTest.runtimeClasspath
+    description = "Runs functional tests"
+    group = "Verification"
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
 tasks.register('integration', Test) {
-  description = "Runs integration tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.integrationTest.output.classesDirs
-  classpath = sourceSets.integrationTest.runtimeClasspath
+    description = "Runs integration tests"
+    group = "Verification"
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
 tasks.register('smoke', Test) {
-  description = "Runs Smoke Tests"
-  testClassesDirs = sourceSets.smokeTest.output.classesDirs
-  classpath = sourceSets.smokeTest.runtimeClasspath
+    description = "Runs Smoke Tests"
+    testClassesDirs = sourceSets.smokeTest.output.classesDirs
+    classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
 checkstyle {
-  maxWarnings = 0
+    maxWarnings = 0
 }
 
 var sourceSetsCopy = sourceSets
 pmd {
-  toolVersion = "6.55.0"
-  sourceSets = [sourceSetsCopy.main]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/main-ruleset.xml")
+    toolVersion = "6.55.0"
+    sourceSets = [sourceSetsCopy.main]
+    reportsDir = file("$project.buildDir/reports/pmd")
+    // https://github.com/pmd/pmd/issues/876
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/main-ruleset.xml")
 }
 
 pmd {
-  toolVersion = "6.55.0"
-  sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/test-ruleset.xml")
+    toolVersion = "6.55.0"
+    sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
+    reportsDir = file("$project.buildDir/reports/pmd")
+    // https://github.com/pmd/pmd/issues/876
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 
 
 def coverageExclusions = [
-  '**/uk/gov/hmcts/darts/common/entity/**',
-  '**/uk/gov/hmcts/darts/**/model/**',
-  '**/uk/gov/hmcts/darts/**/config/**',
-  '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java',
-  '**/uk/gov/hmcts/darts/notification/NotificationConstants.java',
-  '**/uk/gov/hmcts/darts/cases/CasesConstants.java',
-  '**/uk/gov/hmcts/darts/cases/CasesConstants$GetCasesParams.java',
-  '**/uk/gov/hmcts/darts/cases/CasesConstants$GetSearchCasesParams.java',
-  '**/uk/gov/hmcts/darts/notification/NotificationConstants$ParameterMapValues.java',
-  '**/uk/gov/hmcts/darts/cases/api**',
-  '**/uk/gov/hmcts/darts/dailylist/api**',
-  '**/uk/gov/hmcts/darts/courthouse/api**',
-  '**/uk/gov/hmcts/darts/audio/api**',
-  '**/uk/gov/hmcts/darts/hearings/api**',
-  '**/uk/gov/hmcts/darts/audit/api**',
-  '**/uk/gov/hmcts/darts/event/api**',
-  '**/uk/gov/hmcts/darts/audiorequests/api**',
+        '**/uk/gov/hmcts/darts/common/entity/**',
+        '**/uk/gov/hmcts/darts/**/model/**',
+        '**/uk/gov/hmcts/darts/**/config/**',
+        '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java',
+        '**/uk/gov/hmcts/darts/notification/NotificationConstants.java',
+        '**/uk/gov/hmcts/darts/cases/CasesConstants.java',
+        '**/uk/gov/hmcts/darts/cases/CasesConstants$GetCasesParams.java',
+        '**/uk/gov/hmcts/darts/cases/CasesConstants$GetSearchCasesParams.java',
+        '**/uk/gov/hmcts/darts/notification/NotificationConstants$ParameterMapValues.java',
+        '**/uk/gov/hmcts/darts/cases/api**',
+        '**/uk/gov/hmcts/darts/dailylist/api**',
+        '**/uk/gov/hmcts/darts/courthouse/api**',
+        '**/uk/gov/hmcts/darts/audio/api**',
+        '**/uk/gov/hmcts/darts/hearings/api**',
+        '**/uk/gov/hmcts/darts/audit/api**',
+        '**/uk/gov/hmcts/darts/event/api**',
+        '**/uk/gov/hmcts/darts/audiorequests/api**',
 ]
 
 jacocoTestReport {
-  executionData(test, integration)
-  reports {
-    xml.required = true
-    csv.required = false
-    html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
-  }
-  afterEvaluate {
-    classDirectories.setFrom(files(classDirectories.files.collect {
-      fileTree(dir: it, exclude:  jacocoExclusionArray(coverageExclusions)
-      )
-    }))
-  }
+    executionData(test, integration)
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExclusionArray(coverageExclusions)
+            )
+        }))
+    }
 }
 
-static String[] jacocoExclusionArray(ArrayList<String> exclusions)
-{
+static String[] jacocoExclusionArray(ArrayList<String> exclusions) {
     final def lst = new ArrayList<String>();
 
-    exclusions.stream().forEach {it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it)}
+    exclusions.stream().forEach { it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it) }
 
-  return lst.toArray();
+    return lst.toArray();
 }
 
 tasks.jacocoTestCoverageVerification {
-  violationRules {
-    rule {
-      limit {
-        minimum = "0.8".toBigDecimal()
-      }
-    }
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.8".toBigDecimal()
+            }
+        }
 
-    rule {
-      enabled = true
-      element = "CLASS"
-      includes = Arrays.asList(new String[] {"uk.gov.hmcts.darts.*"})
+        rule {
+            enabled = true
+            element = "CLASS"
+            includes = Arrays.asList(new String[]{"uk.gov.hmcts.darts.*"})
 
-      limit {
-        counter = "LINE"
-        value = "TOTALCOUNT"
-        maximum = "0.8".toBigDecimal()
-      }
+            limit {
+                counter = "LINE"
+                value = "TOTALCOUNT"
+                maximum = "0.8".toBigDecimal()
+            }
+        }
     }
-  }
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
@@ -236,60 +235,60 @@ jacocoTestReport.dependsOn check
 jacocoTestCoverageVerification.dependsOn jacocoTestReport
 
 sonarqube {
-  properties {
-    property "sonar.projectName", "DARTS :: darts-api"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
-    property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*"
-    //duplicate code here due to OpenAPI codegen that creates identical
-    // objects (Transcript) in different packages
-    property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
-  }
+    properties {
+        property "sonar.projectName", "DARTS :: darts-api"
+        property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
+        property "sonar.exclusions", coverageExclusions.join(', ')
+        property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,**/ArmServiceImpl*"
+        //duplicate code here due to OpenAPI codegen that creates identical
+        // objects (Transcript) in different packages
+        property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
+    }
 }
 
 // before committing a change, make sure task still works
 dependencyUpdates {
-  def isNonStable = { String version ->
-    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier -> version.toUpperCase().contains(qualifier) }
-    def regex = /^[0-9,.v-]+$/
-    return !stableKeyword && !(version ==~ regex)
-  }
-  rejectVersionIf { selection -> // <---- notice how the closure argument is named
-    return isNonStable(selection.candidate.version) && !isNonStable(selection.currentVersion)
-  }
+    def isNonStable = { String version ->
+        def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier -> version.toUpperCase().contains(qualifier) }
+        def regex = /^[0-9,.v-]+$/
+        return !stableKeyword && !(version ==~ regex)
+    }
+    rejectVersionIf { selection -> // <---- notice how the closure argument is named
+        return isNonStable(selection.candidate.version) && !isNonStable(selection.currentVersion)
+    }
 }
 
 // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
-  // Specifies if the build should be failed if a CVSS score above a specified level is identified.
-  // range of 0-10 fails the build, anything greater and it doesn't fail the build
-  failBuildOnCVSS = 0
-  suppressionFile = 'config/owasp/suppressions.xml'
+    // Specifies if the build should be failed if a CVSS score above a specified level is identified.
+    // range of 0-10 fails the build, anything greater and it doesn't fail the build
+    failBuildOnCVSS = 0
+    suppressionFile = 'config/owasp/suppressions.xml'
 
-  analyzers {
-    // Disable scanning of .NET related binaries
-    assemblyEnabled = false
-  }
-  skipConfigurations = [
-    "compileOnly",
-    "pmd",
-    "integrationTest",
-    "functionalTest",
-    "smokeTest",
-    "contractTestRuntimeClasspath",
-    "contractTestCompileClasspath"
-  ]
+    analyzers {
+        // Disable scanning of .NET related binaries
+        assemblyEnabled = false
+    }
+    skipConfigurations = [
+            "compileOnly",
+            "pmd",
+            "integrationTest",
+            "functionalTest",
+            "smokeTest",
+            "contractTestRuntimeClasspath",
+            "contractTestCompileClasspath"
+    ]
 }
 
 repositories {
-  mavenLocal()
-  mavenCentral()
-  maven { url 'https://jitpack.io' }
-  maven { url  'https://repo.spring.io/milestone/'}
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.spring.io/milestone/' }
 }
 
 ext {
-  log4JVersion = "2.23.1"
+    log4JVersion = "2.23.1"
   tomcatEmbedVersion = "10.1.20"
 }
 
@@ -307,33 +306,33 @@ import java.nio.file.Files
 
 import static groovy.io.FileType.FILES
 
-dir.eachFileRecurse(FILES) {file ->
-  if (file.getName().endsWith(".yaml") && file.getName()!="problem.yaml")
-    swaggerList << file
+dir.eachFileRecurse(FILES) { file ->
+    if (file.getName().endsWith(".yaml") && file.getName() != "problem.yaml")
+        swaggerList << file
 }
 
 def openApiGenerateTaskList = []
 
 // Iterate on all swagger files and generate a task for each one with the nomenclature openApiGenerate + swagger name
 swaggerList.each {
-  def apiName = it.getName().replace(".yaml", "");
-  def taskName = "openApiGenerate" + apiName.capitalize()
-  openApiGenerateTaskList << taskName
-  tasks.register(taskName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask, {
-    generatorName = "spring"
-    inputSpec = "$rootDir/src/main/resources/openapi/".toString() + "${apiName}.yaml"
-    outputDir = "$buildDir/generated/openapi".toString()
-    apiPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".http.api"
-    modelPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".model"
-    //    https://openapi-generator.tech/docs/generators/java/#config-options
-    skipOperationExample = true
-    configOptions = [
-      dateLibrary   : "java8",
-      interfaceOnly : "true",
-      useTags       : "true",
-      useSpringBoot3: "true"
-    ]
-  })
+    def apiName = it.getName().replace(".yaml", "");
+    def taskName = "openApiGenerate" + apiName.capitalize()
+    openApiGenerateTaskList << taskName
+    tasks.register(taskName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask, {
+        generatorName = "spring"
+        inputSpec = "$rootDir/src/main/resources/openapi/".toString() + "${apiName}.yaml"
+        outputDir = "$buildDir/generated/openapi".toString()
+        apiPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".http.api"
+        modelPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".model"
+        //    https://openapi-generator.tech/docs/generators/java/#config-options
+        skipOperationExample = true
+        configOptions = [
+                dateLibrary   : "java8",
+                interfaceOnly : "true",
+                useTags       : "true",
+                useSpringBoot3: "true"
+        ]
+    })
 }
 
 dependencies {
@@ -420,139 +419,139 @@ dependencies {
   testImplementation 'io.github.hakky54:logcaptor:2.9.2'
   testImplementation 'org.testcontainers:testcontainers:1.19.7'
 
-  compileJava.dependsOn = openApiGenerateTaskList
+    compileJava.dependsOn = openApiGenerateTaskList
 }
 
 dependencyManagement {
-  dependencies {
-    // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
+    dependencies {
+        // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
     dependencySet(group: 'io.netty', version: '4.1.108.Final') {
-      entry 'netty-buffer'
-      entry 'netty-codec'
-      entry 'netty-codec-dns'
-      entry 'netty-codec-http'
-      entry 'netty-codec-http2'
-      entry 'netty-codec-socks'
-      entry 'netty-common'
-      entry 'netty-handler'
-      entry 'netty-handler-proxy'
-      entry 'netty-resolver'
-      entry 'netty-resolver-dns'
-      entry 'netty-resolver-dns-classes-macos'
-      entry 'netty-resolver-dns-native-macos'
-      entry 'netty-transport'
-      entry 'netty-transport-classes-epoll'
-      entry 'netty-transport-classes-kqueue'
-      entry 'netty-transport-native-epoll'
-      entry 'netty-transport-native-kqueue'
-      entry 'netty-transport-native-unix-common'
-    }
-    //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
+            entry 'netty-buffer'
+            entry 'netty-codec'
+            entry 'netty-codec-dns'
+            entry 'netty-codec-http'
+            entry 'netty-codec-http2'
+            entry 'netty-codec-socks'
+            entry 'netty-common'
+            entry 'netty-handler'
+            entry 'netty-handler-proxy'
+            entry 'netty-resolver'
+            entry 'netty-resolver-dns'
+            entry 'netty-resolver-dns-classes-macos'
+            entry 'netty-resolver-dns-native-macos'
+            entry 'netty-transport'
+            entry 'netty-transport-classes-epoll'
+            entry 'netty-transport-classes-kqueue'
+            entry 'netty-transport-native-epoll'
+            entry 'netty-transport-native-kqueue'
+            entry 'netty-transport-native-unix-common'
+        }
+        //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
     dependencySet(group: 'io.projectreactor.netty', version: '1.1.18') {
-      entry 'reactor-netty-http'
-      entry 'reactor-netty-core'
+            entry 'reactor-netty-http'
+            entry 'reactor-netty-core'
+        }
     }
-  }
 }
 
 mainClassName = 'uk.gov.hmcts.darts.Application'
 
 bootJar {
-  archiveFileName = "darts-api.jar"
+    archiveFileName = "darts-api.jar"
 
-  manifest {
-    attributes('Implementation-Version': project.version.toString())
-  }
+    manifest {
+        attributes('Implementation-Version': project.version.toString())
+    }
 }
 
 // Gradle 7.x issue, workaround from: https://github.com/gradle/gradle/issues/17236#issuecomment-894768083
 rootProject.tasks.named("processSmokeTestResources") {
-  duplicatesStrategy = 'include'
+    duplicatesStrategy = 'include'
 }
 
 rootProject.tasks.named("processFunctionalTestResources") {
-  duplicatesStrategy = 'include'
+    duplicatesStrategy = 'include'
 }
 
 rootProject.tasks.named("processIntegrationTestResources") {
-  duplicatesStrategy = 'include'
+    duplicatesStrategy = 'include'
 }
 
 wrapper {
-  distributionType = Wrapper.DistributionType.ALL
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 flyway {
-  url = System.getenv('FLYWAY_URL')
-  println "FLYWAY url=${url}"
-  user = System.getenv('FLYWAY_USER')
-  password = System.getenv('FLYWAY_PASSWORD')
-  schemas = ['darts']
-  println "FLYWAY schemas=${schemas}"
-  baselineOnMigrate = true
-  baselineVersion = '000'
-  locations = ["db/migration/common", "db/migration/postgres"]
-  // change to false to allow flyway clean to be run
-  cleanDisabled = true
+    url = System.getenv('FLYWAY_URL')
+    println "FLYWAY url=${url}"
+    user = System.getenv('FLYWAY_USER')
+    password = System.getenv('FLYWAY_PASSWORD')
+    schemas = ['darts']
+    println "FLYWAY schemas=${schemas}"
+    baselineOnMigrate = true
+    baselineVersion = '000'
+    locations = ["db/migration/common", "db/migration/postgres"]
+    // change to false to allow flyway clean to be run
+    cleanDisabled = true
 }
 
 // this can be run to clean the DB down allowing from a fresh migration from scratch
 tasks.register('cleanPostgresDatabase', org.flywaydb.gradle.task.FlywayCleanTask) {
-  if (project.hasProperty("dburl")) {
-    url = "jdbc:postgresql://${dburl}"
-  }
+    if (project.hasProperty("dburl")) {
+        url = "jdbc:postgresql://${dburl}"
+    }
 }
 
 tasks.register('migratePostgresDatabase', org.flywaydb.gradle.task.FlywayMigrateTask) {
-  baselineOnMigrate = true
-  if (project.hasProperty("dburl")) {
-    url = "jdbc:postgresql://${dburl}"
-  }
+    baselineOnMigrate = true
+    if (project.hasProperty("dburl")) {
+        url = "jdbc:postgresql://${dburl}"
+    }
 }
 
 // Add a new jar that will be published to maven with the classifier -openapi
 tasks.register('openapiJar', Jar) {
-  archiveClassifier = 'openapi'
-  from layout.buildDirectory.dir("processedSpecs").get().asFile
+    archiveClassifier = 'openapi'
+    from layout.buildDirectory.dir("processedSpecs").get().asFile
 }
 
 artifacts.add('openapispecifications', openapiJar)
 
 publishing {
-  publications {
-      maven(MavenPublication) {
-        artifact openapiJar
-      }
+    publications {
+        maven(MavenPublication) {
+            artifact openapiJar
+        }
     }
 }
 
 tasks.register('updateOpenSpecificationsWithVersion') {
 
-  doLast {
-    def fileDir = "$projectDir/src/main/resources/openapi/"
+    doLast {
+        def fileDir = "$projectDir/src/main/resources/openapi/"
 
-    File openFile = new File(fileDir)
+        File openFile = new File(fileDir)
 
-    for (File file : openFile.listFiles()) {
-      def fileName = file.getName()
-      def contents = Files.readString(file.toPath())
+        for (File file : openFile.listFiles()) {
+            def fileName = file.getName()
+            def contents = Files.readString(file.toPath())
 
-      def response = contents.replace("\044{version}", version)
-      File newOASFile = layout.buildDirectory.dir("processedSpecs").get().asFile;
+            def response = contents.replace("\044{version}", version)
+            File newOASFile = layout.buildDirectory.dir("processedSpecs").get().asFile;
 
-      newOASFile.mkdirs();
+            newOASFile.mkdirs();
 
-      def newFile = new File(newOASFile.absolutePath + File.separator + fileName)
-      println(fileName);
-      if (!newFile.exists()) {
-        newFile.createNewFile();
-      }
+            def newFile = new File(newOASFile.absolutePath + File.separator + fileName)
+            println(fileName);
+            if (!newFile.exists()) {
+                newFile.createNewFile();
+            }
 
-      newFile.withWriter('utf-8') {
-        writer -> writer.writeLine response
-      }
+            newFile.withWriter('utf-8') {
+                writer -> writer.writeLine response
+            }
+        }
     }
-  }
 }
 
 // set flyway cleanDisabled to true above and uncomment if we require a fresh migration from scratch across all DBs
