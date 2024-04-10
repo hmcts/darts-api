@@ -60,12 +60,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
@@ -211,14 +211,14 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME -> rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
             case OUTBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleOutboundAudioDeleterAutomatedTask();
             case INBOUND_TO_UNSTRUCTURED_TASK_NAME -> rescheduleInboundToUnstructuredAutomatedTask();
-            case EXTERNAL_DATASTORE_DELETER -> rescheduleExternalDataStoreDeleterAutomatedTask();
+            case EXTERNAL_DATASTORE_DELETER_TASK_NAME -> rescheduleExternalDataStoreDeleterAutomatedTask();
             case INBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleInboundAudioDeleterAutomatedTask();
             case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
             case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
             case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcessArmResponseFilesAutomatedTask();
-            case APPLY_RETENTION -> rescheduleApplyRetentionAutomatedTask();
+            case APPLY_RETENTION_TASK_NAME -> rescheduleApplyRetentionAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
-            case CLOSE_OLD_CASES -> rescheduleCloseOldCasesAutomatedTask();
+            case CLOSE_OLD_CASES_TASK_NAME -> rescheduleCloseOldCasesAutomatedTask();
             case DAILY_LIST_HOUSEKEEPING_TASK_NAME -> rescheduleDailyListHousekeepingAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
@@ -245,10 +245,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
             if (task instanceof TriggerTask triggerTask && cancelTriggerTask(
-                    taskName,
-                    scheduledTask,
-                    triggerTask,
-                    mayInterruptIfRunning
+                taskName,
+                scheduledTask,
+                triggerTask,
+                mayInterruptIfRunning
             )) {
                 return true;
             }
@@ -262,8 +262,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
             if (task instanceof TriggerTask triggerTask
-                    && triggerTask.getRunnable() instanceof AutomatedTask automatedTask
-                    && automatedTask.getTaskName().equals(taskName)) {
+                && triggerTask.getRunnable() instanceof AutomatedTask automatedTask
+                && automatedTask.getTaskName().equals(taskName)) {
                 return automatedTask.getAutomatedTaskStatus();
             }
         }
@@ -278,10 +278,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
      */
     private void addProcessDailyListToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                dailyListProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            dailyListProcessor
         );
         processDailyListAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(processDailyListAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
@@ -290,13 +290,13 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addInboundAudioDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         InboundAudioDeleterAutomatedTask inboundAudioDeleterAutomatedTask = new InboundAudioDeleterAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                inboundAudioDeleterProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            inboundAudioDeleterProcessor
         );
         inboundAudioDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
-                inboundAudioDeleterAutomatedTask));
+            inboundAudioDeleterAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(inboundAudioDeleterAutomatedTask);
         taskRegistrar.addTriggerTask(inboundAudioDeleterAutomatedTask, trigger);
     }
@@ -309,10 +309,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
      */
     private void addOutboundAudioDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                outboundAudioDeleterProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            outboundAudioDeleterProcessor
         );
         outboundAudioDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(outboundAudioDeleterAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
@@ -321,10 +321,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addInboundToUnstructuredTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         InboundToUnstructuredAutomatedTask inboundToUnstructuredAutomatedTask = new InboundToUnstructuredAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                inboundToUnstructuredProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            inboundToUnstructuredProcessor
         );
         inboundToUnstructuredAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(inboundToUnstructuredAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(inboundToUnstructuredAutomatedTask);
@@ -339,10 +339,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
      */
     private void addExternalDataStoreDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask = new ExternalDataStoreDeleterAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                inboundDataStoreDeleter, unstructuredDataStoreDeleter, outboundDataStoreDeleter
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            inboundDataStoreDeleter, unstructuredDataStoreDeleter, outboundDataStoreDeleter
         );
         externalDataStoreDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(externalDataStoreDeleterAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(externalDataStoreDeleterAutomatedTask);
@@ -351,9 +351,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
             transcriptionsProcessor
         );
         closeUnfinishedTranscriptionsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(closeUnfinishedTranscriptionsAutomatedTask));
@@ -363,10 +363,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         UnstructuredAudioDeleterAutomatedTask unstructuredAudioDeleterAutomatedTask = new UnstructuredAudioDeleterAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                unstructuredAudioDeleterProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            unstructuredAudioDeleterProcessor
         );
         unstructuredAudioDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(unstructuredAudioDeleterAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(unstructuredAudioDeleterAutomatedTask);
@@ -375,10 +375,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addUnstructuredToArmTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask = new UnstructuredToArmAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                unstructuredToArmProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            unstructuredToArmProcessor
         );
         unstructuredToArmAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(unstructuredToArmAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(unstructuredToArmAutomatedTask);
@@ -387,10 +387,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addProcessArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         ProcessArmResponseFilesAutomatedTask processArmResponseFilesTask = new ProcessArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                armResponseFilesProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            armResponseFilesProcessor
         );
         processArmResponseFilesTask.setLastCronExpression(getAutomatedTaskCronExpression(processArmResponseFilesTask));
         Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
@@ -399,10 +399,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addApplyRetentionToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         ApplyRetentionAutomatedTask applyRetentionAutomatedTask = new ApplyRetentionAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                applyRetentionProcessor
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            applyRetentionProcessor
         );
         applyRetentionAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(applyRetentionAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(applyRetentionAutomatedTask);
@@ -411,10 +411,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addCleanupArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CleanupArmResponseFilesAutomatedTask cleanupArmResponseFilesAutomatedTask = new CleanupArmResponseFilesAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                cleanupArmResponseFilesService
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            cleanupArmResponseFilesService
         );
         cleanupArmResponseFilesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(cleanupArmResponseFilesAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(cleanupArmResponseFilesAutomatedTask);
@@ -433,9 +433,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void addDailyListHouseKeepingToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         DailyListAutomatedTask dailyListTask = new DailyListAutomatedTask(automatedTaskRepository,
-                                                                                     lockProvider,
-                                                                                     automatedTaskConfigurationProperties,
-                                                                                     dailyListService);
+                                                                          lockProvider,
+                                                                          automatedTaskConfigurationProperties,
+                                                                          dailyListService);
         dailyListTask.setLastCronExpression(getAutomatedTaskCronExpression(dailyListTask));
         Trigger trigger = createAutomatedTaskTrigger(dailyListTask);
         taskRegistrar.addTriggerTask(dailyListTask, trigger);
@@ -446,10 +446,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    dailyListProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                dailyListProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
@@ -460,12 +460,12 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void rescheduleCloseNonCompletedTranscriptionsAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
-                CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName());
+            CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
                 transcriptionsProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
@@ -480,10 +480,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(INBOUND_AUDIO_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             InboundAudioDeleterAutomatedTask inboundAudioDeleterAutomatedTask = new InboundAudioDeleterAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    inboundAudioDeleterProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                inboundAudioDeleterProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(inboundAudioDeleterAutomatedTask);
             taskScheduler.schedule(inboundAudioDeleterAutomatedTask, trigger);
@@ -497,10 +497,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(OUTBOUND_AUDIO_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    outboundAudioDeleterProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                outboundAudioDeleterProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
             taskScheduler.schedule(outboundAudioDeleterAutomatedTask, trigger);
@@ -511,13 +511,13 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void rescheduleExternalDataStoreDeleterAutomatedTask() {
 
-        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(EXTERNAL_DATASTORE_DELETER.getTaskName());
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(EXTERNAL_DATASTORE_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask = new ExternalDataStoreDeleterAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    inboundDataStoreDeleter, unstructuredDataStoreDeleter, outboundDataStoreDeleter
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                inboundDataStoreDeleter, unstructuredDataStoreDeleter, outboundDataStoreDeleter
             );
             Trigger trigger = createAutomatedTaskTrigger(externalDataStoreDeleterAutomatedTask);
             taskScheduler.schedule(externalDataStoreDeleterAutomatedTask, trigger);
@@ -531,10 +531,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(INBOUND_TO_UNSTRUCTURED_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             InboundToUnstructuredAutomatedTask inboundToUnstructuredAutomatedTask = new InboundToUnstructuredAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    inboundToUnstructuredProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                inboundToUnstructuredProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(inboundToUnstructuredAutomatedTask);
             taskScheduler.schedule(inboundToUnstructuredAutomatedTask, trigger);
@@ -547,10 +547,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(UNSTRUCTURED_AUDIO_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             UnstructuredAudioDeleterAutomatedTask unstructuredAudioDeleterAutomatedTask = new UnstructuredAudioDeleterAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    unstructuredAudioDeleterProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                unstructuredAudioDeleterProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(unstructuredAudioDeleterAutomatedTask);
             taskScheduler.schedule(unstructuredAudioDeleterAutomatedTask, trigger);
@@ -564,10 +564,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask = new UnstructuredToArmAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    unstructuredToArmProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                unstructuredToArmProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(unstructuredToArmAutomatedTask);
             taskScheduler.schedule(unstructuredToArmAutomatedTask, trigger);
@@ -581,10 +581,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_ARM_RESPONSE_FILES_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             ProcessArmResponseFilesAutomatedTask processArmResponseFilesTask = new ProcessArmResponseFilesAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    armResponseFilesProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                armResponseFilesProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
             taskScheduler.schedule(processArmResponseFilesTask, trigger);
@@ -594,13 +594,13 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void rescheduleApplyRetentionAutomatedTask() {
-        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(APPLY_RETENTION.getTaskName());
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(APPLY_RETENTION_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             ApplyRetentionAutomatedTask applyRetentionAutomatedTask = new ApplyRetentionAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    applyRetentionProcessor
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                applyRetentionProcessor
             );
             Trigger trigger = createAutomatedTaskTrigger(applyRetentionAutomatedTask);
             taskScheduler.schedule(applyRetentionAutomatedTask, trigger);
@@ -614,10 +614,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(CLEANUP_ARM_RESPONSE_FILES_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             CleanupArmResponseFilesAutomatedTask cleanupArmResponseFilesAutomatedTask = new CleanupArmResponseFilesAutomatedTask(
-                    automatedTaskRepository,
-                    lockProvider,
-                    automatedTaskConfigurationProperties,
-                    cleanupArmResponseFilesService
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                cleanupArmResponseFilesService
             );
             Trigger trigger = createAutomatedTaskTrigger(cleanupArmResponseFilesAutomatedTask);
             taskScheduler.schedule(cleanupArmResponseFilesAutomatedTask, trigger);
@@ -628,7 +628,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private void rescheduleCloseOldCasesAutomatedTask() {
 
-        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(CLOSE_OLD_CASES.getTaskName());
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(CLOSE_OLD_CASES_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             CloseOldCasesAutomatedTask closeOldCasesAutomatedTask = new CloseOldCasesAutomatedTask(
                 automatedTaskRepository,
@@ -666,12 +666,12 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
             if (task instanceof TriggerTask triggerTask
-                    && triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask
-                    && automatedTask.getTaskName().equals(taskName)) {
+                && triggerTask.getRunnable() instanceof AbstractLockableAutomatedTask automatedTask
+                && automatedTask.getTaskName().equals(taskName)) {
                 return TriggerAndAutomatedTask.builder()
-                        .automatedTask(automatedTask)
-                        .trigger(triggerTask.getTrigger())
-                        .build();
+                    .automatedTask(automatedTask)
+                    .trigger(triggerTask.getTrigger())
+                    .build();
             }
         }
         return null;
@@ -696,9 +696,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         return triggerContext -> {
             String cronExpression = getAutomatedTaskCronExpression(automatedTask);
             log.debug(
-                    "Creating trigger for task: {} with cron expression: {} ",
-                    automatedTask.getTaskName(),
-                    cronExpression
+                "Creating trigger for task: {} with cron expression: {} ",
+                automatedTask.getTaskName(),
+                cronExpression
             );
             automatedTask.setLastCronExpression(cronExpression);
             CronTrigger crontrigger = new CronTrigger(cronExpression);

@@ -18,5 +18,4 @@ public class UploadNewFileRecord implements ArchiveRecordOperation {
     private String relationId;
     @JsonProperty("file_metadata")
     private UploadNewFileRecordMetadata fileMetadata;
-
 }

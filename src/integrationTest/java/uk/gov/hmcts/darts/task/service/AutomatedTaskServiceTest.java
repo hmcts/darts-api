@@ -105,6 +105,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private DailyListService dailyListService;
 
+
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
         scheduledTasks.forEach(
@@ -766,11 +767,11 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void canUpdatedCronForDailyListHouseKeepingTask() {
         var automatedTask = new DailyListAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                dailyListService
-            );
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            dailyListService
+        );
         var originalAutomatedTaskEntity = automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
 
         automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
@@ -806,5 +807,4 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         log.info("About to reload task {}", automatedTask.getTaskName());
         automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
     }
-
 }

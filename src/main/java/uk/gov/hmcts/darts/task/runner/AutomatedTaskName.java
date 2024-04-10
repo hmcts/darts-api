@@ -12,13 +12,13 @@ public enum AutomatedTaskName {
     OUTBOUND_AUDIO_DELETER_TASK_NAME("OutboundAudioDeleter"),
     INBOUND_TO_UNSTRUCTURED_TASK_NAME("InboundToUnstructuredDataStore"),
     INBOUND_AUDIO_DELETER_TASK_NAME("InboundAudioDeleter"),
-    EXTERNAL_DATASTORE_DELETER("ExternalDataStoreDeleter"),
+    EXTERNAL_DATASTORE_DELETER_TASK_NAME("ExternalDataStoreDeleter"),
     UNSTRUCTURED_AUDIO_DELETER_TASK_NAME("UnstructuredAudioDeleter"),
     UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore"),
     PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles"),
-    APPLY_RETENTION("ApplyRetention"),
+    APPLY_RETENTION_TASK_NAME("ApplyRetention"),
     CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),
-    CLOSE_OLD_CASES("CloseOldCases"),
+    CLOSE_OLD_CASES_TASK_NAME("CloseOldCases"),
     DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping");
 
     private final String taskName;

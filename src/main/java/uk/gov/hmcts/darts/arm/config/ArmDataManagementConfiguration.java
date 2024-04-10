@@ -36,6 +36,7 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private Integer batchSize;
     private String manifestFilePrefix;
     private String armClient;
+    private String continuationTokenDuration;
 
     @Getter
     @Setter

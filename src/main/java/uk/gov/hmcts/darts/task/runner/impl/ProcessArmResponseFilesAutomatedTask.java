@@ -33,6 +33,6 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
 
     @Override
     protected void handleException(Exception exception) {
-        log.error("Exception: {}", exception.getMessage());
+        log.error("Exception ", exception);
     }
 }

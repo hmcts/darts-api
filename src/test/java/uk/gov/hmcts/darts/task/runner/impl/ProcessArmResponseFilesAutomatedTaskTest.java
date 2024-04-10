@@ -6,17 +6,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessArmResponseFilesAutomatedTaskTest {
     @Mock
     private LockProvider lockProvider;
     @Mock
-    private ArmResponseFilesProcessor armResponseFilesProcessor;
+    private ArmResponseFilesProcessorImpl armResponseFilesProcessor;
 
     @Test
     void runTask() {
+        // given
         ProcessArmResponseFilesAutomatedTask processArmResponseFilesAutomatedTask =
             new ProcessArmResponseFilesAutomatedTask(
                 null,
@@ -25,7 +26,10 @@ class ProcessArmResponseFilesAutomatedTaskTest {
                 armResponseFilesProcessor
             );
 
+        // when
         processArmResponseFilesAutomatedTask.runTask();
+
+        //then
         Mockito.verify(armResponseFilesProcessor, Mockito.times(1)).processResponseFiles();
     }
 }
