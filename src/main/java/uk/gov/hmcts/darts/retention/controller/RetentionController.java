@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retention.service.RetentionService;
 import uk.gov.hmcts.darts.retention.validation.RetentionsPostRequestValidator;
 import uk.gov.hmcts.darts.retentions.http.api.RetentionApi;
+import uk.gov.hmcts.darts.retentions.model.AdminPatchRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.AdminPostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
@@ -86,6 +87,15 @@ public class RetentionController implements RetentionApi {
     @Override
     public ResponseEntity<RetentionPolicyType> adminRetentionPolicyTypesPost(AdminPostRetentionRequest adminPostRetentionRequest, Boolean isRevision) {
         return new ResponseEntity<>(retentionPolicyTypeService.createOrReviseRetentionPolicyType(adminPostRetentionRequest, isRevision), HttpStatus.CREATED);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(
+        contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<RetentionPolicyType> adminRetentionPolicyTypesIdPatch(Integer id, AdminPatchRetentionRequest adminPatchRetentionRequest) {
+        return new ResponseEntity<>(retentionPolicyTypeService.editRetentionPolicyType(id, adminPatchRetentionRequest), HttpStatus.OK);
     }
 
 }

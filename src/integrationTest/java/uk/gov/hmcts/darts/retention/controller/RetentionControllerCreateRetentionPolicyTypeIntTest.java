@@ -267,7 +267,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
             .andExpect(jsonPath("$.type").value("https://zalando.github.io/problem/constraint-violation"))
             .andExpect(jsonPath("$.title").value("Constraint Violation"))
             .andExpect(jsonPath("$.violations.*.field").value("description"))
-            .andExpect(jsonPath("$.violations.*.message").value("size must be between 1 and 256"));
+            .andExpect(jsonPath("$.violations.*.message").value("size must be between 0 and 256"));
     }
 
     @Test
@@ -366,7 +366,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
         resultActions
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("RETENTION_112"))
-            .andExpect(jsonPath("$.title").value("To create or revise a policy, the provided start date must be in the future"));
+            .andExpect(jsonPath("$.title").value("The provided start date must be in the future"));
     }
 
     private MockHttpServletRequestBuilder buildRequest() {

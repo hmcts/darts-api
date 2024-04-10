@@ -24,6 +24,8 @@ public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPo
 
     Optional<RetentionPolicyTypeEntity> findFirstByFixedPolicyKeyOrderByPolicyStartDesc(String fixedPolicyKey);
 
+    List<RetentionPolicyTypeEntity> findByFixedPolicyKeyOrderByPolicyStartDesc(String fixedPolicyKey);
+
     Optional<RetentionPolicyTypeEntity> findFirstByPolicyNameAndFixedPolicyKeyNot(String policyName, String excludingFixedPolicyKey);
 
     Optional<RetentionPolicyTypeEntity> findFirstByDisplayNameAndFixedPolicyKeyNot(String displayName, String excludingFixedPolicyKey);
