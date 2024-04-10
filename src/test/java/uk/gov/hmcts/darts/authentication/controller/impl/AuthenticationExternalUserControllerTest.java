@@ -96,6 +96,7 @@ class AuthenticationExternalUserControllerTest {
                                     .roles(Set.of(Role.builder()
                                                       .roleId(TRANSCRIBER.getId())
                                                       .roleName(TRANSCRIBER.toString())
+                                                      .globalAccess(false)
                                                       .permissions(new HashSet<>())
                                                       .build()))
                                     .build())

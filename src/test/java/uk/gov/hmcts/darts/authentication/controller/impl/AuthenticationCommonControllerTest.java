@@ -39,11 +39,13 @@ class AuthenticationCommonControllerTest {
         newRoles.add(Role.builder()
                          .roleId(APPROVER.getId())
                          .roleName(APPROVER.toString())
+                         .globalAccess(false)
                          .permissions(new HashSet<>())
                          .build());
         newRoles.add(Role.builder()
                          .roleId(REQUESTER.getId())
                          .roleName(REQUESTER.toString())
+                         .globalAccess(false)
                          .permissions(new HashSet<>())
                          .build());
 
