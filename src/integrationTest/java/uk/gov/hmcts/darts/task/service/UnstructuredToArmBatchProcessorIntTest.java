@@ -146,7 +146,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(
             eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
         )
-        .hasSize(1);
+            .hasSize(1);
     }
 
     @Test
@@ -176,7 +176,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
         File manifestFile = manifestFileNameCaptor.getValue();
         Path manifestFilePath = manifestFile.toPath();
-        assertThat(lines(manifestFilePath).count()).isEqualTo(2);
+        assertThat(lines(manifestFilePath).count()).isEqualTo(4);
         assertThat(readString(manifestFilePath))
             .contains("\"operation\":\"create_record\"",
                       "\"operation\":\"upload_new_file\"",
@@ -227,7 +227,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         assertThat(armDropzoneEodsMedia3.get(0).getManifestFile()).isEqualTo(manifestFile.getName());
 
         Path generatedManifestFilePath = manifestFile.toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(3);
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(6);
         assertThat(readString(generatedManifestFilePath)).contains(
             format("_%d_", medias.get(0).getId()),
             format("_%d_", medias.get(1).getId()),
@@ -258,7 +258,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
         Path generatedManifestFilePath = manifestFileNameCaptor.getValue().toPath();
-        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(1);
+        assertThat(lines(generatedManifestFilePath).count()).isEqualTo(2);
         assertThat(readString(generatedManifestFilePath)).contains(format("_%d_", medias.get(1).getId()));
         assertThat(readString(generatedManifestFilePath)).doesNotContain(format("_%d_", medias.get(0).getId()));
     }
