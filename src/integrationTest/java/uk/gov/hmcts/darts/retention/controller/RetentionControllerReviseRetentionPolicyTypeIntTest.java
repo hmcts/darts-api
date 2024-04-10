@@ -278,7 +278,7 @@ class RetentionControllerReviseRetentionPolicyTypeIntTest extends IntegrationBas
         resultActions
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("RETENTION_112"))
-            .andExpect(jsonPath("$.title").value("To create or revise a policy, the provided start date must be in the future"));
+            .andExpect(jsonPath("$.title").value("The provided start date must be in the future"));
     }
 
     @Test

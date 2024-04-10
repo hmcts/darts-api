@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.retention.service;
 
+import uk.gov.hmcts.darts.retentions.model.AdminPatchRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.AdminPostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 
@@ -12,5 +13,7 @@ public interface RetentionPolicyTypeService {
     RetentionPolicyType getRetentionPolicyType(Integer id);
 
     RetentionPolicyType createOrReviseRetentionPolicyType(AdminPostRetentionRequest adminPostRetentionRequest, Boolean isRevision);
+
+    RetentionPolicyType editRetentionPolicyType(Integer id, AdminPatchRetentionRequest adminPatchRetentionRequest);
 
 }

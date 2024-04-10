@@ -189,6 +189,48 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+    patch:
+      summary: Create or revise a retention policy
+      tags:
+        - Retention
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPatchRetentionRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionPolicyType'
+        '400':
+          description: "Bad request"
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: "Policy not found"
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '409':
+          description: "Conflict"
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 components:
   schemas:
     GetCaseRetentionsResponse:
@@ -277,6 +319,22 @@ components:
         - duration
         - policy_start_at
 
+    AdminPatchRetentionRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/PolicyName'
+        display_name:
+          $ref: '#/components/schemas/PolicyDisplayName'
+        description:
+          $ref: '#/components/schemas/PolicyDescription'
+        fixed_policy_key:
+          $ref: '#/components/schemas/FixedPolicyKey'
+        duration:
+          $ref: '#/components/schemas/PolicyDuration'
+        policy_start_at:
+          $ref: '#/components/schemas/Timestamp'
+
     PolicyId:
       type: integer
 
@@ -292,7 +350,7 @@ components:
 
     PolicyDescription:
       type: string
-      minLength: 1
+      minLength: 0
       maxLength: 256
 
     FixedPolicyKey:
@@ -333,10 +391,13 @@ components:
         - "RETENTION_113"
         - "RETENTION_114"
         - "RETENTION_115"
+        - "RETENTION_116"
+        - "RETENTION_117"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
-                         POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND]
+                         POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND, LIVE_POLICIES_CANNOT_BE_EDITED,
+                         TARGET_POLICY_HAS_PENDING_REVISION ]
 
     RetentionTitleErrors:
       type: string
@@ -353,11 +414,14 @@ components:
         - "Policy name must be unique"
         - "Display name must be unique"
         - "Duration too short"
-        - "To create or revise a policy, the provided start date must be in the future"
+        - "The provided start date must be in the future"
         - "To revise a policy, the start date of the prior revision must be in the past"
         - "Fixed policy key must be unique"
         - "Fixed policy key not recognised"
+        - "Live policies cannot be edited"
+        - "Target policy has pending revision"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION, RETENTION_DATE_TOO_EARLY, INVALID_REQUEST, CASE_NOT_FOUND, CASE_NOT_CLOSED,
                          NO_RETENTION_POLICIES_APPLIED, INTERNAL_SERVER_ERROR, RETENTION_DATE_TOO_LATE, RETENTION_POLICY_TYPE_ID_NOT_FOUND,
                          NON_UNIQUE_POLICY_NAME, NON_UNIQUE_POLICY_DISPLAY_NAME, DURATION_TOO_SHORT, POLICY_START_MUST_BE_FUTURE,
-                         POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND ]
+                         POLICY_START_DATE_MUST_BE_PAST, NON_UNIQUE_FIXED_POLICY_KEY, FIXED_POLICY_KEY_NOT_FOUND, LIVE_POLICIES_CANNOT_BE_EDITED,
+                         TARGET_POLICY_HAS_PENDING_REVISION ]
