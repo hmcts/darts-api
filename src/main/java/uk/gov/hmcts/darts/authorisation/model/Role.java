@@ -22,7 +22,7 @@ public class Role {
     @NonNull
     private Boolean globalAccess;
     @Exclude
-    private Set<Integer> courthouses;
+    private Set<Integer> courthouseIds;
     @Exclude
     @NonNull
     private Set<String> permissions;

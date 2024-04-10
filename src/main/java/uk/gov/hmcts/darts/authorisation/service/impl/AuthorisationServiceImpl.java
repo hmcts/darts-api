@@ -133,7 +133,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                               .roleId(roleId)
                               .roleName(result.roleName())
                               .globalAccess(result.globalAccess())
-                              .courthouses(courthouses)
+                              .courthouseIds(courthouses)
                               .permissions(permissions)
                               .build());
 

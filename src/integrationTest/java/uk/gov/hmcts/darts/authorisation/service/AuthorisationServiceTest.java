@@ -145,7 +145,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(JUDGE.getId(), judgeRole.getRoleId());
         assertFalse(judgeRole.getGlobalAccess());
 
-        assertTrue(judgeRole.getCourthouses().contains(courthouseEntity.getId()));
+        assertTrue(judgeRole.getCourthouseIds().contains(courthouseEntity.getId()));
 
         Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(12, judgePermissions.size());
@@ -169,7 +169,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(JUDGE.getId(), judgeRole.getRoleId());
         assertTrue(judgeRole.getGlobalAccess());
 
-        assertTrue(judgeRole.getCourthouses().isEmpty());
+        assertTrue(judgeRole.getCourthouseIds().isEmpty());
 
         Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(12, judgePermissions.size());
