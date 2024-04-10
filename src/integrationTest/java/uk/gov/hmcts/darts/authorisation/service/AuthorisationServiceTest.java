@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.authorisation.model.Courthouse;
-import uk.gov.hmcts.darts.authorisation.model.Permission;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -147,18 +145,12 @@ class AuthorisationServiceTest extends IntegrationBase {
         assertEquals(JUDGE.getId(), judgeRole.getRoleId());
         assertFalse(judgeRole.getGlobalAccess());
 
-        assertTrue(judgeRole.getCourthouses().contains(Courthouse.builder()
-                                                           .courthouseId(courthouseEntity.getId())
-                                                           .build()));
+        assertTrue(judgeRole.getCourthouses().contains(courthouseEntity.getId()));
 
-        Set<Permission> judgePermissions = judgeRole.getPermissions();
+        Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(12, judgePermissions.size());
-        assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionName("READ_JUDGES_NOTES")
-                                                 .build()));
-        assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionName("UPLOAD_JUDGES_NOTES")
-                                                 .build()));
+        assertTrue(judgePermissions.contains("READ_JUDGES_NOTES"));
+        assertTrue(judgePermissions.contains("UPLOAD_JUDGES_NOTES"));
     }
 
     @Test
@@ -179,14 +171,10 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         assertTrue(judgeRole.getCourthouses().isEmpty());
 
-        Set<Permission> judgePermissions = judgeRole.getPermissions();
+        Set<String> judgePermissions = judgeRole.getPermissions();
         assertEquals(12, judgePermissions.size());
-        assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionName("READ_JUDGES_NOTES")
-                                                 .build()));
-        assertTrue(judgePermissions.contains(Permission.builder()
-                                                 .permissionName("UPLOAD_JUDGES_NOTES")
-                                                 .build()));
+        assertTrue(judgePermissions.contains("READ_JUDGES_NOTES"));
+        assertTrue(judgePermissions.contains("UPLOAD_JUDGES_NOTES"));
     }
 
     @Test
@@ -200,19 +188,15 @@ class AuthorisationServiceTest extends IntegrationBase {
         Role approverRole = roleIterator.next();
         assertEquals(APPROVER.getId(), approverRole.getRoleId());
         assertFalse(approverRole.getGlobalAccess());
-        Set<Permission> approverPermissions = approverRole.getPermissions();
+        Set<String> approverPermissions = approverRole.getPermissions();
         assertEquals(11, approverPermissions.size());
-        assertTrue(approverPermissions.contains(Permission.builder()
-                                                    .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                                                    .build()));
+        assertTrue(approverPermissions.contains("APPROVE_REJECT_TRANSCRIPTION_REQUEST"));
 
         Role requesterRole = roleIterator.next();
         assertEquals(REQUESTER.getId(), requesterRole.getRoleId());
-        Set<Permission> requesterPermissions = requesterRole.getPermissions();
+        Set<String> requesterPermissions = requesterRole.getPermissions();
         assertEquals(10, requesterPermissions.size());
-        assertFalse(requesterPermissions.contains(Permission.builder()
-                                                      .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                                                      .build()));
+        assertFalse(requesterPermissions.contains("APPROVE_REJECT_TRANSCRIPTION_REQUEST"));
     }
 
     @Test

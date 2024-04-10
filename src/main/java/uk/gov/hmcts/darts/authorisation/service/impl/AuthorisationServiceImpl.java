@@ -13,9 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
-import uk.gov.hmcts.darts.authorisation.model.Courthouse;
 import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
-import uk.gov.hmcts.darts.authorisation.model.Permission;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
@@ -119,8 +117,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         userStateBuilder.roles(roles);
 
         Integer tmpRoleId = 0;
-        Set<Permission> permissions = new LinkedHashSet<>();
-        Set<Courthouse> courthouses = new LinkedHashSet<>();
+        Set<String> permissions = new LinkedHashSet<>();
+        Set<Integer> courthouses = new LinkedHashSet<>();
 
         for (GetAuthorisationResult result : getAuthorisationResultList) {
             userStateBuilder.userId(result.userId());
@@ -144,13 +142,11 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
             Integer permissionId = result.permissionId();
             if (permissionId != null) {
-                permissions.add(Permission.builder()
-                                    .permissionName(result.permissionName())
-                                    .build());
+                permissions.add(result.permissionName());
             }
             Integer courthouseId = result.courthouseId();
             if (courthouseId != null) {
-                courthouses.add(Courthouse.builder().courthouseId(courthouseId).build());
+                courthouses.add(courthouseId);
             }
         }
 

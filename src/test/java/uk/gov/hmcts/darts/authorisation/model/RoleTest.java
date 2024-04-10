@@ -19,14 +19,8 @@ class RoleTest {
             .roleId(APPROVER.getId())
             .roleName(APPROVER.toString())
             .globalAccess(false)
-            .permissions(Set.of(
-                Permission.builder()
-                    .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                    .build(),
-                Permission.builder()
-                    .permissionName("LISTEN_TO_AUDIO_FOR_PLAYBACK")
-                    .build()
-            ))
+            .permissions(Set.of("APPROVE_REJECT_TRANSCRIPTION_REQUEST", "LISTEN_TO_AUDIO_FOR_PLAYBACK")
+            )
             .build();
 
         assertEquals(APPROVER.getId(), role.getRoleId());
