@@ -145,7 +145,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                 permissions.add(result.permissionName());
             }
             Integer courthouseId = result.courthouseId();
-            if (courthouseId != null) {
+            if ((result.globalAccess() == null || !result.globalAccess()) && courthouseId != null) {
                 courthouses.add(courthouseId);
             }
         }
