@@ -28,7 +28,6 @@ import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -51,11 +50,12 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime DOCUMENT_RETENTION_DATE_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 50, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime RETENTION_DATE_TIME =
-        OffsetDateTime.of(2023, 3, 2, 10, 50, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime.of(1923, 6, 10, 10, 50, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime START_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime END_TIME =
         OffsetDateTime.of(2023, 6, 10, 10, 45, 0, 0, ZoneOffset.UTC);
+    public static final int EVENT_DATE_ADJUSTMENT_YEARS = 100;
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -87,7 +87,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithMediaSuccessfulUpdate() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -148,7 +148,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_NoEodsToProcess() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -208,7 +208,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithCorrectlySetRetention() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
+
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -265,9 +266,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
 
     @Test
     void calculateEventDates_WithTranscriptionSuccessfulUpdate() {
-
         // given
-        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
         authorisationStub.givenTestSchema();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
@@ -320,7 +320,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithAnnotationSuccessfulUpdate() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
@@ -376,7 +376,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithCaseDocumentSuccessfulUpdate() {
 
         // given
-        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+        when(armDataManagementConfiguration.getEventDateAdjustmentYears()).thenReturn(EVENT_DATE_ADJUSTMENT_YEARS);
 
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();

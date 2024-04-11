@@ -38,7 +38,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
             OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
-                OffsetDateTime armRetentionDate = retentionDate.minus(armDataManagementConfiguration.getEventDateDurationAdjustment());
+                OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
                 if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) != 0) {
                     log.debug("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
