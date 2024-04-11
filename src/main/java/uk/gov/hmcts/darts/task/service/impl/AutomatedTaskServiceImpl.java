@@ -14,6 +14,7 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
@@ -61,6 +63,7 @@ import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
@@ -126,6 +129,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final CloseOldCasesProcessor closeOldCasesProcessor;
 
     private final DailyListService dailyListService;
+	
+    private final ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
 
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -142,7 +147,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
         addCloseOldCasesTaskRegistrar(taskRegistrar);
+
         addDailyListHouseKeepingToTaskRegistrar(taskRegistrar);
+        addArmRetentionEventDateCalculatorToTaskRegister(taskRegistrar);
     }
 
     @Override
@@ -219,7 +226,9 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case APPLY_RETENTION_TASK_NAME -> rescheduleApplyRetentionAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
             case CLOSE_OLD_CASES_TASK_NAME -> rescheduleCloseOldCasesAutomatedTask();
+
             case DAILY_LIST_HOUSEKEEPING_TASK_NAME -> rescheduleDailyListHousekeepingAutomatedTask();
+            case ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME -> rescheduleArmRetentionEventDateCalculatorAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -442,6 +451,18 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
 
+    private void addArmRetentionEventDateCalculatorToTaskRegister(ScheduledTaskRegistrar taskRegistrar) {
+        ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask =
+            new ArmRetentionEventDateCalculatorAutomatedTask(automatedTaskRepository,
+                                                             lockProvider,
+                                                             automatedTaskConfigurationProperties,
+                                                             armRetentionEventDateProcessor);
+        armRetentionEventDateCalculatorAutomatedTask.setLastCronExpression(
+            getAutomatedTaskCronExpression(armRetentionEventDateCalculatorAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(armRetentionEventDateCalculatorAutomatedTask);
+        taskRegistrar.addTriggerTask(armRetentionEventDateCalculatorAutomatedTask, trigger);
+    }
+
     private void rescheduleProcessDailyListAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
@@ -643,6 +664,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         }
     }
 
+
     private void rescheduleDailyListHousekeepingAutomatedTask() {
 
         var triggerAndAutomatedTask = getTriggerAndAutomatedTask(DAILY_LIST_HOUSEKEEPING_TASK_NAME.getTaskName());
@@ -656,6 +678,22 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             var trigger = createAutomatedTaskTrigger(dailyListAutomatedTask);
             taskScheduler.schedule(dailyListAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+	
+    private void rescheduleArmRetentionEventDateCalculatorAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask = new ArmRetentionEventDateCalculatorAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                armRetentionEventDateProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(armRetentionEventDateCalculatorAutomatedTask);
+            taskScheduler.schedule(armRetentionEventDateCalculatorAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

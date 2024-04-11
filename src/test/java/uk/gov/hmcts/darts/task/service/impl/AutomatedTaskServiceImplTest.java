@@ -143,9 +143,9 @@ class AutomatedTaskServiceImplTest {
         scheduledTaskList.add(scheduledTask);
 
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
-                mockAutomatedTaskRepository,
-                mockLockProvider,
-                mockAutomatedTaskConfigurationProperties) {
+            mockAutomatedTaskRepository,
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties) {
             @Override
             protected void runTask() {
             }
@@ -358,9 +358,7 @@ class AutomatedTaskServiceImplTest {
                 log.debug("Running test automated task");
             }
 
-
         };
     }
-
 
 }
