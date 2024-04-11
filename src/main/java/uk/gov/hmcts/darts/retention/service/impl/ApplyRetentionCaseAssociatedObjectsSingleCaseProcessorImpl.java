@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -25,6 +26,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private final CaseService caseService;
     private final ExternalObjectDirectoryRepository eodRepository;
     private final MediaRepository mediaRepository;
+    private final AnnotationDocumentRepository annotationDocumentRepository;
 
     @Transactional
     public void processApplyRetentionToCaseAssociatedObjects(Integer caseId) {
@@ -62,6 +64,25 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
 
     private void applyRetentionToAnnotations(CourtCaseEntity courtCase) {
 
+        var annotationDocuments = annotationDocumentRepository.findAllByCaseId(courtCase.getId());
+
+        for (var annotationDocument : annotationDocuments) {
+            var cases = annotationDocument.associatedCourtCases();
+            if (allClosed(cases)) {
+                var longestRetentionDate = findLongestRetentionDate(cases);
+                if (longestRetentionDate != null) {
+                    annotationDocument.setRetainUntilTs(longestRetentionDate);
+                    var armEods = eodRepository.findByAnnotationDocumentEntityAndExternalLocationType(annotationDocument, EodHelper.armLocation());
+                    if (armEods.size() == 1) {
+                        armEods.get(0).setUpdateRetention(true);
+                    } else {
+                        throw new DartsException(String.format("Expecting one arm EOD for annotationDocument '%s' but found zero or more", annotationDocument.getId()));
+                    }
+                } else {
+                    throw new DartsException(String.format("No retentions found on cases for annotationDocument '%s'", annotationDocument.getId()));
+                }
+            }
+        }
     }
 
     private boolean allClosed(List<CourtCaseEntity> cases) {

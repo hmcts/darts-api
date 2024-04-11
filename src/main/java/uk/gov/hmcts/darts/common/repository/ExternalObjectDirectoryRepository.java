@@ -169,6 +169,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntityAndExternalLocationType(AnnotationDocumentEntity annotationDocument,
+                                                                           ExternalLocationTypeEntity externalLocationType);
+
     List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
 
     @Query(

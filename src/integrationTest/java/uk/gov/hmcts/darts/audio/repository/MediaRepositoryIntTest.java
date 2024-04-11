@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,5 +64,10 @@ class MediaRepositoryIntTest extends IntegrationBase {
         assertThat(caseAMediasId).containsOnly(medias.get(0).getId(), medias.get(1).getId(), medias.get(2).getId());
         var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
         assertThat(caseBMediasId).containsOnly(medias.get(0).getId());
+
+        List<CourtCaseEntity> media0cases = medias.get(0).associatedCourtCases();
+        assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsOnly(caseA.getId(), caseB.getId());
+        List<CourtCaseEntity> media1cases = medias.get(1).associatedCourtCases();
+        assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsOnly(caseA.getId());
     }
 }
