@@ -39,8 +39,10 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
     public List<TransientObjectDirectoryEntity> markForDeletion() {
 
+        List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
+
         UserAccountEntity systemUser = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid(
-                "housekeeping"));
+            "housekeeping"));
         if (systemUser == null) {
             throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
         }
@@ -49,19 +51,21 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findAllDeletableTransformedMedia(
             deletionStartDateTime);
-
-        List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
-        for (TransformedMediaEntity transformedMedia: transformedMediaList) {
-            try {
-                List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
-                deletedValues.addAll(deleted);
-            } catch (Exception exception) {
-                log.error("Unable to mark for deletion transformed media {}", transformedMedia.getId(), exception);
+        if (!transformedMediaList.isEmpty()) {
+            for (TransformedMediaEntity transformedMedia : transformedMediaList) {
+                try {
+                    List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
+                    deletedValues.addAll(deleted);
+                } catch (Exception exception) {
+                    log.error("Unable to mark for deletion transformed media {}", transformedMedia.getId(), exception);
+                }
             }
-        }
+            Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(toSet());
+            mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
 
-        Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(toSet());
-        mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
+        } else {
+            log.debug("No transformed media to be marked for deletion");
+        }
 
         return deletedValues;
     }

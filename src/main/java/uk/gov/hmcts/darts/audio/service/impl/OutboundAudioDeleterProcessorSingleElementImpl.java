@@ -16,10 +16,10 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
+import java.time.OffsetDateTime;
 import java.util.List;
-
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 
 
 @Service
@@ -39,7 +39,7 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
 
         markTransformedMediaAsExpired(userAccount, transformedMedia);
 
-        ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId());
+        ObjectRecordStatusEntity deletionStatus = EodHelper.markForDeletionStatus();
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByTransformedMediaId(
             transformedMedia.getId()
         );
@@ -62,22 +62,26 @@ public class OutboundAudioDeleterProcessorSingleElementImpl implements OutboundA
         List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequest.getId());
         boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
         if (areAllTransformedMediasExpired) {
+            log.debug("Setting media request ID {} to be expired", mediaRequest.getId());
             mediaRequest.setLastModifiedBy(userAccount);
             mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
             mediaRequestRepository.saveAndFlush(mediaRequest);
+        } else {
+            log.debug("Not all transformed media for media request ID {} have an expiry date set", mediaRequest.getId());
         }
     }
 
     private void markTransformedMediaAsExpired(UserAccountEntity userAccount, TransformedMediaEntity transformedMedia) {
-
-        transformedMedia.setExpiryTime(currentTimeHelper.currentOffsetDateTime());
+        OffsetDateTime expiryTime = currentTimeHelper.currentOffsetDateTime();
+        log.debug("Updating transformed media id {} expiry time to {}", transformedMedia.getId(), expiryTime);
+        transformedMedia.setExpiryTime(expiryTime);
         transformedMedia.setLastModifiedBy(userAccount);
         transformedMediaRepository.saveAndFlush(transformedMedia);
     }
 
     private void markTransientObjectDirectoryAsDeleted(TransientObjectDirectoryEntity entity, UserAccountEntity systemUser,
                                                        ObjectRecordStatusEntity deletionStatus) {
-
+        log.debug("Updating transient object directory {} to be  deleted", entity.getId());
         entity.setLastModifiedBy(systemUser);
         entity.setStatus(deletionStatus);
     }

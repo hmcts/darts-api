@@ -47,6 +47,8 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
 
             repository.delete(entityToBeDeleted);
             if (entityToBeDeleted instanceof TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
+                log.debug("Deleting transformed media {} with transient object directory id={}",
+                          transientObjectDirectoryEntity.getTransformedMedia().getId(), transientObjectDirectoryEntity.getId());
                 transformedMediaRepository.delete(transientObjectDirectoryEntity.getTransformedMedia());
             }
 
