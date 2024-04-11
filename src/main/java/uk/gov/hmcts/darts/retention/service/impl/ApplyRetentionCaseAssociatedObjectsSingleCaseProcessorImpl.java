@@ -6,17 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsSingleCaseProcessor;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +24,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private final CaseRetentionRepository caseRetentionRepository;
     private final CaseService caseService;
     private final ExternalObjectDirectoryRepository eodRepository;
+    private final MediaRepository mediaRepository;
 
     @Transactional
     public void processApplyRetentionToCaseAssociatedObjects(Integer caseId) {
@@ -33,16 +32,14 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         log.info("applying retention to associated objects for case id '{}'", caseId);
 
         var courtCase = caseService.getCourtCaseById(caseId);
-        var medias = new HashSet<MediaEntity>();
 
-        for (var hearing : courtCase.getHearings()) {
-            medias.addAll(hearing.getMediaList());
-        }
-
-        applyRetentionToMedias(medias);
+        applyRetentionToMedias(courtCase);
     }
 
-    private void applyRetentionToMedias(Set<MediaEntity> medias) {
+    private void applyRetentionToMedias(CourtCaseEntity courtCase) {
+
+        var medias = mediaRepository.findAllByCaseId(courtCase.getId());
+
         for (var media : medias) {
             var cases = media.associatedCourtCases();
             if (allClosed(cases)) {
