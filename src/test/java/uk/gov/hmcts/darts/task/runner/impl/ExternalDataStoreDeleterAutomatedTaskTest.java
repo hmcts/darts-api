@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalDataStoreDeleterAutomatedTaskTest {
@@ -26,10 +27,14 @@ class ExternalDataStoreDeleterAutomatedTaskTest {
     @Mock
     private ExternalOutboundDataStoreDeleter outboundDeleter;
 
+    @Mock
+    private LogApi logApi;
+
     @Test
     void runTask() {
         ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask =
-            new ExternalDataStoreDeleterAutomatedTask(null, provider, null, inboundDeleter, unstructuredDeleter, outboundDeleter);
+            new ExternalDataStoreDeleterAutomatedTask(
+                null, provider, null, inboundDeleter, unstructuredDeleter, outboundDeleter, logApi);
 
         externalDataStoreDeleterAutomatedTask.runTask();
 

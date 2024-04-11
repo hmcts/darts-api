@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -20,6 +21,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 import static java.lang.Boolean.TRUE;
@@ -43,11 +45,17 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
 
+    private final LogApi logApi;
+
+    private ThreadLocal<UUID> executionId;
+
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
+                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, LogApi logApi) {
         this.automatedTaskRepository = automatedTaskRepository;
         this.lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
+        this.logApi = logApi;
+
     }
 
     private void setupUserAuthentication() {
@@ -62,6 +70,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     @Override
     public void run() {
+        executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
         try {
 
@@ -72,6 +81,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
                 if (getLastCronExpression().equals(dbCronExpression)) {
                     if (TRUE.equals(automatedTask.getTaskEnabled())) {
+                        logApi.taskStarted(executionId.get(), this.getTaskName());
                         lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());
                     } else {
                         setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
@@ -80,10 +90,12 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 } else {
                     setAutomatedTaskStatus(AutomatedTaskStatus.SKIPPED);
                     log.warn("Not running task {} now as cron expression has been changed in the database from '{}' to '{}'",
-                             getTaskName(), getLastCronExpression(), dbCronExpression);
+                             getTaskName(), getLastCronExpression(), dbCronExpression
+                    );
                 }
             }
         } catch (Exception exception) {
+            logApi.taskFailed(executionId.get(), getTaskName());
             setAutomatedTaskStatus(AutomatedTaskStatus.FAILED);
             handleException(exception);
         } finally {
@@ -102,7 +114,8 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             Instant.now(),
             getTaskName(),
             getLockAtMostFor(),
-            getLockAtLeastFor());
+            getLockAtLeastFor()
+        );
     }
 
     @Override
@@ -143,7 +156,9 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
         stopStopwatchAndLogFinished();
         if (getAutomatedTaskStatus().equals(AutomatedTaskStatus.IN_PROGRESS)) {
             setAutomatedTaskStatus(AutomatedTaskStatus.COMPLETED);
+            logApi.taskCompleted(executionId.get(), this.getTaskName());
         }
+
     }
 
     private void stopStopwatchAndLogFinished() {
