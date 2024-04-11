@@ -139,8 +139,8 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
             dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
-            UUID.randomUUID());
+            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
+        );
 
         var unstructuredBeforeProcessing = eodRepository.findByStatusAndType(dartsDatabase.getObjectRecordStatusEntity(STORED),
                                                                                    dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
@@ -169,8 +169,8 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
             dartsDatabase.getObjectRecordStatusEntity(FAILURE),
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
-            UUID.randomUUID());
+            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
+        );
 
         var unstructuredBeforeProcessing = eodRepository.findByStatusAndType(dartsDatabase.getObjectRecordStatusEntity(FAILURE),
                                                                              dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));

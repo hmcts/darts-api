@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
@@ -504,6 +506,32 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         return processedUpdates;
+    }
+
+    @Override
+    public List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId) {
+        var transcriptions = transcriptionRepository.findByCaseIdManualOrLegacy(caseId);
+        var uniqueTranscriptionDocuments = new ArrayList<TranscriptionDocumentEntity>();
+        for (var transcription : transcriptions) {
+            var transcriptionDocuments = transcription.getTranscriptionDocumentEntities();
+            for (var trDocument : transcriptionDocuments) {
+                if (uniqueTranscriptionDocuments.stream().noneMatch(td -> td.getId().equals(trDocument.getId()))) {
+                    uniqueTranscriptionDocuments.add(trDocument);
+                }
+            }
+        }
+        return uniqueTranscriptionDocuments;
+    }
+
+    @Override
+    public List<CourtCaseEntity> getTranscriptionDocumentsCases(TranscriptionDocumentEntity transcriptionDocumentEntity) {
+        List<CourtCaseEntity> cases = new ArrayList<>();
+        if (nonNull(transcriptionDocumentEntity.getTranscription().getHearing())) {
+            cases.add(transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase());
+        } else if (CollectionUtils.isNotEmpty(transcriptionDocumentEntity.getTranscription().getCourtCases())) {
+            cases.addAll(transcriptionDocumentEntity.getTranscription().getCourtCases());
+        }
+        return cases;
     }
 
     private List<TranscriptionEntity> processTranscriptionUpdates(List<UpdateTranscriptionsItem> request) {

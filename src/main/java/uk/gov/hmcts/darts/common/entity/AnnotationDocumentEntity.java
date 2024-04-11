@@ -16,6 +16,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Setter
@@ -85,4 +86,9 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
+
+    public List<CourtCaseEntity> associatedCourtCases() {
+        var cases = annotation.getHearingList().stream().map(HearingEntity::getCourtCase);
+        return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
+    }
 }

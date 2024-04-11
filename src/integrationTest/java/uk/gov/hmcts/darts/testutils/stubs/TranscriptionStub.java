@@ -138,6 +138,7 @@ public class TranscriptionStub {
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
+        hearing.getTranscriptions().add(transcription);
         return transcriptionRepository.saveAndFlush(transcription);
     }
 

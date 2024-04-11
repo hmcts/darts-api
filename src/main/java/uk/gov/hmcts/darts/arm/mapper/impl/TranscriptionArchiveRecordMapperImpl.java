@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -79,6 +80,8 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static final String CASE_LIST_DELIMITER = "|";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    private final TranscriptionService transcriptionService;
 
     private final CurrentTimeHelper currentTimeHelper;
     private Properties transcriptionRecordProperties;
@@ -254,17 +257,18 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
-        String cases = null;
-        if (nonNull(transcriptionDocumentEntity.getTranscription().getHearing())) {
-            cases = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber();
-        } else if (CollectionUtils.isNotEmpty(transcriptionDocumentEntity.getTranscription().getCourtCases())) {
-            List<String> caseNumbers = transcriptionDocumentEntity.getTranscription().getCourtCases()
+        List<CourtCaseEntity> cases = transcriptionService.getTranscriptionDocumentsCases(transcriptionDocumentEntity);
+        if (cases.isEmpty()) {
+            return null;
+        } else if (cases.size() == 1) {
+            return cases.get(0).getCaseNumber();
+        } else {
+            List<String> caseNumbers = cases
                 .stream()
                 .map(CourtCaseEntity::getCaseNumber)
                 .toList();
-            cases = caseListToString(caseNumbers);
+            return caseListToString(caseNumbers);
         }
-        return cases;
     }
 
     private String caseListToString(List<String> caseNumberList) {
