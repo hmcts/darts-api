@@ -96,9 +96,9 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     @Test
     void generateArchiveRecord_WithLiveMediaProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 9, 0, 0, 0, UTC);
+        OffsetDateTime startedAt = OffsetDateTime.of(2023, 9, 23, 13, 0, 0, 0, UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(startedAt);
-        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 9, 45, 0, 0, UTC);
+        OffsetDateTime endedAt = OffsetDateTime.of(2023, 9, 23, 13, 45, 0, 0, UTC);
 
         MediaEntity media = MediaTestData.createMediaWith(
             hearing.getCourtroom(),
@@ -124,7 +124,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/live/media-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -142,7 +142,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
@@ -185,7 +185,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(armEod);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn(DARTS);
-        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/nle/media-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("tests/arm/properties/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -203,7 +203,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/nle/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
@@ -308,7 +308,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
-            "tests/arm/properties/nle/transcription-record.properties");
+            "tests/arm/properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -326,7 +326,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/nle/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(transcriptionDocumentEntity.getId()));
@@ -373,7 +373,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn(
-            "tests/arm/properties/live/transcription-record.properties");
+            "tests/arm/properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -391,7 +391,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateTranscriptionArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(transcriptionDocumentEntity.getId()));
@@ -503,7 +503,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
-            "tests/arm/properties/nle/annotation-record.properties");
+            "tests/arm/properties/annotation-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -521,7 +521,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/nle/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
@@ -562,7 +562,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
-            "tests/arm/properties/live/annotation-record.properties");
+            "tests/arm/properties/annotation-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -580,7 +580,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateAnnotationArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
@@ -676,7 +676,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
-            "tests/arm/properties/nle/case-record.properties");
+            "tests/arm/properties/case-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -694,7 +694,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(caseDocument.getId()));
@@ -716,7 +716,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         CaseDocumentEntity caseDocument = dartsDatabase.getCaseDocumentStub().createAndSaveCaseDocumentEntity(courtCaseEntity, uploadedBy);
-        caseDocument.setFileName("test_filename.docx");
+        caseDocument.setFileName("test_case_document.docx");
         dartsDatabase.save(caseDocument);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
@@ -731,7 +731,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
         when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn(DARTS);
         when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn(
-            "tests/arm/properties/live/case-record.properties");
+            "tests/arm/properties/case-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -749,7 +749,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("tests/arm/service/testGenerateCaseArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<PREFIX>", prefix);
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(caseDocument.getId()));

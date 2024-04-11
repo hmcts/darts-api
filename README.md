@@ -61,7 +61,6 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 
 | Environment Variable Name     | Value                                                            |
 |-------------------------------|------------------------------------------------------------------|
-| ARM_PROPERTY_FILE_ENVIRONMENT | nle                                                              |
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 
