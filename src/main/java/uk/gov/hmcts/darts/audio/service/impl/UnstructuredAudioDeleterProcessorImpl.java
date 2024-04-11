@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +29,9 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
     private final UserAccountRepository userAccountRepository;
     private final SystemUserHelper systemUserHelper;
 
-    @Transactional
+    private final EodHelper eodHelper;
+
+
     public void markForDeletion() {
 
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
@@ -53,11 +54,14 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
-        externalObjectDirectoryRepository.updateStatus(
+
+        eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
             user,
             audioFileIdsToBeMarked,
             OffsetDateTime.now()
         );
+        audioFileIdsToBeMarked.stream().forEach(eodId -> log.info("Set status of EOD {} to be marked for deletion", eodId));
+
     }
 }

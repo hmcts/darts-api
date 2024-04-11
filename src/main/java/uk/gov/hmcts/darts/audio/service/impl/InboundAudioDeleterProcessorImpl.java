@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +24,12 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final SystemUserHelper systemUserHelper;
+    private final EodHelper eodHelper;
+
 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
-    @Transactional
     public void markForDeletion() {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
             hoursInArm,
@@ -50,11 +50,13 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         log.debug("Marking the following ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
-        externalObjectDirectoryRepository.updateStatus(
+        eodHelper.updateStatus(
             EodHelper.markForDeletionStatus(),
             user,
             audioFileIdsToBeMarked,
             OffsetDateTime.now()
         );
+        audioFileIdsToBeMarked.stream().forEach(eodId -> log.info("Set status of EOD {} to be marked for deletion", eodId));
+
     }
 }
