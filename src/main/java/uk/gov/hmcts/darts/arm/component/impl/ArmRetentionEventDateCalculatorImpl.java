@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -26,17 +27,18 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArmDataManagementApi armDataManagementApi;
     private final UserIdentity userIdentity;
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private UserAccountEntity userAccount;
 
     @Transactional
-    public void calculateRetentionEventDate(Integer externalObjectDirectoryId) {
+    public boolean calculateRetentionEventDate(Integer externalObjectDirectoryId) {
         userAccount = userIdentity.getUserAccount();
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
             OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
-                OffsetDateTime armRetentionDate = retentionDate.minusDays(100);
+                OffsetDateTime armRetentionDate = retentionDate.minus(armDataManagementConfiguration.getEventDateDurationAdjustment());
                 if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) != 0) {
                     log.debug("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
@@ -46,6 +48,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                         externalObjectDirectory.setUpdateRetention(false);
                         externalObjectDirectory.setLastModifiedBy(userAccount);
                         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                        return true;
                     } else {
                         log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
                                   externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
@@ -54,6 +57,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                     externalObjectDirectory.setUpdateRetention(false);
                     externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                    return true;
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
@@ -61,6 +65,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
         } catch (Exception e) {
             log.error("Unable to calculate ARM retention date for EOD {}", externalObjectDirectoryId, e);
         }
+        return false;
     }
 
     private OffsetDateTime getDocumentRetentionDate(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {

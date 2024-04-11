@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmRetentionEventDateProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -62,6 +64,9 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     private ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
 
     @MockBean
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    @MockBean
     private ArmDataManagementApi armDataManagementApi;
     @MockBean
     private UserIdentity userIdentity;
@@ -82,6 +87,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithMediaSuccessfulUpdate() {
 
         // given
+        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -141,6 +148,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_NoEodsToProcess() {
 
         // given
+        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -199,6 +208,7 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithCorrectlySetRetention() {
 
         // given
+        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -257,6 +267,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithTranscriptionSuccessfulUpdate() {
 
         // given
+        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+
         authorisationStub.givenTestSchema();
         TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
@@ -308,6 +320,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithAnnotationSuccessfulUpdate() {
 
         // given
+        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
         AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
@@ -362,6 +376,8 @@ class ArmRetentionEventDateProcessorIntTest extends IntegrationBase {
     void calculateEventDates_WithCaseDocumentSuccessfulUpdate() {
 
         // given
+        when(armDataManagementConfiguration.getEventDateDurationAdjustment()).thenReturn(Duration.ofDays(100));
+
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "Case1");
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 

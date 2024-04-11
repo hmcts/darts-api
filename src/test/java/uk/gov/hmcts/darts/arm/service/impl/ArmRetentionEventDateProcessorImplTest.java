@@ -3,8 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.component.ArmRetentionEventDateCalculator;
@@ -38,9 +36,6 @@ class ArmRetentionEventDateProcessorImplTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
     private ArmRetentionEventDateCalculator armRetentionEventDateCalculator;
-
-    @Captor
-    private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;

@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 
+import java.time.Duration;
+
 @Configuration
 @EnableConfigurationProperties(ArmApiConfigurationProperties.class)
 @ConfigurationProperties(prefix = "darts.storage.arm")
@@ -37,6 +39,7 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private String manifestFilePrefix;
     private String armClient;
     private String continuationTokenDuration;
+    private Duration eventDateDurationAdjustment;
 
     @Getter
     @Setter
