@@ -27,7 +27,11 @@ public class ArmRetentionEventDateProcessorImpl implements ArmRetentionEventDate
             externalObjectDirectoryRepository.findByExternalLocationTypeAndUpdateRetention(EodHelper.armLocation(), updateRetention);
 
         for (ExternalObjectDirectoryEntity externalObjectDirectory : externalObjectDirectoryEntities) {
-            armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectory.getId());
+            try {
+                armRetentionEventDateCalculator.calculateRetentionEventDate(externalObjectDirectory.getId());
+            } catch (Exception e) {
+                log.error("Unable to calculate retention date for EOD {}", externalObjectDirectory.getId(), e);
+            }
         }
     }
 
