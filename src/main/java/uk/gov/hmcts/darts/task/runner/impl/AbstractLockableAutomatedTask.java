@@ -158,7 +158,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             setAutomatedTaskStatus(AutomatedTaskStatus.COMPLETED);
             logApi.taskCompleted(executionId.get(), this.getTaskName());
         }
-
+        executionId.remove();
     }
 
     private void stopStopwatchAndLogFinished() {
