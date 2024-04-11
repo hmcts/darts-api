@@ -133,12 +133,12 @@ public class DataManagementServiceImpl implements DataManagementService {
         log.info("SAVING TEST BLOB {} to {}", testBlobId, destinationContainer);
         destinationBlobClient.upload(BinaryData.fromString("test file to source container"));
 
-        String token = """
-            ?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D
-            """;
         var uniqueBlobId = UUID.randomUUID();
         log.info("COPYING BLOB {} from {} ", uniqueBlobId, sourceBlobClient.getBlobUrl());
-        destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl() + token);
+        destinationContainerClient
+            .getBlobClient(uniqueBlobId.toString())
+            .copyFromUrl(sourceBlobClient.getBlobUrl()
+             + "?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D");
 
     }
 
