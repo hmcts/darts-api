@@ -34,6 +34,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var courtCase = caseService.getCourtCaseById(caseId);
 
         applyRetentionToMedias(courtCase);
+        applyRetentionToAnnotations(courtCase);
     }
 
     private void applyRetentionToMedias(CourtCaseEntity courtCase) {
@@ -57,6 +58,10 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
                 }
             }
         }
+    }
+
+    private void applyRetentionToAnnotations(CourtCaseEntity courtCase) {
+
     }
 
     private boolean allClosed(List<CourtCaseEntity> cases) {

@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,17 +35,13 @@ class MediaRepositoryIntTest extends IntegrationBase {
     void testFindMediasByCaseId() {
 
         // given
-        var caseA = caseStub.createAndSaveMinimalCourtCase();
-        var caseB = caseStub.createAndSaveMinimalCourtCase();
+        var caseA = caseStub.createAndSaveCourtCaseWithHearings();
+        var caseB = caseStub.createAndSaveCourtCaseWithHearings();
 
-        var hearA1 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom", caseA.getCaseNumber(), DATE_NOW);
-        var hearA2 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom2", caseA.getCaseNumber(), DATE_NOW);
-        var hearA3 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom", caseA.getCaseNumber(), DATE_NOW);
-        var hearB = hearingStub.createHearing(caseB.getCourthouse().getCourthouseName(), "testCourtroom", caseB.getCaseNumber(), DATE_NOW);
-        caseA.setHearings(List.of(hearA1, hearA2, hearA3));
-        caseB.setHearings(List.of(hearB));
-        caseRepository.save(caseA);
-        caseRepository.save(caseB);
+        var hearA1 = caseA.getHearings().get(0);
+        var hearA2 = caseA.getHearings().get(1);
+        var hearA3 = caseA.getHearings().get(2);
+        var hearB = caseB.getHearings().get(0);
 
         var medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         hearA1.addMedia(medias.get(0));

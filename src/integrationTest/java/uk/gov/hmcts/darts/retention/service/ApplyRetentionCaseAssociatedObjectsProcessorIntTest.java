@@ -84,25 +84,21 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         */
 
         // given
-        caseA = caseStub.createAndSaveCourtCase(courtCase -> {
+        caseA = caseStub.createAndSaveCourtCaseWithHearings(courtCase -> {
             courtCase.setRetentionUpdated(true);
             courtCase.setRetentionRetries(1);
             courtCase.setClosed(true);
         });
-        caseB = caseStub.createAndSaveCourtCase(courtCase -> {
+        caseB = caseStub.createAndSaveCourtCaseWithHearings(courtCase -> {
             courtCase.setRetentionUpdated(true);
             courtCase.setRetentionRetries(2);
             courtCase.setClosed(true);
         });
 
-        var hearA1 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom", caseA.getCaseNumber(), D_2020_10_1);
-        var hearA2 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom2", caseA.getCaseNumber(), D_2020_10_1);
-        var hearA3 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom", caseA.getCaseNumber(), D_2020_10_2);
-        var hearB = hearingStub.createHearing(caseB.getCourthouse().getCourthouseName(), "testCourtroom", caseB.getCaseNumber(), D_2020_10_1);
-        caseA.setHearings(List.of(hearA1, hearA2, hearA3));
-        caseB.setHearings(List.of(hearB));
-        caseRepository.save(caseA);
-        caseRepository.save(caseB);
+        var hearA1 = caseA.getHearings().get(0);
+        var hearA2 = caseA.getHearings().get(1);
+        var hearA3 = caseA.getHearings().get(2);
+        var hearB = caseB.getHearings().get(0);
 
         medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         hearA1.addMedia(medias.get(0));
