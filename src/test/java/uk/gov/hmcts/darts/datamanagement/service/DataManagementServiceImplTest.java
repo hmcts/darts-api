@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -168,7 +169,8 @@ class DataManagementServiceImplTest {
     void testCopyBlobData() {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobContainerClient(DEST_BLOB_CONTAINER_NAME, serviceClient)).thenReturn(destinationBlobContainerClient);
-        when(dataManagementFactory.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobClient(eq(blobContainerClient), any())).thenReturn(blobClient);
+        when(dataManagementFactory.getBlobClient(eq(destinationBlobContainerClient), any())).thenReturn(destinationBlobClient);
         when(destinationBlobContainerClient.getBlobClient(any())).thenReturn(destinationBlobClient);
 
         dataManagementService.copyBlobData(BLOB_CONTAINER_NAME, DEST_BLOB_CONTAINER_NAME, BLOB_ID);

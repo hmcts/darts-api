@@ -8,8 +8,6 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
-import com.azure.storage.blob.sas.BlobSasPermission;
-import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -28,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
@@ -115,26 +112,33 @@ public class DataManagementServiceImpl implements DataManagementService {
     public void copyBlobData(String sourceContainer, String destinationContainer, UUID sourceBlobId) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
 
-        log.info("FETCHING BLOB {}", sourceBlobId);
+
         BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, serviceClient);
+
+        var testBlobId = UUID.randomUUID();
+        BlobClient testSourceBlob = blobServiceFactory.getBlobClient(sourceContainerClient, testBlobId);
+        log.info("SAVING TEST BLOB {} to {}", testBlobId, sourceContainer);
+        testSourceBlob.upload(BinaryData.fromString("test file to source container"));
+
+        log.info("FETCHING BLOB {}", sourceBlobId);
         BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
 
         if (!sourceBlobClient.exists()) {
             log.error("Blob {} does not exist in {} container", sourceBlobId, sourceContainer);
         }
 
-        // create sas token with write permission
-        var expiryTime = OffsetDateTime.now().plusDays(1);
-        var permission = new BlobSasPermission().setWritePermission(true);
-        var sasSignatureValues = new BlobServiceSasSignatureValues(expiryTime, permission);
-        var sasToken = sourceBlobClient.generateSas(sasSignatureValues);
-
         // create dest blob
-        var uniqueBlobId = UUID.randomUUID();
         BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, serviceClient);
+        BlobClient destinationBlobClient = blobServiceFactory.getBlobClient(destinationContainerClient, testBlobId);
+        log.info("SAVING TEST BLOB {} to {}", testBlobId, destinationContainer);
+        destinationBlobClient.upload(BinaryData.fromString("test file to source container"));
 
-        log.info("COPYING BLOB from {} ", sourceBlobClient.getBlobUrl() + "?" + sasToken);
-        destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl() + "?" + sasToken);
+        String token = """
+            ?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D
+            """;
+        var uniqueBlobId = UUID.randomUUID();
+        log.info("COPYING BLOB {} from {} ", uniqueBlobId, sourceBlobClient.getBlobUrl());
+        destinationContainerClient.getBlobClient(uniqueBlobId.toString()).copyFromUrl(sourceBlobClient.getBlobUrl() + token);
 
     }
 
