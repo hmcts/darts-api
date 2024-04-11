@@ -240,6 +240,7 @@
 --    add FK on marked_for_manual_del_by to annotation_document, case_document, media, transcription_document
 --    add FK on deleted_by to annotation, court_case, media, transcription
 --    add FK on created_by, last_modified_by on transformed_media
+--v67 add 2 tables to support migration media_linked_legacy_case, event_linked_legacy_case
 
 
 -- List of Table Aliases
@@ -262,6 +263,7 @@
 -- defendant                   DFD
 -- event                       EVE
 -- event_handler               EVH
+-- event_linked_legacy_case    ELL
 -- external_object_directory   EOD
 -- external_service_auth_token ESA
 -- hearing                     HEA
@@ -272,6 +274,7 @@
 -- hearing_transcription_ae    HET
 -- judge                       JUD
 -- media                       MED
+-- media_linked_legacy_case    MLL
 -- media_request               MER
 -- node_register               NOD
 -- notification                NOT
@@ -767,6 +770,7 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_event';
 COMMENT ON COLUMN event.message_id
 IS 'no migration element, records the id of the message that gave rise to this event';
 
+
 CREATE TABLE event_handler
 (evh_id                      INTEGER                       NOT NULL
 ,event_type                  CHARACTER VARYING             NOT NULL
@@ -800,6 +804,15 @@ IS 'directly sourced from doc_handler';
 COMMENT ON COLUMN event_handler.handler
 IS 'to indicate if the event pertains to reporting restrictions, both application of, and lifting, in order to provide timeline of RR as applied to a case';
 
+CREATE TABLE event_linked_legacy_case
+(ell_id                      INTEGER                       NOT NULL
+,eve_id                      INTEGER                       NOT NULL     -- unenforced FK to event
+,c_courthouse                CHARACTER VARYING(64)         NOT NULL
+,c_case_id                   CHARACTER VARYING(32)         NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON TABLE event_linked_legacy_case
+IS 'content is to be populated via migration';
 
 CREATE TABLE external_object_directory
 (eod_id                      INTEGER                       NOT NULL
@@ -1044,6 +1057,16 @@ IS 'inherited from moj_case_document_s';
 
 COMMENT ON COLUMN media.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_media';
+
+CREATE TABLE media_linked_legacy_case
+(mll_id                      INTEGER                       NOT NULL
+,med_id                      INTEGER                       NOT NULL     -- unenforced FK to media
+,c_courthouse                CHARACTER VARYING(64)         NOT NULL
+,c_case_id                   CHARACTER VARYING(32)         NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON TABLE event_linked_legacy_case
+IS 'content is to be populated via migration';
 
 CREATE TABLE media_request
 (mer_id                      INTEGER                       NOT NULL
@@ -1505,6 +1528,9 @@ ALTER TABLE defendant             ADD PRIMARY KEY USING INDEX defendant_pk;
 CREATE UNIQUE INDEX event_pk ON event(eve_id) TABLESPACE darts_indexes;
 ALTER TABLE event                   ADD PRIMARY KEY USING INDEX event_pk;
 
+CREATE UNIQUE INDEX event_linked_legacy_case_pk ON event_linked_legacy_case(ell_id) TABLESPACE darts_indexes;
+ALTER TABLE event_linked_legacy_case  ADD PRIMARY KEY USING INDEX event_linked_legacy_case_pk;
+
 CREATE UNIQUE INDEX event_handler_pk ON event_handler(evh_id) TABLESPACE darts_indexes;
 ALTER TABLE event_handler            ADD PRIMARY KEY USING INDEX event_handler_pk;
 
@@ -1540,6 +1566,9 @@ ALTER TABLE judge                ADD PRIMARY KEY USING INDEX judge_pk;
 
 CREATE UNIQUE INDEX media_pk ON media(med_id) TABLESPACE darts_indexes;
 ALTER TABLE media                   ADD PRIMARY KEY USING INDEX media_pk;
+
+CREATE UNIQUE INDEX media_linked_legacy_case_pk ON media_linked_legacy_case(mll_id) TABLESPACE darts_indexes;
+ALTER TABLE media_linked_legacy_case  ADD PRIMARY KEY USING INDEX media_linked_legacy_case_pk;
 
 CREATE UNIQUE INDEX media_request_pk ON media_request(mer_id) TABLESPACE darts_indexes;
 ALTER TABLE media_request           ADD PRIMARY KEY USING INDEX media_request_pk;
@@ -1614,10 +1643,12 @@ CREATE SEQUENCE eve_seq CACHE 20;
 CREATE SEQUENCE evh_seq CACHE 20;
 CREATE SEQUENCE eod_seq CACHE 20;
 CREATE SEQUENCE elt_seq CACHE 20;
+CREATE SEQUENCE ell_seq CACHE 20;
 CREATE SEQUENCE esa_seq CACHE 20;
 CREATE SEQUENCE jud_seq CACHE 20;
 CREATE SEQUENCE hea_seq CACHE 20;
 CREATE SEQUENCE med_seq CACHE 20;
+CREATE SEQUENCE mll_seq CACHE 20;
 CREATE SEQUENCE mer_seq CACHE 20;
 CREATE SEQUENCE nod_seq CACHE 20 START WITH 50000;   -- sequence for node_register.node_id
 CREATE SEQUENCE not_seq CACHE 20;
@@ -2094,10 +2125,6 @@ ADD CONSTRAINT transcription_document_object_hidden_reason_fk
 FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
 
 ALTER TABLE transcription_document
-ADD CONSTRAINT transcription_document_object_hidden_reason_fk
-FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
-
-ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_hidden_by_fk
 FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
 
@@ -2190,6 +2217,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON daily_list TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defence TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defendant TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON event_linked_legacy_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event_handler TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_location_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_object_directory TO darts_user;
@@ -2200,6 +2228,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_event_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_media_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON judge TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON media_linked_legacy_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media_request TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON node_register TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON notification TO darts_user;
