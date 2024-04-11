@@ -151,7 +151,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Test
     void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
-                                                                                        automatedTaskConfigurationProperties,logApi
+                                                                                        automatedTaskConfigurationProperties, logApi
         );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
