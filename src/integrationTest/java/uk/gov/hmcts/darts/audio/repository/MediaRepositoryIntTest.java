@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.CaseTestData;
+import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.time.LocalDate;
@@ -26,6 +26,8 @@ class MediaRepositoryIntTest extends IntegrationBase {
     HearingStub hearingStub;
     @Autowired
     HearingRepository hearingRepository;
+    @Autowired
+    CourtCaseStub caseStub;
 
     @Autowired
     MediaRepository mediaRepository;
@@ -34,12 +36,8 @@ class MediaRepositoryIntTest extends IntegrationBase {
     void testFindMediasByCaseId() {
 
         // given
-        var caseA = CaseTestData.createSomeMinimalCase();
-        var caseB = CaseTestData.createSomeMinimalCase();
-        caseRepository.save(caseA);
-        caseRepository.save(caseB);
-
-        var medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+        var caseA = caseStub.createAndSaveMinimalCourtCase();
+        var caseB = caseStub.createAndSaveMinimalCourtCase();
 
         var hearA1 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom", caseA.getCaseNumber(), DATE_NOW);
         var hearA2 = hearingStub.createHearing(caseA.getCourthouse().getCourthouseName(), "testCourtroom2", caseA.getCaseNumber(), DATE_NOW);
@@ -50,6 +48,7 @@ class MediaRepositoryIntTest extends IntegrationBase {
         caseRepository.save(caseA);
         caseRepository.save(caseB);
 
+        var medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         hearA1.addMedia(medias.get(0));
         hearA1.addMedia(medias.get(1));
         hearA2.addMedia(medias.get(2));
