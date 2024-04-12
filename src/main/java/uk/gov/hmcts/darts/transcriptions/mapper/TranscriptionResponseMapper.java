@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
+import uk.gov.hmcts.darts.transcriptions.model.Requestor;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
@@ -76,6 +77,7 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setTranscriptionId(transcriptionEntity.getId());
         transcriptionResponse.setCaseId(courtCase.getId());
         transcriptionResponse.setCaseNumber(courtCase.getCaseNumber());
+        transcriptionResponse.setCourthouseId(courtCase.getCourthouse().getId());
         transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
         transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
         transcriptionResponse.setJudges(courtCase.getJudgeStringList());
@@ -85,8 +87,15 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setStatus(transcriptionStatusEntity.getDisplayName());
         }
 
-        transcriptionResponse.setFrom(getRequestorName(transcriptionEntity));
+        String requestorName = getRequestorName(transcriptionEntity);
+        transcriptionResponse.setFrom(requestorName);
         transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
+
+        Requestor requestor = new Requestor();
+        requestor.setUserFullName(requestorName);
+        requestor.setUserId(getRequestorId(transcriptionEntity));
+        transcriptionResponse.setRequestor(requestor);
+
         transcriptionResponse.setRequestorComments(TranscriptionUtil.getTranscriptionCommentAtStatus(
             transcriptionEntity,
             TranscriptionStatusEnum.REQUESTED
@@ -174,6 +183,14 @@ public class TranscriptionResponseMapper {
             return transcriptionEntity.getCreatedBy().getUserName();
         } else {
             return transcriptionEntity.getRequestor();
+        }
+    }
+
+    private Integer getRequestorId(TranscriptionEntity transcriptionEntity) {
+        if (transcriptionEntity.getCreatedBy() != null) {
+            return transcriptionEntity.getCreatedBy().getId();
+        } else {
+            return null;
         }
     }
 }
