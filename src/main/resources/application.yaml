@@ -199,6 +199,7 @@ darts:
       case-record-properties-file: properties/arm/case-record.properties
 
       response-cleanup-buffer-days: 0
+      event-date-adjustment-years: 100
 
       batch-size: ${ARM_BATCH_SIZE:10}
       manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}

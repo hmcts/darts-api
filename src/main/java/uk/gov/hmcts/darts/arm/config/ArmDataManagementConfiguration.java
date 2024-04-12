@@ -37,6 +37,7 @@ public class ArmDataManagementConfiguration extends StorageConfiguration {
     private String manifestFilePrefix;
     private String armClient;
     private String continuationTokenDuration;
+    private Integer eventDateAdjustmentYears;
 
     @Getter
     @Setter
