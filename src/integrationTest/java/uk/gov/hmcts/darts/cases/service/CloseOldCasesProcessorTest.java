@@ -79,6 +79,29 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
     }
 
+    @Test
+    void givenOneEventUseLatestDateAsClosedDate() {
+        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7));
+
+        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
+        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 3);
+        eventEntity2.setCreatedDateTime(closeDate);
+
+        dartsDatabase.save(eventEntity2);
+
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(10));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases();
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+    }
+
 
     @Test
     void givenAudioUseDateAsClosedDate() {
