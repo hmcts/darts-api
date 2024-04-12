@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -78,17 +79,35 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
         try {
-            if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
-                Instant start = Instant.now();
-                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} started at {}",
-                         unstructuredExternalObjectDirectoryEntity.getId(), start);
+            Instant binaryStart = Instant.now();
+            log.info("INBOUND TO UNSTRUCTURED BINARY DOWNLOAD/UPLOAD PERFORMANCE for EOD {} started at {}",
+                     unstructuredExternalObjectDirectoryEntity.getId(), binaryStart);
+            BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
 
+
+            if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
+                //upload file
+                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
+                Instant binaryFinish = Instant.now();
+                log.info("INBOUND TO UNSTRUCTURED BINARY DOWNLOAD/UPLOAD PERFORMANCE for EOD {} UUID {} completed at {}",
+                         unstructuredExternalObjectDirectoryEntity.getId(), uuid, binaryFinish);
+                long binaryTimeElapsed = Duration.between(binaryStart, binaryFinish).toMillis();
+                log.info("INBOUND TO UNSTRUCTURED BINARY DOWNLOAD/UPLOAD PERFORMANCE for EOD {} took {} ms",
+                         unstructuredExternalObjectDirectoryEntity.getId(), binaryTimeElapsed);
+
+                Instant copyStart = Instant.now();
+                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} started at {}",
+                         unstructuredExternalObjectDirectoryEntity.getId(), copyStart);
                 // copy file
                 UUID blobId = inboundExternalObjectDirectory.getExternalLocation();
                 dataManagementService.copyBlobData(getInboundContainerName(), getUnstructuredContainerName(), blobId);
                 Instant copyCompleted = Instant.now();
                 log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} copy completed at {}",
                          unstructuredExternalObjectDirectoryEntity.getId(), copyCompleted);
+
+                long copyTimeElapsed = Duration.between(copyStart, copyCompleted).toMillis();
+                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} took {} ms",
+                         unstructuredExternalObjectDirectoryEntity.getId(), copyTimeElapsed);
 
                 unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                 unstructuredExternalObjectDirectoryEntity.setExternalLocation(blobId);
@@ -97,12 +116,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
                 log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
 
-                Instant finish = Instant.now();
-                long timeElapsed = Duration.between(start, finish).toMillis();
-                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} ended at {}",
-                         unstructuredExternalObjectDirectoryEntity.getId(), finish);
-                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} took {} ms",
-                         unstructuredExternalObjectDirectoryEntity.getId(), timeElapsed);
+
             }
         } catch (BlobStorageException e) {
             log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}. Error Stack {}",

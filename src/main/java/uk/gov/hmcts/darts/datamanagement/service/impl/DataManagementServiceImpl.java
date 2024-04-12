@@ -111,14 +111,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     @Override
     public void copyBlobData(String sourceContainer, String destinationContainer, UUID sourceBlobId) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
-
-
         BlobContainerClient sourceContainerClient = blobServiceFactory.getBlobContainerClient(sourceContainer, serviceClient);
-
-        var testBlobId = UUID.randomUUID();
-        BlobClient testSourceBlob = blobServiceFactory.getBlobClient(sourceContainerClient, testBlobId);
-        log.info("SAVING TEST BLOB {} to {}", testBlobId, sourceContainer);
-        testSourceBlob.upload(BinaryData.fromString("test file to source container"));
 
         log.info("FETCHING BLOB {}", sourceBlobId);
         BlobClient sourceBlobClient = blobServiceFactory.getBlobClient(sourceContainerClient, sourceBlobId);
@@ -129,17 +122,12 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         // create dest blob
         BlobContainerClient destinationContainerClient = blobServiceFactory.getBlobContainerClient(destinationContainer, serviceClient);
-        BlobClient destinationBlobClient = blobServiceFactory.getBlobClient(destinationContainerClient, testBlobId);
-        log.info("SAVING TEST BLOB {} to {}", testBlobId, destinationContainer);
-        destinationBlobClient.upload(BinaryData.fromString("test file to source container"));
 
-        var uniqueBlobId = UUID.randomUUID();
-        log.info("COPYING BLOB {} from {} ", uniqueBlobId, sourceBlobClient.getBlobUrl());
+        log.info("COPYING BLOB {} from {} ", sourceBlobId, sourceBlobClient.getBlobUrl());
         destinationContainerClient
-            .getBlobClient(uniqueBlobId.toString())
+            .getBlobClient(sourceBlobId.toString())
             .copyFromUrl(sourceBlobClient.getBlobUrl()
              + "?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D");
-
     }
 
     private ParallelTransferOptions createCommonTransferOptions() {

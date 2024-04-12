@@ -170,7 +170,6 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobContainerClient(DEST_BLOB_CONTAINER_NAME, serviceClient)).thenReturn(destinationBlobContainerClient);
         when(dataManagementFactory.getBlobClient(eq(blobContainerClient), any())).thenReturn(blobClient);
-        when(dataManagementFactory.getBlobClient(eq(destinationBlobContainerClient), any())).thenReturn(destinationBlobClient);
         when(destinationBlobContainerClient.getBlobClient(any())).thenReturn(destinationBlobClient);
 
         dataManagementService.copyBlobData(BLOB_CONTAINER_NAME, DEST_BLOB_CONTAINER_NAME, BLOB_ID);
