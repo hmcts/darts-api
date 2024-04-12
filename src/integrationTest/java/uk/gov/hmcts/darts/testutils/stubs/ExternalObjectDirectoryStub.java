@@ -129,6 +129,16 @@ public class ExternalObjectDirectoryStub {
         return externalObjectDirectory;
     }
 
+    public ExternalObjectDirectoryEntity createAndSaveEod(AnnotationDocumentEntity annotationDocument,
+                                                          ObjectRecordStatusEnum objectRecordStatus,
+                                                          ExternalLocationTypeEnum externalLocationType,
+                                                          Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
+        UUID uuid = UUID.randomUUID();
+        var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
+        createdEodConsumer.accept(eod);
+        return eodRepository.save(eod);
+    }
+
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
