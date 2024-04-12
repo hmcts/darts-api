@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
+import uk.gov.hmcts.darts.common.util.Version;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -45,7 +46,12 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -122,42 +128,173 @@ public class AudioServiceImpl implements AudioService {
     @Override
     @Transactional
     public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
-        MessageDigest md5Digest;
-        try {
-            md5Digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
 
-        UUID externalLocation = null;
-        String checksum = null;
+        log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
-        ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
-            if (audioFileStream.isEmpty()) {
-                objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
+        Optional<Collection<MediaEntity>> identifiedDuplicate = getDuplicateMediaFile(addAudioMetadataRequest);
+        Optional<Collection<MediaEntity>> audioToVersion = findAudioToVersionAccordingToSize(identifiedDuplicate,
+                                                                                                  addAudioMetadataRequest.getFileSize());
+
+        if (identifiedDuplicate.isEmpty() || audioToVersion.isPresent()) {
+
+            // if we have not found any duplicate audio files to process lets add a new one
+            if (audioToVersion.isEmpty()) {
+                List<MediaEntity> audioFileToProcess = new ArrayList<MediaEntity>();
+                MediaEntity newEntity = mapper.mapToMedia(addAudioMetadataRequest);
+
+                audioFileToProcess.add(newEntity);
+                audioToVersion = Optional.of(audioFileToProcess);
+
+                log.info("No duplicates found. Uploading new file");
             } else {
-                externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
-                checksum = fileContentChecksum.calculate(digestInputStream);
+                log.info("Identified media ids that require duplicate audio");
             }
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+
+            MessageDigest md5Digest;
+            try {
+                md5Digest = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+            }
+
+            UUID externalLocation = null;
+            String checksum = null;
+
+            ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
+            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
+                if (audioFileStream.isEmpty()) {
+                    objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
+                } else {
+                    externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
+                    checksum = fileContentChecksum.calculate(digestInputStream);
+                }
+            } catch (IOException e) {
+                throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+            }
+
+            // version the file upload to the database
+            versionUpload(audioToVersion.get(), addAudioMetadataRequest,
+                           externalLocation, checksum, objectRecordStatusEntity);
+        } else {
+            log.info("Duplicate audio upload detected with no difference in file size. Returning 200 with no changes ");
+            for (MediaEntity entity : identifiedDuplicate.get()) {
+                log.info("Duplicate media id {}", entity.getId());
+            }
         }
+    }
 
-        MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
-        savedMedia.setChecksum(checksum);
-        linkAudioToHearingInMetadata(addAudioMetadataRequest, savedMedia);
-        linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
+    private void versionUpload(Collection<MediaEntity> audioToVersion,
+                                AddAudioMetadataRequest addAudioMetadataRequest,
+                                UUID externalLocation, String checksum,
+                                ObjectRecordStatusEntity objectRecordStatusEntity) {
+        for (MediaEntity entity : audioToVersion) {
 
-        saveExternalObjectDirectory(
-            externalLocation,
-            checksum,
-            userIdentity.getUserAccount(),
-            savedMedia,
-            objectRecordStatusEntity
-        );
+            if (entity.getId() != null) {
+                Version version = new Version(entity.getLegacyVersionLabel());
+                entity = mapper.mapToMedia(addAudioMetadataRequest);
+
+                //Increase the major number for now
+                version.increaseMajor();
+
+                setVersion(version, entity);
+                log.info("Uploading version of duplicate filename {} under version number {}", entity.getMediaFile(), entity.getLegacyVersionLabel());
+            } else {
+                log.info("New file uploaded {} with version number {}", entity.getMediaFile(), entity.getLegacyVersionLabel());
+
+                setVersion(new Version(), entity);
+            }
+            MediaEntity savedMedia = mediaRepository.save(entity);
+            log.info("Saved media id {}", entity.getId());
+
+            savedMedia.setChecksum(checksum);
+            linkAudioToHearingInMetadata(addAudioMetadataRequest, savedMedia);
+            linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
+
+            saveExternalObjectDirectory(
+                externalLocation,
+                checksum,
+                userIdentity.getUserAccount(),
+                savedMedia,
+                objectRecordStatusEntity
+            );
+        }
 
         logApi.audioUploaded(addAudioMetadataRequest);
+    }
+
+    //TODO: Clarify how the version is set in the DB
+    private void setVersion(Version version, MediaEntity entity) {
+        entity.setLegacyVersionLabel(version.getVersionString());
+    }
+
+    private Optional<Collection<MediaEntity>> findAudioToVersionAccordingToSize(Optional<Collection<MediaEntity>> duplicates,
+                                                                                long size) {
+        Collection<MediaEntity> mediaEntitiesToVersion = new ArrayList<>();
+
+        if (duplicates.isPresent()) {
+            for (MediaEntity entity : duplicates.get()) {
+
+                // if file size is not expected
+                if (size != entity.getFileSize()) {
+                    mediaEntitiesToVersion.add(entity);
+                }
+            }
+
+            if (!mediaEntitiesToVersion.isEmpty()) {
+                return Optional.of(mediaEntitiesToVersion);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Collection<MediaEntity>> getDuplicateMediaFile(AddAudioMetadataRequest addAudioMetadataRequest) {
+        Map<List<String>, MediaEntity> casesToLatestMedia = new HashMap<>();
+
+        List<MediaEntity> mediaEntities = mediaRepository.findMediaByDetails(
+                                                                             addAudioMetadataRequest.getCourthouse(),
+                                                                             addAudioMetadataRequest.getCourtroom(),
+                                                                             addAudioMetadataRequest.getChannel(),
+                                                                             addAudioMetadataRequest.getFilename(),
+                                                                             addAudioMetadataRequest.getStartedAt(),
+                                                                             addAudioMetadataRequest.getEndedAt());
+        mediaEntities = getCaseRelatedEntities(addAudioMetadataRequest.getCases(), mediaEntities);
+
+        // we now need to get the latest media entity for each type so we can increment the version
+        // for a media entity. To determine this we match on the cases number list
+        for (MediaEntity entity : mediaEntities) {
+            MediaEntity fndMediaEntity = casesToLatestMedia.get(entity.getCaseNumberList());
+            if (fndMediaEntity != null) {
+                int compareVersion = new Version(entity.getLegacyVersionLabel()).compareTo(new Version(fndMediaEntity.getLegacyVersionLabel()));
+                if (compareVersion > 0) {
+                    casesToLatestMedia.put(entity.getCaseNumberList(), fndMediaEntity);
+                }
+            } else {
+                casesToLatestMedia.put(entity.getCaseNumberList(), entity);
+            }
+        }
+
+        if (!casesToLatestMedia.isEmpty()) {
+            return Optional.of(casesToLatestMedia.values());
+        }
+
+        return Optional.empty();
+    }
+
+    private List<MediaEntity> getCaseRelatedEntities(List<String> cases, List<MediaEntity> entities) {
+        ArrayList<MediaEntity> entityForCaseLst = new ArrayList<>();
+        for (MediaEntity entity : entities) {
+            List<String> casesForEntity = entity.getCaseNumberList();
+
+            // lets determine if any of the cases we are targeting exist against the media entities
+            casesForEntity.retainAll(cases);
+
+            if (!casesForEntity.isEmpty()) {
+                entityForCaseLst.add(entity);
+            }
+        }
+
+        return entityForCaseLst;
     }
 
     @Override
