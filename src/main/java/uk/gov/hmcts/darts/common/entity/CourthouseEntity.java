@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,15 +43,20 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     @EqualsAndHashCode.Include
     private String courthouseName;
 
+
+    @JsonIgnore
     @OneToMany(mappedBy = "courthouse")
+    @JsonManagedReference
     private List<CourtroomEntity> courtrooms;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "cth_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "courthouse_region_ae",
         joinColumns = {@JoinColumn(name = "cth_id")},

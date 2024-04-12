@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -127,6 +128,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = HearingEntity_.MEDIA_LIST)
     private List<HearingEntity> hearingList = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +33,7 @@ public class RegionEntity {
     @Column(name = "region_name")
     private String regionName;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = CourthouseEntity_.REGIONS)
     private Set<CourthouseEntity> courthouses = new LinkedHashSet<>();
 

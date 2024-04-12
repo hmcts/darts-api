@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,18 +57,21 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @Column(name = "judge_hearing_date")
     private String judgeHearingDate;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "hearing_judge_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "hearing_media_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
@@ -78,6 +82,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
     //TODO look to remove this
+    @JsonIgnore
     @Deprecated()
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
@@ -85,10 +90,12 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
     private List<EventEntity> eventList = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "hearing_annotation_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},

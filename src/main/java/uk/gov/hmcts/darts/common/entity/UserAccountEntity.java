@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -59,6 +60,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_system_user", nullable = false)
     private Boolean isSystemUser;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "security_group_user_account_ae",
         joinColumns = {@JoinColumn(name = "usr_id")},

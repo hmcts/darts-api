@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.compositeid.UserCourtCaseId;
 @IdClass(UserCourtCaseId.class)
 public class UserAccountCourtCaseEntity {
 
+    @JsonIgnore
     @Id
     @ManyToOne
     @JoinColumn(name = "cth_id")
@@ -32,6 +34,7 @@ public class UserAccountCourtCaseEntity {
     @JoinColumn(name = "rol_id")
     private SecurityRoleEntity securityRole;
 
+    @JsonIgnore
     @Id
     @ManyToOne
     @JoinColumn(name = "cas_id")

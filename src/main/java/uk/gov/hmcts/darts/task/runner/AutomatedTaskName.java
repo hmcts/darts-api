@@ -18,7 +18,8 @@ public enum AutomatedTaskName {
     PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles"),
     APPLY_RETENTION("ApplyRetention"),
     CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),
-    CLOSE_OLD_CASES("CloseOldCases");
+    CLOSE_OLD_CASES("CloseOldCases"),
+    CLOSED_CASES_TO_ARM("ClosedCasesToArm");
 
     private final String taskName;
 

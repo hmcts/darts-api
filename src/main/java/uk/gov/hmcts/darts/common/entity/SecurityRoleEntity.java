@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,6 +40,7 @@ public class SecurityRoleEntity {
     @Column(name = "display_state")
     private Boolean displayState;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "security_role_permission_ae",
         joinColumns = {@JoinColumn(name = "rol_id")},

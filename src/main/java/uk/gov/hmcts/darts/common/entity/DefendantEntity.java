@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +33,7 @@ public class DefendantEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "dfd_gen", sequenceName = "dfd_seq", allocationSize = 1)
     private Integer id;
 
+    @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = CAS_ID)
     private CourtCaseEntity courtCase;

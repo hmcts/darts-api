@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,6 +39,7 @@ public class CourtroomEntity extends CreatedBaseEntity {
     @Column(name = COURTROOM_NAME)
     private String name;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
