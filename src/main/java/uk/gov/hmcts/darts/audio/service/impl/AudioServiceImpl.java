@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +85,7 @@ public class AudioServiceImpl implements AudioService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
     private final LogApi logApi;
+    private final EntityManager em;
 
     private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return AudioFileInfo.builder()
@@ -189,7 +192,19 @@ public class AudioServiceImpl implements AudioService {
                                 ObjectRecordStatusEntity objectRecordStatusEntity) {
         for (MediaEntity entity : audioToVersion) {
 
+            LockModeType modeType = null;
             if (entity.getId() != null) {
+                modeType = em.getLockMode(entity);
+            }
+            if (entity.getId() != null) {
+
+                // lock the entity record so that nothing can write to it. We need
+                // this to ensure version doesnt change if a concurrent add audio request comes through
+                em.lock(entity, LockModeType.PESSIMISTIC_WRITE);
+
+                // ensure that we refresh the entity
+                em.refresh(entity);
+
                 Version version = new Version(entity.getLegacyVersionLabel());
                 entity = mapper.mapToMedia(addAudioMetadataRequest);
 
@@ -204,6 +219,12 @@ public class AudioServiceImpl implements AudioService {
                 setVersion(new Version(), entity);
             }
             MediaEntity savedMedia = mediaRepository.save(entity);
+
+            // set the lock mode back to what is was originally
+            if (modeType != null) {
+                em.lock(entity, modeType);
+            }
+
             log.info("Saved media id {}", entity.getId());
 
             savedMedia.setChecksum(checksum);
