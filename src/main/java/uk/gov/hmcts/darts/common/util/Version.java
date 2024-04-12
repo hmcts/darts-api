@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * A class that manages the versioning format within modernised darts
- * TODO: Understand how this version number should be represented
  **/
 @Slf4j
-public class Version implements Comparable<Version>{
+public class Version implements Comparable<Version> {
 
     private Integer major = 1;
 
