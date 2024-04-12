@@ -52,7 +52,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         for (HearingEntity hearingEntity: courtCase.getHearings()) {
             eventList.addAll(hearingEntity.getEventList());
         }
-        if (eventList.size() > 1) {
+        if (!eventList.isEmpty()) {
             eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
             //find latest closed event
             Optional<EventEntity> closedEvent =
