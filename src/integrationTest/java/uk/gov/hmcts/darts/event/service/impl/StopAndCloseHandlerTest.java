@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
@@ -196,7 +197,8 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
-        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER, testTime.toLocalDate());
+        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
+                                                                             DateConverterUtil.toLocalDateTime(testTime));
 
         dartsGateway.darNotificationReturnsSuccess();
 
@@ -267,7 +269,8 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
-        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER, testTime.toLocalDate());
+        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
+                                                                             DateConverterUtil.toLocalDateTime(testTime));
 
         dartsGateway.darNotificationReturnsSuccess();
 

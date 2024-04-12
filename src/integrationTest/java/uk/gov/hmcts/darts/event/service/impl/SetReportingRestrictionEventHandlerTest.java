@@ -10,10 +10,10 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
-import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -23,7 +23,7 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
     public static final String SOME_ROOM = "some-room";
     public static final String SOME_CASE_NUMBER = "1";
     public static final String TEST_REPORTING_RESTRICTION = "Reporting Restriction Test";
-    private final OffsetDateTime today = now();
+    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 23, 10, 0, 0);
 
     @Autowired
     EventDispatcher eventDispatcher;
@@ -45,17 +45,17 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM,
-            today.toLocalDate()
+            HEARING_DATE
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
-                                    .dateTime(today));
+                                    .dateTime(HEARING_DATE.atOffset(ZoneOffset.UTC)));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
@@ -80,17 +80,17 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM,
-            today.toLocalDate()
+            HEARING_DATE
         );
 
         eventDispatcher.receive(clearReportingRestrictionsDartsEvent()
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
-                                    .dateTime(today));
+                                    .dateTime(HEARING_DATE.atOffset(ZoneOffset.UTC)));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(

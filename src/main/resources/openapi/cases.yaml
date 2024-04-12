@@ -342,6 +342,7 @@ components:
       type: object
       required:
         - courthouse
+        - courtroom
         - case_number
       properties:
         courthouse:

@@ -32,7 +32,7 @@ import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +50,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @ActiveProfiles({"intTest", "h2db"})
 class UnstructuredToArmProcessorTest extends IntegrationBase {
 
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
     private UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
