@@ -16,10 +16,13 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
+
+import java.time.LocalDateTime;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -68,11 +71,12 @@ public abstract class EventHandlerBase implements EventHandler {
 
         String caseNumber = caseNumbers.get(0);
         try {
+            LocalDateTime hearingDateTime = DateConverterUtil.toLocalDateTime(dartsEvent.getDateTime());
             HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
                 dartsEvent.getCourthouse(),
                 dartsEvent.getCourtroom(),
                 caseNumber,
-                dartsEvent.getDateTime().toLocalDate()
+                hearingDateTime
             );
 
             EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);

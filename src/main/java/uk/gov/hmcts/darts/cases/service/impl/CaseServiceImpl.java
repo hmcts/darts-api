@@ -31,13 +31,17 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +65,7 @@ public class CaseServiceImpl implements CaseService {
     private final TranscriptionRepository transcriptionRepository;
     private final AuthorisationApi authorisationApi;
     private final LogApi logApi;
+    private final CurrentTimeHelper currentTimeHelper;
 
     @Override
     @Transactional
@@ -111,11 +116,16 @@ public class CaseServiceImpl implements CaseService {
     @Transactional
     @Override
     public PostCaseResponse addCaseOrUpdate(AddCaseRequest addCaseRequest) {
-        CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
+
+        OffsetDateTime currentTime = currentTimeHelper.currentOffsetDateTime();
+        LocalDateTime hearingLocalDateTime = DateConverterUtil.toLocalDateTime(currentTime);
+        HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
             addCaseRequest.getCourthouse(),
-            addCaseRequest.getCaseNumber()
+            addCaseRequest.getCourtroom(),
+            addCaseRequest.getCaseNumber(),
+            hearingLocalDateTime
         );
-        return updateCase(addCaseRequest, courtCase);
+        return updateCase(addCaseRequest, hearing.getCourtCase());
     }
 
     private PostCaseResponse updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {

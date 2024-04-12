@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.util;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
@@ -21,6 +22,15 @@ public class DateConverterUtil {
 
     public OffsetDateTime toOffsetDateTime(LocalDate localDate) {
         return localDate.atTime(MIDNIGHT_UTC);
+    }
+
+    public LocalDateTime toLocalDateTime(ZonedDateTime zonedDateTime) {
+        return zonedDateTime.toLocalDateTime();
+    }
+
+    public LocalDateTime toLocalDateTime(OffsetDateTime offsetDateTime) {
+        ZonedDateTime zonedDateTime = toZonedDateTime(offsetDateTime);
+        return toLocalDateTime(zonedDateTime);
     }
 
 }

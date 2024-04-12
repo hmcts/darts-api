@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -47,7 +48,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
@@ -91,8 +92,8 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
             }
             """;
 
-       expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
-       expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
+        expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
+        expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
     }

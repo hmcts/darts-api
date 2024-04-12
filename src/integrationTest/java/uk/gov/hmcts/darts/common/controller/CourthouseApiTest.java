@@ -224,7 +224,7 @@ class CourthouseApiTest extends IntegrationBase {
             .getId();
 
         dartsDatabase.createHearing(COURTHOUSE_NAME,
-                                    "roomname", "101", LocalDate.now());
+                                    "roomname", "101", LocalDate.now();
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);

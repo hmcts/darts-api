@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Component
@@ -25,7 +25,7 @@ public class MediaRequestStub {
     @Transactional
     public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType, MediaRequestStatus status) {
 
-        HearingEntity hearing = hearingStub.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
+        HearingEntity hearing = hearingStub.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
         return mediaRequestRepository.save(
             AudioTestData.createCurrentMediaRequest(

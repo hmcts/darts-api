@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AnnotationStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
@@ -54,7 +55,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     void givenJudgeUserReturnOwnAnnotationsButNotDeleted() throws Exception {
         final CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
-            .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
+            .createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(CREATED_DATE));
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createJudgeUser();
@@ -87,11 +88,11 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     void givenJudgeMultipleHearingsInCaseGetAllAnnotations() throws Exception {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity1 = dartsDatabase.getHearingStub()
-            .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
+            .createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(CREATED_DATE));
 
         HearingEntity hearingEntity2 = dartsDatabase.getHearingStub()
             .createHearing("Bristol", "1", "case1",
-                           CREATED_DATE.toLocalDate().plusMonths(1));
+                           DateConverterUtil.toLocalDateTime(CREATED_DATE).plusMonths(1));
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createJudgeUser();
@@ -124,7 +125,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     void givenSuperAdminUserReturnAllAnnotations() throws Exception {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
-            .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
+            .createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(CREATED_DATE));
 
         UserAccountEntity testUser = superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
@@ -158,7 +159,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     void givenNonSuperAdminJudgeUserReturnForbidden() throws Exception {
         final CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
-            .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
+            .createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(CREATED_DATE));
 
         UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
             .createJudgeUser("1");
@@ -184,7 +185,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
     void givenSuperUserReturnForbidden() throws Exception {
         final CourtCaseEntity courtCaseEntity = dartsDatabase.createCase("Bristol", "case1");
         HearingEntity hearingEntity = dartsDatabase.getHearingStub()
-            .createHearing("Bristol", "1", "case1", CREATED_DATE.toLocalDate());
+            .createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(CREATED_DATE));
 
         UserAccountEntity judgeUser = dartsDatabase.getUserAccountStub()
             .createJudgeUser("1");
