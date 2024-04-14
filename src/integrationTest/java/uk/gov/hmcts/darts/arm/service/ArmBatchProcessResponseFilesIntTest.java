@@ -71,9 +71,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     public static final String T_13_45_00_Z = "2023-06-10T13:45:00Z";
 
     @Autowired
-    private ArmResponseFilesProcessor armResponseFilesProcessor;
-
-    @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Autowired
     private ExternalObjectDirectoryService externalObjectDirectoryService;
