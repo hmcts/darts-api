@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.testutils.data.CaseTestData;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class CourtCaseStub {
 
-    private static final LocalDate D_2020_10_1 = LocalDate.of(2020, 10, 1);
-    private static final LocalDate D_2020_10_2 = LocalDate.of(2020, 10, 2);
+    private static final LocalDateTime D_2020_10_1 = LocalDateTime.of(2020, 10, 1, 12, 0, 0);
+    private static final LocalDateTime D_2020_10_2 = LocalDateTime.of(2020, 10, 2, 12, 0, 0);
 
     @Autowired
     HearingStub hearingStub;
