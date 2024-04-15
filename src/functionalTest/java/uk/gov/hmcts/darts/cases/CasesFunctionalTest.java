@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CasesFunctionalTest  extends FunctionalTest {
+class CasesFunctionalTest extends FunctionalTest {
     private static final String CASES_PATH = "/cases";
     private static final String EVENTS_PATH = "/events";
     private static final String CASE_NUMBER = "func-case-" + randomAlphanumeric(7);
@@ -39,15 +39,16 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Order(1)
     void createCaseAndEvent() {
         String caseBody = """
-        {
-            "courthouse": "<<courthouse>>",
-            "case_number": "<<caseNumber>>",
-            "defendants": ["Defendant A"],
-            "judges": ["Judge 1"],
-            "prosecutors": ["Prosecutor A"],
-            "defenders": ["Defender A"]
-        }
-            """;
+            {
+                "courthouse": "<<courthouse>>",
+                "courtroom": "1",
+                "case_number": "<<caseNumber>>",
+                "defendants": ["Defendant A"],
+                "judges": ["Judge 1"],
+                "prosecutors": ["Prosecutor A"],
+                "defenders": ["Defender A"]
+            }
+                """;
         caseBody = caseBody.replace("<<courthouse>>", COURTHOUSE);
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
@@ -63,19 +64,19 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(201, caseResponse.statusCode());
 
         String eventBody = """
-                      {
-                        "message_id": "100",
-                        "type": "1000",
-                        "sub_type": "1002",
-                        "event_id": "12345",
-                        "courthouse": "<<courthouse>>",
-                        "courtroom": "<<courtroom>>",
-                        "case_numbers": [
-                          "<<caseNumber>>"
-                        ],
-                        "event_text": "some text for the event",
-                        "date_time": "2023-08-08T14:01:06.085Z"
-                      }""";
+            {
+              "message_id": "100",
+              "type": "1000",
+              "sub_type": "1002",
+              "event_id": "12345",
+              "courthouse": "<<courthouse>>",
+              "courtroom": "<<courtroom>>",
+              "case_numbers": [
+                "<<caseNumber>>"
+              ],
+              "event_text": "some text for the event",
+              "date_time": "2023-08-08T14:01:06.085Z"
+            }""";
 
         eventBody = eventBody.replace("<<courthouse>>", COURTHOUSE);
         eventBody = eventBody.replace("<<courtroom>>", COURTROOM);
@@ -118,10 +119,10 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Order(3)
     void searchPostCase() {
         String caseBody = """
-        {
-            "case_number": "<<caseNumber>>"
-        }
-            """;
+            {
+                "case_number": "<<caseNumber>>"
+            }
+                """;
 
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
