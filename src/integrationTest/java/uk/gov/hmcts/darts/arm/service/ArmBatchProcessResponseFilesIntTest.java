@@ -231,7 +231,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
         String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
-        String createRecordFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
+        String createRecordFilename4 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
         List<String> hashcodeResponses2 = List.of(createRecordFilename4);
         when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(hashcodeResponses2);
         String createRecordFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
@@ -392,7 +392,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenThrow(new RuntimeException());
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenThrow(new RuntimeException());
 
-        String createRecordFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", HASHCODE_2);
+        String createRecordFilename4 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", HASHCODE_2);
         List<String> hashcodeResponses2 = List.of(createRecordFilename4);
         when(armDataManagementApi.listResponseBlobs(HASHCODE_2)).thenReturn(hashcodeResponses2);
         String createRecordFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
@@ -534,12 +534,12 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
-        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
-        String uploadFileFilename3 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
-        String invalidLineFileFilename3 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
+        String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
+        String createRecordFilename2 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_il.rsp", hashcode1);
+        String uploadFileFilename3 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1897_1_uf.rsp", hashcode1);
+        String invalidLineFileFilename3 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1897_0_il.rsp", hashcode1);
         List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
                                                  createRecordFilename2, invalidLineFileFilename2,
                                                  uploadFileFilename3, invalidLineFileFilename3);
@@ -568,7 +568,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.getBlobData(invalidLineFileFilename3)).thenReturn(invalidLineFileBinaryDataTest3);
 
         String hashcode2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
-        String createRecordFilename4 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
+        String createRecordFilename4 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1890_1_cr.rsp", hashcode2);
         List<String> hashcodeResponses2 = List.of(createRecordFilename4);
         when(armDataManagementApi.listResponseBlobs(hashcode2)).thenReturn(hashcodeResponses2);
         String createRecordFileTest4 = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
@@ -679,10 +679,10 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
-        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_il.rsp", hashcode1);
+        String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp", hashcode1);
+        String createRecordFilename2 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_0_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1896_1_il.rsp", hashcode1);
 
         List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
                                                  createRecordFilename2, invalidLineFileFilename2);
@@ -1111,10 +1111,10 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
 
         when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_invalid_1_cr.rsp", hashcode1);
-        String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_invalid_1_uf.rsp", hashcode1);
-        String createRecordFilename2 = String.format("%s__a17b9015-e6ad-77c5-8d1e-13259aae1896_cr.rsp", hashcode1);
-        String invalidLineFileFilename2 = String.format("%s__a17b9015-e6ad-77c5-8d1e-13259aae1896_il.rsp", hashcode1);
+        String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_invalid_1_cr.rsp", hashcode1);
+        String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_invalid_1_uf.rsp", hashcode1);
+        String createRecordFilename2 = String.format("dropzone/DARTS/response/%s__a17b9015-e6ad-77c5-8d1e-13259aae1896_cr.rsp", hashcode1);
+        String invalidLineFileFilename2 = String.format("dropzone/DARTS/response/%s__a17b9015-e6ad-77c5-8d1e-13259aae1896_il.rsp", hashcode1);
         String uploadFileFilename3 = String.format("%s_1_uf.rsp", hashcode1);
         String invalidLineFileFilename3 = String.format("%s_0_il.rsp", hashcode1);
         List<String> hashcodeResponses = List.of(createRecordFilename1, uploadFileFilename1,
