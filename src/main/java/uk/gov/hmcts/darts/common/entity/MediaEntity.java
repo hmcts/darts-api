@@ -133,4 +133,8 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
 
+    public List<CourtCaseEntity> associatedCourtCases() {
+        var cases = hearingList.stream().map(HearingEntity::getCourtCase);
+        return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
+    }
 }

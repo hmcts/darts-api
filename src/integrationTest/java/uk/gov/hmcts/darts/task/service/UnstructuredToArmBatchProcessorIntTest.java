@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -61,7 +60,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     ArgumentCaptor<File> manifestFileNameCaptor = ArgumentCaptor.forClass(File.class);
