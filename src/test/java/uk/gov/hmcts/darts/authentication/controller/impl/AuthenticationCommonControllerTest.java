@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
@@ -35,14 +35,14 @@ class AuthenticationCommonControllerTest {
         UserAccountEntity userAccountEntity = CommonTestDataUtil.createUserAccount();
         when(authorisationApi.getCurrentUser()).thenReturn(userAccountEntity);
 
-        Set<Role> newRoles = new HashSet<>();
-        newRoles.add(Role.builder()
+        Set<UserStateRole> newRoles = new HashSet<>();
+        newRoles.add(UserStateRole.builder()
                          .roleId(APPROVER.getId())
                          .roleName(APPROVER.toString())
                          .globalAccess(false)
                          .permissions(new HashSet<>())
                          .build());
-        newRoles.add(Role.builder()
+        newRoles.add(UserStateRole.builder()
                          .roleId(REQUESTER.getId())
                          .roleName(REQUESTER.toString())
                          .globalAccess(false)
