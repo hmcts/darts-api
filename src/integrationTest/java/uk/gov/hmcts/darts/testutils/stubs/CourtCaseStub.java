@@ -62,6 +62,6 @@ public class CourtCaseStub {
 
     @Transactional
     public CourtCaseEntity createAndSaveCourtCaseWithHearings() {
-        return createAndSaveCourtCaseWithHearings(courtCase -> {});
+        return createAndSaveCourtCaseWithHearings(courtCase -> { });
     }
 }

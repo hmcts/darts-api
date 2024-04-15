@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
+class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
 
     @Autowired
     AnnotationRepository annotationRepository;

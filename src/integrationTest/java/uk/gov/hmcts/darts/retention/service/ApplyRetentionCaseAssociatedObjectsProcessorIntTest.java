@@ -120,12 +120,12 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
             courtCase.setClosed(true);
         });
 
+        medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
+
         var hearA1 = caseA.getHearings().get(0);
         var hearA2 = caseA.getHearings().get(1);
         var hearA3 = caseA.getHearings().get(2);
         var hearB = caseB.getHearings().get(0);
-
-        medias = dartsDatabase.getMediaStub().createAndSaveSomeMedias();
         hearA1.addMedia(medias.get(0));
         hearA1.addMedia(medias.get(1));
         hearA2.addMedia(medias.get(2));
