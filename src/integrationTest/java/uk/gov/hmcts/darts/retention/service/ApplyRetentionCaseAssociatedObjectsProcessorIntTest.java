@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.testutils.stubs.CourtCaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -33,8 +33,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZO
 
 class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBase {
 
-    public static final LocalDate D_2020_10_1 = LocalDate.of(2020, 10, 1);
-    public static final LocalDate D_2020_10_2 = LocalDate.of(2020, 10, 2);
+    public static final LocalDateTime D_2020_10_1 = LocalDateTime.of(2020, 10, 1, 10, 0, 0);
+    public static final LocalDateTime D_2020_10_2 = LocalDateTime.of(2020, 10, 2, 10, 0, 0);
     private static final OffsetDateTime DT_2025 = OffsetDateTime.of(2025, 1, 1, 1, 0, 0, 0, UTC);
     private static final OffsetDateTime DT_2026 = OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, UTC);
     private static final OffsetDateTime DT_2027 = OffsetDateTime.of(2027, 1, 1, 1, 0, 0, 0, UTC);

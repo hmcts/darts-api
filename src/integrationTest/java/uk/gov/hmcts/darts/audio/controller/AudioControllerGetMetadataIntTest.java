@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -51,7 +51,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
             "999",
             "test",
             "test",
-            LocalDate.now()
+            LocalDateTime.now()
         );
         hearingEntity.addMedia(mediaChannel1);
         hearingEntity.addMedia(mediaChannel2);
@@ -90,7 +90,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
             "999",
             "test",
             "test",
-            LocalDate.now()
+            LocalDateTime.now()
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()

@@ -32,7 +32,7 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
 
     private ArmResponseFilesProcessor armResponseFilesProcessor;
 

@@ -18,9 +18,10 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
@@ -53,7 +54,7 @@ class HearingsGetControllerTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
@@ -125,7 +126,7 @@ class HearingsGetControllerTest extends IntegrationBase {
             "testCourthouse",
             "testCourtroom",
             "testCaseNumber",
-            LocalDate.of(2020, 6, 20)
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
         );
 
         JudgeEntity testJudge = dartsDatabase.createSimpleJudge("testJudge");

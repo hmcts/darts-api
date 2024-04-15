@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -52,7 +53,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());

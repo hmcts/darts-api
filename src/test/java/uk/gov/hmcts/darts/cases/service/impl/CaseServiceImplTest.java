@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -102,6 +104,9 @@ class CaseServiceImplTest {
     private AuthorisationApi authorisationApi;
     @Mock
     private LogApi logApi;
+
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -117,7 +122,8 @@ class CaseServiceImplTest {
             advancedSearchRequestHelper,
             transcriptionRepository,
             authorisationApi,
-            logApi
+            logApi,
+            currentTimeHelper
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }
@@ -207,12 +213,14 @@ class CaseServiceImplTest {
 
     @Test
     void testAddCase() throws IOException {
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 6, 20, 10, 0, 0);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(localDateTime, ZoneOffset.UTC));
         when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return args[0];
         });
-        CourtCaseEntity courtCase = CommonTestDataUtil.createCase("testAddCase");
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(courtCase);
+        HearingEntity hearing = CommonTestDataUtil.createHearing("testAddCase", localDateTime);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(anyString(), anyString(), anyString(), any(LocalDateTime.class))).thenReturn(hearing);
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
 
@@ -246,11 +254,11 @@ class CaseServiceImplTest {
     void testAddCaseNonExistingCourthouse() {
 
         AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
-        when(retrieveCoreObjectService.retrieveOrCreateCase(
-            anyString(),
-            anyString()
-        )).thenThrow(new DartsApiException(
-            CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST));
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 6, 20, 10, 0, 0);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(localDateTime, ZoneOffset.UTC));
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(anyString(), anyString(), anyString(), any(LocalDateTime.class)))
+            .thenThrow(new DartsApiException(
+                CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST));
 
         DartsApiException thrownException = assertThrows(
             DartsApiException.class,
@@ -289,8 +297,11 @@ class CaseServiceImplTest {
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
 
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-            existingCaseEntity);
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 6, 20, 10, 0, 0);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(localDateTime, ZoneOffset.UTC));
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(existingCaseEntity, localDateTime);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(anyString(), anyString(), anyString(), any(LocalDateTime.class))).thenReturn(hearing);
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
@@ -320,8 +331,11 @@ class CaseServiceImplTest {
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
 
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-            existingCaseEntity);
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 6, 20, 10, 0, 0);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(localDateTime, ZoneOffset.UTC));
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(existingCaseEntity, localDateTime);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(anyString(), anyString(), anyString(), any(LocalDateTime.class))).thenReturn(hearing);
 
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
@@ -350,8 +364,11 @@ class CaseServiceImplTest {
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
         existingCaseEntity.setId(1);
 
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-            existingCaseEntity);
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 6, 20, 10, 0, 0);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(localDateTime, ZoneOffset.UTC));
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(existingCaseEntity, localDateTime);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(anyString(), anyString(), anyString(), any(LocalDateTime.class))).thenReturn(hearing);
 
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
@@ -379,8 +396,11 @@ class CaseServiceImplTest {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
 
-        when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
-            existingCaseEntity);
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 6, 20, 10, 0, 0);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(localDateTime, ZoneOffset.UTC));
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(existingCaseEntity, localDateTime);
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(anyString(), anyString(), anyString(), any(LocalDateTime.class))).thenReturn(hearing);
         JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
         when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {

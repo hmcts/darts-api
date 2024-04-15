@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
 
 import java.time.DateTimeException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
@@ -77,9 +78,12 @@ class DailyListUpdater {
                             continue;
                         }
 
+                        LocalTime scheduledStartTime = getScheduledStartTime(sitting, dailyListHearing);
+                        LocalDateTime hearingDateTime = dailyListHearing.getHearingDetails().getHearingDate().atTime(scheduledStartTime);
+
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                             courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate(),
+                            caseNumber, hearingDateTime,
                             dailyListSystemUser
                         );
 
@@ -92,7 +96,6 @@ class DailyListUpdater {
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
                         addDefenders(courtCase, dailyListHearing.getDefendants());
-                        hearing.setScheduledStartTime(getScheduledStartTime(sitting, dailyListHearing));
                         hearingRepository.saveAndFlush(hearing);
                     }
                 }
