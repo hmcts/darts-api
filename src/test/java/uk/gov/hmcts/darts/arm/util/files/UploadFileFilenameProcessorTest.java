@@ -35,4 +35,12 @@ class UploadFileFilenameProcessorTest {
         assertThrows(IllegalArgumentException.class, () ->
             new UploadFileFilenameProcessor(uploadFileFilename));
     }
+
+    @Test
+    void givenCreateRecordFilenameProcessorWithNullFilenameThrowsException() {
+        String uploadFileFilename = null;
+
+        assertThrows(IllegalArgumentException.class, () ->
+            new UploadFileFilenameProcessor(uploadFileFilename));
+    }
 }

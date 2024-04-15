@@ -35,4 +35,12 @@ class InvalidLineFilenameProcessorTest {
         assertThrows(IllegalArgumentException.class, () ->
             new InvalidLineFileFilenameProcessor(invalidLineFilename));
     }
+
+    @Test
+    void givenInvalidLineFilenameProcessorWithNullFileNameThrowsException() {
+        String invalidLineFilename = null;
+
+        assertThrows(IllegalArgumentException.class, () ->
+            new InvalidLineFileFilenameProcessor(invalidLineFilename));
+    }
 }

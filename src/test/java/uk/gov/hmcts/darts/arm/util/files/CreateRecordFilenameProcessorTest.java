@@ -35,4 +35,12 @@ class CreateRecordFilenameProcessorTest {
         assertThrows(IllegalArgumentException.class, () ->
             new CreateRecordFilenameProcessor(createRecordFilename));
     }
+
+    @Test
+    void givenCreateRecordFilenameProcessorWithNullFilenameThrowsException() {
+        String createRecordFilename = null;
+
+        assertThrows(IllegalArgumentException.class, () ->
+            new CreateRecordFilenameProcessor(createRecordFilename));
+    }
 }

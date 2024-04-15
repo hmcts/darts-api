@@ -42,6 +42,15 @@ class BatchInputUploadFileFilenameProcessorTest {
     }
 
     @Test
+    void givenBatchMetadataFilenameProcessorWithNullFilenameThrowsException() {
+        // given
+        String batchMetadataFilename = null;
+        // when then
+        assertThrows(IllegalArgumentException.class, () ->
+            new BatchInputUploadFileFilenameProcessor(batchMetadataFilename));
+    }
+
+    @Test
     void givenBatchMetadataFilenameProcessorWithNoPath() {
         // given
         String batchMetadataFilename = "DARTS_a17b9015-e6ad-77c5-8d1e-13259aae1895_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
