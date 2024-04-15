@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,6 +67,7 @@ class TranscriptionServiceImplTest {
     private static final String TEST_COMMENT = "Test comment";
     private static final String START_TIME = "2023-07-01T09:00:00";
     private static final String END_TIME = "2023-07-01T12:00:00";
+    private static final int CASE_ID = 33;
 
     @Mock
     private TranscriptionRepository mockTranscriptionRepository;
@@ -112,6 +114,8 @@ class TranscriptionServiceImplTest {
 
     @Mock
     private TranscriptionEntity mockTranscription;
+    @Mock
+    private TranscriptionEntity mockTranscription2;
 
     @Mock
     private DuplicateRequestDetector duplicateRequestDetector;
@@ -133,7 +137,7 @@ class TranscriptionServiceImplTest {
 
         testUser = new UserAccountEntity();
         testUser.setEmailAddress("test.user@example.com");
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        lenient().when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         mockCourtCase = new CourtCaseEntity();
         mockHearing = new HearingEntity();
@@ -155,7 +159,7 @@ class TranscriptionServiceImplTest {
         approvers.add(approver1);
         approvers.add(approver2);
 
-        Mockito.lenient().when(authorisationApi.getUsersWithRoleAtCourthouse(eq(SecurityRoleEnum.APPROVER), any())).thenReturn(approvers);
+        lenient().when(authorisationApi.getUsersWithRoleAtCourthouse(eq(SecurityRoleEnum.APPROVER), any())).thenReturn(approvers);
     }
 
     @Test
@@ -539,6 +543,24 @@ class TranscriptionServiceImplTest {
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());
+    }
+
+    @Test
+    void testGetAllCaseTranscriptionDocuments() {
+        TranscriptionDocumentEntity transcriptionDoc1 = new TranscriptionDocumentEntity();
+        transcriptionDoc1.setId(1);
+        TranscriptionDocumentEntity transcriptionDoc2 = new TranscriptionDocumentEntity();
+        transcriptionDoc2.setId(2);
+        TranscriptionDocumentEntity transcriptionDoc3 = new TranscriptionDocumentEntity();
+        transcriptionDoc3.setId(3);
+
+        when(mockTranscriptionRepository.findByCaseIdManualOrLegacy(CASE_ID)).thenReturn(List.of(mockTranscription, mockTranscription2));
+        when(mockTranscription.getTranscriptionDocumentEntities()).thenReturn(List.of(transcriptionDoc1, transcriptionDoc2));
+        when(mockTranscription2.getTranscriptionDocumentEntities()).thenReturn(List.of(transcriptionDoc1, transcriptionDoc3));
+
+        var allCaseTranscriptionDocuments = transcriptionService.getAllCaseTranscriptionDocuments(CASE_ID);
+
+        assertThat(allCaseTranscriptionDocuments).containsExactlyInAnyOrder(transcriptionDoc1, transcriptionDoc2, transcriptionDoc3);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

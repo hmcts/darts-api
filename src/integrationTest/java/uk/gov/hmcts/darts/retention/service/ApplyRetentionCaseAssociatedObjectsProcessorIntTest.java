@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.retention.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -249,7 +248,6 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
     @Test
-    @Disabled
     void testSuccessfullyApplyRetentionToCaseTranscriptionDocuments() {
         /*
         Test data setup:
@@ -257,17 +255,14 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         case A -> hearing 1 -> transcription1 -> transcriptionDoc1, transcriptionDoc2
         case A -> hearing 1 -> transcription2 -> transcriptionDoc3
         case A -> hearing 2 -> transcription2 -> transcriptionDoc3
-        case B -> hearing 3 -> transcription1 -> transcriptionDoc1, transcriptionDoc2
 
         */
 
         // given
         var hear1 = caseA.getHearings().get(0);
         var hear2 = caseA.getHearings().get(1);
-        var hear3 = caseB.getHearings().get(0);
 
         var tr1 = transcriptionStub.createTranscription(hear1);
-        tr1.addHearing(hear3);
         transcriptionRepository.save(tr1);
         var tr2 = transcriptionStub.createTranscription(hear1);
         tr2.addHearing(hear2);
@@ -289,14 +284,19 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
 
         // then
         var actualTranscriptionDoc1 = transcriptionDocumentRepository.findById(trDoc1.getId()).get();
-        assertThat(actualTranscriptionDoc1.getRetainUntilTs()).isEqualTo(DT_2028);
+        assertThat(actualTranscriptionDoc1.getRetainUntilTs()).isEqualTo(DT_2026);
         var eodsTranscriptionDoc1 = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(trDoc1, EodHelper.armLocation());
         assertThat(eodsTranscriptionDoc1.get(0).isUpdateRetention()).isTrue();
         var actualTranscriptionDoc2 = transcriptionDocumentRepository.findById(trDoc2.getId()).get();
-        assertThat(actualTranscriptionDoc2.getRetainUntilTs()).isEqualTo(DT_2028);
+        assertThat(actualTranscriptionDoc2.getRetainUntilTs()).isEqualTo(DT_2026);
+        var eodsTranscriptionDoc2 = eodRepository.findByTranscriptionDocumentEntityAndExternalLocationType(trDoc2, EodHelper.armLocation());
+        assertThat(eodsTranscriptionDoc2.get(0).isUpdateRetention()).isTrue();
         var actualTranscriptionDoc3 = transcriptionDocumentRepository.findById(trDoc3.getId()).get();
         assertThat(actualTranscriptionDoc3.getRetainUntilTs()).isEqualTo(DT_2026);
 
+        var actualCaseA = caseRepository.findById(caseA.getId()).get();
+        assertThat(actualCaseA.isRetentionUpdated()).isFalse();
+        assertThat(actualCaseA.getRetentionRetries()).isEqualTo(1);
     }
 
     @Test

@@ -62,13 +62,13 @@ class MediaRepositoryIntTest extends IntegrationBase {
 
         // then
         var caseAMediasId = caseAMedias.stream().map(MediaEntity::getId);
-        assertThat(caseAMediasId).containsOnly(medias.get(0).getId(), medias.get(1).getId(), medias.get(2).getId());
+        assertThat(caseAMediasId).containsExactlyInAnyOrder(medias.get(0).getId(), medias.get(1).getId(), medias.get(2).getId());
         var caseBMediasId = caseBMedias.stream().map(MediaEntity::getId);
-        assertThat(caseBMediasId).containsOnly(medias.get(0).getId());
+        assertThat(caseBMediasId).containsExactlyInAnyOrder(medias.get(0).getId());
 
         List<CourtCaseEntity> media0cases = medias.get(0).associatedCourtCases();
-        assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsOnly(caseA.getId(), caseB.getId());
+        assertThat(media0cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
         List<CourtCaseEntity> media1cases = medias.get(1).associatedCourtCases();
-        assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsOnly(caseA.getId());
+        assertThat(media1cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
     }
 }

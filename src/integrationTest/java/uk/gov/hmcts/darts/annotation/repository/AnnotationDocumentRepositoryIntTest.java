@@ -60,7 +60,7 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
 
         // then
         assertThat(result.stream().map(AnnotationDocumentEntity::getId))
-            .containsOnly(
+            .containsExactlyInAnyOrder(
                 annotationDocument1.getId(),
                 annotationDocument2.getId(),
                 annotationDocument3.getId(),
@@ -68,8 +68,8 @@ class AnnotationDocumentRepositoryIntTest extends IntegrationBase {
                 annotationDocument5.getId());
 
         List<CourtCaseEntity> annotationDocument3Cases = annotationDocument3.associatedCourtCases();
-        assertThat(annotationDocument3Cases.stream().map(CourtCaseEntity::getId)).containsOnly(caseA.getId());
+        assertThat(annotationDocument3Cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId());
         List<CourtCaseEntity> annotationDocument2Cases = annotationDocument2.associatedCourtCases();
-        assertThat(annotationDocument2Cases.stream().map(CourtCaseEntity::getId)).containsOnly(caseA.getId(), caseB.getId());
+        assertThat(annotationDocument2Cases.stream().map(CourtCaseEntity::getId)).containsExactlyInAnyOrder(caseA.getId(), caseB.getId());
     }
 }
