@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
@@ -117,7 +118,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // given
         String continuationToken = null;
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(2);
+        lenient().when(armDataManagementConfiguration.getBatchSize()).thenReturn(2);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
 
