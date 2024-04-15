@@ -180,6 +180,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                     //Process the final results
                     processBatchResponseFiles(armBatchResponses);
                 }
+            } else {
+                log.info("Unable to find response files starting with {}", batchUploadFileFilenameProcessor.getHashcode());
             }
         } catch (Exception e) {
             log.error("Unable to process responses for file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
@@ -226,7 +228,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 BinaryData createRecordBinary = armDataManagementApi.getBlobData(createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
                 readCreateRecordFile(createRecordBinary, createRecordFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process upload file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
+                log.error("Unable to process ARM create record response file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
             }
         }
     }
@@ -276,7 +278,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
                 readUploadFile(uploadFileBinary, uploadFileFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(), e);
+                log.error("Unable to process ARM response upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(), e);
             }
         }
     }
@@ -469,12 +471,15 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         for (String responseFile : responseFiles) {
             try {
                 if (responseFile.endsWith(generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
+                    log.debug("Found ARM create record response file {}", responseFile);
                     CreateRecordFilenameProcessor createRecordFilenameProcessor = new CreateRecordFilenameProcessor(responseFile);
                     responseFilenames.getCreateRecordResponses().add(createRecordFilenameProcessor);
                 } else if (responseFile.endsWith(generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
+                    log.debug("Found ARM upload file response file {}", responseFile);
                     UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(responseFile);
                     responseFilenames.getUploadFileResponses().add(uploadFileFilenameProcessor);
                 } else if (responseFile.endsWith(generateSuffix(ARM_INVALID_LINE_FILENAME_KEY))) {
+                    log.debug("Found ARM invalid line response file {}", responseFile);
                     InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(responseFile);
                     responseFilenames.getInvalidLineResponses().add(invalidLineFileFilenameProcessor);
                 } else {
