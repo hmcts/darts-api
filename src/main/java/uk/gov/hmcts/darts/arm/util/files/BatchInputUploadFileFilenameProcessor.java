@@ -12,7 +12,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 
 @Getter
 @Slf4j
-public class BatchUploadFileFilenameProcessor {
+public class BatchInputUploadFileFilenameProcessor {
 
     private static final int NUMBER_OF_TOKENS = 5;
     private static final String FILE_EXTENSION_SEPARATOR = ".";
@@ -23,7 +23,7 @@ public class BatchUploadFileFilenameProcessor {
     private String hashcode;
     private String status;
 
-    public BatchUploadFileFilenameProcessor(String batchMetadataFilenameAndPath) {
+    public BatchInputUploadFileFilenameProcessor(String batchMetadataFilenameAndPath) {
         this.batchMetadataFilenameAndPath = batchMetadataFilenameAndPath;
         processFilename();
     }
@@ -41,12 +41,12 @@ public class BatchUploadFileFilenameProcessor {
                 hashcode = tokens.get(2);
                 status = tokens.get(3);
             } else {
-                log.error("Expected {} tokens in filename {} but found {}", NUMBER_OF_TOKENS, batchMetadataFilenameAndPath, tokens.size());
-                throw new IllegalArgumentException("Invalid filename " + batchMetadataFilenameAndPath);
+                log.error("Expected {} tokens in batch input upload filename {} but found {}", NUMBER_OF_TOKENS, batchMetadataFilenameAndPath, tokens.size());
+                throw new IllegalArgumentException("Invalid batch input upload filename " + batchMetadataFilenameAndPath);
             }
         } else {
-            log.error("Batch ARM pull expected filename to contain extension ", batchMetadataFilenameAndPath);
-            throw new IllegalArgumentException("Invalid filename " + batchMetadataFilenameAndPath);
+            log.error("Batch ARM pull expected input upload filename to contain extension ", batchMetadataFilenameAndPath);
+            throw new IllegalArgumentException("Invalid batch input upload filename " + batchMetadataFilenameAndPath);
         }
     }
 }

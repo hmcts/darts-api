@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -11,12 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.impl.ArmBatchProcessResponseFilesImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
@@ -26,23 +25,26 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
+import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
+import static uk.gov.hmcts.darts.common.util.EodHelper.armProcessingResponseFilesStatus;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class ArmBatchProcessResponseFilesImplTest {
 
+    public static final String PREFIX = "DARTS";
+    public static final String RESPONSE_FILENAME_EXTENSION = "a360";
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
@@ -75,32 +77,19 @@ class ArmBatchProcessResponseFilesImplTest {
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
-    private ExternalLocationTypeEntity externalLocationTypeArm;
-    private ObjectRecordStatusEntity objectRecordStatusArmDropZone;
-    private ObjectRecordStatusEntity objectRecordStatusArmProcessingFiles;
-
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
 
+    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
     private ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
+
 
     @BeforeEach
     void setupData() {
 
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
-
-        externalLocationTypeArm = new ExternalLocationTypeEntity();
-        externalLocationTypeArm.setId(ARM.getId());
-
-        objectRecordStatusArmDropZone = new ObjectRecordStatusEntity();
-        objectRecordStatusArmDropZone.setId(ARM_DROP_ZONE.getId());
-        objectRecordStatusArmDropZone.setDescription("Arm Drop Zone");
-
-        objectRecordStatusArmProcessingFiles = new ObjectRecordStatusEntity();
-        objectRecordStatusArmProcessingFiles.setId(ARM_PROCESSING_RESPONSE_FILES.getId());
-        objectRecordStatusArmProcessingFiles.setDescription("Arm Processing Response Files");
 
         armBatchProcessResponseFiles = new ArmBatchProcessResponseFilesImpl(
             externalObjectDirectoryRepository,
@@ -119,39 +108,50 @@ class ArmBatchProcessResponseFilesImplTest {
 
     }
 
+    @AfterAll
+    public static void close() {
+        EOD_HELPER_MOCKS.close();
+    }
+
     @Test
-    @Disabled("Broken")
     void batchProcessResponseFilesWithBatchSizeTwo() {
 
         // given
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(0);
+        String continuationToken = null;
+        lenient().when(armDataManagementConfiguration.getBatchSize()).thenReturn(2);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
 
-        when(externalLocationTypeRepository.getReferenceById(ARM.getId())).thenReturn(externalLocationTypeArm);
+        String manifest1Uuid = UUID.randomUUID().toString();
+        String manifest2Uuid = UUID.randomUUID().toString();
 
-        when(objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId())).thenReturn(Optional.of(objectRecordStatusArmDropZone));
-        when(objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId())).thenReturn(Optional.of(objectRecordStatusArmProcessingFiles));
+        String manifestFile1 = "DARTS_" + manifest1Uuid + ".a360";
+        String manifestFile2 = "DARTS_" + manifest1Uuid + ".a360";
 
-        when(externalObjectDirectoryArmDropZone.getId()).thenReturn(1);
-        when(externalObjectDirectoryArmDropZone.getStatus()).thenReturn(objectRecordStatusArmDropZone);
+        List<String> blobNamesAndPaths = new ArrayList<>();
+        String blobNameAndPath1 = String.format("dropzone/DARTS/response/DARTS_%s_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp", manifest1Uuid);
+        String blobNameAndPath2 = String.format("dropzone/DARTS/response/DARTS_%s_7a374f19a9ce7dc9cc480ea8d4eca0fc_1_iu.rsp", manifest2Uuid);
+        blobNamesAndPaths.add(blobNameAndPath1);
+        blobNamesAndPaths.add(blobNameAndPath2);
+
+        ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
+            .blobNamesAndPaths(blobNamesAndPaths)
+            .build();
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
-        when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(externalLocationTypeArm, objectRecordStatusArmDropZone))
+
+        when(externalObjectDirectoryRepository.findAllByStatusAndManifestFile(any(), any()))
             .thenReturn(inboundList);
 
         // when
         armBatchProcessResponseFiles.processResponseFiles();
 
         // then
-        verify(objectRecordStatusRepository).findById(ARM_DROP_ZONE.getId());
-        verify(objectRecordStatusRepository).findById(ARM_PROCESSING_RESPONSE_FILES.getId());
-        verify(externalLocationTypeRepository).getReferenceById(ARM.getId());
-        verify(externalObjectDirectoryRepository).findByExternalLocationTypeAndObjectStatus(externalLocationTypeArm, objectRecordStatusArmDropZone);
-        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armDropZoneStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armProcessingResponseFilesStatus(), manifestFile1);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armDropZoneStatus(), manifestFile2);
+        verify(externalObjectDirectoryRepository).findAllByStatusAndManifestFile(armProcessingResponseFilesStatus(), manifestFile2);
 
-        verifyNoMoreInteractions(
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            externalObjectDirectoryRepository
-        );
     }
 }
