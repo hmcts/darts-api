@@ -89,8 +89,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     @Override
     public void processResponseFiles() {
         userAccount = userIdentity.getUserAccount();
-        Integer batchSize = armDataManagementConfiguration.getBatchSize();
-
         ContinuationTokenBlobs continuationTokenBlobs = null;
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
 

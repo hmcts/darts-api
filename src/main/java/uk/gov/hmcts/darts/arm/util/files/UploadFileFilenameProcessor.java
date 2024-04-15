@@ -28,7 +28,7 @@ public class UploadFileFilenameProcessor {
     private void processFilename() {
         uploadFileFilename = FilenameUtils.getName(uploadFileFilenameAndPath);
         if (nonNull(uploadFileFilename)) {
-            List<String> tokens = Arrays.asList(uploadFileFilenameAndPath.split(ARM_FILENAME_SEPARATOR));
+            List<String> tokens = Arrays.asList(uploadFileFilename.split(ARM_FILENAME_SEPARATOR));
             // UF - Upload File - This is the Upload file which represents the File which is ingested by ARM.
             // 6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp
             if (tokens.size() == NUMBER_OF_TOKENS) {

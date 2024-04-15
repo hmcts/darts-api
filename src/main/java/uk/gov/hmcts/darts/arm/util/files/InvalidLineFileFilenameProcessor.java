@@ -28,7 +28,7 @@ public class InvalidLineFileFilenameProcessor {
     private void processFilename() {
         invalidLineFilename = FilenameUtils.getName(invalidLineFileFilenameAndPath);
         if (nonNull(invalidLineFilename)) {
-            List<String> tokens = Arrays.asList(invalidLineFileFilenameAndPath.split(ARM_FILENAME_SEPARATOR));
+            List<String> tokens = Arrays.asList(invalidLineFilename.split(ARM_FILENAME_SEPARATOR));
             // IL - Invalid Lines File - This is the Invalid Lines file which represents the File which is ingested by ARM.
             // DARTS/response/fbfec54925d62146aeced724ff9f3c8e_e5afb388-3830-79ca-a5d4-dcc6e51796a3_0_il.rsp
             if (tokens.size() == NUMBER_OF_TOKENS) {

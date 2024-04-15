@@ -20,6 +20,7 @@ class BatchInputUploadFileFilenameProcessorTest {
         assertEquals("a17b9015-e6ad-77c5-8d1e-13259aae1895", batchMetadataFilenameProcessor.getUuidString());
         assertEquals("6a374f19a9ce7dc9cc480ea8d4eca0fb", batchMetadataFilenameProcessor.getHashcode());
         assertEquals("1", batchMetadataFilenameProcessor.getStatus());
+        assertEquals(batchMetadataFilename, batchMetadataFilenameProcessor.getBatchMetadataFilenameAndPath());
     }
 
     @Test
