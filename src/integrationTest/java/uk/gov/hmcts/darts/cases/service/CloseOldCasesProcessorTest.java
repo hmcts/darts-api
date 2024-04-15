@@ -81,7 +81,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenOneEventUseLatestDateAsClosedDate() {
-        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7));
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
         EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 3);
