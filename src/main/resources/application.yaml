@@ -1,5 +1,6 @@
 server:
   port: 4550
+  max-http-request-header-size: 10MB
 
 management:
   endpoint:
