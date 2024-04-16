@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -141,7 +141,7 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         assertEquals(1, judgeUserState.getRoles().size());
 
-        Role judgeRole = judgeUserState.getRoles().iterator().next();
+        UserStateRole judgeRole = judgeUserState.getRoles().iterator().next();
         assertEquals(JUDGE.getId(), judgeRole.getRoleId());
         assertFalse(judgeRole.getGlobalAccess());
 
@@ -165,7 +165,7 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         assertEquals(1, judgeUserState.getRoles().size());
 
-        Role judgeRole = judgeUserState.getRoles().iterator().next();
+        UserStateRole judgeRole = judgeUserState.getRoles().iterator().next();
         assertEquals(JUDGE.getId(), judgeRole.getRoleId());
         assertTrue(judgeRole.getGlobalAccess());
 
@@ -183,16 +183,16 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         assertEquals(2, userState.getRoles().size());
 
-        Iterator<Role> roleIterator = userState.getRoles().iterator();
+        Iterator<UserStateRole> roleIterator = userState.getRoles().iterator();
 
-        Role approverRole = roleIterator.next();
+        UserStateRole approverRole = roleIterator.next();
         assertEquals(APPROVER.getId(), approverRole.getRoleId());
         assertFalse(approverRole.getGlobalAccess());
         Set<String> approverPermissions = approverRole.getPermissions();
         assertEquals(11, approverPermissions.size());
         assertTrue(approverPermissions.contains("APPROVE_REJECT_TRANSCRIPTION_REQUEST"));
 
-        Role requesterRole = roleIterator.next();
+        UserStateRole requesterRole = roleIterator.next();
         assertEquals(REQUESTER.getId(), requesterRole.getRoleId());
         Set<String> requesterPermissions = requesterRole.getPermissions();
         assertEquals(10, requesterPermissions.size());

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
-import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
@@ -113,7 +113,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         }
 
         UserState.UserStateBuilder userStateBuilder = UserState.builder();
-        Set<Role> roles = new LinkedHashSet<>();
+        Set<UserStateRole> roles = new LinkedHashSet<>();
         userStateBuilder.roles(roles);
 
         Integer tmpRoleId = 0;
@@ -129,7 +129,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                 permissions = new LinkedHashSet<>();
                 courthouses = new LinkedHashSet<>();
 
-                roles.add(Role.builder()
+                roles.add(UserStateRole.builder()
                               .roleId(roleId)
                               .roleName(result.roleName())
                               .globalAccess(result.globalAccess())

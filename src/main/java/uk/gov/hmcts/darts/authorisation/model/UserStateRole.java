@@ -10,8 +10,7 @@ import java.util.Set;
 
 @Builder
 @Value
-@SuppressWarnings({"PMD.ShortClassName"})
-public class Role {
+public class UserStateRole {
 
     @Include
     @NonNull

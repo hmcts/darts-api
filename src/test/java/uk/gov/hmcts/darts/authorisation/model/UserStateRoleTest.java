@@ -11,11 +11,11 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
-class RoleTest {
+class UserStateRoleTest {
 
     @Test
     void builder() {
-        Role role = Role.builder()
+        UserStateRole role = UserStateRole.builder()
             .roleId(APPROVER.getId())
             .roleName(APPROVER.toString())
             .globalAccess(false)
@@ -30,26 +30,26 @@ class RoleTest {
 
     @Test
     void shouldEqualsJudgeRole() {
-        Role role = Role.builder()
+        UserStateRole role = UserStateRole.builder()
             .roleId(JUDGE.getId())
             .roleName(JUDGE.toString())
             .globalAccess(false)
             .permissions(Collections.emptySet())
             .build();
 
-        assertEquals(role, new Role(JUDGE.getId(), JUDGE.toString(), false, Collections.emptySet(),  Collections.emptySet()));
+        assertEquals(role, new UserStateRole(JUDGE.getId(), JUDGE.toString(), false, Collections.emptySet(), Collections.emptySet()));
     }
 
     @Test
     void shouldNotEqualsJudgeRole() {
-        Role role = Role.builder()
+        UserStateRole role = UserStateRole.builder()
             .roleId(JUDGE.getId())
             .roleName(JUDGE.toString())
             .globalAccess(false)
             .permissions(Collections.emptySet())
             .build();
 
-        assertNotEquals(role, new Role(REQUESTER.getId(), REQUESTER.toString(),false, Collections.emptySet(), Collections.emptySet()));
+        assertNotEquals(role, new UserStateRole(REQUESTER.getId(), REQUESTER.toString(), false, Collections.emptySet(), Collections.emptySet()));
     }
 
 }
