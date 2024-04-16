@@ -53,6 +53,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
@@ -600,7 +601,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                                               ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntity(externalObjectDirectoryId);
-            if (nonNull(armResponseInvalidLineRecord)) {
+            if (nonNull(externalObjectDirectory) && nonNull(armResponseInvalidLineRecord)) {
 
                 //If the filename contains 0
                 if (ARM_RESPONSE_INVALID_STATUS_CODE.equals(invalidLineFileFilenameProcessor.getStatus())) {
@@ -672,7 +673,19 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     }
 
     private ExternalObjectDirectoryEntity getExternalObjectDirectoryEntity(Integer eodId) {
-        return externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId).orElseThrow();
+        ExternalObjectDirectoryEntity externalObjectDirectory = null;
+        try {
+            Optional<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityOptional =
+                externalObjectDirectoryService.eagerLoadExternalObjectDirectory(eodId);
+            if (externalObjectDirectoryEntityOptional.isPresent()) {
+                externalObjectDirectory = externalObjectDirectoryEntityOptional.get();
+            } else {
+                log.warn("Unable to find external object directory with ID {}", eodId);
+            }
+        } catch (Exception e) {
+            log.error("Unable to find external object directory with ID {}", eodId, e);
+        }
+        return externalObjectDirectory;
     }
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
@@ -680,14 +693,16 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         if (nonNull(externalObjectDirectory)) {
             log.info(
                 "ARM Push updating ARM status from {} to {} for ID {}",
-                externalObjectDirectory.getStatus().getDescription(),
-                objectRecordStatus.getDescription(),
+                externalObjectDirectory.getStatus().getId(),
+                objectRecordStatus.getId(),
                 externalObjectDirectory.getId()
             );
             externalObjectDirectory.setStatus(objectRecordStatus);
             externalObjectDirectory.setLastModifiedBy(userAccount);
             externalObjectDirectory.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
             externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+        } else {
+            log.warn("EOD is null");
         }
     }
 }
