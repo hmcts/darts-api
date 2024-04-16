@@ -192,6 +192,9 @@ class DailyListUpdater {
 
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
+        if (hearing.getProsecution() == null) {
+            return;
+        }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate ->
@@ -203,9 +206,12 @@ class DailyListUpdater {
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
-            for (PersonalDetails personalDetails : defendant.getCounsel()) {
+            for (PersonalDetails counselDetails : defendant.getCounsel()) {
+                if (counselDetails == null) {
+                    continue;
+                }
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(personalDetails.getName()), courtCase, dailyListSystemUser));
+                    buildFullName(counselDetails.getName()), courtCase, dailyListSystemUser));
             }
         }
     }
