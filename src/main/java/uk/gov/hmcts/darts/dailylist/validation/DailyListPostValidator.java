@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.dailylist.validation;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 
@@ -44,7 +45,7 @@ public class DailyListPostValidator {
     }
 
     private void checkSourceSystem(String sourceSystem) {
-        if (!sourceSystem.equals("CPP") && !sourceSystem.equals("XHB")) {
+        if (!sourceSystem.equals(SourceType.CPP.toString()) && !sourceSystem.equals(SourceType.XHB.toString())) {
             throw new DartsApiException(DailyListError.INVALID_SOURCE_SYSTEM);
         }
 
