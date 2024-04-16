@@ -208,6 +208,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 mediaRequestEntity
             );
 
+            if (filteredMediaEntities.isEmpty()) {
+                throw new DartsApiException(
+                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
+                    "No media present to process"
+                );
+            }
+
             boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
 
             if (!hasAllMediaBeenCopiedFromInboundStorage) {

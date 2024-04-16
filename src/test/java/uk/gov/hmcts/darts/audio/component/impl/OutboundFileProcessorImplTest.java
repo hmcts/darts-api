@@ -705,6 +705,61 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
+    void processAudioForPlaybackWithOneAudio()
+        throws ExecutionException, InterruptedException, IOException {
+        
+        AudioFileInfo mergedAudioFile = AudioFileInfo.builder()
+            .startTime(TIME_12_02.toInstant())
+            .endTime(TIME_12_10.toInstant())
+            .channel(1)
+            .path(SOME_DOWNLOAD_PATH)
+            .mediaFile("0001.a00")
+            .build();
+
+        when(audioOperationService.merge(any(), any())).thenReturn(mergedAudioFile);
+
+        var trimmedAudioFileInfo = AudioFileInfo.builder()
+            .isTrimmed(true)
+            .mediaFile(mergedAudioFile.getMediaFile())
+            .channel(mergedAudioFile.getChannel())
+            .startTime(TIME_12_02.toInstant())
+            .endTime(TIME_12_10.toInstant())
+            .path(mergedAudioFile.getPath())
+            .build();
+        when(audioOperationService.trim(any(), any(), any(), any())).thenReturn(trimmedAudioFileInfo);
+
+        var reEncodedAudioFileInfo = AudioFileInfo.builder().build();
+        when(audioOperationService.reEncode(any(), any())).thenReturn(reEncodedAudioFileInfo);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH);
+
+        outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_02, TIME_12_10);
+
+        verify(audioOperationService).merge(any(), any());
+
+        verify(audioOperationService).trim(
+            "",
+            AudioFileInfo.builder()
+                .startTime(TIME_12_02.toInstant())
+                .endTime(TIME_12_10.toInstant())
+                .channel(1)
+                .mediaFile("0001.a00")
+                .path(SOME_DOWNLOAD_PATH)
+                .build(),
+            Duration.ofSeconds(0),
+            Duration.ofMinutes(8));
+
+        verify(audioOperationService, times(1)).reEncode(any(), eq(trimmedAudioFileInfo));
+
+    }
+
+    @Test
     void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive()
         throws ExecutionException, InterruptedException, IOException {
         AudioFileInfo concatenatedAudioFileInfo = AudioFileInfo.builder().build();

@@ -6,10 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.ChannelAudio;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Component
@@ -97,7 +100,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             String audioFilenames = audioFileInfos.stream().map(audio -> audio.getMediaFile()).collect(Collectors.joining(", "));
 
             List<ChannelAudio> concatenationsList = new ArrayList<>();
-            log.debug("About to check if audio files are well formed {}", audioFilenames);
+            
             if (isWellFormedAudio(audioFileInfos)) {
                 log.debug("Audio files {} are well formed", audioFilenames);
                 List<ChannelAudio> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
@@ -111,14 +114,21 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
             for (ChannelAudio audioFileInfoList : concatenationsList) {
                 AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
-                OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(UTC);
-                OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(UTC);
-                AudioFileInfo trimmedAudio = trim(
-                    mergedAudio,
-                    mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
-                    mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
-                );
-                concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
+                if (nonNull(mergedAudio)) {
+                    OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(UTC);
+                    OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(UTC);
+                    AudioFileInfo trimmedAudio = trim(
+                        mergedAudio,
+                        mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
+                        mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
+                    );
+                    concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
+                } else {
+                    throw new DartsApiException(
+                        AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
+                        "No media present to process"
+                    );
+                }
             }
         }
         return concatenatedAndMergedAudioFileInfos;
