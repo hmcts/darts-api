@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
     @AutoConfigureMockMvc
     class TranscriptionControllerGetAllStatusTest extends IntegrationBase {
 
-        private static final String ENDPOINT_URL_TRANSCRIPTION = "/transcription-status";
+        private static final String ENDPOINT_URL_TRANSCRIPTION = "/admin/transcription-status";
 
         @Autowired
         private MockMvc mockMvc;

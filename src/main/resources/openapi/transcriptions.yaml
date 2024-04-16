@@ -606,7 +606,7 @@ paths:
                 title: "User is not a transcriber user"
                 status: 403
 
-  /transcription-status:
+  /admin/transcription-status:
     get:
       tags:
         - Transcription
