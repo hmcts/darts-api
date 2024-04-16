@@ -206,9 +206,12 @@ class DailyListUpdater {
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
-            for (PersonalDetails personalDetails : defendant.getCounsel()) {
+            for (PersonalDetails counselDetails : defendant.getCounsel()) {
+                if (counselDetails == null) {
+                    continue;
+                }
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(personalDetails.getName()), courtCase, dailyListSystemUser));
+                    buildFullName(counselDetails.getName()), courtCase, dailyListSystemUser));
             }
         }
     }
