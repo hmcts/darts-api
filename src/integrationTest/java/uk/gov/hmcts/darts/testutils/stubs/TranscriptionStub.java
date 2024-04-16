@@ -71,6 +71,7 @@ public class TranscriptionStub {
         return createTranscription(hearingStub.createMinimalHearing());
     }
 
+    @Transactional
     public TranscriptionEntity createTranscription(HearingEntity hearing) {
         TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
@@ -256,6 +257,7 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
+    @Transactional
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
                                                                          UserAccountEntity user,
                                                                          OffsetDateTime timestamp,

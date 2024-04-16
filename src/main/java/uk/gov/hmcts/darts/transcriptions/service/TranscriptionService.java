@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -48,4 +49,6 @@ public interface TranscriptionService {
     List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses();
 
     void closeTranscription(Integer transcriptionId, String transcriptionComment);
+
+    List<TranscriptionEntity> searchTranscriptionsByUserName(String userNameLike);
 }

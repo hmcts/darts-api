@@ -2,9 +2,18 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,11 +26,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity_;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -137,6 +149,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Override
     @Transactional
@@ -332,6 +347,44 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         } catch (Exception e) {
             log.error("Unable to close transcription {}", transcriptionId, e);
         }
+    }
+
+    @Override
+    public List<TranscriptionEntity> searchTranscriptionsByUserName(String userNameLike) {
+
+
+        //mario
+        //        SELECT t.*
+        //        FROM transcription t
+        //        INNER JOIN transcription_workflow tw on tw.tra_id = t.id
+        //        WHERE tw.workflow_ts = (
+        //          SELECT MAX(tw2.workflow_ts)
+        //          FROM transcription_workflow tw2
+        //          JOIN user_account ua ON tw2.workflow_actor = ua.usr_id
+        //          WHERE ua.user_name like '%43%'
+        //          AND tw2.tra_id = t.id
+        //        )
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<TranscriptionEntity> query = cb.createQuery(TranscriptionEntity.class);
+        Root<TranscriptionEntity> root = query.from(TranscriptionEntity.class);
+        Join<TranscriptionEntity,TranscriptionWorkflowEntity> join = root.join(TranscriptionEntity_.transcriptionWorkflowEntities);
+
+        Subquery<OffsetDateTime> maxWorkflowTsSq = query.subquery(OffsetDateTime.class);
+        Root<TranscriptionWorkflowEntity> sqRoot = maxWorkflowTsSq.from(TranscriptionWorkflowEntity.class);
+        Join<TranscriptionWorkflowEntity, TranscriptionEntity> sqTranscriptionJoin = sqRoot.join(TranscriptionWorkflowEntity_.transcription);
+        maxWorkflowTsSq.select(cb.greatest(sqRoot.<OffsetDateTime> get(TranscriptionWorkflowEntity_.WORKFLOW_TIMESTAMP)));
+        Predicate transcriptionIdMatchesPredicate = cb.equal(sqTranscriptionJoin.get(TranscriptionWorkflowEntity_.ID), root.get(TranscriptionEntity_.ID));
+        maxWorkflowTsSq.where(transcriptionIdMatchesPredicate);
+        Join<TranscriptionWorkflowEntity, UserAccountEntity> userJoin = sqRoot.join(TranscriptionWorkflowEntity_.WORKFLOW_ACTOR);
+        Predicate userNameLikePredicate = cb.like(userJoin.get(UserAccountEntity_.USER_NAME), userNameLike);
+        maxWorkflowTsSq.where(cb.and(transcriptionIdMatchesPredicate, userNameLikePredicate));
+
+        query.where(cb.equal(join.get(TranscriptionWorkflowEntity_.WORKFLOW_TIMESTAMP), maxWorkflowTsSq.getSelection()));
+        query.select(join.getParent());
+
+        TypedQuery<TranscriptionEntity> typedQuery = entityManager.createQuery(query);
+        return typedQuery.getResultList();
     }
 
     @Override
