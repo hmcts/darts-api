@@ -313,7 +313,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
-    
+
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                                      boolean updateRetention);
+
+
+    List<ExternalObjectDirectoryEntity> findByManifestFile(String manifestName);
 }

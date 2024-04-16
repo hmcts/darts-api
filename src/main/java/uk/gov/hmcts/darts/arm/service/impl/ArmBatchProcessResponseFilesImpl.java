@@ -132,14 +132,51 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 log.warn("No external object directories found with filename: {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
             }
 
-            processResponseFileByHashcode(batchUploadFileFilenameProcessor);
-
+            processResponseFileByHashcode(batchUploadFileFilenameProcessor, manifestName);
+            deleteResponseBlobsByManifestName(batchUploadFileFilenameProcessor, manifestName);
             resetArmStatusForUnprocessedEods(manifestName);
         } catch (IllegalArgumentException e) {
             log.error("Unable to process manifest filename {}", inputUploadBlob, e);
         } catch (Exception e) {
             log.error("Unable to process manifest", e);
         }
+    }
+
+    private void deleteResponseBlobsByManifestName(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor,
+                                                   String manifestName) {
+        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository.findByManifestFile(manifestName);
+        if (CollectionUtils.isNotEmpty(externalObjectDirectoryEntities)) {
+            List<ExternalObjectDirectoryEntity> completedExternalObjectDirectoryEntities = new ArrayList<>();
+            for (ExternalObjectDirectoryEntity eod : externalObjectDirectoryEntities) {
+                if (isResponseCompletedAndCleaned(eod)) {
+                    completedExternalObjectDirectoryEntities.add(eod);
+                }
+            }
+            if (externalObjectDirectoryEntities.size() == completedExternalObjectDirectoryEntities.size()) {
+                log.info("About to delete ARM input upload file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilename());
+                armDataManagementApi.deleteBlobData(batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath());
+            } else {
+                log.warn("Unable to delete ARM batch input upload file {} as referenced data is not complete - total {} vs completed {}",
+                         batchUploadFileFilenameProcessor.getBatchMetadataFilename(),
+                         externalObjectDirectoryEntities.size(), completedExternalObjectDirectoryEntities.size());
+            }
+        }
+    }
+
+    private boolean isResponseCompletedAndCleaned(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        return (externalObjectDirectory.isResponseCleaned()
+            && isCompletedStatus(externalObjectDirectory.getStatus()));
+    }
+
+    private boolean isCompletedStatus(ObjectRecordStatusEntity status) {
+        if (nonNull(status)) {
+            ObjectRecordStatusEnum statusEnum = ObjectRecordStatusEnum.valueOfId(status.getId());
+            return (STORED.equals(statusEnum)
+                || ARM_RESPONSE_PROCESSING_FAILED.equals(statusEnum)
+                || ARM_RESPONSE_MANIFEST_FAILED.equals(statusEnum)
+                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(statusEnum));
+        }
+        return false;
     }
 
     private String generateManifestName(String uuid) {
@@ -166,7 +203,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         }
     }
 
-    private void processResponseFileByHashcode(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
+    private void processResponseFileByHashcode(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor, String manifestName) {
         try {
             List<String> responseFiles = armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode());
             if (CollectionUtils.isNotEmpty(responseFiles)) {
