@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperUserStub;
@@ -63,7 +64,7 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
 

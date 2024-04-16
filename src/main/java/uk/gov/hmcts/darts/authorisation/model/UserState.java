@@ -15,6 +15,6 @@ public class UserState {
     @NonNull
     private String userName;
     @NonNull
-    private Set<Role> roles;
+    private Set<UserStateRole> roles;
 
 }

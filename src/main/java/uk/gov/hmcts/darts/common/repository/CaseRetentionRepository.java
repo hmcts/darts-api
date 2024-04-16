@@ -90,4 +90,7 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
         """
     )
     List<CaseRetentionEntity> findPendingRetention(OffsetDateTime pendingCutoff);
+
+    Optional<CaseRetentionEntity> findTopByCourtCaseOrderByRetainUntilAppliedOnDesc(CourtCaseEntity courtCase);
+
 }

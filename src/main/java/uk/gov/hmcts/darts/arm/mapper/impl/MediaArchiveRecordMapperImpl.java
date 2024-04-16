@@ -257,7 +257,9 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private static String getCourtroom(MediaEntity media) {
         String courtroom = null;
-        if (nonNull(media.getCourtroom())) {
+        if (CollectionUtils.isNotEmpty(media.getHearingList()) && nonNull(media.getHearingList().get(0).getCourtroom())) {
+            courtroom = media.getHearingList().get(0).getCourtroom().getName();
+        } else if (nonNull(media.getCourtroom())) {
             courtroom = media.getCourtroom().getName();
         }
         return courtroom;

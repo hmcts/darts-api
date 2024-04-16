@@ -27,9 +27,11 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
+import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
@@ -109,6 +111,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
+
+    @Autowired
+    private ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
 
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
@@ -798,6 +803,63 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 dailyListService
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+    }
+
+    @Test
+    void givenConfiguredTaskApplyRetentionCaseAssociatedObjectsAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                applyRetentionCaseAssociatedObjectsProcessor
+            );
+
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
+                 originalAutomatedTaskEntity.get().getCronExpression()
+        );
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void givenConfiguredTaskCancelApplyRetentionCaseAssociatedObjectsAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                applyRetentionCaseAssociatedObjectsProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

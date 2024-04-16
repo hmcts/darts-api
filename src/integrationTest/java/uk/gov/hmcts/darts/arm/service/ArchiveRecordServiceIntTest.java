@@ -29,7 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +51,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
 
     private static final String REQUESTED_TRANSCRIPTION_COMMENT = "Requested transcription";
 
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 23);
+    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 23, 10, 0, 0);
 
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
     private static final String DATE_FORMAT = "yyyy-MM-dd";

@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -74,7 +75,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
     }
@@ -242,7 +243,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             NEW_CASE,
             SOME_COURTHOUSE,
             "CR1",
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
         var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);

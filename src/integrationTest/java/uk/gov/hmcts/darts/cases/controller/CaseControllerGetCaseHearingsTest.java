@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -51,7 +52,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
@@ -109,7 +110,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             "CR1",
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);

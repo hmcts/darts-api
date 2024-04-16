@@ -1,5 +1,6 @@
 {
   "courthouse": "SWANSEA",
+  "courtroom": "1",
   "case_number": "CASE1001",
   "defendants": [
     "Jow Bloggs"

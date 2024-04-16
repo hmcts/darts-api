@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -40,7 +41,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 @UtilityClass
 public class CommonTestDataUtil {
 
@@ -210,10 +211,26 @@ public class CommonTestDataUtil {
         return createHearing(caseNumber, date, LocalTime.NOON);
     }
 
+    public HearingEntity createHearing(String caseNumber, LocalDateTime datetime) {
+        return createHearing(caseNumber, datetime.toLocalDate(), datetime.toLocalTime());
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, LocalDateTime datetime) {
+        return createHearing(courtCase, createCourtroom("1"), datetime.toLocalDate(), datetime.toLocalTime());
+    }
+
     public HearingEntity createHearing(String caseNumber, LocalDate date, LocalTime time) {
+        return createHearing(createCase(caseNumber), createCourtroom("1"), date, time);
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDateTime dateTime) {
+        return createHearing(courtCase, courtroom, dateTime.toLocalDate(), dateTime.toLocalTime());
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate date, LocalTime time) {
         HearingEntity hearing1 = new HearingEntity();
-        hearing1.setCourtCase(createCase(caseNumber));
-        hearing1.setCourtroom(createCourtroom("1"));
+        hearing1.setCourtCase(courtCase);
+        hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
@@ -344,8 +361,9 @@ public class CommonTestDataUtil {
 
     public AddCaseRequest createAddCaseRequest() {
 
-        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        AddCaseRequest request = new AddCaseRequest("Swansea", "1", "case_number");
         request.setCaseNumber("2");
+        request.setCourtroom("1");
         request.setDefendants(Lists.newArrayList("Defendant1"));
         request.setJudges(Lists.newArrayList("Judge1"));
         request.setProsecutors(Lists.newArrayList("Prosecutor1"));
@@ -356,8 +374,9 @@ public class CommonTestDataUtil {
 
     public AddCaseRequest createUpdateCaseRequest() {
 
-        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        AddCaseRequest request = new AddCaseRequest("Swansea", "1", "case_number");
         request.setCaseNumber("case1");
+        request.setCourtroom("1");
         request.setDefendants(Lists.newArrayList("UpdatedDefendant1"));
         request.setJudges(Lists.newArrayList("UpdateJudge1"));
         request.setProsecutors(Lists.newArrayList("UpdateProsecutor1"));
@@ -460,7 +479,7 @@ public class CommonTestDataUtil {
 
     public static List<AnnotationDocumentEntity> createAnnotationDocumentEntityList() {
         List<AnnotationDocumentEntity> annotationDocumentEntityList =
-                new ArrayList<>();
+            new ArrayList<>();
         annotationDocumentEntityList.add(createAnnotationDocumentEntity(1));
         annotationDocumentEntityList.add(createAnnotationDocumentEntity(2));
         return annotationDocumentEntityList;
@@ -468,7 +487,7 @@ public class CommonTestDataUtil {
 
     public static AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
         AnnotationDocumentEntity annotationDocumentEntity =
-                new AnnotationDocumentEntity();
+            new AnnotationDocumentEntity();
         annotationDocumentEntity.setId(id);
         annotationDocumentEntity.setFileName("filename");
         annotationDocumentEntity.setFileType("filetype");

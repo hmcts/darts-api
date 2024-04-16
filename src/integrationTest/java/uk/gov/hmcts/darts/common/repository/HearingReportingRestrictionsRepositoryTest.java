@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -26,7 +27,7 @@ class HearingReportingRestrictionsRepositoryTest extends IntegrationBase {
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
         //54 and 188 are is_reporting_restriction = true

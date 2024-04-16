@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -91,7 +92,9 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at").exists())
             .andReturn();
 
+        lenient().when(mockUserIdentity.getUserAccount()).thenReturn(user);
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+
         verifyNoMoreInteractions(mockUserIdentity);
     }
 

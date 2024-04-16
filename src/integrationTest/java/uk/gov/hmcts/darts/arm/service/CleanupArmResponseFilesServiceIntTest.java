@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 9, 26);
+    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
 
     @MockBean
     private ArmDataManagementApi armDataManagementApi;

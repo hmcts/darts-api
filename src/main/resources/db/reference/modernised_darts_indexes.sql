@@ -1,12 +1,12 @@
 --modernised_darts_indexes
 --
 -- v1 aligned to v60 of the modernised schema, v19 security, v6 retention
--- commented statements, unnecessary due to presence of PK, which will support the FK in question.
+--    commented statements, unnecessary due to presence of PK, which will support the FK in question.
 -- v2 additional indexes to accommodate initial access to driving site table
 -- adding storage clauses to all indexes
 -- v3 remove indexes on hea_id and cas_id from transcription
 -- v4 amend a number of the indexes on character columns to be case-insenstive upper() function based
---
+-- v5 add 2 user_account indexes
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -182,13 +182,14 @@ CREATE INDEX rpt_lst_mod_by_fk  ON RETENTION_POLICY_TYPE(last_modified_by) TABLE
 
 
 --v2 
-CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)            TABLESPACE darts_indexes;
-CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name)) TABLESPACE darts_indexes;  
-CREATE INDEX ctr_cn_idx         ON COURTROOM(UPPER(courtroom_name))   TABLESPACE darts_indexes;
-CREATE INDEX dfc_dn_idx         ON DEFENCE(UPPER(defence_name))       TABLESPACE darts_indexes;
-CREATE INDEX dfd_dn_idx         ON DEFENDANT(UPPER(defendant_name))   TABLESPACE darts_indexes;
-CREATE INDEX hea_hd_idx         ON HEARING(hearing_date)              TABLESPACE darts_indexes;
-CREATE INDEX jud_jn_idx         ON JUDGE(UPPER(judge_name))           TABLESPACE darts_indexes;
-CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name)) TABLESPACE darts_indexes;
-CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name)            TABLESPACE darts_indexes;
-
+CREATE INDEX cas_cn_idx         ON COURT_CASE(case_number)                  TABLESPACE darts_indexes;
+CREATE INDEX cth_cn_idx         ON COURTHOUSE(UPPER(courthouse_name))       TABLESPACE darts_indexes;  
+CREATE INDEX ctr_cn_idx         ON COURTROOM(UPPER(courtroom_name))         TABLESPACE darts_indexes;
+CREATE INDEX dfc_dn_idx         ON DEFENCE(UPPER(defence_name))             TABLESPACE darts_indexes;
+CREATE INDEX dfd_dn_idx         ON DEFENDANT(UPPER(defendant_name))         TABLESPACE darts_indexes;
+CREATE INDEX hea_hd_idx         ON HEARING(hearing_date)                    TABLESPACE darts_indexes;
+CREATE INDEX jud_jn_idx         ON JUDGE(UPPER(judge_name))                 TABLESPACE darts_indexes;
+CREATE INDEX prn_pn_idx         ON PROSECUTOR(UPPER(prosecutor_name))       TABLESPACE darts_indexes;
+CREATE INDEX usr_un_idx         ON USER_ACCOUNT(user_name)                  TABLESPACE darts_indexes;
+CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address))  TABLESPACE darts_indexes;
+CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid)               TABLESPACE darts_indexes;

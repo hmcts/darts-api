@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class HearingStub {
     private final UserAccountStub userAccountStub;
 
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
-                                       LocalDate hearingDate) {
+                                       LocalDateTime hearingDate) {
         courthouseStub.createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
@@ -30,6 +30,6 @@ public class HearingStub {
 
     public HearingEntity createMinimalHearing() {
         CourthouseEntity minimalCourthouse = courthouseStub.createMinimalCourthouse();
-        return createHearing(minimalCourthouse.getCourthouseName(), "1", "caseNumber1", LocalDate.of(2020, 10, 1));
+        return createHearing(minimalCourthouse.getCourthouseName(), "1", "caseNumber1", LocalDateTime.of(2020, 10, 1, 10, 0, 0));
     }
 }

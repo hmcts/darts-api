@@ -173,23 +173,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    void casesPostWithoutExistingCaseAndCourtroomMissing() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithoutCourtroom.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
-
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
-
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseWithoutCourtroomAndJudge.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
     void casesPostCaseNumberMissing() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -220,36 +203,19 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    void casesPostWithNonExistingCourtroom() throws Exception {
+    void casesPostWithNoCourtroom() throws Exception {
         setupExternalMidTierUserForCourthouse(null);
 
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithNonExistingCourtroom.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
 
         String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNonExistingCourtroom.json"));
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void casesPostOnlyCaseNumberAndCourthouseProvided() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyOnlyCourthouseProvided.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
-
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
-
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseOnlyCourthouseProvided.json");
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNoCourtroom.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

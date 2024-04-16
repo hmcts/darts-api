@@ -23,7 +23,7 @@ import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRec
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
-import uk.gov.hmcts.darts.arm.util.files.BatchUploadFileFilenameProcessor;
+import uk.gov.hmcts.darts.arm.util.files.BatchInputUploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -89,8 +89,6 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     @Override
     public void processResponseFiles() {
         userAccount = userIdentity.getUserAccount();
-        Integer batchSize = armDataManagementConfiguration.getBatchSize();
-
         ContinuationTokenBlobs continuationTokenBlobs = null;
         String prefix = armDataManagementConfiguration.getManifestFilePrefix();
 
@@ -119,7 +117,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private void processInputUploadBlob(String inputUploadBlob) {
         log.debug("Found ARM Input Upload file {}", inputUploadBlob);
         try {
-            BatchUploadFileFilenameProcessor batchUploadFileFilenameProcessor = new BatchUploadFileFilenameProcessor(inputUploadBlob);
+            BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor = new BatchInputUploadFileFilenameProcessor(inputUploadBlob);
             String manifestName = generateManifestName(batchUploadFileFilenameProcessor.getUuidString());
             List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = externalObjectDirectoryRepository
                 .findAllByStatusAndManifestFile(EodHelper.armDropZoneStatus(), manifestName);
@@ -168,7 +166,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         }
     }
 
-    private void processResponseFileByHashcode(BatchUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
+    private void processResponseFileByHashcode(BatchInputUploadFileFilenameProcessor batchUploadFileFilenameProcessor) {
         try {
             List<String> responseFiles = armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode());
             if (CollectionUtils.isNotEmpty(responseFiles)) {
@@ -182,6 +180,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                     //Process the final results
                     processBatchResponseFiles(armBatchResponses);
                 }
+            } else {
+                log.info("Unable to find response files starting with {}", batchUploadFileFilenameProcessor.getHashcode());
             }
         } catch (Exception e) {
             log.error("Unable to process responses for file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
@@ -225,10 +225,10 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                                                   ArmBatchResponses armBatchResponses) {
         for (CreateRecordFilenameProcessor createRecordFilenameProcessor : createRecordResponses) {
             try {
-                BinaryData createRecordBinary = armDataManagementApi.getBlobData(createRecordFilenameProcessor.getCreateRecordFilename());
+                BinaryData createRecordBinary = armDataManagementApi.getBlobData(createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
                 readCreateRecordFile(createRecordBinary, createRecordFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process upload file {}", createRecordFilenameProcessor.getCreateRecordFilename());
+                log.error("Unable to process ARM create record response file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
             }
         }
     }
@@ -256,18 +256,18 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         log.warn("Failed to obtain relation id from create record");
                     }
                 } else {
-                    log.warn("Failed to write create record file to temp workspace {}", createRecordFilenameProcessor.getCreateRecordFilename());
+                    log.warn("Failed to write create record file to temp workspace {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
                 }
             } catch (IOException e) {
-                log.error("Unable to write create record file to temporary workspace {} - {}", createRecordFilenameProcessor.getCreateRecordFilename(),
+                log.error("Unable to write create record file to temporary workspace {} - {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath(),
                           e.getMessage());
             } catch (Exception e) {
-                log.error("Unable to process arm response create record file {}", createRecordFilenameProcessor.getCreateRecordFilename(), e);
+                log.error("Unable to process arm response create record file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath(), e);
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
-            log.warn("Failed to read create record file {}", createRecordFilenameProcessor.getCreateRecordFilename());
+            log.warn("Failed to read create record file {}", createRecordFilenameProcessor.getCreateRecordFilenameAndPath());
         }
 
     }
@@ -275,10 +275,10 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private void processUploadResponseFiles(List<UploadFileFilenameProcessor> uploadFileResponses, ArmBatchResponses armBatchResponses) {
         for (UploadFileFilenameProcessor uploadFileFilenameProcessor : uploadFileResponses) {
             try {
-                BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFileFilenameProcessor.getUploadFileFilename());
+                BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
                 readUploadFile(uploadFileBinary, uploadFileFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process upload file {}", uploadFileFilenameProcessor.getUploadFileFilename(), e);
+                log.error("Unable to process ARM response upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(), e);
             }
         }
     }
@@ -305,17 +305,18 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                                                                armResponseUploadFileRecord, uploadFileFilenameProcessor);
                     }
                 } else {
-                    log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilename());
+                    log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
                 }
             } catch (IOException e) {
-                log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
+                log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
+                          e.getMessage());
             } catch (Exception e) {
-                log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilename(), e);
+                log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(), e);
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
-            log.warn("Failed to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
+            log.warn("Failed to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
         }
     }
 
@@ -343,7 +344,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         processUploadFileDataSuccess(externalObjectDirectory, armResponseUploadFileRecord);
                     } else {
                         log.warn(
-                            "Unable to process upload file {} with EOD record {}, file Id {}", uploadFileFilenameProcessor.getUploadFileFilename(),
+                            "Unable to process upload file {} with EOD record {}, file Id {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
                             armResponseUploadFileRecord.getA360RecordId(), armResponseUploadFileRecord.getA360FileId());
                     }
                 } else {
@@ -353,7 +354,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
                     log.warn(
                         "ARM status reports failed for upload file {}. ARM error description: {} ARM error status: {} for record {}, file Id {}",
-                        uploadFileFilenameProcessor.getUploadFileFilename(),
+                        uploadFileFilenameProcessor.getUploadFileFilenameAndPath(),
                         errorDescription,
                         armResponseUploadFileRecord.getErrorStatus(),
                         armResponseUploadFileRecord.getA360RecordId(),
@@ -362,7 +363,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
-                log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
+                log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
             }
         } catch (Exception e) {
             log.error(UNABLE_TO_UPDATE_EOD, e);
@@ -470,12 +471,15 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         for (String responseFile : responseFiles) {
             try {
                 if (responseFile.endsWith(generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
+                    log.debug("Found ARM create record response file {}", responseFile);
                     CreateRecordFilenameProcessor createRecordFilenameProcessor = new CreateRecordFilenameProcessor(responseFile);
                     responseFilenames.getCreateRecordResponses().add(createRecordFilenameProcessor);
                 } else if (responseFile.endsWith(generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
+                    log.debug("Found ARM upload file response file {}", responseFile);
                     UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(responseFile);
                     responseFilenames.getUploadFileResponses().add(uploadFileFilenameProcessor);
                 } else if (responseFile.endsWith(generateSuffix(ARM_INVALID_LINE_FILENAME_KEY))) {
+                    log.debug("Found ARM invalid line response file {}", responseFile);
                     InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(responseFile);
                     responseFilenames.getInvalidLineResponses().add(invalidLineFileFilenameProcessor);
                 } else {
@@ -492,10 +496,10 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private void processInvalidFiles(List<InvalidLineFileFilenameProcessor> invalidLineResponses, ArmBatchResponses armBatchResponses) {
         for (InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor : invalidLineResponses) {
             try {
-                BinaryData invalidLineFileBinary = armDataManagementApi.getBlobData(invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                BinaryData invalidLineFileBinary = armDataManagementApi.getBlobData(invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                 readInvalidLineFile(invalidLineFileBinary, invalidLineFileFilenameProcessor, armBatchResponses);
             } catch (Exception e) {
-                log.error("Unable to process ARM invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e);
+                log.error("Unable to process ARM invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(), e);
             }
         }
     }
@@ -508,7 +512,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 boolean appendUuidToWorkspace = true;
                 jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
                     invalidLineFileBinary,
-                    invalidLineFileFilenameProcessor.getInvalidLineFileFilename(),
+                    invalidLineFileFilenameProcessor.getInvalidLineFilename(),
                     armDataManagementConfiguration.getTempBlobWorkspace(),
                     appendUuidToWorkspace
                 );
@@ -521,21 +525,21 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                                                                armResponseInvalidLineRecord, invalidLineFileFilenameProcessor);
                     }
                 } else {
-                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                    log.warn("Failed to write invalid line file to temp workspace {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                 }
             } catch (IOException e) {
                 log.error("Unable to write invalid line file to temporary workspace {} - {}",
-                          invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e.getMessage());
+                          invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(), e.getMessage());
 
             } catch (Exception e) {
                 log.error("Unable to process ARM response invalid line file {}",
-                          invalidLineFileFilenameProcessor.getInvalidLineFileFilename(), e);
+                          invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath(), e);
 
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
-            log.error("Unable to read ARM response invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+            log.error("Unable to read ARM response invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
         }
     }
 
@@ -559,11 +563,11 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
                 } else {
                     log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
-                             invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                             invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
                 }
             } else {
-                log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilename());
+                log.warn("Unable to read invalid line file {}", invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
             }
         } catch (Exception e) {
@@ -598,13 +602,13 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private static List<String> getResponseBlobsToBeDeleted(ArmResponseBatchData armResponseBatchData) {
         List<String> responseBlobsToBeDeleted = new ArrayList<>();
         if (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())) {
-            responseBlobsToBeDeleted.add(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilename());
+            responseBlobsToBeDeleted.add(armResponseBatchData.getCreateRecordFilenameProcessor().getCreateRecordFilenameAndPath());
         }
         if (nonNull(armResponseBatchData.getUploadFileFilenameProcessor())) {
-            responseBlobsToBeDeleted.add(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilename());
+            responseBlobsToBeDeleted.add(armResponseBatchData.getUploadFileFilenameProcessor().getUploadFileFilenameAndPath());
         }
         if (nonNull(armResponseBatchData.getInvalidLineFileFilenameProcessor())) {
-            responseBlobsToBeDeleted.add(armResponseBatchData.getInvalidLineFileFilenameProcessor().getInvalidLineFileFilename());
+            responseBlobsToBeDeleted.add(armResponseBatchData.getInvalidLineFileFilenameProcessor().getInvalidLineFileFilenameAndPath());
         }
         return responseBlobsToBeDeleted;
     }

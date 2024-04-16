@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -179,7 +179,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         return userAccountEntity;
     }
 
-    public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+    public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName, LocalDateTime hearingDate) {
         hearingEntity = dartsDatabaseStub.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             caseNumber,
             courthouseName,

@@ -7,10 +7,11 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -26,7 +27,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenClosedEventsUseDateAsClosedDate() {
-        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7).plusMonths(3));
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
 
@@ -54,7 +55,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenEventsUseLatestDateAsClosedDate() {
-        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7));
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
         EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);
@@ -78,6 +79,28 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
     }
 
+    @Test
+    void givenOneEventUseLatestDateAsClosedDate() {
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
+
+        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
+        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 3);
+        eventEntity2.setCreatedDateTime(closeDate);
+
+        dartsDatabase.save(eventEntity2);
+
+        CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
+        courtCaseEntity.setCreatedDateTime(OffsetDateTime.now().minusYears(10));
+        dartsDatabase.getCaseRepository().save(courtCaseEntity);
+        assertFalse(courtCaseEntity.getClosed());
+
+        closeOldCasesProcessor.closeCases();
+
+        CourtCaseEntity updatedCourtCaseEntity = dartsDatabase.getCaseRepository().findById(courtCaseEntity.getId()).orElse(null);
+        assert updatedCourtCaseEntity != null;
+        assertTrue(updatedCourtCaseEntity.getClosed());
+        assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES), updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+    }
 
 
     @Test
@@ -94,7 +117,7 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         mediaEntity3.setCreatedDateTime(OffsetDateTime.now().minusYears(6).minusDays(2));
         dartsDatabase.saveAll(mediaEntity1, mediaEntity2, mediaEntity3);
 
-        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDate.now().minusYears(7));
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7));
         hearing.addMedia(mediaEntity1);
         hearing.addMedia(mediaEntity2);
         hearing.addMedia(mediaEntity3);
@@ -115,9 +138,9 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
 
     @Test
     void givenOnlyHearingUseDateAsClosedDate() {
-        OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
-        dartsDatabase.createHearing("a_courthouse", "1", "1078", closeDate.toLocalDate().minusDays(10));
-        HearingEntity hearing =  dartsDatabase.createHearing("a_courthouse", "1", "1078", closeDate.toLocalDate());
+        LocalDateTime closeDate = DateConverterUtil.toLocalDateTime(OffsetDateTime.now().minusYears(7));
+        dartsDatabase.createHearing("a_courthouse", "1", "1078", closeDate.minusDays(10));
+        HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", closeDate);
 
 
         CourtCaseEntity courtCaseEntity = hearing.getCourtCase();
