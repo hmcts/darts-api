@@ -207,7 +207,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         try {
             List<String> responseFiles = armDataManagementApi.listResponseBlobs(batchUploadFileFilenameProcessor.getHashcode());
             if (CollectionUtils.isNotEmpty(responseFiles)) {
-                ResponseFilenames responseFilenames = getArmResponseFilenames(responseFiles);
+                ResponseFilenames responseFilenames = getArmResponseFilenames(responseFiles, manifestName);
                 ArmBatchResponses armBatchResponses = new ArmBatchResponses();
                 if (responseFilenames.containsResponses()) {
                     //Put response files into their respective groups based on the contents relation id (EOD id)
@@ -218,7 +218,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                     processBatchResponseFiles(armBatchResponses);
                 }
             } else {
-                log.info("Unable to find response files starting with {}", batchUploadFileFilenameProcessor.getHashcode());
+                log.info("Unable to find response files starting with {} for manifest {}", batchUploadFileFilenameProcessor.getHashcode(), manifestName);
             }
         } catch (Exception e) {
             log.error("Unable to process responses for file {}", batchUploadFileFilenameProcessor.getBatchMetadataFilenameAndPath(), e);
@@ -503,28 +503,28 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         return uploadNewFileRecord;
     }
 
-    private static ResponseFilenames getArmResponseFilenames(List<String> responseFiles) {
+    private static ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
         ResponseFilenames responseFilenames = new ResponseFilenames();
         for (String responseFile : responseFiles) {
             try {
                 if (responseFile.endsWith(generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
-                    log.debug("Found ARM create record response file {}", responseFile);
+                    log.debug("Found ARM create record response file {} for manifest {}", responseFile, manifestName);
                     CreateRecordFilenameProcessor createRecordFilenameProcessor = new CreateRecordFilenameProcessor(responseFile);
                     responseFilenames.getCreateRecordResponses().add(createRecordFilenameProcessor);
                 } else if (responseFile.endsWith(generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
-                    log.debug("Found ARM upload file response file {}", responseFile);
+                    log.debug("Found ARM upload file response file {} for manifest {}", responseFile, manifestName);
                     UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(responseFile);
                     responseFilenames.getUploadFileResponses().add(uploadFileFilenameProcessor);
                 } else if (responseFile.endsWith(generateSuffix(ARM_INVALID_LINE_FILENAME_KEY))) {
-                    log.debug("Found ARM invalid line response file {}", responseFile);
+                    log.debug("Found ARM invalid line response file {} for manifest {}", responseFile, manifestName);
                     InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor = new InvalidLineFileFilenameProcessor(responseFile);
                     responseFilenames.getInvalidLineResponses().add(invalidLineFileFilenameProcessor);
                 } else {
-                    log.warn("Unknown ARM response file type {}", responseFile);
+                    log.warn("Unknown ARM response file type {} for manifest {}", responseFile, manifestName);
                 }
             } catch (IllegalArgumentException e) {
                 // This occurs when the filename is not parsable
-                log.error("Invalid ARM response filename: {}", responseFile);
+                log.error("Invalid ARM response filename: {} for manifest {}", responseFile, manifestName);
             }
         }
         return responseFilenames;
