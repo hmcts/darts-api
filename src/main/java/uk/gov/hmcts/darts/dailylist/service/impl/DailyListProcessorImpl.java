@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.dailylist.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -92,7 +91,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
                 // report on the daily list result
                 report.registerResult(dailyLists.get(0).getStatus());
-            } catch (JsonProcessingException | IllegalArgumentException e) {
+            } catch (Exception e) {
                 dailyLists.get(0).setStatus(JobStatusType.FAILED);
                 report.registerFailed();
                 log.error("Failed to process dailylist for dailylist id: {}", dailyLists.get(0).getId(), e);
