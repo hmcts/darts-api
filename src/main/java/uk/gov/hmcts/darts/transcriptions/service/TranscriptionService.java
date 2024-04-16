@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -46,6 +47,8 @@ public interface TranscriptionService {
     List<UpdateTranscriptionsItem> updateTranscriptions(List<UpdateTranscriptionsItem> request);
 
     List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses();
+
+    List<TranscriptionStatus> getTranscriptionStatuses();
 
     void closeTranscription(Integer transcriptionId, String transcriptionComment);
 }

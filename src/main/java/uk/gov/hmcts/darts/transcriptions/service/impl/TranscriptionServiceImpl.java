@@ -54,6 +54,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -467,6 +468,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
+    public List<TranscriptionStatus> getTranscriptionStatuses() {
+        List<TranscriptionStatusEntity> transcriptionStatusRepositoryAll = transcriptionStatusRepository.findAll();
+
+        return transcriptionStatusRepositoryAll.stream().map(this::mapToTranscriptionStatus).toList();
+    }
+
+    @Override
     @Transactional
     public GetTranscriptionByIdResponse getTranscription(Integer transcriptionId) {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
@@ -542,4 +550,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return updateTranscriptions.stream().filter(e ->
                                                         e.getId().equals(transcriptionId)).findAny();
     }
+
+    private TranscriptionStatus mapToTranscriptionStatus(TranscriptionStatusEntity transcriptionStatusEntity) {
+        TranscriptionStatus transcriptionStatus = new TranscriptionStatus();
+        transcriptionStatus.setId(transcriptionStatusEntity.getId());
+        transcriptionStatus.setType(transcriptionStatusEntity.getStatusType());
+        transcriptionStatus.setDisplayName(transcriptionStatusEntity.getDisplayName());
+        return transcriptionStatus;
+    }
+
 }

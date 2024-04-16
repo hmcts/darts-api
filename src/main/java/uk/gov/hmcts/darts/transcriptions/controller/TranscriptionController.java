@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -184,4 +185,14 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<TranscriptionTranscriberCountsResponse> getTranscriptionTranscriberCounts(Integer userId) {
         return ResponseEntity.ok(transcriptionService.getTranscriptionTranscriberCounts(userId));
     }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(
+        contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    @Override
+    public ResponseEntity<List<TranscriptionStatus>> getTranscriptionStatus() {
+        return ResponseEntity.ok(transcriptionService.getTranscriptionStatuses());
+    }
+
 }
