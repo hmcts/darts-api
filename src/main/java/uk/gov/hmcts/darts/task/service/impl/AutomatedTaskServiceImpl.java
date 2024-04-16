@@ -445,7 +445,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            applyRetentionCaseAssociatedObjectsProcessor
+            applyRetentionCaseAssociatedObjectsProcessor,
+            logApi
         );
         applyRetentionCaseAssociatedObjectsAutomatedTask.setLastCronExpression(
             getAutomatedTaskCronExpression(applyRetentionCaseAssociatedObjectsAutomatedTask)
@@ -495,7 +496,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             new ArmRetentionEventDateCalculatorAutomatedTask(automatedTaskRepository,
                                                              lockProvider,
                                                              automatedTaskConfigurationProperties,
-                                                             armRetentionEventDateProcessor);
+                                                             armRetentionEventDateProcessor,
+                                                             logApi);
         armRetentionEventDateCalculatorAutomatedTask.setLastCronExpression(
             getAutomatedTaskCronExpression(armRetentionEventDateCalculatorAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(armRetentionEventDateCalculatorAutomatedTask);
@@ -688,7 +690,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                applyRetentionCaseAssociatedObjectsProcessor
+                applyRetentionCaseAssociatedObjectsProcessor,
+                logApi
             );
             Trigger trigger = createAutomatedTaskTrigger(applyRetentionCaseAssociatedObjectsAutomatedTask);
             taskScheduler.schedule(applyRetentionCaseAssociatedObjectsAutomatedTask, trigger);
@@ -760,7 +763,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armRetentionEventDateProcessor
+                armRetentionEventDateProcessor,
+                logApi
             );
             Trigger trigger = createAutomatedTaskTrigger(armRetentionEventDateCalculatorAutomatedTask);
             taskScheduler.schedule(armRetentionEventDateCalculatorAutomatedTask, trigger);

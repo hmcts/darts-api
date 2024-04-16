@@ -844,7 +844,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                applyRetentionCaseAssociatedObjectsProcessor
+                applyRetentionCaseAssociatedObjectsProcessor,
+                logApi
             );
 
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
@@ -877,7 +878,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                applyRetentionCaseAssociatedObjectsProcessor
+                applyRetentionCaseAssociatedObjectsProcessor,
+                logApi
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
@@ -901,7 +903,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armRetentionEventDateProcessor
+                armRetentionEventDateProcessor,
+                logApi
             );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -931,7 +934,8 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armRetentionEventDateProcessor
+                armRetentionEventDateProcessor,
+                logApi
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

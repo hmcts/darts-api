@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
@@ -18,8 +19,9 @@ public class ApplyRetentionCaseAssociatedObjectsAutomatedTask extends AbstractLo
     public ApplyRetentionCaseAssociatedObjectsAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                             LockProvider lockProvider,
                                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                            ApplyRetentionCaseAssociatedObjectsProcessor processor) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
+                                                            ApplyRetentionCaseAssociatedObjectsProcessor processor,
+                                                            LogApi logApi) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
         this.processor = processor;
     }
 
