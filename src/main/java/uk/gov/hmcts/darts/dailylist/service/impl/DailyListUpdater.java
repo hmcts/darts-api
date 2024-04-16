@@ -192,6 +192,9 @@ class DailyListUpdater {
 
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
+        if (hearing.getProsecution() == null) {
+            return;
+        }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate ->
