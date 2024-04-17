@@ -240,21 +240,34 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
-        return createTranscriptionList(hearing, true, true);
+        return createTranscriptionList(hearing, true, true, false);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
-        return createTranscriptionList(hearing, generateStatus, true);
+        return createTranscriptionList(hearing, generateStatus, true, false);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
+        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(
+        HearingEntity hearing,
+        boolean generateStatus,
+        boolean excludeWorkflow,
+        boolean generateRequestor
+    ) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
         transcription.setCourtroom(hearing.getCourtroom());
         transcription.addHearing(hearing);
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
-        transcription.setCreatedBy(createUserAccount());
+        if (generateRequestor) {
+            transcription.setCreatedBy(createUserAccountWithId());
+        } else {
+            transcription.setCreatedBy(createUserAccount());
+        }
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD, 999));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());
@@ -271,6 +284,7 @@ public class CommonTestDataUtil {
             transcriptionStatus.setDisplayName(TranscriptionStatusEnum.APPROVED.name());
             transcription.setTranscriptionStatus(transcriptionStatus);
         }
+
         return List.of(transcription);
     }
 
@@ -332,6 +346,12 @@ public class CommonTestDataUtil {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setUserName(userName);
         userAccount.setEmailAddress("test@test.com");
+        return userAccount;
+    }
+
+    public UserAccountEntity createUserAccountWithId() {
+        UserAccountEntity userAccount = createUserAccount("testUsername");
+        userAccount.setId(1002);
         return userAccount;
     }
 

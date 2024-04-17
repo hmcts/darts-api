@@ -904,6 +904,9 @@ components:
         case_number:
           type: string
           example: Swansea_case_1
+        courthouse_id:
+          type: integer
+          example: 1
         courthouse:
           type: string
           example: Swansea
@@ -920,6 +923,8 @@ components:
         received:
           type: string
           format: date-time
+        requestor:
+          type: requestor
         requestor_comments:
           type: string
         rejection_reason:
@@ -963,7 +968,15 @@ components:
     judge:
       type: string
       example: Mr Judge
-
+    requestor:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        user_full_name:
+          type: string
+          example: Joe Bloggs
     TranscriptionsErrorCode:
         type: string
         enum:

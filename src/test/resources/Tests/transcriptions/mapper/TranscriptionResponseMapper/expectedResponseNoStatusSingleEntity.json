@@ -3,9 +3,13 @@
   "case_id": 101,
   "hearing_id": 102,
   "case_number": "case1",
+  "courthouse_id": 1001,
   "courthouse": "case_courthouse",
   "from": "testUsername",
   "received": "2020-06-20T10:10:00Z",
+  "requestor": {
+    "user_full_name":"testUsername"
+  },
   "defendants": [
     "defendant_case1_1",
     "defendant_case1_2"
