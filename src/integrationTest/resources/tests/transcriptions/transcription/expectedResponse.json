@@ -1,9 +1,14 @@
 {
   "case_number": "1",
+  "courthouse_id" : 4,
   "courthouse": "some-courthouse",
   "status": "Approved",
   "from": "integrationtest.user@example.comUsername",
   "received": "2023-06-20T10:00:00Z",
+  "requestor" : {
+    "user_id" : 2,
+    "user_full_name" : "integrationtest.user@example.comUsername"
+  },
   "requestor_comments": "comment1",
   "defendants": [],
   "judges": [

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -105,6 +107,18 @@ class DailyListUpdaterTest {
         assertThat(hearingEntityCaptorValue.getCourtCase().getLastModifiedDateTime()).isEqualTo(testTime);
 
         assertThat(dailyList.getStatus()).isEqualTo(PROCESSED);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "NOT BEFORE 10:00 am, 10:00",
+        "NOT BEFORE  10:00 am, 10:00",
+        "SITTING AT  10:00 am, 10:00",
+        "SITTING AT 10:00 am, 10:00",
+        "11:00 am, 11:00",
+    })
+    void getTimeFromTimeMarkingNote(String timeMarkingNote, String result) {
+        assertThat(dailyListUpdater.getTimeFromTimeMarkingNote(timeMarkingNote)).isEqualTo(result);
     }
 
     private DailyListEntity setUpDailyList(String filename) throws IOException {
