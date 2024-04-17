@@ -89,17 +89,13 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             }
 
             var md5Digest = DigestUtils.getMd5Digest();
-            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inboundFile.toStream()), md5Digest)) {
-                try (var in = digestInputStream;
-                     var out = new ByteArrayOutputStream()) {
-                    in.transferTo(out);
-                }
-
+            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inboundFile.toStream()), md5Digest);
+                 var out = new ByteArrayOutputStream()) {
+                digestInputStream.transferTo(out);
                 String calculatedChecksum = fileContentChecksum.calculate(digestInputStream);
                 log.warn("new checksum: {}", calculatedChecksum);
                 validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, inboundFile.getLength());
             }
-
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 // upload file
