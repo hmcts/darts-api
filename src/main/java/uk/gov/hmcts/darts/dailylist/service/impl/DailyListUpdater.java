@@ -150,7 +150,7 @@ class DailyListUpdater {
     }
 
 
-    private LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
+    protected LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
         String rawTime;
         if (StringUtils.isNotBlank(timeMarkingNote)) {
 
@@ -162,7 +162,7 @@ class DailyListUpdater {
                 rawTime = timeMarkingNote;
             }
 
-            return LocalTime.parse(rawTime, new DateTimeFormatterBuilder()
+            return LocalTime.parse(rawTime.strip(), new DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
                 .appendPattern(TIME_MARKING_NOTE_FORMAT)
                 .toFormatter(Locale.ENGLISH));
