@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -82,6 +84,12 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED, eod -> eod.setTransferAttempts(10));
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(MediaTestData.getBinaryData());
+        when(dataManagementService.saveBlobData(anyString(), any(InputStream.class)))
+            .thenAnswer(invocation -> {
+                InputStream inputStream = invocation.getArgument(1, InputStream.class);
+                inputStream.readAllBytes();
+                return UUID.randomUUID();
+            });
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();

@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorSingleElementImpl;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
@@ -64,7 +66,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
+    @SpyBean
     private DataManagementService dataManagementService;
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
@@ -103,6 +105,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     ObjectRecordStatusEntity objectRecordStatusEntityFailureChecksum;
     @Mock
     ObjectRecordStatusEntity objectRecordStatusEntityFailureFileNotFound;
+    @Mock
+    FileContentChecksum fileContentChecksum;
 
     @Mock
     MediaRepository mediaRepository;
@@ -117,7 +121,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
                                                                                              externalLocationTypeRepository,
                                                                                              transcriptionConfigurationProperties,
                                                                                              audioConfigurationProperties,
-                                                                                             externalObjectDirectoryRepository, mediaRepository);
+                                                                                             externalObjectDirectoryRepository, mediaRepository,
+                                                                                             fileContentChecksum);
         when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.of(externalObjectDirectoryEntityInbound));
     }
 

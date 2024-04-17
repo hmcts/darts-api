@@ -5,6 +5,7 @@ import com.azure.storage.blob.models.BlobStorageException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -23,19 +24,21 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.security.DigestInputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
-import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
@@ -65,6 +68,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final MediaRepository mediaRepository;
+    private final FileContentChecksum fileContentChecksum;
 
     @SuppressWarnings("java:S4790")
     @Override
@@ -80,14 +84,26 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
         try {
             BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
-            byte[] bytes = inboundFile.toBytes();
-            final String calculatedChecksum = new String(encodeBase64(md5(bytes)));
+            if (!inboundFile.isReplayable()) {
+                inboundFile = inboundFile.toReplayableBinaryData();
+            }
 
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, Long.valueOf(bytes.length));
+            var md5Digest = DigestUtils.getMd5Digest();
+            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inboundFile.toStream()), md5Digest)) {
+                try (var in = digestInputStream;
+                     var out = new ByteArrayOutputStream()) {
+                    in.transferTo(out);
+                }
+
+                String calculatedChecksum = fileContentChecksum.calculate(digestInputStream);
+                log.warn("new checksum: {}", calculatedChecksum);
+                validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, inboundFile.getLength());
+            }
+
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 // upload file
-                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
+                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile.toStream());
                 unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                 unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
