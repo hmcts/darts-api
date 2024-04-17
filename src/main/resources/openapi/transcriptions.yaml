@@ -606,8 +606,41 @@ paths:
                 title: "User is not a transcriber user"
                 status: 403
 
+  /admin/transcription-status:
+    get:
+      tags:
+        - Transcription
+      summary: Get Transcription Status
+      operationId: getTranscriptionStatus
+      parameters: [ ]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranscriptionStatus'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+
 components:
   schemas:
+    TranscriptionStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        type:
+          type: string
+          example: "Requested"
+        display_name:
+          type: string
+          example: "Requested"
     TranscriptionRequestDetails:
       type: object
       required:
