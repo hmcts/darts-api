@@ -173,21 +173,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    void casesPostCaseNumberMissing() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseNumberMissing.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
     void casesPostCourthouseMissing() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -199,23 +184,6 @@ class CaseControllerTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
-    void casesPostWithNoCourtroom() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithNonExistingCourtroom.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
-
-        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNoCourtroom.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

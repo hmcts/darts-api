@@ -104,7 +104,7 @@ class CasesMapperTest {
         caseEntity.setDefendantList(createDefendantList(caseEntity));
 
 
-        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1", CASE_NUMBER);
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1");
         request.setProsecutors(new ArrayList<>(List.of("New Prosecutor")));
         request.setDefenders(new ArrayList<>(List.of("New Defenders")));
         request.setDefendants(new ArrayList<>(List.of("New Defendants")));
@@ -130,7 +130,7 @@ class CasesMapperTest {
         caseEntity.setDefenceList(createDefenceList(caseEntity));
         caseEntity.setDefendantList(createDefendantList(caseEntity));
 
-        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1", CASE_NUMBER);
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, "1");
         request.setProsecutors(new ArrayList<>(List.of("prosecutor_casenumber1_1")));
         request.setDefenders(new ArrayList<>(List.of("defence_casenumber1_1")));
         request.setDefendants(new ArrayList<>(List.of("defendant_casenumber1_1")));
