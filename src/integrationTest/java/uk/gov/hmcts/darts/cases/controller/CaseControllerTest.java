@@ -173,6 +173,21 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
+    void casesPostCaseNumberMissing() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseNumberMissing.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void casesPostCourthouseMissing() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
