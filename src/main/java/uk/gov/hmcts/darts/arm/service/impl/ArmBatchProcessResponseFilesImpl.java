@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -284,6 +285,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 );
 
                 if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
+                    logResponseFileContents(jsonPath);
                     ArmResponseCreateRecord armResponseCreateRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
@@ -335,6 +337,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 );
 
                 if (jsonPath.toFile().exists()) {
+                    logResponseFileContents(jsonPath);
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
@@ -354,6 +357,15 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
             }
         } else {
             log.warn("Failed to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+        }
+    }
+
+    private void logResponseFileContents(Path jsonPath) {
+        try {
+            String contents = FileUtils.readFileToString(jsonPath.toFile(), "UTF-8");
+            log.info("Contents of response file {} - \n{}", jsonPath.toFile().getAbsoluteFile(), contents);
+        } catch (Exception e) {
+            log.error("Unable to ARM manifest file {}", jsonPath.toFile().getAbsoluteFile(), e);
         }
     }
 
@@ -555,6 +567,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 );
 
                 if (jsonPath.toFile().exists()) {
+                    logResponseFileContents(jsonPath);
                     ArmResponseInvalidLineRecord armResponseInvalidLineRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseInvalidLineRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {

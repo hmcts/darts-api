@@ -39,7 +39,6 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -66,7 +65,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     public static final String HASHCODE_2 = "7a374f19a9ce7dc9cc480ea8d4eca0fc";
     private static final String PREFIX = "DARTS";
     private static final LocalDateTime HEARING_DATETIME = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
-    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     public static final String T_13_00_00_Z = "2023-06-10T13:00:00Z";
     public static final String T_13_45_00_Z = "2023-06-10T13:45:00Z";
 
