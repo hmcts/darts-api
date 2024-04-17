@@ -203,23 +203,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    void casesPostWithNoCourtroom() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
-
-        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(
-                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithNonExistingCourtroom.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
-
-        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNoCourtroom.json"));
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @Test
     void casesPostWithExistingCaseButNoHearing() throws Exception {
         setupExternalMidTierUserForCourthouse(null);
 

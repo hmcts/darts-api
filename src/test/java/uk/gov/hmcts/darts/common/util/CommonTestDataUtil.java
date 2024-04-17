@@ -381,9 +381,9 @@ public class CommonTestDataUtil {
 
     public AddCaseRequest createAddCaseRequest() {
 
-        AddCaseRequest request = new AddCaseRequest("Swansea", "1", "case_number");
+        AddCaseRequest request = new AddCaseRequest();
+        request.setCourthouse("Swansea");
         request.setCaseNumber("2");
-        request.setCourtroom("1");
         request.setDefendants(Lists.newArrayList("Defendant1"));
         request.setJudges(Lists.newArrayList("Judge1"));
         request.setProsecutors(Lists.newArrayList("Prosecutor1"));
@@ -394,9 +394,9 @@ public class CommonTestDataUtil {
 
     public AddCaseRequest createUpdateCaseRequest() {
 
-        AddCaseRequest request = new AddCaseRequest("Swansea", "1", "case_number");
+        AddCaseRequest request = new AddCaseRequest();
+        request.setCourthouse("Swansea");
         request.setCaseNumber("case1");
-        request.setCourtroom("1");
         request.setDefendants(Lists.newArrayList("UpdatedDefendant1"));
         request.setJudges(Lists.newArrayList("UpdateJudge1"));
         request.setProsecutors(Lists.newArrayList("UpdateProsecutor1"));
