@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -60,7 +59,6 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     @MockBean
     private AuditApi mockAuditApi;
 
-    private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
 
     private Integer transcriptionId;
@@ -70,7 +68,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     void beforeEach() {
         authorisationStub.givenTestSchema();
 
-        transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionEntity.getTranscriptionStatus().getId());
         assertEquals(2, transcriptionEntity.getTranscriptionWorkflowEntities().size());
 
@@ -91,9 +89,6 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
     @Test
     void updateAwaitingAuthorisationTranscriptionToRequested() throws Exception {
 
-        TranscriptionEntity existingTranscription = dartsDatabase.getTranscriptionRepository().findById(
-            transcriptionId).orElseThrow();
-        CourthouseEntity courthouse = existingTranscription.getCourtCase().getCourthouse();
         dartsDatabase.getUserAccountStub().createSuperAdminUser();
         UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(REQUESTED.getId());
