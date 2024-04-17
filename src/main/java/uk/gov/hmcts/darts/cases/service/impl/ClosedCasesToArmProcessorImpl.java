@@ -28,11 +28,20 @@ public class ClosedCasesToArmProcessorImpl implements ClosedCasesToArmProcessor 
         courtCaseEntityList.forEach(this::createJsonStringFromCourtCaseEntity);
     }
 
+    @Transactional
     private void createJsonStringFromCourtCaseEntity(CourtCaseEntity courtCaseEntity) {
 
         ObjectMapper mapper = getObjectMapper();
 
         courtCaseEntity.setUserAccountCourtCaseEntities(null);
+        //courtCaseEntity.setProsecutorList(null);
+        //courtCaseEntity.setJudges(null);
+        //courtCaseEntity.setHearings(null);
+        //courtCaseEntity.setCourthouse(null);
+
+        //courtCaseEntity.setDefendantList(null);
+        //courtCaseEntity.setDefenceList(null);
+
 
         String json = "";
         try {
@@ -46,6 +55,7 @@ public class ClosedCasesToArmProcessorImpl implements ClosedCasesToArmProcessor 
     private static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.registerModule(new JavaTimeModule());
         return mapper;

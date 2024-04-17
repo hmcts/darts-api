@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +34,7 @@ import java.util.List;
 @Table(name = "hearing")
 @Getter
 @Setter
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id" )
 public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public static final String HEA_ID = "hea_id";
@@ -41,6 +44,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "hea_gen", sequenceName = "hea_seq", allocationSize = 1)
     private Integer id;
 
+    @JsonIgnore
     @JoinColumn(name = "ctr_id")
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
@@ -64,17 +68,18 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
-    @JsonIgnore
+    //@JsonIgnore
     @ManyToMany
     @JoinTable(name = "hearing_media_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
 
-    @JsonIgnore
+    //@JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = MediaRequestEntity_.HEARING)
     private List<MediaRequestEntity> mediaRequests = new ArrayList<>();
 
@@ -95,7 +100,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 
-    @JsonIgnore
+    //@JsonIgnore
     @ManyToMany
     @JoinTable(name = "hearing_annotation_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},

@@ -1,5 +1,8 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,6 +33,7 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @Table(name = "transcription")
 @Getter
 @Setter
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id" )
 public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -38,30 +42,36 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "tra_gen", sequenceName = "tra_seq", allocationSize = 1)
     private Integer id;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "cas_id")})
     private List<CourtCaseEntity> courtCases = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "trt_id", nullable = false)
     private TranscriptionTypeEntity transcriptionType;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "tru_id")
     private TranscriptionUrgencyEntity transcriptionUrgency;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "hearing_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private List<HearingEntity> hearings = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "trs_id")
     private TranscriptionStatusEntity transcriptionStatus;
@@ -93,6 +103,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private UserAccountEntity deletedBy;
@@ -106,12 +117,15 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "antecedent_id")
     private String antecedentId;
 
+    @JsonIgnore
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(cascade = {PERSIST, MERGE}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
     private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
 
+    //@JsonIgnore
     @OneToMany(mappedBy = TranscriptionDocumentEntity_.TRANSCRIPTION)
     private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
 

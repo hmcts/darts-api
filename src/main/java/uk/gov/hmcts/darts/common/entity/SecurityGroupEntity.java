@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -62,12 +63,14 @@ public class SecurityGroupEntity extends CreatedModifiedBaseEntity {
     @Column(name = "use_interpreter")
     private Boolean useInterpreter;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "grp_id")},
         inverseJoinColumns = {@JoinColumn(name = "cth_id")})
     private Set<CourthouseEntity> courthouseEntities = new LinkedHashSet<>();
 
+    @JsonIgnore
     @ManyToMany(mappedBy = UserAccountEntity_.SECURITY_GROUP_ENTITIES)
     private Set<UserAccountEntity> users = new LinkedHashSet<>();
 

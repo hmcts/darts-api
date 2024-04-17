@@ -12,6 +12,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 
@@ -29,6 +30,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
     @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
     private Integer id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ann_id", nullable = false)
     private AnnotationEntity annotation;
@@ -46,6 +48,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
     @Column(name = "file_size", nullable = false)
     private Integer fileSize;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by")
     private UserAccountEntity uploadedBy;
@@ -66,6 +69,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hidden_by")
     private UserAccountEntity hiddenBy;
@@ -76,6 +80,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
     @Column(name = "marked_for_manual_deletion", nullable = false)
     private boolean markedForManualDeletion;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marked_for_manual_del_by")
     private UserAccountEntity markedForManualDelBy;

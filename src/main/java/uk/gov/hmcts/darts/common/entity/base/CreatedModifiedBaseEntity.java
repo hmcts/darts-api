@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -17,10 +18,12 @@ import java.time.OffsetDateTime;
 @Setter
 public class CreatedModifiedBaseEntity extends CreatedBaseEntity {
 
+    //@JsonIgnore
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by")
     private UserAccountEntity lastModifiedBy;

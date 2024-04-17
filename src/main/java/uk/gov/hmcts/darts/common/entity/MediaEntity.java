@@ -40,6 +40,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "ohr_id")
     private ObjectHiddenReasonEntity objectHiddenReason;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"), nullable = false)
     private CourtroomEntity courtroom;

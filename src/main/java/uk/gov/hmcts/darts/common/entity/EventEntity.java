@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -72,6 +73,7 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "antecedent_id")
     private String antecedentId;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "eve_id")},

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +18,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -27,6 +30,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id" )
 public class AnnotationEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -47,6 +51,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @Column(name = "version_label")
     private String legacyVersionLabel;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_owner", nullable = false)
     private UserAccountEntity currentOwner;
@@ -54,6 +59,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_deleted")
     private boolean deleted;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private UserAccountEntity deletedBy;
@@ -61,9 +67,11 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @Column(name = "deleted_ts")
     private OffsetDateTime deletedTimestamp;
 
+    @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, mappedBy = AnnotationDocumentEntity_.ANNOTATION)
     private List<AnnotationDocumentEntity> annotationDocuments = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToMany()
     @JoinTable(name = "hearing_annotation_ae",
         joinColumns = {@JoinColumn(name = "ann_id")},

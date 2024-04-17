@@ -16,6 +16,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
@@ -54,6 +55,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     /**
      * The reporting restriction maps to the EventHandlerEntity.event_name
      */
+    @JsonIgnore
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = EVH_ID)
     private EventHandlerEntity reportingRestrictions;
@@ -64,6 +66,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = CASE_NUMBER, nullable = false)
     private String caseNumber;
 
+    @JsonIgnore
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
@@ -83,12 +86,15 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = RETENTION_RETRIES)
     private Integer retentionRetries;
 
+    //@JsonIgnore
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefendantEntity> defendantList = new ArrayList<>();
 
+    //@JsonIgnore
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
+    //@JsonIgnore
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
@@ -98,6 +104,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = IS_DELETED)
     private boolean isDeleted;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private UserAccountEntity deletedBy;
@@ -108,12 +115,15 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 
+    //@JsonIgnore
     @OneToMany(mappedBy = COURT_CASE)
     private List<CaseRetentionEntity> caseRetentionEntities = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = COURT_CASE)
     private List<UserAccountCourtCaseEntity> userAccountCourtCaseEntities = new ArrayList<>();
 
+    //@JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_judge_ae",
         joinColumns = {@JoinColumn(name = "cas_id")},

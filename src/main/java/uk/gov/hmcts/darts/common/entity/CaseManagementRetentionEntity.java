@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,6 +28,7 @@ public class CaseManagementRetentionEntity {
     @SequenceGenerator(name = "cmr_gen", sequenceName = "cmr_seq", allocationSize = 1)
     private Integer id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cas_id", nullable = false)
     private CourtCaseEntity courtCase;
