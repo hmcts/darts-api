@@ -253,9 +253,10 @@ public class ArmServiceImpl implements ArmService {
             );
 
             HttpStatus httpStatus = valueOf(response.getStatusCode());
-            log.debug("Attempted to delete blob data for containerName={}, blobPathAndName={}, httpStatus={}",
-                      containerName, blobPathAndName, httpStatus);
+
             if (httpStatus.is2xxSuccessful() || NOT_FOUND.equals(httpStatus)) {
+                log.info("Successfully deleted blob data for containerName={}, blobPathAndName={}, httpStatus={}",
+                         containerName, blobPathAndName, httpStatus);
                 return true;
             } else {
                 String message = String.format("Failed to delete from storage container=%s, blobPathAndName=%s, httpStatus=%s",
@@ -264,8 +265,7 @@ public class ArmServiceImpl implements ArmService {
             }
 
         } catch (Exception e) {
-            log.error("Could not delete from storage container={}, blobPathAndName {}",
-                      containerName, blobPathAndName, e);
+            log.error("Could not delete from storage container={}, blobPathAndName {}", containerName, blobPathAndName, e);
             return false;
         }
     }
