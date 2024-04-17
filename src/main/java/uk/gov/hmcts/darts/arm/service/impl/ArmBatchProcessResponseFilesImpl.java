@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -53,6 +54,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
@@ -284,6 +286,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 );
 
                 if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
+                    logResponseFileContents(jsonPath);
                     ArmResponseCreateRecord armResponseCreateRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseCreateRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseCreateRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
@@ -335,6 +338,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 );
 
                 if (jsonPath.toFile().exists()) {
+                    logResponseFileContents(jsonPath);
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseUploadFileRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
@@ -354,6 +358,17 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
             }
         } else {
             log.warn("Failed to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilenameAndPath());
+        }
+    }
+
+    private void logResponseFileContents(Path jsonPath) {
+        try {
+            String contents = FileUtils.readFileToString(jsonPath.toFile(), UTF_8);
+            log.info("Contents of ARM response file {} - \n{}",
+                     jsonPath.toFile().getAbsoluteFile(),
+                     contents);
+        } catch (Exception e) {
+            log.error("Unable to read ARM response file {}", jsonPath.toFile().getAbsoluteFile(), e);
         }
     }
 
@@ -555,6 +570,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                 );
 
                 if (jsonPath.toFile().exists()) {
+                    logResponseFileContents(jsonPath);
                     ArmResponseInvalidLineRecord armResponseInvalidLineRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseInvalidLineRecord.class);
                     UploadNewFileRecord uploadNewFileRecord = readInputJson(armResponseInvalidLineRecord.getInput());
                     if (nonNull(uploadNewFileRecord)) {
