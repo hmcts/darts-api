@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 class UnstructuredAudioDeleterProcessorTest extends IntegrationBase {
 
-    public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    public static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
 
     @Autowired
     private UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;

@@ -393,6 +393,8 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.4'
   implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.4'
 
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
+
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.4.Final')
@@ -426,7 +428,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.108.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.109.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'

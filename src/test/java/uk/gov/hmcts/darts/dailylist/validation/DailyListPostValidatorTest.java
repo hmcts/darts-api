@@ -25,7 +25,7 @@ class DailyListPostValidatorTest {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setMessageId("test");
         request.setHearingDate(LocalDate.now());
@@ -39,7 +39,7 @@ class DailyListPostValidatorTest {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setHearingDate(LocalDate.now());
         request.setPublishedDateTime(OffsetDateTime.now());
@@ -52,7 +52,7 @@ class DailyListPostValidatorTest {
     void error_Xml_missingUniqueId() {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setHearingDate(LocalDate.now());
         request.setPublishedDateTime(OffsetDateTime.now());
@@ -65,7 +65,7 @@ class DailyListPostValidatorTest {
     void error_Xml_missingXml() {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setHearingDate(LocalDate.now());
         request.setPublishedDateTime(OffsetDateTime.now());
@@ -92,7 +92,7 @@ class DailyListPostValidatorTest {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setHearingDate(LocalDate.now());
         request.setPublishedDateTime(OffsetDateTime.now());
         request.setMessageId("test");
@@ -105,7 +105,7 @@ class DailyListPostValidatorTest {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setMessageId("test");
         request.setPublishedDateTime(OffsetDateTime.now());
@@ -119,7 +119,7 @@ class DailyListPostValidatorTest {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setMessageId("test");
         request.setHearingDate(LocalDate.now());
@@ -132,12 +132,36 @@ class DailyListPostValidatorTest {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setDailyListXml("test");
         request.setUniqueId("test");
-        request.setSourceSystem("test");
+        request.setSourceSystem("CPP");
         request.setCourthouse("test");
         request.setHearingDate(LocalDate.now());
         request.setPublishedDateTime(OffsetDateTime.now());
         Exception exception = assertThrows(DartsApiException.class, () -> DailyListPostValidator.validate(request));
         assertThat(exception.getMessage()).contains("If xml_document is being provided");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenJsonAndSourceSystemInvalid() {
+        DailyListPostRequest request = new DailyListPostRequest();
+        request.setDailyListXml("test");
+        request.setUniqueId("test");
+        request.setSourceSystem("RUB");
+        request.setCourthouse("test");
+        request.setHearingDate(LocalDate.now());
+        request.setDailyListJson(new DailyListJsonObject());
+        Exception exception = assertThrows(Exception.class, () -> DailyListPostValidator.validate(request));
+        assertThat(exception.getMessage()).contains("Invalid source system. Should be CPP or XHB.");
+    }
+
+    @Test
+    void shouldSuccessfullyValidateWhenJsonAndNoSourceSystem() {
+        DailyListPostRequest request = new DailyListPostRequest();
+        request.setDailyListXml("test");
+        request.setUniqueId("test");
+        request.setCourthouse("test");
+        request.setHearingDate(LocalDate.now());
+        request.setDailyListJson(new DailyListJsonObject());
+        DailyListPostValidator.validate(request);
     }
 
 }

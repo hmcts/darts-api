@@ -26,7 +26,7 @@ import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests");
+    private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
     private static final String HEARING_DATE = "2023-01-01";
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
@@ -72,7 +73,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            LocalDate.parse(HEARING_DATE)
+            LocalDateTime.parse(HEARING_DATETIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor("aProsecutor");

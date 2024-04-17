@@ -31,6 +31,11 @@ public enum DailyListError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         DailyListTitleErrors.DAILY_LIST_NOT_FOUND.toString()
     ),
+    INVALID_SOURCE_SYSTEM(
+        DailyListErrorCode.INVALID_SOURCE_SYSTEM.getValue(),
+        HttpStatus.BAD_REQUEST,
+        DailyListTitleErrors.INVALID_SOURCE_SYSTEM.toString()
+    ),
     INTERNAL_ERROR(
         DailyListErrorCode.INTERNAL_ERROR.getValue(),
         HttpStatus.INTERNAL_SERVER_ERROR,

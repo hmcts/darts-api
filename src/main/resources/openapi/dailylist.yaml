@@ -26,7 +26,7 @@ paths:
             type: string
             enum: [ CPP, XHB ]
           description: "The source system that has sent the message"
-          required: true
+          required: false
         - in: query
           name: courthouse
           schema:
@@ -487,7 +487,8 @@ components:
       - "DAILYLIST_102"
       - "DAILYLIST_103"
       - "DAILYLIST_104"
-     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR ]
+      - "DAILYLIST_105"
+     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
 
     DailyListTitleErrors:
      type: string
@@ -497,5 +498,6 @@ components:
       - "If xml_document is being provided without json_document, then courthouse, hearing_date, published_ts and unique_id also need to be provided."
       - "The provided Daily List Id could not be found."
       - "An Internal Server Error has occurred."
-     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR ]
+      - "Invalid source system. Should be CPP or XHB."
+     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
 

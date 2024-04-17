@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,10 +50,10 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
 
     private void closeCase(CourtCaseEntity courtCase) {
         List<EventEntity> eventList = new ArrayList<>();
-        for (HearingEntity hearingEntity: courtCase.getHearings()) {
+        for (HearingEntity hearingEntity : courtCase.getHearings()) {
             eventList.addAll(hearingEntity.getEventList());
         }
-        if (eventList.size() > 1) {
+        if (CollectionUtils.isNotEmpty(eventList)) {
             eventList.sort(Comparator.comparing(EventEntity::getCreatedDateTime).reversed());
             //find latest closed event
             Optional<EventEntity> closedEvent =
@@ -67,7 +68,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         } else if (!courtCase.getHearings().isEmpty()) {
             //look for the last audio and use its recorded date
             List<MediaEntity> mediaList = new ArrayList<>();
-            for (HearingEntity hearingEntity: courtCase.getHearings()) {
+            for (HearingEntity hearingEntity : courtCase.getHearings()) {
                 mediaList.addAll(hearingEntity.getMediaList());
             }
             if (!mediaList.isEmpty()) {

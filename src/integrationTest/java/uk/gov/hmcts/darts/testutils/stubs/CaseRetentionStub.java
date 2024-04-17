@@ -55,4 +55,9 @@ public class CaseRetentionStub {
         return caseRetentionEntity;
     }
 
+    @Transactional
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase, OffsetDateTime retainUntilDate) {
+        return createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, retainUntilDate, false);
+    }
+
 }

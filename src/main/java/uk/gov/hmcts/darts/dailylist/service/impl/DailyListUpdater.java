@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
 
 import java.time.DateTimeException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
@@ -77,9 +78,12 @@ class DailyListUpdater {
                             continue;
                         }
 
+                        LocalTime scheduledStartTime = getScheduledStartTime(sitting, dailyListHearing);
+                        LocalDateTime hearingDateTime = dailyListHearing.getHearingDetails().getHearingDate().atTime(scheduledStartTime);
+
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                             courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate(),
+                            caseNumber, hearingDateTime,
                             dailyListSystemUser
                         );
 
@@ -92,7 +96,6 @@ class DailyListUpdater {
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
                         addDefenders(courtCase, dailyListHearing.getDefendants());
-                        hearing.setScheduledStartTime(getScheduledStartTime(sitting, dailyListHearing));
                         hearingRepository.saveAndFlush(hearing);
                     }
                 }
@@ -189,6 +192,9 @@ class DailyListUpdater {
 
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
+        if (hearing.getProsecution() == null) {
+            return;
+        }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate ->
@@ -200,9 +206,12 @@ class DailyListUpdater {
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
-            for (PersonalDetails personalDetails : defendant.getCounsel()) {
+            for (PersonalDetails counselDetails : defendant.getCounsel()) {
+                if (counselDetails == null) {
+                    continue;
+                }
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(personalDetails.getName()), courtCase, dailyListSystemUser));
+                    buildFullName(counselDetails.getName()), courtCase, dailyListSystemUser));
             }
         }
     }

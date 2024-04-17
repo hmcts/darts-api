@@ -13,14 +13,14 @@ class UserStateTest {
 
     @Test
     void builder() {
-        Set<Role> newRoles = new HashSet<>();
-        newRoles.add(Role.builder()
+        Set<UserStateRole> newRoles = new HashSet<>();
+        newRoles.add(UserStateRole.builder()
                          .roleId(APPROVER.getId())
                          .roleName(APPROVER.toString())
                          .globalAccess(false)
                          .permissions(new HashSet<>())
                          .build());
-        newRoles.add(Role.builder()
+        newRoles.add(UserStateRole.builder()
                          .roleId(REQUESTER.getId())
                          .roleName(REQUESTER.toString())
                          .globalAccess(false)
@@ -35,7 +35,7 @@ class UserStateTest {
 
         assertEquals(123, userState.getUserId());
         assertEquals("UserName", userState.getUserName());
-        Set<Role> roles = userState.getRoles();
+        Set<UserStateRole> roles = userState.getRoles();
         assertEquals(newRoles, roles);
         assertEquals(2, roles.size());
     }

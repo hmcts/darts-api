@@ -342,11 +342,15 @@ components:
       type: object
       required:
         - courthouse
+        - courtroom
         - case_number
       properties:
         courthouse:
           type: string
           example: SWANSEA
+        courtroom:
+          type: string
+          example: 1
         case_number:
           type: string
           example: CASE1001

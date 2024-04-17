@@ -21,8 +21,8 @@ import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderCon
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.common.service.UserAccountService;
 
 import java.net.URI;
@@ -93,7 +93,7 @@ class AuthenticationExternalUserControllerTest {
             Optional.ofNullable(UserState.builder()
                                     .userId(-1)
                                     .userName("Test User")
-                                    .roles(Set.of(Role.builder()
+                                    .roles(Set.of(UserStateRole.builder()
                                                       .roleId(TRANSCRIBER.getId())
                                                       .roleName(TRANSCRIBER.toString())
                                                       .globalAccess(false)

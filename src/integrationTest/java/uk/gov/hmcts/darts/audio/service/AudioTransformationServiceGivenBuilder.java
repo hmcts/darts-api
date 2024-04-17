@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -56,7 +56,7 @@ public class AudioTransformationServiceGivenBuilder {
             "NEWCASTLE",
             "room_a",
             "c1",
-            LocalDate.of(2020, 6, 20)
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
         );
         judge = dartsDatabase.save(createJudgeWithName("aJudge"));
         hearingEntityWithMedia1.addJudge(judge);
@@ -64,14 +64,14 @@ public class AudioTransformationServiceGivenBuilder {
             "NEWCASTLE",
             "room_a",
             "c1",
-            LocalDate.of(2020, 6, 21)
+            LocalDateTime.of(2020, 6, 21, 10, 0, 0)
         );
         hearingEntityWithMedia2.addJudge(judge);
         hearingEntityWithoutMedia = dartsDatabase.createHearing(
             "NEWCASTLE",
             "room_a",
             "c1",
-            LocalDate.of(2020, 6, 22)
+            LocalDateTime.of(2020, 6, 22, 10, 0, 0)
         );
         hearingEntityWithoutMedia.addJudge(judge);
 
