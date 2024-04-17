@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -27,6 +30,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id" )
 public class MediaEntity extends CreatedModifiedBaseEntity {
     public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
@@ -40,7 +44,7 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "ohr_id")
     private ObjectHiddenReasonEntity objectHiddenReason;
 
-    @JsonIgnore
+    //@JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"), nullable = false)
     private CourtroomEntity courtroom;
@@ -136,4 +140,6 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
 
+    @OneToMany(mappedBy = "media")
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 }

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -17,11 +20,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
 @Getter
 @Table(name = "annotation_document")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id" )
 public class AnnotationDocumentEntity extends ModifiedBaseEntity {
 
     @Id
@@ -90,4 +96,7 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
+
+    @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.ANNOTATION_DOCUMENT_ENTITY)
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 }
