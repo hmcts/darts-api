@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
@@ -21,7 +21,7 @@ public class TranscriptionsApiImpl implements TranscriptionsApi {
     }
 
     @Override
-    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription) {
+    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscriptionRequest updateTranscription) {
         return transcriptionService.updateTranscription(transcriptionId, updateTranscription, true);
     }
 }

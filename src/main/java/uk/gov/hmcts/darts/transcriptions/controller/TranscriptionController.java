@@ -27,7 +27,8 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
@@ -82,9 +83,18 @@ public class TranscriptionController implements TranscriptionApi {
         securityRoles = {APPROVER, TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
-                                                                           UpdateTranscription updateTranscription) {
+                                                                           UpdateTranscriptionRequest updateTranscription) {
 
         return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription, false));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<UpdateTranscriptionAdminResponse> updateTranscriptionAdmin(Integer transcriptionId,
+                                                                                     UpdateTranscriptionRequest updateTranscriptionRequest) {
+        return ResponseEntity.ok(transcriptionService.updateTranscriptionAdmin(transcriptionId, updateTranscriptionRequest, false));
     }
 
     @Override

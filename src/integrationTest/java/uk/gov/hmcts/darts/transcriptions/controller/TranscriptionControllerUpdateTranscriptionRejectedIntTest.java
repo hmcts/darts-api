@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import java.net.URI;
 import java.util.List;
@@ -90,7 +90,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
     @Test
     void updateTranscriptionRejectedWithoutCommentShouldReturnTranscriptionBadRequestError() throws Exception {
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(REJECTED.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
@@ -116,7 +116,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
     @Test
     void updateTranscriptionRejectedWithComment() throws Exception {
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(REJECTED.getId());
         updateTranscription.setWorkflowComment("REJECTED");
 
@@ -158,7 +158,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
 
     @Test
     void updateTranscriptionShouldReturnTranscriptionNotFoundError() throws Exception {
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(REJECTED.getId());
         updateTranscription.setWorkflowComment("REJECTED");
 
@@ -184,7 +184,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
 
     @Test
     void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
         updateTranscription.setWorkflowComment("REJECTED");
 

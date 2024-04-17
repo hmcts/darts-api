@@ -60,7 +60,8 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
@@ -192,12 +193,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                           UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
+                                                           UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection);
+        validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection, false);
 
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
@@ -216,8 +217,37 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return updateTranscriptionResponse;
     }
 
+    @Override
+    @Transactional
+    public UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Integer transcriptionId,
+                                                                     UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection) {
+        final var userAccountEntity = getUserAccount();
+        final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
+            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+
+        validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection, true);
+
+        final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+        transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
+            getUserAccount(),
+            transcriptionEntity,
+            transcriptionStatusEntity,
+            updateTranscription.getWorkflowComment()
+        );
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+
+        UpdateTranscriptionAdminResponse updateTranscriptionResponse = new UpdateTranscriptionAdminResponse();
+        updateTranscriptionResponse.setTranscriptionId(transcriptionEntity.getId());
+        updateTranscriptionResponse.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());
+
+        transcriptionNotifications.handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
+        return updateTranscriptionResponse;
+    }
+
+
     private void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
+                                             UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection, boolean isAdmin) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
@@ -230,8 +260,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             transcription.getIsManualTranscription(),
             TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId()),
             TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()),
-            desiredTargetTranscriptionStatus
-        )) {
+            desiredTargetTranscriptionStatus,
+            isAdmin)) {
             throw new DartsApiException(TRANSCRIPTION_WORKFLOW_ACTION_INVALID);
         }
 
@@ -327,7 +357,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @SuppressWarnings("java:S6809")
     public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
-            UpdateTranscription updateTranscription = new UpdateTranscription();
+            UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
             updateTranscription(transcriptionId, updateTranscription, false);
@@ -354,7 +384,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptFileValidator.validate(transcript);
 
-        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()), false);
+        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscriptionRequest(COMPLETE.getId()), false);
 
         final BlobClient inboundBlobCLient;
         final BlobClient unstructuredBlobClient;
