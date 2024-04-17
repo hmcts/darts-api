@@ -368,7 +368,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                      jsonPath.toFile().getAbsoluteFile(),
                      contents);
         } catch (Exception e) {
-            log.error("Unable to ARM response file {}", jsonPath.toFile().getAbsoluteFile(), e);
+            log.error("Unable to read ARM response file {}", jsonPath.toFile().getAbsoluteFile(), e);
         }
     }
 
