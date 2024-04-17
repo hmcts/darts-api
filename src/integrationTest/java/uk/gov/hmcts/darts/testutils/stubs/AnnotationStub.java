@@ -18,6 +18,7 @@ public class AnnotationStub {
 
     private final AnnotationRepository annotationRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final UserAccountStub userAccountStub;
 
     public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
                                                               String annotationText) {
@@ -45,7 +46,7 @@ public class AnnotationStub {
         return annotationEntity;
     }
 
-
+    @Transactional
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
                                                                               String fileName,
                                                                               String fileType,
@@ -60,6 +61,7 @@ public class AnnotationStub {
         return annotationDocument;
     }
 
+    @Transactional
     public AnnotationDocumentEntity createAnnotationDocumentEntity(AnnotationEntity annotationEntity, String fileName, String fileType, Integer fileSize,
                                                                    UserAccountEntity uploadedBy, OffsetDateTime uploadedDateTime, String checksum) {
         AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
@@ -72,6 +74,24 @@ public class AnnotationStub {
         annotationDocument.setChecksum(checksum);
 
         return annotationDocument;
+    }
+
+    @Transactional
+    public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntity(AnnotationEntity annotation) {
+
+        // this is so that annotation becomes managed by JPA and its hearing list is loaded
+        var managedAnnotation = annotationRepository.findById(annotation.getId()).get();
+        managedAnnotation.getHearingList().size();
+
+        UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "123";
+
+        return createAndSaveAnnotationDocumentEntityWith(managedAnnotation, fileName, fileType, fileSize, testUser, uploadedDateTime, checksum);
     }
 
 }

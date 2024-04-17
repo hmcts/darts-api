@@ -49,6 +49,7 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -146,6 +147,8 @@ class ArchiveRecordServiceImplTest {
     private AnnotationArchiveRecordMapper annotationArchiveRecordMapperMock;
     @Mock
     private CaseArchiveRecordMapper caseArchiveRecordMapperMock;
+    @Mock
+    private TranscriptionService transcriptionService;
 
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
@@ -162,6 +165,7 @@ class ArchiveRecordServiceImplTest {
         MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
         TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(
             armDataManagementConfiguration,
+            transcriptionService,
             currentTimeHelper
         );
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
@@ -400,7 +404,6 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
@@ -420,6 +423,9 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+
+        when(transcriptionService.getTranscriptionDocumentsCases(transcriptionDocumentEntity))
+            .thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
 
@@ -474,7 +480,6 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
@@ -483,6 +488,9 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
         when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
+
+        when(transcriptionService.getTranscriptionDocumentsCases(transcriptionDocumentEntity))
+            .thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
