@@ -41,7 +41,6 @@ class CasesFunctionalTest extends FunctionalTest {
         String caseBody = """
             {
                 "courthouse": "<<courthouse>>",
-                "courtroom": "1",
                 "case_number": "<<caseNumber>>",
                 "defendants": ["Defendant A"],
                 "judges": ["Judge 1"],
