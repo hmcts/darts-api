@@ -831,6 +831,17 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals("A360230516_TestIngestion_1.docx", foundTranscriptionEod.getExternalFileId());
         assertEquals(String.valueOf(armEod.getId()), foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+
+        verify(armDataManagementApi).getBlobData(createRecordFilename1);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
     @NotNull
@@ -1005,6 +1016,17 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
         assertEquals(String.valueOf(armEod.getId()), foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+
+        verify(armDataManagementApi).getBlobData(createRecordFilename1);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
     @Test
@@ -1082,6 +1104,17 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
         assertEquals(String.valueOf(armEod.getId()), foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
+
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobs(hashcode1);
+
+        verify(armDataManagementApi).getBlobData(createRecordFilename1);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(createRecordFilename1);
+        verify(armDataManagementApi).deleteBlobData(uploadFileFilename1);
+
+        verify(armDataManagementApi).deleteBlobData(blobNameAndPath1);
     }
 
     @Test
