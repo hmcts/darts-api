@@ -54,6 +54,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_CREATE_RECORD_FILENAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAttributes.ARM_INVALID_LINE_FILENAME_KEY;
@@ -362,10 +363,12 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
     private void logResponseFileContents(Path jsonPath) {
         try {
-            String contents = FileUtils.readFileToString(jsonPath.toFile(), "UTF-8");
-            log.info("Contents of response file {} - \n{}", jsonPath.toFile().getAbsoluteFile(), contents);
+            String contents = FileUtils.readFileToString(jsonPath.toFile(), UTF_8);
+            log.info("Contents of ARM response file {} - \n{}",
+                     jsonPath.toFile().getAbsoluteFile(),
+                     contents);
         } catch (Exception e) {
-            log.error("Unable to ARM manifest file {}", jsonPath.toFile().getAbsoluteFile(), e);
+            log.error("Unable to ARM response file {}", jsonPath.toFile().getAbsoluteFile(), e);
         }
     }
 

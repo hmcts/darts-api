@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
 
 @Component
@@ -73,13 +74,13 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
         }
     }
 
-    /*
-    TODO: This is a temporary method that is used to help debug issues with the manifest file and should be removed
-     */
+    /* TODO: This is a temporary method that is used to help debug issues with the manifest file and should be removed */
+    @Deprecated
     private void logManifestFile(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
         try {
-            String contents = FileUtils.readFileToString(archiveRecordsFile.getAbsoluteFile(), "UTF-8");
-            log.info("Contents of manifest file {} for EOD {}\n{}", archiveRecordsFile.getAbsoluteFile(),
+            String contents = FileUtils.readFileToString(archiveRecordsFile.getAbsoluteFile(), UTF_8);
+            log.info("Contents of manifest file {} for EOD {}\n{}",
+                     archiveRecordsFile.getAbsoluteFile(),
                      archiveRecords.get(0).getArchiveRecordOperation().getRelationId(),
                      contents);
         } catch (Exception e) {
