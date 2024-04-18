@@ -16,10 +16,10 @@ import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class MediaTestData {
 
-    private static final String TEST_BINARY_DATA = "test binary data";
+    private static final byte[] TEST_BINARY_DATA = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
 
     public static BinaryData getBinaryData() {
-        return BinaryData.fromString(TEST_BINARY_DATA);
+        return BinaryData.fromBytes(TEST_BINARY_DATA);
     }
 
     public static MediaEntity someMinimalMedia() {
@@ -71,7 +71,7 @@ public class MediaTestData {
     }
 
     private String getChecksum() {
-        return new String(encodeBase64(md5(getBinaryData().toBytes())));
+        return new String(encodeBase64(md5(TEST_BINARY_DATA)));
     }
 
 }

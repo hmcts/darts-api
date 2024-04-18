@@ -40,7 +40,7 @@ class FileContentChecksumTest {
         try (var digestInputStream = new DigestInputStream(testDataInputStream, md5Digest)) {
             // The digest is based on what has been consumed from the stream, so we must first consume the entire stream before computing the digest.
             digestInputStream.readAllBytes();
-            assertEquals(EXPECTED_STRING_MD5_CHECKSUM, checksum.calculate(digestInputStream));
+            assertEquals(EXPECTED_STRING_MD5_CHECKSUM, checksum.calculateConsumed(digestInputStream));
         }
 
     }
@@ -53,7 +53,7 @@ class FileContentChecksumTest {
         // file hashing with DigestInputStream
         try (DigestInputStream digestInputStream = new DigestInputStream(Files.newInputStream(audioFileTest.toPath()), md5Digest)) {
             digestInputStream.readAllBytes();
-            audioFileChecksum = checksum.calculate(digestInputStream);
+            audioFileChecksum = checksum.calculateConsumed(digestInputStream);
             log.info("audioFileChecksum {}", audioFileChecksum);
         }
         assertEquals(EXPECTED_AUDIO_FILE_MD5_CHECKSUM, audioFileChecksum);
@@ -67,7 +67,7 @@ class FileContentChecksumTest {
         // file hashing with DigestInputStream
         try (DigestInputStream digestInputStream = new DigestInputStream(Files.newInputStream(audioFileTest.toPath()), md5Digest)) {
             digestInputStream.readAllBytes();
-            audioFileChecksum = checksum.calculate(digestInputStream);
+            audioFileChecksum = checksum.calculateConsumed(digestInputStream);
         }
         log.info("audioFileChecksum 2 {}", audioFileChecksum);
         assertEquals(EXPECTED_AZURE_AUDIO_FILE_CHECKSUM, audioFileChecksum);

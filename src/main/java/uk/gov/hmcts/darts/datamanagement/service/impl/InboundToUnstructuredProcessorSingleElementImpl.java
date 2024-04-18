@@ -5,7 +5,6 @@ import com.azure.storage.blob.models.BlobStorageException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -30,9 +29,6 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.security.DigestInputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -84,18 +80,15 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
         try {
             BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+
             if (!inboundFile.isReplayable()) {
                 inboundFile = inboundFile.toReplayableBinaryData();
             }
 
-            var md5Digest = DigestUtils.getMd5Digest();
-            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inboundFile.toStream()), md5Digest);
-                 var out = new ByteArrayOutputStream()) {
-                digestInputStream.transferTo(out);
-                String calculatedChecksum = fileContentChecksum.calculate(digestInputStream);
-                log.warn("new checksum: {}", calculatedChecksum);
-                validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, inboundFile.getLength());
-            }
+            String calculatedChecksum = fileContentChecksum.consumeAndCalculate(inboundFile.toStream());
+
+            //FIXME
+            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, inboundFile.getLength());
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 // upload file

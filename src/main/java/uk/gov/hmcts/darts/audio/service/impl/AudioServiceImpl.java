@@ -139,7 +139,7 @@ public class AudioServiceImpl implements AudioService {
                 objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
             } else {
                 externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
-                checksum = fileContentChecksum.calculate(digestInputStream);
+                checksum = fileContentChecksum.calculateConsumed(digestInputStream);
             }
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);

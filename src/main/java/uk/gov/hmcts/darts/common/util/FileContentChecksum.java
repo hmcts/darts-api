@@ -1,8 +1,13 @@
 package uk.gov.hmcts.darts.common.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.security.DigestInputStream;
 
@@ -29,8 +34,21 @@ public class FileContentChecksum {
         return encodeToString(md5(bytes));
     }
 
-    public String calculate(DigestInputStream digestInputStream) throws IOException {
+    /**
+     * Please note: for the checksum to be correctly computed, consumption of the source data must already have happened.
+     * Otherwise use consumeAndCalculate(DigestInputStream digestInputStream)
+     */
+    public String calculateConsumed(DigestInputStream digestInputStream) throws IOException {
         return encodeToString(digestInputStream.getMessageDigest().digest());
+    }
+
+    @SneakyThrows
+    public String consumeAndCalculate(InputStream inputStream) {
+        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inputStream), DigestUtils.getMd5Digest());
+             var out = new ByteArrayOutputStream()) {
+            digestInputStream.transferTo(out);
+            return encodeToString(digestInputStream.getMessageDigest().digest());
+        }
     }
 
     private String encodeToString(byte[] bytes) {
