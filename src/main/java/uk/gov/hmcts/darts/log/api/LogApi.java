@@ -40,7 +40,7 @@ public interface LogApi {
 
     void taskStarted(UUID taskExecutionId, String taskName);
 
-    void taskCompleted(UUID uuid, String taskName);
+    void taskCompleted(UUID taskExecutionId, String taskName);
 
-    void taskFailed(UUID uuid, String taskName);
+    void taskFailed(UUID taskExecutionId, String taskName);
 }
