@@ -85,9 +85,8 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 inboundFile = inboundFile.toReplayableBinaryData();
             }
 
-            String calculatedChecksum = fileContentChecksum.consumeAndCalculate(inboundFile.toStream());
+            String calculatedChecksum = fileContentChecksum.consumeSourceAndCalculate(inboundFile.toStream());
 
-            //FIXME
             validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, inboundFile.getLength());
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {

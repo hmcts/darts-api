@@ -35,15 +35,15 @@ public class FileContentChecksum {
     }
 
     /**
-     * Please note: for the checksum to be correctly computed, consumption of the source data must already have happened.
+     * Please note: for the checksum to be computed, consumption of the source data must already have happened.
      * Otherwise use consumeAndCalculate(DigestInputStream digestInputStream)
      */
-    public String calculateConsumed(DigestInputStream digestInputStream) throws IOException {
+    public String calculateFromConsumedSource(DigestInputStream digestInputStream) throws IOException {
         return encodeToString(digestInputStream.getMessageDigest().digest());
     }
 
     @SneakyThrows
-    public String consumeAndCalculate(InputStream inputStream) {
+    public String consumeSourceAndCalculate(InputStream inputStream) {
         try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inputStream), DigestUtils.getMd5Digest());
              var out = new ByteArrayOutputStream()) {
             digestInputStream.transferTo(out);
