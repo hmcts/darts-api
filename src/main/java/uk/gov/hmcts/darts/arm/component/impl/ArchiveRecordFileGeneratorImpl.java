@@ -73,9 +73,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
             logManifestFile(archiveRecords, archiveRecordsFile);
         }
     }
-
-    /* TODO: This is a temporary method that is used to help debug issues with the manifest file and should be removed */
-    @Deprecated
+    
     private void logManifestFile(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
         try {
             String contents = FileUtils.readFileToString(archiveRecordsFile.getAbsoluteFile(), UTF_8);
