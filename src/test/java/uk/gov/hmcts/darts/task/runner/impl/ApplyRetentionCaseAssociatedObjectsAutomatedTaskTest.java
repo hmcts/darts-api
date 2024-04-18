@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.service.ApplyRetentionCaseAssociatedObjectsProcessor;
 
 @ExtendWith(MockitoExtension.class)
@@ -15,6 +16,9 @@ class ApplyRetentionCaseAssociatedObjectsAutomatedTaskTest {
     private LockProvider lockProvider;
     @Mock
     private ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
+    @Mock
+    private LogApi logApi;
+
 
     @Test
     void runTask() {
@@ -23,7 +27,8 @@ class ApplyRetentionCaseAssociatedObjectsAutomatedTaskTest {
                 null,
                 lockProvider,
                 null,
-                applyRetentionCaseAssociatedObjectsProcessor
+                applyRetentionCaseAssociatedObjectsProcessor,
+                logApi
             );
 
         task.runTask();

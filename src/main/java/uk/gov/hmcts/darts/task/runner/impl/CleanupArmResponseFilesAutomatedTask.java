@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
@@ -16,8 +17,8 @@ public class CleanupArmResponseFilesAutomatedTask extends AbstractLockableAutoma
     public CleanupArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                 LockProvider lockProvider,
                                                 AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                CleanupArmResponseFilesService cleanupArmResponseFilesService) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
+                                                CleanupArmResponseFilesService cleanupArmResponseFilesService, LogApi logApi) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
         this.cleanupArmResponseFilesService = cleanupArmResponseFilesService;
     }
 
