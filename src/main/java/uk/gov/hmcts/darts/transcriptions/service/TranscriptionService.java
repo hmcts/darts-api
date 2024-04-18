@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
@@ -61,4 +62,6 @@ public interface TranscriptionService {
     List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId);
 
     List<CourtCaseEntity> getTranscriptionDocumentsCases(TranscriptionDocumentEntity transcriptionDocumentEntity);
+
+    List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent);
 }
