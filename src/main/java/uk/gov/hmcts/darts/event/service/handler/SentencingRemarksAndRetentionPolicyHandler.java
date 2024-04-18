@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.transcriptionRequestDetailsFrom;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -52,7 +52,7 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
 
         var transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(transcriptionRequestDetails, false);
 
-        var updateTranscription = new UpdateTranscription();
+        var updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("Transcription Automatically approved");
         transcriptionsApi.updateTranscription(transcriptionResponse.getTranscriptionId(), updateTranscription);
