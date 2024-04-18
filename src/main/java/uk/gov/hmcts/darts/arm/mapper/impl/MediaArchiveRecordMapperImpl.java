@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
@@ -227,7 +228,8 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private String getHearingDate(MediaEntity media) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(media.getHearingList())) {
-            hearingDate = media.getHearingList().get(0).getHearingDate().format(dateFormatter);
+            hearingDate = OffsetDateTime.of(media.getHearingList().get(0).getHearingDate().atTime(0, 0, 0),
+                                            ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
     }

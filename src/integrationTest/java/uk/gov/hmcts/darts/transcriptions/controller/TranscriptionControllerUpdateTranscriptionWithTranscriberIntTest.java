@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import java.net.URI;
 import java.util.List;
@@ -99,7 +99,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
     @Test
     void updateTranscriptionWithTranscriberWithoutComment() throws Exception {
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
@@ -135,7 +135,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
     @Test
     void updateTranscriptionShouldReturnTranscriptionNotFoundError() throws Exception {
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
@@ -157,7 +157,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
     @Test
     void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(COMPLETE.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
@@ -185,7 +185,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         testUser.getSecurityGroupEntities().clear();
         userAccountRepository.save(testUser);
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
@@ -217,7 +217,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             .createTranscriptionCompanyUser(authorisationStub.getCourthouseEntity());
         assertEquals(1, testUser.getSecurityGroupEntities().size());
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(

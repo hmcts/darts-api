@@ -15,7 +15,8 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
@@ -28,7 +29,10 @@ public interface TranscriptionService {
 
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                    UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection);
+                                                    UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection);
+
+    UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Integer transcriptionId,
+                                                              UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection);
 
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
