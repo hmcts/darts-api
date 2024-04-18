@@ -135,7 +135,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         List<Integer> createdUnstructuredTranscriptionId = createdUnstructured.stream().map(
             eod -> eod.getTranscriptionDocumentEntity().getTranscription().getId()).collect(toList());
         assertThat(createdUnstructuredTranscriptionId).contains(transcription.getId());
-        verify(dataManagementService).saveBlobData(any(), any(BinaryData.class));
+        verify(dataManagementService).saveBlobData(any(), any(InputStream.class));
     }
 
     @Test
@@ -195,7 +195,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
                                                                             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(unstructuredAfterProcessing).hasSize(1);
         assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
-        verify(dataManagementService).saveBlobData(any(), any(BinaryData.class));
+        verify(dataManagementService).saveBlobData(any(), any(InputStream.class));
     }
 
     @Test
