@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -27,6 +28,12 @@ public class Application implements CommandLineRunner {
     public void started() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
         log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
+        log.info("****************** POST CONSTRUCT ********************");
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        log.info("****************** PRE DESTROY ********************");
     }
 
     @SuppressWarnings({"PMD.CloseResource"})
