@@ -92,15 +92,15 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                                                         OffsetDateTime mediaRequestStartTime,
                                                         OffsetDateTime mediaRequestEndTime)
         throws ExecutionException, InterruptedException, IOException {
-        List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
 
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
+        List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         if (isNotEmpty(audioFileInfos)) {
             String audioFilenames = audioFileInfos.stream().map(audio -> audio.getMediaFile()).collect(Collectors.joining(", "));
 
             List<ChannelAudio> concatenationsList = new ArrayList<>();
-            
+
             if (isWellFormedAudio(audioFileInfos)) {
                 log.debug("Audio files {} are well formed", audioFilenames);
                 List<ChannelAudio> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
@@ -174,8 +174,10 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private List<AudioFileInfo> mapToAudioFileInfos(Map<MediaEntity, Path> mediaEntityPathMap) {
         List<AudioFileInfo> audioFileInfos = new ArrayList<>();
-        for (Entry<MediaEntity, Path> mediaEntityPathEntry : mediaEntityPathMap.entrySet()) {
-            audioFileInfos.add(mapToAudioFileInfo(mediaEntityPathEntry));
+        if (nonNull(mediaEntityPathMap)) {
+            for (Entry<MediaEntity, Path> mediaEntityPathEntry : mediaEntityPathMap.entrySet()) {
+                audioFileInfos.add(mapToAudioFileInfo(mediaEntityPathEntry));
+            }
         }
         return audioFileInfos;
     }
