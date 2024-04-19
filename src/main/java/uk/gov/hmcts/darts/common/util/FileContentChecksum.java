@@ -46,7 +46,14 @@ public class FileContentChecksum {
     public String consumeSourceAndCalculate(InputStream inputStream) {
         try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inputStream), DigestUtils.getMd5Digest());
              var out = new ByteArrayOutputStream()) {
-            digestInputStream.transferTo(out);
+
+            byte[] buffer = new byte[4096];
+            int readLength = -1;
+            while ((readLength = inputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, readLength);
+            }
+
+//            digestInputStream.transferTo(out);
             return encodeToString(digestInputStream.getMessageDigest().digest());
         }
     }

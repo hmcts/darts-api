@@ -151,7 +151,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public Path saveBlobDataToTempWorkspace(InputStream mediaFile, String fileName) throws IOException {
 
-        return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        return fileOperationService.saveAsTempFile(mediaFile, fileName);
     }
 
     @Override

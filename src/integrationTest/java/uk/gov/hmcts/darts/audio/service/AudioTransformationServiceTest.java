@@ -211,7 +211,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         InputStream inputStream = new ByteArrayInputStream(TEST_BINARY_STRING.getBytes());
 
-        when(mockFileOperationService.saveFileToTempWorkspace(
+        when(mockFileOperationService.saveAsTempFile(
             inputStream,
             fileName
         )).thenReturn(filePath);
@@ -219,7 +219,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         Path actualFilePath = audioTransformationService.saveBlobDataToTempWorkspace(inputStream, fileName);
 
         assertEquals(filePath, actualFilePath);
-        verify(mockFileOperationService).saveFileToTempWorkspace(
+        verify(mockFileOperationService).saveAsTempFile(
             inputStream,
             fileName
         );

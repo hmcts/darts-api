@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
-import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import com.azure.storage.blob.specialized.BlobInputStream;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -23,12 +25,18 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.DigestInputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -52,6 +60,9 @@ import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructur
 @Slf4j
 public class InboundToUnstructuredProcessorSingleElementImpl implements InboundToUnstructuredProcessorSingleElement {
 
+    @Value("${darts.storage.inbound.temp-blob-workspace}")
+    private String inboundWorkspace;
+
     private static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
     private static final int INITIAL_TRANSFER_ATTEMPTS = 1;
 
@@ -65,6 +76,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final MediaRepository mediaRepository;
     private final FileContentChecksum fileContentChecksum;
+    private final FileOperationService fileOperationService;
 
     @SuppressWarnings("java:S4790")
     @Override
@@ -79,19 +91,24 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
         try {
-            BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+            BlobInputStream inboundFileStream = dataManagementService.getBlobDataStream(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
 
-            if (!inboundFile.isReplayable()) {
-                inboundFile = inboundFile.toReplayableBinaryData();
+            Path tempFile = null;
+            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inboundFileStream), DigestUtils.getMd5Digest())){
+                 tempFile = fileOperationService.saveAsTempFile(digestInputStream, inboundWorkspace);
+
+                 String calculatedChecksum = fileContentChecksum.calculateFromConsumedSource(digestInputStream);
+                 log.info("calculated checksum: {}", calculatedChecksum);
+                 long size = Files.size(tempFile);
+                 log.info("file size {}", size);
+                 validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, size);
             }
 
-            String calculatedChecksum = fileContentChecksum.consumeSourceAndCalculate(inboundFile.toStream());
 
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, inboundFile.getLength());
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 // upload file
-                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile.toStream());
+                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), new FileInputStream(tempFile.toFile()));
                 unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                 unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));

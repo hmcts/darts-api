@@ -4,6 +4,7 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.specialized.BlobInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,11 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
         log.warn("Returning dummy file to mimic Blob storage download");
         return BinaryData.fromBytes(new byte[1024]);
+    }
+
+    @Override
+    public BlobInputStream getBlobDataStream(String containerName, UUID blobId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

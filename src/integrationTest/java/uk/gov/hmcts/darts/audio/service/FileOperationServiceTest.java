@@ -49,14 +49,14 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-1: Check if file is created in temporary folder")
     void saveBlobDataToTempWorkspaceTestOne() throws IOException {
-        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        filePath = fileOperationService.saveAsTempFile(mediaFile, fileName);
         assertTrue(Files.exists(filePath));
     }
 
     @Test
     @DisplayName("Test-2: Check if file is empty")
     void saveBlobDataToTempWorkspaceTestTwo() throws IOException {
-        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        filePath = fileOperationService.saveAsTempFile(mediaFile, fileName);
         assertNotEquals(0L, Files.size(filePath));
     }
 
@@ -64,7 +64,7 @@ class FileOperationServiceTest extends IntegrationBase {
     @DisplayName("Test-3: Check if the saved file is equal to the original BinaryData file")
     void saveBlobDataToTempWorkspaceTestThree() throws IOException {
         mediaFile.mark(0);
-        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+        filePath = fileOperationService.saveAsTempFile(mediaFile, fileName);
         mediaFile.reset();
         assertArrayEquals(mediaFile.readAllBytes(), Files.readAllBytes(filePath));
     }
@@ -74,7 +74,7 @@ class FileOperationServiceTest extends IntegrationBase {
     void saveBlobDataToTempWorkspaceTestFive() {
         String invalidFileName = "inlaid/<:?*|>/file";
 
-        assertThrows(IOException.class, () -> fileOperationService.saveFileToTempWorkspace(mediaFile, invalidFileName));
+        assertThrows(IOException.class, () -> fileOperationService.saveAsTempFile(mediaFile, invalidFileName));
     }
 
     @Test

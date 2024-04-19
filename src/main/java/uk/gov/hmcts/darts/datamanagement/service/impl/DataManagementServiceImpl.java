@@ -8,6 +8,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
+import com.azure.storage.blob.specialized.BlobInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -63,6 +64,18 @@ public class DataManagementServiceImpl implements DataManagementService {
         return binaryData;
     }
 
+    @Override
+    public BlobInputStream getBlobDataStream(String containerName, UUID blobId) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+        if (!blobClient.exists()) {
+            log.error("Blob {} does not exist in {} container", blobId, containerName);
+        }
+
+        return blobClient.openInputStream();
+    }
+
     /**
      * @deprecated This implementation is not memory-efficient with large files, use saveBlobData(String containerName, InputStream inputStream) instead.
      */
@@ -89,6 +102,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         var client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
 
+        log.debug("starting upload of file to '{}'", containerName);
         var uploadOptions = new BlobParallelUploadOptions(inputStream);
         uploadOptions.setParallelTransferOptions(createCommonTransferOptions());
         client.uploadWithResponse(uploadOptions, dataManagementConfiguration.getBlobClientTimeout(), null);

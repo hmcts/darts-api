@@ -12,6 +12,8 @@ public interface FileOperationService {
 
     Path saveFileToTempWorkspace(InputStream mediaFile, String fileName) throws IOException;
 
+    Path saveAsTempFile(InputStream inputStream, String workspace) throws IOException;
+
     Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUuidToWorkspace) throws IOException;
 
     BinaryData convertFileToBinaryData(String fileName);
