@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface TranscriptionSearchQuery {
 
-    List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner);
+    List<TranscriptionSearchResult> searchLegacyTranscriptions(TranscriptionSearchRequest request);
 
-    List<TranscriptionSearchResult> searchTranscriptionsByFilters(
-        TranscriptionSearchRequest request,
-        List<Integer> transcriptionsForOwner);
+    List<TranscriptionSearchResult> searchNonLegacyTranscriptions(TranscriptionSearchRequest request);
 }

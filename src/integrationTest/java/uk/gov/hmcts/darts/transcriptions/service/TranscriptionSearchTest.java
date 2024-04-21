@@ -15,7 +15,6 @@ import java.util.List;
 import static java.time.LocalDate.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("VariableDeclarationUsageDistance")
 class TranscriptionSearchTest extends IntegrationBase {
 
     @Autowired

@@ -22,20 +22,15 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     private final TranscriptionSearchQuery transcriptionSearchQuery;
     @Override
     public List<TranscriptionSearchResponse> searchTranscriptions(TranscriptionSearchRequest request) {
-        if (request.getOwner() != null) {
-            var transcriptionsForOwner = transcriptionSearchQuery.findTranscriptionsCurrentlyOwnedBy(request.getOwner());
-            if (transcriptionsForOwner.isEmpty()) {
-                return emptyList();
-            }
-            return transcriptionSearchQuery.searchTranscriptionsByFilters(request, transcriptionsForOwner).stream()
-                .map(this::toTranscriptionSearchResponse)
-                .toList();
+        var transcriptionSearchResults = transcriptionSearchQuery.searchLegacyTranscriptions(request);
+        var nonLegacyTranscriptions = transcriptionSearchQuery.searchNonLegacyTranscriptions(request);
 
-        } else {
-            return transcriptionSearchQuery.searchTranscriptionsByFilters(request, null).stream()
-                .map(this::toTranscriptionSearchResponse)
-                .toList();
-        }
+        transcriptionSearchResults.addAll(nonLegacyTranscriptions);
+
+        return transcriptionSearchResults.stream()
+            .map(this::toTranscriptionSearchResponse)
+            .toList();
+
     }
 
     private TranscriptionSearchResponse toTranscriptionSearchResponse(TranscriptionSearchResult transcriptionSearchResult) {

@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -104,7 +105,7 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
                 AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
                 AND (ua.userFullName LIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
            """)
-    List<TranscriptionSearchResult> searchFilteringOn(
+    List<TranscriptionSearchResult> searchNonLegacyTranscriptionsFilteringOn(
         List<Integer> ids,
         String caseNumber,
         String courthouseDisplayNamePattern,
@@ -112,5 +113,38 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         OffsetDateTime createdFrom,
         OffsetDateTime createdTo,
         Boolean isManual,
+        String requestedBy);
+
+
+    // TODO: can we match on case number?
+    @Query("""
+            SELECT new uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult(
+                t.id,
+                "some-case-number",
+                cth.id,
+                t.hearingDate,
+                t.createdDateTime,
+                ts.id,
+                t.isManualTranscription)
+            FROM TranscriptionEntity t
+            JOIN t.courtroom cr
+            JOIN cr.courthouse cth
+            JOIN t.transcriptionStatus ts
+            JOIN t.createdBy ua
+            WHERE (:ids IS NULL OR t.id IN :ids)
+                AND (cth.displayName LIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
+                AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = t.hearingDate)
+                AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
+                AND (cast(:createdTo as TIMESTAMP) IS NULL OR t.createdDateTime <= :createdTo)
+                AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
+                AND (ua.userFullName LIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
+           """)
+    List<TranscriptionSearchResult> searchLegacyTranscriptionsFilteringOn(
+        List<Integer> transcriptionIds,
+        String courthouseDisplayName,
+        LocalDate hearingDate,
+        OffsetDateTime createdFrom,
+        OffsetDateTime createdTo,
+        Boolean isManualTranscription,
         String requestedBy);
 }

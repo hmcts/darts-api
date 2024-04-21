@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.repository.TranscriptionIdsAndLatestWorkflowTs;
@@ -25,11 +24,18 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
 
     @Override
-    public List<TranscriptionSearchResult> searchTranscriptionsByFilters(TranscriptionSearchRequest request, List<Integer> transcriptionsForOwner) {
+    public List<TranscriptionSearchResult> searchNonLegacyTranscriptions(TranscriptionSearchRequest request) {
+        List<Integer> transcriptionsForOwner = new ArrayList<>();
+        if (request.getOwner() != null) {
+            transcriptionsForOwner = findTranscriptionsCurrentlyOwnedBy(request.getOwner());
+            if (transcriptionsForOwner.isEmpty()) {
+                return emptyList();
+            }
+        }
+
         if (request.getTranscriptionId() != null
-            && !isEmpty(transcriptionsForOwner)
-            && !transcriptionsForOwner.contains(request.getTranscriptionId()))
-        {
+              && !isEmpty(transcriptionsForOwner)
+              && !transcriptionsForOwner.contains(request.getTranscriptionId())) {
             return emptyList();
         }
 
@@ -44,13 +50,12 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
 
         var createdFrom = request.getRequestedAtFrom() == null ? null : OffsetDateTime.of(request.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC);
         var createdTo = request.getRequestedAtTo() == null ? null : OffsetDateTime.of(request.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC);
-        var hearingDate = request.getHearingDate() == null ? null : request.getHearingDate();
 
-        return transcriptionRepository.searchFilteringOn(
+        return transcriptionRepository.searchNonLegacyTranscriptionsFilteringOn(
             transcriptionIds,
             request.getCaseNumber(),
             request.getCourthouseDisplayName(),
-            hearingDate,
+            request.getHearingDate(),
             createdFrom,
             createdTo,
             request.getIsManualTranscription(),
@@ -59,8 +64,25 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     }
 
     @Override
-    @Transactional
-    public List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner) {
+    public List<TranscriptionSearchResult> searchLegacyTranscriptions(TranscriptionSearchRequest request) {
+        var transcriptionIds = new ArrayList<Integer>();
+
+        var createdFrom = request.getRequestedAtFrom() == null ? null : OffsetDateTime.of(request.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC);
+        var createdTo = request.getRequestedAtTo() == null ? null : OffsetDateTime.of(request.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC);
+
+        return transcriptionRepository.searchLegacyTranscriptionsFilteringOn(
+            transcriptionIds,
+            request.getCourthouseDisplayName(),
+            request.getHearingDate(),
+            createdFrom,
+            createdTo,
+            request.getIsManualTranscription(),
+            request.getRequestedBy()
+        );
+    }
+
+
+    private List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner) {
         return transcriptionWorkflowRepository.findWorkflowOwnedBy(owner).stream()
             .map(TranscriptionIdsAndLatestWorkflowTs::transcriptionId).toList();
     }
