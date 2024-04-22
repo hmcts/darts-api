@@ -8,7 +8,6 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
-import com.azure.storage.blob.specialized.BlobInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -65,18 +64,6 @@ public class DataManagementServiceImpl implements DataManagementService {
         log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
         return binaryData;
-    }
-
-    @Override
-    public BlobInputStream getBlobDataStream(String containerName, UUID blobId) {
-        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
-        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
-        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
-        if (!blobClient.exists()) {
-            log.error("Blob {} does not exist in {} container", blobId, containerName);
-        }
-
-        return blobClient.openInputStream();
     }
 
     @Override
