@@ -1,8 +1,15 @@
-package uk.gov.hmcts.darts.transcriptions.service;
+package uk.gov.hmcts.darts.transcriptions.given;
 
+import jakarta.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.data.TranscriptionWorkflowTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.LocalDate;
@@ -15,25 +22,30 @@ import java.util.Random;
 
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.generate;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.someTranscriptionForHearing;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionWorkflowTestData.workflowForTranscription;
+import static uk.gov.hmcts.darts.testutils.data.TranscriptionWorkflowTestData.*;
 
 @Component
-@SuppressWarnings("VariableDeclarationUsageDistance")
-class MigratedTranscriptionSearchGivensBuilder {
-    private final Random random = new Random();
+abstract class TranscriptionSearchGivensBuilder {
+
+    protected final Random random = new Random();
 
     @Autowired
-    private DartsDatabaseStub dartsDatabase;
+    protected DartsDatabaseStub dartsDatabase;
 
-    public void allForHearingOnDate(List<TranscriptionEntity> transcriptionEntities, LocalDate hearingDate) {
-        transcriptionEntities.forEach(t -> {
-            var hearing = t.getHearing();
-            hearing.setHearingDate(hearingDate);
-            dartsDatabase.save(hearing);
-        });
-    }
+    abstract public void allForHearingOnDate(List<TranscriptionEntity> transcriptionEntities, LocalDate hearingDate);
+
+    abstract public List<TranscriptionEntity> persistedTranscriptionsWithDisplayNames(int quantity, String... displayNames);
+
+    abstract public List<TranscriptionEntity> persistedTranscriptionsForHearingsWithHearingDates(int quantity, LocalDate... hearingDates);
+
+    abstract public void allAtCourthousesWithDisplayName(List<TranscriptionEntity> transcriptionEntities, String courthouseDisplayName);
+
+    abstract public void allForCaseWithCaseNumber(List<TranscriptionEntity> transcriptionEntities, String caseNumber);
+    abstract public TranscriptionEntity createTranscription();
+
 
     public void allOwnedBy(List<TranscriptionEntity> transcriptions, String owner) {
         transcriptions.forEach(t -> {
@@ -132,20 +144,6 @@ class MigratedTranscriptionSearchGivensBuilder {
         return transcriptions;
     }
 
-    public List<TranscriptionEntity> persistedTranscriptionsWithDisplayNames(int quantity, String... displayNames) {
-        checkParamsQuantity(quantity,"display names", displayNames.length);
-
-        var transcriptions = persistedTranscriptions(quantity);
-        range(0, quantity).forEach(j -> {
-            var transcription = transcriptions.get(j);
-            var courthouse = transcription.getHearing().getCourtroom().getCourthouse();
-            courthouse.setDisplayName(displayNames[j]);
-            dartsDatabase.save(courthouse);
-        });
-
-        return transcriptions;
-    }
-
     public List<TranscriptionEntity> persistedTranscriptionsWithIsManualTranscription(int quantity, Boolean... isManualTranscriptions) {
         checkParamsQuantity(quantity,"manual transcriptions", isManualTranscriptions.length);
 
@@ -159,59 +157,21 @@ class MigratedTranscriptionSearchGivensBuilder {
         return transcriptions;
     }
 
-    public List<TranscriptionEntity> persistedTranscriptionsForHearingsWithHearingDates(int quantity, LocalDate... hearingDates) {
-        checkParamsQuantity(quantity,"hearing dates", hearingDates.length);
+    protected OffsetDateTime middayToday() {
+        return OffsetDateTime.of(LocalDate.now(), LocalTime.of(12,0), ZoneOffset.UTC);
+    }
 
-        var transcriptions = persistedTranscriptions(quantity);
-        range(0, quantity).forEach(i -> {
-            var transcription = transcriptions.get(i);
-            var hearing = transcription.getHearing();
-            hearing.setHearingDate(hearingDates[i]);
-            dartsDatabase.save(hearing);
-        });
+    protected static OffsetDateTime toOffsetDateTimeAtMidnight(LocalDate requestedDates) {
+        return OffsetDateTime.of(requestedDates, LocalTime.of(0, 0), ZoneOffset.UTC);
+    }
 
-        return transcriptions;
+    protected void checkParamsQuantity(int expectedQuantity, String paramName, int actualQuantity) {
+        if (actualQuantity != expectedQuantity) {
+            throw new IllegalArgumentException("Expected " + expectedQuantity + " " + paramName + " but found " + actualQuantity);
+        }
     }
 
     public List<TranscriptionEntity> persistedTranscriptions(int quantity) {
         return generate(this::createTranscription).limit(quantity).toList();
-    }
-
-    public void allForHearingsAtCourthouseWithDisplayName(List<TranscriptionEntity> transcriptionEntities, String courthouseDisplayName) {
-        transcriptionEntities.forEach(t -> {
-            var hearing = t.getHearing();
-            var courthouse = hearing.getCourtroom().getCourthouse();
-            courthouse.setDisplayName(courthouseDisplayName);
-            dartsDatabase.save(courthouse);
-        });
-    }
-
-    public TranscriptionEntity createTranscription() {
-        var hearing = dartsDatabase.save(createSomeMinimalHearing());
-        var transcription = someTranscriptionForHearing(hearing);
-        dartsDatabase.save(transcription.getCreatedBy());
-        return dartsDatabase.save(transcription);
-    }
-
-    public void allForCaseWithCaseNumber(List<TranscriptionEntity> transcriptionEntities, String caseNumber) {
-        transcriptionEntities.forEach(t -> {
-            var courtCase = t.getHearing().getCourtCase();
-            courtCase.setCaseNumber(caseNumber);
-            dartsDatabase.save(courtCase);
-        });
-    }
-
-    private OffsetDateTime middayToday() {
-        return OffsetDateTime.of(LocalDate.now(), LocalTime.of(12,0), ZoneOffset.UTC);
-    }
-
-    private static OffsetDateTime toOffsetDateTimeAtMidnight(LocalDate requestedDates) {
-        return OffsetDateTime.of(requestedDates, LocalTime.of(0, 0), ZoneOffset.UTC);
-    }
-
-    private void checkParamsQuantity(int expectedQuantity, String paramName, int actualQuantity) {
-        if (actualQuantity != expectedQuantity) {
-            throw new IllegalArgumentException("Expected " + expectedQuantity + " " + paramName + " but found " + actualQuantity);
-        }
     }
 }

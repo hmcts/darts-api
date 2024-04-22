@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -105,7 +104,7 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
                 AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
                 AND (ua.userFullName LIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
            """)
-    List<TranscriptionSearchResult> searchNonLegacyTranscriptionsFilteringOn(
+    List<TranscriptionSearchResult> searchModernisedTranscriptionsFilteringOn(
         List<Integer> ids,
         String caseNumber,
         String courthouseDisplayNamePattern,
@@ -140,7 +139,7 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
                 AND (:isManual IS NULL OR t.isManualTranscription = :isManual)
                 AND (ua.userFullName LIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
            """)
-    List<TranscriptionSearchResult> searchLegacyTranscriptionsFilteringOn(
+    List<TranscriptionSearchResult> searchMigratedTranscriptionsFilteringOn(
         List<Integer> ids,
         String caseNumber,
         String courthouseDisplayNamePattern,

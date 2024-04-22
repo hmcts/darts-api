@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TranscriptionSearchQuery {
 
-    List<TranscriptionSearchResult> searchLegacyTranscriptions(TranscriptionSearchRequest request);
+    Set<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds);
 
-    List<TranscriptionSearchResult> searchNonLegacyTranscriptions(TranscriptionSearchRequest request);
+    List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner);
+
 }

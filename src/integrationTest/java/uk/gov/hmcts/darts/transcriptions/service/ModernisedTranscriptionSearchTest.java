@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.controller.AdminTranscriptionSearchService;
+import uk.gov.hmcts.darts.transcriptions.given.ModernisedTranscriptionSearchGivensBuilder;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 
 import static java.time.LocalDate.*;
@@ -12,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ModernisedTranscriptionSearchTest extends IntegrationBase {
 
     @Autowired
-    private TranscriptionSearchGivensBuilder given;
+    private ModernisedTranscriptionSearchGivensBuilder given;
 
     @Autowired
     private AdminTranscriptionSearchService adminTranscriptionSearchService;
@@ -173,8 +174,8 @@ class ModernisedTranscriptionSearchTest extends IntegrationBase {
         given.allForCaseWithCaseNumber(transcriptions.subList(0, 20), "case-1");
         given.allForCaseWithCaseNumber(transcriptions.subList(13, 14), "case-2");
 
-        given.allForHearingsAtCourthouseWithDisplayName(transcriptions.subList(0, 20), "courthouse-1");
-        given.allForHearingsAtCourthouseWithDisplayName(transcriptions.subList(12, 13), "courthouse-2");
+        given.allAtCourthousesWithDisplayName(transcriptions.subList(0, 20), "courthouse-1");
+        given.allAtCourthousesWithDisplayName(transcriptions.subList(12, 13), "courthouse-2");
 
         var transcriptionSearchRequest = new TranscriptionSearchRequest()
             .isManualTranscription(true)                        // Should filter out transcription with id: 20

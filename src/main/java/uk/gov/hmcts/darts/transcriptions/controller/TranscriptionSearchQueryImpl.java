@@ -10,11 +10,9 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
-import static java.util.Collections.*;
-import static org.springframework.util.CollectionUtils.*;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,28 +22,9 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
 
     @Override
-    public List<TranscriptionSearchResult> searchNonLegacyTranscriptions(TranscriptionSearchRequest request) {
-        List<Integer> transcriptionsForOwner = new ArrayList<>();
-        if (request.getOwner() != null) {
-            transcriptionsForOwner = findTranscriptionsCurrentlyOwnedBy(request.getOwner());
-            if (transcriptionsForOwner.isEmpty()) {
-                return emptyList();
-            }
-            if (transcriptionIdFilterIsNotContainedInTheTranscriptionsOwnedBy(request, transcriptionsForOwner)) {
-                return emptyList();
-            }
-        }
+    public Set<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds) {
 
-        var transcriptionIds = new ArrayList<Integer>();
-        if (request.getTranscriptionId() != null) {
-            transcriptionIds.add(request.getTranscriptionId());
-        } else if (!isEmpty(transcriptionsForOwner)) {
-            transcriptionIds.addAll(transcriptionsForOwner);
-        } else {
-            transcriptionIds = null;
-        }
-
-        return transcriptionRepository.searchNonLegacyTranscriptionsFilteringOn(
+        var nonLegacyTranscriptions = transcriptionRepository.searchModernisedTranscriptionsFilteringOn(
             transcriptionIds,
             request.getCaseNumber(),
             request.getCourthouseDisplayName(),
@@ -55,40 +34,29 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
             request.getIsManualTranscription(),
             request.getRequestedBy()
         );
+
+        var legacyTranscriptions = transcriptionRepository.searchMigratedTranscriptionsFilteringOn(
+            transcriptionIds,
+            request.getCaseNumber(),
+            request.getCourthouseDisplayName(),
+            request.getHearingDate(),
+            getCreatedFromTs(request),
+            getCreatedTo(request),
+            request.getIsManualTranscription(),
+            request.getRequestedBy()
+        );
+
+        var combinedSearchResults = new HashSet<TranscriptionSearchResult>();
+        combinedSearchResults.addAll(nonLegacyTranscriptions);
+        combinedSearchResults.addAll(legacyTranscriptions);
+
+        return combinedSearchResults;
     }
 
     @Override
-    public List<TranscriptionSearchResult> searchLegacyTranscriptions(TranscriptionSearchRequest request) {
-        List<Integer> transcriptionsForOwner = new ArrayList<>();
-        if (request.getOwner() != null) {
-            transcriptionsForOwner = findTranscriptionsCurrentlyOwnedBy(request.getOwner());
-            if (transcriptionsForOwner.isEmpty()) {
-                return emptyList();
-            }
-            if (transcriptionIdFilterIsNotContainedInTheTranscriptionsOwnedBy(request, transcriptionsForOwner)) {
-                return emptyList();
-            }
-        }
-
-        var transcriptionIds = new ArrayList<Integer>();
-        if (request.getTranscriptionId() != null) {
-            transcriptionIds.add(request.getTranscriptionId());
-        } else if (!isEmpty(transcriptionsForOwner)) {
-            transcriptionIds.addAll(transcriptionsForOwner);
-        } else {
-            transcriptionIds = null;
-        }
-
-        return transcriptionRepository.searchLegacyTranscriptionsFilteringOn(
-            transcriptionIds,
-            request.getCaseNumber(),
-            request.getCourthouseDisplayName(),
-            request.getHearingDate(),
-            getCreatedFromTs(request),
-            getCreatedTo(request),
-            request.getIsManualTranscription(),
-            request.getRequestedBy()
-        );
+    public List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner) {
+        return transcriptionWorkflowRepository.findWorkflowOwnedBy(owner).stream()
+            .map(TranscriptionIdsAndLatestWorkflowTs::transcriptionId).toList();
     }
 
     private static OffsetDateTime getCreatedTo(TranscriptionSearchRequest request) {
@@ -97,17 +65,6 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
 
     private static OffsetDateTime getCreatedFromTs(TranscriptionSearchRequest request) {
         return request.getRequestedAtFrom() == null ? null : OffsetDateTime.of(request.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC);
-    }
-
-    private static boolean transcriptionIdFilterIsNotContainedInTheTranscriptionsOwnedBy(TranscriptionSearchRequest request, List<Integer> transcriptionsForOwner) {
-        return request.getTranscriptionId() != null
-            && !isEmpty(transcriptionsForOwner)
-            && !transcriptionsForOwner.contains(request.getTranscriptionId());
-    }
-
-    private List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner) {
-        return transcriptionWorkflowRepository.findWorkflowOwnedBy(owner).stream()
-            .map(TranscriptionIdsAndLatestWorkflowTs::transcriptionId).toList();
     }
 
 }
