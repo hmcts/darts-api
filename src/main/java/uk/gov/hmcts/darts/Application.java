@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -36,7 +35,6 @@ public class Application implements CommandLineRunner {
         log.info("****************** PRE DESTROY ********************");
     }
 
-    @SuppressWarnings({"PMD.CloseResource"})
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
         final var instance = application.run(args);

@@ -77,6 +77,14 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
 
+        try {
+            log.info("BEFORE SLEEP");
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("AFTER SLEEP");
+
         List<ExternalObjectDirectoryEntity> allPendingSourceToArmEntities = getArmExternalObjectDirectoryEntities(batchSize);
 
         log.info("Found {} pending entities to process from source '{}'", allPendingSourceToArmEntities.size(), getEodSourceLocation().getDescription());

@@ -59,6 +59,13 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private void processAllStoredInboundExternalObjectsOneCall() {
+        try {
+            log.info("BEFORE SLEEP");
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("AFTER SLEEP");
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodIdsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                             getStatus(STORED), getType(UNSTRUCTURED), 3, limit);
         int count = 1;
