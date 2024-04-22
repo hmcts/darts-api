@@ -135,6 +135,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         for (AudioFileInfo audioFileInfo : audioFilesInfo) {
+            log.info("Setting up to merge audio {}", audioFileInfo);
             command.addArgument("-i").addArgument(audioFileInfo.getPath().toString());
         }
         command.addArgument("-filter_complex")
