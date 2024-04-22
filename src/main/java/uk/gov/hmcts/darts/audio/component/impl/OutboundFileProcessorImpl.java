@@ -97,7 +97,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         if (isNotEmpty(audioFileInfos)) {
-            String audioFilenames = audioFileInfos.stream().map(audio -> audio.getMediaFile()).collect(Collectors.joining(", "));
+            String audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
 
             List<ChannelAudio> concatenationsList = new ArrayList<>();
 
@@ -146,7 +146,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             Map<Instant, List<AudioFileInfo>> audioFileInfosByStartTime = audioFileInfos.stream()
                 .collect(Collectors.groupingBy(AudioFileInfo::getStartTime));
 
-            String audioFilenames = audioFileInfos.stream().map(audio -> audio.getMediaFile()).collect(Collectors.joining(", "));
+            String audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
 
             if (isNotEmpty(numberOfChannelsList)) {
 
@@ -315,7 +315,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
         if (isNotEmpty(audioFileInfosByChannel)) {
 
-            final String audioFilenames = audioFileInfosByChannel.stream().map(audio -> audio.getMediaFile()).collect(Collectors.joining(", "));
+            final String audioFilenames = audioFileInfosByChannel.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
             AudioFileInfo previousAudio;
 
             audioFileInfosByChannel.sort(comparing(AudioFileInfo::getStartTime));
@@ -333,7 +333,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                 audioFileInfoList.add(thisAudio);
             }
             audioFileInfoByFileList.add(new ChannelAudio(audioFileInfoList));
-            String reorderedAudioFilenames = audioFileInfosByChannel.stream().map(audio -> audio.getMediaFile()).collect(Collectors.joining(", "));
+            String reorderedAudioFilenames = audioFileInfosByChannel.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
             log.debug("Reordered audio files {} to {} by start time", audioFilenames, reorderedAudioFilenames);
         }
         return audioFileInfoByFileList;

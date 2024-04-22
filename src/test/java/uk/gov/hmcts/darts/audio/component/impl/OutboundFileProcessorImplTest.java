@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.impl.AudioOperationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -705,9 +707,49 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
+    void processAudioForPlaybackMergeFails()
+        throws ExecutionException, InterruptedException, IOException {
+        // given
+        AudioFileInfo concatenatedAudioFileInfo = AudioFileInfo.builder().build();
+
+        List<AudioFileInfo> concatenatedAudioFileInfoList = List.of(
+            concatenatedAudioFileInfo
+        );
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
+            .thenReturn(concatenatedAudioFileInfoList);
+
+        AudioFileInfo mergedAudioFile = null;
+
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+        
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_10,
+            TIME_12_20,
+            2,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        // when then
+        var exception = assertThrows(DartsApiException.class, () ->
+            outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00));
+
+        assertEquals("Failed to process audio request. No media present to process", exception.getMessage());
+    }
+
+    @Test
     void processAudioForPlaybackWithOneAudio()
         throws ExecutionException, InterruptedException, IOException {
-        
+
         AudioFileInfo mergedAudioFile = AudioFileInfo.builder()
             .startTime(TIME_12_02.toInstant())
             .endTime(TIME_12_10.toInstant())
