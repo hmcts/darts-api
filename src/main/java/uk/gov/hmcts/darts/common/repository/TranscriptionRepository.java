@@ -116,7 +116,6 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         String requestedBy);
 
 
-    // TODO: can we match on case number?
     @Query("""
             SELECT new uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult(
                 t.id,
@@ -142,12 +141,12 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
                 AND (ua.userFullName LIKE CONCAT('%', :requestedBy, '%') OR :requestedBy IS NULL)
            """)
     List<TranscriptionSearchResult> searchLegacyTranscriptionsFilteringOn(
-        List<Integer> transcriptionIds,
+        List<Integer> ids,
         String caseNumber,
-        String courthouseDisplayName,
+        String courthouseDisplayNamePattern,
         LocalDate hearingDate,
         OffsetDateTime createdFrom,
         OffsetDateTime createdTo,
-        Boolean isManualTranscription,
+        Boolean isManual,
         String requestedBy);
 }

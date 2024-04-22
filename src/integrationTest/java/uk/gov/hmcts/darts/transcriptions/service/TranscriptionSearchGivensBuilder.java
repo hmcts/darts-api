@@ -28,7 +28,6 @@ import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.someTransc
 import static uk.gov.hmcts.darts.testutils.data.TranscriptionWorkflowTestData.*;
 
 @Component
-@SuppressWarnings("VariableDeclarationUsageDistance")
 class TranscriptionSearchGivensBuilder {
 
     private final Random random = new Random();

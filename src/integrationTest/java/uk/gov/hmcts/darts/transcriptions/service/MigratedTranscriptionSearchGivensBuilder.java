@@ -21,7 +21,7 @@ import static uk.gov.hmcts.darts.testutils.data.TranscriptionWorkflowTestData.wo
 
 @Component
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class MigratedTranscriptionSearchGivensBuilder extends TranscriptionSearchGivensBuilder{
+class MigratedTranscriptionSearchGivensBuilder {
     private final Random random = new Random();
 
     @Autowired
