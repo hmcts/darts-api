@@ -120,7 +120,7 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
     @Query("""
             SELECT new uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult(
                 t.id,
-                "some-case-number",
+                cc.caseNumber,
                 cth.id,
                 t.hearingDate,
                 t.createdDateTime,
@@ -128,10 +128,12 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
                 t.isManualTranscription)
             FROM TranscriptionEntity t
             JOIN t.courtroom cr
+            JOIN t.courtCases cc
             JOIN cr.courthouse cth
             JOIN t.transcriptionStatus ts
             JOIN t.createdBy ua
             WHERE (:ids IS NULL OR t.id IN :ids)
+                AND (:caseNumber IS NULL OR :caseNumber = cc.caseNumber)
                 AND (cth.displayName LIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
                 AND (cast(:hearingDate as LocalDate) IS NULL OR :hearingDate = t.hearingDate)
                 AND (cast(:createdFrom as TIMESTAMP) IS NULL OR t.createdDateTime >= :createdFrom)
@@ -141,6 +143,7 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
            """)
     List<TranscriptionSearchResult> searchLegacyTranscriptionsFilteringOn(
         List<Integer> transcriptionIds,
+        String caseNumber,
         String courthouseDisplayName,
         LocalDate hearingDate,
         OffsetDateTime createdFrom,

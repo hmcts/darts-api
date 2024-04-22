@@ -2,20 +2,14 @@ package uk.gov.hmcts.darts.transcriptions.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.transcriptions.controller.AdminTranscriptionSearchService;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-
 import static java.time.LocalDate.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TranscriptionSearchTest extends IntegrationBase {
+class ModernisedTranscriptionSearchTest extends IntegrationBase {
 
     @Autowired
     private TranscriptionSearchGivensBuilder given;

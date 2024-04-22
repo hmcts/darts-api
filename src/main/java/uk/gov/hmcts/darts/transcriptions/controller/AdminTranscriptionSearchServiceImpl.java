@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Collections.*;
@@ -25,12 +26,13 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         var transcriptionSearchResults = transcriptionSearchQuery.searchLegacyTranscriptions(request);
         var nonLegacyTranscriptions = transcriptionSearchQuery.searchNonLegacyTranscriptions(request);
 
-        transcriptionSearchResults.addAll(nonLegacyTranscriptions);
+        var combinedSearchResults = new HashSet<TranscriptionSearchResult>();
+        combinedSearchResults.addAll(transcriptionSearchResults);
+        combinedSearchResults.addAll(nonLegacyTranscriptions);
 
-        return transcriptionSearchResults.stream()
+        return combinedSearchResults.stream()
             .map(this::toTranscriptionSearchResponse)
             .toList();
-
     }
 
     private TranscriptionSearchResponse toTranscriptionSearchResponse(TranscriptionSearchResult transcriptionSearchResult) {

@@ -72,6 +72,7 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
 
         return transcriptionRepository.searchLegacyTranscriptionsFilteringOn(
             transcriptionIds,
+            request.getCaseNumber(),
             request.getCourthouseDisplayName(),
             request.getHearingDate(),
             createdFrom,
