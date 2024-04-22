@@ -197,10 +197,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             List<MediaEntity> mediaEntitiesForHearing = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForHearing.isEmpty()) {
-                throw new DartsApiException(
-                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
-                    "No media present to process"
-                );
+                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
             }
 
             List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
@@ -209,10 +206,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             );
 
             if (filteredMediaEntities.isEmpty()) {
-                throw new DartsApiException(
-                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
-                    "No media present to process"
-                );
+                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No filtered media present to process");
             }
 
             boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
