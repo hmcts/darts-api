@@ -197,16 +197,17 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             List<MediaEntity> mediaEntitiesForHearing = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForHearing.isEmpty()) {
-                throw new DartsApiException(
-                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
-                    "No media present to process"
-                );
+                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
             }
 
             List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
                 mediaEntitiesForHearing,
                 mediaRequestEntity
             );
+
+            if (filteredMediaEntities.isEmpty()) {
+                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No filtered media present to process");
+            }
 
             boolean hasAllMediaBeenCopiedFromInboundStorage = eodService.hasAllMediaBeenCopiedFromInboundStorage(filteredMediaEntities);
 
@@ -248,12 +249,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 }
 
                 mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
-                log.debug(
-                    "Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
-                    requestId,
-                    fileName,
-                    blobId
-                );
+                log.debug("Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
+                          requestId, fileName, blobId);
             }
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
@@ -261,17 +258,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         } catch (Exception e) {
-            log.error(
-                "Exception occurred for request id {}.",
-                requestId,
-                e
-            );
+            log.error("Exception occurred for request id {}.", requestId, e);
             var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
-                notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(),
-                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
-                );
+                notifyUser(updatedMediaRequest, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
             }
 
             logApi.atsProcessingUpdate(updatedMediaRequest);
