@@ -178,18 +178,30 @@ class ModernisedTranscriptionSearchTest extends IntegrationBase {
         given.allAtCourthousesWithDisplayName(transcriptions.subList(12, 13), "courthouse-2");
 
         var transcriptionSearchRequest = new TranscriptionSearchRequest()
-            .isManualTranscription(true)                        // Should filter out transcription with id: 20
-            .requestedAtFrom(parse("2020-01-01"))          // Should filter out transcription with id: 19
-            .requestedAtTo(parse("2020-12-31"))            // Should filter out transcription with id: 18
-            .owner("e")                                         // Should filter out transcription with id: 16, 17
-            .hearingDate(parse("2022-01-01"))              // Should filter out transcription with id: 15
-            .caseNumber("case-1")                               // Should filter out transcription with id: 14
-            .courthouseDisplayName("1");                        // Should filter out transcription with id: 13
+            .isManualTranscription(true)                        // Should filter out transcription at index: 19
+            .requestedAtFrom(parse("2020-01-01"))          // Should filter out transcription at index: 18
+            .requestedAtTo(parse("2020-12-31"))            // Should filter out transcription at index: 17
+            .owner("e")                                         // Should filter out transcription at index: 16, 15
+            .hearingDate(parse("2022-01-01"))              // Should filter out transcription at index: 14
+            .caseNumber("case-1")                               // Should filter out transcription at index: 13
+            .courthouseDisplayName("1");                        // Should filter out transcription at index: 12
 
         var transcriptionResponse = adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest);
 
         assertThat(transcriptionResponse).extracting("transcriptionId")
-            .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+            .containsExactly(
+                transcriptions.get(0).getId(),
+                transcriptions.get(1).getId(),
+                transcriptions.get(2).getId(),
+                transcriptions.get(3).getId(),
+                transcriptions.get(4).getId(),
+                transcriptions.get(5).getId(),
+                transcriptions.get(6).getId(),
+                transcriptions.get(7).getId(),
+                transcriptions.get(8).getId(),
+                transcriptions.get(9).getId(),
+                transcriptions.get(10).getId(),
+                transcriptions.get(11).getId());
     }
 
 }
