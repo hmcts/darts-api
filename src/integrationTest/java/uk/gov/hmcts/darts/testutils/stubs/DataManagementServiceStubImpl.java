@@ -4,7 +4,6 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
-import com.azure.storage.blob.specialized.BlobInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -44,8 +44,11 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public BlobInputStream getBlobDataStream(String containerName, UUID blobId) {
-        throw new UnsupportedOperationException();
+    public Path downloadBlobToFile(String containerName, UUID blobId, String inboundWorkspace) {
+        logStubUsageWarning();
+        BinaryData data = this.getBlobData(containerName, blobId);
+
+        return null;
     }
 
     @Override

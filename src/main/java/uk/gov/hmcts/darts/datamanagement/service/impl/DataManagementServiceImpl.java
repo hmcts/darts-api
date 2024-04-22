@@ -10,6 +10,7 @@ import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,8 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -74,6 +77,26 @@ public class DataManagementServiceImpl implements DataManagementService {
         }
 
         return blobClient.openInputStream();
+    }
+
+    @Override
+    @SneakyThrows
+    public Path downloadBlobToFile(String containerName, UUID blobId, String workspace) {
+        BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
+        BlobContainerClient containerClient = blobServiceFactory.getBlobContainerClient(containerName, serviceClient);
+        BlobClient blobClient = blobServiceFactory.getBlobClient(containerClient, blobId);
+        if (!blobClient.exists()) {
+            log.error("Blob {} does not exist in {} container", blobId, containerName);
+        }
+
+        Path workspacePath = Path.of(workspace);
+        Path targetFile = workspacePath.resolve(UUID.randomUUID() + ".tmp");
+        Files.createDirectories(workspacePath);
+
+        log.debug("started downloading blob {} to {}", blobId, targetFile.toAbsolutePath());
+        blobClient.downloadToFile(targetFile.toString());
+        log.debug("finished downloading blob {}", blobId);
+        return targetFile;
     }
 
     /**

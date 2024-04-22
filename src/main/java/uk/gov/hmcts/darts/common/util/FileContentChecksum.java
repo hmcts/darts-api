@@ -1,14 +1,14 @@
 package uk.gov.hmcts.darts.common.util;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteSource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.DigestInputStream;
 
 import static org.apache.commons.codec.digest.DigestUtils.md5;
@@ -35,27 +35,17 @@ public class FileContentChecksum {
     }
 
     /**
-     * Please note: for the checksum to be computed, consumption of the source data must already have happened.
-     * Otherwise use consumeAndCalculate(DigestInputStream digestInputStream)
+     * Note: for the digest to be computed, consumption of the source data must already have happened.
      */
     public String calculateFromConsumedSource(DigestInputStream digestInputStream) throws IOException {
         return encodeToString(digestInputStream.getMessageDigest().digest());
     }
 
     @SneakyThrows
-    public String consumeSourceAndCalculate(InputStream inputStream) {
-        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(inputStream), DigestUtils.getMd5Digest());
-             var out = new ByteArrayOutputStream()) {
-
-            byte[] buffer = new byte[4096];
-            int readLength = -1;
-            while ((readLength = inputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, readLength);
-            }
-
-//            digestInputStream.transferTo(out);
-            return encodeToString(digestInputStream.getMessageDigest().digest());
-        }
+    public String calculateFromFile(Path filePath) {
+        ByteSource byteSource = com.google.common.io.Files.asByteSource(filePath.toFile());
+        HashCode hc = byteSource.hash(Hashing.md5());
+        return encodeToString(hc.asBytes());
     }
 
     private String encodeToString(byte[] bytes) {

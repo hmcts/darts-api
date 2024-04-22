@@ -86,7 +86,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         when(dataManagementService.getBlobData(any(), any())).thenReturn(MediaTestData.getBinaryData());
         when(dataManagementService.saveBlobData(anyString(), any(InputStream.class)))
             .thenAnswer(invocation -> {
-                //simulates the service reading the stream highlight potential stream closed exceptions if the stream is read twice
+                //simulates the service reading the stream to highlight potential stream closed exceptions if the stream is read twice
                 InputStream inputStream = invocation.getArgument(1, InputStream.class);
                 inputStream.readAllBytes();
                 return UUID.randomUUID();

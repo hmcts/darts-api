@@ -29,7 +29,6 @@ public class FileOperationServiceImpl implements FileOperationService {
         }
         Path targetTempFile = workspacePath.resolve(fileName);
         Files.createDirectories(workspacePath);
-        log.info("temp file: {}", targetTempFile.toAbsolutePath());
         return Files.createFile(targetTempFile);
     }
 
@@ -40,22 +39,6 @@ public class FileOperationServiceImpl implements FileOperationService {
 
         try (InputStream audioInputStream = mediaFile) {
             tempFilePath = createFile(fileName, audioConfigurationProperties.getTempBlobWorkspace(), true);
-            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            log.error("IOException. Unable to copy Blob Data to temporary workspace");
-            throw new IOException(e);
-        }
-
-        return tempFilePath;
-    }
-
-    @Override
-    public Path saveAsTempFile(InputStream inputStream, String workspace) throws IOException {
-
-        Path tempFilePath;
-        var fileName = UUID.randomUUID() + ".tmp";
-        try (InputStream audioInputStream = inputStream) {
-            tempFilePath = createFile(fileName, workspace, false);
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("IOException. Unable to copy Blob Data to temporary workspace");

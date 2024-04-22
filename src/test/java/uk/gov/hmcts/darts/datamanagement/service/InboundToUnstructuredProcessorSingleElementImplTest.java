@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorSingleElementImpl;
@@ -107,6 +108,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     ObjectRecordStatusEntity objectRecordStatusEntityFailureFileNotFound;
     @Mock
     FileContentChecksum fileContentChecksum;
+    @Mock
+    FileOperationService fileOperationService;
 
     @Mock
     MediaRepository mediaRepository;
@@ -122,7 +125,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
                                                                                              transcriptionConfigurationProperties,
                                                                                              audioConfigurationProperties,
                                                                                              externalObjectDirectoryRepository, mediaRepository,
-                                                                                             fileContentChecksum);
+                                                                                             fileContentChecksum,
+                                                                                             fileOperationService);
         when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.of(externalObjectDirectoryEntityInbound));
     }
 
