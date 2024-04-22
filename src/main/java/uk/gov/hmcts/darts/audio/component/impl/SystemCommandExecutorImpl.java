@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 @Slf4j
 @Component
 @Profile("!intTest")
-@Slf4j
 public class SystemCommandExecutorImpl implements SystemCommandExecutor {
 
     @SuppressWarnings("PMD.DoNotUseThreads")
