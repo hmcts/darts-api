@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -69,7 +70,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private RestTemplate restTemplate;
 
     @Value("${spring.servlet.multipart.max-file-size}")
-    private String addAudioThreshold;
+    private DataSize addAudioThreshold;
 
     @BeforeEach
     void beforeEach() {
@@ -158,7 +159,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp3",
             // add one onto the threshold so we are going to fail
-            Integer.valueOf(addAudioThreshold.replace("KB", "")) + 1
+            addAudioThreshold.toBytes() + 1
         );
 
         UserAccountEntity testUser = authorisationStub.getSystemUser();

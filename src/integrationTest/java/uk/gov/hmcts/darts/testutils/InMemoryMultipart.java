@@ -36,8 +36,9 @@ public class InMemoryMultipart implements MultipartFile {
         this.contents = Arrays.copyOf(content, content.length);
     }
 
-    public static InMemoryMultipart getMultiPartOfRandomisedLengthKb(String name, @Nullable String contentType, int kbLength) {
-        byte[] fileBytesOverThreshold = new byte[kbLength * 1000];
+    public static InMemoryMultipart getMultiPartOfRandomisedLengthKb(String name, @Nullable String contentType, long byteLength) {
+        Long bytes = byteLength;
+        byte[] fileBytesOverThreshold = new byte[bytes.intValue()];
         new Random().nextBytes(fileBytesOverThreshold);
         return new InMemoryMultipart(name, contentType, fileBytesOverThreshold);
     }
