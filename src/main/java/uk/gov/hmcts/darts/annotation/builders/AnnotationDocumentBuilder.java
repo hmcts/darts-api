@@ -20,6 +20,7 @@ public class AnnotationDocumentBuilder {
         annotationDocumentEntity.setFileSize((int) document.getSize());
         annotationDocumentEntity.setChecksum(checksum);
         annotationDocumentEntity.setUploadedBy(userIdentity.getUserAccount());
+        annotationDocumentEntity.setLastModifiedBy(userIdentity.getUserAccount());
 
         return annotationDocumentEntity;
     }
