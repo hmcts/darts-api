@@ -42,13 +42,13 @@ public class FileContentChecksum {
     }
 
     @SneakyThrows
-    public String calculateFromFile(Path filePath) {
+    public String calculate(Path filePath) {
         ByteSource byteSource = com.google.common.io.Files.asByteSource(filePath.toFile());
         HashCode hc = byteSource.hash(Hashing.md5());
         return encodeToString(hc.asBytes());
     }
 
-    private String encodeToString(byte[] bytes) {
+    protected String encodeToString(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
             result.append(String.format("%02x", b));

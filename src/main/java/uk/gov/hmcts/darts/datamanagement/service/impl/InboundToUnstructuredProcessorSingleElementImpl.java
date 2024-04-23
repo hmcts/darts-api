@@ -89,7 +89,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                                                                       inboundExternalObjectDirectory.getExternalLocation(),
                                                                       inboundWorkspace);
 
-            var calculatedChecksum = fileContentChecksum.calculateFromFile(tempFile);
+            var calculatedChecksum = fileContentChecksum.calculate(tempFile);
             long size = Files.size(tempFile);
             validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, size);
 

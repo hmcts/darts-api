@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProper
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -142,7 +143,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getAllowedMediaFormats()).thenReturn(List.of(MP2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -172,7 +173,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getAllowedMediaFormats()).thenReturn(List.of(MP2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         when(externalObjectDirectoryRepository.findByIdsAndFailure(mediaEntity.getId(), null, null, null,
            List.of(
@@ -210,7 +211,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(transcriptionConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList(DOC, DOCX));
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -237,7 +238,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(transcriptionConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList(DOC, DOCX));
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -258,7 +259,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -285,7 +286,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getAllowedMediaFormats()).thenReturn(Arrays.asList(MP2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -313,7 +314,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getAllowedMediaFormats()).thenReturn(Arrays.asList(MP2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(1);
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -349,7 +350,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(100);
 
         when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeBlobToFile());
-        when(fileContentChecksum.calculateFromFile(any())).thenReturn("checksum");
+        when(fileContentChecksum.calculate(any(Path.class))).thenReturn("checksum");
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 

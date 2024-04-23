@@ -49,6 +49,10 @@ public class DataManagementServiceImpl implements DataManagementService {
     private final DataManagementAzureClientFactory blobServiceFactory;
 
 
+    /**
+     * Note: This implementation is not memory-efficient with large files,
+     * use downloadBlobToFile(String containerName, UUID blobId, String workspace) instead.
+     */
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClient(dataManagementConfiguration.getBlobStorageAccountConnectionString());
