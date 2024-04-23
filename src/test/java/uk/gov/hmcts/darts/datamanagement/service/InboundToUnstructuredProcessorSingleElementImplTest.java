@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorSingleElementImpl;
@@ -107,6 +109,13 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     @Mock
     FileContentChecksum fileContentChecksum;
 
+    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
+
+    @AfterAll
+    public static void close() {
+        EOD_HELPER_MOCKS.close();
+    }
+
     @Mock
     MediaRepository mediaRepository;
 
@@ -129,7 +138,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     void processInboundToUnstructuredMedia() {
 
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-        String calculatedChecksum = new String(encodeBase64(md5(binaryData.toBytes())));
+        String calculatedChecksum = new String((md5(binaryData.toBytes())));
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -34,6 +35,16 @@ public final class TestUtils {
 
     }
 
+    @SneakyThrows
+    public static File getClasspathFile(String filelocation) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL resource = classLoader.getResource(filelocation);
+        if (resource == null) {
+            throw new IOException(MessageFormat.format("File not found {0}", filelocation));
+        }
+        return new File(resource.getFile());
+    }
+
     public static String removeIds(String input) {
         return input.replaceAll("\"case_id\".{1,6},", "")
             .replaceAll("\"id\".{1,6},", "");
@@ -61,5 +72,14 @@ public final class TestUtils {
 
     public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove) {
         JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    public static String encodeToString(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+
+        return result.toString();
     }
 }
