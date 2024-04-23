@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 
 import java.time.OffsetDateTime;
 
@@ -19,6 +20,8 @@ import static java.time.ZoneOffset.UTC;
 public class CaseDocumentStub {
 
     private final CaseDocumentRepository caseDocumentRepository;
+
+    private final CaseRepository caseRepository;
 
     @Transactional
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity, UserAccountEntity uploadedBy) {
@@ -36,6 +39,7 @@ public class CaseDocumentStub {
         caseDocumentEntity.setChecksum("xC3CCA7021CF79B42F245AF350601C284");
         caseDocumentEntity.setHidden(false);
         caseDocumentEntity.setCreatedBy(uploadedBy);
+        caseDocumentEntity.setLastModifiedBy(uploadedBy);
         caseDocumentEntity.setCreatedTs(OffsetDateTime.now(UTC));
         return caseDocumentEntity;
     }
