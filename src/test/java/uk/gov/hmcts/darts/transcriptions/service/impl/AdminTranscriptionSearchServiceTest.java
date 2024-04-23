@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,8 @@ import uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchQuery;
 import uk.gov.hmcts.darts.transcriptions.controller.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -61,11 +64,22 @@ class AdminTranscriptionSearchServiceTest {
     @Test
     void mapsTranscriptionsSearchResultsToTranscriptionSearchResponse() {
         when(transcriptionSearchQuery.searchTranscriptions(any(TranscriptionSearchRequest.class), anyList()))
-            .thenReturn(Set.of(new TranscriptionSearchResult(1, "case-number", "courthouse", "hearing-date", false, 1)));
+            .thenReturn(someSetOfTranscriptionSearchResult(3));
 
         var results = adminTranscriptionSearchService.searchTranscriptions(new TranscriptionSearchRequest());
 
         assertThat(results).isEmpty();
         verifyNoMoreInteractions(transcriptionSearchQuery);
+    }
+
+    private static Set<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {
+        return Set.of(new TranscriptionSearchResult(
+            1,
+            "some-case-number",
+            11,
+            LocalDate.parse("2020-01-01"),
+            OffsetDateTime.parse("2021-02-02T00:00:00Z"),
+            111,
+            true));
     }
 }
