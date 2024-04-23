@@ -183,7 +183,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             400 : "{"title":"Bad Request","status":400,"detail":"Maximum upload size exceeded"}"
             """;
 
-            Assertions.assertEquals(expectedJson.trim(), restClientException.getMessage());
+            assertEquals(expectedJson.trim(), restClientException.getMessage());
         }
     }
 

@@ -37,3 +37,5 @@ export DETS_SAS_URL_ENDPOINT="$(az keyvault secret show --vault-name darts-stg -
 export AAD_TENANT_ID_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADTenantIdJustice | jq .value -r)"
 export AAD_CLIENT_ID_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADClientIdJustice | jq .value -r)"
 export AAD_CLIENT_SECRET_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADClientSecretJustice | jq .value -r)"
+export MAX_FILE_UPLOAD_SIZE_MEGABYTES="$(az keyvault secret show --vault-name darts-stg --name MaxFileUploadSizeInMegabytes | jq .value -r)"
+export MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES="$(az keyvault secret show --vault-name darts-stg --name MaxFileUploadRequestSizeInMegabytes | jq .value -r)"
