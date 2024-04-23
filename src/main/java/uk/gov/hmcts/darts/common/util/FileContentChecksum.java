@@ -37,7 +37,7 @@ public class FileContentChecksum {
     /**
      * Calculates the digest when the source data has already been consumed.
      */
-    public String calculateFromConsumedSource(DigestInputStream digestInputStream) throws IOException {
+    public String calculate(DigestInputStream digestInputStream) throws IOException {
         return encodeToString(digestInputStream.getMessageDigest().digest());
     }
 
