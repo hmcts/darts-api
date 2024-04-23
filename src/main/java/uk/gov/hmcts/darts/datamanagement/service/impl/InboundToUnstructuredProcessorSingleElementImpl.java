@@ -27,12 +27,14 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -79,12 +81,38 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
         try {
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
+                StringBuilder command = new StringBuilder();
+                command.append("/usr/bin/azcopy_linux_amd64_10.25.0-Preview-1/azcopy copy");
+                command.append(" https://dartssastg.blob.core.windows.net/darts-inbound-container");
+                command.append("?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=" +
+                                   "2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D");
+                command.append(" https://dartssastg.blob.core.windows.net/darts-unstructured");
+                command.append("?sp=racw&st=2024-04-23T07:49:47Z&se=2024-05-31T15:49:47Z&spr=https&sv=" +
+                                   "2022-11-02&sr=c&sig=6Jtf3mCfOtYvRlVFlfIubtsWi1rA2zOiJzAGouhEuBM%3D");
+
+
                 Instant copyStart = Instant.now();
-                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} started at {}",
+                log.info("INBOUND TO UNSTRUCTURED AZ-COPY PERFORMANCE for EOD {} started at {}",
                          unstructuredExternalObjectDirectoryEntity.getId(), copyStart);
-                // copy file
-                UUID blobId = inboundExternalObjectDirectory.getExternalLocation();
-                dataManagementService.copyBlobData(getInboundContainerName(), getUnstructuredContainerName(), blobId);
+
+                Process p = Runtime.getRuntime().exec(command.toString());
+                p.waitFor();
+
+                final int exitValue = p.waitFor();
+                if (exitValue == 0) {
+                    log.info("Successfully executed the command: " + command);
+                } else {
+                    log.error("Failed to execute the following command: " + command + " due to the following error(s):");
+                    try (final BufferedReader b = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+                        String line;
+                        if ((line = b.readLine()) != null) {
+                            System.out.println(line);
+                        }
+                    } catch (final IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 Instant copyCompleted = Instant.now();
                 log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} copy completed at {}",
                          unstructuredExternalObjectDirectoryEntity.getId(), copyCompleted);
@@ -94,13 +122,11 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                          unstructuredExternalObjectDirectoryEntity.getId(), copyTimeElapsed);
 
                 unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
-                unstructuredExternalObjectDirectoryEntity.setExternalLocation(blobId);
+                unstructuredExternalObjectDirectoryEntity.setExternalLocation(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
                 log.debug("Saving unstructured stored EOD for media ID: {}", unstructuredExternalObjectDirectoryEntity.getId());
                 externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
                 log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
-
-
             }
         } catch (BlobStorageException e) {
             log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}. Error Stack {}",

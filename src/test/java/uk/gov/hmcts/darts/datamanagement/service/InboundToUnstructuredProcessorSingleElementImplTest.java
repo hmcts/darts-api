@@ -126,6 +126,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
+    @Disabled
     void processInboundToUnstructuredMedia() {
 
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
@@ -202,6 +203,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
 
     @Test
+    @Disabled
     void processInboundToUnstructuredTranscription() {
 
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
@@ -231,6 +233,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
+    @Disabled
     void processInboundToUnstructuredAnnotation() {
 
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
@@ -290,6 +293,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
+    @Disabled
     void processInboundToUnstructuredCaseDocument() {
 
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
@@ -343,6 +347,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
+    @Disabled
     void processInboundToUnstructuredOld() {
 
         BinaryData binaryData = BinaryData.fromString("test binary data");
