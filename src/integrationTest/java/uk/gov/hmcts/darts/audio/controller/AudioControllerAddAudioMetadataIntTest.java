@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.unit.DataSize;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.Problem;
@@ -54,6 +56,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     HearingStub hearingStub;
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize fileSizeThreshold;
 
     @BeforeEach
     void beforeEach() {
@@ -358,6 +363,55 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         Problem problem = objectMapper.readValue(actualJson, Problem.class);
         assertEquals(AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE.getType().toString(), problem.getType().toString());
         assertEquals(AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE.getTitle(), problem.getTitle());
+    }
+
+    @Test
+    void addAudioSizeOutsideOfBoundaries() throws Exception {
+        UserAccountEntity testUser = authorisationStub.getSystemUser();
+        dartsDatabase.getUserAccountRepository().save(testUser);
+
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT_NEXT_DAY, "Bristol", "1");
+
+        // set the file size to be greater than the maximum threshold
+        addAudioMetadataRequest.setFileSize(fileSizeThreshold.toBytes() + 1);
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp3",
+            "audio/mpeg",
+            "Test Document (doc)".getBytes()
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        Problem problem = objectMapper.readValue(actualJson, Problem.class);
+        assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getType().toString(), problem.getType().toString());
+        assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getTitle(), problem.getTitle());
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse, String courtroom) {

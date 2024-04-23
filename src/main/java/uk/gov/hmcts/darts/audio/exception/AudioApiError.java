@@ -50,6 +50,11 @@ public enum AudioApiError implements DartsApiError {
         AddAudioErrorCode.FILE_DURATION_OUT_OF_BOUNDS.getValue(),
         HttpStatus.BAD_REQUEST,
         AddAudioTitleErrors.FILE_DURATION_OUT_OF_BOUNDS.toString()
+    ),
+    FILE_SIZE_OUT_OF_BOUNDS(
+        AddAudioErrorCode.FILE_SIZE_OUT_OF_BOUNDS.getValue(),
+        HttpStatus.BAD_REQUEST,
+        AddAudioTitleErrors.FILE_SIZE_OUT_OF_BOUNDS.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO";

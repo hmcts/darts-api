@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.unit.DataSize;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -28,6 +29,9 @@ public class AddAudioValidator implements Validator<AddAudioMetadataRequest> {
     @Value("${darts.audio.max-file-duration-minutes}")
     private Long audioDurationInMinutes;
 
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize fileSizeThreshold;
+
     public void validate(AddAudioMetadataRequest addAudioMetadataRequest) {
 
         // attempt to resolve the court house
@@ -43,6 +47,11 @@ public class AddAudioValidator implements Validator<AddAudioMetadataRequest> {
             throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
         }
 
+        // if the metadata file size exceeds the upload threshold then error
+        if (addAudioMetadataRequest.getFileSize() > fileSizeThreshold.toBytes()) {
+            throw new DartsApiException(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS);
+        }
+
         // check the duration
         OffsetDateTime startDate = addAudioMetadataRequest.getStartedAt();
         OffsetDateTime finishDate = addAudioMetadataRequest.getEndedAt();
@@ -53,5 +62,10 @@ public class AddAudioValidator implements Validator<AddAudioMetadataRequest> {
         if (minutesDifference > audioDurationInMinutes) {
             throw new DartsApiException(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS);
         }
+    }
+
+    private long getByteThreshold() {
+
+        return 0;
     }
 }

@@ -272,8 +272,9 @@ components:
         - "AUDIO_106"
         - "AUDIO_107"
         - "AUDIO_108"
+        - "AUDIO_109"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
-                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS]
+                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS]
 
     AddAudioTitleErrors:
       type: string
@@ -286,5 +287,7 @@ components:
         - "Audio not found"
         - "The file type is not acceptable"
         - "The duration of the audio exceeds maximum threshold"
+        - "The audio metadata size exceeds maximum threshold"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
-                         FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS]
+                         FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
+                         FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS]
