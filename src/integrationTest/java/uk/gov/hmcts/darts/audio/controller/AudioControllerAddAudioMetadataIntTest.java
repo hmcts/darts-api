@@ -37,7 +37,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -150,8 +149,12 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
-        byte[] fileBytesOverThreshold = new byte[Integer.valueOf(addAudioThreshold.replace("KB", "")) + 2 * 1000];
-        new Random().nextBytes(fileBytesOverThreshold);
+        StreamingMultipart audioFile =  StreamingMultipart.getMultiPartOfRandomisedLengthKb(
+            "file",
+            "audio.mp3",
+            // add one onto the threshold so we are going to fail
+            Integer.valueOf(addAudioThreshold.replace("KB", "")) + 1
+        );
 
         UserAccountEntity testUser = authorisationStub.getSystemUser();
         dartsDatabase.getUserAccountRepository().save(testUser);
@@ -168,12 +171,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
-
-        StreamingMultipart audioFile = new StreamingMultipart(
-            "file",
-            "audio.mp3",
-            fileBytesOverThreshold
-        );
 
         try {
             streamFileWithMetaData(audioFile,  addAudioMetadataRequest, "http://localhost:" + port + "/audios");

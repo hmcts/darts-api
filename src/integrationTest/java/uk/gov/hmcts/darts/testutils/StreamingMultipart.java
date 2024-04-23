@@ -15,9 +15,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
- * An in memory multipart test. To be used as part of integration tests.
+ * An in memory multipart file. To be used as part of integration tests.
  */
 @Slf4j
 @Getter
@@ -29,10 +30,16 @@ public class StreamingMultipart implements MultipartFile {
     private final byte[] contents;
 
     public StreamingMultipart(
-        String name, @Nullable String contentType, byte[] content) throws IOException {
+        String name, @Nullable String contentType, byte[] content) {
         this.name = name;
         this.contentType = contentType;
         this.contents = Arrays.copyOf(content, content.length);
+    }
+
+    public static StreamingMultipart getMultiPartOfRandomisedLengthKb(String name, @Nullable String contentType, int kbLength) {
+        byte[] fileBytesOverThreshold = new byte[kbLength * 1000];
+        new Random().nextBytes(fileBytesOverThreshold);
+        return new StreamingMultipart(name, contentType, fileBytesOverThreshold);
     }
 
     @Override
