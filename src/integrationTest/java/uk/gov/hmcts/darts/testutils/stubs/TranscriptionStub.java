@@ -346,7 +346,6 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setUploadedBy(testUser);
         transcriptionDocumentEntity.setUploadedDateTime(now(UTC));
         transcriptionDocumentEntity.setChecksum(checksum);
-        transcriptionDocumentEntity.setLastModifiedBy(testUser);
         return transcriptionDocumentEntity;
     }
 

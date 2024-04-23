@@ -382,7 +382,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
-        transcriptionDocumentEntity.setLastModifiedBy(userAccountEntity);
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
