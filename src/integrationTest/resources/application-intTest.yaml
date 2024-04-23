@@ -31,8 +31,8 @@ spring:
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
     multipart:
-      max-file-size: ${MAX_FILE_UPLOAD_SIZE_MEGABYTES:1}MB
-      max-request-size: ${MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES:1}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-file-size: 1KB
+      max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}

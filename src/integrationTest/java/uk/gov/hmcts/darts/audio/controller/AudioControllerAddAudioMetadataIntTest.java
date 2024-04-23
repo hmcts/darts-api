@@ -150,7 +150,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
-        byte[] fileBytesOverThreshold = new byte[Integer.valueOf(addAudioThreshold.replace("MB", "") + 2) * 1000 * 1000];
+        byte[] fileBytesOverThreshold = new byte[Integer.valueOf(addAudioThreshold.replace("KB", "")) + 2 * 1000];
         new Random().nextBytes(fileBytesOverThreshold);
 
         UserAccountEntity testUser = authorisationStub.getSystemUser();
