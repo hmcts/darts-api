@@ -22,24 +22,24 @@ import java.util.Random;
  */
 @Slf4j
 @Getter
-public class StreamingMultipart implements MultipartFile {
+public class InMemoryMultipart implements MultipartFile {
     private final String name;
 
     private final String contentType;
 
     private final byte[] contents;
 
-    public StreamingMultipart(
+    public InMemoryMultipart(
         String name, @Nullable String contentType, byte[] content) {
         this.name = name;
         this.contentType = contentType;
         this.contents = Arrays.copyOf(content, content.length);
     }
 
-    public static StreamingMultipart getMultiPartOfRandomisedLengthKb(String name, @Nullable String contentType, int kbLength) {
+    public static InMemoryMultipart getMultiPartOfRandomisedLengthKb(String name, @Nullable String contentType, int kbLength) {
         byte[] fileBytesOverThreshold = new byte[kbLength * 1000];
         new Random().nextBytes(fileBytesOverThreshold);
-        return new StreamingMultipart(name, contentType, fileBytesOverThreshold);
+        return new InMemoryMultipart(name, contentType, fileBytesOverThreshold);
     }
 
     @Override

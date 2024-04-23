@@ -26,7 +26,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.StreamingMultipart;
+import uk.gov.hmcts.darts.testutils.InMemoryMultipart;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
@@ -149,7 +149,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
-        StreamingMultipart audioFile =  StreamingMultipart.getMultiPartOfRandomisedLengthKb(
+        InMemoryMultipart audioFile =  InMemoryMultipart.getMultiPartOfRandomisedLengthKb(
             "file",
             "audio.mp3",
             // add one onto the threshold so we are going to fail
@@ -184,7 +184,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         }
     }
 
-    public <T> void streamFileWithMetaData(StreamingMultipart multipartFile, T metadata, String url) {
+    public <T> void streamFileWithMetaData(InMemoryMultipart multipartFile, T metadata, String url) {
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
         HttpHeaders headers = new HttpHeaders();
