@@ -1,9 +1,14 @@
 package uk.gov.hmcts.darts.common.util;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteSource;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.DigestInputStream;
 
 import static org.apache.commons.codec.digest.DigestUtils.md5;
@@ -29,11 +34,21 @@ public class FileContentChecksum {
         return encodeToString(md5(bytes));
     }
 
+    /**
+     * Calculates the digest when the source data has already been consumed.
+     */
     public String calculate(DigestInputStream digestInputStream) throws IOException {
         return encodeToString(digestInputStream.getMessageDigest().digest());
     }
 
-    private String encodeToString(byte[] bytes) {
+    @SneakyThrows
+    public String calculate(Path filePath) {
+        ByteSource byteSource = com.google.common.io.Files.asByteSource(filePath.toFile());
+        HashCode hc = byteSource.hash(Hashing.md5());
+        return encodeToString(hc.asBytes());
+    }
+
+    protected String encodeToString(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
             result.append(String.format("%02x", b));

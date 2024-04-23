@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
-import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -23,19 +23,21 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
+import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
-import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
@@ -53,6 +55,9 @@ import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructur
 @Slf4j
 public class InboundToUnstructuredProcessorSingleElementImpl implements InboundToUnstructuredProcessorSingleElement {
 
+    @Value("${darts.storage.inbound.temp-blob-workspace}")
+    private String inboundWorkspace;
+
     private static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
     private static final int INITIAL_TRANSFER_ATTEMPTS = 1;
 
@@ -65,6 +70,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final MediaRepository mediaRepository;
+    private final FileContentChecksum fileContentChecksum;
 
     @SuppressWarnings("java:S4790")
     @Override
@@ -77,17 +83,19 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
         unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-
+        Path tempFile = null;
         try {
-            BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
-            byte[] bytes = inboundFile.toBytes();
-            final String calculatedChecksum = new String(encodeBase64(md5(bytes)));
+            tempFile = dataManagementService.downloadBlobToFile(getInboundContainerName(),
+                                                                      inboundExternalObjectDirectory.getExternalLocation(),
+                                                                      inboundWorkspace);
 
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, Long.valueOf(bytes.length));
+            var calculatedChecksum = fileContentChecksum.calculate(tempFile);
+            long size = Files.size(tempFile);
+            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, size);
 
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 // upload file
-                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
+                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), new FileInputStream(tempFile.toFile()));
                 unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                 unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
@@ -109,6 +117,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
             setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
         } finally {
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+            delete(tempFile);
         }
     }
 
@@ -218,7 +227,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         String incomingChecksum, String calculatedChecksum,
         List<String> allowedMediaFormats, String mediaFormat,
         Integer maxFileSize, Long fileSize) {
-        if (incomingChecksum == null || calculatedChecksum.compareTo(incomingChecksum) != 0) {
+        if (incomingChecksum == null || !calculatedChecksum.equalsIgnoreCase(incomingChecksum)) {
             log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
                       incomingChecksum, calculatedChecksum, unstructured.getId()
             );
@@ -289,11 +298,20 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
+    private ExternalLocationTypeEntity getType(ExternalLocationTypeEnum type) {
+        return externalLocationTypeRepository.getReferenceById(type.getId());
+    }
+
     private ObjectRecordStatusEntity getStatus(ObjectRecordStatusEnum status) {
         return objectRecordStatusRepository.getReferenceById(status.getId());
     }
 
-    private ExternalLocationTypeEntity getType(ExternalLocationTypeEnum type) {
-        return externalLocationTypeRepository.getReferenceById(type.getId());
+    private static void delete(Path tempFile) {
+        if (tempFile != null) {
+            var deleted = tempFile.toFile().delete();
+            if (!deleted) {
+                log.error("Failed to delete temp file at {}", tempFile.toAbsolutePath());
+            }
+        }
     }
 }
