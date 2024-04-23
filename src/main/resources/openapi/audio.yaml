@@ -268,7 +268,12 @@ components:
         - "AUDIO_102"
         - "AUDIO_103"
         - "AUDIO_104"
-      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]
+        - "AUDIO_105"
+        - "AUDIO_106"
+        - "AUDIO_107"
+        - "AUDIO_108"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
+                         MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS]
 
     AddAudioTitleErrors:
       type: string
@@ -278,4 +283,8 @@ components:
         - "The requested media cannot be found"
         - "Failed to store uploaded audio file"
         - "Failed to mark audio(s) for deletion as system user was not found"
-      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]
+        - "Audio not found"
+        - "The file type is not acceptable"
+        - "The duration of the audio exceeds maximum threshold"
+      x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
+                         FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS]
