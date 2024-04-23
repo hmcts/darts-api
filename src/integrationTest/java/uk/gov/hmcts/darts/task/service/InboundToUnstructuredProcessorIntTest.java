@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.task.service;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -285,7 +284,6 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
     }
 
-    @NotNull
     private static Answer<Object> writeMediaBlobToFile() {
         return invocationOnMock -> {
             File downloadedInboundTestBlobDataFile = File.createTempFile("integrationTestInboundBlob", ".tmp");
@@ -294,7 +292,6 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         };
     }
 
-    @NotNull
     private static Answer<Object> writeTranscriptionDocumentBlobToFile() {
         return invocationOnMock -> {
             File downloadedInboundTestBlobDataFile = File.createTempFile("integrationTestInboundBlob", ".tmp");

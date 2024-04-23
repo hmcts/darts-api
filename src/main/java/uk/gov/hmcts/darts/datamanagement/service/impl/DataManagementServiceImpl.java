@@ -112,7 +112,6 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         var client = blobServiceFactory.getBlobClient(containerClient, uniqueBlobId);
 
-        log.debug("starting upload of file to '{}'", containerName);
         var uploadOptions = new BlobParallelUploadOptions(inputStream);
         uploadOptions.setParallelTransferOptions(createCommonTransferOptions());
         client.uploadWithResponse(uploadOptions, dataManagementConfiguration.getBlobClientTimeout(), null);

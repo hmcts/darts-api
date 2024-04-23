@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -33,16 +32,6 @@ public final class TestUtils {
         File file = new File(resource.getFile());
         return FileUtils.readFileToString(file, "UTF-8");
 
-    }
-
-    @SneakyThrows
-    public static File getClasspathFile(String filelocation) {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        URL resource = classLoader.getResource(filelocation);
-        if (resource == null) {
-            throw new IOException(MessageFormat.format("File not found {0}", filelocation));
-        }
-        return new File(resource.getFile());
     }
 
     public static String removeIds(String input) {

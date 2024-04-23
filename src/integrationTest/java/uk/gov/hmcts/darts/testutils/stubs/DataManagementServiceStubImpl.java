@@ -16,8 +16,10 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.Map;
@@ -43,12 +45,15 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         return BinaryData.fromBytes(new byte[1024]);
     }
 
+    @SneakyThrows
     @Override
     public Path downloadBlobToFile(String containerName, UUID blobId, String inboundWorkspace) {
         logStubUsageWarning();
-        BinaryData data = this.getBlobData(containerName, blobId);
 
-        return null;
+        log.warn("Downloading blob to dummy file to mimic Blob storage download to file");
+        File downloadedBlobDataFile = File.createTempFile("dataManagementServiceStubBlobFile", ".tmp");
+        Files.write(downloadedBlobDataFile.toPath(), "someContent".getBytes());
+        return downloadedBlobDataFile.toPath();
     }
 
     @Override
