@@ -20,10 +20,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
@@ -45,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
@@ -60,10 +58,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    @Autowired
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Autowired
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
     @MockBean
@@ -109,8 +103,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -127,7 +121,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -156,8 +150,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -175,7 +169,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -203,8 +197,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -225,7 +219,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -256,8 +250,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -279,7 +273,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -310,8 +304,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -332,7 +326,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -360,8 +354,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -379,7 +373,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -407,8 +401,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -431,7 +425,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -461,8 +455,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -502,7 +496,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -532,8 +526,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -573,7 +567,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -603,8 +597,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -644,7 +638,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -674,8 +668,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -715,7 +709,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -725,6 +719,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(createRecordFilename);
         verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
@@ -752,7 +747,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
             dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
@@ -794,6 +789,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(createRecordFilename);
         verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
@@ -819,7 +815,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
@@ -862,6 +858,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(createRecordFilename);
         verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
@@ -890,8 +887,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -931,7 +928,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -962,7 +959,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
             dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
@@ -1006,7 +1003,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
-        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).getBlobData(createRecordFilename);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
@@ -1031,7 +1029,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             transcriptionDocumentEntity,
             dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            dartsDatabase.getExternalLocationTypeEntity(ARM),
             UUID.randomUUID()
         );
         armEod.setTransferAttempts(1);
@@ -1075,7 +1073,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
-        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).getBlobData(createRecordFilename);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
@@ -1104,8 +1103,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -1145,7 +1144,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -1155,7 +1154,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
-        verify(armDataManagementApi).getBlobData("6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp");
+        verify(armDataManagementApi).getBlobData(createRecordFilename);
+        verify(armDataManagementApi).getBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
@@ -1183,8 +1183,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -1224,7 +1224,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -1233,6 +1233,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(inputUploadFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
@@ -1261,8 +1262,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            ARM_DROP_ZONE,
+            ARM,
             UUID.randomUUID()
         );
 
@@ -1296,7 +1297,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
-            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -1305,6 +1306,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);

@@ -375,8 +375,16 @@ class ArmResponseFilesProcessSingleElementImplTest {
             "InvalidInputFile.json";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
+
+        String createRecordTestFilename = "Tests/arm/component/ArmResponseFilesProcessSingleElement/testInvalidInputFileJson/" +
+            "CreateRecordFile.json";
+        String createRecordJson = TestUtils.getContentsFromFile(createRecordTestFilename);
+        BinaryData createRecordBinaryData = BinaryData.fromString(createRecordJson);
+
+        when(armDataManagementApi.getBlobData(createRecordFilename)).thenReturn(createRecordBinaryData);
         when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
         when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(any(BinaryData.class), anyString(), anyString(), anyBoolean()))
+            .thenReturn(Path.of(createRecordTestFilename))
             .thenReturn(Path.of(uploadFileTestFilename));
 
         when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
@@ -394,7 +402,6 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).deleteBlobData(uploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
-        verifyNoMoreInteractions(armDataManagementApi);
     }
 
     @Test
@@ -461,6 +468,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -510,6 +518,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
@@ -562,6 +571,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
@@ -616,6 +626,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
@@ -671,6 +682,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verifyNoMoreInteractions(armDataManagementApi);
@@ -724,6 +736,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
@@ -754,6 +767,8 @@ class ArmResponseFilesProcessSingleElementImplTest {
         hashcodeResponseBlobs.add(failedUploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
+        when(armDataManagementApi.getBlobData(failedUploadFileFilename)).thenThrow(new AzureException());
+
         when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenThrow(new AzureException());
 
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
@@ -766,6 +781,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verifyNoMoreInteractions(armDataManagementApi);
     }
@@ -818,6 +834,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(failedUploadFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verify(armDataManagementApi).deleteBlobData(failedUploadFileFilename);
@@ -873,6 +890,7 @@ class ArmResponseFilesProcessSingleElementImplTest {
 
         verify(armDataManagementApi).listResponseBlobs(prefix);
         verify(armDataManagementApi).listResponseBlobs(hashcode);
+        verify(armDataManagementApi).getBlobData(createRecordFileFilename);
         verify(armDataManagementApi).getBlobData(invalidLineFileFilename);
         verify(armDataManagementApi).deleteBlobData(responseBlobFilename);
         verify(armDataManagementApi).deleteBlobData(createRecordFileFilename);
