@@ -103,7 +103,8 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     }
 
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        // IU Input Upload File - EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
+        // Search for Input Upload Files starting with the ExternalObjectDirectoryEntity id (EODID), document object id eg. media id and transfer attempts
+        // - Expected filename: EODID_ObjectID_TransferAttempts_Hashcode_Status_iu.rsp
         String prefix = ArmResponseFilesHelper.getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
         try {
