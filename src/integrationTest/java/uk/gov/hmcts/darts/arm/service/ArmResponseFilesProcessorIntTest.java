@@ -1218,7 +1218,13 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getBlobData(failedUploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(inputUploadFilename)).thenReturn(uploadFileBinaryData);
+
+        String invalidLineTestFilename = "tests/arm/service/ArmResponseFilesProcessorTest/uploadFile/" +
+            "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        String invalidLineFileJson = TestUtils.getContentsFromFile(invalidLineTestFilename);
+        BinaryData invalidLineBinaryData = BinaryData.fromString(invalidLineFileJson);
+        when(armDataManagementApi.getBlobData(invalidLineFileFilename)).thenReturn(invalidLineBinaryData);
 
         when(armDataManagementApi.deleteBlobData(inputUploadFilename)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(invalidLineFileFilename)).thenReturn(true);
