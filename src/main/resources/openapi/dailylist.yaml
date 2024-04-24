@@ -58,7 +58,7 @@ paths:
           schema:
             type: string
           description: "The message id of the event. <p>
-                      **Conditional mandatory**"
+                        **Conditional mandatory**, required if json_document not provided"
         - in: header
           name: xml_document
           schema:
