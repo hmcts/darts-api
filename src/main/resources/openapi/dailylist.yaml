@@ -174,7 +174,7 @@ paths:
         '202':
           description: ACCEPTED
         '400':
-          description: Provided id is does not exist.
+          description: Provided courthouse does not exist.
           content:
             application/json+problem:
               schema:
