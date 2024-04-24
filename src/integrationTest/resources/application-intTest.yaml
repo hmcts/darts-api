@@ -50,6 +50,7 @@ darts:
     allowed-media-formats:
       - "mpeg2"
       - "mp2"
+      - "audio/mpeg"
   testing-support-endpoints:
     enabled: true
   bank-holidays:

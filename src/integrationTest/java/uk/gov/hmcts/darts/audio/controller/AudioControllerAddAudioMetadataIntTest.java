@@ -12,6 +12,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.unit.DataSize;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.Problem;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -66,12 +68,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = authorisationStub.getTestUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-    }
 
-    @Test
-    void addAudioMetadata() throws Exception {
-
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
         dartsDatabase.getUserAccountRepository().save(testUser);
 
         dartsDatabase.createCase("Bristol", "case1");
@@ -84,14 +81,18 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
         HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
+    }
 
+    @Test
+    void addAudioMetadata() throws Exception {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
-            "Test Document (doc)".getBytes()
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                    .getResource("sample6.mp2").getFile()))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -100,7 +101,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "application/json",
             objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
-
 
         mockMvc.perform(
                 multipart(ENDPOINT)
@@ -148,9 +148,10 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
-            "Test Document (doc)".getBytes()
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -176,28 +177,15 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioUnsupportedType() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabase.getUserAccountRepository().save(testUser);
-
-        dartsDatabase.createCase("Bristol", "case1");
-        dartsDatabase.createCase("Bristol", "case2");
-        dartsDatabase.createCase("Bristol", "case3");
-
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
-
         String unknownType = "unsupportedType";
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1", unknownType);
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
-            "Test Document (doc)".getBytes()
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -223,25 +211,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioNotProvided() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabase.getUserAccountRepository().save(testUser);
-
-        dartsDatabase.createCase("Bristol", "case1");
-        dartsDatabase.createCase("Bristol", "case2");
-        dartsDatabase.createCase("Bristol", "case3");
-
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
-
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
             "".getBytes()
         );
@@ -269,27 +243,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioDurationOutOfBounds() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabase.getUserAccountRepository().save(testUser);
-
-        dartsDatabase.createCase("Bristol", "case1");
-        dartsDatabase.createCase("Bristol", "case2");
-        dartsDatabase.createCase("Bristol", "case3");
-
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
-
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT_NEXT_DAY, "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
-            "Test Document (doc)".getBytes()
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -315,32 +276,25 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addFailedToUploadAudio() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabase.getUserAccountRepository().save(testUser);
-
-        dartsDatabase.createCase("Bristol", "case1");
-        dartsDatabase.createCase("Bristol", "case2");
-        dartsDatabase.createCase("Bristol", "case3");
-
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
-
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
 
         // create an audio file that throws an exception
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
-            "Test Document (doc)".getBytes()
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
         ) {
+            private int FILE_SIGNATURE_CALL_COUNT = 0;
             @Override
             public InputStream getInputStream() throws IOException {
-                throw new IOException();
+                // fail on any call other than for the file signature validation
+                if (FILE_SIGNATURE_CALL_COUNT != 0) {
+                    throw new IOException();
+                }
+                FILE_SIGNATURE_CALL_COUNT = FILE_SIGNATURE_CALL_COUNT + 1;
+                return super.getInputStream();
             }
         };
 
@@ -367,20 +321,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioSizeOutsideOfBoundaries() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabase.getUserAccountRepository().save(testUser);
-
-        dartsDatabase.createCase("Bristol", "case1");
-        dartsDatabase.createCase("Bristol", "case2");
-        dartsDatabase.createCase("Bristol", "case3");
-
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
-
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT_NEXT_DAY, "Bristol", "1");
 
         // set the file size to be greater than the maximum threshold
@@ -388,9 +328,10 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             "audio/mpeg",
-            "Test Document (doc)".getBytes()
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -412,6 +353,104 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         Problem problem = objectMapper.readValue(actualJson, Problem.class);
         assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getType().toString(), problem.getType().toString());
         assertEquals(AudioApiError.FILE_SIZE_OUT_OF_BOUNDS.getTitle(), problem.getTitle());
+    }
+
+    @Test
+    void addAudioFileExtensionIncorrect() throws Exception {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.incorrect",
+            "audio/mpeg",
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        Problem problem = objectMapper.readValue(actualJson, Problem.class);
+        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getType().toString(), problem.getType().toString());
+        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
+    }
+
+    @Test
+    void addAudioFileExtensionContentType() throws Exception {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp2",
+            "audio/mpegincorrect",
+            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
+                                                        .getResource("sample6.mp2").getFile()))
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        Problem problem = objectMapper.readValue(actualJson, Problem.class);
+        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getType().toString(), problem.getType().toString());
+        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
+    }
+
+    @Test
+    void addAudioFileSignatureException() throws Exception {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp2",
+            "audio/mpeg",
+            "Not an mp2 signature".getBytes()
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        Problem problem = objectMapper.readValue(actualJson, Problem.class);
+        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getType().toString(), problem.getType().toString());
+        assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse, String courtroom) {

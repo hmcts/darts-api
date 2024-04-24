@@ -396,6 +396,8 @@ dependencies {
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+  implementation group: 'org.apache.tika', name: 'tika-core', version: '2.9.2'
+
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.4.Final')
 
