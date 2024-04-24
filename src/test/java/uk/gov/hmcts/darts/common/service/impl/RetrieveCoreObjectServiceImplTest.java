@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,7 +65,7 @@ class RetrieveCoreObjectServiceImplTest {
             COURTHOUSE_1,
             COURTROOM_1,
             CASE_NUMBER_1,
-            LocalDate.now()
+            LocalDateTime.now()
         );
 
         assertEquals(123, response.getId());
@@ -80,7 +81,7 @@ class RetrieveCoreObjectServiceImplTest {
             COURTHOUSE_1,
             COURTROOM_1,
             CASE_NUMBER_1,
-            LocalDate.now()
+            LocalDateTime.now()
         );
 
         assertEquals(COURTROOM_1, response.getCourtroom().getName());
@@ -133,7 +134,7 @@ class RetrieveCoreObjectServiceImplTest {
                 COURTHOUSE_1,
                 COURTROOM_1,
                 CASE_NUMBER_1,
-                LocalDate.now()
+                LocalDateTime.now()
             )
         );
 

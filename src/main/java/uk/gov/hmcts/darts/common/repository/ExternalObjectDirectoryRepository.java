@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -58,6 +59,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     List<ExternalObjectDirectoryEntity> findByEntityAndStatus(TranscriptionDocumentEntity transcriptionDocument, ObjectRecordStatusEntity status);
 
+    List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationType(TranscriptionDocumentEntity transcriptionDocument,
+                                                                                              ExternalLocationTypeEntity externalLocationType);
+
     @Query(
         """
                 SELECT eod.media.id FROM ExternalObjectDirectoryEntity eod
@@ -89,7 +93,15 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
                                                                                   ExternalLocationTypeEntity location1,
-                                                                                  ExternalLocationTypeEntity location2);
+                                                                                  ExternalLocationTypeEntity location2,
+                                                                                  Pageable pageable);
+
+
+    default List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
+                                                                                          ExternalLocationTypeEntity location1,
+                                                                                          ExternalLocationTypeEntity location2) {
+        return findExternalObjectsNotIn2StorageLocations(status, location1, location2, Pageable.unpaged());
+    }
 
 
     @Query(
@@ -120,9 +132,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                             ExternalLocationTypeEntity type,
-                                                                                            Integer transferAttempts);
+                                                                                            Integer transferAttempts,
+                                                                                            Pageable pageable);
 
-    List<EntityIdOnly> findByStatusAndExternalLocationType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
+    default List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
+                                                                                                    ExternalLocationTypeEntity type,
+                                                                                                    Integer transferAttempts) {
+        return findNotFinishedAndNotExceededRetryInStorageLocation(failedStatuses, type, transferAttempts, Pageable.unpaged());
+    }
 
     @Query(
         """
@@ -155,6 +172,13 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
 
+    List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntityAndExternalLocationType(AnnotationDocumentEntity annotationDocument,
+                                                                           ExternalLocationTypeEntity externalLocationType);
+
+    List<ExternalObjectDirectoryEntity> findByCaseDocumentAndExternalLocationType(CaseDocumentEntity caseDocument,
+                                                                                  ExternalLocationTypeEntity externalLocationTypeEntity);
+
+
     List<ExternalObjectDirectoryEntity> findByMedia(MediaEntity media);
 
     @Query(
@@ -168,8 +192,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     boolean existsMediaFileIn2StorageLocations(MediaEntity media,
-                                                  ExternalLocationTypeEntity location1,
-                                                  ExternalLocationTypeEntity location2);
+                                               ExternalLocationTypeEntity location1,
+                                               ExternalLocationTypeEntity location2);
 
     @Query(
         """
@@ -180,7 +204,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.status = :status2
             AND eod.externalLocationType = :location1
             AND eod2.externalLocationType = :location2
-            AND eod2.lastModifiedDateTime < :lastModifiedBefore
+            AND eod.lastModifiedDateTime < :lastModifiedBefore
             """
     )
     List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
@@ -229,10 +253,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             set eod.status = :newStatus,
             eod.lastModifiedBy = :userAccount,
             eod.lastModifiedDateTime = :timestamp
-            where eod.id in :idsToDelete
+            where eod.id in :idsToUpdate
             """
     )
-    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
+    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp);
 
     @Query(
         """
@@ -267,4 +291,42 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     )
     ExternalObjectDirectoryEntity findByIdsAndFailure(Integer mediaId, Integer caseDocumentId, Integer annotationDocumentId, Integer transcriptionDocumentId,
                                                       List<Integer> failureStatesList);
+
+
+    @Query(
+        """
+            SELECT COUNT(eod) > 0
+            FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :inboundStatus
+            AND eod.media = :media
+            AND eod.externalLocationType = :inboundLocation
+            AND NOT EXISTS
+              (
+              SELECT eod2 FROM ExternalObjectDirectoryEntity eod2
+              WHERE eod.media = eod2.media
+              AND eod2.status != :ignoredUnstructuredStatus
+              AND eod2.externalLocationType IN :destinationLocations
+              )
+            """
+    )
+    boolean hasMediaNotBeenCopiedFromInboundStorage(MediaEntity media, ObjectRecordStatusEntity inboundStatus,
+                                                    ExternalLocationTypeEntity inboundLocation,
+                                                    ObjectRecordStatusEntity ignoredUnstructuredStatus,
+                                                    List<ExternalLocationTypeEntity> destinationLocations);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status 
+            AND eod.manifestFile = :manifestFile
+            ORDER BY eod.lastModifiedDateTime
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findAllByStatusAndManifestFile(ObjectRecordStatusEntity status, String manifestFile);
+
+    List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndUpdateRetention(ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                                     boolean updateRetention);
+
+
+    List<ExternalObjectDirectoryEntity> findByManifestFile(String manifestName);
 }

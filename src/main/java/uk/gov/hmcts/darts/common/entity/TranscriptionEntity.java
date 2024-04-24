@@ -90,6 +90,16 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "hide_request_from_requestor", nullable = false)
     private Boolean hideRequestFromRequestor;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTimestamp;
+
     @Column(name = "chronicle_id")
     private String chronicleId;
 
@@ -125,6 +135,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
      * A potential enhancement for officially supporting this many-to-many is detailed in
      * <a href="https://tools.hmcts.net/jira/browse/DMP-2489">DMP-2489</a>
      * </p>
+     *
      * @return CourtCaseEntity if found, otherwise null
      */
     public CourtCaseEntity getCourtCase() {

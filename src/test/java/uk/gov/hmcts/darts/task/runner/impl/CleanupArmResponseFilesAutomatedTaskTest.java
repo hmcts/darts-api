@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @ExtendWith(MockitoExtension.class)
 class CleanupArmResponseFilesAutomatedTaskTest {
@@ -15,6 +16,9 @@ class CleanupArmResponseFilesAutomatedTaskTest {
     private LockProvider lockProvider;
     @Mock
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
+    @Mock
+    private LogApi logApi;
+
 
     @Test
     void runTask() {
@@ -22,7 +26,8 @@ class CleanupArmResponseFilesAutomatedTaskTest {
                 null,
                 lockProvider,
                 null,
-                cleanupArmResponseFilesService
+                cleanupArmResponseFilesService,
+                logApi
         );
 
         cleanupArmResponseFilesAutomatedTask.runTask();

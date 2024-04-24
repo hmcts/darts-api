@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.common.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Getter
 @RequiredArgsConstructor
 public enum SecurityRoleEnum {
@@ -21,5 +24,18 @@ public enum SecurityRoleEnum {
     SUPER_USER(12);
 
     private final Integer id;
+
+    private static final Map<Integer, SecurityRoleEnum> BY_ID = new ConcurrentHashMap<>();
+
+    static {
+        for (SecurityRoleEnum e : values()) {
+            BY_ID.put(e.id, e);
+        }
+    }
+
+    public static SecurityRoleEnum valueOfId(Integer id) {
+        return BY_ID.get(id);
+    }
+
 
 }

@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.transcriptionRequestDetailsFrom;
 
@@ -55,7 +55,7 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
             transcriptionRequestDetails, false);
 
         //automatically approve the transcription request
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.APPROVED.getId());
         updateTranscription.setWorkflowComment("Transcription Automatically approved");
         transcriptionsApi.updateTranscription(transcriptionResponse.getTranscriptionId(), updateTranscription);

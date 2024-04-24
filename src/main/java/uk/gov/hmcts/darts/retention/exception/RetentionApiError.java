@@ -47,6 +47,42 @@ public enum RetentionApiError implements DartsApiError {
         RetentionErrorCode.RETENTION_POLICY_TYPE_ID_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
         RetentionTitleErrors.RETENTION_POLICY_TYPE_ID_NOT_FOUND.toString()
+    ), NON_UNIQUE_POLICY_NAME(
+        RetentionErrorCode.NON_UNIQUE_POLICY_NAME.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.NON_UNIQUE_POLICY_NAME.toString()
+    ), NON_UNIQUE_POLICY_DISPLAY_NAME(
+        RetentionErrorCode.NON_UNIQUE_POLICY_DISPLAY_NAME.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.NON_UNIQUE_POLICY_DISPLAY_NAME.toString()
+    ), DURATION_TOO_SHORT(
+        RetentionErrorCode.DURATION_TOO_SHORT.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.DURATION_TOO_SHORT.toString()
+    ), POLICY_START_MUST_BE_FUTURE(
+        RetentionErrorCode.POLICY_START_MUST_BE_FUTURE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.POLICY_START_MUST_BE_FUTURE.toString()
+    ), POLICY_START_DATE_MUST_BE_PAST(
+        RetentionErrorCode.POLICY_START_DATE_MUST_BE_PAST.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.POLICY_START_DATE_MUST_BE_PAST.toString()
+    ), NON_UNIQUE_FIXED_POLICY_KEY(
+        RetentionErrorCode.NON_UNIQUE_FIXED_POLICY_KEY.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.NON_UNIQUE_FIXED_POLICY_KEY.toString()
+    ), FIXED_POLICY_KEY_NOT_FOUND(
+        RetentionErrorCode.FIXED_POLICY_KEY_NOT_FOUND.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.FIXED_POLICY_KEY_NOT_FOUND.toString()
+    ), LIVE_POLICIES_CANNOT_BE_EDITED(
+        RetentionErrorCode.LIVE_POLICIES_CANNOT_BE_EDITED.getValue(),
+        HttpStatus.CONFLICT,
+        RetentionTitleErrors.LIVE_POLICIES_CANNOT_BE_EDITED.toString()
+    ), TARGET_POLICY_HAS_PENDING_REVISION(
+        RetentionErrorCode.TARGET_POLICY_HAS_PENDING_REVISION.getValue(),
+        HttpStatus.BAD_REQUEST,
+        RetentionTitleErrors.TARGET_POLICY_HAS_PENDING_REVISION.toString()
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";

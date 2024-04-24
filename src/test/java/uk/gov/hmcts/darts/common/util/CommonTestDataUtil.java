@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -40,7 +41,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects"})
 @UtilityClass
 public class CommonTestDataUtil {
 
@@ -105,6 +106,7 @@ public class CommonTestDataUtil {
 
     public CourthouseEntity createCourthouse(String name) {
         CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setId(1001);
         courthouse.setCourthouseName(name);
         return courthouse;
     }
@@ -209,10 +211,26 @@ public class CommonTestDataUtil {
         return createHearing(caseNumber, date, LocalTime.NOON);
     }
 
+    public HearingEntity createHearing(String caseNumber, LocalDateTime datetime) {
+        return createHearing(caseNumber, datetime.toLocalDate(), datetime.toLocalTime());
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, LocalDateTime datetime) {
+        return createHearing(courtCase, createCourtroom("1"), datetime.toLocalDate(), datetime.toLocalTime());
+    }
+
     public HearingEntity createHearing(String caseNumber, LocalDate date, LocalTime time) {
+        return createHearing(createCase(caseNumber), createCourtroom("1"), date, time);
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDateTime dateTime) {
+        return createHearing(courtCase, courtroom, dateTime.toLocalDate(), dateTime.toLocalTime());
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtCase, CourtroomEntity courtroom, LocalDate date, LocalTime time) {
         HearingEntity hearing1 = new HearingEntity();
-        hearing1.setCourtCase(createCase(caseNumber));
-        hearing1.setCourtroom(createCourtroom("1"));
+        hearing1.setCourtCase(courtCase);
+        hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
@@ -222,21 +240,34 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
-        return createTranscriptionList(hearing, true, true);
+        return createTranscriptionList(hearing, true, true, false);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
-        return createTranscriptionList(hearing, generateStatus, true);
+        return createTranscriptionList(hearing, generateStatus, true, false);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
+        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(
+        HearingEntity hearing,
+        boolean generateStatus,
+        boolean excludeWorkflow,
+        boolean generateRequestor
+    ) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
         transcription.setCourtroom(hearing.getCourtroom());
         transcription.addHearing(hearing);
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
-        transcription.setCreatedBy(createUserAccount());
+        if (generateRequestor) {
+            transcription.setCreatedBy(createUserAccountWithId());
+        } else {
+            transcription.setCreatedBy(createUserAccount());
+        }
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD, 999));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());
@@ -253,6 +284,7 @@ public class CommonTestDataUtil {
             transcriptionStatus.setDisplayName(TranscriptionStatusEnum.APPROVED.name());
             transcription.setTranscriptionStatus(transcriptionStatus);
         }
+
         return List.of(transcription);
     }
 
@@ -317,6 +349,12 @@ public class CommonTestDataUtil {
         return userAccount;
     }
 
+    public UserAccountEntity createUserAccountWithId() {
+        UserAccountEntity userAccount = createUserAccount("testUsername");
+        userAccount.setId(1002);
+        return userAccount;
+    }
+
     public List<JudgeEntity> createJudges(int numOfJudges) {
         List<JudgeEntity> returnList = new ArrayList<>();
         for (int counter = 1; counter <= numOfJudges; counter++) {
@@ -343,7 +381,8 @@ public class CommonTestDataUtil {
 
     public AddCaseRequest createAddCaseRequest() {
 
-        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        AddCaseRequest request = new AddCaseRequest();
+        request.setCourthouse("Swansea");
         request.setCaseNumber("2");
         request.setDefendants(Lists.newArrayList("Defendant1"));
         request.setJudges(Lists.newArrayList("Judge1"));
@@ -355,7 +394,8 @@ public class CommonTestDataUtil {
 
     public AddCaseRequest createUpdateCaseRequest() {
 
-        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        AddCaseRequest request = new AddCaseRequest();
+        request.setCourthouse("Swansea");
         request.setCaseNumber("case1");
         request.setDefendants(Lists.newArrayList("UpdatedDefendant1"));
         request.setJudges(Lists.newArrayList("UpdateJudge1"));
@@ -459,7 +499,7 @@ public class CommonTestDataUtil {
 
     public static List<AnnotationDocumentEntity> createAnnotationDocumentEntityList() {
         List<AnnotationDocumentEntity> annotationDocumentEntityList =
-                new ArrayList<>();
+            new ArrayList<>();
         annotationDocumentEntityList.add(createAnnotationDocumentEntity(1));
         annotationDocumentEntityList.add(createAnnotationDocumentEntity(2));
         return annotationDocumentEntityList;
@@ -467,7 +507,7 @@ public class CommonTestDataUtil {
 
     public static AnnotationDocumentEntity createAnnotationDocumentEntity(Integer id) {
         AnnotationDocumentEntity annotationDocumentEntity =
-                new AnnotationDocumentEntity();
+            new AnnotationDocumentEntity();
         annotationDocumentEntity.setId(id);
         annotationDocumentEntity.setFileName("filename");
         annotationDocumentEntity.setFileType("filetype");

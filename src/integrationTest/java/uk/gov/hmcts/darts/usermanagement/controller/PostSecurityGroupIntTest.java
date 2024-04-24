@@ -1,20 +1,26 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,9 +52,23 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     private TransactionTemplate transactionTemplate;
 
+    private int maxSecurityGroupId;
+
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
+        List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.ID).descending());
+        maxSecurityGroupId = securityGroupEntities.get(0).getId();
+    }
+
+    @AfterEach
+    void tearDown() {
+        List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll(Sort.by(SecurityGroupEntity_.ID).descending());
+        for (SecurityGroupEntity securityGroup : securityGroupEntities) {
+            if (securityGroup.getId() > maxSecurityGroupId) {
+                securityGroupRepository.delete(securityGroup);
+            }
+        }
     }
 
     @Test
@@ -59,7 +79,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .content("""
                          {
                            "name": "ACME",
-                           "display_name": "ACME Transcription Services"
+                           "display_name": "ACME Transcription Services",
+                           "security_role_id": 4
                          }
                            """);
 
@@ -101,7 +122,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                          {
                            "name": "Scribe It",
                            "display_name": "Scribe It Transcription Services",
-                           "description": "A test group"
+                           "description": "A test group",
+                           "security_role_id": 4
                          }
                            """);
 
@@ -141,7 +163,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {
-                           "name": "ACME"
+                           "name": "ACME",
+                           "security_role_id": 4
                          }
                            """);
 
@@ -157,7 +180,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .content("""
                          {
                            "name": "Weyland",
-                           "display_name": "Weyland Transcription Services"
+                           "display_name": "Weyland Transcription Services",
+                           "security_role_id": 4
                          }
                            """);
         MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
@@ -170,13 +194,47 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .content("""
                          {
                            "name": "Weyland",
-                           "display_name": "Trying to create a group whose name already exists"
+                           "display_name": "Trying to create a group whose name already exists",
+                           "security_role_id": 4
                          }
                            """);
         mockMvc.perform(requestForDuplicateGroup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_105"))
             .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
+    }
+
+    @Test
+    void createSecurityGroupShouldFailWhenAttemptingToCreateGroupThatDisplayNameAlreadyExists() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder requestForInitialGroup = buildRequest()
+            .content("""
+                         {
+                           "name": "Weyland",
+                           "display_name": "Weyland Transcription Services",
+                           "security_role_id": 4
+                         }
+                           """);
+        MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
+            .andExpect(status().isCreated())
+            .andReturn();
+        JSONObject initialSecurityGroup = new JSONObject(initialResponse.getResponse()
+                                                             .getContentAsString());
+
+        MockHttpServletRequestBuilder requestForDuplicateGroup = buildRequest()
+            .content("""
+                         {
+                           "name": "Weyland-new",
+                           "display_name": "Weyland Transcription Services",
+                           "security_role_id": 4
+                         }
+                           """);
+        mockMvc.perform(requestForDuplicateGroup)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_107"))
+            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")))
+            .andExpect(jsonPath("$.detail").value("Attempt to create group with a display name that already exists"));
     }
 
     @Test
@@ -187,11 +245,46 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .content("""
                          {
                            "name": "ACME",
-                           "display_name": "ACME Transcription Services"
+                           "display_name": "ACME Transcription Services",
+                           "security_role_id": 4
                          }
                            """);
         mockMvc.perform(request)
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void createSecurityGroupShouldFailIfRoleNotProvided() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder request = buildRequest()
+            .content("""
+                         {
+                           "name": "ACME",
+                           "display_name": "ACME Transcription Services"
+                         }
+                           """);
+        mockMvc.perform(request)
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createSecurityGroupShouldFailIfRoleNotAllowed() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder request = buildRequest()
+            .content("""
+                         {
+                           "name": "ACME",
+                           "display_name": "ACME Transcription Services",
+                           "security_role_id": 1
+                         }
+                           """);
+        mockMvc.perform(request)
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_106"))
+            .andExpect(jsonPath("$.detail").value(
+                "A group with a role of type APPROVER has been requested, but only roles of type [TRANSCRIBER, TRANSLATION_QA] are allowed."));
     }
 
     private MockHttpServletRequestBuilder buildRequest() {

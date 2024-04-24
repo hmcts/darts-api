@@ -52,8 +52,7 @@ public class ArmTestUtil {
             }
 
         } catch (Exception e) {
-            log.error("Could not delete from storage container={}, blobPathAndName={}",
-                      containerName, blobPathAndName, e);
+            log.error("Could not delete from storage container={}, blobPathAndName={}", containerName, blobPathAndName, e);
         }
     }
 }

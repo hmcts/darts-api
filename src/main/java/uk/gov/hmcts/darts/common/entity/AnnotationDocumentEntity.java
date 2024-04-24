@@ -13,14 +13,16 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Setter
 @Getter
 @Table(name = "annotation_document")
-public class AnnotationDocumentEntity {
+public class AnnotationDocumentEntity extends ModifiedBaseEntity {
 
     @Id
     @Column(name = "ado_id")
@@ -31,6 +33,10 @@ public class AnnotationDocumentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ann_id", nullable = false)
     private AnnotationEntity annotation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ohr_id")
+    private ObjectHiddenReasonEntity objectHiddenReason;
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
@@ -49,7 +55,7 @@ public class AnnotationDocumentEntity {
     @Column(name = "uploaded_ts")
     private OffsetDateTime uploadedDateTime;
 
-    @Column(name = "checksum", nullable = false)
+    @Column(name = "checksum")
     private String checksum;
 
     @Column(name = "content_object_id")
@@ -61,4 +67,28 @@ public class AnnotationDocumentEntity {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hidden_by")
+    private UserAccountEntity hiddenBy;
+
+    @Column(name = "hidden_ts")
+    private OffsetDateTime hiddenTs;
+
+    @Column(name = "marked_for_manual_deletion", nullable = false)
+    private boolean markedForManualDeletion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "marked_for_manual_del_by")
+    private UserAccountEntity markedForManualDelBy;
+
+    @Column(name = "marked_for_manual_del_ts")
+    private OffsetDateTime markedForManualDelTs;
+
+    @Column(name = "retain_until_ts")
+    private OffsetDateTime retainUntilTs;
+
+    public List<CourtCaseEntity> associatedCourtCases() {
+        var cases = annotation.getHearingList().stream().map(HearingEntity::getCourtCase);
+        return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
+    }
 }

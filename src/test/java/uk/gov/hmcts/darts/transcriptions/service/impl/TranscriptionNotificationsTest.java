@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -162,7 +162,7 @@ class TranscriptionNotificationsTest {
         var approver = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.APPROVED.getId());
-        var updateTranscription = new UpdateTranscription();
+        var updateTranscription = new UpdateTranscriptionRequest();
 
         transcriptionNotifications.handleNotificationsAndAudit(approver, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
 
@@ -188,7 +188,7 @@ class TranscriptionNotificationsTest {
         var reason = "Rejected";
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.REJECTED.getId());
-        var updateTranscription = new UpdateTranscription();
+        var updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setWorkflowComment(reason);
 
         transcriptionNotifications.handleNotificationsAndAudit(rejecter, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
@@ -210,7 +210,7 @@ class TranscriptionNotificationsTest {
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
-        var updateTranscription = new UpdateTranscription();
+        var updateTranscription = new UpdateTranscriptionRequest();
 
         transcriptionNotifications.handleNotificationsAndAudit(transcriber, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
 
@@ -223,7 +223,7 @@ class TranscriptionNotificationsTest {
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.COMPLETE.getId());
-        var updateTranscription = new UpdateTranscription();
+        var updateTranscription = new UpdateTranscriptionRequest();
 
         transcriptionNotifications.handleNotificationsAndAudit(transcriber, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
 
@@ -243,7 +243,7 @@ class TranscriptionNotificationsTest {
         var transcriber = new UserAccountEntity();
         var transcriptionStatusEntity = new TranscriptionStatusEntity();
         transcriptionStatusEntity.setId(TranscriptionStatusEnum.COMPLETE.getId());
-        var updateTranscription = new UpdateTranscription();
+        var updateTranscription = new UpdateTranscriptionRequest();
 
         transcriptionNotifications.handleNotificationsAndAudit(transcriber, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
 

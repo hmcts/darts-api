@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,7 +56,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
     void usersGetShouldReturnForbiddenError() throws Exception {
         superAdminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isForbidden())
             .andReturn();
 
@@ -91,7 +92,9 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at").exists())
             .andReturn();
 
+        lenient().when(mockUserIdentity.getUserAccount()).thenReturn(user);
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
@@ -102,8 +105,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
         createEnabledUserAccountEntity(user);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
-                                                 .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
-                                                 .queryParam(COURTHOUSE_ID, "21"))
+                                                 .header(EMAIL_ADDRESS, "james.smith@hmcts.com"))
             .andReturn();
 
         assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.com"));

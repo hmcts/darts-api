@@ -54,6 +54,13 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_deleted")
     private boolean deleted;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTimestamp;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = AnnotationDocumentEntity_.ANNOTATION)
     private List<AnnotationDocumentEntity> annotationDocuments = new ArrayList<>();
 

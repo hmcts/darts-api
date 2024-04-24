@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.cases.exception.AdvancedSearchNoResultsException;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("PMD.TooManyMethods")
 public class CaseServiceImpl implements CaseService {
 
-    private static final int MAX_RESULTS = 500;
+    public static final int MAX_RESULTS = 500;
     private final CasesMapper casesMapper;
     private final CasesAnnotationMapper annotationMapper;
 
@@ -128,7 +129,12 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        List<Integer> caseIds = advancedSearchRequestHelper.getMatchingCourtCases(request);
+        List<Integer> caseIds = null;
+        try {
+            caseIds = advancedSearchRequestHelper.getMatchingCourtCases(request);
+        } catch (AdvancedSearchNoResultsException e) {
+            return new ArrayList<>();
+        }
         if (caseIds.size() > MAX_RESULTS) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }

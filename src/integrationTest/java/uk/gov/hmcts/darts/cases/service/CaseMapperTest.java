@@ -60,6 +60,22 @@ class CaseMapperTest extends IntegrationBase {
     }
 
     @Test
+    void mapsCaseCourtroomIdCorrectly() {
+        List<OffsetDateTime> eventDateTimes = new ArrayList<>();
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
+            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+            .toList();
+        var minimalHearing = createSomeMinimalHearing();
+        dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
+
+        var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
+
+        assertThat(singleCase.getCourthouseId()).isGreaterThan(0);
+    }
+
+
+    @Test
     void mapsMultipleReportingRestrictionsValuesCorrectly() {
 
         List<OffsetDateTime> eventDateTimes = new ArrayList<>();

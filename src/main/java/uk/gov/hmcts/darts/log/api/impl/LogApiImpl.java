@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.log.service.AtsLoggerService;
 import uk.gov.hmcts.darts.log.service.AudioLoggerService;
+import uk.gov.hmcts.darts.log.service.AutomatedTaskLoggerService;
 import uk.gov.hmcts.darts.log.service.CasesLoggerService;
 import uk.gov.hmcts.darts.log.service.DailyListLoggerService;
 import uk.gov.hmcts.darts.log.service.EventLoggerService;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.darts.log.service.impl.NotificationLoggerService;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.service.notify.NotificationClientException;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +30,8 @@ public class LogApiImpl implements LogApi {
     private final CasesLoggerService casesLoggerService;
     private final AudioLoggerService audioLoggerService;
     private final NotificationLoggerService notificationLoggerService;
-
     private final DailyListLoggerService logJobService;
+    private final AutomatedTaskLoggerService automatedTaskLoggerService;
 
     @Override
     public void eventReceived(DartsEvent event) {
@@ -92,6 +95,21 @@ public class LogApiImpl implements LogApi {
     @Override
     public void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
         notificationLoggerService.failedNotification(notification, templateId, e);
+    }
+
+    @Override
+    public void taskStarted(UUID taskExecutionId, String taskName) {
+        automatedTaskLoggerService.taskStarted(taskExecutionId, taskName);
+    }
+
+    @Override
+    public void taskCompleted(UUID taskExecutionId, String taskName) {
+        automatedTaskLoggerService.taskCompleted(taskExecutionId, taskName);
+    }
+
+    @Override
+    public void taskFailed(UUID taskExecutionId, String taskName) {
+        automatedTaskLoggerService.taskFailed(taskExecutionId, taskName);
     }
 }
 

@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +45,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
 
     private static final String EMAIL_ADDRESS = "test@test.com";
-    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
+    public static final LocalDateTime MOCK_HEARING_DATE = LocalDateTime.of(2023, 5, 1, 10, 0, 0);
     public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
     public static final String MOCK_COURTHOUSE_NAME = "some-courthouse";
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";

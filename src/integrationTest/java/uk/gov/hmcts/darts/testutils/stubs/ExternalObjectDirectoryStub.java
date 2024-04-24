@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +36,29 @@ public class ExternalObjectDirectoryStub {
                                                           ExternalLocationTypeEnum externalLocationTypeEnum) {
         UUID uuid = UUID.randomUUID();
         var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
+        return eodRepository.save(eod);
+    }
+
+    /**
+     * Creates an ExternalObjectDirectoryEntity. Passes the created EOD to the client for further customisations before saving
+     */
+    public ExternalObjectDirectoryEntity createAndSaveEod(MediaEntity media,
+                                                          ObjectRecordStatusEnum objectRecordStatusEnum,
+                                                          ExternalLocationTypeEnum externalLocationTypeEnum,
+                                                          Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
+        UUID uuid = UUID.randomUUID();
+        var eod = createExternalObjectDirectory(media, objectRecordStatusEnum, externalLocationTypeEnum, uuid);
+        createdEodConsumer.accept(eod);
+        return eodRepository.save(eod);
+    }
+
+    public ExternalObjectDirectoryEntity createAndSaveEod(AnnotationDocumentEntity annotationDocument,
+                                                          ObjectRecordStatusEnum objectRecordStatus,
+                                                          ExternalLocationTypeEnum externalLocationType,
+                                                          Consumer<ExternalObjectDirectoryEntity> createdEodConsumer) {
+        UUID uuid = UUID.randomUUID();
+        var eod = createExternalObjectDirectory(annotationDocument, getStatus(objectRecordStatus), getLocation(externalLocationType), uuid);
+        createdEodConsumer.accept(eod);
         return eodRepository.save(eod);
     }
 
@@ -115,7 +139,6 @@ public class ExternalObjectDirectoryStub {
         return externalObjectDirectory;
     }
 
-
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(TranscriptionDocumentEntity transcriptionDocumentEntity,
                                                                        ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                        ExternalLocationTypeEntity externalLocationTypeEntity,
@@ -134,13 +157,12 @@ public class ExternalObjectDirectoryStub {
     @Transactional
     public ExternalObjectDirectoryEntity createAndSaveExternalObjectDirectory(Integer transcriptionDocumentId,
                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
-                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              UUID externalLocation) {
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity) {
         TranscriptionDocumentEntity transcriptionDocument = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
         ExternalObjectDirectoryEntity externalObjectDirectory = createMinimalExternalObjectDirectory(
             objectRecordStatusEntity,
             externalLocationTypeEntity,
-            externalLocation
+            UUID.randomUUID()
         );
 
         externalObjectDirectory.setTranscriptionDocumentEntity(transcriptionDocument);

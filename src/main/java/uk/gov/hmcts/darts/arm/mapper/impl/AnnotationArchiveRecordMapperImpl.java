@@ -20,9 +20,9 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
@@ -79,7 +79,6 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
 
     @Override
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                File archiveRecordFile,
                                                                 String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         dateFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateFormat());
@@ -239,7 +238,8 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     private String getHearingDate(AnnotationDocumentEntity annotationDocument) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(annotationDocument.getAnnotation().getHearingList())) {
-            hearingDate = annotationDocument.getAnnotation().getHearingList().get(0).getHearingDate().format(dateFormatter);
+            hearingDate = OffsetDateTime.of(annotationDocument.getAnnotation().getHearingList().get(0).getHearingDate().atTime(0, 0, 0),
+                                            ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
     }

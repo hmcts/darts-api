@@ -241,6 +241,12 @@ paths:
           schema:
             type: integer
           required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTranscriptionRequest'
       responses:
         '200':
           description: OK
@@ -318,12 +324,6 @@ paths:
                 type: "TRANSCRIPTION_105"
                 title: "Transcription workflow action is not permitted"
                 status: 409
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateTranscription'
   /transcriptions/{transcription_id}/document:
     get:
       tags:
@@ -551,7 +551,6 @@ paths:
                 $ref: '#/components/schemas/TranscriptionTypesResponse'
         '401':
           description: Unauthorised Error
-
   /transcriptions/urgencies:
     get:
       tags:
@@ -567,7 +566,6 @@ paths:
                 $ref: '#/components/schemas/TranscriptionUrgenciesResponse'
         '401':
           description: Unauthorised Error
-
   /transcriptions/transcriber-counts:
     get:
       tags:
@@ -605,9 +603,138 @@ paths:
                 type: "113"
                 title: "User is not a transcriber user"
                 status: 403
+  /admin/transcriptions/{transcription_id}:
+    patch:
+      tags:
+        - Transcription
+      summary: change the current status of a request (Admin only)
+      description: An Admin may change the current status of a request, which includes moving the request either backwards or fowards in the workflow. For Admins, there are business rules governing which transitions are possible from any given state
+      operationId: updateTranscriptionAdmin
+      parameters:
+        - in: path
+          name: transcription_id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTranscriptionRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateTranscriptionAdminResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription400ErrorCode'
+              example:
+                type: "TRANSCRIPTION_103"
+                title: "The workflow comment is required for this transcription update"
+                status: 400
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription404ErrorCode'
+              example:
+                type: "TRANSCRIPTION_101"
+                title: "The requested transcription cannot be found"
+                status: 404
+        '409':
+          description: Transcription Workflow Action Not Permitted
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription409ErrorCode'
+              example:
+                type: "TRANSCRIPTION_105"
+                title: "Transcription workflow action is not permitted"
+                status: 409
+
+  /admin/transcription-status:
+    get:
+      tags:
+        - Transcription
+      summary: Get Transcription Status
+      operationId: getTranscriptionStatus
+      parameters: [ ]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranscriptionStatus'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
 
 components:
   schemas:
+    TranscriptionStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        type:
+          type: string
+          example: "Requested"
+        display_name:
+          type: string
+          example: "Requested"
     TranscriptionRequestDetails:
       type: object
       required:
@@ -657,7 +784,7 @@ components:
       enum:
         - "TRANSCRIPTION_107"
       x-enum-varnames: [ DUPLICATE_TRANSCRIPTION ]
-    UpdateTranscription:
+    UpdateTranscriptionRequest:
       type: object
       required:
         - transcription_status_id
@@ -777,6 +904,15 @@ components:
       properties:
         transcription_workflow_id:
           type: integer
+    UpdateTranscriptionAdminResponse:
+      type: object
+      required:
+        - transcription_id
+      properties:
+        transcription_id:
+          type: integer
+        transcription_status_id:
+          type: integer
     UpdateTranscription404ErrorCode:
       type: string
       enum:
@@ -882,6 +1018,7 @@ components:
           type: integer
           description: The number of assigned transcript requests for a user with transcriber role.
           example: 3
+
     UpdateTranscriptions400ErrorCode:
       type: string
       enum:
@@ -904,6 +1041,9 @@ components:
         case_number:
           type: string
           example: Swansea_case_1
+        courthouse_id:
+          type: integer
+          example: 1
         courthouse:
           type: string
           example: Swansea
@@ -920,6 +1060,8 @@ components:
         received:
           type: string
           format: date-time
+        requestor:
+          type: requestor
         requestor_comments:
           type: string
         rejection_reason:
@@ -963,37 +1105,45 @@ components:
     judge:
       type: string
       example: Mr Judge
-
+    requestor:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        user_full_name:
+          type: string
+          example: Joe Bloggs
     TranscriptionsErrorCode:
-        type: string
-        enum:
-          - "TRANSCRIPTION_100"
-          - "TRANSCRIPTION_101"
-          - "TRANSCRIPTION_102"
-          - "TRANSCRIPTION_103"
-          - "TRANSCRIPTION_104"
-          - "TRANSCRIPTION_105"
-          - "TRANSCRIPTION_106"
-          - "TRANSCRIPTION_107"
-          - "TRANSCRIPTION_108"
-          - "TRANSCRIPTION_109"
-          - "TRANSCRIPTION_110"
-          - "TRANSCRIPTION_111"
-        x-enum-varnames: [FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER]
+      type: string
+      enum:
+        - "TRANSCRIPTION_100"
+        - "TRANSCRIPTION_101"
+        - "TRANSCRIPTION_102"
+        - "TRANSCRIPTION_103"
+        - "TRANSCRIPTION_104"
+        - "TRANSCRIPTION_105"
+        - "TRANSCRIPTION_106"
+        - "TRANSCRIPTION_107"
+        - "TRANSCRIPTION_108"
+        - "TRANSCRIPTION_109"
+        - "TRANSCRIPTION_110"
+        - "TRANSCRIPTION_111"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]
 
     TranscriptionsTitleErrors:
-        type: string
-        enum:
-          - "Failed to validate transcription request"
-          - "The requested transcription cannot be found"
-          - "Unexpected transcription status for this workflow"
-          - "The workflow comment is required for this transcription update"
-          - "Unexpected transcription type for this workflow"
-          - "Transcription workflow action is not permitted"
-          - "Unexpected transcription urgency for this workflow"
-          - "A transcription already exists with these properties"
-          - "Failed to attach transcript"
-          - "Failed to download transcript"
-          - "Transcription could not be requested, no audio"
-          - "Transcription could not be requested, times outside of hearing times"
-        x-enum-varnames: [FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]
+      type: string
+      enum:
+        - "Failed to validate transcription request"
+        - "The requested transcription cannot be found"
+        - "Unexpected transcription status for this workflow"
+        - "The workflow comment is required for this transcription update"
+        - "Unexpected transcription type for this workflow"
+        - "Transcription workflow action is not permitted"
+        - "Unexpected transcription urgency for this workflow"
+        - "A transcription already exists with these properties"
+        - "Failed to attach transcript"
+        - "Failed to download transcript"
+        - "Transcription could not be requested, no audio"
+        - "Transcription could not be requested, times outside of hearing times"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]

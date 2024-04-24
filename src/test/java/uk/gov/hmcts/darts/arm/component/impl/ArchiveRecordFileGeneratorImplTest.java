@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.arm.model.record.operation.CaseCreateArchiveRecordOper
 import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.arm.model.record.operation.TranscriptionCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,11 +32,19 @@ import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.common.util.TestUtils.getFile;
 
 @SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)
@@ -128,6 +138,58 @@ class ArchiveRecordFileGeneratorImplTest {
         assertFalse(result);
     }
 
+    @Test
+    void generateArchiveRecords() {
+        String fileLocation = tempDirectory.getAbsolutePath();
+        String relationId = "1234";
+        File archiveFile = new File(fileLocation, "archive-records.a360");
+        var archiveRecord = createMediaArchiveRecord(relationId);
+        List<ArchiveRecord> archiveRecords = List.of(archiveRecord, archiveRecord);
+
+        archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile);
+
+        File expectedResponse = getFile("Tests/arm/component/expectedResponseMultipleArchiveRecords.a360");
+        assertThat(archiveFile).hasSameTextualContentAs(expectedResponse);
+    }
+
+    @Test
+    void generateArchiveRecordsEmptyArchiveRecords() {
+        String fileLocation = tempDirectory.getAbsolutePath();
+        File archiveFile = new File(fileLocation, "archive-records.a360");
+        List<ArchiveRecord> archiveRecords = Collections.emptyList();
+
+        archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile);
+
+        assertThat(Files.notExists(archiveFile.toPath())).isTrue();
+    }
+
+    @Test
+    void generateArchiveRecordsArchiveRecordError() throws JsonProcessingException {
+        var objectMapper = mock(ObjectMapper.class);
+        archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(objectMapper);
+        when(objectMapper.writeValueAsString(any())).thenThrow(RuntimeException.class);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        File archiveFile = new File(fileLocation, "archive-records.a360");
+        String relationId = "1234";
+        var archiveRecord = createMediaArchiveRecord(relationId);
+        List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
+
+        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, archiveFile));
+    }
+
+    @Test
+    void generateArchiveRecordsFileError() {
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        File invalidFile = new File(fileLocation, "archive-recor/ds.a360");
+        String relationId = "1234";
+        var archiveRecord = createMediaArchiveRecord(relationId);
+        List<ArchiveRecord> archiveRecords = List.of(archiveRecord);
+
+        assertThrows(DartsException.class, () -> archiveRecordFileGenerator.generateArchiveRecords(archiveRecords, invalidFile));
+    }
+
     private static String getFileContents(File archiveFile) throws IOException {
         StringBuilder fileContents = new StringBuilder();
         try (BufferedReader reader = Files.newBufferedReader(archiveFile.toPath())) {
@@ -169,7 +231,7 @@ class ArchiveRecordFileGeneratorImplTest {
             .bf001("Media")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
             .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
@@ -246,7 +308,7 @@ class ArchiveRecordFileGeneratorImplTest {
             .bf001("Transcription")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("mp2")
-            .bf004("2024-01-23")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
             .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
@@ -304,7 +366,7 @@ class ArchiveRecordFileGeneratorImplTest {
             .bf001("Annotation")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
             .bf011("2024-01-23T11:39:30Z")
             .bf012(1)
@@ -361,7 +423,7 @@ class ArchiveRecordFileGeneratorImplTest {
             .bf001("Case")
             .bf002("Case_1|Case_2|Case_3")
             .bf003("txt")
-            .bf004("2024-01-23")
+            .bf004("2024-01-23T00:00:00Z")
             .bf005("xi/XkzD2HuqTUzDafW8Cgw==")
             .bf011("2024-01-23T11:39:30Z")
             .bf012(1)

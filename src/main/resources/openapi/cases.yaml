@@ -281,7 +281,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdvancedSearchDetails'
+              $ref: '#/components/schemas/AdvancedSearchRequest'
       responses:
         '200':
           description: OK
@@ -450,6 +450,9 @@ components:
         case_id:
           type: integer
           example: 1
+        courthouse_id:
+          type: integer
+          example: 1001
         courthouse:
           type: string
           example: SWANSEA
@@ -518,7 +521,7 @@ components:
         hearings:
           type: array
           items:
-              $ref: '#/components/schemas/advancedSearchResultHearing'
+            $ref: '#/components/schemas/advancedSearchResultHearing'
     advancedSearchResultHearing:
       type: object
       properties:
@@ -599,7 +602,7 @@ components:
         transcript_count:
           type: integer
 
-    AdvancedSearchDetails:
+    AdvancedSearchRequest:
       type: object
       properties:
         case_number:
@@ -610,10 +613,18 @@ components:
           type: string
           example: Swansea
           maxLength: 255
+        courthouseId:
+          type: integer
+          example: 1
+          description: the courthouse ID if known.
         courtroom:
           type: string
           example: 2
           maxLength: 255
+        courtroomId:
+          type: integer
+          example: 1
+          description: the courtroom ID if known.
         judge_name:
           type: string
           example: Judge Walker
@@ -655,22 +666,22 @@ components:
     CaseErrorCode:
       type: string
       enum:
-       - "CASE_100"
-       - "CASE_101"
-       - "CASE_102"
-       - "CASE_103"
-       - "CASE_104"
-       - "CASE_106"
+        - "CASE_100"
+        - "CASE_101"
+        - "CASE_102"
+        - "CASE_103"
+        - "CASE_104"
+        - "CASE_106"
       x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET ]
 
     CaseTitleErrors:
       type: string
       enum:
-      - "Too many results have been returned. Please change search criteria."
-      - "No search criteria has been specified, please add at least 1 criteria to search for."
-      - "Search criteria is too broad, please add at least 1 more criteria to search for."
-      - "The request is not valid.."
-      - "The requested case cannot be found"
-      - "The request does not contain any values that are supported by the PATCH operation."
+        - "Too many results have been returned. Please change search criteria."
+        - "No search criteria has been specified, please add at least 1 criteria to search for."
+        - "Search criteria is too broad, please add at least 1 more criteria to search for."
+        - "The request is not valid.."
+        - "The requested case cannot be found"
+        - "The request does not contain any values that are supported by the PATCH operation."
       x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET ]
 

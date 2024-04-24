@@ -28,6 +28,15 @@ public class SecurityGroupCreationValidation implements Validator<SecurityGroupM
                     Collections.singletonMap("existing_group_id", existingGroup.getId())
                 );
             });
+
+        securityGroupRepository.findByDisplayNameIgnoreCase(securityGroup.getDisplayName())
+            .ifPresent(existingGroup -> {
+                throw new DartsApiException(
+                    UserManagementError.DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED,
+                    "Attempt to create group with a display name that already exists",
+                    Collections.singletonMap("existing_group_id", existingGroup.getId())
+                );
+            });
     }
 
 }

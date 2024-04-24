@@ -57,7 +57,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private ExternalLocationTypeEntity externalLocationType;
 
     @NaturalId(mutable = true)
-    @Column(name = "external_location", unique = true, nullable = false)
+    @Column(name = "external_location", unique = true)
     private UUID externalLocation;
 
     @Column(name = "external_file_id")
@@ -86,6 +86,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
 
     @Column(name = "is_response_cleaned")
     private boolean responseCleaned;
+
+    @Column(name = "update_retention")
+    private boolean updateRetention;
 
     @Override
     public int getStatusId() {

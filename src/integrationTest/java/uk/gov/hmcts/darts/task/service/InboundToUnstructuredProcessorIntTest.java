@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -18,6 +19,9 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +29,7 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -37,8 +42,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_EMP
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.getBinaryTranscriptionDocumentData;
-import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.getEmptyFile;
+import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.TRANSCRIPTION_TEST_DATA_BINARY_DATA;
 
 @Disabled
 class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
@@ -81,11 +85,15 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         //does not match because unstructured failed with max attempts reached
         var media4 = medias.get(3);
         externalObjectDirectoryStub.createAndSaveEod(media4, STORED, INBOUND);
-        var failed = externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED);
-        failed.setTransferAttempts(10);
-        eodRepository.save(failed);
-
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(MediaTestData.getBinaryData());
+        externalObjectDirectoryStub.createAndSaveEod(media4, FAILURE, UNSTRUCTURED, eod -> eod.setTransferAttempts(10));
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeMediaBlobToFile());
+        when(dataManagementService.saveBlobData(anyString(), any(InputStream.class)))
+            .thenAnswer(invocation -> {
+                //simulates the service reading the stream to highlight potential stream closed exceptions if the stream is read twice
+                InputStream inputStream = invocation.getArgument(1, InputStream.class);
+                inputStream.readAllBytes();
+                return UUID.randomUUID();
+            });
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -108,14 +116,13 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
         dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND);
 
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
         when(dataManagementService.saveBlobData(any(), any(BinaryData.class))).thenReturn(UUID.randomUUID());
 
         var existingUnstructuredStored = eodRepository.findByStatusAndType(dartsDatabase.getObjectRecordStatusEntity(STORED),
                                                                            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(existingUnstructuredStored).isEmpty();
 
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeTranscriptionDocumentBlobToFile());
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -130,7 +137,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         List<Integer> createdUnstructuredTranscriptionId = createdUnstructured.stream().map(
             eod -> eod.getTranscriptionDocumentEntity().getTranscription().getId()).collect(toList());
         assertThat(createdUnstructuredTranscriptionId).contains(transcription.getId());
-        verify(dataManagementService).saveBlobData(any(), any(BinaryData.class));
+        verify(dataManagementService).saveBlobData(any(), any(InputStream.class));
     }
 
     @Test
@@ -143,14 +150,12 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
             dartsDatabase.getObjectRecordStatusEntity(STORED),
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
-            UUID.randomUUID());
+            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
+        );
 
         var unstructuredBeforeProcessing = eodRepository.findByStatusAndType(dartsDatabase.getObjectRecordStatusEntity(STORED),
                                                                                    dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(unstructuredBeforeProcessing).hasSize(1);
-
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -173,14 +178,14 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
             dartsDatabase.getObjectRecordStatusEntity(FAILURE),
-            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED),
-            UUID.randomUUID());
+            dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED)
+        );
 
         var unstructuredBeforeProcessing = eodRepository.findByStatusAndType(dartsDatabase.getObjectRecordStatusEntity(FAILURE),
                                                                              dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(unstructuredBeforeProcessing).hasSize(1);
 
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeTranscriptionDocumentBlobToFile());
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -190,7 +195,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
                                                                             dartsDatabase.getExternalLocationTypeEntity(UNSTRUCTURED));
         assertThat(unstructuredAfterProcessing).hasSize(1);
         assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
-        verify(dataManagementService).saveBlobData(any(), any(BinaryData.class));
+        verify(dataManagementService).saveBlobData(any(), any(InputStream.class));
     }
 
     @Test
@@ -202,7 +207,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         var media1 = medias.get(0);
         externalObjectDirectoryStub.createAndSaveEod(media1, STORED, INBOUND);
 
-        when(dataManagementService.getBlobData(any(), any())).thenThrow(new BlobStorageException("No blob", null, null));
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenThrow(new BlobStorageException("No blob", null, null));
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -214,14 +219,16 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processInboundMediasFailedType() {
+    void processInboundMediasFailedAllowedMediaFormat() {
         // given
         MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("testCourthouse", "testCourtroom",
-           OffsetDateTime.parse("2023-01-01T12:00:00Z"), OffsetDateTime.parse("2023-01-01T12:00:00Z"), 1, "some.other");
+                                                                           OffsetDateTime.parse("2023-01-01T12:00:00Z"),
+                                                                           OffsetDateTime.parse("2023-01-01T12:00:00Z"), 1,
+                                                                           "notAllowedMedia.type");
 
         externalObjectDirectoryStub.createAndSaveEod(media, STORED, INBOUND);
 
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(MediaTestData.getBinaryData());
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(writeMediaBlobToFile());
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -240,7 +247,11 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(media, STORED, INBOUND);
 
         //generates a different checksum
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(getBinaryTranscriptionDocumentData());
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(invocationOnMock -> {
+            File downloadedInboundTestBlobDataFile = File.createTempFile("integrationTestInboundBlob", ".tmp");
+            Files.write(downloadedInboundTestBlobDataFile.toPath(), new byte[1024]);
+            return downloadedInboundTestBlobDataFile.toPath();
+        });
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -256,12 +267,15 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         // given
         MediaEntity media = dartsDatabase.getMediaStub().createMediaEntity("testCourthouse", "testCourtroom",
                OffsetDateTime.parse("2023-01-01T12:00:00Z"), OffsetDateTime.parse("2023-01-01T12:00:00Z"), 1);
-        media.setChecksum("1B2M2Y8AsgTpgAmY7PhCfg==");
-        media.setFileSize(0L);
+        var emptyFileChecksum = "d41d8cd98f00b204e9800998ecf8427e";
+        media.setChecksum(emptyFileChecksum);
         dartsDatabase.save(media);
         externalObjectDirectoryStub.createAndSaveEod(media, STORED, INBOUND);
 
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(getEmptyFile());
+        when(dataManagementService.downloadBlobToFile(any(), any(), any())).thenAnswer(invocationOnMock -> {
+            File downloadedInboundTestBlobDataFile = File.createTempFile("integrationTestInboundBlob", ".tmp");
+            return downloadedInboundTestBlobDataFile.toPath();
+        });
 
         // when
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -270,5 +284,21 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         assertThat(externalObjectDirectoryStub.findByMediaStatusAndType(media, FAILURE_EMPTY_FILE, UNSTRUCTURED)).hasSize(1);
         var argument = ArgumentCaptor.forClass(ExternalObjectDirectoryEntity.class);
         verify(eodRepository, atLeastOnce()).saveAndFlush(argument.capture());
+    }
+
+    private static Answer<Object> writeMediaBlobToFile() {
+        return invocationOnMock -> {
+            File downloadedInboundTestBlobDataFile = File.createTempFile("integrationTestInboundBlob", ".tmp");
+            Files.write(downloadedInboundTestBlobDataFile.toPath(), MediaTestData.MEDIA_TEST_DATA_BINARY_DATA);
+            return downloadedInboundTestBlobDataFile.toPath();
+        };
+    }
+
+    private static Answer<Object> writeTranscriptionDocumentBlobToFile() {
+        return invocationOnMock -> {
+            File downloadedInboundTestBlobDataFile = File.createTempFile("integrationTestInboundBlob", ".tmp");
+            Files.write(downloadedInboundTestBlobDataFile.toPath(), TRANSCRIPTION_TEST_DATA_BINARY_DATA);
+            return downloadedInboundTestBlobDataFile.toPath();
+        };
     }
 }

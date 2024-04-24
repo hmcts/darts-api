@@ -198,6 +198,9 @@ components:
         hearing_id:
           type: integer
           example: 1
+        courthouse_id:
+          type: integer
+          example: 1001
         courthouse:
           type: string
           example: SWANSEA

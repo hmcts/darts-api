@@ -35,6 +35,7 @@ class DailylistFunctionalTest extends FunctionalTest {
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
+        String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
@@ -50,6 +51,7 @@ class DailylistFunctionalTest extends FunctionalTest {
             .queryParam("hearing_date", tomorrowDateString)
             .queryParam("unique_id", uniqueId)
             .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
+            .queryParam("message_id", messageId)
             .header("xml_document", xmlDocument)
             .when()
             .baseUri(getUri(POST_DAILYLIST_URL))
@@ -100,6 +102,8 @@ class DailylistFunctionalTest extends FunctionalTest {
             .queryParam("hearing_date", tomorrowDateString)
             .queryParam("unique_id", "1111111")
             .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
+            .queryParam("message_id", "some-message-id")
+
             .when()
             .baseUri(getUri(POST_DAILYLIST_URL))
             .redirects().follow(false)

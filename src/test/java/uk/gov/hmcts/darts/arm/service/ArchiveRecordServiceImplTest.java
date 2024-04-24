@@ -21,7 +21,12 @@ import uk.gov.hmcts.darts.arm.mapper.impl.AnnotationArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.CaseArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.MediaArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
+import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
+import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
@@ -40,9 +45,11 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,6 +62,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
@@ -76,7 +88,7 @@ class ArchiveRecordServiceImplTest {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
 
-    @Mock
+    @Mock(lenient = true)
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
@@ -127,6 +139,19 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
+    @Mock
+    private MediaArchiveRecordMapper mediaArchiveRecordMapperMock;
+    @Mock
+    private TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapperMock;
+    @Mock
+    private AnnotationArchiveRecordMapper annotationArchiveRecordMapperMock;
+    @Mock
+    private CaseArchiveRecordMapper caseArchiveRecordMapperMock;
+    @Mock
+    private TranscriptionService transcriptionService;
+
+    private ArchiveRecordFileGenerator archiveRecordFileGenerator;
+
     @TempDir
     private File tempDirectory;
 
@@ -135,11 +160,12 @@ class ArchiveRecordServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ArchiveRecordFileGenerator archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
+        archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
 
         MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
         TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(
             armDataManagementConfiguration,
+            transcriptionService,
             currentTimeHelper
         );
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration, currentTimeHelper);
@@ -205,7 +231,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/media-record.properties");
+        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/media-record.properties");
         when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
@@ -217,66 +243,7 @@ class ArchiveRecordServiceImplTest {
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actual Response {}", actualResponse);
 
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateMediaArchiveRecord/live/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
-        log.info("expect Response {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-    }
-
-    @Test
-    void generateArchiveRecord_WithNleMediaProperties_ReturnFileSuccess() throws IOException {
-
-        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
-
-        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
-        when(courtroomEntity.getName()).thenReturn("Room1");
-
-        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
-        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
-        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
-        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
-
-        OffsetDateTime startedAt = testTime.minusHours(1);
-        OffsetDateTime endedAt = testTime;
-
-        when(mediaEntity.getId()).thenReturn(1);
-        when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
-        when(mediaEntity.getChannel()).thenReturn(1);
-        when(mediaEntity.getTotalChannels()).thenReturn(4);
-        when(mediaEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(mediaEntity.getMediaFile()).thenReturn(TEST_ARCHIVE_FILENAME);
-        when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
-        when(mediaEntity.getStart()).thenReturn(startedAt);
-        when(mediaEntity.getEnd()).thenReturn(endedAt);
-        when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
-        when(mediaEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
-
-        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
-        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
-        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
-
-        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
-
-        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/media-record.properties");
-        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
-
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
-
-        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
-
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        log.info("actual Response {}", actualResponse);
-
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateMediaArchiveRecord/nle/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("expect Response {}", expectedResponse);
@@ -407,78 +374,6 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecord_WithNleTranscriptionProperties_ReturnFileSuccess() throws IOException {
-
-        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
-
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
-
-        when(courtroomEntity.getName()).thenReturn("Room1");
-        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
-
-        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
-        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
-        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
-
-        when(userAccountEntity.getId()).thenReturn(0);
-
-        when(transcriptionStatusEntity.getId()).thenReturn(TranscriptionStatusEnum.REQUESTED.getId());
-        when(transcriptionWorkflowEntity.getTranscriptionStatus()).thenReturn(transcriptionStatusEntity);
-        when(transcriptionCommentEntity.getTranscriptionWorkflow()).thenReturn(transcriptionWorkflowEntity);
-        when(transcriptionCommentEntity.getComment()).thenReturn("Test transcription comment");
-
-        when(transcriptionUrgencyEntity.getDescription()).thenReturn("STANDARD");
-        when(transcriptionTypeEntity.getDescription()).thenReturn("SPECIFIED_TIMES");
-
-        when(transcriptionEntity.getId()).thenReturn(1);
-        when(transcriptionEntity.getTranscriptionCommentEntities()).thenReturn(List.of(transcriptionCommentEntity));
-        when(transcriptionEntity.getTranscriptionUrgency()).thenReturn(transcriptionUrgencyEntity);
-        when(transcriptionEntity.getCourtroom()).thenReturn(courtroomEntity);
-        when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
-        when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
-        when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
-
-        when(transcriptionDocumentEntity.getId()).thenReturn(1);
-        when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
-        when(transcriptionDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
-        when(transcriptionDocumentEntity.getFileType()).thenReturn("docx");
-        when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
-        when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        OffsetDateTime startedAt = testTime.minusHours(1);
-        when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
-
-        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
-        when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
-        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
-
-        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
-
-        when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/transcription-record.properties");
-        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
-
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
-
-        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
-
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        log.info("aResponse {}", actualResponse);
-
-        OffsetDateTime endedAt = testTime.plusHours(2);
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateTranscriptionArchiveRecord/nle/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
-        log.info("eResponse {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-
-    }
-
-    @Test
     void generateArchiveRecord_WithLiveTranscriptionProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -509,7 +404,6 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
@@ -527,8 +421,11 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
 
         when(armDataManagementConfiguration.getTranscriptionRecordClass()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/transcription-record.properties");
+        when(armDataManagementConfiguration.getTranscriptionRecordPropertiesFile()).thenReturn("Tests/arm/properties/transcription-record.properties");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
+
+        when(transcriptionService.getTranscriptionDocumentsCases(transcriptionDocumentEntity))
+            .thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
 
@@ -539,7 +436,7 @@ class ArchiveRecordServiceImplTest {
         log.info("aResponse {}", actualResponse);
 
         OffsetDateTime endedAt = testTime.plusHours(2);
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateTranscriptionArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateTranscriptionArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
@@ -583,7 +480,6 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.getCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
@@ -592,6 +488,9 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionDocumentEntity.getFileName()).thenReturn("transcription.docx");
         when(transcriptionDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
         when(transcriptionDocumentEntity.getUploadedDateTime()).thenReturn(startedAt);
+
+        when(transcriptionService.getTranscriptionDocumentsCases(transcriptionDocumentEntity))
+            .thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
@@ -670,69 +569,6 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecord_WithNleAnnotationProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
-
-        when(courtroomEntity.getName()).thenReturn("Room1");
-
-        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
-        when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
-        when(courtCaseEntity2.getCaseNumber()).thenReturn("Case2");
-        when(courtCaseEntity3.getCaseNumber()).thenReturn("Case3");
-        when(hearingEntity1.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(hearingEntity2.getCourtCase()).thenReturn(courtCaseEntity2);
-        when(hearingEntity3.getCourtCase()).thenReturn(courtCaseEntity3);
-        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
-
-        when(hearingEntity1.getCourtroom()).thenReturn(courtroomEntity);
-
-        when(annotationEntity.getId()).thenReturn(1);
-        when(annotationEntity.getHearingList()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
-        when(annotationEntity.getText()).thenReturn("Annotation comments");
-
-        OffsetDateTime uploadedDateTime = testTime.minusHours(1);
-
-        when(annotationDocumentEntity.getId()).thenReturn(1);
-        when(annotationDocumentEntity.getAnnotation()).thenReturn(annotationEntity);
-        when(annotationDocumentEntity.getUploadedBy()).thenReturn(userAccountEntity);
-        when(annotationDocumentEntity.getFileType()).thenReturn("application/msword");
-        when(annotationDocumentEntity.getFileName()).thenReturn("annotation.docx");
-        when(annotationDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(annotationDocumentEntity.getUploadedDateTime()).thenReturn(uploadedDateTime);
-
-        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
-        when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
-        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
-
-        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
-
-        when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
-        when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
-            "Tests/arm/properties/nle/annotation-record.properties");
-
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
-
-        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
-
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        log.info("aResponse {}", actualResponse);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateAnnotationArchiveRecord/nle/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
-        log.info("eResponse {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-    }
-
-    @Test
     void generateArchiveRecord_WithLiveAnnotationProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -775,7 +611,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getAnnotationRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
         when(armDataManagementConfiguration.getAnnotationRecordPropertiesFile()).thenReturn(
-            "Tests/arm/properties/live/annotation-record.properties");
+            "Tests/arm/properties/annotation-record.properties");
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
 
@@ -788,7 +624,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
 
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateAnnotationArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateAnnotationArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
@@ -911,58 +747,6 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecord_WithNleCaseProperties_ReturnFileSuccess() throws IOException {
-        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
-
-        when(courtCaseEntity1.getCaseNumber()).thenReturn("Case1");
-        when(courtCaseEntity1.getCourthouse()).thenReturn(courthouseEntity);
-
-        when(hearingEntity1.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
-
-        when(courtCaseEntity1.getId()).thenReturn(1);
-        when(courtCaseEntity1.getHearings()).thenReturn(List.of(hearingEntity1, hearingEntity2, hearingEntity3));
-
-        OffsetDateTime uploadedDateTime = testTime.minusHours(1);
-
-        when(caseDocumentEntity.getId()).thenReturn(1);
-        when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
-        when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
-        when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
-        when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
-
-        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
-        when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
-        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
-
-        when(externalObjectDirectoryRepository.findById(EODID)).thenReturn(Optional.of(externalObjectDirectoryEntity));
-
-        when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
-        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/nle/case-record.properties");
-
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
-
-        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
-
-        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        log.info("aResponse {}", actualResponse);
-
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/nle/expectedResponse.a360");
-        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
-        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
-        log.info("eResponse {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-    }
-
-    @Test
     void generateArchiveRecord_WithLiveCaseProperties_ReturnFileSuccess() throws IOException {
         OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
@@ -985,7 +769,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
         when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -995,7 +779,7 @@ class ArchiveRecordServiceImplTest {
 
         when(armDataManagementConfiguration.getCaseRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
-        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/live/case-record.properties");
+        when(armDataManagementConfiguration.getCaseRecordPropertiesFile()).thenReturn("Tests/arm/properties/case-record.properties");
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
 
@@ -1008,7 +792,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
 
-        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/live/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateCaseArchiveRecord/expectedResponse.a360");
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("expect Response {}", expectedResponse);
@@ -1037,7 +821,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getFileType()).thenReturn("application/msword");
         when(caseDocumentEntity.getFileName()).thenReturn("annotation.docx");
         when(caseDocumentEntity.getChecksum()).thenReturn("xi/XkzD2HuqTUzDafW8Cgw==");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -1081,7 +865,7 @@ class ArchiveRecordServiceImplTest {
         when(caseDocumentEntity.getId()).thenReturn(1);
         when(caseDocumentEntity.getCourtCase()).thenReturn(courtCaseEntity1);
         when(caseDocumentEntity.getFileName()).thenReturn("case.");
-        when(caseDocumentEntity.getUploadedTs()).thenReturn(uploadedDateTime);
+        when(caseDocumentEntity.getCreatedTs()).thenReturn(uploadedDateTime);
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
@@ -1109,6 +893,176 @@ class ArchiveRecordServiceImplTest {
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forMedia_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
+        when(mediaArchiveRecordMapperMock.mapToMediaArchiveRecord(any(), any())).thenReturn(MediaArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(MediaArchiveRecord.class);
+        verify(mediaArchiveRecordMapperMock).mapToMediaArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(annotationArchiveRecordMapperMock);
+        verifyNoInteractions(caseArchiveRecordMapperMock);
+        verifyNoInteractions(transcriptionArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forTranscription_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+        when(transcriptionArchiveRecordMapperMock.mapToTranscriptionArchiveRecord(any(), any())).thenReturn(TranscriptionArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(TranscriptionArchiveRecord.class);
+        verify(transcriptionArchiveRecordMapperMock).mapToTranscriptionArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(annotationArchiveRecordMapperMock);
+        verifyNoInteractions(caseArchiveRecordMapperMock);
+        verifyNoInteractions(mediaArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forAnnotation_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(annotationArchiveRecordMapperMock.mapToAnnotationArchiveRecord(any(), any())).thenReturn(AnnotationArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(AnnotationArchiveRecord.class);
+        verify(annotationArchiveRecordMapperMock).mapToAnnotationArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(transcriptionArchiveRecordMapperMock);
+        verifyNoInteractions(caseArchiveRecordMapperMock);
+        verifyNoInteractions(mediaArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_forCaseDocument_delegatesToCorrectMapper() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getCaseDocument()).thenReturn(caseDocumentEntity);
+        when(caseArchiveRecordMapperMock.mapToCaseArchiveRecord(any(), any())).thenReturn(CaseArchiveRecord.builder().build());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // when
+        ArchiveRecord archiveRecord = archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1");
+
+        // then
+        assertThat(archiveRecord).isInstanceOf(CaseArchiveRecord.class);
+        verify(caseArchiveRecordMapperMock).mapToCaseArchiveRecord(externalObjectDirectoryEntity, "1234_1_1");
+        verifyNoInteractions(transcriptionArchiveRecordMapperMock);
+        verifyNoInteractions(annotationArchiveRecordMapperMock);
+        verifyNoInteractions(mediaArchiveRecordMapperMock);
+    }
+
+    @Test
+    void generateArchiveRecordInfo_throwsError_whenMapperReturnsNoResult() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+        when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // then
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+    }
+
+    @Test
+    void generateArchiveRecordInfo_throwsError_whenCannotFindEod() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.empty());
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // then
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
+    }
+
+    @Test
+    void generateArchiveRecordInfo_throwsError_whenUnknownArchiveRecordType() {
+        // given
+        when(externalObjectDirectoryRepository.findById(any())).thenReturn(Optional.of(externalObjectDirectoryEntity));
+
+        ArchiveRecordServiceImpl archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapperMock,
+            transcriptionArchiveRecordMapperMock,
+            annotationArchiveRecordMapperMock,
+            caseArchiveRecordMapperMock,
+            externalObjectDirectoryRepository
+        );
+
+        // then
+        assertThrows(DartsException.class, () -> archiveRecordService.generateArchiveRecordInfo(EODID, "1234_1_1"));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {

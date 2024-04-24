@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.CaseArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.io.File;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -87,7 +90,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         CaseArchiveRecord caseArchiveRecord =
-            caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+            caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(caseArchiveRecord, archiveRecordFile, ArchiveRecordType.CASE_ARCHIVE_TYPE)
@@ -106,7 +109,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
-        MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+        MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
         );
@@ -126,7 +129,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         TranscriptionArchiveRecord transcriptionArchiveRecord =
-            transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+            transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(transcriptionArchiveRecord, archiveRecordFile, ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE)
@@ -145,7 +148,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
         AnnotationArchiveRecord annotationArchiveRecord =
-            annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, archiveRecordFile, rawFilename);
+            annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
 
         archiveRecordFileInfo.setFileGenerationSuccessful(
             archiveRecordFileGenerator.generateArchiveRecord(annotationArchiveRecord, archiveRecordFile, ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE)
@@ -162,6 +165,33 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
             .append(FILE_EXTENSION_PERIOD)
             .append(armDataManagementConfiguration.getFileExtension())
             .toString();
+    }
+
+    @Transactional
+    public ArchiveRecord generateArchiveRecordInfo(Integer externalObjectDirectoryId, String rawFilename) {
+
+        ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
+            () -> new DartsException(format("external object directory not found with id: %d", externalObjectDirectoryId)));
+
+        ArchiveRecord result;
+
+        if (nonNull(externalObjectDirectory.getMedia())) {
+            result = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, rawFilename);
+        } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
+            result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
+        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+            result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
+        } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
+            result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
+        } else {
+            throw new DartsException(String.format("unknown archive record type for EOD %d", externalObjectDirectoryId));
+        }
+
+        if (result == null) {
+            throw new DartsException(String.format("exception generating archive record for EOD %d", externalObjectDirectoryId));
+        } else {
+            return result;
+        }
     }
 
 }

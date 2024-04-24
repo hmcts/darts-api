@@ -2,51 +2,41 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 
 import java.util.List;
-
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnExpression("${darts.storage.arm.batch-size} == 0")
 public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserIdentity userIdentity;
     private final ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
-
-    private ObjectRecordStatusEntity armDropZoneStatus;
-    private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
     private UserAccountEntity userAccount;
 
     @Override
     public void processResponseFiles() {
         initialisePreloadedObjects();
         // Fetch All records from external_object_directory table with external_location_type as 'ARM' and with status 'Arm Drop Zone'.
-        ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ARM.getId());
         List<ExternalObjectDirectoryEntity> dataSentToArm =
-            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
+            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(EodHelper.armLocation(), EodHelper.armDropZoneStatus());
 
         List<Integer> externalObjects = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
         log.info("ARM Response process found : {} records to be processed", externalObjects.size());
         for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armProcessingResponseFilesStatus());
         }
         int row = 1;
         for (Integer eodId : externalObjects) {
@@ -57,9 +47,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
     @SuppressWarnings("java:S3655")
     private void initialisePreloadedObjects() {
-        armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
-        armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
-
         userAccount = userIdentity.getUserAccount();
     }
 

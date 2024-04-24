@@ -36,6 +36,10 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ohr_id")
+    private ObjectHiddenReasonEntity objectHiddenReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ctr_id", foreignKey = @ForeignKey(name = "media_courtroom_fk"), nullable = false)
     private CourtroomEntity courtroom;
 
@@ -93,10 +97,44 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hidden_by")
+    private UserAccountEntity hiddenBy;
+
+    @Column(name = "hidden_ts")
+    private OffsetDateTime hiddenTs;
+
+    @Column(name = "marked_for_manual_deletion", nullable = false)
+    private boolean markedForManualDeletion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "marked_for_manual_del_by")
+    private UserAccountEntity markedForManualDelBy;
+
+    @Column(name = "marked_for_manual_del_ts")
+    private OffsetDateTime markedForManualDelTs;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private UserAccountEntity deletedBy;
+
+    @Column(name = "deleted_ts")
+    private OffsetDateTime deletedTimestamp;
+
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
 
     @ManyToMany(mappedBy = HearingEntity_.MEDIA_LIST)
     private List<HearingEntity> hearingList = new ArrayList<>();
 
+    @Column(name = "retain_until_ts")
+    private OffsetDateTime retainUntilTs;
+
+    public List<CourtCaseEntity> associatedCourtCases() {
+        var cases = hearingList.stream().map(HearingEntity::getCourtCase);
+        return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
+    }
 }

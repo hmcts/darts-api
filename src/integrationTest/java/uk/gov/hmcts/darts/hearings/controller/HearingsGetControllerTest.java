@@ -18,9 +18,10 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import static org.mockito.Mockito.when;
@@ -53,7 +54,7 @@ class HearingsGetControllerTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
-            SOME_DATE_TIME.toLocalDate()
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
@@ -76,6 +77,7 @@ class HearingsGetControllerTest extends IntegrationBase {
         String expectedJson = """
             {
                "hearing_id": <hearing-id>,
+               "courthouse_id": <courthouse-id>,
                "courthouse": "some-courthouse",
                "courtroom": "some-courtroom",
                "hearing_date": "<hearing-date>",
@@ -90,6 +92,7 @@ class HearingsGetControllerTest extends IntegrationBase {
             """;
         log.info(actualJson);
         expectedJson = expectedJson.replace("<hearing-id>", hearingEntity.getId().toString());
+        expectedJson = expectedJson.replace("<courthouse-id>", hearingEntity.getCourtCase().getCourthouse().getId().toString());
         expectedJson = expectedJson.replace("<case-id>", hearingEntity.getCourtCase().getId().toString());
         expectedJson = expectedJson.replace("<hearing-date>", hearingEntity.getHearingDate().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -123,7 +126,7 @@ class HearingsGetControllerTest extends IntegrationBase {
             "testCourthouse",
             "testCourtroom",
             "testCaseNumber",
-            LocalDate.of(2020, 6, 20)
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
         );
 
         JudgeEntity testJudge = dartsDatabase.createSimpleJudge("testJudge");

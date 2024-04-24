@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
@@ -22,13 +23,14 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     private List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, LogApi logApi) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
     }
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, DailyListProcessor processor) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                         DailyListProcessor processor, LogApi logApi) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
         this.dailyListProcessor = processor;
     }
 

@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +44,7 @@ public class TranscriptionNotifications {
     @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
     public void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
                                             TranscriptionEntity transcriptionEntity,
-                                            TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
+                                            TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscriptionRequest updateTranscription) {
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
         final var courtCaseEntity = transcriptionEntity.getCourtCase();

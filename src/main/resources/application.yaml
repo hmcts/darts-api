@@ -1,5 +1,6 @@
 server:
   port: 4550
+  max-http-request-header-size: 10MB
 
 management:
   endpoint:
@@ -37,8 +38,8 @@ spring:
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
-            client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}
-            client-secret: ${AAD_CLIENT_SECRET:}
+            client-id: ${AAD_CLIENT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}
+            client-secret: ${AAD_CLIENT_SECRET_JUSTICE:}
             scope: openid
             redirect-uri: ${darts.portal.url}/auth/internal/callback
             logout-redirect-uri: ${darts.portal.url}/auth/internal/logout-callback
@@ -46,7 +47,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt:
-            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
+            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/v2.0
             claims: preferred_username
             provider: internal-azure-ad-provider
         provider:
@@ -57,11 +58,11 @@ spring:
             logout-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
             reset-password-uri: ${ACTIVE_DIRECTORY_B2C_AUTH_URI}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
           internal-azure-ad-provider:
-            authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
-            token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
-            jwk-set-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/discovery/v2.0/keys
-            logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
-            reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
+            authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
+            token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
+            jwk-set-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/discovery/v2.0/keys
+            logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
+            reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
 
   servlet:
     multipart:
@@ -151,8 +152,9 @@ darts:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
   notification:
+    enabled: ${NOTIFICATION_SCHEDULER_ENABLED:true}
     scheduler:
-      cron: ${NOTIFICATION_SCHEDULER_CRON:3 */2 * * * MON-FRI}
+      cron: ${NOTIFICATION_SCHEDULER_CRON:3/60 * * * * *}
     max_retry_attempts: 3
     gov-notify:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}
@@ -170,14 +172,17 @@ darts:
     overridable-fixed-policy-keys: 3
     close-open-cases-older-than-years: 6
     close-events: "Case closed,Archive case"
+    max-retention-retries: 3
   storage:
+    inbound:
+      temp-blob-workspace: ${user.home}/inbound/tempworkspace
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
-      container-name: darts-arm
+      container-name: dropzone
       folders:
-        submission: dropzone/DARTS/submission/
-        collected: dropzone/DARTS/collected/
-        response: dropzone/DARTS/response/
+        submission: DARTS/submission/
+        collected: DARTS/collected/
+        response: DARTS/response/
       max-retry-attempts: 3
       max-blobs-per-page: 3
       publisher: DARTS
@@ -192,12 +197,18 @@ darts:
       file-extension: a360
       list-blobs-timeout-duration: 60s
 
-      media-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
-      transcription-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
-      annotation-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
-      case-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+      media-record-properties-file: properties/arm/media-record.properties
+      transcription-record-properties-file: properties/arm/transcription-record.properties
+      annotation-record-properties-file: properties/arm/annotation-record.properties
+      case-record-properties-file: properties/arm/case-record.properties
 
       response-cleanup-buffer-days: 0
+      event-date-adjustment-years: 100
+
+      batch-size: ${ARM_BATCH_SIZE:10}
+      manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}
+      arm-client: ${ARM_CLIENT:darts}
+      continuation-token-duration: PT60M
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
@@ -284,3 +295,4 @@ dbMigration:
 logging:
   level:
     uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
+    net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}

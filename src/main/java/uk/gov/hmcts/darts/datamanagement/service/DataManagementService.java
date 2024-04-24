@@ -9,11 +9,14 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 
 public interface DataManagementService {
     BinaryData getBlobData(String containerName, UUID blobId);
+
+    Path downloadBlobToFile(String containerName, UUID blobId, String inboundWorkspace);
 
     UUID saveBlobData(String containerName, BinaryData binaryData);
 

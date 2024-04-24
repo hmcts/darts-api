@@ -23,6 +23,9 @@ services:
       - AAD_TENANT_ID
       - AAD_CLIENT_ID
       - AAD_CLIENT_SECRET
+      - AAD_TENANT_ID_JUSTICE
+      - AAD_CLIENT_ID_JUSTICE
+      - AAD_CLIENT_SECRET_JUSTICE
       - XHIBIT_USER_NAME
       - XHIBIT_PASSWORD
       - CPP_USER_NAME
@@ -45,7 +48,6 @@ services:
       - ARM_USERNAME
       - ARM_PASSWORD
       - ARM_URL=http://darts-stub-services:4551
-      - ARM_PROPERTY_FILE_ENVIRONMENT=nle
       - ACTIVE_DIRECTORY_B2C_BASE_URI=https://hmctsstgextid.b2clogin.com
       - ACTIVE_DIRECTORY_B2C_AUTH_URI=https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
     build:

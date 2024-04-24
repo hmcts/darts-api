@@ -40,7 +40,7 @@ import uk.gov.hmcts.darts.testutils.stubs.RegionStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
@@ -224,7 +224,7 @@ class CourthouseApiTest extends IntegrationBase {
             .getId();
 
         dartsDatabase.createHearing(COURTHOUSE_NAME,
-                                    "roomname", "101", LocalDate.now());
+                                    "roomname", "101", LocalDateTime.now());
 
         MockHttpServletRequestBuilder requestBuilder = get("/admin/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
