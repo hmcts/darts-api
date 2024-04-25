@@ -11,6 +11,7 @@ RUN cp -p ffmpeg*/ffmpeg /usr/bin
 
 ADD lib/azcopy /usr/local/bin
 RUN cp -p azcopy /usr/bin
+RUN chmod -R 777 /usr/bin/azcopy
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 FROM hmctspublic.azurecr.io/base/java:17-distroless
