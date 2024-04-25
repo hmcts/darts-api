@@ -12,13 +12,10 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
@@ -61,9 +58,6 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                ApplicationEventPublisher eventPublisher,
                                DarNotifyServiceImpl darNotifyService,
                                CaseRetentionRepository caseRetentionRepository,
-                               CaseManagementRetentionRepository caseManagementRetentionRepository,
-                               RetentionPolicyTypeRepository retentionPolicyTypeRepository,
-                               CurrentTimeHelper currentTimeHelper,
                                RetentionApi retentionApi,
                                AuthorisationApi authorisationApi,
                                LogApi logApi,
