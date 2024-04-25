@@ -89,7 +89,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         try {
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
                 StringBuilder command = new StringBuilder();
-                command.append("/usr/bin/azcopy_linux_amd64_10.25.0-Preview-1/azcopy copy");
+                command.append("/usr/bin/azcopy copy");
                 command.append(" https://dartssastg.blob.core.windows.net/darts-inbound-container");
                 command.append("?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=" +
                                    "2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D");
