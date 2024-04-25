@@ -32,13 +32,9 @@ import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProper
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-
-import java.io.FileInputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;

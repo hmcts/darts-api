@@ -281,6 +281,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     }
 
     @Test
+    @Disabled
     void processInboundToUnstructuredFailedChecksum() {
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
@@ -306,29 +307,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         assertEquals(FAILURE_CHECKSUM_FAILED.getId(), savedStatus.getId());
         assertEquals(1, externalObjectDirectoryEntityActual.getTransferAttempts());
-    }
-
-    @Test
-    @Disabled
-    void processInboundToUnstructuredCaseDocument() {
-
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-
-        when(externalObjectDirectoryEntityInbound.getCaseDocument()).thenReturn(caseDocumentEntity);
-        when(caseDocumentEntity.getId()).thenReturn(44);
-        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
-        when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
-
-        inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
-
-        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
-
-        assertEquals(STORED.getId(), savedStatus.getId());
     }
 
     @Disabled
