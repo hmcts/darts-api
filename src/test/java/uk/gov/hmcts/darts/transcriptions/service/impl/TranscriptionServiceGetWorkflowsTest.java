@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TranscriptionServiceGetWorkflowsTest {
+class TranscriptionServiceGetWorkflowsTest {
 
     @Mock
     private TranscriptionRepository transcriptionRepository;
