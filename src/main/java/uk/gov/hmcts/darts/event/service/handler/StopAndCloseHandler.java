@@ -10,11 +10,8 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -28,6 +25,7 @@ import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.model.stopandclosehandler.PendingRetention;
+import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.event.service.impl.DarNotifyServiceImpl;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -35,7 +33,6 @@ import uk.gov.hmcts.darts.retention.api.RetentionApi;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 
-import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -44,7 +41,6 @@ import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
-import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_DATA_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -52,10 +48,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
     private final DarNotifyServiceImpl darNotifyService;
     private final CaseRetentionRepository caseRetentionRepository;
-    private final CaseManagementRetentionRepository caseManagementRetentionRepository;
-    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
-    private final CurrentTimeHelper currentTimeHelper;
     private final RetentionApi retentionApi;
+    private final CaseManagementRetentionService caseManagementRetentionService;
 
     @Value("${darts.retention.overridable-fixed-policy-keys}")
     List<String> overridableFixedPolicyKeys;
@@ -72,13 +66,12 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                CurrentTimeHelper currentTimeHelper,
                                RetentionApi retentionApi,
                                AuthorisationApi authorisationApi,
-                               LogApi logApi) {
+                               LogApi logApi,
+                               CaseManagementRetentionService caseManagementRetentionService) {
         super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
         this.darNotifyService = darNotifyService;
         this.caseRetentionRepository = caseRetentionRepository;
-        this.caseManagementRetentionRepository = caseManagementRetentionRepository;
-        this.retentionPolicyTypeRepository = retentionPolicyTypeRepository;
-        this.currentTimeHelper = currentTimeHelper;
+        this.caseManagementRetentionService = caseManagementRetentionService;
         this.retentionApi = retentionApi;
     }
 
@@ -94,7 +87,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
 
         setDefaultPolicyIfNotDefined(dartsEvent);
 
-        CaseManagementRetentionEntity caseManagementRetentionEntity = createCaseManagementRetentionEntity(hearingAndEvent.getEventEntity(),
+        CaseManagementRetentionEntity caseManagementRetentionEntity = caseManagementRetentionService.createCaseManagementRetention(
+                                                                                                          hearingAndEvent.getEventEntity(),
                                                                                                           hearingAndEvent.getHearingEntity().getCourtCase(),
                                                                                                           dartsEvent.getRetentionPolicy());
 
@@ -187,32 +181,6 @@ public class StopAndCloseHandler extends EventHandlerBase {
         caseRetentionEntity.setCreatedBy(currentUser);
         caseRetentionEntity.setLastModifiedBy(currentUser);
         caseRetentionRepository.save(caseRetentionEntity);
-    }
-
-    private CaseManagementRetentionEntity createCaseManagementRetentionEntity(EventEntity eventEntity, CourtCaseEntity courtCase,
-                                                                              DartsEventRetentionPolicy dartsEventRetentionPolicy) {
-        CaseManagementRetentionEntity caseManagementRetentionEntity = new CaseManagementRetentionEntity();
-        caseManagementRetentionEntity.setCourtCase(courtCase);
-        caseManagementRetentionEntity.setEventEntity(eventEntity);
-
-
-        caseManagementRetentionEntity.setRetentionPolicyTypeEntity(getRetentionPolicy(dartsEventRetentionPolicy.getCaseRetentionFixedPolicy()));
-        caseManagementRetentionEntity.setTotalSentence(dartsEventRetentionPolicy.getCaseTotalSentence());
-        caseManagementRetentionEntity = caseManagementRetentionRepository.save(caseManagementRetentionEntity);
-        return caseManagementRetentionEntity;
-    }
-
-    private RetentionPolicyTypeEntity getRetentionPolicy(String fixedPolicyKey) {
-        List<RetentionPolicyTypeEntity> retentionPolicyList = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
-            fixedPolicyKey, currentTimeHelper.currentOffsetDateTime());
-        if (retentionPolicyList.isEmpty()) {
-            throw new DartsApiException(EVENT_DATA_NOT_FOUND,
-                                        MessageFormat.format("Could not find a retention policy for fixedPolicyKey ''{0}''", fixedPolicyKey));
-        } else if (retentionPolicyList.size() > 1) {
-            throw new DartsApiException(EVENT_DATA_NOT_FOUND,
-                                        MessageFormat.format("More than 1 retention policy found for fixedPolicyKey ''{0}''", fixedPolicyKey));
-        }
-        return retentionPolicyList.get(0);
     }
 
 }
