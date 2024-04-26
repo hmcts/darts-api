@@ -9,9 +9,8 @@ WORKDIR /usr/local/bin
 ADD lib/ffmpeg-release-amd64-static.tar.xz /usr/local/bin
 RUN cp -p ffmpeg*/ffmpeg /usr/bin
 
-ADD lib/azcopy /usr/local/bin
-RUN cp -p azcopy /usr/bin
-RUN chmod -R 777 /usr/bin/azcopy
+ADD lib/azcopy_linux_amd64_10.25.0-Preview-1.tar.gz /usr/local/bin
+RUN cp -p azcopy*/azcopy /usr/bin
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 FROM hmctspublic.azurecr.io/base/java:17-distroless
