@@ -885,6 +885,8 @@ components:
         requested_ts:
           type: string
           format: date-time
+        transcription_urgency:
+          $ref: '#/components/schemas/TranscriptionUrgencyDetails'
     TranscriberViewSummary:
       type: object
       required:
@@ -924,6 +926,24 @@ components:
           format: date-time
         is_manual:
           type: boolean
+        transcription_urgency:
+          $ref: '#/components/schemas/TranscriptionUrgencyDetails'
+    TranscriptionUrgencyDetails:
+      type: object
+      required:
+        - transcription_urgency_id
+        - description
+        - priority_order
+      properties:
+        transcription_urgency_id:
+          type: integer
+          example: 4567
+        priority_order:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: "An urgency description"
     UpdateTranscriptionResponse:
       type: object
       required:
@@ -1126,6 +1146,8 @@ components:
           type: string
           format: date-time
           example: 2023-06-26T13:00:00Z
+        transcription_urgency:
+          $ref: '#/components/schemas/TranscriptionUrgencyDetails'
     defendant:
       type: string
       example: Joe Bloggs

@@ -20,5 +20,10 @@
   "transcription_start_ts": "2023-01-01T12:00:00Z",
   "transcription_end_ts": "2023-01-01T12:00:00Z",
   "is_manual": true,
-  "case_reporting_restrictions": []
+  "case_reporting_restrictions": [],
+  "transcription_urgency": {
+      "transcription_urgency_id": 1,
+      "description": "Standard",
+      "priority_order": 999
+  }
 }

@@ -265,7 +265,12 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "urgency": "Standard",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
                 "state_change_ts": "2023-11-23T16:26:20.441633Z",
-                "is_manual": true
+                "is_manual": true,
+                "transcription_urgency": {
+                  "transcription_urgency_id": 1,
+                  "description": "Standard",
+                  "priority_order": 999
+                }
               }
             ]
             """;

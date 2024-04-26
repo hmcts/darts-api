@@ -32,8 +32,10 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     hea.hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
-                    tru.description as urgency,
-                    trw.workflow_ts as requested_ts
+                    tru.description as transcription_urgency_description,
+                    tru.tru_id  as transcription_urgency_id,
+                    tru.priority_order as transcription_urgency_priority_order,
+                    trw.workflow_ts as requested_ts,
                 FROM
                     darts.transcription_workflow trw
                 INNER JOIN
@@ -89,7 +91,9 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tra.hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
-                    tru.description as urgency,
+                    tru.description as transcription_urgency_description,
+                    tru.tru_id  as transcription_urgency_id,
+                    tru.priority_order as transcription_urgency_priority_order,
                     trw.workflow_ts as requested_ts
                 FROM
                     darts.transcription_workflow trw
@@ -149,7 +153,9 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     hea.hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
-                    tru.description as urgency,
+                    tru.description as transcription_urgency_description,
+                    tru.tru_id  as transcription_urgency_id,
+                    tru.priority_order as transcription_urgency_priority_order,
                     trw.workflow_ts as requested_ts
                 FROM
                     darts.transcription tra
@@ -225,7 +231,9 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     hearing_date,
                     trt.description as transcription_type,
                     trs.display_name as status,
-                    tru.description as urgency,
+                    tru.description as transcription_urgency_description,
+                    tru.tru_id  as transcription_urgency_id,
+                    tru.priority_order as transcription_urgency_priority_order,
                     trw.workflow_ts as requested_ts
                 FROM
                     darts.transcription tra

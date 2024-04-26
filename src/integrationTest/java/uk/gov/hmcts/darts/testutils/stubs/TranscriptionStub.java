@@ -106,6 +106,7 @@ public class TranscriptionStub {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
         transcriptionUrgencyEntity.setId(urgencyEnum.getId());
         transcriptionUrgencyEntity.setDescription(urgencyEnum.name());
+        transcriptionUrgencyEntity.setPriorityOrder(urgencyEnum.getPriorityOrderId());
         return transcriptionUrgencyEntity;
     }
 
