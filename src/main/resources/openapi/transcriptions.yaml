@@ -721,6 +721,33 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /admin/transcription-workflows:
+    get:
+      tags:
+        - Transcription
+      summary: Return all transcription workflow records in descending workflow timestamp chronological order
+      parameters:
+        - in: query
+          name: is_current
+          schema:
+            type: boolean
+            description: Return only the latest (current) transcription workflow record for any transcription
+        - in: query
+          name: transcription_id
+          required: true
+          schema:
+            type: integer
+            description: Return only workflow items that relate to the provided transcription id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetTranscriptionWorkflowsResponse'
+
 components:
   schemas:
     TranscriptionStatus:
@@ -1114,6 +1141,37 @@ components:
         user_full_name:
           type: string
           example: Joe Bloggs
+
+    TranscriptionWorkflowsComment:
+      type: object
+      properties:
+        comment:
+          type: string
+        commented_at:
+          type: string
+          format: date-time
+          example: 2024-0415T12:00:00Z
+        author_id:
+          type: integer
+
+    GetTranscriptionWorkflowsResponse:
+      type: object
+      properties:
+        workflow_actor:
+          type: integer
+          example: 0
+        status_id:
+          type: integer
+          example: 0
+        workflow_ts:
+          type: string
+          format: date-time
+          example: 2024-0415T12:00:00Z
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranscriptionWorkflowsComment'
+
     TranscriptionsErrorCode:
       type: string
       enum:
