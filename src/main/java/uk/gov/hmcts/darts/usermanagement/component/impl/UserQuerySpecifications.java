@@ -19,8 +19,8 @@ public class UserQuerySpecifications {
             return null;
         }
         return (root, query, cb) -> cb.equal(
-            cb.lower(root.get(UserAccountEntity_.emailAddress)),
-            emailAddress.toLowerCase());
+            cb.upper(root.get(UserAccountEntity_.emailAddress)),
+            emailAddress.toUpperCase());
     }
 
     public static Specification<UserAccountEntity> isInIds(List<Integer> userIds) {

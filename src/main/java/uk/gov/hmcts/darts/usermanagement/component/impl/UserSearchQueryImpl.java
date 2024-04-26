@@ -44,16 +44,16 @@ public class UserSearchQueryImpl implements UserSearchQuery {
         boolean isNotBlankEmailAddress = isNotBlank(emailAddress);
         if (isNotBlankEmailAddress) {
             wherePredicates.add(criteriaBuilder.like(
-                criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
-                criteriaBuilder.lower(paramEmailAddress)
+                criteriaBuilder.upper(root.get(UserAccountEntity_.emailAddress)),
+                criteriaBuilder.upper(paramEmailAddress)
             ));
         }
 
         boolean isNotBlankFullName = isNotBlank(fullName);
         if (isNotBlankFullName) {
             wherePredicates.add(criteriaBuilder.like(
-                criteriaBuilder.lower(root.get(UserAccountEntity_.userFullName)),
-                criteriaBuilder.lower(paramFullName)
+                criteriaBuilder.upper(root.get(UserAccountEntity_.userFullName)),
+                criteriaBuilder.upper(paramFullName)
             ));
         }
 
