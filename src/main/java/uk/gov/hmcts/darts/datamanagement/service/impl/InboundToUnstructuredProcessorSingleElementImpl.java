@@ -110,7 +110,9 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
                 final int exitValue = p.waitFor();
                 if (exitValue == 0) {
-                    log.info("Successfully executed the command: " + builder.toString());
+                    log.info("Successfully executed the command: " + builder.toString() +
+                        "for location id"
+                        + inboundExternalObjectDirectory.getExternalLocation());
                 } else {
                     log.error("Failed to execute the following command: " + builder.toString() + " due to the following error(s):");
                     try (final BufferedReader b = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
