@@ -15,7 +15,7 @@ RUN cp -p azcopy*/azcopy /usr/bin
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 FROM hmctspublic.azurecr.io/base/java:17-distroless
 COPY --from=build-env /usr/bin/ffmpeg /usr/bin
-
+COPY --from=build-env /usr/bin/azcopy /usr/bin
 COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/darts-api.jar /opt/app/
 
