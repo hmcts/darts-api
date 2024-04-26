@@ -29,8 +29,10 @@ public class EventLoggerServiceImpl implements EventLoggerService {
         var isPollCheck = false;
         EventSource source = EventSource.UNKNOWN;
         try {
-            // Xhibit sends event positive IDs, CPP send negative event IDs
-            if (Integer.parseInt(event.getEventId()) >= 0) {
+            if (event.getIsMidTier()) {
+                source = EventSource.MIDTIER;
+            } else if (Integer.parseInt(event.getEventId()) >= 0) {
+                // XHIBIT sends event positive IDs, CPP send negative event IDs
                 source = EventSource.XHB;
                 if (StringUtils.equals(event.getEventText(), xhbDailyTestEventText)) {
                     isPollCheck = true;
