@@ -88,31 +88,31 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         Path tempFile = null;
         try {
             if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
-                StringBuilder command = new StringBuilder();
 
-                command.append("/usr/bin/azcopy copy");
-                command.append(" 'https://dartssastg.blob.core.windows.net/darts-inbound-container/");
-                command.append(inboundExternalObjectDirectory.getExternalLocation().toString());
-                command.append("?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=" +
-                                   "2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D'");
-                command.append(" 'https://dartssastg.blob.core.windows.net/darts-unstructured/");
-                command.append(inboundExternalObjectDirectory.getExternalLocation().toString());
-                command.append("?sp=racw&st=2024-04-23T07:49:47Z&se=2024-05-31T15:49:47Z&spr=https&sv=" +
-                                   "2022-11-02&sr=c&sig=6Jtf3mCfOtYvRlVFlfIubtsWi1rA2zOiJzAGouhEuBM%3D'");
-
+                ProcessBuilder builder = new ProcessBuilder();
+                builder.command("/usr/bin/azcopy",
+                                "copy",
+                                "https://dartssastg.blob.core.windows.net/darts-inbound-container/" +
+                                    inboundExternalObjectDirectory.getExternalLocation().toString() +
+                                    "?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=" +
+                                    "2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D",
+                                "https://dartssastg.blob.core.windows.net/darts-unstructured/" +
+                                    inboundExternalObjectDirectory.getExternalLocation().toString() +
+                                    "?sp=racw&st=2024-04-23T07:49:47Z&se=2024-05-31T15:49:47Z&spr=https&sv=" +
+                                    "2022-11-02&sr=c&sig=6Jtf3mCfOtYvRlVFlfIubtsWi1rA2zOiJzAGouhEuBM%3D");
 
                 Instant copyStart = Instant.now();
                 log.info("INBOUND TO UNSTRUCTURED AZ-COPY PERFORMANCE for EOD {} started at {}",
                          unstructuredExternalObjectDirectoryEntity.getId(), copyStart);
 
-                Process p = Runtime.getRuntime().exec(command.toString());
+                Process p = builder.start();
                 p.waitFor();
 
                 final int exitValue = p.waitFor();
                 if (exitValue == 0) {
-                    log.info("Successfully executed the command: " + command);
+                    log.info("Successfully executed the command: " + builder.toString());
                 } else {
-                    log.error("Failed to execute the following command: " + command + " due to the following error(s):");
+                    log.error("Failed to execute the following command: " + builder.toString() + " due to the following error(s):");
                     try (final BufferedReader b = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
                         String line;
                         if ((line = b.readLine()) != null) {
