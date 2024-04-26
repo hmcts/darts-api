@@ -26,10 +26,11 @@ import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -91,8 +92,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                    .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                         .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -150,8 +151,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -184,8 +185,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -249,8 +250,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -283,17 +284,17 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         ) {
-            private int FILE_SIGNATURE_CALL_COUNT = 0;
+            private int fileSignatureValidationCallCount;
             @Override
             public InputStream getInputStream() throws IOException {
                 // fail on any call other than for the file signature validation
-                if (FILE_SIGNATURE_CALL_COUNT != 0) {
+                if (fileSignatureValidationCallCount != 0) {
                     throw new IOException();
                 }
-                FILE_SIGNATURE_CALL_COUNT = FILE_SIGNATURE_CALL_COUNT + 1;
+                fileSignatureValidationCallCount = fileSignatureValidationCallCount + 1;
                 return super.getInputStream();
             }
         };
@@ -330,8 +331,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -363,8 +364,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.incorrect",
             "audio/mpeg",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -396,8 +397,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "file",
             "audio.mp2",
             "audio/mpegincorrect",
-            IOUtils.toByteArray(new FileInputStream(AudioControllerAddAudioMetadataIntTest.class.getClassLoader()
-                                                        .getResource("sample6.mp2").getFile()))
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(

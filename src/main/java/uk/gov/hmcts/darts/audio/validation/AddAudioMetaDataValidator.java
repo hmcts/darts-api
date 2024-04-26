@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
