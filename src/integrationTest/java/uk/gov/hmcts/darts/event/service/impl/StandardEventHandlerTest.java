@@ -226,7 +226,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
 
 
     @Test
-    void testSummationWithConcurrency() throws InterruptedException {
+    void testEventHandlingConcurrency() throws InterruptedException {
 
         dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
         dartsGateway.darNotificationReturnsSuccess();

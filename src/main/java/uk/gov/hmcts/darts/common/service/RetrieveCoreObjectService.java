@@ -4,6 +4,7 @@ import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -19,28 +20,28 @@ import java.time.LocalDateTime;
 
 public interface RetrieveCoreObjectService {
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate);
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                           UserAccountEntity userAccount);
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName);
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName);
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber);
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber, UserAccountEntity userAccount);
 
@@ -53,7 +54,7 @@ public interface RetrieveCoreObjectService {
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     JudgeEntity retrieveOrCreateJudge(String judgeName, UserAccountEntity userAccount);
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     DefenceEntity createDefence(String defence, CourtCaseEntity courtCase, UserAccountEntity userAccount);
 
     DefendantEntity createDefendant(String defendant, CourtCaseEntity courtCase, UserAccountEntity userAccount);
