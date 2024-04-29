@@ -43,6 +43,8 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
     private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
     private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
+    public static final String COMMAND_INPUT = " -i ";
+    public static final String FFMPEG = "ffmpeg";
 
     private List<AudioFileInfo> preloadedInputAudioFileInfos;
     private Path tempDirectory;
@@ -108,9 +110,9 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder("ffmpeg")
-            .append(" -i ").append(path1)
-            .append(" -i ").append(path2)
+        StringBuilder command = new StringBuilder(FFMPEG);
+        command.append(COMMAND_INPUT).append(path1)
+            .append(COMMAND_INPUT).append(path2)
             .append(" -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 ")
             .append(outputPath);
         CommandLine expectedCommand = CommandLine.parse(command.toString());
@@ -165,11 +167,11 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder("ffmpeg")
-            .append(" -i ").append(path1)
-            .append(" -i ").append(path2)
-            .append(" -i ").append(path3)
-            .append(" -i ").append(path4)
+        StringBuilder command = new StringBuilder(FFMPEG);
+        command.append(COMMAND_INPUT).append(path1)
+            .append(COMMAND_INPUT).append(path2)
+            .append(COMMAND_INPUT).append(path3)
+            .append(COMMAND_INPUT).append(path4)
             .append(" -filter_complex [0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1 ")
             .append(outputPath);
         CommandLine expectedCommand = CommandLine.parse(command.toString());
