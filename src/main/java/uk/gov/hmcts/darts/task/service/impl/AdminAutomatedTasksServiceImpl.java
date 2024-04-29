@@ -14,6 +14,7 @@ import java.util.List;
 public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService {
 
     private final AutomatedTaskRepository automatedTaskRepository;
+
     @Override
     public List<AutomatedTask> getAllAutomatedTasks() {
         var automatedTask = automatedTaskRepository.findAll();
