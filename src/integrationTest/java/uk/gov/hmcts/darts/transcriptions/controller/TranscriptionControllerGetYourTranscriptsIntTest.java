@@ -94,6 +94,42 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     }
 
     @Test
+    void getYourTranscriptsShouldReturnRequesterOnlyOkWithNoUrgency() throws Exception {
+        var courtCase = authorisationStub.getCourtCaseEntity();
+        var hearing = authorisationStub.getHearingEntity();
+        transcriptionStub.createAndSaveAwaitingAuthorisationTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, false);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
+            .header(
+                "user_id",
+                testUser.getId()
+            );
+        requestBuilder.content("");
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(2)))
+            .andExpect(jsonPath("$.requester_transcriptions[1].transcription_id", is(transcriptionEntity.getId())))
+            .andExpect(jsonPath("$.requester_transcriptions[1].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath(
+                "$.requester_transcriptions[1].case_number",
+                is(courtCase.getCaseNumber())
+            ))
+            .andExpect(jsonPath("$.requester_transcriptions[0].courthouse_name", is("Bristol")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
+            .andExpect(jsonPath("$.requester_transcriptions[0].urgency").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description").doesNotExist())
+            .andExpect(jsonPath("$.requester_transcriptions[0]." +
+                                    "transcription_urgency.priority_order").doesNotExist())
+
+            .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
+
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
+    }
+
+    @Test
     void getYourTranscriptsShouldReturnOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
