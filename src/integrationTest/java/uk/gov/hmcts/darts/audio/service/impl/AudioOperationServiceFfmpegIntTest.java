@@ -47,9 +47,6 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
     private List<AudioFileInfo> preloadedInputAudioFileInfos;
     private Path tempDirectory;
 
-    private Path path1;
-    private Path path2;
-
     @Autowired
     private AudioOperationServiceImpl audioOperationService;
 
@@ -57,11 +54,11 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
     @BeforeEach
     void beforeEach() throws IOException {
         UUID externalLocation = UUID.randomUUID();
-        tempDirectory = Files.createTempDirectory(externalLocation.toString() + "darts_api_unit_test");
+        tempDirectory = Files.createTempDirectory(externalLocation + "darts_api_unit_test");
 
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original0.mp2"), REPLACE_EXISTING);
-        path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original1.mp2"), REPLACE_EXISTING);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original0.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original1.mp2"), REPLACE_EXISTING);
 
         preloadedInputAudioFileInfos = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
@@ -111,11 +108,11 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder("ffmpeg -i ").append(path1.toString())
-            .append(" -i ")
-            .append(path2.toString())
+        StringBuilder command = new StringBuilder("ffmpeg")
+            .append(" -i ").append(path1)
+            .append(" -i ").append(path2)
             .append(" -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 ")
-            .append(outputPath.toString());
+            .append(outputPath);
         CommandLine expectedCommand = CommandLine.parse(command.toString());
 
         assertNotNull(actualCommand);
@@ -169,12 +166,12 @@ class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
         );
 
         StringBuilder command = new StringBuilder("ffmpeg")
-            .append(" -i ").append(path1.toString())
-            .append(" -i ").append(path2.toString())
-            .append(" -i ").append(path3.toString())
-            .append(" -i ").append(path4.toString())
+            .append(" -i ").append(path1)
+            .append(" -i ").append(path2)
+            .append(" -i ").append(path3)
+            .append(" -i ").append(path4)
             .append(" -filter_complex [0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1 ")
-            .append(outputPath.toString());
+            .append(outputPath);
         CommandLine expectedCommand = CommandLine.parse(command.toString());
 
         assertNotNull(actualCommand);
