@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -25,8 +24,8 @@ public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequ
 
     private final AudioConfigurationProperties properties;
 
-    @Value("${darts.audio.max-file-duration-minutes}")
-    private Long audioDurationInMinutes;
+    @Value("${darts.audio.max-file-duration}")
+    private Duration maxAllowableAudioDuration;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize fileSizeThreshold;
@@ -54,9 +53,8 @@ public class AddAudioMetaDataValidator implements Validator<AddAudioMetadataRequ
         OffsetDateTime finishDate = addAudioMetadataRequest.getEndedAt();
 
         Duration difference = Duration.between(startDate, finishDate);
-        long minutesDifference = difference.get(ChronoUnit.SECONDS) / 60;
 
-        if (minutesDifference > audioDurationInMinutes) {
+        if (difference.compareTo(maxAllowableAudioDuration) > 0) {
             throw new DartsApiException(AudioApiError.FILE_DURATION_OUT_OF_BOUNDS);
         }
     }

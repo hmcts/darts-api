@@ -21,7 +21,7 @@ public class AddAudioFileValidator implements Validator<MultipartFile> {
     private final AudioConfigurationProperties properties;
 
     public void validate(MultipartFile addAudioFileRequest) {
-        if (addAudioFileRequest.getSize() == 0) {
+        if (addAudioFileRequest.getSize() <= 0) {
             throw new DartsApiException(AudioApiError.AUDIO_NOT_PROVIDED);
         }
 
