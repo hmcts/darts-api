@@ -40,7 +40,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @AutoConfigureMockMvc
-@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/testAudio.mp2"})
+@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioControllerPreviewIntTest extends IntegrationBase {
 
     @Value("${darts.audio.preview.redis-folder}")

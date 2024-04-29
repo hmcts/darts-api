@@ -24,7 +24,7 @@ import static uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData.
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.someMinimalMedia;
 
-@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/testAudio.mp2"})
+@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioPreviewTest extends IntegrationBase {
 
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
