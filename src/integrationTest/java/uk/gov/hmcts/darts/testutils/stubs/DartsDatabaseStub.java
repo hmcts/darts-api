@@ -254,7 +254,6 @@ public class DartsDatabaseStub {
         return courtroom;
     }
 
-    @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
         String caseNumber, String courthouseName, String courtroomName, LocalDateTime hearingDate) {
         createCourthouseUnlessExists(courthouseName);
@@ -267,7 +266,7 @@ public class DartsDatabaseStub {
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
-        return hearingRepository.save(hearing);
+        return hearingRepository.saveAndFlush(hearing);
     }
 
     @Transactional

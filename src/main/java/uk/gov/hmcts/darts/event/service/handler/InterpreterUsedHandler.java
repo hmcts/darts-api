@@ -43,5 +43,6 @@ public class InterpreterUsedHandler extends EventHandlerBase {
             eventPublisher.publishEvent(notifyEvent);
         }
         courtCase.setInterpreterUsed(true);
+        caseRepository.saveAndFlush(courtCase);
     }
 }
