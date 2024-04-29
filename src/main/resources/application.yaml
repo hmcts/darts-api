@@ -144,7 +144,6 @@ darts:
   daily-list:
     housekeeping:
       enabled: true
-      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
