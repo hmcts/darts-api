@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -46,8 +47,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
-    private static final OffsetDateTime ENDED_AT = OffsetDateTime.of(2024, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC);
-    private static final OffsetDateTime ENDED_AT_NEXT_DAY = OffsetDateTime.of(2024, 10, 11, 11, 0, 0, 0, ZoneOffset.UTC);
+
+    @Value("${darts.audio.max-file-duration}")
+    private Duration maxFileDuration;
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,12 +83,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
         HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
-        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
     }
 
     @Test
     void addAudioMetadata() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -125,7 +126,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             MediaEntity media = mediaEntities.get(0);
             assertEquals(1, mediaEntities.size());
             assertEquals(STARTED_AT, media.getStart());
-            assertEquals(ENDED_AT, media.getEnd());
+            assertEquals(STARTED_AT.plus(maxFileDuration), media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
             assertEquals(3, media.getCaseNumberList().size());
@@ -145,7 +146,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioMetadataNonExistingCourthouse() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "TEST", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -179,7 +180,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     @Test
     void addAudioUnsupportedType() throws Exception {
         String unknownType = "unsupportedType";
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1", unknownType);
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1", unknownType);
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -212,7 +213,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioNotProvided() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -244,7 +245,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioDurationOutOfBounds() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT_NEXT_DAY, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration).plusSeconds(1), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -277,7 +278,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addFailedToUploadAudio() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         // create an audio file that throws an exception
         MockMultipartFile audioFile = new MockMultipartFile(
@@ -322,7 +323,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioSizeOutsideOfBoundaries() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT_NEXT_DAY, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         // set the file size to be greater than the maximum threshold
         addAudioMetadataRequest.setFileSize(fileSizeThreshold.toBytes() + 1);
@@ -358,7 +359,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioFileExtensionIncorrect() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -391,7 +392,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioFileExtensionContentType() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
@@ -424,7 +425,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     @Test
     void addAudioFileSignatureException() throws Exception {
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plus(maxFileDuration), "Bristol", "1");
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "file",
