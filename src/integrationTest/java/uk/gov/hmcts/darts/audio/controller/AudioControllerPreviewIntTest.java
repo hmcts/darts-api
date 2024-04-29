@@ -3,10 +3,12 @@ package uk.gov.hmcts.darts.audio.controller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
@@ -14,26 +16,19 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RedisService;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
@@ -43,9 +38,9 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getFile;
 
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/testAudio.mp2"})
 class AudioControllerPreviewIntTest extends IntegrationBase {
 
     @Value("${darts.audio.preview.redis-folder}")
@@ -57,8 +52,11 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     @MockBean
     private Authorisation authorisation;
 
-    @MockBean
+    @Mock
     private DataManagementFacade mockDataManagementFacade;
+
+    @Mock
+    private FileBasedDownloadResponseMetaData mockFileBasedDownloadResponseMetaData;
 
     private MediaEntity mediaEntity;
 
@@ -72,18 +70,12 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     void setupData() throws FileNotDownloadedException, IOException {
         given.setupTest();
         mediaEntity = given.getMediaEntity1();
-        ExternalObjectDirectoryEntity externalObjectDirectory = given.externalObjectDirForMedia(mediaEntity);
+        given.externalObjectDirForMedia(mediaEntity);
         doNothing().when(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
-        File audioFileTest = getFile("tests/audio/testAudio.mp2");
-        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        when(mockDataManagementFacade.retrieveFileFromStorage(any(MediaEntity.class))).thenReturn(mockFileBasedDownloadResponseMetaData);
-        when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(
-            Files.newInputStream(audioFileTest.toPath()));
-        when(mockFileBasedDownloadResponseMetaData.getEodEntity()).thenReturn(externalObjectDirectory);
-        when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(DatastoreContainerType.UNSTRUCTURED);
+
     }
 
     @AfterEach
@@ -95,7 +87,6 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
     @Test
     void previewWithRangeFromStartShouldReturnSuccess() throws Exception {
-
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
             String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-1023");

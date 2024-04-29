@@ -5,35 +5,22 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
-import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
-import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
-import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getFile;
 
 @Transactional
 @Service
@@ -54,9 +41,6 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     private static final OffsetDateTime TIME_14_00 = OffsetDateTime.parse("2023-01-01T14:00Z");
     private static final OffsetDateTime TIME_20_00 = OffsetDateTime.parse("2023-01-01T20:00Z");
     private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
-
-    @MockBean
-    private DataManagementFacade mockDataManagementFacade;
 
     private final DartsDatabaseStub dartsDatabaseStub;
 
@@ -183,29 +167,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity3);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity4);
 
-            mockFileBasedDownloadResponse(mediaEntity, inboundExternalObjectDirectoryEntity, DatastoreContainerType.INBOUND);
-            mockFileBasedDownloadResponse(mediaEntity, unstructuredExternalObjectDirectoryEntity, DatastoreContainerType.UNSTRUCTURED);
-            mockFileBasedDownloadResponse(mediaEntity2, inboundExternalObjectDirectoryEntity2, DatastoreContainerType.INBOUND);
-            mockFileBasedDownloadResponse(mediaEntity2, unstructuredExternalObjectDirectoryEntity2, DatastoreContainerType.UNSTRUCTURED);
-            mockFileBasedDownloadResponse(mediaEntity3, inboundExternalObjectDirectoryEntity3, DatastoreContainerType.INBOUND);
-            mockFileBasedDownloadResponse(mediaEntity3, unstructuredExternalObjectDirectoryEntity3, DatastoreContainerType.UNSTRUCTURED);
-            mockFileBasedDownloadResponse(mediaEntity4, inboundExternalObjectDirectoryEntity4, DatastoreContainerType.INBOUND);
-            mockFileBasedDownloadResponse(mediaEntity4, unstructuredExternalObjectDirectoryEntity4, DatastoreContainerType.UNSTRUCTURED);
-            mockFileBasedDownloadResponse(mediaEntity5, inboundExternalObjectDirectoryEntity5, DatastoreContainerType.INBOUND);
-
         }
-    }
-
-    private void mockFileBasedDownloadResponse(MediaEntity mediaEntity, ExternalObjectDirectoryEntity externalObjectDirectoryEntity,
-                                               DatastoreContainerType datastoreContainerType)
-        throws FileNotDownloadedException, IOException {
-        File audioFileTest = getFile("tests/audio/testAudio.mp2");
-        var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
-        lenient().when(mockDataManagementFacade.retrieveFileFromStorage(mediaEntity)).thenReturn(mockFileBasedDownloadResponseMetaData);
-        lenient().when(mockFileBasedDownloadResponseMetaData.getInputStream()).thenReturn(
-            Files.newInputStream(audioFileTest.toPath()));
-        lenient().when(mockFileBasedDownloadResponseMetaData.getEodEntity()).thenReturn(externalObjectDirectoryEntity);
-        lenient().when(mockFileBasedDownloadResponseMetaData.getContainerTypeUsedToDownload()).thenReturn(datastoreContainerType);
     }
 
     public UserAccountEntity aUserAccount(String emailAddress) {
