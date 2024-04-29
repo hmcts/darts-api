@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
@@ -68,6 +69,18 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         }
 
         automatedTaskRunner.run(automatedTask.get());
+    }
+
+    @Override
+    public DetailedAutomatedTask updateAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
+        var automatedTask = automatedTaskRepository.findById(taskId)
+            .orElseThrow(() -> new DartsApiException(AUTOMATED_TASK_NOT_FOUND));
+
+        automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
+
+        var updatedTask = automatedTaskRepository.save(automatedTask);
+
+        return mapper.mapEntityToDetailedAutomatedTask(updatedTask);
     }
 
     private boolean isLocked(AutomatedTaskEntity automatedTask) {
