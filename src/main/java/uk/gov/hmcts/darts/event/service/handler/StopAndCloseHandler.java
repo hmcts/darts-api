@@ -140,6 +140,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
             courtCase.setClosed(TRUE);
             courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
             courtCase.setLastModifiedBy(authorisationApi.getCurrentUser());
+            caseRepository.saveAndFlush(courtCase);
         }
     }
 

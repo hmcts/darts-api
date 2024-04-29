@@ -37,6 +37,7 @@ public class UserAccountStub {
     private final SecurityGroupRepository securityGroupRepository;
     private final CourthouseStub courthouseStub;
     private final CourthouseRepository courthouseRepository;
+    private final SecurityGroupStub securityGroupStub;
 
     public UserAccountEntity getSystemUserAccountEntity() {
 
@@ -256,7 +257,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createMidTierExternalUser(String guid, CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-17);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-17).get();
         securityGroupEntity.setGlobalAccess(true);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
@@ -266,7 +267,7 @@ public class UserAccountStub {
     public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
                                                 CourthouseEntity courthouseEntity) {
         if (nonNull(courthouseEntity)) {
-            securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+            securityGroupStub.addCourthouse(securityGroupEntity, courthouseEntity);
         }
 
         var testUser = getIntegrationTestUserAccountEntity();
