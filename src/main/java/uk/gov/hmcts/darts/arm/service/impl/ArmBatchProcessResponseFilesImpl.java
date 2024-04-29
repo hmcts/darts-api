@@ -466,7 +466,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {
-        if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
+        if (objectChecksum.equalsIgnoreCase(armResponseUploadFileRecord.getMd5())) {
             UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
             if (nonNull(uploadNewFileRecord)) {
                 externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());

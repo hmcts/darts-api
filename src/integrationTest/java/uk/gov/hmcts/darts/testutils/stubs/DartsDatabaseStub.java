@@ -443,7 +443,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
-        entityManager.merge(annotationEntity.getCurrentOwner());
+        save(annotationEntity.getCurrentOwner());
         return annotationRepository.save(annotationEntity);
     }
 

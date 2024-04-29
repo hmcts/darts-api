@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
-import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -40,7 +40,6 @@ import java.util.UUID;
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
@@ -53,6 +52,8 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 @Component
 @RequiredArgsConstructor
 public class TranscriptionStub {
+
+    public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
@@ -287,7 +288,7 @@ public class TranscriptionStub {
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
                                                externalLocation,
-                                               getTranscriptionDocumentChecksum());
+                                               getChecksum());
     }
 
     @Transactional
@@ -324,16 +325,8 @@ public class TranscriptionStub {
         return transcriptionRepository.save(transcriptionEntity);
     }
 
-    public static BinaryData getBinaryTranscriptionDocumentData() {
-        return BinaryData.fromString("test binary transcription document data");
-    }
-
-    public static BinaryData getEmptyFile() {
-        return BinaryData.fromBytes(new byte[0]);
-    }
-
-    public static String getTranscriptionDocumentChecksum() {
-        return new String(encodeBase64(md5(getBinaryTranscriptionDocumentData().toBytes())));
+    private String getChecksum() {
+        return TestUtils.encodeToString(md5(TRANSCRIPTION_TEST_DATA_BINARY_DATA));
     }
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,

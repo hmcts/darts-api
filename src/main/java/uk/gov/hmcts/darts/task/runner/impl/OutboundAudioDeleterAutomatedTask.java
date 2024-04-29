@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
@@ -16,8 +17,9 @@ public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomated
 
     public OutboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                             OutboundAudioDeleterProcessor processor) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
+                                             OutboundAudioDeleterProcessor processor,
+                                             LogApi logApi) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
         this.outboundAudioDeleterProcessor = processor;
     }
 

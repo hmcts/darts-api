@@ -92,8 +92,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
         criteriaQuery.where(criteriaBuilder.equal(
-            criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
-            criteriaBuilder.lower(paramEmailAddress)
+            criteriaBuilder.upper(root.get(UserAccountEntity_.emailAddress)),
+            criteriaBuilder.upper(paramEmailAddress)
         ));
         criteriaQuery.orderBy(List.of(
             criteriaBuilder.asc(securityRole.get(SecurityRoleEntity_.id)),

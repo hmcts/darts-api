@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.11.0")
+    classpath("org.flywaydb:flyway-database-postgresql:10.11.1")
   }
 }
 
@@ -11,13 +11,13 @@ plugins {
   id 'jacoco'
   id 'idea'
   id 'io.spring.dependency-management' version '1.1.4'
-  id 'org.springframework.boot' version '3.2.2'
+  id 'org.springframework.boot' version '3.2.5'
   id 'org.owasp.dependencycheck' version '9.1.0'
   id 'com.github.ben-manes.versions' version '0.51.0'
   id 'org.sonarqube' version '5.0.0.4638'
   id "io.freefair.lombok" version "8.6"
   id "org.openapi.generator" version "7.4.0"
-  id "org.flywaydb.flyway" version "10.11.0"
+  id "org.flywaydb.flyway" version "10.11.1"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "3.0.0"
 }
@@ -290,7 +290,7 @@ repositories {
 
 ext {
   log4JVersion = "2.23.1"
-  tomcatEmbedVersion = "10.1.20"
+  tomcatEmbedVersion = "10.1.23"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -377,12 +377,12 @@ dependencies {
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
   implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
-  implementation platform('com.azure:azure-sdk-bom:1.2.22')
+  implementation platform('com.azure:azure-sdk-bom:1.2.23')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.11.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.11.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.11.1'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.11.1'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.7.4'
 
   //database
@@ -395,9 +395,11 @@ dependencies {
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
+  implementation group: 'com.google.guava', name: 'guava', version: '33.1.0-jre'
+
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.4.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.6.Final')
 
   // Added to resolve issue where the default Feign client will silently convert GET requests to POST if the request contains a body
   // Ref: https://github.com/spring-cloud/spring-cloud-openfeign/issues/832

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRetentionEventDateCalculatorAutomatedTaskTest {
@@ -15,6 +16,8 @@ class ArmRetentionEventDateCalculatorAutomatedTaskTest {
     private LockProvider lockProvider;
     @Mock
     private ArmRetentionEventDateProcessor armRetentionEventDateProcessor;
+    @Mock
+    private LogApi logApi;
 
     @Test
     void runTask() {
@@ -23,7 +26,8 @@ class ArmRetentionEventDateCalculatorAutomatedTaskTest {
                 null,
                 lockProvider,
                 null,
-                armRetentionEventDateProcessor
+                armRetentionEventDateProcessor,
+                logApi
             );
 
         armRetentionEventDateCalculatorAutomatedTask.runTask();

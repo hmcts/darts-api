@@ -1,0 +1,93 @@
+package uk.gov.hmcts.darts.transcriptions.service.impl;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class TranscriptionServiceGetWorkflowsTest {
+
+    @Mock
+    private TranscriptionRepository transcriptionRepository;
+    @Mock
+    private TranscriptionWorkflowRepository transcriptionWorkflowRepository;
+    @Mock
+    private TranscriptionResponseMapper transcriptionResponseMapper;
+    @Mock
+    private GetTranscriptionWorkflowsResponse mockTranscriptionWorkflowResponse;
+    @Mock
+    private GetTranscriptionWorkflowsResponse mockTranscriptionWorkflowResponse2;
+    @Mock
+    TranscriptionWorkflowEntity mockTranscriptionWorkflowEntity;
+    @Mock
+    TranscriptionWorkflowEntity mockTranscriptionWorkflowEntity2;
+    @InjectMocks
+    private TranscriptionServiceImpl transcriptionService;
+
+    @Test
+    void getCurrentTranscriptionWorkflowSuccess() {
+        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
+        when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(getListOfTranscriptionWorkflows());
+        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(mockTranscriptionWorkflowEntity)))
+            .thenReturn(List.of(mockTranscriptionWorkflowResponse));
+
+        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
+
+        assertEquals(1, transcriptionWorkflows.size());
+        verify(transcriptionRepository, times(1)).findById(anyInt());
+        verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
+    }
+
+    @Test
+    void getTranscriptionWorkflowSuccess() {
+        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
+        when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(getListOfTranscriptionWorkflows());
+        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(getListOfTranscriptionWorkflows()))
+            .thenReturn(List.of(mockTranscriptionWorkflowResponse, mockTranscriptionWorkflowResponse2));
+
+        List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, false);
+
+        assertEquals(2, transcriptionWorkflows.size());
+        verify(transcriptionRepository, times(1)).findById(anyInt());
+        verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenTranscriptionIdNotFound() {
+        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        var transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
+
+        verify(transcriptionRepository, times(1)).findById(any());
+        assertEquals(0, transcriptionWorkflows.size());
+    }
+
+    private List<TranscriptionWorkflowEntity> getListOfTranscriptionWorkflows() {
+
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+        transcriptionWorkflowEntities.add(mockTranscriptionWorkflowEntity);
+        transcriptionWorkflowEntities.add(mockTranscriptionWorkflowEntity2);
+
+        return transcriptionWorkflowEntities;
+    }
+
+}

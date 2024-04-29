@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.util.UUID;
+
 public interface LogApi {
     void eventReceived(DartsEvent event);
 
@@ -36,5 +38,9 @@ public interface LogApi {
 
     void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e);
 
+    void taskStarted(UUID taskExecutionId, String taskName);
 
+    void taskCompleted(UUID taskExecutionId, String taskName);
+
+    void taskFailed(UUID taskExecutionId, String taskName);
 }

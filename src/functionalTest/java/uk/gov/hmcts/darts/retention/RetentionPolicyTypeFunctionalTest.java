@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.retention;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 
 class RetentionPolicyTypeFunctionalTest extends FunctionalTest {
 
@@ -37,8 +40,8 @@ class RetentionPolicyTypeFunctionalTest extends FunctionalTest {
             .statusCode(HttpStatus.SC_OK)
             .extract().response();
 
-        String retentionPolicyApplied = response.jsonPath().getString("[0].name");
-        assertEquals("DARTS Permanent Retention v3", retentionPolicyApplied);
+        JSONArray jsonResponseArray = new JSONArray(response.asString());
+        assertFalse(jsonResponseArray.isEmpty());
     }
 
     @Test

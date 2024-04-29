@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
+import uk.gov.hmcts.darts.log.api.LogApi;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessArmResponseFilesAutomatedTaskTest {
@@ -14,6 +15,8 @@ class ProcessArmResponseFilesAutomatedTaskTest {
     private LockProvider lockProvider;
     @Mock
     private ArmResponseFilesProcessorImpl armResponseFilesProcessor;
+    @Mock
+    private LogApi logApi;
 
     @Test
     void runTask() {
@@ -23,7 +26,8 @@ class ProcessArmResponseFilesAutomatedTaskTest {
                 null,
                 lockProvider,
                 null,
-                armResponseFilesProcessor
+                armResponseFilesProcessor,
+                logApi
             );
 
         // when
