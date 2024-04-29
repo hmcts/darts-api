@@ -3,14 +3,12 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import org.apache.commons.exec.CommandLine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.component.impl.SystemCommandExecutorImpl;
-import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TestUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,8 +17,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -28,85 +28,154 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class AudioOperationServiceImplTest {
+
+class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
 
     private static final String WORKSPACE_DIR = "44887a8c-d918-4907-b9e8-38d5b1bf9c9c";
     private static final String T_09_00_00_Z = "2023-04-28T09:00:00Z";
-    private static final String T_10_30_00_Z = "2023-04-28T10:30:00Z";
-    private static final String T_11_00_00_Z = "2023-04-28T11:00:00Z";
-    private static final String T_11_30_00_Z = "2023-04-28T11:30:00Z";
-    private static final String T_10_30_12_Z = "2023-04-28T10:30:12Z";
+    private static final String T_09_01_00_Z = "2023-04-28T09:01:00Z";
+    private static final String T_09_02_00_Z = "2023-04-28T09:02:00Z";
+    private static final String T_09_02_01_Z = "2023-04-28T09:02:01Z";
+    private static final String T_09_03_00_Z = "2023-04-28T09:03:00Z";
+    private static final String T_09_04_00_Z = "2023-04-28T09:04:00Z";
     private static final String FFMPEG = "/usr/bin/ffmpeg";
     private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
     private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
+    private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
 
     private List<AudioFileInfo> preloadedInputAudioFileInfos;
     private Path tempDirectory;
 
-    @InjectMocks
+    private Path path1;
+    private Path path2;
+
+    @Autowired
     private AudioOperationServiceImpl audioOperationService;
 
-    @Mock
-    private AudioConfigurationProperties audioConfigurationProperties;
-
-    @Mock
-    private SystemCommandExecutorImpl systemCommandExecutor;
 
     @BeforeEach
     void beforeEach() throws IOException {
-        tempDirectory = Files.createTempDirectory("darts_api_unit_test");
+        UUID externalLocation = UUID.randomUUID();
+        tempDirectory = Files.createTempDirectory(externalLocation.toString() + "darts_api_unit_test");
+
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original0.mp2"), REPLACE_EXISTING);
+        path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original1.mp2"), REPLACE_EXISTING);
 
         preloadedInputAudioFileInfos = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
                 .startTime(Instant.parse(T_09_00_00_Z))
-                .endTime(Instant.parse(T_10_30_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
                 .channel(1)
                 .mediaFile("original0.mp2")
-                .path(createFile(tempDirectory, "original0.mp2"))
+                .path(path1)
                 .build(),
             AudioFileInfo.builder()
-                .startTime(Instant.parse(T_10_30_00_Z))
-                .endTime(Instant.parse(T_11_00_00_Z))
+                .startTime(Instant.parse(T_09_01_00_Z))
+                .endTime(Instant.parse(T_09_02_00_Z))
                 .channel(1)
                 .mediaFile("original1.mp2")
-                .path(createFile(tempDirectory, "original1.mp2"))
+                .path(path2)
                 .build()
         ));
     }
 
     @Test
-    void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+    void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() throws IOException {
+
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfos = List.of(
             AudioFileInfo.builder()
                 .startTime(Instant.parse(T_09_00_00_Z))
-                .endTime(Instant.parse(T_10_30_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
                 .channel(1)
-                .mediaFile("original0.mp2")
-                .path(Path.of("/path/to/audio/original0.mp2"))
+                .mediaFile("test1.mp2")
+                .path(path1)
                 .build(),
             AudioFileInfo.builder()
-                .startTime(Instant.parse(T_10_30_00_Z))
-                .endTime(Instant.parse(T_11_00_00_Z))
+                .startTime(Instant.parse(T_09_01_00_Z))
+                .endTime(Instant.parse(T_09_02_00_Z))
                 .channel(1)
-                .mediaFile("original1.mp2")
-                .path(Path.of("/path/to/audio/original1.mp2"))
+                .mediaFile("test2.mp2")
+                .path(path2)
                 .build()
         );
 
+        Path outputPath = tempDirectory.resolve("/audio.mp2");
         CommandLine actualCommand = audioOperationService.generateConcatenateCommand(
             inputAudioFileInfos,
-            Path.of("/path/to/output/audio.mp2")
+            outputPath
         );
 
-        CommandLine expectedCommand = CommandLine.parse(
-            "/usr/bin/ffmpeg -i /path/to/audio/original0.mp2 -i /path/to/audio/original1.mp2"
-                + " -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 /path/to/output/audio.mp2");
+        StringBuilder command = new StringBuilder("ffmpeg -i ").append(path1.toString())
+            .append(" -i ")
+            .append(path2.toString())
+            .append(" -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 ")
+            .append(outputPath.toString());
+        CommandLine expectedCommand = CommandLine.parse(command.toString());
+
+        assertNotNull(actualCommand);
+        assertEquals(expectedCommand.toString(), actualCommand.toString());
+    }
+
+    @Test
+    void shouldGenerateConcatenateCommandWhenMultpleChannelsAreReceived() throws IOException {
+
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
+        Path path3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test3.mp2"), REPLACE_EXISTING);
+        Path path4 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test4.mp2"), REPLACE_EXISTING);
+
+        List<AudioFileInfo> inputAudioFileInfos = List.of(
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
+                .channel(1)
+                .mediaFile("test1.mp2")
+                .path(path1)
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
+                .channel(2)
+                .mediaFile("test2.mp2")
+                .path(path2)
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
+                .channel(3)
+                .mediaFile("test3.mp2")
+                .path(path3)
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
+                .channel(4)
+                .mediaFile("test4.mp2")
+                .path(path4)
+                .build()
+        );
+
+        Path outputPath = tempDirectory.resolve("/audio.mp2");
+        CommandLine actualCommand = audioOperationService.generateConcatenateCommand(
+            inputAudioFileInfos,
+            outputPath
+        );
+
+        StringBuilder command = new StringBuilder("ffmpeg")
+            .append(" -i ").append(path1.toString())
+            .append(" -i ").append(path2.toString())
+            .append(" -i ").append(path3.toString())
+            .append(" -i ").append(path4.toString())
+            .append(" -filter_complex [0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1 ")
+            .append(outputPath.toString());
+        CommandLine expectedCommand = CommandLine.parse(command.toString());
 
         assertNotNull(actualCommand);
         assertEquals(expectedCommand.toString(), actualCommand.toString());
@@ -114,10 +183,6 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnConcatenatedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
-
         AudioFileInfo audioFileInfo = audioOperationService.concatenate(
             WORKSPACE_DIR,
             preloadedInputAudioFileInfos
@@ -126,16 +191,12 @@ class AudioOperationServiceImplTest {
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
+        assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.getEndTime());
         assertFalse(audioFileInfo.isTrimmed());
     }
 
     @Test
     void shouldReturnMergedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioConfigurationProperties.getMergeWorkspace()).thenReturn(tempDirectory.toString());
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
-
         AudioFileInfo audioFileInfo = audioOperationService.merge(
             preloadedInputAudioFileInfos,
             WORKSPACE_DIR
@@ -144,38 +205,34 @@ class AudioOperationServiceImplTest {
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C0-merge-[0-9]*.mp2"));
         assertEquals(0, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
+        assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.getEndTime());
         assertFalse(audioFileInfo.isTrimmed());
     }
 
     @Test
     void shouldReturnTrimmedAudioFileWhenValidInputAudioFile()
         throws ExecutionException, InterruptedException, IOException {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
 
-        Path tempDirectory = createTempDirectory();
-        when(audioConfigurationProperties.getTrimWorkspace()).thenReturn(tempDirectory.toString());
-
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
-        Path file = Files.createFile(tempDirectory.resolve("original.mp2"));
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test1.mp2"), REPLACE_EXISTING);
 
         AudioFileInfo audioFileInfo = audioOperationService.trim(
             WORKSPACE_DIR,
             AudioFileInfo.builder()
                 .startTime(Instant.parse(T_09_00_00_Z))
-                .endTime(Instant.parse(T_10_30_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
                 .channel(1)
-                .mediaFile("original.mp2")
-                .path(file)
+                .mediaFile("test1.mp2")
+                .path(path1)
                 .build(),
-            Duration.of(45, MINUTES),
-            Duration.of(75, MINUTES)
+            Duration.of(15, SECONDS),
+            Duration.of(45, SECONDS)
         );
 
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-trim-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
-        assertEquals(Instant.parse("2023-04-28T09:45:00Z"), audioFileInfo.getStartTime());
-        assertEquals(Instant.parse("2023-04-28T10:15:00Z"), audioFileInfo.getEndTime());
+        assertEquals(Instant.parse("2023-04-28T09:00:15Z"), audioFileInfo.getStartTime());
+        assertEquals(Instant.parse("2023-04-28T09:00:45Z"), audioFileInfo.getEndTime());
         assertTrue(audioFileInfo.isTrimmed());
     }
 
@@ -191,8 +248,8 @@ class AudioOperationServiceImplTest {
             audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(5, SECONDS))
         );
         assertEquals(
-            Instant.parse("2023-04-28T09:01:30Z"),
-            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(90, SECONDS))
+            Instant.parse("2023-04-28T09:00:30Z"),
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(30, SECONDS))
         );
         assertEquals(
             Instant.parse("2023-04-28T10:15:00Z"),
@@ -224,9 +281,6 @@ class AudioOperationServiceImplTest {
     @Test
     void shouldReturnReEncodedAudioFileInfoWhenValidInputAudioFile()
         throws ExecutionException, InterruptedException, IOException {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioConfigurationProperties.getReEncodeWorkspace()).thenReturn(tempDirectory.toString());
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo audioFileInfo = audioOperationService.reEncode(
             WORKSPACE_DIR,
@@ -236,7 +290,7 @@ class AudioOperationServiceImplTest {
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
-        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.getEndTime());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.getEndTime());
         assertFalse(audioFileInfo.isTrimmed());
     }
 
@@ -250,24 +304,24 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGap() throws Exception {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test2.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test3.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
-                .startTime(Instant.parse(T_09_00_00_Z))
-                .endTime(Instant.parse(T_10_30_00_Z))
+                .startTime(Instant.parse(T_09_01_00_Z))
+                .endTime(Instant.parse(T_09_02_00_Z))
                 .channel(1)
-                .mediaFile("original2.mp2")
-                .path(createFile(tempDirectory, "original2.mp2"))
+                .mediaFile("test2.mp2")
+                .path(path1)
                 .build(),
             AudioFileInfo.builder()
-                .startTime(Instant.parse(T_11_00_00_Z))
-                .endTime(Instant.parse(T_11_30_00_Z))
+                .startTime(Instant.parse(T_09_02_01_Z))
+                .endTime(Instant.parse(T_09_03_00_Z))
                 .channel(1)
-                .mediaFile("original3.mp2")
-                .path(createFile(tempDirectory, "original3.mp2"))
+                .mediaFile("test3.mp2")
+                .path(path2)
                 .build()
         ));
 
@@ -279,33 +333,32 @@ class AudioOperationServiceImplTest {
 
         assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(1).getStartTime());
-        assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getStartTime());
+        assertEquals(Instant.parse(T_09_03_00_Z), audioFileInfo.get(0).getEndTime());
         assertFalse(audioFileInfo.get(0).isTrimmed());
     }
 
     @Test
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGapWithSeconds() throws Exception {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
+
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original4.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "original5.mp2"), REPLACE_EXISTING);
 
         List<AudioFileInfo> inputAudioFileInfosWithSecondGaps = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
                 .startTime(Instant.parse(T_09_00_00_Z))
-                .endTime(Instant.parse(T_10_30_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
                 .channel(1)
                 .mediaFile("original4.mp2")
-                .path(createFile(tempDirectory, "original4.mp2"))
+                .path(path1)
                 .build(),
             AudioFileInfo.builder()
-                .startTime(Instant.parse(T_10_30_12_Z))
-                .endTime(Instant.parse(T_11_30_00_Z))
+                .startTime(Instant.parse(T_09_02_00_Z))
+                .endTime(Instant.parse(T_09_03_00_Z))
                 .channel(1)
                 .mediaFile("original5.mp2")
-                .path(createFile(tempDirectory, "original5.mp2"))
+                .path(path2)
                 .build()
         ));
 
@@ -318,17 +371,14 @@ class AudioOperationServiceImplTest {
         assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
-        assertEquals(Instant.parse(T_10_30_12_Z), audioFileInfo.get(1).getStartTime());
-        assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
+        assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.get(1).getStartTime());
+        assertEquals(Instant.parse(T_09_03_00_Z), audioFileInfo.get(1).getEndTime());
         assertFalse(audioFileInfo.get(0).isTrimmed());
     }
 
     @Test
     void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveNoGap() throws Exception {
-        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
-        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
@@ -339,7 +389,7 @@ class AudioOperationServiceImplTest {
         assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(0).getEndTime());
+        assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.get(0).getEndTime());
         assertEquals(1, audioFileInfo.size());
         assertFalse(audioFileInfo.get(0).isTrimmed());
     }
