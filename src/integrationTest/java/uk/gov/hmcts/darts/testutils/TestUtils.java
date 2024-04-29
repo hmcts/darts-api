@@ -34,6 +34,11 @@ public final class TestUtils {
 
     }
 
+    public static File getFile(String filelocation) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        return new File(classLoader.getResource(filelocation).getFile());
+    }
+
     public static String removeIds(String input) {
         return input.replaceAll("\"case_id\".{1,6},", "")
             .replaceAll("\"id\".{1,6},", "");

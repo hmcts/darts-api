@@ -7,16 +7,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Import;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -40,7 +40,6 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
-@Import(SystemCommandExecutorStubImpl.class)
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
@@ -69,6 +68,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     private MediaRequestService mediaRequestService;
 
     private HearingEntity hearing;
+
 
     @BeforeEach
     void setUp() {
@@ -129,7 +129,8 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
     @Test
     @SuppressWarnings("PMD.LawOfDemeter")
-    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
+    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback()
+        throws FileNotDownloadedException, IOException {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
