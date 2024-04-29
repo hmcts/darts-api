@@ -358,7 +358,7 @@ class AudioTransformationServiceImplTest {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
         when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
 
@@ -378,7 +378,7 @@ class AudioTransformationServiceImplTest {
     void testNotifyUserScheduleErrorNotificationNoDefendants() {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -393,7 +393,7 @@ class AudioTransformationServiceImplTest {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
         when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -409,7 +409,7 @@ class AudioTransformationServiceImplTest {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
         when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -420,7 +420,7 @@ class AudioTransformationServiceImplTest {
     void testNotifyUserScheduleErrorNotificationMissingCourthouseName() {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, null, TIME_12_00, TIME_13_00);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -431,7 +431,7 @@ class AudioTransformationServiceImplTest {
     void testNotifyUserScheduleErrorNotificationMissingHearingData() {
         initNotifyUserScheduleErrorNotificationMocks(null, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -442,7 +442,7 @@ class AudioTransformationServiceImplTest {
     void testNotifyUserScheduleErrorNotificationMissingNoStartTime() {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, null, TIME_13_00);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -453,7 +453,7 @@ class AudioTransformationServiceImplTest {
     void testNotifyUserScheduleErrorNotificationMissingNoEndTime() {
         initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, null);
 
-        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        transformedMediaHelper.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
@@ -478,15 +478,15 @@ class AudioTransformationServiceImplTest {
 
     @Test
     void getDayFormat() {
-        assertEquals("st", AudioTransformationServiceImpl.getNthNumber(1));
-        assertEquals("nd", AudioTransformationServiceImpl.getNthNumber(2));
-        assertEquals("rd", AudioTransformationServiceImpl.getNthNumber(3));
-        assertEquals("th", AudioTransformationServiceImpl.getNthNumber(4));
-        assertEquals("th", AudioTransformationServiceImpl.getNthNumber(18));
-        assertEquals("st", AudioTransformationServiceImpl.getNthNumber(21));
-        assertEquals("nd", AudioTransformationServiceImpl.getNthNumber(22));
-        assertEquals("rd", AudioTransformationServiceImpl.getNthNumber(23));
-        assertEquals("th", AudioTransformationServiceImpl.getNthNumber(24));
+        assertEquals("st", TransformedMediaHelper.getNthNumber(1));
+        assertEquals("nd", TransformedMediaHelper.getNthNumber(2));
+        assertEquals("rd", TransformedMediaHelper.getNthNumber(3));
+        assertEquals("th", TransformedMediaHelper.getNthNumber(4));
+        assertEquals("th", TransformedMediaHelper.getNthNumber(18));
+        assertEquals("st", TransformedMediaHelper.getNthNumber(21));
+        assertEquals("nd", TransformedMediaHelper.getNthNumber(22));
+        assertEquals("rd", TransformedMediaHelper.getNthNumber(23));
+        assertEquals("th", TransformedMediaHelper.getNthNumber(24));
     }
 
     @Test
