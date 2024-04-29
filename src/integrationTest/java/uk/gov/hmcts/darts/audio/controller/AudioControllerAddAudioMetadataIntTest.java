@@ -82,7 +82,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
         HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
     }
 
     @Test
