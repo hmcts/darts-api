@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
@@ -43,7 +44,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     public static final LocalDate DATE_27TH_OCTOBER = LocalDate.of(2023, Month.OCTOBER, 27);
     public static final LocalTime LOCAL_TIME = LocalTime.of(13, 1);
-    public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    public static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 

@@ -22,6 +22,16 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
 
     @Query("""
            SELECT me
+           FROM CourtCaseEntity ca
+           JOIN ca.hearings he
+           JOIN he.mediaList me
+           WHERE ca.id = :caseId
+           ORDER BY me.start
+        """)
+    List<MediaEntity> findAllByCaseId(Integer caseId);
+
+    @Query("""
+           SELECT me
            FROM HearingEntity he
            JOIN he.mediaList me
            WHERE he.id = :hearingId

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Integer> {
+public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Integer>, JpaSpecificationExecutor<UserAccountEntity> {
 
     List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
@@ -45,7 +46,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         FROM UserAccountEntity userAccount
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.securityRoleEntity securityRole
-        WHERE (LOWER(userAccount.emailAddress) = LOWER(:emailAddress) OR userAccount.accountGuid = :accountGuid)
+        WHERE (upper(userAccount.emailAddress) = upper(:emailAddress) OR userAccount.accountGuid = :accountGuid)
         AND securityRole.id IN (:roleIds)
         AND securityGroup.globalAccess = true
         """)

@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
@@ -33,7 +34,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class DailyListServiceImpSaveDailyListTest {
-    public static final String CPP = "CPP";
+
     ObjectMapper objectMapper;
 
     @InjectMocks
@@ -66,7 +67,7 @@ class DailyListServiceImpSaveDailyListTest {
             any(String.class)
         )).thenReturn(new DailyListEntity());
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null,
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null,
                                                                 null, null, getDailyListJson(), "some-message-id");
         service.saveDailyListToDatabase(request);
 
@@ -81,7 +82,7 @@ class DailyListServiceImpSaveDailyListTest {
         when(userIdentity.getUserAccount()).thenReturn(user);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
                                                                 null,
@@ -112,7 +113,7 @@ class DailyListServiceImpSaveDailyListTest {
         )).thenReturn(new DailyListEntity());
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
                                                                 getDailyListJson(),
@@ -136,7 +137,7 @@ class DailyListServiceImpSaveDailyListTest {
         dailyListEntity.setCreatedBy(createdByUser);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.of(dailyListEntity));
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
                                                                 "uniqueId",
                                                                 OffsetDateTime.now(),
                                                                 getDailyListJson(),

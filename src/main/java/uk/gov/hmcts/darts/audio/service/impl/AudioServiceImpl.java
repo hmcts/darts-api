@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.common.util.Version;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -325,7 +326,7 @@ public class AudioServiceImpl implements AudioService {
                 addAudioMetadataRequest.getCourthouse(),
                 addAudioMetadataRequest.getCourtroom(),
                 caseNumber,
-                addAudioMetadataRequest.getStartedAt().toLocalDate(),
+                DateConverterUtil.toLocalDateTime(addAudioMetadataRequest.getStartedAt()),
                 userIdentity.getUserAccount()
             );
             hearing.addMedia(savedMedia);

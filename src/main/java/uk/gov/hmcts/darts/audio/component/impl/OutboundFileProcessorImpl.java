@@ -6,10 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.ChannelAudio;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Component
 @RequiredArgsConstructor
@@ -88,30 +92,42 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                                                         OffsetDateTime mediaRequestStartTime,
                                                         OffsetDateTime mediaRequestEndTime)
         throws ExecutionException, InterruptedException, IOException {
+
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
-        List<ChannelAudio> concatenationsList;
-
-        if (isWellFormedAudio(audioFileInfos)) {
-            List<ChannelAudio> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
-            concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
-        } else {
-            concatenationsList = convertChannelsListToFilesList(audioFileInfos);
-        }
-
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
-        for (ChannelAudio audioFileInfoList : concatenationsList) {
-            AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
-            OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(UTC);
-            OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(UTC);
-            AudioFileInfo trimmedAudio = trim(
-                mergedAudio,
-                mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
-                mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
-            );
-            concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
-        }
+        if (isNotEmpty(audioFileInfos)) {
+            String audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
 
+            List<ChannelAudio> concatenationsList = new ArrayList<>();
+
+            if (isWellFormedAudio(audioFileInfos)) {
+                log.debug("Audio files {} are well formed", audioFilenames);
+                List<ChannelAudio> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
+                if (isNotEmpty(concatenatedAudios)) {
+                    concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
+                }
+            } else {
+                log.debug("Audio files {} are not well formed", audioFilenames);
+                concatenationsList = convertChannelsListToFilesList(audioFileInfos);
+            }
+
+            for (ChannelAudio audioFileInfoList : concatenationsList) {
+                AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
+                if (nonNull(mergedAudio)) {
+                    OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(UTC);
+                    OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(UTC);
+                    AudioFileInfo trimmedAudio = trim(
+                        mergedAudio,
+                        mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
+                        mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
+                    );
+                    concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
+                } else {
+                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
+                }
+            }
+        }
         return concatenatedAndMergedAudioFileInfos;
     }
 
@@ -130,22 +146,35 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             Map<Instant, List<AudioFileInfo>> audioFileInfosByStartTime = audioFileInfos.stream()
                 .collect(Collectors.groupingBy(AudioFileInfo::getStartTime));
 
-            // collect number in each start time group
-            List<Integer> numberOfStartTimesList = new ArrayList<>();
-            audioFileInfosByStartTime.forEach((startTime, audioFileInfoList) -> numberOfStartTimesList.add(audioFileInfoList.size()));
+            String audioFilenames = audioFileInfos.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
 
-            boolean numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.get(0)::equals);
-            boolean startTimesMatch = numberOfStartTimesList.stream().allMatch(numberOfStartTimesList.get(0)::equals) && !numberOfStartTimesList.contains(1);
+            if (isNotEmpty(numberOfChannelsList)) {
 
-            return numberOfChannelsMatch && startTimesMatch;
+                // collect number in each start time group
+                List<Integer> numberOfStartTimesList = new ArrayList<>();
+                boolean numberOfChannelsMatch = false;
+                boolean startTimesMatch = false;
+                audioFileInfosByStartTime.forEach((startTime, audioFileInfoList) -> numberOfStartTimesList.add(audioFileInfoList.size()));
+
+                numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.get(0)::equals);
+                startTimesMatch = numberOfStartTimesList.stream().allMatch(numberOfStartTimesList.get(0)::equals)
+                    && !numberOfStartTimesList.contains(1);
+                log.debug("Do channels match: {}, start times match: {} for audios {}", numberOfChannelsMatch, startTimesMatch, audioFilenames);
+                return numberOfChannelsMatch && startTimesMatch;
+            } else {
+                log.debug("Unable to group audio by channels", audioFilenames);
+                return false;
+            }
         }
         return true;
     }
 
     private List<AudioFileInfo> mapToAudioFileInfos(Map<MediaEntity, Path> mediaEntityPathMap) {
         List<AudioFileInfo> audioFileInfos = new ArrayList<>();
-        for (Entry<MediaEntity, Path> mediaEntityPathEntry : mediaEntityPathMap.entrySet()) {
-            audioFileInfos.add(mapToAudioFileInfo(mediaEntityPathEntry));
+        if (nonNull(mediaEntityPathMap)) {
+            for (Entry<MediaEntity, Path> mediaEntityPathEntry : mediaEntityPathMap.entrySet()) {
+                audioFileInfos.add(mapToAudioFileInfo(mediaEntityPathEntry));
+            }
         }
         return audioFileInfos;
     }
@@ -186,28 +215,30 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private List<ChannelAudio> concatenateByChannelWithGaps(List<AudioFileInfo> audioFileInfos)
         throws ExecutionException, InterruptedException, IOException {
-        Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
-            .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
 
         List<ChannelAudio> concatenateByChannelWithGaps = new ArrayList<>();
 
-        for (List<AudioFileInfo> audioFileInfosForChannel : audioFileInfosByChannel.values()) {
-            if (audioFileInfosForChannel.size() == 1) {
-                // If there is only one file then there is nothing to concatenate
-                List<AudioFileInfo> processedAudios = new ArrayList<>();
-                processedAudios.add(audioFileInfosForChannel.get(0));
-                concatenateByChannelWithGaps.add(new ChannelAudio(processedAudios));
-                continue;
+        if (isNotEmpty(audioFileInfos)) {
+            Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
+                .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
+
+            for (List<AudioFileInfo> audioFileInfosForChannel : audioFileInfosByChannel.values()) {
+                if (audioFileInfosForChannel.size() == 1) {
+                    // If there is only one file then there is nothing to concatenate
+                    List<AudioFileInfo> processedAudios = new ArrayList<>();
+                    processedAudios.add(audioFileInfosForChannel.get(0));
+                    concatenateByChannelWithGaps.add(new ChannelAudio(processedAudios));
+                    continue;
+                }
+
+                List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
+                    StringUtils.EMPTY,
+                    audioFileInfosForChannel,
+                    audioConfigurationProperties.getAllowableAudioGapDuration()
+                );
+                concatenateByChannelWithGaps.add(new ChannelAudio(concatenatedAudios));
             }
-
-            List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
-                StringUtils.EMPTY,
-                audioFileInfosForChannel,
-                audioConfigurationProperties.getAllowableAudioGapDuration()
-            );
-            concatenateByChannelWithGaps.add(new ChannelAudio(concatenatedAudios));
         }
-
         return concatenateByChannelWithGaps;
     }
 
@@ -264,38 +295,47 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
         List<ChannelAudio> concatenationsList = new ArrayList<>();
-        int numConcatenations = channelsList.get(0).getAudioFiles().size();
-        for (int i = 0; i < numConcatenations; i++) {
-            List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
-            for (ChannelAudio channelAudio : channelsList) {
-                audioFileInfoList.add(channelAudio.getAudioFiles().get(i));
+        if (isNotEmpty(channelsList)) {
+            int numConcatenations = channelsList.get(0).getAudioFiles().size();
+            for (int i = 0; i < numConcatenations; i++) {
+                List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
+                for (ChannelAudio channelAudio : channelsList) {
+                    audioFileInfoList.add(channelAudio.getAudioFiles().get(i));
+                }
+                concatenationsList.add(new ChannelAudio(audioFileInfoList));
             }
-            concatenationsList.add(new ChannelAudio(audioFileInfoList));
         }
         return concatenationsList;
     }
 
     private static List<ChannelAudio> convertChannelsListToFilesList(List<AudioFileInfo> audioFileInfosByChannel) {
 
-        audioFileInfosByChannel.sort(comparing(AudioFileInfo::getStartTime));
-
         List<ChannelAudio> audioFileInfoByFileList = new ArrayList<>();
         List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
-        AudioFileInfo previousAudio;
-        AudioFileInfo thisAudio = audioFileInfosByChannel.get(0);
-        audioFileInfoList.add(thisAudio);
 
-        for (int counter = 1; counter < audioFileInfosByChannel.size(); counter++) {
-            previousAudio = audioFileInfosByChannel.get(counter - 1);
-            thisAudio = audioFileInfosByChannel.get(counter);
-            if (thisAudio.getStartTime().compareTo(previousAudio.getStartTime()) != 0) {
-                audioFileInfoByFileList.add(new ChannelAudio(audioFileInfoList));
-                audioFileInfoList = new ArrayList<>();
-            }
+        if (isNotEmpty(audioFileInfosByChannel)) {
+
+            final String audioFilenames = audioFileInfosByChannel.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
+            AudioFileInfo previousAudio;
+
+            audioFileInfosByChannel.sort(comparing(AudioFileInfo::getStartTime));
+
+            AudioFileInfo thisAudio = audioFileInfosByChannel.get(0);
             audioFileInfoList.add(thisAudio);
-        }
-        audioFileInfoByFileList.add(new ChannelAudio(audioFileInfoList));
 
+            for (int counter = 1; counter < audioFileInfosByChannel.size(); counter++) {
+                previousAudio = audioFileInfosByChannel.get(counter - 1);
+                thisAudio = audioFileInfosByChannel.get(counter);
+                if (thisAudio.getStartTime().compareTo(previousAudio.getStartTime()) != 0) {
+                    audioFileInfoByFileList.add(new ChannelAudio(audioFileInfoList));
+                    audioFileInfoList = new ArrayList<>();
+                }
+                audioFileInfoList.add(thisAudio);
+            }
+            audioFileInfoByFileList.add(new ChannelAudio(audioFileInfoList));
+            String reorderedAudioFilenames = audioFileInfosByChannel.stream().map(AudioFileInfo::getMediaFile).collect(Collectors.joining(", "));
+            log.debug("Reordered audio files {} to {} by start time", audioFilenames, reorderedAudioFilenames);
+        }
         return audioFileInfoByFileList;
     }
 }

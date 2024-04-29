@@ -26,7 +26,7 @@ import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -45,22 +45,22 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private final AuthorisationApi authorisationApi;
 
     @Override
-    public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
+    public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate) {
         UserAccountEntity userAccount = authorisationApi.getCurrentUser();
         return retrieveOrCreateHearing(courthouseName, courtroomName, caseNumber, hearingDate, userAccount);
     }
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber,
-                                                 LocalDate hearingDate, UserAccountEntity userAccount) {
+                                                 LocalDateTime hearingDate, UserAccountEntity userAccount) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
             courthouseName,
             courtroomName,
             caseNumber,
-            hearingDate
+            hearingDate.toLocalDate()
         );
 
-        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount)).orElseGet(()  -> createHearing(
+        return foundHearing.map(hearingEntity -> setHearingLastDateModifiedBy(hearingEntity, userAccount)).orElseGet(() -> createHearing(
             courthouseName,
             courtroomName,
             caseNumber,
@@ -69,14 +69,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         ));
     }
 
-    private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount) {
+    private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
+                                        UserAccountEntity userAccount) {
         final CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
         final CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
         HearingEntity hearing = new HearingEntity();
 
         hearing.setCourtCase(courtCase);
         hearing.setCourtroom(courtroom);
-        hearing.setHearingDate(hearingDate);
+        hearing.setHearingDate(hearingDate.toLocalDate());
+        hearing.setScheduledStartTime(hearingDate.toLocalTime().withNano(0));
         hearing.setNew(true);
         hearing.setHearingIsActual(false);
         hearing.setCreatedBy(userAccount);

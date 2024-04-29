@@ -19,14 +19,17 @@ import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
@@ -60,6 +63,14 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    public ResponseEntity<List<GetTranscriptionWorkflowsResponse>> adminTranscriptionWorkflowsGet(Integer transcriptionId, Boolean isCurrent)  {
+        return ResponseEntity.ok(transcriptionService.getTranscriptionWorkflows(transcriptionId, isCurrent));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER},
         globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER})
@@ -81,9 +92,18 @@ public class TranscriptionController implements TranscriptionApi {
         securityRoles = {APPROVER, TRANSCRIBER},
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
-                                                                           UpdateTranscription updateTranscription) {
+                                                                           UpdateTranscriptionRequest updateTranscription) {
 
         return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription, false));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<UpdateTranscriptionAdminResponse> updateTranscriptionAdmin(Integer transcriptionId,
+                                                                                     UpdateTranscriptionRequest updateTranscriptionRequest) {
+        return ResponseEntity.ok(transcriptionService.updateTranscriptionAdmin(transcriptionId, updateTranscriptionRequest, false));
     }
 
     @Override
@@ -184,4 +204,14 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<TranscriptionTranscriberCountsResponse> getTranscriptionTranscriberCounts(Integer userId) {
         return ResponseEntity.ok(transcriptionService.getTranscriptionTranscriberCounts(userId));
     }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(
+        contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    @Override
+    public ResponseEntity<List<TranscriptionStatus>> getTranscriptionStatus() {
+        return ResponseEntity.ok(transcriptionService.getTranscriptionStatuses());
+    }
+
 }

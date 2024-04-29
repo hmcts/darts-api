@@ -22,11 +22,19 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.courthouseEntities courthouse
         JOIN securityGroup.securityRoleEntity securityRole
-        WHERE (lower(userAccount.emailAddress) = lower(:emailAddress) or
+        WHERE (upper(userAccount.emailAddress) = upper(:emailAddress) or
         userAccount.accountGuid = :guid)
         AND securityRole.id IN (:roleIds)
         """)
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
+
+    @Query("""
+        SELECT ch.id
+        FROM CourthouseEntity ch
+        WHERE upper(ch.courthouseName) like upper(CONCAT('%', :name, '%'))
+        or upper(ch.displayName) like upper(CONCAT('%', :name, '%'))
+        """)
+    List<Integer> findAllIdByDisplayNameOrNameLike(String name);
 
     Optional<CourthouseEntity> findByDisplayNameIgnoreCase(String displayName);
 

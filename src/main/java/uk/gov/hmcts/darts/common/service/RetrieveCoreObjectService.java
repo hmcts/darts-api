@@ -15,17 +15,18 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface RetrieveCoreObjectService {
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
-    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate);
+    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate);
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
-    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate, UserAccountEntity userAccount);
+    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
+                                          UserAccountEntity userAccount);
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})

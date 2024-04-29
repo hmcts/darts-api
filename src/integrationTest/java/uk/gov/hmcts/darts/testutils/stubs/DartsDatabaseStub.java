@@ -84,6 +84,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static java.time.LocalDate.now;
+import static java.time.LocalDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -255,7 +256,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-        String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+        String caseNumber, String courthouseName, String courtroomName, LocalDateTime hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
@@ -301,7 +302,7 @@ public class DartsDatabaseStub {
     }
 
     public HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber,
-                                       LocalDate hearingDate) {
+                                       LocalDateTime hearingDate) {
         createCourthouseUnlessExists(courthouseName);
         return retrieveCoreObjectService.retrieveOrCreateHearing(
             courthouseName,
@@ -374,7 +375,7 @@ public class DartsDatabaseStub {
     @Transactional
     public MediaRequestEntity createAndLoadOpenMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType) {
 
-        HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
+        HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
         return save(
             AudioTestData.createCurrentMediaRequest(
@@ -390,7 +391,7 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
                                                                                 AudioRequestType audioRequestType) {
 
-        HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
+        HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDateTime.of(2023, 6, 10, 10, 0, 0));
 
         MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
             hearing,
@@ -442,7 +443,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
-        entityManager.merge(annotationEntity.getCurrentOwner());
+        save(annotationEntity.getCurrentOwner());
         return annotationRepository.save(annotationEntity);
     }
 

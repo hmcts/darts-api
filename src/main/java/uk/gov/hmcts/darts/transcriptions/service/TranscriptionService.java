@@ -1,18 +1,23 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
@@ -25,7 +30,10 @@ public interface TranscriptionService {
 
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
-                                                    UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection);
+                                                    UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection);
+
+    UpdateTranscriptionAdminResponse updateTranscriptionAdmin(Integer transcriptionId,
+                                                              UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection);
 
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
@@ -47,5 +55,13 @@ public interface TranscriptionService {
 
     List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses();
 
+    List<TranscriptionStatus> getTranscriptionStatuses();
+
     void closeTranscription(Integer transcriptionId, String transcriptionComment);
+
+    List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId);
+
+    List<CourtCaseEntity> getTranscriptionDocumentsCases(TranscriptionDocumentEntity transcriptionDocumentEntity);
+
+    List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent);
 }

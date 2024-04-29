@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
+    public static final String FUNCTIONAL_TEST = "functional_test";
 
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
@@ -43,11 +46,12 @@ class ArmServiceFunctionalTest {
 
     private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
 
-    private final List<String> armCollectedBlobsToBeDeleted = new ArrayList<>();
+    private final List<String> armBlobsWithPathToBeDeleted = new ArrayList<>();
 
 
     @Test
     void saveBlobData() {
+        log.info("------------------  saveBlobData test");
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -56,12 +60,12 @@ class ArmServiceFunctionalTest {
         armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
         log.info("Blob filename {}", actualResult);
-
+        cleanupArmBlobData();
     }
 
     @Test
     void listSubmissionBlobs() {
-
+        log.info("------------------  listSubmissionBlobs test");
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String filename = String.format("functional_test_%s", UUID.randomUUID());
@@ -70,13 +74,70 @@ class ArmServiceFunctionalTest {
         String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
 
         log.info("Saved blob {} in {}", actualResult, blobPathAndName);
-        armSubmissionBlobsToBeDeleted.add(actualResult);
+        armBlobsWithPathToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
-        log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
-        List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
+        List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, FUNCTIONAL_TEST);
         assertFalse(submissionBlobs.isEmpty());
 
+        cleanupArmBlobData();
+    }
+
+    @Test
+    void listBlobsUsingBatch() {
+        log.info("------------------  listBlobsUsingBatch test");
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        uploadBatchedSubmissionBlobs(data);
+
+        Integer batchSize = 5;
+        List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, FUNCTIONAL_TEST, batchSize);
+        for (String blobPathAndName : blobs) {
+            log.info("Blob about to be deleted {}", blobPathAndName);
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        }
+
+        assertFalse(blobs.isEmpty());
+    }
+
+    @Test
+    void listBlobsUsingMarker() {
+        log.info("------------------  listBlobsUsingMarker test");
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        uploadBatchedSubmissionBlobs(data);
+        Integer batchSize = 3;
+        String continuationToken = null;
+        List<String> allBlobs = new ArrayList<>();
+        do {
+            ContinuationTokenBlobs continuationTokenBlobs = armService.listSubmissionBlobsWithMarker(
+                armContainerName, FUNCTIONAL_TEST, batchSize, continuationToken);
+            continuationToken = continuationTokenBlobs.getContinuationToken();
+            log.info("continuationToken: \n{}", continuationToken);
+            log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesAndPaths().size());
+            allBlobs.addAll(continuationTokenBlobs.getBlobNamesAndPaths());
+            for (String blobPathAndName : continuationTokenBlobs.getBlobNamesAndPaths()) {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            }
+        } while (nonNull(continuationToken));
+
+        assertFalse(allBlobs.isEmpty());
+    }
+
+    private void uploadBatchedSubmissionBlobs(BinaryData data) {
+        for (int counter = 0; counter < 11; counter++) {
+            String filename = String.format("functional_test_%s", UUID.randomUUID());
+            String blobPathAndName = armSubmissionDropZone + filename;
+
+            String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
+
+            log.info("{} Saved blob {}", counter, actualResult);
+            armBlobsWithPathToBeDeleted.add(actualResult);
+        }
     }
 
     @AfterEach
@@ -88,9 +149,9 @@ class ArmServiceFunctionalTest {
         }
         armSubmissionBlobsToBeDeleted.clear();
 
-        for (String blobPathAndName : armCollectedBlobsToBeDeleted) {
+        for (String blobPathAndName : armBlobsWithPathToBeDeleted) {
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         }
-        armCollectedBlobsToBeDeleted.clear();
+        armBlobsWithPathToBeDeleted.clear();
     }
 }

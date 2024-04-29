@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -98,6 +99,12 @@ class DailyListProcessorTest extends IntegrationBase {
         report.registerResult(PROCESSED);
         report.registerResult(IGNORED);
 
+        List<DailyListEntity> savedDailyLists = dailyListRepository.findAll();
+        List<JobStatusType> dailyListStatuses = savedDailyLists.stream().map(dailyList -> dailyList.getStatus()).toList();
+        long countOfProcessed = dailyListStatuses.stream().filter(status -> status.equals(PROCESSED)).count();
+        assertEquals(1, countOfProcessed);
+        long countOfIgnored = dailyListStatuses.stream().filter(status -> status.equals(IGNORED)).count();
+        assertEquals(1, countOfIgnored);
         assertFalse(logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).isEmpty());
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();

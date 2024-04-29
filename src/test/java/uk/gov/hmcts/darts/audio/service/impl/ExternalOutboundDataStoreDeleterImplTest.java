@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreD
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundExternalObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
@@ -66,16 +67,26 @@ class ExternalOutboundDataStoreDeleterImplTest {
     private List<TransientObjectDirectoryEntity> createOutboundData() {
         TransientObjectDirectoryEntity outboundAudio = new TransientObjectDirectoryEntity();
         outboundAudio.setStatus(markedForDeletionStatus);
-        outboundAudio.setId(1);
+        int id1 = 1;
+        outboundAudio.setId(id1);
+        outboundAudio.setTransformedMedia(createTransformedMedia(id1));
 
         TransientObjectDirectoryEntity outboundAudio2 = new TransientObjectDirectoryEntity();
         outboundAudio2.setStatus(markedForDeletionStatus);
-        outboundAudio2.setId(21);
+        int id2 = 21;
+        outboundAudio2.setId(id2);
+        outboundAudio2.setTransformedMedia(createTransformedMedia(id2));
 
         List<TransientObjectDirectoryEntity> outboundList = new ArrayList<>();
         outboundList.add(outboundAudio);
         outboundList.add(outboundAudio2);
         return outboundList;
+    }
+
+    private TransformedMediaEntity createTransformedMedia(int id) {
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(id);
+        return transformedMediaEntity;
     }
 
     @Test

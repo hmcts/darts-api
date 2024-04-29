@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
@@ -237,7 +238,8 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     private String getHearingDate(CaseDocumentEntity caseDocument) {
         String hearingDate = null;
         if (CollectionUtils.isNotEmpty(caseDocument.getCourtCase().getHearings())) {
-            hearingDate = caseDocument.getCourtCase().getHearings().get(0).getHearingDate().format(dateFormatter);
+            hearingDate = OffsetDateTime.of(caseDocument.getCourtCase().getHearings().get(0).getHearingDate().atTime(0, 0, 0),
+                                            ZoneOffset.UTC).format(dateTimeFormatter);
         }
         return hearingDate;
     }

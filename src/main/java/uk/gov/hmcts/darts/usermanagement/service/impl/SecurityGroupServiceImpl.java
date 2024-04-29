@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -15,22 +14,26 @@ import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.usermanagement.component.validation.impl.SecurityGroupCreationValidation;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPostRequest;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
+import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_ALLOWED;
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 
 @Service
@@ -44,7 +47,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityGroupMapper securityGroupMapper;
     private final SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
     private final SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
-    private final Validator<SecurityGroupModel> securityGroupCreationValidation;
+    private final SecurityGroupCreationValidation securityGroupCreationValidation;
+
+    private final List<SecurityRoleEnum> securityRolesAllowedToBeCreatedInGroup = List.of(SecurityRoleEnum.TRANSCRIBER, SecurityRoleEnum.TRANSLATION_QA);
 
     @Override
     public SecurityGroupWithIdAndRoleAndUsers getSecurityGroup(Integer securityGroupId) {
@@ -56,9 +61,10 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     @Override
     @Transactional
-    public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroupRequest) {
+    public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroupPostRequest securityGroupRequest) {
+        validateCreateSecurityGroupRequest(securityGroupRequest);
+
         SecurityGroupModel securityGroupModel = securityGroupMapper.mapToSecurityGroupModel(securityGroupRequest);
-        securityGroupModel.setRoleId(SecurityRoleEnum.TRANSCRIBER.getId());
 
         SecurityGroupEntity createdSecurityGroupEntity = createAndSaveSecurityGroup(securityGroupModel);
 
@@ -66,6 +72,17 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupPostResponse.setSecurityRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
 
         return securityGroupPostResponse;
+    }
+
+    private void validateCreateSecurityGroupRequest(SecurityGroupPostRequest securityGroupRequest) {
+        //check the roleType is allowed
+        SecurityRoleEnum requestedSecurityRole = SecurityRoleEnum.valueOfId(securityGroupRequest.getSecurityRoleId());
+        if (!securityRolesAllowedToBeCreatedInGroup.contains(requestedSecurityRole)) {
+            List<String> listOfAllowedRoleNames = securityRolesAllowedToBeCreatedInGroup.stream().map(role -> role.name()).toList();
+            String errorMessage = MessageFormat.format("A group with a role of type {0} has been requested, but only roles of type {1} are allowed.",
+                                                       requestedSecurityRole.name(), listOfAllowedRoleNames);
+            throw new DartsApiException(SECURITY_GROUP_NOT_ALLOWED, errorMessage);
+        }
     }
 
     @Override
@@ -83,7 +100,8 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
-    public List<SecurityGroupWithIdAndRole> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
+    public List<SecurityGroupWithIdAndRoleAndUsers> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
+
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
 
         securityGroupEntities = filterSecurityGroupEntitiesByRoleIds(securityGroupEntities, roleIds);
@@ -91,8 +109,14 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupEntities = filterSecurityGroupEntitiesByUserId(securityGroupEntities, userId);
         securityGroupEntities = filterSecurityGroupEntitiesBySingleUser(securityGroupEntities, singletonUser);
 
+        if (isNull(courthouseId)) {
+            securityGroupEntities.forEach(entity -> entity.getUsers().clear());
+        }
+
         return securityGroupEntities.stream()
-            .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
+            .map(securityGroupWithIdAndRoleAndUsersMapper::mapToSecurityGroupWithIdAndRoleAndUsers).toList();
+
+
     }
 
     @Transactional
@@ -135,7 +159,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         List<Integer> courthouseIds = securityGroupPatch.getCourthouseIds();
         if (courthouseIds != null) {
             Set<CourthouseEntity> courthouseEntities = new HashSet<>();
-            for (Integer courthouseId: courthouseIds) {
+            for (Integer courthouseId : courthouseIds) {
                 Optional<CourthouseEntity> courthouseEntity = courthouseRepository.findById(courthouseId);
                 if (courthouseEntity.isPresent()) {
                     courthouseEntities.add(courthouseEntity.get());
@@ -156,7 +180,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         if (userIds != null) {
             securityGroupEntity.getUsers().forEach(userAccountEntity -> userAccountEntity.getSecurityGroupEntities().remove(securityGroupEntity));
             securityGroupEntity.getUsers().clear();
-            for (Integer userId: userIds) {
+            for (Integer userId : userIds) {
                 Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
                 if (userAccountEntity.isPresent()) {
                     userAccountEntity.get().getSecurityGroupEntities().add(securityGroupEntity);

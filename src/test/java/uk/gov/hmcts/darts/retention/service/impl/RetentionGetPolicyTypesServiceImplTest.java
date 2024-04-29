@@ -7,14 +7,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionPolicyTypeMapper;
-import uk.gov.hmcts.darts.retention.service.RetentionPolicyTypeService;
-import uk.gov.hmcts.darts.retention.validation.CreateOrRevisePolicyTypeValidator;
+import uk.gov.hmcts.darts.retention.validation.CreatePolicyTypeValidator;
+import uk.gov.hmcts.darts.retention.validation.LivePolicyValidator;
+import uk.gov.hmcts.darts.retention.validation.PolicyDisplayNameIsUniqueValidator;
+import uk.gov.hmcts.darts.retention.validation.PolicyDurationValidator;
+import uk.gov.hmcts.darts.retention.validation.PolicyHasNoPendingRevisionValidator;
+import uk.gov.hmcts.darts.retention.validation.PolicyNameIsUniqueValidator;
+import uk.gov.hmcts.darts.retention.validation.PolicyStartDateIsFutureValidator;
+import uk.gov.hmcts.darts.retention.validation.RevisePolicyTypeValidator;
 import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 
 import java.time.OffsetDateTime;
@@ -42,34 +47,44 @@ class RetentionGetPolicyTypesServiceImplTest {
     private RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     @Mock
     private AuthorisationApi authorisationApi;
-    @Mock
-    private Validator<String> policyDurationValidator;
-    @Mock
-    private CreateOrRevisePolicyTypeValidator createOrRevisePolicyTypeValidator;
-    @Mock
-    private Validator<String> policyTypeRevisionValidator;
-    @Mock
-    private Validator<String> policyTypeCreationValidator;
 
-    private RetentionPolicyTypeService retentionService;
+    @Mock
+    private PolicyDurationValidator policyDurationValidator;
+    @Mock
+    private CreatePolicyTypeValidator createPolicyTypeValidator;
+    @Mock
+    private RevisePolicyTypeValidator revisePolicyTypeValidator;
+    @Mock
+    private PolicyNameIsUniqueValidator policyNameIsUniqueValidator;
+    @Mock
+    private PolicyDisplayNameIsUniqueValidator policyDisplayNameIsUniqueValidator;
+    @Mock
+    private PolicyStartDateIsFutureValidator policyStartDateIsFutureValidator;
+    @Mock
+    private LivePolicyValidator livePolicyValidator;
+    @Mock
+    private PolicyHasNoPendingRevisionValidator policyHasNoPendingRevisionValidator;
 
+    private RetentionPolicyTypeServiceImpl retentionService;
 
     private void setupStubs() {
-
         retentionService = new RetentionPolicyTypeServiceImpl(
             retentionPolicyTypeMapper,
-        retentionPolicyTypeRepository,
-        authorisationApi,
-        createOrRevisePolicyTypeValidator,
-        policyDurationValidator,
-        policyTypeRevisionValidator,
-        policyTypeCreationValidator
+            retentionPolicyTypeRepository,
+            authorisationApi,
+            policyDurationValidator,
+            createPolicyTypeValidator,
+            revisePolicyTypeValidator,
+            policyNameIsUniqueValidator,
+            policyDisplayNameIsUniqueValidator,
+            policyStartDateIsFutureValidator,
+            livePolicyValidator,
+            policyHasNoPendingRevisionValidator
         );
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
         when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
-
     }
 
     @Test
@@ -122,7 +137,6 @@ class RetentionGetPolicyTypesServiceImplTest {
         assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND, exception.getError());
 
         verifyNoInteractions(retentionPolicyTypeMapper);
-
 
 
     }

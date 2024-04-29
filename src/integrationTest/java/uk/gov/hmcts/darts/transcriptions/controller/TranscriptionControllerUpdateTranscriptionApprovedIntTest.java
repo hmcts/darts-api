@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import java.net.URI;
 import java.util.List;
@@ -39,6 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUTHORISE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
@@ -80,7 +81,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         transcriptionId = transcriptionEntity.getId();
 
         doNothing().when(authorisation).authoriseByTranscriptionId(
-            transcriptionId, Set.of(APPROVER, TRANSCRIBER));
+            transcriptionId, Set.of(SUPER_ADMIN));
 
         testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
@@ -97,7 +98,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionId).orElseThrow();
         CourthouseEntity courthouse = existingTranscription.getCourtCase().getCourthouse();
         dartsDatabase.getUserAccountStub().createTranscriptionCompanyUser(courthouse);
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
@@ -141,7 +142,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @Test
     void updateTranscriptionApprovedWithComment() throws Exception {
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("APPROVED");
 
@@ -185,7 +186,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
     @Test
     void updateTranscriptionShouldReturnTranscriptionNotFoundError() throws Exception {
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("APPROVED");
 
@@ -211,7 +212,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
     @Test
     void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
         updateTranscription.setWorkflowComment("APPROVED");
 
@@ -243,7 +244,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         transcriptCreatorId = authorisationStub.getTestUser().getId();
 
-        UpdateTranscription updateTranscription = new UpdateTranscription();
+        UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("APPROVED");
 

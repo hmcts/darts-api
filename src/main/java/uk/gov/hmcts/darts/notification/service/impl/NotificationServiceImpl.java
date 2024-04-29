@@ -3,13 +3,11 @@ package uk.gov.hmcts.darts.notification.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -35,28 +33,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-@RequiredArgsConstructor
 @Service
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
-    private final NotificationRepository notificationRepo;
-
-    private final CaseRepository caseRepository;
-    private final GovNotifyService govNotifyService;
-    private final TemplateIdHelper templateIdHelper;
-    private final GovNotifyRequestHelper govNotifyRequestHelper;
-    private final EmailValidator emailValidator = EmailValidator.getInstance();
     private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
         NotificationStatus.OPEN,
         NotificationStatus.PROCESSING
     );
 
-    @Value("${darts.notification.max_retry_attempts}")
-    private int maxRetry;
-
+    private final NotificationRepository notificationRepo;
+    private final CaseRepository caseRepository;
+    private final GovNotifyService govNotifyService;
+    private final TemplateIdHelper templateIdHelper;
+    private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final LogApi logApi;
+    private final boolean notificationsEnabled;
+    private final boolean atsMode;
+    private final int maxRetry;
+
+    public NotificationServiceImpl(
+        NotificationRepository notificationRepo,
+        CaseRepository caseRepository,
+        GovNotifyService govNotifyService,
+        TemplateIdHelper templateIdHelper,
+        GovNotifyRequestHelper govNotifyRequestHelper,
+        LogApi logApi,
+        @Value("${darts.notification.enabled}") boolean notificationsEnabled,
+        @Value("${darts.automated-tasks-pod}") boolean atsMode,
+        @Value("${darts.notification.max_retry_attempts}") int maxRetry) {
+
+        this.notificationRepo = notificationRepo;
+        this.caseRepository = caseRepository;
+        this.govNotifyService = govNotifyService;
+        this.templateIdHelper = templateIdHelper;
+        this.govNotifyRequestHelper = govNotifyRequestHelper;
+        this.logApi = logApi;
+        this.notificationsEnabled = notificationsEnabled;
+        this.atsMode = atsMode;
+        this.maxRetry = maxRetry;
+    }
 
     @Override
     @Transactional
@@ -131,7 +147,9 @@ public class NotificationServiceImpl implements NotificationService {
         lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
-        sendNotificationToGovNotifyNow();
+        if (notificationsEnabled && !atsMode) {
+            sendNotificationToGovNotifyNow();
+        }
     }
 
     @Override

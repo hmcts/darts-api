@@ -5,13 +5,16 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +23,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTI
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -35,22 +40,43 @@ public class EodHelper {
     private final ExternalLocationTypeRepository eltRepository;
     private final ObjectRecordStatusRepository orsRepository;
 
-    @Getter private static ExternalLocationTypeEntity unstructuredLocation;
-    @Getter private static ExternalLocationTypeEntity armLocation;
-    @Getter private static ExternalLocationTypeEntity detsLocation;
-    @Getter private static ExternalLocationTypeEntity inboundLocation;
+    @Getter
+    private static ExternalLocationTypeEntity unstructuredLocation;
+    @Getter
+    private static ExternalLocationTypeEntity armLocation;
+    @Getter
+    private static ExternalLocationTypeEntity detsLocation;
+    @Getter
+    private static ExternalLocationTypeEntity inboundLocation;
 
-    @Getter private static ObjectRecordStatusEntity armIngestionStatus;
-    @Getter private static ObjectRecordStatusEntity armDropZoneStatus;
-    @Getter private static ObjectRecordStatusEntity armProcessingResponseFilesStatus;
-    @Getter private static ObjectRecordStatusEntity failedArmRawDataStatus;
-    @Getter private static ObjectRecordStatusEntity failedArmManifestFileStatus;
-    @Getter private static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
-    @Getter private static ObjectRecordStatusEntity storedStatus;
-    @Getter private static ObjectRecordStatusEntity markForDeletionStatus;
-    @Getter private static ObjectRecordStatusEntity awaitingVerificationStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armIngestionStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armDropZoneStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armProcessingResponseFilesStatus;
+    @Getter
+    private static ObjectRecordStatusEntity failedArmRawDataStatus;
+    @Getter
+    private static ObjectRecordStatusEntity failedArmManifestFileStatus;
+    @Getter
+    private static ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
+    @Getter
+    private static ObjectRecordStatusEntity storedStatus;
+    @Getter
+    private static ObjectRecordStatusEntity markForDeletionStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armResponseProcessingFailedStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armResponseManifestFailedStatus;
+    @Getter
+    private static ObjectRecordStatusEntity armResponseChecksumVerificationFailedStatus;
+    @Getter
+    private static ObjectRecordStatusEntity awaitingVerificationStatus;
 
-    @Getter private static List<ObjectRecordStatusEntity> failedArmStatuses;
+    @Getter
+    private static List<ObjectRecordStatusEntity> failedArmStatuses;
+
 
     @PostConstruct
     public void init() {
@@ -67,9 +93,13 @@ public class EodHelper {
         EodHelper.failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
         EodHelper.armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
         EodHelper.armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
+        EodHelper.armResponseProcessingFailedStatus = orsRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).orElseThrow();
+        EodHelper.armResponseManifestFailedStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
+        EodHelper.armResponseChecksumVerificationFailedStatus = orsRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).orElseThrow();
         EodHelper.awaitingVerificationStatus = orsRepository.findById(AWAITING_VERIFICATION.getId()).orElseThrow();
 
-        EodHelper.failedArmStatuses  = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
+        EodHelper.failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
+
     }
 
     public static boolean isEqual(ObjectRecordStatusEntity ors1, ObjectRecordStatusEntity ors2) {
@@ -84,4 +114,13 @@ public class EodHelper {
         return Arrays.stream(orsEntitiesToCompareTo).map(ObjectRecordStatusEntity::getId).anyMatch(orsToCompareTo -> orsToCompareTo.equals(ors.getId()));
     }
 
+    @Transactional
+    public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Integer> idsToBeUpdated, OffsetDateTime timestamp) {
+        eodRepository.updateStatus(
+            EodHelper.markForDeletionStatus(),
+            user,
+            idsToBeUpdated,
+            OffsetDateTime.now()
+        );
+    }
 }

@@ -62,4 +62,13 @@ public final class TestUtils {
     public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove) {
         JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), JSONCompareMode.NON_EXTENSIBLE);
     }
+
+    public static String encodeToString(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+
+        return result.toString();
+    }
 }

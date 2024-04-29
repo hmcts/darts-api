@@ -2,10 +2,14 @@
   "transcription_id": 1,
   "case_id": 101,
   "case_number": "case1",
+  "courthouse_id": 1001,
   "courthouse": "case_courthouse",
   "status": "APPROVED",
   "from": "testUsername",
   "received": "2020-06-20T10:10:00Z",
+  "requestor": {
+    "user_full_name": "testUsername"
+  },
   "requestor_comments": "workflowcommenta1",
   "defendants": [
     "defendant_case1_1",

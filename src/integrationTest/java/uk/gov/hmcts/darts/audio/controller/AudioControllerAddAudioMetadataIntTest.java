@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.LogUtil;
 import uk.gov.hmcts.darts.common.util.Version;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
@@ -113,11 +114,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
 
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", STARTED_AT.toLocalDate());
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", STARTED_AT.toLocalDate());
+        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", STARTED_AT.toLocalDate());
+        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
         eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1", fileSize);

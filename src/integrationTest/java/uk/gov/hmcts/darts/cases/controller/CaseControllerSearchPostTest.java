@@ -181,6 +181,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         String requestBody = """
             {
               "courthouse": "SWANSEA",
+              "courtroom": "courtroom",
               "date_to": "2023-09-20",
               "date_from": "2023-05-20"
             }""";
@@ -204,7 +205,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             {
               "courthouse": "SWANSEA",
               "courtroom": "1",
-              "event_text_contains": "5b"
+              "event_text_contains": "t5b"
             }""";
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
@@ -226,7 +227,7 @@ class CaseControllerSearchPostTest extends IntegrationBase {
             {
               "courthouse": "SWANSEA",
               "courtroom": "1",
-              "judge_name": "3a"
+              "judge_name": "e3a"
             }""";
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)

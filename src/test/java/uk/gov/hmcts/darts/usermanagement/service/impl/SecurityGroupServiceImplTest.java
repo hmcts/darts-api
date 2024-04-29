@@ -5,16 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.usermanagement.component.validation.impl.SecurityGroupCreationValidation;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupCourthouseMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
@@ -47,7 +46,7 @@ class SecurityGroupServiceImplTest {
     @Mock
     SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
     @Mock
-    Validator<SecurityGroupModel> securityGroupCreationValidation;
+    SecurityGroupCreationValidation securityGroupCreationValidation;
 
     @BeforeEach
     void setUp() {
@@ -194,9 +193,9 @@ class SecurityGroupServiceImplTest {
         Integer userId = 2;
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
@@ -214,9 +213,9 @@ class SecurityGroupServiceImplTest {
         Integer userId = 20;
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
@@ -234,9 +233,9 @@ class SecurityGroupServiceImplTest {
         Boolean singletonUser = true;
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         addUserAccountsToSecurityGroups(securityGroupEntities);
@@ -254,9 +253,9 @@ class SecurityGroupServiceImplTest {
         Boolean singletonUser = false;
 
         List<SecurityGroupEntity> securityGroupEntities = List.of(
-            createSecurityGroupEntity(1,10,20),
-            createSecurityGroupEntity(2,11,21),
-            createSecurityGroupEntity(3,12,22)
+            createSecurityGroupEntity(1, 10, 20),
+            createSecurityGroupEntity(2, 11, 21),
+            createSecurityGroupEntity(3, 12, 22)
         );
 
         addUserAccountsToSecurityGroups(securityGroupEntities);

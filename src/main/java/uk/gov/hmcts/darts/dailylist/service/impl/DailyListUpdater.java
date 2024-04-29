@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
 
 import java.time.DateTimeException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
@@ -77,19 +78,24 @@ class DailyListUpdater {
                             continue;
                         }
 
+                        LocalTime scheduledStartTime = getScheduledStartTime(sitting, dailyListHearing);
+                        LocalDateTime hearingDateTime = dailyListHearing.getHearingDetails().getHearingDate().atTime(scheduledStartTime);
+
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                             courtHouseName, sitting.getCourtRoomNumber(),
-                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate(),
+                            caseNumber, hearingDateTime,
                             dailyListSystemUser
                         );
 
+                        hearing.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
+
                         CourtCaseEntity courtCase = hearing.getCourtCase();
+                        courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
                         updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
                         addDefenders(courtCase, dailyListHearing.getDefendants());
-                        hearing.setScheduledStartTime(getScheduledStartTime(sitting, dailyListHearing));
                         hearingRepository.saveAndFlush(hearing);
                     }
                 }
@@ -144,7 +150,7 @@ class DailyListUpdater {
     }
 
 
-    private LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
+    protected LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
         String rawTime;
         if (StringUtils.isNotBlank(timeMarkingNote)) {
 
@@ -156,7 +162,7 @@ class DailyListUpdater {
                 rawTime = timeMarkingNote;
             }
 
-            return LocalTime.parse(rawTime, new DateTimeFormatterBuilder()
+            return LocalTime.parse(rawTime.strip(), new DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
                 .appendPattern(TIME_MARKING_NOTE_FORMAT)
                 .toFormatter(Locale.ENGLISH));
@@ -186,6 +192,9 @@ class DailyListUpdater {
 
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
+        if (hearing.getProsecution() == null) {
+            return;
+        }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate ->
@@ -197,9 +206,12 @@ class DailyListUpdater {
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
-            for (PersonalDetails personalDetails : defendant.getCounsel()) {
+            for (PersonalDetails counselDetails : defendant.getCounsel()) {
+                if (counselDetails == null) {
+                    continue;
+                }
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(personalDetails.getName()), courtCase, dailyListSystemUser));
+                    buildFullName(counselDetails.getName()), courtCase, dailyListSystemUser));
             }
         }
     }

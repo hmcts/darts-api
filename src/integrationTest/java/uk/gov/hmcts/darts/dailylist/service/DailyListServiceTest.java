@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
@@ -32,7 +33,6 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 class DailyListServiceTest extends IntegrationBase {
 
-    static final String CPP = "CPP";
     static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
@@ -59,7 +59,7 @@ class DailyListServiceTest extends IntegrationBase {
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList, "some-message-id");
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null, null, null, dailyList, "some-message-id");
 
         service.saveDailyListToDatabase(request);
 
@@ -77,7 +77,7 @@ class DailyListServiceTest extends IntegrationBase {
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, "someXml", null, null, dailyList, "some-message-id");
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, "someXml", null, null, dailyList, "some-message-id");
 
         service.saveDailyListToDatabase(request);
 
@@ -95,10 +95,10 @@ class DailyListServiceTest extends IntegrationBase {
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList, "some-message-id");
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null, null, null, dailyList, "some-message-id");
         service.saveDailyListToDatabase(request);
 
-        request = new DailyListPostRequest(CPP, null, null, "someXml", null, null, dailyList, "some-message-id");
+        request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, "someXml", null, null, dailyList, "some-message-id");
         service.saveDailyListToDatabase(request);
 
         List<DailyListEntity> resultList = dailyListRepository.findAll();
@@ -117,14 +117,14 @@ class DailyListServiceTest extends IntegrationBase {
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList, "some-message-id");
+        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null, null, null, dailyList, "some-message-id");
         service.saveDailyListToDatabase(request);
 
         String requestBody2 = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest2.json");
         DailyListJsonObject dailyList2 = MAPPER.readValue(requestBody2, DailyListJsonObject.class);
 
-        DailyListPostRequest request2 = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList2, "some-message-id");
+        DailyListPostRequest request2 = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null, null, null, dailyList2, "some-message-id");
         service.saveDailyListToDatabase(request2);
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(1, resultList.size());
@@ -150,7 +150,7 @@ class DailyListServiceTest extends IntegrationBase {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         DailyListPostRequest requestWithXml = new DailyListPostRequest(
-            CPP,
+            SourceType.CPP.toString(),
             "SWANSEA",
             LocalDate.now(),
             "theXml",

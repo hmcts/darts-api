@@ -75,11 +75,9 @@ class UserManagementServiceImplTest {
     void testGetUser() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
-        Mockito.when(userManagementQuery.getUsers(
-            eq(EXISTING_EMAIL_ADDRESS)
-        )).thenReturn(userAccountEntities);
+        Mockito.when(userManagementQuery.getUsers(eq(EXISTING_EMAIL_ADDRESS), eq(null))).thenReturn(userAccountEntities);
 
-        List<UserWithIdAndTimestamps> resultList = service.getUsers(EXISTING_EMAIL_ADDRESS);
+        List<UserWithIdAndTimestamps> resultList = service.getUsers(EXISTING_EMAIL_ADDRESS, null);
 
         assertEquals(userAccountEntities.get(0).getUserName(), resultList.get(0).getFullName());
         assertEquals(userAccountEntities.get(0).getEmailAddress(), resultList.get(0).getEmailAddress());

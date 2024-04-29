@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
-import uk.gov.hmcts.darts.authorisation.model.Permission;
-import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.authorisation.model.UserStateRole;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
@@ -61,10 +61,17 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             UserAccountEntity_.securityGroupEntities,
             JoinType.LEFT
         );
+
+        Join<SecurityGroupEntity, CourthouseEntity> courthouses = securityGroup.join(
+            SecurityGroupEntity_.courthouseEntities,
+            JoinType.LEFT
+        );
+
         Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
             SecurityGroupEntity_.securityRoleEntity,
             JoinType.LEFT
         );
+
         Join<SecurityRoleEntity, SecurityPermissionEntity> securityPermission = securityRole.join(
             SecurityRoleEntity_.securityPermissionEntities,
             JoinType.LEFT
@@ -74,6 +81,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                                  GetAuthorisationResult.class,
                                  root.get(UserAccountEntity_.id),
                                  root.get(UserAccountEntity_.userName),
+                                 securityGroup.get(SecurityGroupEntity_.globalAccess),
+                                 courthouses.get(CourthouseEntity_.id),
                                  securityRole.get(SecurityRoleEntity_.id),
                                  securityRole.get(SecurityRoleEntity_.roleName),
                                  securityPermission.get(SecurityPermissionEntity_.id),
@@ -83,8 +92,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
         criteriaQuery.where(criteriaBuilder.equal(
-            criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
-            criteriaBuilder.lower(paramEmailAddress)
+            criteriaBuilder.upper(root.get(UserAccountEntity_.emailAddress)),
+            criteriaBuilder.upper(paramEmailAddress)
         ));
         criteriaQuery.orderBy(List.of(
             criteriaBuilder.asc(securityRole.get(SecurityRoleEntity_.id)),
@@ -104,11 +113,13 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         }
 
         UserState.UserStateBuilder userStateBuilder = UserState.builder();
-        Set<Role> roles = new LinkedHashSet<>();
+        Set<UserStateRole> roles = new LinkedHashSet<>();
         userStateBuilder.roles(roles);
 
         Integer tmpRoleId = 0;
-        Set<Permission> permissions = new LinkedHashSet<>();
+        Set<String> permissions = new LinkedHashSet<>();
+        Set<Integer> courthouses = new LinkedHashSet<>();
+
         for (GetAuthorisationResult result : getAuthorisationResultList) {
             userStateBuilder.userId(result.userId());
             userStateBuilder.userName(result.userName());
@@ -116,9 +127,13 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             Integer roleId = result.roleId();
             if (roleId != null && !tmpRoleId.equals(roleId)) {
                 permissions = new LinkedHashSet<>();
-                roles.add(Role.builder()
+                courthouses = new LinkedHashSet<>();
+
+                roles.add(UserStateRole.builder()
                               .roleId(roleId)
                               .roleName(result.roleName())
+                              .globalAccess(result.globalAccess())
+                              .courthouseIds(courthouses)
                               .permissions(permissions)
                               .build());
 
@@ -127,10 +142,11 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
             Integer permissionId = result.permissionId();
             if (permissionId != null) {
-                permissions.add(Permission.builder()
-                                    .permissionId(permissionId)
-                                    .permissionName(result.permissionName())
-                                    .build());
+                permissions.add(result.permissionName());
+            }
+            Integer courthouseId = result.courthouseId();
+            if ((result.globalAccess() == null || !result.globalAccess()) && courthouseId != null) {
+                courthouses.add(courthouseId);
             }
         }
 

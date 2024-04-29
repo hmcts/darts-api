@@ -1,5 +1,6 @@
 server:
   port: 4550
+  max-http-request-header-size: 10MB
 
 management:
   endpoint:
@@ -143,7 +144,6 @@ darts:
   daily-list:
     housekeeping:
       enabled: true
-      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
@@ -151,8 +151,9 @@ darts:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
   notification:
+    enabled: ${NOTIFICATION_SCHEDULER_ENABLED:true}
     scheduler:
-      cron: ${NOTIFICATION_SCHEDULER_CRON:3 */2 * * * MON-FRI}
+      cron: ${NOTIFICATION_SCHEDULER_CRON:3/60 * * * * *}
     max_retry_attempts: 3
     gov-notify:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}
@@ -170,7 +171,10 @@ darts:
     overridable-fixed-policy-keys: 3
     close-open-cases-older-than-years: 6
     close-events: "Case closed,Archive case"
+    max-retention-retries: 3
   storage:
+    inbound:
+      temp-blob-workspace: ${user.home}/inbound/tempworkspace
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
       container-name: dropzone
@@ -192,16 +196,18 @@ darts:
       file-extension: a360
       list-blobs-timeout-duration: 60s
 
-      media-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/media-record.properties
-      transcription-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/transcription-record.properties
-      annotation-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/annotation-record.properties
-      case-record-properties-file: properties/arm/${ARM_PROPERTY_FILE_ENVIRONMENT}/case-record.properties
+      media-record-properties-file: properties/arm/media-record.properties
+      transcription-record-properties-file: properties/arm/transcription-record.properties
+      annotation-record-properties-file: properties/arm/annotation-record.properties
+      case-record-properties-file: properties/arm/case-record.properties
 
       response-cleanup-buffer-days: 0
+      event-date-adjustment-years: 100
 
       batch-size: ${ARM_BATCH_SIZE:10}
       manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}
       arm-client: ${ARM_CLIENT:darts}
+      continuation-token-duration: PT60M
 
     arm-api:
       arm-username: ${ARM_USERNAME:}
@@ -288,3 +294,4 @@ dbMigration:
 logging:
   level:
     uk.gov.hmcts.darts: ${DARTS_LOG_LEVEL:INFO}
+    net.javacrumbs.shedlock: ${DARTS_LOG_LEVEL:INFO}

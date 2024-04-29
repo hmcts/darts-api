@@ -14,14 +14,15 @@ import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +38,8 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
     public static final String SOME_ROOM = "some-room";
     public static final String SOME_OTHER_ROOM = "some-other-room";
     public static final String SOME_CASE_NUMBER = "some-case-number";
-    private final OffsetDateTime today = now();
+    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 23, 10, 0, 0);
+    private static final OffsetDateTime HEARING_DATE_ODT = HEARING_DATE.atOffset(ZoneOffset.UTC);
 
     @Autowired
     EventDispatcher eventDispatcher;
@@ -59,7 +61,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         dartsDatabase.save(someMinimalCase());
         DartsEvent dartsEvent = someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE);
         dartsEvent.setCaseNumbers(List.of("123"));
-        dartsEvent.setDateTime(today);
+        dartsEvent.setDateTime(HEARING_DATE_ODT);
         assertThatThrownBy(() -> eventDispatcher.receive(dartsEvent))
             .isInstanceOf(DartsApiException.class);
     }
@@ -77,7 +79,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
-                                    .dateTime(today));
+                                    .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -87,7 +89,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE,
             SOME_ROOM,
-            today.toLocalDate()
+            HEARING_DATE_ODT.toLocalDate()
         );
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
@@ -115,7 +117,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
-                                    .dateTime(today));
+                                    .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -123,7 +125,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -152,7 +154,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
-                                    .dateTime(today));
+                                    .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -160,7 +162,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         ).get();
 
         var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_OTHER_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -171,7 +173,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
 
         assertTrue(
-            dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate()).isEmpty());
+            dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
         dartsGateway.verifyReceivedNotificationType(3);
     }
@@ -182,7 +184,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM,
-            today.toLocalDate()
+            HEARING_DATE
         );
         dartsGateway.darNotificationReturnsSuccess();
 
@@ -190,7 +192,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
-                                    .dateTime(today));
+                                    .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -198,7 +200,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -241,7 +243,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
                     .caseNumbers(List.of("asyncTestCaseNumber"))
                     .courthouse(SOME_COURTHOUSE)
                     .courtroom("asyncTestCourtroom")
-                    .dateTime(today.withNano(nanoSec))
+                    .dateTime(HEARING_DATE_ODT.withNano(nanoSec))
                     .eventId(null);
                 eventDispatcher.receive(dartsEvent);
                 latch.countDown();

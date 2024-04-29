@@ -28,6 +28,12 @@ public class WorkflowValidator {
     private final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> automaticWorkflowTransitionRules =
         new EnumMap<>(TranscriptionStatusEnum.class);
 
+    private final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> manualWorkflowTransitionRulesAdmin =
+        new EnumMap<>(TranscriptionStatusEnum.class);
+
+    private final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> automaticWorkflowTransitionRulesAdmin =
+        new EnumMap<>(TranscriptionStatusEnum.class);
+
     public WorkflowValidator() {
         manualWorkflowTransitionRules.put(REQUESTED, Set.of(AWAITING_AUTHORISATION, CLOSED));
         manualWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED, CLOSED));
@@ -37,21 +43,46 @@ public class WorkflowValidator {
         manualWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
         manualWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
 
+        manualWorkflowTransitionRulesAdmin.put(REQUESTED, Set.of(CLOSED));
+        manualWorkflowTransitionRulesAdmin.put(AWAITING_AUTHORISATION, Set.of(REQUESTED, CLOSED));
+        manualWorkflowTransitionRulesAdmin.put(APPROVED, Set.of(CLOSED));
+        manualWorkflowTransitionRulesAdmin.put(REJECTED, Collections.emptySet());
+        manualWorkflowTransitionRulesAdmin.put(WITH_TRANSCRIBER, Set.of(APPROVED, CLOSED));
+        manualWorkflowTransitionRulesAdmin.put(COMPLETE, Collections.emptySet());
+        manualWorkflowTransitionRulesAdmin.put(CLOSED, Collections.emptySet());
+
         automaticWorkflowTransitionRules.put(REQUESTED, Set.of(APPROVED, CLOSED));
         automaticWorkflowTransitionRules.put(APPROVED, Set.of(WITH_TRANSCRIBER, CLOSED));
         automaticWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED));
         automaticWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
         automaticWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
+
+        automaticWorkflowTransitionRulesAdmin.put(REQUESTED, Set.of(CLOSED));
+        automaticWorkflowTransitionRulesAdmin.put(APPROVED, Set.of(CLOSED));
+        automaticWorkflowTransitionRulesAdmin.put(WITH_TRANSCRIBER, Set.of(APPROVED, COMPLETE, CLOSED));
+        automaticWorkflowTransitionRulesAdmin.put(COMPLETE, Collections.emptySet());
+        automaticWorkflowTransitionRulesAdmin.put(CLOSED, Collections.emptySet());
     }
 
     public boolean validateChangeToWorkflowStatus(boolean isManual, TranscriptionTypeEnum transcriptionTypeEnum,
                                                   TranscriptionStatusEnum currentTranscriptionStatus,
-                                                  TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
+                                                  TranscriptionStatusEnum desiredTargetTranscriptionStatus, boolean isAdmin) {
+
+        Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> rulesToUse;
         if (isManual) {
-            return isValid(manualWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
-                           isManual);
+            if (isAdmin) {
+                rulesToUse = manualWorkflowTransitionRulesAdmin;
+            } else {
+                rulesToUse = manualWorkflowTransitionRules;
+            }
+        } else {
+            if (isAdmin) {
+                rulesToUse = automaticWorkflowTransitionRulesAdmin;
+            } else {
+                rulesToUse = automaticWorkflowTransitionRules;
+            }
         }
-        return isValid(automaticWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
+        return isValid(rulesToUse, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
                        isManual);
     }
 
@@ -60,7 +91,7 @@ public class WorkflowValidator {
                             TranscriptionStatusEnum desiredTargetTranscriptionStatus,
                             TranscriptionTypeEnum transcriptionTypeEnum, boolean isManual) {
         boolean isValid = transitionRules.get(currentTranscriptionStatus) != null
-                          && transitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus);
+            && transitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus);
         if (!isValid) {
             log.warn("Unable to go from workflow state {} to {} for type {} for isManual {}",
                      currentTranscriptionStatus,

@@ -6,9 +6,10 @@ import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDel
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
 
 @Slf4j
 public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutomatedTask {
@@ -18,14 +19,15 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
     private final ExternalOutboundDataStoreDeleter outboundDeleter;
 
 
-    protected String taskName = EXTERNAL_DATASTORE_DELETER.getTaskName();
+    protected String taskName = EXTERNAL_DATASTORE_DELETER_TASK_NAME.getTaskName();
 
     public ExternalDataStoreDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                                  AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
                                                  ExternalInboundDataStoreDeleter inboundDeleter,
                                                  ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
-                                                 ExternalOutboundDataStoreDeleter outboundDeleter) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
+                                                 ExternalOutboundDataStoreDeleter outboundDeleter,
+                                                 LogApi logApi) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
         this.inboundDeleter = inboundDeleter;
         this.unstructuredDeleter = unstructuredDeleter;
         this.outboundDeleter = outboundDeleter;

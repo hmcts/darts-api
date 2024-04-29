@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface UserManagementQuery {
 
-    List<UserAccountEntity> getUsers(String emailAddress);
+    List<UserAccountEntity> getUsers(String emailAddress, List<Integer> userIds);
 
 }

@@ -58,9 +58,10 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                       {
                         "name": "ACME",
                         "display_name": "ACME Transcription Services",
-                        "description": "A temporary group created by functional test"
+                        "description": "A temporary group created by functional test",
+                        "security_role_id": 4
                       }
-                        """)
+                      """)
             .post()
             .thenReturn();
 
@@ -114,18 +115,18 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .thenReturn();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+        List<SecurityGroupWithIdAndRoleAndUsers> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+                                                                                              new TypeReference<List<SecurityGroupWithIdAndRoleAndUsers>>() {
                                                                                               });
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
-        List<SecurityGroupWithIdAndRole> staticGroups =
+        List<SecurityGroupWithIdAndRoleAndUsers> staticGroups =
             securityGroupWithIdAndRoles.stream()
                 .filter(group -> group.getId() == 1
                     || group.getId() >= -6 && group.getId() <= -1
                     || group.getId() >= -17 && group.getId() <= -14
                     || group.getSecurityRoleId() == SecurityRoleEnum.SUPER_USER.getId())
-                .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed())
+                .sorted(Comparator.comparingInt(SecurityGroupWithIdAndRoleAndUsers::getId).reversed())
                 .toList();
 
         checkGroup(staticGroups.get(0), "SUPER_USER", true, 12, true, null);
@@ -143,7 +144,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
 
     }
 
-    private void checkGroup(SecurityGroupWithIdAndRole group, String name, boolean globalAccess, Integer roleId, boolean displayState,
+    private void checkGroup(SecurityGroupWithIdAndRoleAndUsers group, String name, boolean globalAccess, Integer roleId, boolean displayState,
                             Integer courtroomId) {
         assertEquals(name, group.getName());
         assertEquals(globalAccess, group.getGlobalAccess());
@@ -158,12 +159,13 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     void shouldPatchSecurityGroups() throws JsonProcessingException {
 
         String postContent = """
-                         {
-                           "name": "<func-a-security-group>",
-                           "display_name": "<A security group>",
-                           "description": "func-test group"
-                         }
-                           """;
+            {
+              "name": "<func-a-security-group>",
+              "display_name": "<A security group>",
+              "description": "func-test group",
+              "security_role_id": 4
+            }
+            """;
         postContent = postContent.replace("<func-a-security-group>", "func-a-security-group " + UUID.randomUUID());
         postContent = postContent.replace("<A security group>", "A security group " + UUID.randomUUID());
 
@@ -177,14 +179,14 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         assertEquals(201, response.getStatusCode());
 
         String patchContent = """
-                         {
-                           "name": "<func-a-security-group-new-name>",
-                           "display_name": "<A security group new name>",
-                           "description": "func-test group new description",
-                           "courthouse_ids": [<id1>,<id2>],
-                           "user_ids": [<userId1>,<userId2>]
-                         }
-                           """;
+            {
+              "name": "<func-a-security-group-new-name>",
+              "display_name": "<A security group new name>",
+              "description": "func-test group new description",
+              "courthouse_ids": [<id1>,<id2>],
+              "user_ids": [<userId1>,<userId2>]
+            }
+            """;
         String newName = "func-a-security-group-new-name " + UUID.randomUUID();
         patchContent = patchContent.replace("<func-a-security-group-new-name>", newName);
         String newDisplayName = "A security group new name " + UUID.randomUUID();
@@ -203,7 +205,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         patchContent = patchContent.replace("<userId2>", Integer.toString(userId2));
 
         SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
-                                                                                  new TypeReference<SecurityGroupWithIdAndRole>(){});
+                                                                                  new TypeReference<SecurityGroupWithIdAndRole>() {
+                                                                                  });
 
         response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/security-groups/" + securityGroupWithIdAndRoles.getId()))
@@ -213,7 +216,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .thenReturn();
 
         SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = MAPPER.readValue(response.asString(),
-                                                                                                 new TypeReference<SecurityGroupWithIdAndRoleAndUsers>(){});
+                                                                                                 new TypeReference<SecurityGroupWithIdAndRoleAndUsers>() {
+                                                                                                 });
 
         assertEquals(newName, securityGroupWithIdAndRoleAndUsers.getName());
         assertEquals(newDisplayName, securityGroupWithIdAndRoleAndUsers.getDisplayName());
@@ -230,7 +234,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .thenReturn();
 
         SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
-                                                                                           new TypeReference<SecurityGroupWithIdAndRole>(){});
+                                                                                           new TypeReference<SecurityGroupWithIdAndRole>() {
+                                                                                           });
 
         assertEquals(newName, retrievedSecurityGroupWithIdAndRoles.getName());
         assertEquals(newDisplayName, retrievedSecurityGroupWithIdAndRoles.getDisplayName());
@@ -253,18 +258,19 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .thenReturn();
 
         ExtendedCourthousePost extendedCourthousePost = MAPPER.readValue(response.asString(),
-                                                                         new TypeReference<ExtendedCourthousePost>(){});
+                                                                         new TypeReference<ExtendedCourthousePost>() {
+                                                                         });
         return extendedCourthousePost.getId();
     }
 
     private Response createUser(String email) {
         String request = """
-              {
-                   "full_name": "James Smith",
-                   "email_address": "<email>",
-                   "description": "A temporary user created by functional test"
-              }
-              """;
+            {
+                 "full_name": "James Smith",
+                 "email_address": "<email>",
+                 "description": "A temporary user created by functional test"
+            }
+            """;
         request = request.replace("<email>", email);
 
         Response response = buildRequestWithExternalGlobalAccessAuth()

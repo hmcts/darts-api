@@ -21,47 +21,46 @@
 To run the functional tests locally, you must set the following environment variables on your machine.
 The required value of each variable is stored in Azure Key Vault as a Secret.
 
-| Environment Variable Name                 | Corresponding Azure Key Vault Secret Name |
-|-------------------------------------------|-------------------------------------------|
-| GOVUK_NOTIFY_API_KEY                      | GovukNotifyTestApiKey                     |
-| FUNC_TEST_ROPC_USERNAME                   | AzureAdB2CFuncTestROPCUsername            |
-| FUNC_TEST_ROPC_PASSWORD                   | AzureAdB2CFuncTestROPCPassword            |
-| AAD_B2C_TENANT_ID                         | AzureAdB2CTenantId                        |
-| AAD_B2C_CLIENT_ID                         | AzureAdB2CClientId                        |
-| AAD_B2C_CLIENT_SECRET                     | AzureAdB2CClientSecret                    |
-| AAD_B2C_ROPC_CLIENT_ID                    | AzureAdB2CFuncTestROPCClientId            |
-| AAD_B2C_ROPC_CLIENT_SECRET                | AzureAdB2CFuncTestROPCClientSecret        |
-| AZURE_STORAGE_CONNECTION_STRING           | AzureStorageConnectionString              |
-| AAD_TENANT_ID                             | AzureADTenantId                           |
-| AAD_CLIENT_ID                             | AzureADClientId                           |
-| AAD_CLIENT_SECRET                         | AzureADClientSecret                       |
-| XHIBIT_USER_NAME                          | XhibitUserName                            |
-| XHIBIT_PASSWORD                           | XhibitPassword                            |
-| CPP_USER_NAME                             | CppUserName                               |
-| CPP_PASSWORD                              | CppPassword                               |
-| DARPC_USER_NAME                           | DarPcUserName                             |
-| DARPC_PASSWORD                            | DarPcPassword                             |
-| SYSTEM_USER_EMAIL                         | DartsSystemUserEmail                      |
-| DAR_MIDTIER_USER_NAME                     | DarMidTierUserName                        |
-| DAR_MIDTIER_PASSWORD                      | DarMidTierPassword                        |
-| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME  | AzureAdB2CFuncTestROPCGlobalUsername      |
-| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD  | AzureAdB2CFuncTestROPCGlobalPassword      |
-| AZURE_AD_FUNCTIONAL_TEST_USERNAME         | AzureADFunctionalTestUsername             |
-| AZURE_AD_FUNCTIONAL_TEST_PASSWORD         | AzureADFunctionalTestPassword             |
-| ARM_SAS_ENDPOINT                          | ARMSasEndpoint                            |
-| ARM_URL                                   | ArmUrl                                    |
-| DETS_SAS_URL_ENDPOINT                     | DETSSasURLEndpoint                        |
-| ARM_USERNAME                              | ArmUsername                               |
-| ARM_PASSWORD                              | ArmPassword                               |
-| AAD_TENANT_ID_JUSTICE                     | AzureADTenantIdJustice                    |
-| AAD_CLIENT_ID_JUSTICE                     | AzureADClientIdJustice                    |
-| AAD_CLIENT_SECRET_JUSTICE                 | AzureADClientSecretJustice                |
+| Environment Variable Name                | Corresponding Azure Key Vault Secret Name |
+|------------------------------------------|-------------------------------------------|
+| GOVUK_NOTIFY_API_KEY                     | GovukNotifyTestApiKey                     |
+| FUNC_TEST_ROPC_USERNAME                  | AzureAdB2CFuncTestROPCUsername            |
+| FUNC_TEST_ROPC_PASSWORD                  | AzureAdB2CFuncTestROPCPassword            |
+| AAD_B2C_TENANT_ID                        | AzureAdB2CTenantId                        |
+| AAD_B2C_CLIENT_ID                        | AzureAdB2CClientId                        |
+| AAD_B2C_CLIENT_SECRET                    | AzureAdB2CClientSecret                    |
+| AAD_B2C_ROPC_CLIENT_ID                   | AzureAdB2CFuncTestROPCClientId            |
+| AAD_B2C_ROPC_CLIENT_SECRET               | AzureAdB2CFuncTestROPCClientSecret        |
+| AZURE_STORAGE_CONNECTION_STRING          | AzureStorageConnectionString              |
+| AAD_TENANT_ID                            | AzureADTenantId                           |
+| AAD_CLIENT_ID                            | AzureADClientId                           |
+| AAD_CLIENT_SECRET                        | AzureADClientSecret                       |
+| XHIBIT_USER_NAME                         | XhibitUserName                            |
+| XHIBIT_PASSWORD                          | XhibitPassword                            |
+| CPP_USER_NAME                            | CppUserName                               |
+| CPP_PASSWORD                             | CppPassword                               |
+| DARPC_USER_NAME                          | DarPcUserName                             |
+| DARPC_PASSWORD                           | DarPcPassword                             |
+| SYSTEM_USER_EMAIL                        | DartsSystemUserEmail                      |
+| DAR_MIDTIER_USER_NAME                    | DarMidTierUserName                        |
+| DAR_MIDTIER_PASSWORD                     | DarMidTierPassword                        |
+| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME | AzureAdB2CFuncTestROPCGlobalUsername      |
+| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD | AzureAdB2CFuncTestROPCGlobalPassword      |
+| AZURE_AD_FUNCTIONAL_TEST_USERNAME        | AzureADFunctionalTestUsername             |
+| AZURE_AD_FUNCTIONAL_TEST_PASSWORD        | AzureADFunctionalTestPassword             |
+| ARM_SAS_ENDPOINT                         | ARMSasEndpoint                            |
+| ARM_URL                                  | ArmUrl                                    |
+| DETS_SAS_URL_ENDPOINT                    | DETSSasURLEndpoint                        |
+| ARM_USERNAME                             | ArmUsername                               |
+| ARM_PASSWORD                             | ArmPassword                               |
+| AAD_TENANT_ID_JUSTICE                    | AzureADTenantIdJustice                    |
+| AAD_CLIENT_ID_JUSTICE                    | AzureADClientIdJustice                    |
+| AAD_CLIENT_SECRET_JUSTICE                | AzureADClientSecretJustice                |
 
 There are few attributes which doesn't use Azure Keyvault secrets. Those environment variable values are controlled dynamically via Flux config
 
 | Environment Variable Name     | Value                                                            |
 |-------------------------------|------------------------------------------------------------------|
-| ARM_PROPERTY_FILE_ENVIRONMENT | nle                                                              |
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
 
@@ -343,3 +342,4 @@ _Disclaimer: The script has been written to work using `bash`._
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+

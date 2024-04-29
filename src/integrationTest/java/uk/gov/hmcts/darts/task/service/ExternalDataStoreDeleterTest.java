@@ -36,7 +36,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -103,7 +103,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             "NEWCASTLE",
             "Int Test Courtroom 2",
             "2",
-            LocalDate.now()
+            LocalDateTime.now()
         );
 
         SystemUserHelper systemUserHelper = new SystemUserHelper(dartsDatabase.getUserAccountRepository());

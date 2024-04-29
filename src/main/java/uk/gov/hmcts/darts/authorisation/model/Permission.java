@@ -7,9 +7,6 @@ import lombok.Value;
 @Builder
 @Value
 public class Permission {
-
-    @NonNull
-    private Integer permissionId;
     @NonNull
     private String permissionName;
 

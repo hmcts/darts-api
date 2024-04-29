@@ -7,21 +7,27 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
+import uk.gov.hmcts.darts.transcriptions.model.Requestor;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionWorkflowsComment;
 import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,6 +71,36 @@ public class TranscriptionResponseMapper {
         return transcriptionUrgencyResponse;
     }
 
+    public List<GetTranscriptionWorkflowsResponse> mapToTranscriptionWorkflowsResponse(
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {
+        return emptyIfNull(transcriptionWorkflowEntities).stream()
+            .map(this::mapToTranscriptionWorkflows)
+            .collect(toList());
+    }
+
+    private GetTranscriptionWorkflowsResponse mapToTranscriptionWorkflows(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
+
+        GetTranscriptionWorkflowsResponse transcriptionWorkflowsResponse = new GetTranscriptionWorkflowsResponse();
+        transcriptionWorkflowsResponse.setWorkflowActor(transcriptionWorkflowEntity.getWorkflowActor().getId());
+        transcriptionWorkflowsResponse.setStatusId(transcriptionWorkflowEntity.getTranscriptionStatus().getId());
+        transcriptionWorkflowsResponse.setWorkflowTs(transcriptionWorkflowEntity.getWorkflowTimestamp());
+        transcriptionWorkflowsResponse.setComments(mapToTranscriptionComments(transcriptionWorkflowEntity.getTranscriptionComments()));
+
+        return transcriptionWorkflowsResponse;
+    }
+
+    private List<TranscriptionWorkflowsComment> mapToTranscriptionComments(List<TranscriptionCommentEntity> transcriptionCommentEntities) {
+        List<TranscriptionWorkflowsComment> transcriptionWorkflowsComments = new ArrayList<>();
+        for (TranscriptionCommentEntity commentEntity : transcriptionCommentEntities) {
+            TranscriptionWorkflowsComment transcriptionWorkflowsComment = new TranscriptionWorkflowsComment();
+            transcriptionWorkflowsComment.setComment(commentEntity.getComment());
+            transcriptionWorkflowsComment.setCommentedAt(commentEntity.getCommentTimestamp());
+            transcriptionWorkflowsComment.setAuthorId(commentEntity.getAuthorUserId());
+            transcriptionWorkflowsComments.add(transcriptionWorkflowsComment);
+        }
+        return transcriptionWorkflowsComments;
+    }
+
     public GetTranscriptionByIdResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {
         CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
         if (isNull(courtCase)) {
@@ -76,6 +112,7 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setTranscriptionId(transcriptionEntity.getId());
         transcriptionResponse.setCaseId(courtCase.getId());
         transcriptionResponse.setCaseNumber(courtCase.getCaseNumber());
+        transcriptionResponse.setCourthouseId(courtCase.getCourthouse().getId());
         transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
         transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
         transcriptionResponse.setJudges(courtCase.getJudgeStringList());
@@ -85,8 +122,15 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setStatus(transcriptionStatusEntity.getDisplayName());
         }
 
-        transcriptionResponse.setFrom(getRequestorName(transcriptionEntity));
+        String requestorName = getRequestorName(transcriptionEntity);
+        transcriptionResponse.setFrom(requestorName);
         transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
+
+        Requestor requestor = new Requestor();
+        requestor.setUserFullName(requestorName);
+        requestor.setUserId(getRequestorId(transcriptionEntity));
+        transcriptionResponse.setRequestor(requestor);
+
         transcriptionResponse.setRequestorComments(TranscriptionUtil.getTranscriptionCommentAtStatus(
             transcriptionEntity,
             TranscriptionStatusEnum.REQUESTED
@@ -174,6 +218,14 @@ public class TranscriptionResponseMapper {
             return transcriptionEntity.getCreatedBy().getUserName();
         } else {
             return transcriptionEntity.getRequestor();
+        }
+    }
+
+    private Integer getRequestorId(TranscriptionEntity transcriptionEntity) {
+        if (transcriptionEntity.getCreatedBy() != null) {
+            return transcriptionEntity.getCreatedBy().getId();
+        } else {
+            return null;
         }
     }
 }
