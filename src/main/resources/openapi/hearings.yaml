@@ -288,7 +288,7 @@ components:
           example: "Joe Bloggs"
         status:
           type: string
-          example: "Available"
+          example: "COMPLETE"
     annotation:
       type: object
       properties:
