@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
@@ -28,6 +29,8 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
 
     private final TranscriptionsApi transcriptionsApi;
 
+    private final CaseManagementRetentionService caseManagementRetentionService;
+
     public SentencingRemarksAndRetentionPolicyHandler(RetrieveCoreObjectService retrieveCoreObjectService,
                                                       EventRepository eventRepository,
                                                       HearingRepository hearingRepository,
@@ -35,17 +38,21 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
                                                       ApplicationEventPublisher eventPublisher,
                                                       TranscriptionsApi transcriptionsApi,
                                                       AuthorisationApi authorisationApi,
-                                                      LogApi logApi) {
+                                                      LogApi logApi,
+                                                      CaseManagementRetentionService caseManagementRetentionService) {
         super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
         this.transcriptionsApi = transcriptionsApi;
+        this.caseManagementRetentionService = caseManagementRetentionService;
     }
 
     @Override
     @Transactional
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
+
         var transcriptionRequestDetails = transcriptionRequestDetailsFrom(
             dartsEvent,
-            createHearingAndSaveEvent(dartsEvent, eventHandler).getHearingEntity());
+            hearingAndEvent.getHearingEntity());
 
         transcriptionRequestDetails.setTranscriptionTypeId(SENTENCING_REMARKS.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(STANDARD.getId());
@@ -56,6 +63,14 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("Transcription Automatically approved");
         transcriptionsApi.updateTranscription(transcriptionResponse.getTranscriptionId(), updateTranscription);
+
+        // store retention information for potential future use
+        if (dartsEvent.getRetentionPolicy() != null) {
+            caseManagementRetentionService.createCaseManagementRetention(
+                hearingAndEvent.getEventEntity(),
+                hearingAndEvent.getHearingEntity().getCourtCase(),
+                dartsEvent.getRetentionPolicy());
+        }
     }
 
 }
