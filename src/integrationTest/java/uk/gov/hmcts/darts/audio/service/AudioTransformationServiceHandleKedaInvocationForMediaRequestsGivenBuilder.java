@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -48,7 +47,6 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     private HearingEntity hearingEntity;
     private UserAccountEntity userAccountEntity;
 
-    @SneakyThrows
     public void aMediaEntityGraph() {
 
         var inboundLocation = ExternalLocationTypeEnum.INBOUND;
