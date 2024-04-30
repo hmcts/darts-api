@@ -1,21 +1,33 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.unit.DataSize;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.testutils.InMemoryMultipart;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.EventStub;
@@ -25,6 +37,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +46,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
+
+    @Value("${local.server.port}")
+    protected int port;
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
@@ -48,6 +65,12 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     HearingStub hearingStub;
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize addAudioThreshold;
 
     @BeforeEach
     void beforeEach() {
@@ -90,7 +113,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
         );
 
-
         mockMvc.perform(
                 multipart(ENDPOINT)
                     .file(audioFile)
@@ -129,6 +151,57 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
+    }
+
+    @Test
+    void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
+        InMemoryMultipart audioFile =  InMemoryMultipart.getMultiPartOfRandomisedLengthKb(
+            "file",
+            "audio.mp3",
+            // add one onto the threshold so we are going to fail
+            addAudioThreshold.toBytes() + 1
+        );
+
+        UserAccountEntity testUser = authorisationStub.getSystemUser();
+        dartsDatabase.getUserAccountRepository().save(testUser);
+
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
+
+        try {
+            streamFileWithMetaData(audioFile,  addAudioMetadataRequest, "http://localhost:" + port + "/audios");
+            Assertions.fail();
+        } catch (RestClientException restClientException) {
+            String expectedJson = """
+            400 : "{"title":"Bad Request","status":400,"detail":"Maximum upload size exceeded"}"
+            """;
+
+            assertEquals(expectedJson.trim(), restClientException.getMessage());
+        }
+    }
+
+    public <T> void streamFileWithMetaData(InMemoryMultipart multipartFile, T metadata, String url) {
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        map.put("metadata", Collections.singletonList(metadata));
+        map.put("file", List.of(multipartFile.getResource()));
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+
+        restTemplate.postForEntity(url, requestEntity, String.class);
     }
 
     @Test
