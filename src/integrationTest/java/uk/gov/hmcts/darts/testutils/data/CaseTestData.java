@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.testutils.data;
 
 import lombok.experimental.UtilityClass;
+import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
 import java.util.Random;
 
+import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.*;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendantForCaseWithName;
@@ -15,10 +17,8 @@ import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createProsecu
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseTestData {
 
-    private static final Random RANDOM = new Random();
-
     public static CourtCaseEntity createSomeMinimalCase() {
-        int postfix = RANDOM.nextInt(100000, 999999);
+        var postfix = random(10);
         var courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setCourthouse(someMinimalCourthouse());
         courtCaseEntity.setCaseNumber("case-1-" + postfix);

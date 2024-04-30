@@ -7,15 +7,14 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import java.util.Random;
 import java.util.Set;
 
+import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.testutils.data.SecurityRoleTestData.securityRoleFor;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class SecurityGroupTestData {
 
-    private static final Random RANDOM = new Random();
-
     public static SecurityGroupEntity minimalSecurityGroup() {
-        int postfix = RANDOM.nextInt(1000, 9999);
+        var postfix = random(10);
         var securityGroup = new SecurityGroupEntity();
         securityGroup.setGroupName("some-group-name-" + postfix);
         securityGroup.setGlobalAccess(false);

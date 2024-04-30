@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
+import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.zalando.problem.jackson.ProblemModule;
 
 import java.io.BufferedReader;

@@ -6,16 +6,15 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
 import java.util.Random;
 
+import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class CourtroomTestData {
 
-    private static final Random RANDOM = new Random();
-
     public static CourtroomEntity someMinimalCourtRoom() {
-        int postfix = RANDOM.nextInt(100000, 999999);
+        var postfix = random(10);
         var courtroom = new CourtroomEntity();
         courtroom.setCourthouse(createCourthouse("some-courthouse-" + postfix));
         courtroom.setName("room_a-" + postfix);

@@ -9,8 +9,6 @@ import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserA
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class AnnotationTestData {
 
-    private static final Random RANDOM = new Random();
-
     public static AnnotationEntity minimalAnnotationEntity() {
         var annotation = new AnnotationEntity();
         annotation.setCurrentOwner(minimalUserAccount());
