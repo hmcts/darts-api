@@ -20,6 +20,8 @@ import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
+import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_11_1981_DB_ID;
+import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_4_1981_DB_ID;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 
@@ -136,7 +138,6 @@ class CaseMapperTest extends IntegrationBase {
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
         var event2 = dartsDatabase.getEventStub().createDefaultEvent();
-        event2.setEventName("reporting-restrictions-lifted");
         event2.setTimestamp(OffsetDateTime.of(2020, 11, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(event2);
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
@@ -147,24 +148,22 @@ class CaseMapperTest extends IntegrationBase {
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
 
         assertThat(singleCase.getReportingRestrictions()).hasSize(2);
-        assertThat(singleCase.getReportingRestrictions()).extracting("eventName").contains("reporting-restrictions-lifted");
+        assertThat(singleCase.getReportingRestrictions()).extracting("eventName").contains("Restrictions lifted");
     }
 
     @Test
     void includesReportingRestrictionsLiftedWhenReapplied() {
         var event1 = dartsDatabase.getEventStub().createDefaultEvent();
         event1.setTimestamp(now().minusDays(2));
-        var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
+        var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, SECTION_4_1981_DB_ID);
 
         var event2 = dartsDatabase.getEventStub().createDefaultEvent();
-        event2.setEventName("reporting-restrictions-lifted");
         event2.setTimestamp(now().minusDays(1));
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
         var event3 = dartsDatabase.getEventStub().createDefaultEvent();
-        event3.setEventName("reapplying-reporting-restrictions");
         event3.setTimestamp(now());
-        var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, someReportingRestrictionId());
+        var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, SECTION_11_1981_DB_ID);
 
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestriction, reportingRestrictionLifted, reappliedReportingRestriction);
@@ -173,7 +172,7 @@ class CaseMapperTest extends IntegrationBase {
 
         assertThat(singleCase.getReportingRestrictions()).hasSize(3);
         assertThat(singleCase.getReportingRestrictions()).extracting("eventName")
-            .contains("reporting-restrictions-lifted", "reapplying-reporting-restrictions");
+            .contains("Section 4(2) of the Contempt of Court Act 1981", "Section 11 of the Contempt of Court Act 1981");
     }
 
     @Test
@@ -198,7 +197,6 @@ class CaseMapperTest extends IntegrationBase {
         return rangeClosed(1, eventDateTimes.size())
             .mapToObj(index -> {
                 var event = dartsDatabase.getEventStub().createDefaultEvent();
-                event.setEventName("some-event-name-" + index);
                 event.setEventText("some-event-text-" + index);
                 event.setMessageId("some-message-id-" + index);
                 event.setTimestamp(eventDateTimes.get(index - 1));
@@ -233,7 +231,7 @@ class CaseMapperTest extends IntegrationBase {
 
     private List<String> eventNamesFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(EventEntity::getEventName)
+            .map((e) -> e.getEventType().getEventName())
             .toList();
     }
 
