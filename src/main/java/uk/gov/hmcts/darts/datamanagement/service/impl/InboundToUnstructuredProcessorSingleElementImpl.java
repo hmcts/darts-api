@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -38,6 +39,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -73,6 +75,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final MediaRepository mediaRepository;
     private final FileContentChecksum fileContentChecksum;
+    private final FileOperationService fileOperationService;
 
     @SuppressWarnings("java:S4790")
     @Override
@@ -81,13 +84,15 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundObjectId)
             .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundObjectId)));
 
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundExternalObjectDirectory);
+        //ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundExternalObjectDirectory);
 
-        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
-        externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+        //unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
+        //externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         Path tempFile = null;
         try {
-            if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
+                tempFile = fileOperationService.createFile(inboundExternalObjectDirectory.getExternalLocation().toString(),
+                                                                audioConfigurationProperties.getTempBlobWorkspace(),
+                                                                true);
 
                 ProcessBuilder builder = new ProcessBuilder();
                 builder.command("/usr/bin/azcopy",
@@ -96,14 +101,11 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                                     inboundExternalObjectDirectory.getExternalLocation().toString() +
                                     "?sp=racw&st=2024-04-10T11:22:56Z&se=2025-01-01T20:22:56Z&spr=https&sv=" +
                                     "2022-11-02&sr=c&sig=3rEj5WONE%2BfqbkViWId3JhXh0ZtOaqryIKdGAfDJMwQ%3D",
-                                "https://dartssastg.blob.core.windows.net/darts-unstructured/" +
-                                    inboundExternalObjectDirectory.getExternalLocation().toString() +
-                                    "?sp=racw&st=2024-04-23T07:49:47Z&se=2024-05-31T15:49:47Z&spr=https&sv=" +
-                                    "2022-11-02&sr=c&sig=6Jtf3mCfOtYvRlVFlfIubtsWi1rA2zOiJzAGouhEuBM%3D");
+                                tempFile.toAbsolutePath().toString());
 
                 Instant copyStart = Instant.now();
-                log.info("INBOUND TO UNSTRUCTURED AZ-COPY PERFORMANCE for EOD {} started at {}",
-                         unstructuredExternalObjectDirectoryEntity.getId(), copyStart);
+                log.info("INBOUND TO UNSTRUCTURED AZ-COPY DOWNLOAD PERFORMANCE for EOD {} started at {}",
+                         inboundExternalObjectDirectory.getId(), copyStart);
 
                 Process p = builder.start();
                 p.waitFor();
@@ -126,34 +128,34 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 }
 
                 Instant copyCompleted = Instant.now();
-                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} copy completed at {}",
-                         unstructuredExternalObjectDirectoryEntity.getId(), copyCompleted);
+                log.info("INBOUND TO UNSTRUCTURED AZ-COPY DOWNLOAD PERFORMANCE for EOD {} copy completed at {}",
+                         inboundExternalObjectDirectory.getId(), copyCompleted);
 
                 long copyTimeElapsed = Duration.between(copyStart, copyCompleted).toMillis();
-                log.info("INBOUND TO UNSTRUCTURED COPY PERFORMANCE for EOD {} took {} ms",
-                         unstructuredExternalObjectDirectoryEntity.getId(), copyTimeElapsed);
+                log.info("INBOUND TO UNSTRUCTURED AZ-COPY DOWNLOAD PERFORMANCE for EOD {} took {} ms",
+                         inboundExternalObjectDirectory.getId(), copyTimeElapsed);
 
-                unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
-                unstructuredExternalObjectDirectoryEntity.setExternalLocation(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
-                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
-                log.debug("Saving unstructured stored EOD for media ID: {}", unstructuredExternalObjectDirectoryEntity.getId());
-                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+                //unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
+                //unstructuredExternalObjectDirectoryEntity.setExternalLocation(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
+                //unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+                log.debug("Saving unstructured stored EOD for media ID: {}", inboundExternalObjectDirectory.getId());
+                externalObjectDirectoryRepository.saveAndFlush(inboundExternalObjectDirectory);
                 log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
-            }
+
         } catch (BlobStorageException e) {
             log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}. Error Stack {}",
                       getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId(), e.toString()
             );
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
-            setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            inboundExternalObjectDirectory.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
+            setNumTransferAttempts(inboundExternalObjectDirectory);
         } catch (Exception e) {
             log.error("Failed to move from inboundExternalObjectDirectory to unstructuredExternalObjectDirectoryEntity for EOD ID: {}, with error: {}",
                       inboundExternalObjectDirectory.getId(), e.getMessage(), e
             );
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
-            setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            inboundExternalObjectDirectory.setStatus(getStatus(FAILURE));
+            setNumTransferAttempts(inboundExternalObjectDirectory);
         } finally {
-            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+            externalObjectDirectoryRepository.saveAndFlush(inboundExternalObjectDirectory);
             delete(tempFile);
         }
     }
