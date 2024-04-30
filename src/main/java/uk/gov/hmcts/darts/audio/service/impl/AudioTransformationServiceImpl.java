@@ -223,20 +223,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                     log.error("No file found when trying to save to storage. {}", generatedAudioFile.getPath());
                     throw nsfe;
                 }
-
-                mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
                 log.debug("Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
                           requestId, fileName, blobId);
             }
-
+            mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity);
             logApi.atsProcessingUpdate(mediaRequestEntity);
-
             transformedMediaHelper.notifyUser(
                 mediaRequestEntity,
                 hearingEntity.getCourtCase(),
                 NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString()
             );
-
         } catch (Exception e) {
             log.error("Exception occurred for request id {}.", requestId, e);
             var updatedMediaRequest = mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
