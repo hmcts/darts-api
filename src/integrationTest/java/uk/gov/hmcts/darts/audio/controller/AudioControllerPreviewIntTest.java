@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.audio.controller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,8 +13,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
-import uk.gov.hmcts.darts.common.datamanagement.api.DataManagementFacade;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RedisService;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
@@ -51,12 +48,6 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
     @MockBean
     private Authorisation authorisation;
-
-    @Mock
-    private DataManagementFacade mockDataManagementFacade;
-
-    @Mock
-    private FileBasedDownloadResponseMetaData mockFileBasedDownloadResponseMetaData;
 
     private MediaEntity mediaEntity;
 
