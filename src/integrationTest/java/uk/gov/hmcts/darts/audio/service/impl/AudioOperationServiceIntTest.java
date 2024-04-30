@@ -39,6 +39,8 @@ class AudioOperationServiceIntTest extends IntegrationBase {
     private static final String T_09_02_01_Z = "2023-04-28T09:02:01Z";
     private static final String T_09_03_00_Z = "2023-04-28T09:03:00Z";
     private static final String T_09_03_01_Z = "2023-04-28T09:03:01Z";
+    private static final String T_12_00_00_Z = "2023-04-28T12:00:00Z";
+    private static final String T_12_01_00_Z = "2023-04-28T12:01:00Z";
 
     private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
     private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
@@ -365,6 +367,42 @@ class AudioOperationServiceIntTest extends IntegrationBase {
         assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
         assertEquals(Instant.parse(T_09_02_00_Z), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_09_03_00_Z), audioFileInfo.get(1).getEndTime());
+        assertFalse(audioFileInfo.get(0).isTrimmed());
+    }
+
+    @Test
+    void shouldNotReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveLargeGap() throws Exception {
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path path1 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test6.mp2"), REPLACE_EXISTING);
+        Path path2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "test7.mp2"), REPLACE_EXISTING);
+
+        List<AudioFileInfo> inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_09_00_00_Z))
+                .endTime(Instant.parse(T_09_01_00_Z))
+                .channel(1)
+                .mediaFile("test6.mp2")
+                .path(path1)
+                .build(),
+            AudioFileInfo.builder()
+                .startTime(Instant.parse(T_12_00_00_Z))
+                .endTime(Instant.parse(T_12_01_00_Z))
+                .channel(1)
+                .mediaFile("test7.mp2")
+                .path(path2)
+                .build()
+        ));
+
+        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
+            WORKSPACE_DIR,
+            inputAudioFileInfosWithGaps,
+            ALLOWABLE_GAP
+        );
+
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.get(0).getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
+        assertEquals(Instant.parse(T_09_01_00_Z), audioFileInfo.get(0).getEndTime());
         assertFalse(audioFileInfo.get(0).isTrimmed());
     }
 
