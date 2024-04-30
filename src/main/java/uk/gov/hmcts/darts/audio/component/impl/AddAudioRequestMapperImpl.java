@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.common.util.Version;
 
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
@@ -38,7 +37,6 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
         media.setMediaType(MEDIA_TYPE_DEFAULT);
         media.setCreatedBy(userIdentity.getUserAccount());
         media.setLastModifiedBy(userIdentity.getUserAccount());
-        media.setLegacyVersionLabel(new Version().getVersionString());
         return media;
     }
 }
