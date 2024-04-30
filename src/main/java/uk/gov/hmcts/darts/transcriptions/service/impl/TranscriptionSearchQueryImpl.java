@@ -56,7 +56,7 @@ public class TranscriptionSearchQueryImpl implements TranscriptionSearchQuery {
     }
 
     @Override
-    public List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner) {
+    public List<Integer> findTranscriptionsIdsCurrentlyOwnedBy(String owner) {
         return transcriptionWorkflowRepository.findWorkflowOwnedBy(owner).stream()
             .map(TranscriptionIdsAndLatestWorkflowTs::transcriptionId).toList();
     }

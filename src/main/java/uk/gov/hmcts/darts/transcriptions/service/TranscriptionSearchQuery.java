@@ -10,6 +10,6 @@ public interface TranscriptionSearchQuery {
 
     Set<TranscriptionSearchResult> searchTranscriptions(TranscriptionSearchRequest request, List<Integer> transcriptionIds);
 
-    List<Integer> findTranscriptionsCurrentlyOwnedBy(String owner);
+    List<Integer> findTranscriptionsIdsCurrentlyOwnedBy(String owner);
 
 }

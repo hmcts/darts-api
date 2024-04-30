@@ -22,13 +22,17 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
 
     @Override
     public List<TranscriptionSearchResponse> searchTranscriptions(TranscriptionSearchRequest request) {
-        List<Integer> transcriptionsForOwner = new ArrayList<>();
+        // If the owner filter is provided, we prefetch the ids of all the transcriptions owned by that owner.
+        // This avoids using a sub query in the search query and improves performance.  These ids are then used
+        // in the main query.
+        List<Integer> transcriptionsIdsForOwner = new ArrayList<>();
         if (request.getOwner() != null) {
-            transcriptionsForOwner = transcriptionSearchQuery.findTranscriptionsCurrentlyOwnedBy(request.getOwner());
-            if (transcriptionsForOwner.isEmpty()) {
+            transcriptionsIdsForOwner = transcriptionSearchQuery.findTranscriptionsIdsCurrentlyOwnedBy(request.getOwner());
+            if (transcriptionsIdsForOwner.isEmpty()) {
                 return emptyList();
             }
-            if (transcriptionIdIsNotOwnedBy(request.getTranscriptionId(), transcriptionsForOwner)) {
+            var transcriptionId = request.getTranscriptionId();
+            if (transcriptionId != null && !transcriptionsIdsForOwner.contains(transcriptionId)) {
                 return emptyList();
             }
         }
@@ -36,8 +40,8 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         var transcriptionIds = new ArrayList<Integer>();
         if (request.getTranscriptionId() != null) {
             transcriptionIds.add(request.getTranscriptionId());
-        } else if (!isEmpty(transcriptionsForOwner)) {
-            transcriptionIds.addAll(transcriptionsForOwner);
+        } else if (!isEmpty(transcriptionsIdsForOwner)) {
+            transcriptionIds.addAll(transcriptionsIdsForOwner);
         } else {
             transcriptionIds = null;
         }
@@ -57,11 +61,5 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         transcriptionSearchResponse.setIsManualTranscription(transcriptionSearchResult.isManualTranscription());
         transcriptionSearchResponse.setTranscriptionStatusId(transcriptionSearchResult.transcriptionStatusId());
         return transcriptionSearchResponse;
-    }
-
-    private static boolean transcriptionIdIsNotOwnedBy(Integer transcriptionId, List<Integer> transcriptionsForOwner) {
-        return transcriptionId != null
-            && !isEmpty(transcriptionsForOwner)
-            && !transcriptionsForOwner.contains(transcriptionId);
     }
 }

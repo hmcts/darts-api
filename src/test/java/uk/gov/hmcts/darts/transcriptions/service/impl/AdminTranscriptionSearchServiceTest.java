@@ -37,7 +37,7 @@ class AdminTranscriptionSearchServiceTest {
 
     @Test
     void returnsEmptyIfOwnerFilterProvidedWithNoMatches() {
-        when(transcriptionSearchQuery.findTranscriptionsCurrentlyOwnedBy("some-owner")).thenReturn(List.of());
+        when(transcriptionSearchQuery.findTranscriptionsIdsCurrentlyOwnedBy("some-owner")).thenReturn(List.of());
 
         var results = adminTranscriptionSearchService.searchTranscriptions(
             new TranscriptionSearchRequest().owner("some-owner"));
@@ -48,7 +48,7 @@ class AdminTranscriptionSearchServiceTest {
 
     @Test
     void returnsEmptyIfOwnedByFilterResultsDontIntersectWithProvidedTranscriptionIdFilter() {
-        when(transcriptionSearchQuery.findTranscriptionsCurrentlyOwnedBy("some-owner")).thenReturn(List.of(2, 3, 4));
+        when(transcriptionSearchQuery.findTranscriptionsIdsCurrentlyOwnedBy("some-owner")).thenReturn(List.of(2, 3, 4));
 
         var results = adminTranscriptionSearchService.searchTranscriptions(
             new TranscriptionSearchRequest()
