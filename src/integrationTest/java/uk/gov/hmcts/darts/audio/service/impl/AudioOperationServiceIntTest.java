@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-class AudioOperationServiceFfmpegIntTest extends IntegrationBase {
+class AudioOperationServiceIntTest extends IntegrationBase {
 
     private static final String WORKSPACE_DIR = "44887a8c-d918-4907-b9e8-38d5b1bf9c9c";
     private static final String T_09_00_00_Z = "2023-04-28T09:00:00Z";
