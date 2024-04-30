@@ -15,10 +15,8 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RedisService;
-import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
 
@@ -58,7 +56,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @BeforeEach
-    void setupData() throws FileNotDownloadedException, IOException {
+    void setupData() {
         given.setupTest();
         mediaEntity = given.getMediaEntity1();
         given.externalObjectDirForMedia(mediaEntity);
