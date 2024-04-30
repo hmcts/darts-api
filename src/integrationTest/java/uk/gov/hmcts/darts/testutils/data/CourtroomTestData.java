@@ -15,7 +15,7 @@ public class CourtroomTestData {
     private static final Random RANDOM = new Random();
 
     public static CourtroomEntity someMinimalCourtRoom() {
-        var postfix = RANDOM.nextInt(1000, 9999);
+        int postfix = RANDOM.nextInt(100000, 999999);
         var courtroom = new CourtroomEntity();
         courtroom.setCourthouse(createCourthouse("some-courthouse-" + postfix));
         courtroom.setName("room_a-" + postfix);

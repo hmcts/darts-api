@@ -18,7 +18,7 @@ public class CaseTestData {
     private static final Random RANDOM = new Random();
 
     public static CourtCaseEntity createSomeMinimalCase() {
-        int postfix = RANDOM.nextInt(1000, 9999);
+        int postfix = RANDOM.nextInt(100000, 999999);
         var courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setCourthouse(someMinimalCourthouse());
         courtCaseEntity.setCaseNumber("case-1-" + postfix);
