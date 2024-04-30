@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -177,9 +176,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
 
     void shouldSetDownloadFileNameAndFormat() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
-                                                                                                AudioRequestOutputFormat.MP3
-        );
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1));
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
     }
@@ -187,9 +184,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
 
     void shouldSetPlaybackFileNameAndFormat() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
-                                                                                                AudioRequestOutputFormat.ZIP
-        );
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1));
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
     }

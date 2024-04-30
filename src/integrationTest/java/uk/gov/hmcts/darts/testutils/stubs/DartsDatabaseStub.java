@@ -254,7 +254,6 @@ public class DartsDatabaseStub {
         return courtroom;
     }
 
-    @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
         String caseNumber, String courthouseName, String courtroomName, LocalDateTime hearingDate) {
         createCourthouseUnlessExists(courthouseName);
@@ -267,7 +266,7 @@ public class DartsDatabaseStub {
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
-        return hearingRepository.save(hearing);
+        return hearingRepository.saveAndFlush(hearing);
     }
 
     @Transactional
@@ -443,7 +442,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public AnnotationEntity save(AnnotationEntity annotationEntity) {
-        entityManager.merge(annotationEntity.getCurrentOwner());
+        save(annotationEntity.getCurrentOwner());
         return annotationRepository.save(annotationEntity);
     }
 

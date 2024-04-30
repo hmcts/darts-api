@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -33,7 +32,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEventHandlerWith;
 
 @AutoConfigureMockMvc
-@Transactional
 class EventsControllerPostEventsTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/events");

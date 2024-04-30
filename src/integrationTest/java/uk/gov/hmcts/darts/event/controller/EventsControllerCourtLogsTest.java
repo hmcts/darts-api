@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -43,7 +42,6 @@ import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateT
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
-@Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 

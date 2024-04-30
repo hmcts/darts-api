@@ -1,14 +1,13 @@
 package uk.gov.hmcts.darts.testutils.data;
 
-import com.azure.core.util.BinaryData;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.OffsetDateTime;
 
 import static java.time.OffsetDateTime.now;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
@@ -16,11 +15,7 @@ import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class MediaTestData {
 
-    private static final String TEST_BINARY_DATA = "test binary data";
-
-    public static BinaryData getBinaryData() {
-        return BinaryData.fromString(TEST_BINARY_DATA);
-    }
+    public static final byte[] MEDIA_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
     public static MediaEntity someMinimalMedia() {
         var media = new MediaEntity();
@@ -71,7 +66,7 @@ public class MediaTestData {
     }
 
     private String getChecksum() {
-        return new String(encodeBase64(md5(getBinaryData().toBytes())));
+        return TestUtils.encodeToString(md5(MEDIA_TEST_DATA_BINARY_DATA));
     }
 
 }

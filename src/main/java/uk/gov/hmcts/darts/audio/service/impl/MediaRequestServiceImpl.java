@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
@@ -386,8 +385,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName,
-                                                          AudioRequestOutputFormat audioRequestOutputFormat) {
+    public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity) {
 
         mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
         //todo update transformed media info
