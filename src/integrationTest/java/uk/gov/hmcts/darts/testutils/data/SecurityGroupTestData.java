@@ -4,7 +4,6 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
-import java.util.Random;
 import java.util.Set;
 
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;

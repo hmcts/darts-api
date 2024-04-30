@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.testutils.data;
 
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 
-import java.util.Random;
-
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})

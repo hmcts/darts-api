@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.testutils.data;
 
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 
-import java.util.Random;
-
 import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
 
 @SuppressWarnings({"HideUtilityClassConstructor"})

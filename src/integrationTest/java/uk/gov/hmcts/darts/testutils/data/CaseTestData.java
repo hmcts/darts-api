@@ -1,13 +1,10 @@
 package uk.gov.hmcts.darts.testutils.data;
 
 import lombok.experimental.UtilityClass;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
-import java.util.Random;
-
-import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.*;
+import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.DefenceTestData.createDefenceForCaseWithName;
 import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendantForCaseWithName;

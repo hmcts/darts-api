@@ -3,8 +3,6 @@ package uk.gov.hmcts.darts.testutils.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
-import java.util.Random;
-
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 
 @UtilityClass

@@ -4,8 +4,6 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
-import java.util.Random;
-
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.random;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
