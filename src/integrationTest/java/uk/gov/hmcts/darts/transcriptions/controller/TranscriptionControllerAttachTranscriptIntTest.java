@@ -274,6 +274,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         );
         assertTrue(transcriptionDocumentEntity.getFileSize() > 0);
 
+        assertEquals(authorisationStub.getSeparateIntegrationUser(),transcriptionDocumentEntities.get(0).getLastModifiedBy());
+
         final List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = transcriptionDocumentEntity
             .getExternalObjectDirectoryEntities();
         assertEquals(2, externalObjectDirectoryEntities.size());

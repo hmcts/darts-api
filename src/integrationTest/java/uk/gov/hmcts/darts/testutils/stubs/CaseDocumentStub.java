@@ -37,6 +37,7 @@ public class CaseDocumentStub {
         caseDocumentEntity.setHidden(false);
         caseDocumentEntity.setCreatedBy(uploadedBy);
         caseDocumentEntity.setCreatedTs(OffsetDateTime.now(UTC));
+        caseDocumentEntity.setLastModifiedBy(uploadedBy);
         return caseDocumentEntity;
     }
 }
