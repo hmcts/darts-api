@@ -160,8 +160,6 @@ class MigratedTranscriptionSearchTest extends IntegrationBase {
     void filtersCorrectlyWhenAllFiltersProvided_ExceptTranscriptionId() {
         var transcriptions = given.persistedTranscriptions(20);
 
-        //        private String requestedBy;
-
         given.allHaveManualTranscription(transcriptions.subList(0, 19), true);
         given.allHaveManualTranscription(transcriptions.subList(19, 20), false);
 

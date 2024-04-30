@@ -25,7 +25,10 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         List<Integer> transcriptionsForOwner = new ArrayList<>();
         if (request.getOwner() != null) {
             transcriptionsForOwner = transcriptionSearchQuery.findTranscriptionsCurrentlyOwnedBy(request.getOwner());
-            if (!transcriptionIdIsOwnedBy(request.getTranscriptionId(), transcriptionsForOwner)) {
+            if (transcriptionsForOwner.isEmpty()) {
+                return emptyList();
+            }
+            if (transcriptionIdIsNotOwnedBy(request.getTranscriptionId(), transcriptionsForOwner)) {
                 return emptyList();
             }
         }
@@ -56,9 +59,9 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         return transcriptionSearchResponse;
     }
 
-    private static boolean transcriptionIdIsOwnedBy(Integer transcriptionId, List<Integer> transcriptionsForOwner) {
+    private static boolean transcriptionIdIsNotOwnedBy(Integer transcriptionId, List<Integer> transcriptionsForOwner) {
         return transcriptionId != null
             && !isEmpty(transcriptionsForOwner)
-            && transcriptionsForOwner.contains(transcriptionId);
+            && !transcriptionsForOwner.contains(transcriptionId);
     }
 }
