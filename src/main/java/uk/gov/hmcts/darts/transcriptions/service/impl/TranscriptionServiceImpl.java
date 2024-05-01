@@ -474,6 +474,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriberTranscriptsQuery.getTranscriptRequests(userId);
     }
 
+    @SuppressWarnings({"java:S2259"})
     @Override
     public List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent) {
         var transcription = transcriptionRepository.findById(transcriptionId);
