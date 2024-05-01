@@ -5,17 +5,38 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-public class Tree<T extends TreeNode> {
-
-    public Map<Integer, T> nodeList = new HashMap<>();
+public class Tree<T extends TreeNode> extends HashMap<Integer, T> {
 
     public void addNode(T t) {
-        nodeList.put(t.getId(), t);
+        put(t.getId(), t);
     }
 
     public void addNode(Collection<T> nodeCollection) {
         nodeCollection.forEach(this::addNode);
+    }
+
+    public Optional<T> getParent(T node) {
+        Optional<T> parentNode = Optional.empty();
+        if (node.doesHaveAntecedent()) {
+            return Optional.of(get(Integer.valueOf(node.getAntecedent())));
+        }
+
+        return parentNode;
+    }
+
+    public List<T> getChildren(T node) {
+        List<T> children = new ArrayList<>();
+        if (node.doesHaveAntecedent()) {
+            children = getNodesWithAntecendantMap().get(node.getId().toString());
+        }
+
+        return children;
+    }
+
+    public boolean isLeaf(T node) {
+        return getNodesWithAntecendantMap().get(node.getId().toString()) == null;
     }
 
     public Collection<T> getLowestLevelDescendants() {
@@ -24,7 +45,7 @@ public class Tree<T extends TreeNode> {
 
         // gets the lowest level top nodes
         for (T node : topLevelNodes) {
-            Map<String, T>  antecendantMap = getNodesWithAntecendantMap();
+            Map<String, List<T>>  antecendantMap = getNodesWithAntecendantMap();
 
             // if the top level node is not an antecedent then this is the lowest level
             if (antecendantMap.get(node.getId().toString()) == null) {
@@ -39,7 +60,7 @@ public class Tree<T extends TreeNode> {
 
     public List<T> getTopLevelNodes() {
         final List<T> topLevelList = new ArrayList<>();
-        nodeList.values().forEach((node) -> {
+        values().forEach((node) -> {
             if (!node.doesHaveAntecedent()) {
                 topLevelList.add(node);
             }
@@ -50,22 +71,28 @@ public class Tree<T extends TreeNode> {
 
     public List<T> getNodeWhichIsNotAnAntecedent() {
         final List<T> lowestLevelNodes = new ArrayList<>();
-        Map<String, T>  atecendantMap = getNodesWithAntecendantMap();
-        for (T node : atecendantMap.values()) {
+        Map<String, List<T>>  atecendantMap = getNodesWithAntecendantMap();
+        for (List<T> nodeLst : atecendantMap.values()) {
             // if this node is not an attendant to any other node this is the lowest level
-            if (atecendantMap.get(node.getId().toString()) == null) {
-                lowestLevelNodes.add(node);
+            for (T node : nodeLst) {
+                if (atecendantMap.get(node.getId().toString()) == null) {
+                    lowestLevelNodes.add(node);
+                }
             }
         }
 
         return lowestLevelNodes;
     }
 
-    private Map<String, T> getNodesWithAntecendantMap() {
-        final Map<String, T> atecedantMap = new HashMap<>();
-        nodeList.values().forEach((node) -> {
-            if (node.doesHaveAntecedent()) {
-                atecedantMap.put(node.getAntecedent(), node);
+    private Map<String, List<T>> getNodesWithAntecendantMap() {
+        final Map<String, List<T>> atecedantMap = new HashMap<>();
+        values().forEach((node) -> {
+            if (node.doesHaveAntecedent() && !atecedantMap.containsKey(node.getAntecedent())) {
+                List<T> nodeList = new ArrayList<>();
+                nodeList.add(node);
+                atecedantMap.put(node.getAntecedent(), nodeList);
+            } else if (node.doesHaveAntecedent()) {
+                atecedantMap.get(node.getAntecedent()).add(node);
             }
         });
 
