@@ -6,10 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.buildUserWithRoleFor;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -103,6 +108,35 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
 
     }
 
+    @Test
+    void storesRetentionInformation() {
+        dartsDatabase.createCourthouseUnlessExists(SWANSEA_COURTHOUSE);
+        var retentionPolicy = new DartsEventRetentionPolicy();
+        retentionPolicy.setCaseRetentionFixedPolicy(RetentionPolicyEnum.DEFAULT.getPolicyKey());
+        retentionPolicy.setCaseTotalSentence("20Y2M0D");
+        eventDispatcher.receive(createSentencingRemarksWithRetentionDartsEventFor(SWANSEA_COURTHOUSE, retentionPolicy));
+
+        List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
+
+        assertEquals(1, caseManagementRetentionEntities.size());
+        assertEquals(retentionPolicy.getCaseTotalSentence(), caseManagementRetentionEntities.get(0).getTotalSentence());
+        RetentionPolicyTypeEntity caseManagementRetentionPolicyType = dartsDatabase.getRetentionPolicyTypeRepository()
+            .findById(caseManagementRetentionEntities.get(0).getRetentionPolicyTypeEntity().getId())
+            .get();
+        assertEquals(retentionPolicy.getCaseRetentionFixedPolicy(), caseManagementRetentionPolicyType.getFixedPolicyKey());
+    }
+
+
+    @Test
+    void doesNotStoreRetentionInformationIfNonePresent() {
+        dartsDatabase.createCourthouseUnlessExists(SWANSEA_COURTHOUSE);
+
+        eventDispatcher.receive(createSentencingRemarksWithRetentionDartsEventFor(SWANSEA_COURTHOUSE, null));
+
+        List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
+        assertEquals(0, caseManagementRetentionEntities.size());
+    }
+
     private UserAccountEntity givenATranscriberIsAuthorisedFor(CourthouseEntity courthouse) {
         var transcriber = buildUserWithRoleFor(TRANSCRIBER, courthouse);
         dartsDatabase.saveUserWithGroup(transcriber);
@@ -125,6 +159,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
             .dateTime(eventTime)
             .startTime(startTime)
             .endTime(endTime);
+    }
+
+    private DartsEvent createSentencingRemarksWithRetentionDartsEventFor(String courthouseName, DartsEventRetentionPolicy retentionPolicy) {
+        DartsEvent event = this.createSentencingRemarksDartsEventFor(courthouseName);
+        event.setRetentionPolicy(retentionPolicy);
+        return event;
     }
 
 }
