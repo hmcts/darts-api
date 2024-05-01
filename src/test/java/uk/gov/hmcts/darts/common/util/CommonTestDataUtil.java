@@ -54,10 +54,13 @@ public class CommonTestDataUtil {
     public static EventEntity createEventWith(String eventName, String eventText,
                                               HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
 
+        EventHandlerEntity eventType = new EventHandlerEntity();
+        eventType.setEventName(eventName);
+
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
-        event.setEventName(eventName);
+        event.setEventType(eventType);
         event.setEventText(eventText);
         event.setId(1);
         event.setTimestamp(eventTimestamp);
@@ -80,7 +83,6 @@ public class CommonTestDataUtil {
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
         event.setCourtroom(hearingEntity.getCourtroom());
-        event.setEventName(eventName);
         event.setEventText(eventText);
         event.setId(1);
         event.setTimestamp(eventTimestamp);

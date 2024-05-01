@@ -46,6 +46,11 @@ darts:
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
+
+  transformation:
+    service:
+      audio:
+        file:
   testing-support-endpoints:
     enabled: true
   bank-holidays:
@@ -65,3 +70,4 @@ logging:
         hmcts:
           darts: DEBUG
   config: classpath:logback-test.xml
+

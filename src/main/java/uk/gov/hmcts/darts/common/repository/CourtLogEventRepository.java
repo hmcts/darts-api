@@ -12,11 +12,12 @@ import java.util.List;
 public interface CourtLogEventRepository extends JpaRepository<EventEntity, Integer> {
 
     @Query("""
-           SELECT ee FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch, CourtCaseEntity ce
+           SELECT ee
+           FROM EventEntity ee, CourtroomEntity cr, CourthouseEntity ch, CourtCaseEntity ce
            JOIN ee.hearingEntities hearing
            WHERE upper(ch.courthouseName) = upper(:courtHouse)
            AND upper(ce.caseNumber) = upper(:caseNumber)
-           AND ee.eventName = upper('LOG')
+           AND ee.isLogEntry = true
            AND ee.timestamp between :start AND :end
            AND cr.courthouse = ch
            AND hearing.courtroom = cr
@@ -29,7 +30,7 @@ public interface CourtLogEventRepository extends JpaRepository<EventEntity, Inte
            JOIN ee.hearingEntities hearing
            WHERE upper(ch.courthouseName) = upper(:courtHouse)
            AND upper(cr.name) = upper(:courtRoomName)
-           AND ee.eventName = upper('LOG')
+           AND ee.isLogEntry = true
            AND ee.timestamp between :start AND :end
            AND cr.courthouse = ch
            AND hearing.courtroom = cr

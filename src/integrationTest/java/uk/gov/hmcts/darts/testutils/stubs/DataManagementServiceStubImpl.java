@@ -7,6 +7,7 @@ import com.azure.storage.blob.BlobClientBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
@@ -25,6 +26,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.testutils.TestUtils.getFile;
+
 /**
  * This class is a test implementation of DataManagementService, intended to mimic the basic behaviour of Azure
  * Blob Storage. TODO: Hopefully this will be replaced by a more functional implementation (see DMP-597).
@@ -36,6 +40,9 @@ import java.util.UUID;
 public class DataManagementServiceStubImpl implements DataManagementService {
 
     private final DataManagementConfiguration dataManagementConfiguration;
+
+    @Value("${darts.audio.transformation.service.audio.file:#{null}}")
+    private String audioFile;
 
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
@@ -107,10 +114,18 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
         FileBasedDownloadResponseMetaData fileBasedDownloadResponseMetaData = new FileBasedDownloadResponseMetaData();
 
-
+        byte[] audio = new byte[1024];
+        if (nonNull(audioFile)) {
+            File audioFileTest = getFile(audioFile);
+            if (nonNull(audioFileTest) && audioFileTest.exists()) {
+                audio = Files.newInputStream(audioFileTest.toPath()).readAllBytes();
+            } else {
+                log.warn("Unable to read audio file {}", audioFile);
+            }
+        }
         try (OutputStream downloadOS = fileBasedDownloadResponseMetaData.getOutputStream(dataManagementConfiguration)) {
             Date downloadStartDate = new Date();
-            downloadOS.write(new byte[1024]);
+            downloadOS.write(audio);
             Date downloadEndDate = new Date();
             log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
         }

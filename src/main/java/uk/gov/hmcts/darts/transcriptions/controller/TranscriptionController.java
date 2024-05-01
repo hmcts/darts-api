@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionStatus;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
+import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.util.ArrayList;
@@ -57,6 +60,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;
+    private final AdminTranscriptionSearchService adminTranscriptionSearchService;
     private final AuthorisationUnitOfWork authorisation;
 
     private final Validator<TranscriptionRequestDetails> transcriptionRequestDetailsValidator;
@@ -214,4 +218,14 @@ public class TranscriptionController implements TranscriptionApi {
         return ResponseEntity.ok(transcriptionService.getTranscriptionStatuses());
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    public ResponseEntity<List<TranscriptionSearchResponse>> adminTranscriptionsSearchPost(TranscriptionSearchRequest transcriptionSearchRequest) {
+        return new ResponseEntity<>(
+            adminTranscriptionSearchService.searchTranscriptions(transcriptionSearchRequest),
+            HttpStatus.OK
+        );
+    }
 }

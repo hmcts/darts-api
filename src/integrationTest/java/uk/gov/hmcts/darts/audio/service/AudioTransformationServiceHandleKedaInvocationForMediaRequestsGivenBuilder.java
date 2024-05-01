@@ -41,7 +41,6 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     private static final OffsetDateTime TIME_20_00 = OffsetDateTime.parse("2023-01-01T20:00Z");
     private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
 
-
     private final DartsDatabaseStub dartsDatabaseStub;
 
     private MediaRequestEntity mediaRequestEntity;
@@ -165,6 +164,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity2);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity3);
             dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredExternalObjectDirectoryEntity4);
+
         }
     }
 
