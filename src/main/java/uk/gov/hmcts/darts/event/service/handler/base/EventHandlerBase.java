@@ -52,7 +52,6 @@ public abstract class EventHandlerBase implements EventHandler {
         var event = new EventEntity();
         event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
-        event.setEventName(eventHandler.getEventName());
         event.setEventText(dartsEvent.getEventText());
         event.setEventType(eventHandler);
         event.setMessageId(dartsEvent.getMessageId());

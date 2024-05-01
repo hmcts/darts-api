@@ -110,7 +110,7 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
                                    .getSeconds())
             );
 
-            eventElement.appendChild(document.createTextNode(event.getEventName()));
+            eventElement.appendChild(document.createTextNode(event.getEventType().getEventName()));
             annotations.appendChild(eventElement);
             eventCounter++;
         }

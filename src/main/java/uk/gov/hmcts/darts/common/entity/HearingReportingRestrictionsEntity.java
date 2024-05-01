@@ -26,6 +26,9 @@ public class HearingReportingRestrictionsEntity {
     @Column(name = "hea_id")
     Integer hearingId;
 
+    @Column(name = "event_name")
+    String eventName;
+
     @Column(name = "event_type")
     String eventType;
 
@@ -49,9 +52,6 @@ public class HearingReportingRestrictionsEntity {
 
     @Column(name = "event_id")
     Integer mojEventId;
-
-    @Column(name = "event_name")
-    String eventName;
 
     @Column(name = "event_text")
     String eventText;

@@ -126,7 +126,6 @@ class OutboundFileZipGeneratorImplTest {
         EventHandlerEntity eventType = mock(EventHandlerEntity.class);
         eventEntity.setEventType(eventType);
         eventEntity.setLegacyEventId(1);
-        eventEntity.setEventName("Jury Returned");
         eventEntity.setEventText("Start Event");
         OffsetDateTime utcStartTime = OffsetDateTime.ofInstant(SOME_START_TIME, UTC);
         eventEntity.setTimestamp(utcStartTime.plusMinutes(5));
