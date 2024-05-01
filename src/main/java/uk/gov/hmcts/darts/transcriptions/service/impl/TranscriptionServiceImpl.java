@@ -484,7 +484,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var transcriptionWorkflows = transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(transcription.get());
 
-        if (isCurrent) {
+        if (!isNull(isCurrent) && isCurrent) {
             return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(transcriptionWorkflows.get(0)));
         }
 
