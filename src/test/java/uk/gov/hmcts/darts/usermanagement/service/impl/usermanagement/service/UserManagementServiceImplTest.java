@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.impl.UserManagementServiceImpl;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
+import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -56,6 +57,7 @@ class UserManagementServiceImplTest {
         UserAccountMapper mapper = new UserAccountMapperImpl();
         UserEmailValidator userEmailValidator = new UserEmailValidator(userAccountRepository);
         UserAccountExistsValidator userAccountExistsValidator = new UserAccountExistsValidator(userAccountRepository);
+        UserTypeValidator userTypeValidator = new UserTypeValidator(userAccountRepository);
 
         service = new UserManagementServiceImpl(
             mapper,
@@ -66,7 +68,8 @@ class UserManagementServiceImplTest {
             userSearchQuery,
             userManagementQuery,
             userEmailValidator,
-            userAccountExistsValidator
+            userAccountExistsValidator,
+            userTypeValidator
         );
     }
 
@@ -99,4 +102,3 @@ class UserManagementServiceImplTest {
         return userAccount;
     }
 }
-

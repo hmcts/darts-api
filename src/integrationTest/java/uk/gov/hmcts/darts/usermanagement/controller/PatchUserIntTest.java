@@ -8,14 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.model.Problem;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -54,6 +59,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+
+    @Autowired
+    private UserAccountStub accountStub;
 
     @MockBean
     private UserIdentity userIdentity;
@@ -435,6 +443,26 @@ class PatchUserIntTest extends IntegrationBase {
                          """);
         mockMvc.perform(request)
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void patchUserShouldFailIfProvidedUserIsASystemUser() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity userAccountEntity = accountStub.getSystemUserAccountEntity();
+
+        MockHttpServletRequestBuilder request = buildRequest(userAccountEntity.getId())
+            .content("""
+                         {
+                           "full_name": "Jimmy Smith"
+                         }
+                         """);
+
+        MvcResult mvcResult = mockMvc.perform(request).andReturn();
+
+        Problem problem = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
+        assertEquals(UserManagementError.USER_NOT_FOUND.getHttpStatus().value(), mvcResult.getResponse().getStatus());
+        assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email) {

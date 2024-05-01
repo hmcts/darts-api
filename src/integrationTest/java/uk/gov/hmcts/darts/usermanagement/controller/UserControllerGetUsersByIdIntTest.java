@@ -1,5 +1,8 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -9,8 +12,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.model.Problem;
+import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.util.Set;
 
@@ -32,6 +40,9 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
+    @Autowired
+    private UserAccountStub accountStub;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -39,22 +50,39 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
     void usersGetShouldReturnOk() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
+        UserAccountEntity accountEntity = accountStub.createJudgeUser();
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + accountEntity.getId()))
             .andExpect(status().isOk())
             .andReturn();
 
-        String expectedResponse = """
-            {"id":1,"full_name":"system_housekeeping",
-            "description":"Housekeeping job",
-            "active":true,
-            "security_group_ids":[]}
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        UserWithIdAndTimestamps userWithIdAndTimestamps =
+            mapper.readValue(mvcResult.getResponse().getContentAsString(), UserWithIdAndTimestamps.class);
 
+        Assertions.assertEquals("Judgedefault@example.com", userWithIdAndTimestamps.getEmailAddress());
+        Assertions.assertTrue(userWithIdAndTimestamps.getActive());
+        Assertions.assertEquals("JudgedefaultUsername", userWithIdAndTimestamps.getFullName());
+        Assertions.assertEquals(-3, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void usersGetShouldReturnSystemUserFailure() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        UserAccountEntity userAccountEntity = accountStub.getSystemUserAccountEntity();
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + userAccountEntity.getId()))
+            .andReturn();
+
+        Problem problem = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
+
+        Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getHttpStatus().value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
