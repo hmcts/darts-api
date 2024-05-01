@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionWorkflowsComment;
 import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
@@ -152,7 +153,15 @@ public class TranscriptionResponseMapper {
         }
         if (nonNull(transcriptionEntity.getTranscriptionUrgency())) {
             transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
+
+            // populate the urgency details
+            TranscriptionUrgencyDetails urgencyDetails = new TranscriptionUrgencyDetails();
+            urgencyDetails.setPriorityOrder(transcriptionEntity.getTranscriptionUrgency().getPriorityOrder());
+            urgencyDetails.setTranscriptionUrgencyId(transcriptionEntity.getTranscriptionUrgency().getId());
+            urgencyDetails.setDescription(transcriptionEntity.getTranscriptionUrgency().getDescription());
+            transcriptionResponse.setTranscriptionUrgency(urgencyDetails);
         }
+
         transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
         transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
         transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());

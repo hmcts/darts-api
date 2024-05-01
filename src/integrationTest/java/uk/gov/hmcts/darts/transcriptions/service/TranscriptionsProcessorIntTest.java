@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -72,7 +73,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -102,7 +103,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -123,7 +124,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -152,7 +153,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, approvedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -181,7 +182,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, rejectedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -209,7 +210,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -238,7 +239,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, completeTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
@@ -266,7 +267,7 @@ class TranscriptionsProcessorIntTest extends IntegrationBase {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
             .createAndSaveTranscriptionEntity(hearing, transcriptionType, closedTranscriptionStatus,
-                                              transcriptionUrgency, systemUser);
+                                              Optional.of(transcriptionUrgency), systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcription.getId()).orElseThrow();
