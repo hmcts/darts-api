@@ -16,8 +16,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
-import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -91,7 +91,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionUrgencyResponse() throws Exception {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity =
-            CommonTestDataUtil.createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD, 999);
+            CommonTestDataUtil.createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD);
 
         TranscriptionUrgencyResponse transcriptionUrgencyResponse =
             transcriptionResponseMapper.mapToTranscriptionUrgencyResponse(transcriptionUrgencyEntity);

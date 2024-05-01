@@ -66,8 +66,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 350MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
-      max-request-size: 360MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-file-size: ${MAX_FILE_UPLOAD_SIZE_MEGABYTES:350}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-request-size: ${MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES:360}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 
   datasource:
     driver-class-name: org.postgresql.Driver

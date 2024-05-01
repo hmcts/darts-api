@@ -210,6 +210,8 @@ public class DartsDatabaseStub {
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
         annotationRepository.deleteAll();
+        transcriptionRepository.deleteAll();
+        transcriptionWorkflowRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {

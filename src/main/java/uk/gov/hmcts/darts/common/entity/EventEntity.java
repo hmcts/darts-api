@@ -44,9 +44,6 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "event_id")
     private Integer legacyEventId;
 
-    @Column(name = "event_name")
-    private String eventName;
-
     @Column(name = "event_text")
     private String eventText;
 

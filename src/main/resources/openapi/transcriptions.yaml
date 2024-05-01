@@ -721,6 +721,49 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /admin/transcriptions/search:
+    post:
+      tags:
+        - Transcription
+      summary: |-
+        Search for transcriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranscriptionSearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranscriptionSearchResponse'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+
   /admin/transcription-workflows:
     get:
       tags:
@@ -750,6 +793,65 @@ paths:
 
 components:
   schemas:
+    TranscriptionSearchRequest:
+      type: object
+      properties:
+        transcription_id:
+          type: integer
+          example: 1234
+        case_number:
+          type: string
+          example: C123
+        courthouse_display_name:
+          type: string
+          example: some_courthouse
+        hearing_date:
+          type: string
+          format: date
+          example: '2023-07-31'
+        owner:
+          type: string
+          example: 'some-user-name'
+        requested_by:
+          type: string
+          example: 'some-user-name'
+        requested_at_from:
+          type: string
+          format: date
+          example: '2023-07-31'
+        requested_at_to:
+          type: string
+          format: date
+          example: '2023-07-31'
+        is_manual_transcription:
+          type: boolean
+          example: true
+    TranscriptionSearchResponse:
+      type: object
+      properties:
+        transcription_id:
+          type: integer
+          example: 1234
+        case_number:
+          type: string
+          example: C123
+        courthouse_id:
+          type: integer
+          example: 1
+        hearing_date:
+          type: string
+          format: date
+          example: '2023-07-31'
+        requested_at:
+          type: string
+          format: date-time
+          example: '2023-07-31T14:32:24.000Z'
+        transcription_status_id:
+          type: integer
+          example: 1
+        is_manual_transcription:
+          type: boolean
+          example: true
     TranscriptionStatus:
       type: object
       properties:
@@ -885,6 +987,8 @@ components:
         requested_ts:
           type: string
           format: date-time
+        transcription_urgency:
+          $ref: '#/components/schemas/TranscriptionUrgencyDetails'
     TranscriberViewSummary:
       type: object
       required:
@@ -924,6 +1028,24 @@ components:
           format: date-time
         is_manual:
           type: boolean
+        transcription_urgency:
+          $ref: '#/components/schemas/TranscriptionUrgencyDetails'
+    TranscriptionUrgencyDetails:
+      type: object
+      required:
+        - transcription_urgency_id
+        - description
+        - priority_order
+      properties:
+        transcription_urgency_id:
+          type: integer
+          example: 4567
+        priority_order:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: "An urgency description"
     UpdateTranscriptionResponse:
       type: object
       required:
@@ -1126,6 +1248,8 @@ components:
           type: string
           format: date-time
           example: 2023-06-26T13:00:00Z
+        transcription_urgency:
+          $ref: '#/components/schemas/TranscriptionUrgencyDetails'
     defendant:
       type: string
       example: Joe Bloggs

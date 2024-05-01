@@ -157,7 +157,12 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                 "urgency": "Standard",
                 "requested_ts": "2023-11-23T17:45:14.940936Z",
                 "state_change_ts": "2023-11-23T17:45:51.151621Z",
-                "is_manual": true
+                "is_manual": true,
+                "transcription_urgency": {
+                    "transcription_urgency_id": 1,
+                    "description": "Standard",
+                    "priority_order": 999
+                }
               }
             ]
             """;

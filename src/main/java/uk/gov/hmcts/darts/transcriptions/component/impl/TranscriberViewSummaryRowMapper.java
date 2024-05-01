@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.transcriptions.component.impl;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +27,15 @@ public class TranscriberViewSummaryRowMapper implements RowMapper<TranscriberVie
             rs.getObject("state_change_ts", OffsetDateTime.class),
             rs.getBoolean("is_manual")
         );
-        summary.setUrgency(rs.getString("urgency"));
+        summary.setUrgency(rs.getString("transcription_urgency_description"));
+
+        if (rs.getInt("transcription_urgency_id") != 0) {
+            TranscriptionUrgencyDetails urgencyDetails = new TranscriptionUrgencyDetails();
+            urgencyDetails.setTranscriptionUrgencyId(rs.getInt("transcription_urgency_id"));
+            urgencyDetails.setPriorityOrder(rs.getInt("transcription_urgency_priority_order"));
+            urgencyDetails.setDescription(rs.getString("transcription_urgency_description"));
+            summary.setTranscriptionUrgency(urgencyDetails);
+        }
         return summary;
     }
 

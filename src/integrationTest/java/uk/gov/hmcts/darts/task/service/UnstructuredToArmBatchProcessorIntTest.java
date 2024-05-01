@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -59,7 +58,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.failedArmRawDataStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
-@SpringBootTest
 class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
 
     ArgumentCaptor<File> manifestFileNameCaptor = ArgumentCaptor.forClass(File.class);

@@ -22,6 +22,8 @@ import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
+import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
+import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -45,7 +47,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final UserSearchQuery userSearchQuery;
     private final UserManagementQuery userManagementQuery;
     private final Validator<User> userEmailValidator;
-    private final Validator<Integer> userAccountExistsValidator;
+    private final UserAccountExistsValidator userAccountExistsValidator;
+    private final UserTypeValidator userTypeValidator;
 
     @Override
     @Transactional
@@ -80,6 +83,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Transactional
     public UserWithIdAndTimestamps modifyUser(Integer userId, UserPatch userPatch) {
         userAccountExistsValidator.validate(userId);
+        userTypeValidator.validate(userId);
 
         UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
             .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
@@ -122,6 +126,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public UserWithIdAndTimestamps getUserById(Integer userId) {
         Optional<UserAccountEntity> entity = userAccountRepository.findById(userId);
         if (entity.isPresent()) {
+            userTypeValidator.validate(userId);
             return securityGroupIdMapper.mapToUserWithSecurityGroups(entity.get());
         }
         throw new DartsApiException(

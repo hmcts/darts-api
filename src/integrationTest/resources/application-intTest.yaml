@@ -29,7 +29,10 @@ spring:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-
+  servlet:
+    multipart:
+      max-file-size: 1KB
+      max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
@@ -43,6 +46,11 @@ darts:
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
+
+  transformation:
+    service:
+      audio:
+        file:
   testing-support-endpoints:
     enabled: true
   bank-holidays:
@@ -62,3 +70,4 @@ logging:
         hmcts:
           darts: DEBUG
   config: classpath:logback-test.xml
+

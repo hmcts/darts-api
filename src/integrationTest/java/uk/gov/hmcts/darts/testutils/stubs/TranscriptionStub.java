@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
@@ -82,9 +83,25 @@ public class TranscriptionStub {
             hearing,
             transcriptionType,
             transcriptionStatus,
-            transcriptionUrgencyEntity,
+            Optional.of(transcriptionUrgencyEntity),
             authorisedIntegrationTestUser
         );
+    }
+
+    public TranscriptionEntity createTranscription(HearingEntity hearing, boolean associateUrgency) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
+        UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(hearing.getCourtCase()
+                                                                                                                  .getCourthouse());
+        return createAndSaveTranscriptionEntity(
+            hearing,
+            transcriptionType,
+            transcriptionStatus,
+            associateUrgency ? Optional.of(transcriptionUrgencyEntity) : Optional.empty(),
+            authorisedIntegrationTestUser
+        );
+
     }
 
     public TranscriptionEntity createTranscription(CourtCaseEntity courtCase) {
@@ -103,10 +120,7 @@ public class TranscriptionStub {
     }
 
     private TranscriptionUrgencyEntity mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum urgencyEnum) {
-        TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
-        transcriptionUrgencyEntity.setId(urgencyEnum.getId());
-        transcriptionUrgencyEntity.setDescription(urgencyEnum.name());
-        return transcriptionUrgencyEntity;
+        return transcriptionUrgencyRepository.findById(urgencyEnum.getId()).get();
     }
 
     private TranscriptionTypeEntity mapToTranscriptionTypeEntity(TranscriptionTypeEnum typeEnum) {
@@ -127,14 +141,20 @@ public class TranscriptionStub {
     public TranscriptionEntity createAndSaveTranscriptionEntity(HearingEntity hearing,
                                                                 TranscriptionTypeEntity transcriptionType,
                                                                 TranscriptionStatusEntity transcriptionStatus,
-                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
                                                                 UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtroom(hearing.getCourtroom());
         transcription.addHearing(hearing);
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);
-        transcription.setTranscriptionUrgency(transcriptionUrgency);
+
+        if (transcriptionUrgency.isPresent()) {
+            transcription.setTranscriptionUrgency(transcriptionUrgency.get());
+        } else {
+            transcription.setTranscriptionUrgency(null);
+        }
+
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
@@ -193,6 +213,23 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
+    @Transactional
+    public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               OffsetDateTime workflowTimestamp,
+                                                                               boolean associatedUrgency) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
+            null,
+            associatedUrgency
+        );
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
 
     @Transactional
     public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
@@ -370,11 +407,23 @@ public class TranscriptionStub {
                                                               OffsetDateTime workflowTimestamp,
                                                               TranscriptionStatusEntity status,
                                                               String comment) {
+        return createTranscriptionWithStatus(userAccountEntity, courtCaseEntity, hearingEntity, workflowTimestamp, status, comment, true);
+    }
+
+    private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
+                                                              CourtCaseEntity courtCaseEntity,
+                                                              HearingEntity hearingEntity,
+                                                              OffsetDateTime workflowTimestamp,
+                                                              TranscriptionStatusEntity status,
+                                                              String comment, boolean associateUrgency) {
         final var transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
         transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
-        transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
+
+        if (associateUrgency) {
+            transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
+        }
         transcriptionEntity.setTranscriptionStatus(status);
         OffsetDateTime now = now(UTC);
         OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
