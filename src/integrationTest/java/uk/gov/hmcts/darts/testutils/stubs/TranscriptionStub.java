@@ -120,11 +120,7 @@ public class TranscriptionStub {
     }
 
     private TranscriptionUrgencyEntity mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum urgencyEnum) {
-        TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
-        transcriptionUrgencyEntity.setId(urgencyEnum.getId());
-        transcriptionUrgencyEntity.setDescription(urgencyEnum.name());
-        transcriptionUrgencyEntity.setPriorityOrder(urgencyEnum.getPriorityOrderId());
-        return transcriptionUrgencyEntity;
+        return transcriptionUrgencyRepository.findById(urgencyEnum.getId()).get();
     }
 
     private TranscriptionTypeEntity mapToTranscriptionTypeEntity(TranscriptionTypeEnum typeEnum) {

@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -69,6 +70,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                 testUser.getId()
             );
 
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionStub.getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD);
+
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
@@ -82,11 +85,11 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is(TranscriptionUrgencyEnum.STANDARD.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(TranscriptionUrgencyEnum.STANDARD.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0]." +
-                                    "transcription_urgency.priority_order", is(TranscriptionUrgencyEnum.STANDARD.getPriorityOrderId())))
+                                    "transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
 
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
 
@@ -159,6 +162,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
                 testUser.getId()
             );
 
+        TranscriptionUrgencyEntity urgencyEntity = transcriptionStub.getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD);
+
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
@@ -174,11 +179,11 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is(TranscriptionUrgencyEnum.STANDARD.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(TranscriptionUrgencyEnum.STANDARD.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0]." +
-                                    "transcription_urgency.priority_order", is(TranscriptionUrgencyEnum.STANDARD.getPriorityOrderId())))
+                                    "transcription_urgency.priority_order", is(urgencyEntity.getPriorityOrder())))
 
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
 
@@ -195,11 +200,11 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.approver_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.approver_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.approver_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.approver_transcriptions[0].urgency", is(TranscriptionUrgencyEnum.STANDARD.getDescription())))
+            .andExpect(jsonPath("$.approver_transcriptions[0].urgency", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
-            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(TranscriptionUrgencyEnum.STANDARD.getDescription())))
+            .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency." +
-                                    "priority_order", is(TranscriptionUrgencyEnum.STANDARD.getPriorityOrderId())))
+                                    "priority_order", is(urgencyEntity.getPriorityOrder())))
             .andExpect(jsonPath("$.approver_transcriptions[0].requested_ts").isString());
     }
 
