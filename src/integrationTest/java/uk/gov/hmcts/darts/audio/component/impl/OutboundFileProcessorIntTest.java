@@ -3,8 +3,13 @@ package uk.gov.hmcts.darts.audio.component.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
@@ -13,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
@@ -45,6 +52,12 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private Path tempDirectory;
     private Path audioPath;
 
+    private HearingEntity hearingEntity;
+    private UserAccountEntity testUser;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
 
     @Autowired
     private OutboundFileProcessorImpl outboundFileProcessor;
@@ -57,6 +70,21 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
+        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            LocalDateTime.parse(HEARING_DATETIME)
+        );
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor("aProsecutor");
+        courtCase.addDefendant("aDefendant");
+        courtCase.addDefence("aDefence");
+        dartsDatabase.save(courtCase);
+
+        testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
