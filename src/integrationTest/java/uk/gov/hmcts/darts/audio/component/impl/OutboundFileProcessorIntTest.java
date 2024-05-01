@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -31,8 +32,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
+    private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
+    private static final String HEARING_DATE = "2023-01-01";
     private static final OffsetDateTime TIME_10_00 = OffsetDateTime.parse("2023-01-01T10:00Z");
     private static final OffsetDateTime TIME_10_01 = OffsetDateTime.parse("2023-01-01T10:01Z");
     private static final OffsetDateTime TIME_11_00 = OffsetDateTime.parse("2023-01-01T11:00Z");
@@ -49,6 +53,9 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
     private static final OffsetDateTime TIME_12_50 = OffsetDateTime.parse("2023-01-01T12:50Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
+    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTROOM = "some-courtroom";
+    private static final String SOME_CASE_NUMBER = "1";
     private Path tempDirectory;
     private Path audioPath;
 
@@ -184,6 +191,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             1,
             1
         );
+
         var mediaEntity2 = createMediaEntity(
             TIME_12_00,
             TIME_12_10,
@@ -610,10 +618,11 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int session, int channel) {
-        var mediaEntity = new MediaEntity();
-        mediaEntity.setStart(startTime);
-        mediaEntity.setEnd(endTime);
-        mediaEntity.setChannel(channel);
+        var mediaEntity = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom",
+                                                          startTime,
+                                                          endTime,
+                                                          channel
+        );
         mediaEntity.setMediaFile(String.format("000%d.a0%d", session, channel - 1));
         mediaEntity.setMediaFormat("mpeg2");
         mediaEntity.setFileSize(240_744L);
