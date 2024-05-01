@@ -15,8 +15,14 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 
-@SuppressWarnings({"PMD.TestClassWithoutTestCases"})
+import static java.lang.Character.isLetter;
+import static java.lang.Character.isUpperCase;
+import static java.lang.Character.toLowerCase;
+import static java.lang.Character.toUpperCase;
+
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.CognitiveComplexity"})
 public final class TestUtils {
 
     private TestUtils() {
@@ -75,5 +81,32 @@ public final class TestUtils {
         }
 
         return result.toString();
+    }
+
+    public static String randomizeCase(String str) {
+        Random random = new Random();
+        StringBuilder output = new StringBuilder();
+
+        for (char c : str.toCharArray()) {
+            if (random.nextBoolean()) {
+                if (isLetter(c)) {
+                    if (isUpperCase(c)) {
+                        output.append(toLowerCase(c));
+                    } else {
+                        output.append(toUpperCase(c));
+                    }
+                } else {
+                    output.append(c);
+                }
+            } else {
+                output.append(c);
+            }
+        }
+
+        if (output.toString().equals(str)) {
+            return randomizeCase(str);
+        }
+
+        return output.toString();
     }
 }
