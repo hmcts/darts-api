@@ -165,15 +165,22 @@ public class RetentionPostServiceImpl implements RetentionPostService {
 
     private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
                                                        LocalDate newRetentionDate) {
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        return createNewCaseRetention(postRetentionRequest, courtCase,
+                                      newRetentionDate, currentUser, CaseRetentionStatus.COMPLETE);
+    }
+
+    @Override
+    public CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
+                                                      LocalDate newRetentionDate, UserAccountEntity userAccount, CaseRetentionStatus caseRetentionStatus) {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
-        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
-        caseRetention.setLastModifiedBy(currentUser);
-        caseRetention.setCreatedBy(currentUser);
-        caseRetention.setSubmittedBy(currentUser);
+        caseRetention.setLastModifiedBy(userAccount);
+        caseRetention.setCreatedBy(userAccount);
+        caseRetention.setSubmittedBy(userAccount);
         caseRetention.setComments(postRetentionRequest.getComments());
         caseRetention.setRetainUntil(newRetentionDate.atTime(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC)));
-        caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.COMPLETE));
+        caseRetention.setCurrentState(String.valueOf(caseRetentionStatus));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
 
         caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
@@ -181,7 +188,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetentionRepository.saveAndFlush(caseRetention);
         auditApi.recordAudit(
             AuditActivity.APPLY_RETENTION,
-            currentUser,
+            userAccount,
             courtCase
         );
         return caseRetention;
