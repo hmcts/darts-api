@@ -5,8 +5,6 @@ import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
-import java.util.UUID;
-
 @Component
 public class DartsEventMapperImpl implements DartsEventMapper {
 
@@ -15,8 +13,6 @@ public class DartsEventMapperImpl implements DartsEventMapper {
     @Override
     public DartsEvent toDartsEvent(CourtLogsPostRequestBody request) {
         var dartsEvent = new DartsEvent();
-        dartsEvent.setMessageId(UUID.randomUUID()
-                                    .toString());
 
         dartsEvent.setType(COURTLOG_MESSAGE_TYPE);
         dartsEvent.setSubType(null);

@@ -7,12 +7,10 @@ import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -44,7 +42,7 @@ class DartsEventMapperImplTest {
 
         var dartsEvent = dartsEventMapper.toDartsEvent(request);
 
-        assertDoesNotThrow(() -> UUID.fromString(dartsEvent.getMessageId()));
+        assertNull(dartsEvent.getMessageId());
         assertEquals("LOG", dartsEvent.getType());
         assertNull(dartsEvent.getSubType());
         assertNull(dartsEvent.getEventId());
