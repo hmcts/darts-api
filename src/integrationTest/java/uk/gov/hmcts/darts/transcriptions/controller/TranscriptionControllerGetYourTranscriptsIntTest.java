@@ -85,7 +85,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0]." +
@@ -179,7 +178,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.requester_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.requester_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0]." +
@@ -200,7 +198,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.approver_transcriptions[0].hearing_date").isString())
             .andExpect(jsonPath("$.approver_transcriptions[0].transcription_type", is("Specified Times")))
             .andExpect(jsonPath("$.approver_transcriptions[0].status", is("Awaiting Authorisation")))
-            .andExpect(jsonPath("$.approver_transcriptions[0].urgency", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.transcription_urgency_id", is(TranscriptionUrgencyEnum.STANDARD.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency.description", is(urgencyEntity.getDescription())))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_urgency." +

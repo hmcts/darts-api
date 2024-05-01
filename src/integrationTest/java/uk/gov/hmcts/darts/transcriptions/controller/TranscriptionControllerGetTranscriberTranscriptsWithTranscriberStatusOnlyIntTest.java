@@ -154,7 +154,6 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                 "hearing_date": "2023-11-17",
                 "transcription_type": "Specified Times",
                 "status": "With Transcriber",
-                "urgency": "Standard",
                 "requested_ts": "2023-11-23T17:45:14.940936Z",
                 "state_change_ts": "2023-11-23T17:45:51.151621Z",
                 "is_manual": true,
