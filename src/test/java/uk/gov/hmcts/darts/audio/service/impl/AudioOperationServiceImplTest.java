@@ -44,7 +44,7 @@ class AudioOperationServiceImplTest {
     private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
     private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
 
-    private List<AudioFileInfo> inputAudioFileInfos;
+    private List<AudioFileInfo> preloadedInputAudioFileInfos;
     private Path tempDirectory;
 
     @InjectMocks
@@ -60,7 +60,7 @@ class AudioOperationServiceImplTest {
     void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("darts_api_unit_test");
 
-        inputAudioFileInfos = new ArrayList<>(Arrays.asList(
+        preloadedInputAudioFileInfos = new ArrayList<>(Arrays.asList(
             AudioFileInfo.builder()
                 .startTime(Instant.parse(T_09_00_00_Z))
                 .endTime(Instant.parse(T_10_30_00_Z))
@@ -120,7 +120,7 @@ class AudioOperationServiceImplTest {
 
         AudioFileInfo audioFileInfo = audioOperationService.concatenate(
             WORKSPACE_DIR,
-            inputAudioFileInfos
+            preloadedInputAudioFileInfos
         );
 
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
@@ -137,7 +137,7 @@ class AudioOperationServiceImplTest {
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo audioFileInfo = audioOperationService.merge(
-            inputAudioFileInfos,
+            preloadedInputAudioFileInfos,
             WORKSPACE_DIR
         );
 
@@ -181,7 +181,7 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldAdjustTimeDurationWhenValid() {
-        AudioFileInfo audioFileInfo = inputAudioFileInfos.get(0);
+        AudioFileInfo audioFileInfo = preloadedInputAudioFileInfos.get(0);
         assertEquals(
             Instant.parse(T_09_00_00_Z),
             audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(0, SECONDS))
@@ -230,7 +230,7 @@ class AudioOperationServiceImplTest {
 
         AudioFileInfo audioFileInfo = audioOperationService.reEncode(
             WORKSPACE_DIR,
-            inputAudioFileInfos.get(0)
+            preloadedInputAudioFileInfos.get(0)
         );
 
         assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
@@ -332,7 +332,7 @@ class AudioOperationServiceImplTest {
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
-            inputAudioFileInfos,
+            preloadedInputAudioFileInfos,
             ALLOWABLE_GAP
         );
 
