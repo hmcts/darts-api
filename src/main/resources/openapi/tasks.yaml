@@ -1,0 +1,76 @@
+openapi: 3.0.1
+
+info:
+  title: 'Modernised DARTS'
+  description: 'Modernised DARTS (Digital Audio Recording and Transcription Service).'
+  version: '${version}'
+
+
+########################################################################################################################
+# PATH DEFINITIONS
+########################################################################################################################
+
+paths:
+  /admin/automated-tasks:
+    get:
+      tags:
+        - Tasks
+      operationId: getAutomatedTasks
+      responses:
+        '200':
+          $ref: '#/components/responses/AutomatedTasksResponse'
+
+
+
+########################################################################################################################
+# COMPONENT DEFINITIONS
+########################################################################################################################
+
+components:
+
+  responses:
+    AutomatedTasksResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AutomatedTask'
+
+  schemas:
+    AutomatedTask:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/AutomatedTaskId'
+        name:
+          $ref: '#/components/schemas/AutomatedTaskName'
+        description:
+          $ref: '#/components/schemas/AutomatedTaskDescription'
+        cron_expression:
+            $ref: '#/components/schemas/CronExpression'
+        is_active:
+            $ref: '#/components/schemas/IsActive'
+
+    AutomatedTaskId:
+      type: integer
+    AutomatedTaskName:
+      type: string
+      minLength: 1
+      maxLength: 256
+    AutomatedTaskDescription:
+      type: string
+      minLength: 1
+      maxLength: 256
+    CronExpression:
+      type: string
+      minLength: 1
+      maxLength: 256
+    IsActive:
+      type: boolean
+
+
+
+
+
