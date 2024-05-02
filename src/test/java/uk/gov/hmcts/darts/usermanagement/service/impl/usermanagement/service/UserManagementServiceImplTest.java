@@ -7,9 +7,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupIdMapper;
@@ -20,6 +22,8 @@ import uk.gov.hmcts.darts.usermanagement.service.impl.UserManagementServiceImpl;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
+import uk.gov.hmcts.darts.usermanagement.validation.UserDeactivateNotLastSuperAdminValidator;
+import uk.gov.hmcts.darts.usermanagement.validation.UserEnablementValidator;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -52,11 +56,22 @@ class UserManagementServiceImplTest {
     @Mock
     SecurityGroupIdMapper securityGroupIdMapper;
 
+    @Mock
+    TranscriptionService transcriptionService;
+
+    @Mock
+    UserIdentity userIdentity;
+
     @BeforeEach
     void setUp() {
         UserAccountMapper mapper = new UserAccountMapperImpl();
         UserEmailValidator userEmailValidator = new UserEmailValidator(userAccountRepository);
         UserAccountExistsValidator userAccountExistsValidator = new UserAccountExistsValidator(userAccountRepository);
+
+        UserEnablementValidator enablementValidator = new UserEnablementValidator(userIdentity);
+        UserDeactivateNotLastSuperAdminValidator deactivateNotLastSuperAdminValidator
+            = new UserDeactivateNotLastSuperAdminValidator(securityGroupRepository);
+
         UserTypeValidator userTypeValidator = new UserTypeValidator(userAccountRepository);
 
         service = new UserManagementServiceImpl(
@@ -69,7 +84,10 @@ class UserManagementServiceImplTest {
             userManagementQuery,
             userEmailValidator,
             userAccountExistsValidator,
-            userTypeValidator
+            userTypeValidator,
+            enablementValidator,
+            deactivateNotLastSuperAdminValidator,
+            transcriptionService
         );
     }
 

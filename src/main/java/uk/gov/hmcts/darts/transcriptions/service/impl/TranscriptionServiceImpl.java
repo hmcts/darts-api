@@ -306,7 +306,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
-    private TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
+    public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                                                   TranscriptionEntity transcription,
                                                                   TranscriptionStatusEntity transcriptionStatus,
                                                                   String workflowComment) {
@@ -571,6 +571,26 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             }
         }
         return uniqueTranscriptionDocuments;
+    }
+
+    @Override
+    public List<Integer> rollbackUserTransactions(UserAccountEntity entity) {
+        List<TranscriptionEntity> transcriptionEntity = transcriptionRepository
+            .findTranscriptionForUserWithState(entity.getId(),
+        TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
+
+        List<Integer> transcriptionIds = new ArrayList<>();
+
+        // add the workflows back
+        for (TranscriptionEntity transcription : transcriptionEntity) {
+            saveTranscriptionWorkflow(entity, transcription,
+                                      transcriptionStatusRepository.getReferenceById(
+                                          TranscriptionStatusEnum.APPROVED.getId()),
+                                      "Owner was disabled");
+            transcriptionIds.add(transcription.getId());
+        }
+
+        return transcriptionIds;
     }
 
     @Override

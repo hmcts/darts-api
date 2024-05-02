@@ -147,4 +147,15 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         OffsetDateTime createdTo,
         Boolean isManual,
         String requestedBy);
+
+    @Query("""
+        SELECT t
+        FROM TranscriptionEntity t
+        WHERE t.created_by = :userId
+        AND t.trs_id = :statusId
+        """)
+    List<TranscriptionEntity> findTranscriptionForUserWithState(
+        Integer userId,
+        Integer statusId
+    );
 }
