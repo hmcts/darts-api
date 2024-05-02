@@ -515,7 +515,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(courtCaseEntity.getId()));
         expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
-        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -569,7 +569,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(courtCaseEntity.getId()));
         expectedResponse = expectedResponse.replaceAll("<CASE_NUMBERS>", String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)) + "|Case1");
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(uploadedBy.getId()));
-        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", caseDocument.getCreatedDateTime().format(formatter));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);

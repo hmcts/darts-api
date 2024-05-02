@@ -1,27 +1,14 @@
-ALTER TABLE object_admin_action
-ADD CONSTRAINT oaa_annotation_document_fk
-FOREIGN KEY (ado_id) REFERENCES annotation_document(ado_id);
+CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address));
+CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid)             ;
 
-ALTER TABLE object_admin_action
-ADD CONSTRAINT oaa_case_document_fk
-FOREIGN KEY (cad_id) REFERENCES case_document(cad_id);
+CREATE UNIQUE INDEX event_linked_case_pk ON event_linked_case(elc_id);
+ALTER TABLE event_linked_case  ADD PRIMARY KEY USING INDEX event_linked_case_pk;
 
-ALTER TABLE object_admin_action
-ADD CONSTRAINT oaa_media_fk
-FOREIGN KEY (med_id) REFERENCES media(med_id);
+CREATE UNIQUE INDEX media_linked_case_pk ON media_linked_case(mlc_id);
+ALTER TABLE media_linked_case  ADD PRIMARY KEY USING INDEX media_linked_case_pk;
 
-ALTER TABLE object_admin_action
-ADD CONSTRAINT oaa_transcription_document_fk
-FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
+CREATE UNIQUE INDEX object_admin_action_pk ON object_admin_action(oaa_id);
+ALTER TABLE object_admin_action ADD PRIMARY KEY USING INDEX object_admin_action_pk;
 
-ALTER TABLE object_admin_action
-ADD CONSTRAINT object_admin_action_ohr_id_fk
-FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
-
-ALTER TABLE object_admin_action
-ADD CONSTRAINT object_admin_action_hidden_by_fk
-FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE object_admin_action
-ADD CONSTRAINT object_admin_action_marked_for_manual_del_by_fk
-FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
+CREATE UNIQUE INDEX object_retrieval_queue_pk ON object_retrieval_queue(orq_id);
+ALTER TABLE object_retrieval_queue ADD PRIMARY KEY USING INDEX object_retrieval_queue_pk;

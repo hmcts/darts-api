@@ -58,4 +58,22 @@ public class CaseOverflowEntity {
     @Column(name = "audio_folder_object_id", updatable = false, insertable = false)
     private String audioFolderObjectId;
 
+    @Column(name = "checked_ts")
+    private OffsetDateTime checkedTs;
+
+    @Column(name = "corrected_ts")
+    private OffsetDateTime correctedTs;
+
+    @Column(name = "confidence_level")
+    private Integer confidenceLevel;
+
+    @Column(name = "confidence_reason")
+    private String confidenceReason;
+
+    @Column(name = "c_closed_pre_live")
+    private Integer caseClosedPreLive;
+
+    @Column(name = "c_case_closed_date_pre_live")
+    private OffsetDateTime caseClosedDatePreLive;
+
 }

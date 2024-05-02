@@ -1,0 +1,59 @@
+package uk.gov.hmcts.darts.common.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+
+import java.time.OffsetDateTime;
+
+@Entity
+@Table(name = "object_retrieval_queue")
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = false)
+public class ObjectRetrievalQueueEntity extends CreatedModifiedBaseEntity {
+
+    @Id
+    @Column(name = "orq_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orq_gen")
+    @SequenceGenerator(name = "orq_gen", sequenceName = "orq_seq", allocationSize = 1)
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "med_id")
+    private MediaEntity media;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "trd_id")
+    private TranscriptionDocumentEntity transcriptionDocument;
+
+    @Column(name = "parent_object_id")
+    private String parentObjectId;
+
+    @Column(name = "content_object_id")
+    private String contentObjectId;
+
+    @Column(name = "clip_id")
+    private String clipId;
+
+    @Column(name = "acknowledged_ts")
+    private OffsetDateTime acknowledgedTs;
+
+    @Column(name = "migrated_ts")
+    private OffsetDateTime migratedTs;
+
+    @Column(name = "status")
+    private String status;
+
+}
