@@ -36,6 +36,7 @@ import static java.lang.Boolean.TRUE;
 @RequiredArgsConstructor
 @Slf4j
 public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
+    private static final String CLOSE_CASE_RETENTION_COMMENT = "CloseOldCases Automated job setting retention period to Default";
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
     private final RetentionApi retentionApi;
@@ -107,7 +108,7 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
         LocalDate retentionDate = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.DEFAULT);
 
         PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
-        postRetentionRequest.setComments("CloseOldCases Automated job setting retention period to Default");
+        postRetentionRequest.setComments(CLOSE_CASE_RETENTION_COMMENT);
         postRetentionRequest.setRetentionDate(retentionDate);
 
         CaseRetentionEntity retentionEntity = retentionApi.createRetention(postRetentionRequest, courtCase, retentionDate, userAccount,

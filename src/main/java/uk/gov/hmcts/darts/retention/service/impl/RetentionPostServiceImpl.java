@@ -163,13 +163,6 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         return latestCompletedAutomatedRetentionOpt.get();
     }
 
-    private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
-                                                       LocalDate newRetentionDate) {
-        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
-        return createNewCaseRetention(postRetentionRequest, courtCase,
-                                      newRetentionDate, currentUser, CaseRetentionStatus.COMPLETE);
-    }
-
     @Override
     public CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
                                                       LocalDate newRetentionDate, UserAccountEntity userAccount, CaseRetentionStatus caseRetentionStatus) {
@@ -192,6 +185,13 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             courtCase
         );
         return caseRetention;
+    }
+
+    private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
+                                                       LocalDate newRetentionDate) {
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        return createNewCaseRetention(postRetentionRequest, courtCase,
+                                      newRetentionDate, currentUser, CaseRetentionStatus.COMPLETE);
     }
 
     private RetentionPolicyTypeEntity getRetentionPolicy(Boolean isPermanent) {
