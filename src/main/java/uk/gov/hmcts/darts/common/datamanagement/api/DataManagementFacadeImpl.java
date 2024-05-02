@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.service.impl.ArmApiServiceImpl;
 import uk.gov.hmcts.darts.audio.helper.UnstructuredDataHelper;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
@@ -47,6 +49,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private final StorageOrderHelper storageOrderHelper;
     private final UnstructuredDataHelper unstructuredDataHelper;
     private final DataManagementConfiguration dataManagementConfiguration;
+    private final ArmApiServiceImpl armApiService;
 
     @Override
     public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException {
@@ -126,7 +129,11 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private DownloadResponseMetaData retrieveFileFromStorage(DatastoreContainerType datastoreType, ExternalObjectDirectoryEntity eodEntity,
                                                              BlobContainerDownloadable container) throws FileNotDownloadedException {
         try {
-            return container.downloadBlobFromContainer(datastoreType, eodEntity);
+            if (datastoreType == ARM) {
+                return armApiService.downloadArmData(eodEntity.getExternalRecordId(), eodEntity.getExternalFileId());
+            } else {
+                return container.downloadBlobFromContainer(datastoreType, eodEntity);
+            }
         } catch (UncheckedIOException | BlobStorageException e) {
             throw new FileNotDownloadedException(eodEntity.getExternalLocation(), datastoreType.name(), "Error downloading blob", e);
         }
