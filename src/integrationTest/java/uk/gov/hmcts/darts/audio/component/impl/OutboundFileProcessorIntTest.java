@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
@@ -40,9 +39,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime TIME_10_01 = OffsetDateTime.parse("2023-01-01T10:01Z");
     private static final OffsetDateTime TIME_10_02 = OffsetDateTime.parse("2023-01-01T10:02Z");
     private static final OffsetDateTime TIME_10_03 = OffsetDateTime.parse("2023-01-01T10:03Z");
-    private static final OffsetDateTime TIME_11_00 = OffsetDateTime.parse("2023-01-01T11:00Z");
-    private static final OffsetDateTime TIME_11_01 = OffsetDateTime.parse("2023-01-01T11:01Z");
-    private static final OffsetDateTime TIME_11_58 = OffsetDateTime.parse("2023-01-01T11:58Z");
     private static final OffsetDateTime TIME_11_59 = OffsetDateTime.parse("2023-01-01T11:59Z");
     private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime TIME_12_00_15 = OffsetDateTime.parse("2023-01-01T12:00:15Z");
@@ -58,7 +54,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final OffsetDateTime TIME_12_30 = OffsetDateTime.parse("2023-01-01T12:30Z");
     private static final OffsetDateTime TIME_12_30_30 = OffsetDateTime.parse("2023-01-01T12:30:30Z");
     private static final OffsetDateTime TIME_12_31 = OffsetDateTime.parse("2023-01-01T12:31Z");
-    private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
     private static final OffsetDateTime TIME_12_50 = OffsetDateTime.parse("2023-01-01T12:50Z");
     private static final OffsetDateTime TIME_12_51 = OffsetDateTime.parse("2023-01-01T12:51Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
@@ -67,9 +62,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String SOME_CASE_NUMBER = "1";
     private Path tempDirectory;
     private Path audioPath;
-
-    private HearingEntity hearingEntity;
-    private UserAccountEntity testUser;
 
     @Autowired
     private OutboundFileProcessorImpl outboundFileProcessor;
@@ -82,7 +74,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
         audioPath = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test.mp2"), REPLACE_EXISTING);
 
-        hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
@@ -93,9 +85,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         courtCase.addDefendant("aDefendant");
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
-
-        testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
 
     }
 
@@ -161,24 +150,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
                                                    mediaEntity2, audioPath2
         );
 
-        var firstTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_12_09.toInstant())
-            .endTime(TIME_12_10.toInstant())
-            .channel(1)
-            .mediaFile("0001.a00")
-            .path(audioPath)
-            .isTrimmed(false)
-            .build();
-        var secondTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_12_10.toInstant())
-            .endTime(TIME_12_11.toInstant())
-            .channel(1)
-            .mediaFile("0002.a00")
-            .path(audioPath2)
-            .isTrimmed(false)
-            .build();
-
-
         // When
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
@@ -224,24 +195,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
                                                    mediaEntity2, audioPath2
         );
 
-        var firstTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_11_59.toInstant())
-            .endTime(TIME_12_00.toInstant())
-            .channel(1)
-            .mediaFile("0001.a00")
-            .path(audioPath)
-            .isTrimmed(false)
-            .build();
-        var secondTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_11_59.toInstant())
-            .endTime(TIME_12_00.toInstant())
-            .channel(2)
-            .mediaFile("0001.a01")
-            .path(audioPath2)
-            .isTrimmed(false)
-            .build();
-
-
         // When
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
@@ -254,8 +207,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         List<AudioFileInfo> session = sessions.get(0);
 
         assertEquals(2, session.size());
-//        assertEquals(firstTrimmedAudioFileInfo, session.get(0));
-//        assertEquals(secondTrimmedAudioFileInfo, session.get(1));
 
     }
 
@@ -283,23 +234,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
                                                    mediaEntity2, audioPath2
         );
 
-        var firstTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_12_00_15.toInstant())
-            .endTime(TIME_12_01.toInstant())
-            .channel(1)
-            .mediaFile("0001.a00")
-            .path(audioPath)
-            .isTrimmed(false)
-            .build();
-        var secondTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_12_29.toInstant())
-            .endTime(TIME_12_29_45.toInstant())
-            .channel(1)
-            .mediaFile("0002.a00")
-            .path(audioPath2)
-            .isTrimmed(false)
-            .build();
-
         // When
         List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
@@ -313,10 +247,8 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         List<AudioFileInfo> secondSession = sessions.get(1);
 
         assertEquals(1, firstSession.size());
-        //assertEquals(firstTrimmedAudioFileInfo, firstSession.get(0));
 
         assertEquals(1, secondSession.size());
-        //assertEquals(secondTrimmedAudioFileInfo, secondSession.get(0));
 
     }
 
@@ -411,7 +343,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         Path audioPath11 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test11.mp2"), REPLACE_EXISTING);
         Path audioPath12 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test12.mp2"), REPLACE_EXISTING);
 
-        var mediaEntityToDownloadLocation = new LinkedHashMap<MediaEntity, Path>();
+        LinkedHashMap<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
         mediaEntityToDownloadLocation.put(mediaEntity1, audioPath);
         mediaEntityToDownloadLocation.put(mediaEntity2, audioPath2);
         mediaEntityToDownloadLocation.put(mediaEntity3, audioPath3);
@@ -536,15 +468,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     @Test
     void processAudioForPlaybackWithOneAudio() throws IOException, ExecutionException, InterruptedException {
         // given
-        var firstTrimmedAudioFileInfo = AudioFileInfo.builder()
-            .startTime(TIME_12_09.toInstant())
-            .endTime(TIME_12_10.toInstant())
-            .channel(1)
-            .mediaFile("0001.a00")
-            .path(audioPath)
-            .isTrimmed(false)
-            .build();
-
         var mediaEntity1 = createMediaEntity(
             TIME_12_09,
             TIME_12_10,
@@ -643,9 +566,6 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToPlaybackLocation, TIME_12_00, TIME_13_00);
 
         assertEquals(3, sessions.size());
-        AudioFileInfo firstSession = sessions.get(0);
-        AudioFileInfo secondSession = sessions.get(1);
-
     }
 
     @Test
