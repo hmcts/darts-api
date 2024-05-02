@@ -152,14 +152,16 @@ components:
       enum:
         - "AUTOMATED_TASK_100"
         - "AUTOMATED_TASK_101"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING ]
+        - "AUTOMATED_TASK_102"
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED ]
 
     AutomatedTaskTitleErrors:
       type: string
       enum:
         - "The provided task_id does not exist"
         - "The automated task is already running"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING ]
+        - "The automated task has not been initialized correctly on application start up and can not be run manually."
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED ]
 
 
   parameters:

@@ -60,9 +60,14 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
         var automatedTask = automatedTaskService.getAutomatedTasks().stream()
             .filter(task -> task.getTaskName().equals(automatedTaskEntity.getTaskName()))
-            .findFirst().orElseThrow();
+            .findFirst();
 
-        automatedTaskRunner.run(automatedTask);
+        if (automatedTask.isEmpty()) {
+            log.error("Manual running of {} failed as it does not exist", automatedTaskEntity.getTaskName());
+            throw new DartsApiException(AutomatedTaskApiError.AUTOMATED_TASK_NOT_CONFIGURED_CORRECTLY);
+        }
+
+        automatedTaskRunner.run(automatedTask.get());
     }
 
     private boolean isLocked(AutomatedTaskEntity automatedTask) {
