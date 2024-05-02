@@ -22,7 +22,7 @@ public class UserEnablementValidator implements Validator<UserPatch> {
     public void validate(UserPatch userPatch) {
 
         // only allow super user to transition from false to true
-        if (userPatch.getActive().equals(true)) {
+        if (userPatch.getActive() != null && userPatch.getActive().equals(true)) {
             Set<SecurityRoleEnum> securityRoleEnum = new HashSet<>();
             securityRoleEnum.add(SecurityRoleEnum.SUPER_USER);
 

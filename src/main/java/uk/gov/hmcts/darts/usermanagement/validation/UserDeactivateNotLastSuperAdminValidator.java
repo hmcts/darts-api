@@ -24,7 +24,7 @@ public class UserDeactivateNotLastSuperAdminValidator implements Validator<UserQ
 
     @Override
     public void validate(UserQueryRequest<UserPatch> userPatch) {
-        if (!userPatch.getPayload().getActive()) {
+        if (userPatch.getPayload().getActive() != null && !userPatch.getPayload().getActive()) {
             Optional<SecurityGroupEntity> securityGroupEntityLst = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
             Set<UserAccountEntity> accountEntities = securityGroupEntityLst.get().getUsers();
 
