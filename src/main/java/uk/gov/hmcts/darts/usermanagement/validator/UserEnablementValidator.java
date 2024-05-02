@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.usermanagement.validation;
+package uk.gov.hmcts.darts.usermanagement.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,12 +23,23 @@ public class UserEnablementValidator implements Validator<UserPatch> {
 
         // only allow super user to transition from false to true
         if (userPatch.getActive() != null && userPatch.getActive().equals(true)) {
+            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
+        } else {
             Set<SecurityRoleEnum> securityRoleEnum = new HashSet<>();
-            securityRoleEnum.add(SecurityRoleEnum.SUPER_USER);
+            securityRoleEnum.add(SecurityRoleEnum.SUPER_ADMIN);
 
-            if (!userIdentity.userHasGlobalAccess(securityRoleEnum)) {
-                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
+            if (userIdentity.userHasGlobalAccess(securityRoleEnum)) {
+                if (hasAnythingOtherThanEnablementStateChanged(userPatch)) {
+                    throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
+                }
             }
         }
+    }
+
+    private boolean hasAnythingOtherThanEnablementStateChanged(UserPatch userPatch) {
+        return userPatch.getDescription() != null
+            || userPatch.getEmailAddress() != null
+            || userPatch.getFullName() != null
+            || !userPatch.getSecurityGroupIds().isEmpty();
     }
 }

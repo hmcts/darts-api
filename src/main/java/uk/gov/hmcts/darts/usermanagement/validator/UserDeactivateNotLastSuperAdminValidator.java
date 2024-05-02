@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.usermanagement.validation;
+package uk.gov.hmcts.darts.usermanagement.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

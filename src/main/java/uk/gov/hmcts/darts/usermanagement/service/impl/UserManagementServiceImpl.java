@@ -26,8 +26,8 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
-import uk.gov.hmcts.darts.usermanagement.validation.UserDeactivateNotLastSuperAdminValidator;
-import uk.gov.hmcts.darts.usermanagement.validation.UserEnablementValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastSuperAdminValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserEnablementValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
