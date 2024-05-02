@@ -35,7 +35,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as transcription_urgency_description,
                     tru.tru_id  as transcription_urgency_id,
                     tru.priority_order as transcription_urgency_priority_order,
-                    trw.workflow_ts as requested_ts,
+                    trw.workflow_ts as requested_ts
                 FROM
                     darts.transcription_workflow trw
                 INNER JOIN
