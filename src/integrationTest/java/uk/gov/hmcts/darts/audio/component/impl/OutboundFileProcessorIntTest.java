@@ -569,10 +569,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
             1,
             1
         );
-
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
-
+        
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath);
 
         // when
