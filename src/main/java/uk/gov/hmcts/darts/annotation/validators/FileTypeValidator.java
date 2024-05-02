@@ -8,8 +8,6 @@ import uk.gov.hmcts.darts.annotation.errors.AnnotationApiError;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
-import java.io.IOException;
-
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -28,16 +26,9 @@ public class FileTypeValidator implements Validator<MultipartFile> {
         if (!config.getAllowedContentTypes().contains(file.getContentType())) {
             throw new DartsApiException(AnnotationApiError.BAD_REQUEST_CONTENT_TYPE);
         }
-        if (getBytes(file).length > config.getMaxFileSize()) {
+        if (file.getSize() > config.getMaxFileSize()) {
             throw new DartsApiException(AnnotationApiError.BAD_REQUEST_FILE_SIZE);
         }
     }
 
-    private static byte[] getBytes(MultipartFile file) {
-        try {
-            return file.getBytes();
-        } catch (IOException e) {
-            throw new DartsApiException(AnnotationApiError.FAILED_TO_UPLOAD_ANNOTATION_DOCUMENT, e);
-        }
-    }
 }

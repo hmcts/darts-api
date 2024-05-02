@@ -312,7 +312,7 @@ public class TranscriptionStub {
                                                                ExternalLocationTypeEnum location) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        final int fileSize = 11_937;
+        final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
         final UUID externalLocation = UUID.randomUUID();
