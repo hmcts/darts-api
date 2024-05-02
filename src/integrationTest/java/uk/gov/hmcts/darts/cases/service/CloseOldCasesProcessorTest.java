@@ -1,8 +1,13 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -14,6 +19,8 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,17 +32,30 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
     @Autowired
     CloseOldCasesProcessor closeOldCasesProcessor;
 
+    private static final String REQUESTER_EMAIL = "test.user@example.com";
+
+    @BeforeEach
+    void beforeEach() {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of(REQUESTER_EMAIL))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        dartsDatabase.createTestUserAccount();
+    }
+
     @Test
     void givenClosedEventsUseDateAsClosedDate() {
         HearingEntity hearing = dartsDatabase.createHearing("a_courthouse", "1", "1078", LocalDateTime.now().minusYears(7).plusMonths(3));
 
         OffsetDateTime closeDate = OffsetDateTime.now().minusYears(7);
 
-        EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);
+        EventEntity eventEntity1 = dartsDatabase.getEventStub().createEvent(hearing, 8);//Re-examination
         eventEntity1.setCreatedDateTime(OffsetDateTime.now().minusYears(7).plusDays(10));
-        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 214);
+        EventEntity eventEntity2 = dartsDatabase.getEventStub().createEvent(hearing, 214);//case closed
         eventEntity2.setCreatedDateTime(closeDate);
-        EventEntity eventEntity3 = dartsDatabase.getEventStub().createEvent(hearing, 23);
+        EventEntity eventEntity3 = dartsDatabase.getEventStub().createEvent(hearing, 23);//Application: No case to answer
         eventEntity3.setCreatedDateTime(OffsetDateTime.now().minusYears(7).plusDays(5));
         dartsDatabase.saveAll(eventEntity1, eventEntity2, eventEntity3);
 
@@ -51,6 +71,9 @@ class CloseOldCasesProcessorTest extends IntegrationBase {
         assertTrue(updatedCourtCaseEntity.getClosed());
         assertEquals(closeDate.truncatedTo(ChronoUnit.MINUTES),
                      updatedCourtCaseEntity.getCaseClosedTimestamp().truncatedTo(ChronoUnit.MINUTES));
+        CaseRetentionEntity caseRetentionEntity = dartsDatabase.getCaseRetentionRepository().findAll().get(0);
+        assertEquals(courtCaseEntity.getId(), caseRetentionEntity.getCourtCase().getId());
+        assertEquals(closeDate.plusYears(7).truncatedTo(ChronoUnit.DAYS), caseRetentionEntity.getRetainUntil());
     }
 
     @Test

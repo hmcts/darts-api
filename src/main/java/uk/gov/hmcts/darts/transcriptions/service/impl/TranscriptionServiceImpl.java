@@ -474,6 +474,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriberTranscriptsQuery.getTranscriptRequests(userId);
     }
 
+    @SuppressWarnings({"java:S2259"})
     @Override
     public List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent) {
         var transcription = transcriptionRepository.findById(transcriptionId);
@@ -484,7 +485,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         var transcriptionWorkflows = transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(transcription.get());
 
-        if (isCurrent) {
+        if (nonNull(isCurrent) && TRUE.equals(isCurrent)) {
             return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(transcriptionWorkflows.get(0)));
         }
 

@@ -45,7 +45,7 @@ echo "Restoring local database..."
 # make the password available for psql
 export PGPASSWORD="$LOCAL_PASSWORD"
 # drop the darts schema
-psql -h $LOCAL_HOST -U $LOCAL_USER -d $DATABASE -c "DROP SCHEMA IF EXISTS $SCHEMA CASCADE" &> null
+psql -h $LOCAL_HOST -U $LOCAL_USER -d $DATABASE -c "DROP SCHEMA IF EXISTS $SCHEMA CASCADE" &> /dev/null
 # restore from the dump file
 psql -h $LOCAL_HOST -U $LOCAL_USER -d $DATABASE -L $RESTORE_LOG_FILE < $DUMP_FILE &> $RESTORE_OUTPUT
 

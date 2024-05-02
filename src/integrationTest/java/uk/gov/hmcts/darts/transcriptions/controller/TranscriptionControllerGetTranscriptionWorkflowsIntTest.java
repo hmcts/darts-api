@@ -82,8 +82,7 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
-            .queryParam("transcription_id", transcription.getId().toString())
-            .queryParam("is_current", "false");
+            .queryParam("transcription_id", transcription.getId().toString());
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = response.getResponse().getContentAsString();

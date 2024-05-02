@@ -40,7 +40,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.util.unit.DataSize.ofBytes;
 import static org.springframework.util.unit.DataSize.ofMegabytes;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
@@ -187,8 +186,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @Test
     void attachTranscriptShouldReturnBadRequestErrorWithFileSizeLimitExceeded() throws Exception {
-        when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofBytes(5));
-        when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofBytes(5));
 
         setPermissions(authorisationStub.getSeparateIntegrationUser());
 
@@ -196,7 +193,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             "transcript",
             "Test Document.doc",
             "application/msword",
-            "Test Document (doc)".getBytes()
+            "Test Document exceeding max configured doc size(doc)".getBytes()
         );
 
         final MvcResult mvcResult = mockMvc.perform(

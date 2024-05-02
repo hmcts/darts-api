@@ -10,7 +10,8 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.tasks.http.api.TasksApi;
-import uk.gov.hmcts.darts.tasks.model.AutomatedTask;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
+import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
 import java.util.List;
 
@@ -31,9 +32,15 @@ public class AutomatedTasksController implements TasksApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     @Override
-    public ResponseEntity<List<AutomatedTask>> getAutomatedTasks() {
+    public ResponseEntity<List<AutomatedTaskSummary>> getAutomatedTasks() {
         return new ResponseEntity<>(adminAutomatedTaskService.getAllAutomatedTasks(), HttpStatus.OK);
     }
 
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<DetailedAutomatedTask> getAutomatedTaskById(Integer taskId) {
+        return new ResponseEntity<>(adminAutomatedTaskService.getAutomatedTaskById(taskId), HttpStatus.OK);
+    }
 }
 
