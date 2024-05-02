@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
@@ -34,8 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OutboundFileProcessorIntTest extends IntegrationBase {
     private static final String AUDIO_FILENAME = "tests/audio/WithViqHeader/viq0001min.mp2";
     private static final String HEARING_DATETIME = "2023-01-01T10:00:00";
-    private static final OffsetDateTime TIME_10_00 = OffsetDateTime.parse("2023-01-01T10:00Z");
+    private static final OffsetDateTime TIME_10_00 = OffsetDateTime.parse("2023-01-01T10:00:00Z");
+    private static final OffsetDateTime TIME_10_00_15 = OffsetDateTime.parse("2023-01-01T10:00:15Z");
     private static final OffsetDateTime TIME_10_00_30 = OffsetDateTime.parse("2023-01-01T10:00:30Z");
+    private static final OffsetDateTime TIME_10_00_45 = OffsetDateTime.parse("2023-01-01T10:00:45Z");
     private static final OffsetDateTime TIME_10_01 = OffsetDateTime.parse("2023-01-01T10:01Z");
     private static final OffsetDateTime TIME_10_02 = OffsetDateTime.parse("2023-01-01T10:02Z");
     private static final OffsetDateTime TIME_10_03 = OffsetDateTime.parse("2023-01-01T10:03Z");
@@ -161,13 +164,8 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         assertEquals(2, sessions.size());
         List<AudioFileInfo> firstSession = sessions.get(0);
         List<AudioFileInfo> secondSession = sessions.get(1);
-
         assertEquals(1, firstSession.size());
-        //assertEquals(firstTrimmedAudioFileInfo, firstSession.get(0));
-
         assertEquals(1, secondSession.size());
-        //assertEquals(secondTrimmedAudioFileInfo, secondSession.get(0));
-
     }
 
     @Test
@@ -406,34 +404,190 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
 
     }
 
+    @Disabled("TODO - This requires a code change in order to work")
     @Test
-    void processAudioForPlaybackShouldPerformExpectedAudioOperations()
+    void processAudioForDownloadShouldReturnOneSessionExcludingFirstAndThirdSession()
         throws ExecutionException, InterruptedException, IOException {
 
+        // Given
         var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
+            TIME_10_00,
+            TIME_10_01,
             1,
             1
         );
         var mediaEntity2 = createMediaEntity(
-            TIME_12_10,
-            TIME_12_20,
+            TIME_10_00,
+            TIME_10_01,
+            1,
+            2
+        );
+        var mediaEntity3 = createMediaEntity(
+            TIME_10_00,
+            TIME_10_01,
+            1,
+            3
+        );
+        var mediaEntity4 = createMediaEntity(
+            TIME_10_00,
+            TIME_10_01,
+            1,
+            4
+        );
+        var mediaEntity5 = createMediaEntity(
+            TIME_11_59,
+            TIME_12_00,
             2,
             1
         );
-        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
-        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
-
-        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath,
-                                                   mediaEntity2, audioPath2
+        var mediaEntity6 = createMediaEntity(
+            TIME_11_59,
+            TIME_12_00,
+            2,
+            2
+        );
+        var mediaEntity7 = createMediaEntity(
+            TIME_11_59,
+            TIME_12_00,
+            2,
+            3
+        );
+        var mediaEntity8 = createMediaEntity(
+            TIME_11_59,
+            TIME_12_00,
+            2,
+            4
+        );
+        var mediaEntity9 = createMediaEntity(
+            TIME_12_30,
+            TIME_12_31,
+            3,
+            1
+        );
+        var mediaEntity10 = createMediaEntity(
+            TIME_12_30,
+            TIME_12_31,
+            3,
+            2
+        );
+        var mediaEntity11 = createMediaEntity(
+            TIME_12_30,
+            TIME_12_31,
+            3,
+            3
+        );
+        var mediaEntity12 = createMediaEntity(
+            TIME_12_30,
+            TIME_12_31,
+            3,
+            4
         );
 
-        outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+        Path audioPath3 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test3.mp2"), REPLACE_EXISTING);
+        Path audioPath4 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test4.mp2"), REPLACE_EXISTING);
+        Path audioPath5 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test5.mp2"), REPLACE_EXISTING);
+        Path audioPath6 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test6.mp2"), REPLACE_EXISTING);
+        Path audioPath7 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test7.mp2"), REPLACE_EXISTING);
+        Path audioPath8 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test8.mp2"), REPLACE_EXISTING);
+        Path audioPath9 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test9.mp2"), REPLACE_EXISTING);
+        Path audioPath10 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test10.mp2"), REPLACE_EXISTING);
+        Path audioPath11 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test11.mp2"), REPLACE_EXISTING);
+        Path audioPath12 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test12.mp2"), REPLACE_EXISTING);
+
+        LinkedHashMap<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
+        mediaEntityToDownloadLocation.put(mediaEntity1, audioPath);
+        mediaEntityToDownloadLocation.put(mediaEntity2, audioPath2);
+        mediaEntityToDownloadLocation.put(mediaEntity3, audioPath3);
+        mediaEntityToDownloadLocation.put(mediaEntity4, audioPath4);
+        mediaEntityToDownloadLocation.put(mediaEntity5, audioPath5);
+        mediaEntityToDownloadLocation.put(mediaEntity6, audioPath6);
+        mediaEntityToDownloadLocation.put(mediaEntity7, audioPath7);
+        mediaEntityToDownloadLocation.put(mediaEntity8, audioPath8);
+        mediaEntityToDownloadLocation.put(mediaEntity9, audioPath9);
+        mediaEntityToDownloadLocation.put(mediaEntity10, audioPath10);
+        mediaEntityToDownloadLocation.put(mediaEntity11, audioPath11);
+        mediaEntityToDownloadLocation.put(mediaEntity12, audioPath12);
+
+        // When
+        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
+            mediaEntityToDownloadLocation,
+            TIME_10_01,
+            TIME_12_30
+        );
+
+        // Then
+        assertEquals(3, sessions.size());
+        List<AudioFileInfo> firstSession = sessions.get(0);
+        assertEquals(4, firstSession.size());
+
+        List<AudioFileInfo> secondSession = sessions.get(1);
+        assertEquals(4, secondSession.size());
+        var session2UntrimmedAudioFileInfoBuilder = AudioFileInfo.builder()
+            .startTime(TIME_11_59.toInstant())
+            .endTime(TIME_12_00.toInstant())
+            .isTrimmed(false);
+
+        assertEquals(session2UntrimmedAudioFileInfoBuilder
+                         .channel(1)
+                         .mediaFile("0002.a00")
+                         .path(audioPath5)
+                         .build(),
+                     secondSession.get(0));
+        assertEquals(session2UntrimmedAudioFileInfoBuilder
+                         .channel(2)
+                         .mediaFile("0002.a01")
+                         .path(audioPath6)
+                         .build(),
+                     secondSession.get(1));
+        assertEquals(session2UntrimmedAudioFileInfoBuilder
+                         .channel(3)
+                         .mediaFile("0002.a02")
+                         .path(audioPath7)
+                         .build(),
+                     secondSession.get(2));
+        assertEquals(session2UntrimmedAudioFileInfoBuilder
+                         .channel(4)
+                         .mediaFile("0002.a03")
+                         .path(audioPath8)
+                         .build(),
+                     secondSession.get(3));
+
+        List<AudioFileInfo> thirdSession = sessions.get(2);
+        assertEquals(4, thirdSession.size());
+
     }
 
     @Test
-    void processAudioForPlaybackShouldReturnOneSessionWithTwoContinousAudio() throws IOException, ExecutionException, InterruptedException {
+    void processAudioForPlaybackShouldReturnOneSessionWithOneAudio()
+        throws ExecutionException, InterruptedException, IOException {
+        // given
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_01,
+            1,
+            1
+        );
+
+        File audioFileTest = TestUtils.getFile(AUDIO_FILENAME);
+        Path audioPath2 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test2.mp2"), REPLACE_EXISTING);
+
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath);
+
+        // when
+        List<AudioFileInfo> audioResults = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_11_59, TIME_13_00);
+
+        // then
+        assertEquals(1, audioResults.size());
+        AudioFileInfo firstSession = audioResults.get(0);
+
+        assertEquals(TIME_12_00.toInstant(), firstSession.getStartTime());
+        assertEquals(TIME_12_01.toInstant(), firstSession.getEndTime());
+    }
+
+    @Test
+    void processAudioForPlaybackShouldReturnOneSessionWithTwoContinuousAudio() throws IOException, ExecutionException, InterruptedException {
         // given
 
         var mediaEntity1 = createMediaEntity(
@@ -466,24 +620,24 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processAudioForPlaybackWithOneAudio() throws IOException, ExecutionException, InterruptedException {
+    void processAudioForPlaybackWithOneAudioTrimmed() throws IOException, ExecutionException, InterruptedException {
         // given
         var mediaEntity1 = createMediaEntity(
-            TIME_12_09,
-            TIME_12_10,
+            TIME_10_00,
+            TIME_10_01,
             1,
             1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, audioPath);
 
         // when
-        List<AudioFileInfo> audioResults = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_09, TIME_12_10);
+        List<AudioFileInfo> audioResults = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_10_00_15, TIME_10_00_45);
 
         // then
         AudioFileInfo firstSession = audioResults.get(0);
 
-        assertEquals(TIME_12_09.toInstant(), firstSession.getStartTime());
-        assertEquals(TIME_12_10.toInstant(), firstSession.getEndTime());
+        assertEquals(TIME_10_00_15.toInstant(), firstSession.getStartTime());
+        assertEquals(TIME_10_00_45.toInstant(), firstSession.getEndTime());
     }
 
     @Test
@@ -519,7 +673,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
     @Test
     void processAudioForPlaybackShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
         throws ExecutionException, InterruptedException, IOException {
-
+        // given
         var mediaEntity1 = createMediaEntity(
             TIME_12_00,
             TIME_12_01,
@@ -563,9 +717,24 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
                                                    mediaEntity5, audioPath5
         );
 
+        // when
         List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToPlaybackLocation, TIME_12_00, TIME_13_00);
 
+        // then
         assertEquals(3, sessions.size());
+        AudioFileInfo firstSession = sessions.get(0);
+        AudioFileInfo secondSession = sessions.get(0);
+        AudioFileInfo thirdSession = sessions.get(0);
+
+        assertEquals(TIME_12_00.toInstant(), firstSession.getStartTime());
+        assertEquals(TIME_12_01.toInstant(), firstSession.getEndTime());
+
+        assertEquals(TIME_12_00.toInstant(), secondSession.getStartTime());
+        assertEquals(TIME_12_01.toInstant(), secondSession.getEndTime());
+
+        assertEquals(TIME_12_00.toInstant(), thirdSession.getStartTime());
+        assertEquals(TIME_12_01.toInstant(), thirdSession.getEndTime());
+
     }
 
     @Test
