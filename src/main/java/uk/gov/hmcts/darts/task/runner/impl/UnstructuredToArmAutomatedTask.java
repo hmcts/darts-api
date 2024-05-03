@@ -18,7 +18,6 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTask {
 
     protected String taskName = UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName();
-    private UnstructuredToArmProcessor unstructuredToArmProcessor;
     private final UnstructuredToArmProcessorFactory unstructuredToArmProcessorFactory;
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
@@ -40,14 +39,15 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
         Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
 
         if (automatedTaskEntity.isEmpty()) {
-            handleException(new Exception("Unable to find automated task details."));
+            handleException(new Exception("Unable to find automated task details"));
+            return;
         }
 
         AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
         boolean isBatchMode = nonNull(automatedTask.getBatchSize()) && automatedTask.getBatchSize() > 0;
 
         log.info("Building UnstructuredToArmAutomatedTask processor");
-        unstructuredToArmProcessor = unstructuredToArmProcessorFactory.createUnstructuredToArmProcessor(isBatchMode);
+        UnstructuredToArmProcessor unstructuredToArmProcessor = unstructuredToArmProcessorFactory.createUnstructuredToArmProcessor(isBatchMode);
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
 
