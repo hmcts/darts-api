@@ -145,6 +145,10 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     protected abstract void handleException(Exception exception);
 
+    protected Optional<AutomatedTaskEntity> getAutomatedTaskDetails(String taskName) {
+        return automatedTaskRepository.findByTaskName(getTaskName());
+    }
+
     private void preRunTask() {
         setupUserAuthentication();
         start = Instant.now();

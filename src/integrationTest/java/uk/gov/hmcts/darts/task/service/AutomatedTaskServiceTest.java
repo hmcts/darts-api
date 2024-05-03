@@ -11,10 +11,10 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
+import uk.gov.hmcts.darts.arm.component.UnstructuredToArmProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -96,7 +96,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
 
     @Autowired
-    private UnstructuredToArmProcessor unstructuredToArmProcessor;
+    private UnstructuredToArmProcessorFactory unstructuredToArmProcessor;
 
     @Autowired
     private ArmResponseFilesProcessor armResponseFilesProcessor;
