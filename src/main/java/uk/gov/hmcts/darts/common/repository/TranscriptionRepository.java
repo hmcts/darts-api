@@ -124,11 +124,11 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
                 ts.id,
                 t.isManualTranscription)
             FROM TranscriptionEntity t
-            JOIN t.courtroom cr
-            JOIN t.courtCases cc
-            JOIN cr.courthouse cth
             JOIN t.transcriptionStatus ts
             JOIN t.createdBy ua
+            LEFT JOIN t.courtroom cr
+            LEFT JOIN t.courtCases cc
+            LEFT JOIN cr.courthouse cth
             WHERE (:ids IS NULL OR t.id IN :ids)
                 AND (:caseNumber IS NULL OR cc.caseNumber = :caseNumber)
                 AND (cth.displayName ILIKE CONCAT('%', :courthouseDisplayNamePattern, '%') OR :courthouseDisplayNamePattern IS NULL)
