@@ -6,6 +6,8 @@ SET SEARCH_PATH TO DARTS;
 DROP TRIGGER trw_ar_trg ON transcription_workflow;
 DROP FUNCTION tra_trw_sync_fnc;
 
+DROP TABLE object_retrieval_queue;
+
 DROP TABLE case_retention;
 DROP TABLE case_management_retention;
 DROP TABLE retention_policy_type;
@@ -13,6 +15,8 @@ DROP TABLE retention_policy_type;
 DROP SEQUENCE cmr_seq;
 DROP SEQUENCE car_seq;
 DROP SEQUENCE rpt_seq;
+
+DROP TABLE object_state_record;
 
 DROP TABLE security_group_courthouse_ae;
 DROP TABLE security_role_permission_ae;
@@ -25,8 +29,8 @@ DROP SEQUENCE grp_seq;
 DROP SEQUENCE rol_seq;
 DROP SEQUENCE per_seq;
 
-DROP TABLE event_linked_legacy_case;
-DROP TABLE media_linked_legacy_case;
+DROP TABLE event_linked_case;
+DROP TABLE media_linked_case;
 
 DROP TABLE audit_heritage;
 DROP TABLE case_judge_ae;
@@ -40,6 +44,9 @@ DROP TABLE node_register;
 DROP TABLE transient_object_directory;
 DROP TABLE transformed_media;
 DROP TABLE external_object_directory; 
+
+DROP TABLE object_admin_action;
+
 DROP TABLE case_document; 
 DROP TABLE object_record_status; 
 DROP TABLE external_location_type;  
@@ -83,6 +90,7 @@ DROP TABLE object_hidden_reason;
 DROP TABLE courtroom; 
 DROP TABLE courthouse;   
 DROP TABLE user_account;
+
  
 DROP SEQUENCE ann_seq;
 DROP SEQUENCE ado_seq;
@@ -99,18 +107,20 @@ DROP SEQUENCE dfd_seq;
 DROP SEQUENCE eve_seq;
 DROP SEQUENCE evh_seq;
 DROP SEQUENCE eod_seq;
-DROP SEQUENCE ell_seq;
+DROP SEQUENCE elc_seq;
 DROP SEQUENCE elt_seq;
 DROP SEQUENCE esa_seq;
 DROP SEQUENCE jud_seq;
 DROP SEQUENCE hea_seq;
 DROP SEQUENCE med_seq;
 DROP SEQUENCE mer_seq;
-DROP SEQUENCE mll_seq;
+DROP SEQUENCE mlc_seq;
 DROP SEQUENCE nod_seq;
 DROP SEQUENCE not_seq;
+DROP SEQUENCE oaa_seq;
 DROP SEQUENCE ohr_seq;
 DROP SEQUENCE ors_seq;
+DROP SEQUENCE orq_seq;
 DROP SEQUENCE prn_seq;
 DROP SEQUENCE reg_seq;
 DROP SEQUENCE rep_seq;
