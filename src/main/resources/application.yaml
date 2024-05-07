@@ -104,7 +104,7 @@ spring:
     mixed: true
 
 darts:
-  automated-tasks-pod: true
+  automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
     max-file-duration: 1440m
