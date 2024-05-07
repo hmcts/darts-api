@@ -4,14 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
-import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
-import java.util.Optional;
-
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
 
 @Slf4j
@@ -36,17 +32,9 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
 
     @Override
     protected void runTask() {
-        Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
+        boolean inBatchMode = isAutomatedTaskInBatchMode(taskName);
 
-        if (automatedTaskEntity.isEmpty()) {
-            handleException(new Exception("Unable to find automated task details"));
-            return;
-        }
-
-        AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
-        boolean isBatchMode = nonNull(automatedTask.getBatchSize()) && automatedTask.getBatchSize() > 0;
-
-        UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(isBatchMode);
+        UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(inBatchMode);
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
 

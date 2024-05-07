@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,26 +82,6 @@ class UnstructuredToArmAutomatedTaskTest {
 
         //then
         Mockito.verify(unstructuredToArmBatchProcessor, Mockito.times(1)).processUnstructuredToArm();
-    }
-
-    @Test
-    void runTaskInvalidTaskName() {
-        UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
-            new UnstructuredToArmAutomatedTask(
-                automatedTaskRepository,
-                lockProvider,
-                automatedTaskConfigurationProperties,
-                processorFactory,
-                logApi
-            );
-
-        UnstructuredToArmAutomatedTask spy = Mockito.spy(unstructuredToArmAutomatedTask);
-        when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.empty());
-
-        spy.runTask();
-
-        Mockito.verify(spy, Mockito.times(1)).handleException(any());
-
     }
 }
 
