@@ -107,6 +107,7 @@ darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
   audio:
+    max-file-duration: 1440m
     allowable-audio-gap-duration: 1s
     ffmpeg-executable: ffmpeg
     concat-workspace: ${user.home}/audiotransform/concatenate
@@ -119,6 +120,7 @@ darts:
     allowed-media-formats:
       - "mpeg2"
       - "mp2"
+      - "audio/mpeg"
     max-file-size: 524288000
     pre-amble-duration: 30
     post-amble-duration: 30

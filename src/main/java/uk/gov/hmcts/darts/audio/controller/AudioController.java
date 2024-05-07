@@ -18,6 +18,8 @@ import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
+import uk.gov.hmcts.darts.audio.validation.AddAudioFileValidator;
+import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -47,6 +49,8 @@ public class AudioController implements AudioApi {
     private final AudioService audioService;
     private final AudioResponseMapper audioResponseMapper;
     private final AudioPreviewService audioPreviewService;
+    private final AddAudioMetaDataValidator addAudioMetaDataValidator;
+    private final AddAudioFileValidator multipartFileValidator;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -65,6 +69,11 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<Void> addAudio(MultipartFile file, AddAudioMetadataRequest metadata) {
+
+        // validate the payloads
+        addAudioMetaDataValidator.validate(metadata);
+        multipartFileValidator.validate(file);
+
         audioService.addAudio(file, metadata);
         return new ResponseEntity<>(HttpStatus.OK);
     }
