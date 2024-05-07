@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.BiValidator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -33,13 +35,19 @@ import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
 import uk.gov.hmcts.darts.usermanagement.api.UserManagementApi;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CREATE_COURTHOUSE;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE_GROUP;
 import static uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError.COURTHOUSE_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -65,6 +73,8 @@ public class CourthouseServiceImpl implements CourthouseService {
     private final uk.gov.hmcts.darts.common.util.StringUtils stringUtils;
 
     private final AuthorisationApi authorisationApi;
+
+    private final AuditApi auditApi;
 
 
     // TODO: needs to be removed. Only used in test
@@ -138,6 +148,8 @@ public class CourthouseServiceImpl implements CourthouseService {
         validatedSecurityGroupEntities.add(createAndSaveGroupForRole(courthouseName, displayName, SecurityRoleEnum.REQUESTER));
 
         var courthouseEntity = createAndSaveCourthouseEntity(courthousePost, validatedRegionEntity, validatedSecurityGroupEntities);
+
+        auditApi.recordAudit(CREATE_COURTHOUSE, authorisationApi.getCurrentUser(), null);
 
         return mapToPostResponse(courthouseEntity);
     }
@@ -285,11 +297,60 @@ public class CourthouseServiceImpl implements CourthouseService {
         var courthouseEntity = courthouseRepository.findById(courthouseId)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
         courthousePatchValidator.validate(courthousePatch, courthouseId);
+        
+        var updateDiffsForAuditing = updateDiffsOf(courthouseEntity, courthousePatch);
 
         var patchedCourthouse = courthouseUpdateMapper.mapPatchToEntity(courthousePatch, courthouseEntity);
         courthouseRepository.saveAndFlush(patchedCourthouse);
 
+        auditUpdates(updateDiffsForAuditing);
+
         return courthouseUpdateMapper.mapEntityToAdminCourthouse(patchedCourthouse);
     }
 
+    private void auditUpdates(Map<AuditActivity, Boolean> updateDiffsForAuditing) {
+        if (updateDiffsForAuditing.get(UPDATE_COURTHOUSE_GROUP)) {
+            auditApi.recordAudit(UPDATE_COURTHOUSE_GROUP, authorisationApi.getCurrentUser(), null);
+        }
+
+        if (updateDiffsForAuditing.get(UPDATE_COURTHOUSE)) {
+            auditApi.recordAudit(UPDATE_COURTHOUSE, authorisationApi.getCurrentUser(), null);
+        }
+    }
+
+    private Map<AuditActivity, Boolean> updateDiffsOf(CourthouseEntity courthouseEntity, CourthousePatch courthousePatch) {
+        Map<AuditActivity, Boolean> updateDiffs = new HashMap<>();
+
+        if (basicDetailsUpdated(courthousePatch, courthouseEntity)) {
+            updateDiffs.put(AuditActivity.UPDATE_COURTHOUSE, true);
+        } else {
+            updateDiffs.put(AuditActivity.UPDATE_COURTHOUSE, false);
+        }
+        if (securityGroupsUpdated(courthousePatch, courthouseEntity)) {
+            updateDiffs.put(AuditActivity.UPDATE_COURTHOUSE_GROUP, true);
+        } else {
+            updateDiffs.put(AuditActivity.UPDATE_COURTHOUSE_GROUP, false);
+        }
+        return updateDiffs;
+    }
+
+    private static boolean basicDetailsUpdated(CourthousePatch courthousePatch, CourthouseEntity prePatchedEntity) {
+        if (nonNull(courthousePatch.getCourthouseName()) && !courthousePatch.getCourthouseName().equals(prePatchedEntity.getCourthouseName())) {
+            return true;
+        }
+        if (nonNull(courthousePatch.getDisplayName()) && !courthousePatch.getDisplayName().equals(prePatchedEntity.getDisplayName())) {
+            return true;
+        }
+        return nonNull(courthousePatch.getRegionId()) && !courthousePatch.getRegionId().equals(prePatchedEntity.getRegion().getId());
+    }
+
+    private static boolean securityGroupsUpdated(CourthousePatch courthousePatch, CourthouseEntity prePatchedEntity) {
+        if (courthousePatch.getSecurityGroupIds() == null) {
+            return false;
+        }
+        var prePatchedGroups = prePatchedEntity.getSecurityGroups().stream()
+            .map(SecurityGroupEntity::getId)
+            .toList();
+        return !prePatchedGroups.equals(courthousePatch.getSecurityGroupIds());
+    }
 }

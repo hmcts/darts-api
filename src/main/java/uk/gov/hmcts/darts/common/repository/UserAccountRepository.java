@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -67,10 +68,10 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
     @Modifying
     @Query("""
         UPDATE UserAccountEntity
-        SET lastLoginTime = CURRENT_TIMESTAMP
+        SET lastLoginTime = :now
         WHERE id = :userId
         """)
-    void updateLastLoginTime(Integer userId);
+    void updateLastLoginTime(Integer userId, OffsetDateTime now);
 
     List<UserAccountEntity> findByIdIn(List<Integer> userIds);
 }

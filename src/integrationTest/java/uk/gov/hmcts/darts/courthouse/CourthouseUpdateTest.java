@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TransactionalAssert;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.RegionTestData.minimalRegion;
 
@@ -26,9 +28,13 @@ class CourthouseUpdateTest extends IntegrationBase {
     @Autowired
     private CourthouseService courthouseService;
 
+    @Autowired
+    private GivenBuilder given;
+
 
     @Test
     void persistsPatchedCourthouse() {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var existingRegion = dartsDatabase.save(minimalRegion());
         var courthouseEntity = someCourtHouseWithRegionAndSecurityGroup(existingRegion, 1);
         var someOtherRegionId = dartsDatabase.save(minimalRegion()).getId();
@@ -46,7 +52,66 @@ class CourthouseUpdateTest extends IntegrationBase {
             assertThat(courthouse.getRegion().getId()).isEqualTo(someOtherRegionId);
             assertThat(courthouse.getSecurityGroups()).extracting("id").containsExactlyInAnyOrder(2);
         });
+    }
 
+    @Test
+    void auditsWhenGroupsAreUpdated() {
+        var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var existingRegion = dartsDatabase.save(minimalRegion());
+        var courthouseEntity = someCourtHouseWithRegionAndSecurityGroup(existingRegion, 1);
+
+        courthouseService.updateCourthouse(courthouseEntity.getId(), new CourthousePatch()
+            .securityGroupIds(List.of(2)));
+
+        var audits = dartsDatabase.findAudits();
+        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
+        assertThat(audits).extracting("auditActivity.name").containsExactly("Update Courthouse Group");
+    }
+
+    @Test
+    void auditsWhenBasicDetailsAreUpdated() {
+        var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var existingRegion = dartsDatabase.save(minimalRegion());
+        var newRegion = dartsDatabase.save(minimalRegion());
+        var courthouseEntity = someCourtHouseWithRegionAndSecurityGroup(existingRegion, 1);
+
+        courthouseService.updateCourthouse(courthouseEntity.getId(), new CourthousePatch()
+            .regionId(newRegion.getId()));
+
+        var audits = dartsDatabase.findAudits();
+        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
+        assertThat(audits).extracting("auditActivity.name").containsExactly("Update Courthouse");
+    }
+
+    @Test
+    void auditsWhenGroupsAndBasicDetailsAreUpdated() {
+        var userAccountEntity = given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var existingRegion = dartsDatabase.save(minimalRegion());
+        var newRegion = dartsDatabase.save(minimalRegion());
+        var courthouseEntity = someCourtHouseWithRegionAndSecurityGroup(existingRegion, 1);
+
+        courthouseService.updateCourthouse(courthouseEntity.getId(), new CourthousePatch()
+            .regionId(newRegion.getId())
+            .securityGroupIds(List.of(2)));
+
+        var audits = dartsDatabase.findAudits();
+        assertThat(audits).extracting("user.id")
+            .containsExactly(userAccountEntity.getId(), userAccountEntity.getId());
+        assertThat(audits).extracting("auditActivity.name")
+            .containsExactly("Update Courthouse Group", "Update Courthouse");
+    }
+
+    @Test
+    void doesntAuditWhenNoUpdatesMade() {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+        var existingRegion = dartsDatabase.save(minimalRegion());
+        var courthouseEntity = someCourtHouseWithRegionAndSecurityGroup(existingRegion, 1);
+
+        courthouseService.updateCourthouse(courthouseEntity.getId(), new CourthousePatch()
+            .regionId(existingRegion.getId())
+            .securityGroupIds(List.of(1)));
+
+        assertThat(dartsDatabase.findAudits()).extracting("user.id").isEmpty();
     }
 
     private CourthouseEntity someCourtHouseWithRegionAndSecurityGroup(RegionEntity existingRegion, Integer securityGroupId) {
