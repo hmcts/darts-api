@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.arm.component.UnstructuredToArmProcessorFactory;
+import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -28,7 +28,7 @@ class UnstructuredToArmAutomatedTaskTest {
     @Mock
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
     @Mock
-    UnstructuredToArmProcessorFactory processorFactory;
+    AutomatedTaskProcessorFactory processorFactory;
     @Mock
     private LogApi logApi;
     @Mock

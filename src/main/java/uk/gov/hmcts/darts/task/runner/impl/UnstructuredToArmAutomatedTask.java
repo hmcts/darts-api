@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
-import uk.gov.hmcts.darts.arm.component.UnstructuredToArmProcessorFactory;
+import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -18,15 +18,15 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTask {
 
     protected String taskName = UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName();
-    private final UnstructuredToArmProcessorFactory unstructuredToArmProcessorFactory;
+    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                           LockProvider lockProvider,
                                           AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                          UnstructuredToArmProcessorFactory processor,
+                                          AutomatedTaskProcessorFactory processor,
                                           LogApi logApi) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
-        this.unstructuredToArmProcessorFactory = processor;
+        this.automatedTaskProcessorFactory = processor;
     }
 
     @Override
@@ -46,8 +46,7 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
         AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
         boolean isBatchMode = nonNull(automatedTask.getBatchSize()) && automatedTask.getBatchSize() > 0;
 
-        log.info("Building UnstructuredToArmAutomatedTask processor");
-        UnstructuredToArmProcessor unstructuredToArmProcessor = unstructuredToArmProcessorFactory.createUnstructuredToArmProcessor(isBatchMode);
+        UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(isBatchMode);
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
 
