@@ -157,7 +157,6 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                 "hearing_date": "2023-11-17",
                 "transcription_type": "Specified Times",
                 "status": "Approved",
-                "urgency": "Standard",
                 "requested_ts": "2023-11-23T16:25:55.304517Z",
                 "state_change_ts": "2023-11-23T16:26:20.441633Z",
                 "is_manual": true,
