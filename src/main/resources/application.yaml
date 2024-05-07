@@ -215,7 +215,7 @@ darts:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
       cabinet-id: 100
-      url: ${ARM_URL:}
+      url: ${ARM_URL}
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
