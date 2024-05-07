@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -35,14 +37,14 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
-import uk.gov.hmcts.darts.notification.api.NotificationApi;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
-import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,12 +97,10 @@ class TranscriptionServiceImplTest {
 
     @Mock
     private UserIdentity mockUserIdentity;
-    @Mock
-    private WorkflowValidator mockWorkflowValidator;
+
     @Mock
     private AuthorisationApi authorisationApi;
-    @Mock
-    private NotificationApi notificationApi;
+
     @Mock
     private TranscriptionNotifications transcriptionNotifications;
 
@@ -120,9 +120,6 @@ class TranscriptionServiceImplTest {
     @Mock
     private DuplicateRequestDetector duplicateRequestDetector;
 
-    @InjectMocks
-    private TranscriptionServiceImpl transcriptionService;
-
     @Captor
     private ArgumentCaptor<TranscriptionEntity> transcriptionEntityArgumentCaptor;
 
@@ -131,6 +128,9 @@ class TranscriptionServiceImplTest {
 
     @Captor
     private ArgumentCaptor<TranscriptionCommentEntity> transcriptionCommentEntityArgumentCaptor;
+
+    @InjectMocks
+    private TranscriptionServiceImpl transcriptionService;
 
     @BeforeEach
     void setUp() {
@@ -561,6 +561,36 @@ class TranscriptionServiceImplTest {
         var allCaseTranscriptionDocuments = transcriptionService.getAllCaseTranscriptionDocuments(CASE_ID);
 
         assertThat(allCaseTranscriptionDocuments).containsExactlyInAnyOrder(transcriptionDoc1, transcriptionDoc2, transcriptionDoc3);
+    }
+
+    @Test
+    void testRollbackUserTransactions() {
+        UserAccountEntity entity = new UserAccountEntity();
+
+        Integer transcriptionId = 1000;
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(transcriptionId);
+
+        TranscriptionStatusEntity transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntityEntity = new TranscriptionWorkflowEntity();
+        List<TranscriptionEntity> transcriptionEntityList = Arrays.asList(transcriptionEntity);
+
+        when(mockTranscriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.APPROVED.getId())).thenReturn(transcriptionStatusEntity);
+        Mockito.when(mockTranscriptionRepository
+                         .findTranscriptionForUserWithState(eq(entity.getId()), eq(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId())))
+            .thenReturn(transcriptionEntityList);
+
+        when(mockTranscriptionWorkflowRepository.saveAndFlush(Mockito.notNull()))
+            .thenReturn(transcriptionWorkflowEntityEntity);
+
+        var allCaseTranscriptionDocuments = transcriptionService.rollbackUserTransactions(entity);
+
+        verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
+        TranscriptionWorkflowEntity workflowEntity = transcriptionWorkflowEntityArgumentCaptor.getValue();
+        Assertions.assertEquals(transcriptionId, allCaseTranscriptionDocuments.get(0));
+        Assertions.assertEquals(transcriptionStatusEntity, workflowEntity.getTranscriptionStatus());
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

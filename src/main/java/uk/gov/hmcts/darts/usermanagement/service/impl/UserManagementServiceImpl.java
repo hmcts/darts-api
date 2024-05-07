@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
@@ -26,8 +25,8 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
-import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastSuperAdminValidator;
-import uk.gov.hmcts.darts.usermanagement.validator.UserEnablementValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserSuperAdminDeactivateValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -55,8 +54,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final Validator<User> userEmailValidator;
     private final UserAccountExistsValidator userAccountExistsValidator;
     private final UserTypeValidator userTypeValidator;
-    private final UserEnablementValidator userEnablementValidator;
-    private final UserDeactivateNotLastSuperAdminValidator userNotLastSuperAdminValidator;
+    private final UserSuperAdminDeactivateValidator userEnablementValidator;
+    private final UserDeactivateNotLastInSuperAdminGroupValidator userNotLastSuperAdminValidator;
     private final TranscriptionService transcriptionService;
 
     @Override
@@ -111,8 +110,11 @@ public class UserManagementServiceImpl implements UserManagementService {
             user.setRolledBackTranscriptRequests(rolledBackTranscriptions);
         }
 
-        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.get().getSecurityGroupEntities());
-        user.setSecurityGroupIds(securityGroupIds);
+        if (userPatch.getSecurityGroupIds() != null) {
+            List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.get().getSecurityGroupEntities());
+
+            user.setSecurityGroupIds(securityGroupIds);
+        }
 
         return user;
     }
@@ -192,7 +194,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             }
         }
 
-        if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
+        if (userPatch.getSecurityGroupIds() != null) {
             mapSecurityGroupsToUserEntity(userPatch.getSecurityGroupIds(), userAccountEntity);
         } else {
             userAccountEntity.setSecurityGroupEntities(Collections.emptySet());

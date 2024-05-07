@@ -14,7 +14,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class UserEnablementValidator implements Validator<UserPatch> {
+public class UserSuperAdminDeactivateValidator implements Validator<UserPatch> {
 
     private final UserIdentity userIdentity;
 
@@ -40,6 +40,6 @@ public class UserEnablementValidator implements Validator<UserPatch> {
         return userPatch.getDescription() != null
             || userPatch.getEmailAddress() != null
             || userPatch.getFullName() != null
-            || !userPatch.getSecurityGroupIds().isEmpty();
+            || userPatch.getSecurityGroupIds() != null && !userPatch.getSecurityGroupIds().isEmpty();
     }
 }

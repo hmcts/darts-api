@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class UserDeactivateNotLastSuperAdminValidator implements Validator<UserQueryRequest<UserPatch>> {
+public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validator<UserQueryRequest<UserPatch>> {
 
     private final SecurityGroupRepository securityGroupRepository;
 
