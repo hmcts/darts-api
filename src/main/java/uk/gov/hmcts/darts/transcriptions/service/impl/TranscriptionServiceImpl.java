@@ -52,6 +52,7 @@ import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
@@ -72,6 +73,7 @@ import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -412,6 +414,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
+        transcriptionDocumentEntity.setLastModifiedBy(userAccountEntity);
         transcriptionDocumentRepository.save(transcriptionDocumentEntity);
 
         final var externalObjectDirectoryInboundEntity = saveExternalObjectDirectory(
@@ -469,6 +472,24 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             return transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
         }
         return transcriberTranscriptsQuery.getTranscriptRequests(userId);
+    }
+
+    @SuppressWarnings({"java:S2259"})
+    @Override
+    public List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent) {
+        var transcription = transcriptionRepository.findById(transcriptionId);
+
+        if (transcription.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        var transcriptionWorkflows = transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(transcription.get());
+
+        if (nonNull(isCurrent) && TRUE.equals(isCurrent)) {
+            return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(transcriptionWorkflows.get(0)));
+        }
+
+        return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(transcriptionWorkflows);
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,

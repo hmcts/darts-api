@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -19,9 +20,12 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.someMinimalEventHandler;
+import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_11_1981_DB_ID;
+import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_39_1933_DB_ID;
+import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_4_1981_DB_ID;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
-
 
 class GetHearingResponseMapperIntTest extends IntegrationBase {
 
@@ -43,14 +47,14 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
     @Test
     void getHearingWithOneReportingRestrictions() {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
+            .map(eve -> dartsDatabase.addHandlerToEvent(eve, SECTION_11_1981_DB_ID))
             .toList();
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
         assertEquals(1, getHearingResponse.getCaseReportingRestrictions().size());
-        assertEquals("some-event-name-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
+        assertEquals("Section 11 of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
         assertEquals("some-event-text-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventText());
         assertEquals(minimalHearing.getId(), getHearingResponse.getCaseReportingRestrictions().get(0).getHearingId());
         assertEquals(reportingRestrictions.get(0).getId(), getHearingResponse.getCaseReportingRestrictions().get(0).getEventId());
@@ -58,17 +62,19 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
     @Test
     void getHearingWithThreeReportingRestrictions() {
-        var reportingRestrictions = createEventsWithDefaults(3).stream()
-            .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
-            .toList();
+        var reportingRestrictions = createEventsWithDefaults(3);
+        dartsDatabase.addHandlerToEvent(reportingRestrictions.get(0), SECTION_4_1981_DB_ID);
+        dartsDatabase.addHandlerToEvent(reportingRestrictions.get(1), SECTION_11_1981_DB_ID);
+        dartsDatabase.addHandlerToEvent(reportingRestrictions.get(2), SECTION_39_1933_DB_ID);
+
         var minimalHearing = createSomeMinimalHearing();
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
         assertEquals(3, getHearingResponse.getCaseReportingRestrictions().size());
-        assertEquals("some-event-name-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
-        assertEquals("some-event-name-2", getHearingResponse.getCaseReportingRestrictions().get(1).getEventName());
-        assertEquals("some-event-name-3", getHearingResponse.getCaseReportingRestrictions().get(2).getEventName());
+        assertEquals("Section 4(2) of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
+        assertEquals("Section 11 of the Contempt of Court Act 1981", getHearingResponse.getCaseReportingRestrictions().get(1).getEventName());
+        assertEquals("Section 39 of the Children and Young Persons Act 1933", getHearingResponse.getCaseReportingRestrictions().get(2).getEventName());
     }
 
     @Test
@@ -100,10 +106,11 @@ class GetHearingResponseMapperIntTest extends IntegrationBase {
 
 
     private List<EventEntity> createEventsWithDefaults(int quantity) {
+        EventHandlerEntity eventHandler = someMinimalEventHandler();
         return rangeClosed(1, quantity)
             .mapToObj(index -> {
                 var event = dartsDatabase.getEventStub().createDefaultEvent();
-                event.setEventName("some-event-name-" + index);
+                event.setEventType(eventHandler);
                 event.setEventText("some-event-text-" + index);
                 event.setMessageId("some-message-id-" + index);
                 return event;

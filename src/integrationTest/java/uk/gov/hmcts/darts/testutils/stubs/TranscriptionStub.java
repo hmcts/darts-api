@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
-import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,18 +28,19 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
@@ -53,6 +53,8 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 @Component
 @RequiredArgsConstructor
 public class TranscriptionStub {
+
+    public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
@@ -81,9 +83,25 @@ public class TranscriptionStub {
             hearing,
             transcriptionType,
             transcriptionStatus,
-            transcriptionUrgencyEntity,
+            Optional.of(transcriptionUrgencyEntity),
             authorisedIntegrationTestUser
         );
+    }
+
+    public TranscriptionEntity createTranscription(HearingEntity hearing, boolean associateUrgency) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
+        UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(hearing.getCourtCase()
+                                                                                                                  .getCourthouse());
+        return createAndSaveTranscriptionEntity(
+            hearing,
+            transcriptionType,
+            transcriptionStatus,
+            associateUrgency ? Optional.of(transcriptionUrgencyEntity) : Optional.empty(),
+            authorisedIntegrationTestUser
+        );
+
     }
 
     public TranscriptionEntity createTranscription(CourtCaseEntity courtCase) {
@@ -102,10 +120,7 @@ public class TranscriptionStub {
     }
 
     private TranscriptionUrgencyEntity mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum urgencyEnum) {
-        TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
-        transcriptionUrgencyEntity.setId(urgencyEnum.getId());
-        transcriptionUrgencyEntity.setDescription(urgencyEnum.name());
-        return transcriptionUrgencyEntity;
+        return transcriptionUrgencyRepository.findById(urgencyEnum.getId()).get();
     }
 
     private TranscriptionTypeEntity mapToTranscriptionTypeEntity(TranscriptionTypeEnum typeEnum) {
@@ -126,14 +141,20 @@ public class TranscriptionStub {
     public TranscriptionEntity createAndSaveTranscriptionEntity(HearingEntity hearing,
                                                                 TranscriptionTypeEntity transcriptionType,
                                                                 TranscriptionStatusEntity transcriptionStatus,
-                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
                                                                 UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtroom(hearing.getCourtroom());
         transcription.addHearing(hearing);
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);
-        transcription.setTranscriptionUrgency(transcriptionUrgency);
+
+        if (transcriptionUrgency.isPresent()) {
+            transcription.setTranscriptionUrgency(transcriptionUrgency.get());
+        } else {
+            transcription.setTranscriptionUrgency(null);
+        }
+
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
@@ -192,6 +213,23 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
+    @Transactional
+    public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               OffsetDateTime workflowTimestamp,
+                                                                               boolean associatedUrgency) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION),
+            null,
+            associatedUrgency
+        );
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
 
     @Transactional
     public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
@@ -274,7 +312,7 @@ public class TranscriptionStub {
                                                                ExternalLocationTypeEnum location) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        final int fileSize = 11_937;
+        final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
         final UUID externalLocation = UUID.randomUUID();
@@ -287,7 +325,7 @@ public class TranscriptionStub {
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
                                                externalLocation,
-                                               getTranscriptionDocumentChecksum());
+                                               getChecksum());
     }
 
     @Transactional
@@ -324,16 +362,8 @@ public class TranscriptionStub {
         return transcriptionRepository.save(transcriptionEntity);
     }
 
-    public static BinaryData getBinaryTranscriptionDocumentData() {
-        return BinaryData.fromString("test binary transcription document data");
-    }
-
-    public static BinaryData getEmptyFile() {
-        return BinaryData.fromBytes(new byte[0]);
-    }
-
-    public static String getTranscriptionDocumentChecksum() {
-        return new String(encodeBase64(md5(getBinaryTranscriptionDocumentData().toBytes())));
+    private String getChecksum() {
+        return TestUtils.encodeToString(md5(TRANSCRIPTION_TEST_DATA_BINARY_DATA));
     }
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
@@ -346,6 +376,7 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setUploadedBy(testUser);
         transcriptionDocumentEntity.setUploadedDateTime(now(UTC));
         transcriptionDocumentEntity.setChecksum(checksum);
+        transcriptionDocumentEntity.setLastModifiedBy(testUser);
         return transcriptionDocumentEntity;
     }
 
@@ -376,11 +407,23 @@ public class TranscriptionStub {
                                                               OffsetDateTime workflowTimestamp,
                                                               TranscriptionStatusEntity status,
                                                               String comment) {
+        return createTranscriptionWithStatus(userAccountEntity, courtCaseEntity, hearingEntity, workflowTimestamp, status, comment, true);
+    }
+
+    private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
+                                                              CourtCaseEntity courtCaseEntity,
+                                                              HearingEntity hearingEntity,
+                                                              OffsetDateTime workflowTimestamp,
+                                                              TranscriptionStatusEntity status,
+                                                              String comment, boolean associateUrgency) {
         final var transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
         transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
-        transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
+
+        if (associateUrgency) {
+            transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
+        }
         transcriptionEntity.setTranscriptionStatus(status);
         OffsetDateTime now = now(UTC);
         OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);

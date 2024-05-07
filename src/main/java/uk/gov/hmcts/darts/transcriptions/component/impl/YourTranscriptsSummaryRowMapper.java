@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.component.impl;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.YourTranscriptsSummary;
 
 import java.sql.ResultSet;
@@ -24,7 +25,16 @@ public class YourTranscriptsSummaryRowMapper implements RowMapper<YourTranscript
             rs.getString("status"),
             rs.getObject("requested_ts", OffsetDateTime.class)
         );
-        summary.setUrgency(rs.getString("urgency"));
+        summary.setUrgency(rs.getString("transcription_urgency_description"));
+
+        if (rs.getInt("transcription_urgency_id") != 0) {
+            TranscriptionUrgencyDetails urgencyDetails = new TranscriptionUrgencyDetails();
+            urgencyDetails.setTranscriptionUrgencyId(rs.getInt("transcription_urgency_id"));
+            urgencyDetails.setPriorityOrder(rs.getInt("transcription_urgency_priority_order"));
+            urgencyDetails.setDescription(rs.getString("transcription_urgency_description"));
+            summary.setTranscriptionUrgency(urgencyDetails);
+        }
+
         return summary;
     }
 

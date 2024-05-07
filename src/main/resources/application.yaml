@@ -66,8 +66,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 350MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
-      max-request-size: 360MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-file-size: ${MAX_FILE_UPLOAD_SIZE_MEGABYTES:350}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-request-size: ${MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES:360}MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -76,6 +76,8 @@ spring:
     password: ${DARTS_API_DB_PASSWORD:darts}
     schema: ${DARTS_API_DB_SCHEMA:darts}
     type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 50
   jpa:
     database: postgresql
     show-sql: false
@@ -146,7 +148,6 @@ darts:
   daily-list:
     housekeeping:
       enabled: true
-      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
   dar-pc-notification:
     url-format: http://{0}/VIQDARNotifyEvent/DARNotifyEvent.asmx
@@ -176,6 +177,8 @@ darts:
     close-events: "Case closed,Archive case"
     max-retention-retries: 3
   storage:
+    inbound:
+      temp-blob-workspace: ${user.home}/inbound/tempworkspace
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
       container-name: dropzone
@@ -285,8 +288,6 @@ darts:
         cpp: ${EVENT_LOG_CPP_DAILY_TEST_TEXT:CPP Daily Test}
     cases:
       defendant-name-char-limit: 600
-  hikari:
-    maximum-pool-size: 50
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).

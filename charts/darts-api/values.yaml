@@ -88,6 +88,10 @@ java:
           alias: ARM_USERNAME
         - name: ArmPassword
           alias: ARM_PASSWORD
+        - name: MaxFileUploadSizeInMegabytes
+          alias: MAX_FILE_UPLOAD_SIZE_MEGABYTES
+        - name: MaxFileUploadRequestSizeInMegabytes
+          alias: MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require

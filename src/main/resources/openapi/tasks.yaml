@@ -1,0 +1,153 @@
+openapi: 3.0.1
+
+info:
+  title: 'Modernised DARTS'
+  description: 'Modernised DARTS (Digital Audio Recording and Transcription Service).'
+  version: '${version}'
+
+
+########################################################################################################################
+# PATH DEFINITIONS
+########################################################################################################################
+
+paths:
+  /admin/automated-tasks:
+    get:
+      tags:
+        - Tasks
+      operationId: getAutomatedTasks
+      responses:
+        '200':
+          $ref: '#/components/responses/AutomatedTasksResponse'
+
+  /admin/automated-tasks/{task_id}:
+    get:
+      tags:
+        - Tasks
+      operationId: getAutomatedTaskById
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          $ref: '#/components/responses/AutomatedTaskResponse'
+        '404':
+          $ref: '#/components/responses/AutomatedTaskNotFound'
+
+
+
+########################################################################################################################
+# COMPONENT DEFINITIONS
+########################################################################################################################
+
+components:
+
+  responses:
+    AutomatedTasksResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AutomatedTaskSummary'
+    AutomatedTaskResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DetailedAutomatedTask'
+    AutomatedTaskNotFound:
+      description: Automated task not found
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            type: "AUTOMATED_TASK_100"
+            title: "User not found"
+            status: 404
+
+  schemas:
+    AutomatedTaskSummary:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/AutomatedTaskId'
+        name:
+          $ref: '#/components/schemas/AutomatedTaskName'
+        description:
+          $ref: '#/components/schemas/AutomatedTaskDescription'
+        cron_expression:
+          $ref: '#/components/schemas/CronExpression'
+        is_active:
+          $ref: '#/components/schemas/IsActive'
+    DetailedAutomatedTask:
+      type: object
+      properties:
+        is_cron_editable:
+          $ref: '#/components/schemas/IsCronEditable'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        created_by:
+          $ref: '#/components/schemas/CreatedBy'
+        last_modified_at:
+          $ref: '#/components/schemas/LastModifiedAt'
+        last_modified_by:
+          $ref: '#/components/schemas/LastModifiedBy'
+      allOf:
+        - $ref: '#/components/schemas/AutomatedTaskSummary'
+
+    AutomatedTaskId:
+      type: integer
+    AutomatedTaskName:
+      type: string
+      minLength: 1
+      maxLength: 256
+    AutomatedTaskDescription:
+      type: string
+      minLength: 1
+      maxLength: 256
+    CronExpression:
+      type: string
+      minLength: 1
+      maxLength: 256
+    IsActive:
+      type: boolean
+    IsCronEditable:
+      type: boolean
+    CreatedAt:
+      type: string
+      format: date-time
+    CreatedBy:
+      type: integer
+    LastModifiedAt:
+      type: string
+      format: date-time
+    LastModifiedBy:
+      type: integer
+
+    AutomatedTaskErrorCode:
+      type: string
+      enum:
+        - "AUTOMATED_TASK_100"
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND ]
+
+    AutomatedTaskTitleErrors:
+      type: string
+      enum:
+        - "The provided task_id does not exist"
+        -
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND ]
+
+
+  parameters:
+    TaskId:
+      in: path
+      name: task_id
+      required: true
+      schema:
+        type: integer
+
+
+
+

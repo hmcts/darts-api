@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -31,7 +30,6 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,7 +41,6 @@ import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateT
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
-@Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
@@ -109,7 +106,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertEquals(SOME_COURTROOM, persistedEvent.getCourtroom().getName());
         Assertions.assertEquals(SOME_COURTHOUSE, persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
         Assertions.assertEquals(true, persistedEvent.getIsLogEntry());
-        Assertions.assertDoesNotThrow(() -> UUID.fromString(persistedEvent.getMessageId()));
+        Assertions.assertNull(persistedEvent.getMessageId());
 
         Assertions.assertNull(persistedEvent.getLegacyEventId());
         Assertions.assertNull(persistedEvent.getLegacyVersionLabel());
@@ -298,15 +295,13 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     }
 
     private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {
-        String guid = UUID.randomUUID().toString();
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(null, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
     }
 
     private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
-        String guid = UUID.randomUUID().toString();
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createMidTierExternalUser(guid, courthouse);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createMidTierExternalUser(null, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER))).thenReturn(true);
     }

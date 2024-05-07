@@ -31,8 +31,8 @@ spring:
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   servlet:
     multipart:
-      max-file-size: 350MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
-      max-request-size: 360MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-file-size: 1KB
+      max-request-size: 10KB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 darts:
   automated-tasks-pod: ${AUTOMATED_TASK_MODE:true}
   api-pod: ${API_MODE:true}
@@ -51,6 +51,10 @@ darts:
       - "mpeg2"
       - "mp2"
       - "audio/mpeg"
+  transformation:
+    service:
+      audio:
+        file:
   testing-support-endpoints:
     enabled: true
   bank-holidays:
@@ -63,6 +67,8 @@ darts:
       arm-username: some-username
       arm-password: some-password
       url: http://localhost:4551
+  transcription:
+    max-file-size: 20
 logging:
   level:
     uk:

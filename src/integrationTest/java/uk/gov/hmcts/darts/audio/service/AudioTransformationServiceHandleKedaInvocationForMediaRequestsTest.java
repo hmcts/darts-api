@@ -7,14 +7,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
@@ -38,8 +39,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
-
-@Import(SystemCommandExecutorStubImpl.class)
+@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
@@ -53,9 +53,10 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     private static final String MOCK_DOWNLOAD_REQUEST_ID = "2";
     public static final String TIME_12_00 = "12:00:00";
     public static final String TIME_13_00 = "13:00:00";
-    public static final String NOT_AVAILABLE = "N/A";
     private static final OffsetDateTime TIME_20_00 = OffsetDateTime.parse("2023-01-01T20:00Z");
     private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
+    private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
+    private static final OffsetDateTime TIME_14_00 = OffsetDateTime.parse("2023-01-01T14:00Z");
 
     @Autowired
     private AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder given;
@@ -67,6 +68,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     private MediaRequestService mediaRequestService;
 
     private HearingEntity hearing;
+
 
     @BeforeEach
     void setUp() {
@@ -103,6 +105,26 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
+    }
+
+    @Test
+    @SuppressWarnings("PMD.LawOfDemeter")
+    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedOnlyOnce() {
+        given.aMediaEntityGraph();
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
+        // request time includes gap in audio, resulting in multiple generated files
+        given.aMediaRequestEntityForHearingWithRequestType(
+            hearing,
+            AudioRequestType.PLAYBACK,
+            userAccountEntity,
+            TIME_12_01,
+            TIME_14_00
+        );
+
+        audioTransformationService.handleKedaInvocationForMediaRequests();
+
+        // checking that the media request is only updated to COMPLETED once
+        verify(mediaRequestService, times(1)).updateAudioRequestCompleted(any(MediaRequestEntity.class));
     }
 
     @Test

@@ -72,6 +72,7 @@ public class AnnotationStub {
         annotationDocument.setUploadedBy(uploadedBy);
         annotationDocument.setUploadedDateTime(uploadedDateTime);
         annotationDocument.setChecksum(checksum);
+        annotationDocument.setLastModifiedBy(uploadedBy);
 
         return annotationDocument;
     }

@@ -100,7 +100,53 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         String expected = TestUtils.removeTags(
             TAGS_TO_IGNORE,
             getContentsFromFile(
-                "tests/transcriptions/transcription/expectedResponse.json")
+                "tests/transcriptions/transcription/expectedResponse.json").replace("$COURTHOUSE_ID",
+                                                                                   hearingEntity.getCourtroom().getCourthouse().getId().toString())
+        );
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getTranscriptionNoUrgency() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity, false);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription.setStartTime(SOME_DATE_TIME);
+        transcription.setEndTime(SOME_DATE_TIME);
+        transcription = dartsDatabase.save(transcription);
+
+        UserAccountEntity userAccount = transcription.getCreatedBy();
+
+        {
+            TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
+            workflowAEntity.setTranscription(transcription);
+            workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
+            workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+            workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+            dartsDatabase.save(workflowAEntity);
+
+            addCommentToWorkflow(workflowAEntity, "comment1", userAccount);
+        }
+
+        {
+            TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
+            workflowBEntity.setTranscription(transcription);
+            workflowBEntity.setWorkflowActor(transcription.getCreatedBy());
+            workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+            workflowBEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+            dartsDatabase.save(workflowBEntity);
+
+            addCommentToWorkflow(workflowBEntity, "comment2", userAccount);
+        }
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
+        String expected = TestUtils.removeTags(
+            TAGS_TO_IGNORE,
+            getContentsFromFile(
+                "tests/transcriptions/transcription/expectedResponseNoUrgency.json").replace("$COURTHOUSE_ID",
+                                                                                             hearingEntity.getCourtroom().getCourthouse().getId().toString())
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
