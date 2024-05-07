@@ -51,7 +51,9 @@ public class TranscriptionNotifications {
         switch (newStatusEnum) {
             case APPROVED -> {
                 notifyTranscriptionCompanyForCourthouse(courtCaseEntity);
-                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED.toString());
+                if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
+                    notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED.toString());
+                }
                 auditApi.recordAudit(
                     AUTHORISE_TRANSCRIPTION,
                     userAccountEntity,
@@ -62,12 +64,14 @@ public class TranscriptionNotifications {
                 Map<String, String> templateParams = new HashMap<>();
                 templateParams.put(REJECTION_REASON, updateTranscription.getWorkflowComment());
 
-                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED.toString(), templateParams);
+                if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
+                    notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED.toString(), templateParams);
+                }
                 auditApi.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
             case WITH_TRANSCRIBER -> auditApi.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             case COMPLETE -> {
-                if (transcriptionEntity.getIsManualTranscription()) {
+                if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
                     notifyRequestor(transcriptionEntity, TRANSCRIPTION_AVAILABLE.toString());
                 }
                 auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
