@@ -10,7 +10,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'idea'
-  id 'io.spring.dependency-management' version '1.1.4'
+  id 'io.spring.dependency-management' version '1.1.5'
   id 'org.springframework.boot' version '3.2.5'
   id 'org.owasp.dependencycheck' version '9.1.0'
   id 'com.github.ben-manes.versions' version '0.51.0'
@@ -395,7 +395,7 @@ dependencies {
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
-  implementation group: 'com.google.guava', name: 'guava', version: '33.1.0-jre'
+  implementation group: 'com.google.guava', name: 'guava', version: '33.2.0-jre'
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '2.9.2'

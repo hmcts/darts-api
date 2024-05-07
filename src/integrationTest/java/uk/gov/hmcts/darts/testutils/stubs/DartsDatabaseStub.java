@@ -719,4 +719,18 @@ public class DartsDatabaseStub {
     public List<AutomatedTaskEntity> getAllAutomatedTasks() {
         return automatedTaskRepository.findAll();
     }
+
+    @Transactional(dontRollbackOn = RuntimeException.class)
+    public void lockTaskUntil(String taskName, OffsetDateTime taskReleaseDateTime) {
+        var updateRowForTaskSql = """
+        update darts.shedlock
+        set lock_until = (?)
+        where name = (?)
+        """;
+        entityManager.createNativeQuery(updateRowForTaskSql, Integer.class)
+            .setParameter(1, taskReleaseDateTime)
+            .setParameter(2, taskName)
+            .executeUpdate();
+    }
+
 }

@@ -42,5 +42,13 @@ public class AutomatedTasksController implements TasksApi {
     public ResponseEntity<DetailedAutomatedTask> getAutomatedTaskById(Integer taskId) {
         return new ResponseEntity<>(adminAutomatedTaskService.getAutomatedTaskById(taskId), HttpStatus.OK);
     }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, securityRoles = {SUPER_ADMIN}, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<Void> runAutomatedTask(Integer taskId) {
+        adminAutomatedTaskService.runAutomatedTask(taskId);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
 }
 
