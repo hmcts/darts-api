@@ -50,7 +50,6 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | AZURE_AD_FUNCTIONAL_TEST_USERNAME        | AzureADFunctionalTestUsername             |
 | AZURE_AD_FUNCTIONAL_TEST_PASSWORD        | AzureADFunctionalTestPassword             |
 | ARM_SAS_ENDPOINT                         | ARMSasEndpoint                            |
-| ARM_URL                                  | ArmUrl                                    |
 | DETS_SAS_URL_ENDPOINT                    | DETSSasURLEndpoint                        |
 | ARM_USERNAME                             | ArmUsername                               |
 | ARM_PASSWORD                             | ArmPassword                               |
@@ -64,6 +63,7 @@ There are few attributes which doesn't use Azure Keyvault secrets. Those environ
 |-------------------------------|------------------------------------------------------------------|
 | ACTIVE_DIRECTORY_B2C_BASE_URI | https://hmctsstgextid.b2clogin.com                               |
 | ACTIVE_DIRECTORY_B2C_AUTH_URI | https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com |
+| ARM_URL                       |                                                                  |  
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
