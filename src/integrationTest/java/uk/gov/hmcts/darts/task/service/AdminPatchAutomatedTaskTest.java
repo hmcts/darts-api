@@ -31,7 +31,7 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = Mode.INCLUDE)
-    void allowsSuperAdminToRetrieveAllAutomatedTasks(SecurityRoleEnum role) throws Exception {
+    void allowsSuperAdminToPatchAutomatedTasks(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(
@@ -46,7 +46,7 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = Mode.EXCLUDE)
-    void disallowsAllUsersExceptSuperAdminToRetrieveAllAutomatedTasks(SecurityRoleEnum role) throws Exception {
+    void disallowsAllUsersExceptSuperAdminToPatchAutomatedTasks(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         mockMvc.perform(
@@ -56,6 +56,34 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
                                  { "is_active": false }
                                  """))
             .andExpect(status().isForbidden())
+            .andReturn();
+    }
+
+    @Test
+    void returns400WhenIsActiveIsNull() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+
+        mockMvc.perform(
+                patch(ENDPOINT + "/1")
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("""
+                                 { "is_active": null }
+                                 """))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+    }
+
+    @Test
+    void returns400RequiredFieldIsMissing() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+
+        mockMvc.perform(
+                patch(ENDPOINT + "/1")
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .content("""
+                                 {  }
+                                 """))
+            .andExpect(status().isBadRequest())
             .andReturn();
     }
 
@@ -73,4 +101,6 @@ class AdminPatchAutomatedTaskTest extends IntegrationBase {
             .andExpect(status().isNotFound())
             .andReturn();
     }
+
+
 }
