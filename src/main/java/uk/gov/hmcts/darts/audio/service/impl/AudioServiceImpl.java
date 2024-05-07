@@ -133,8 +133,8 @@ public class AudioServiceImpl implements AudioService {
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
         Collection<MediaEntity> identifiedDuplicate = getDuplicateMediaFile(addAudioMetadataRequest);
-        Optional<Collection<MediaEntity>> audioToVersion = findAudioToVersionAccordingToSize(identifiedDuplicate,
-                                                                                                  addAudioMetadataRequest.getFileSize());
+        Optional<Collection<MediaEntity>> audioToVersion = findChangedSizeAudioFilesFromDuplicates(identifiedDuplicate,
+                                                                                                   addAudioMetadataRequest.getFileSize());
 
         if (identifiedDuplicate.isEmpty() || audioToVersion.isPresent()) {
 
@@ -170,7 +170,7 @@ public class AudioServiceImpl implements AudioService {
 
                 log.info("No duplicates found. Uploading new file");
             } else {
-                log.info("Identified media ids that require duplicate audio");
+                log.info("Duplicate audio file has been found with difference in file size");
             }
 
             // version the file upload to the database
@@ -199,9 +199,9 @@ public class AudioServiceImpl implements AudioService {
                 saveEntity.setChronicleId(entity.getChronicleId());
                 saveEntity.setAntecedentId(entity.getId().toString());
 
-                log.info("Uploading version of duplicate filename {} under version number {}", entity.getMediaFile(), entity.getLegacyVersionLabel());
+                log.info("Uploading version of duplicate filename {} with antecedent media id {}", entity.getMediaFile(), entity.getId().toString());
             } else {
-                log.info("New file uploaded {} with version number {}", entity.getMediaFile(), entity.getLegacyVersionLabel());
+                log.info("New file uploaded {} with filename", entity.getMediaFile());
 
                 saveEntity = mediaRepository.save(saveEntity);
                 saveEntity.setChronicleId(saveEntity.getId().toString());
@@ -227,7 +227,7 @@ public class AudioServiceImpl implements AudioService {
         logApi.audioUploaded(addAudioMetadataRequest);
     }
 
-    private Optional<Collection<MediaEntity>> findAudioToVersionAccordingToSize(Collection<MediaEntity> duplicates, long size) {
+    private Optional<Collection<MediaEntity>> findChangedSizeAudioFilesFromDuplicates(Collection<MediaEntity> duplicates, long size) {
         Collection<MediaEntity> mediaEntitiesToVersion = new ArrayList<>();
         for (MediaEntity entity : duplicates) {
 
