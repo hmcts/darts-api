@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseManagementRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -150,6 +152,7 @@ public class DartsDatabaseStub {
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
     private final RegionRepository regionRepository;
+    private final AutomatedTaskRepository automatedTaskRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -707,5 +710,13 @@ public class DartsDatabaseStub {
 
     public Optional<NodeRegisterEntity> findByNodeId(int id) {
         return nodeRegisterRepository.findById(id);
+    }
+
+    public AutomatedTaskEntity getAutomatedTask(int id) {
+        return automatedTaskRepository.findById(id).orElseThrow();
+    }
+
+    public List<AutomatedTaskEntity> getAllAutomatedTasks() {
+        return automatedTaskRepository.findAll();
     }
 }
