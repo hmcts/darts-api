@@ -123,12 +123,10 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setStatus(transcriptionStatusEntity.getDisplayName());
         }
 
-        String requestorName = getRequestorName(transcriptionEntity);
-        transcriptionResponse.setFrom(requestorName);
         transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
 
         Requestor requestor = new Requestor();
-        requestor.setUserFullName(requestorName);
+        requestor.setUserFullName(getRequestorName(transcriptionEntity));
         requestor.setUserId(getRequestorId(transcriptionEntity));
         transcriptionResponse.setRequestor(requestor);
 
