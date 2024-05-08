@@ -29,19 +29,19 @@ public class ObjectAdminActionEntity {
     @SequenceGenerator(name = "oaa_gen", sequenceName = "oaa_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne
     @JoinColumn(name = "ado_id")
     private AnnotationDocumentEntity annotationDocument;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne
     @JoinColumn(name = "cad_id")
     private CaseDocumentEntity caseDocument;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne
     @JoinColumn(name = "med_id")
     private MediaEntity media;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne
     @JoinColumn(name = "trd_id")
     private TranscriptionDocumentEntity transcriptionDocument;
 
@@ -54,7 +54,7 @@ public class ObjectAdminActionEntity {
     private UserAccountEntity hiddenBy;
 
     @Column(name = "hidden_ts")
-    private OffsetDateTime hiddenTs;
+    private OffsetDateTime hiddenDateTime;
 
     @Column(name = "marked_for_manual_deletion")
     private boolean markedForManualDeletion;
@@ -64,7 +64,7 @@ public class ObjectAdminActionEntity {
     private UserAccountEntity markedForManualDelBy;
 
     @Column(name = "marked_for_manual_del_ts")
-    private OffsetDateTime markedForManualDelTs;
+    private OffsetDateTime markedForManualDelDateTime;
 
     @Column(name = "ticket_reference")
     private String ticketReference;

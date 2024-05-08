@@ -32,22 +32,22 @@ public class CaseOverflowEntity {
     private String caseTotalSentence;
 
     @Column(name = "retention_event_ts")
-    private OffsetDateTime retentionEventTs;
+    private OffsetDateTime retentionEventDateTime;
 
     @Column(name = "case_retention_fixed")
     private String caseRetentionFixed;
 
     @Column(name = "retention_applies_from_ts")
-    private OffsetDateTime retentionAppliesFromTimestamp;
+    private OffsetDateTime retentionAppliesFromDateTime;
 
     @Column(name = "end_of_sentence_date_ts")
-    private OffsetDateTime endOfSentenceTimestamp;
+    private OffsetDateTime endOfSentenceDateTime;
 
     @Column(name = "manual_retention_override")
     private Integer manualRetentionOverride;
 
     @Column(name = "retain_until_ts")
-    private OffsetDateTime retainUntilTs;
+    private OffsetDateTime retainUntilDateTime;
 
     @Column(name = "is_standard_policy")
     private Boolean isStandardPolicy;
@@ -59,10 +59,10 @@ public class CaseOverflowEntity {
     private String audioFolderObjectId;
 
     @Column(name = "checked_ts")
-    private OffsetDateTime checkedTs;
+    private OffsetDateTime checkedDateTime;
 
     @Column(name = "corrected_ts")
-    private OffsetDateTime correctedTs;
+    private OffsetDateTime correctedDateTime;
 
     @Column(name = "confidence_level")
     private Integer confidenceLevel;

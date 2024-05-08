@@ -1,5 +1,5 @@
 CREATE INDEX usr_upea_idx       ON USER_ACCOUNT(UPPER(user_email_address));
-CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid)             ;
+CREATE INDEX usr_ag_idx         ON USER_ACCOUNT(account_guid);
 
 CREATE UNIQUE INDEX event_linked_case_pk ON event_linked_case(elc_id);
 ALTER TABLE event_linked_case  ADD PRIMARY KEY USING INDEX event_linked_case_pk;
