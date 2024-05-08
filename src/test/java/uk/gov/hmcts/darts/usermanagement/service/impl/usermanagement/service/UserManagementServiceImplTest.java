@@ -25,8 +25,8 @@ import uk.gov.hmcts.darts.usermanagement.service.impl.UserManagementServiceImpl;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserEmailValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
 import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
-import uk.gov.hmcts.darts.usermanagement.validator.UserSuperAdminDeactivateValidator;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -41,6 +41,8 @@ import java.util.Set;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +79,7 @@ class UserManagementServiceImplTest {
         UserEmailValidator userEmailValidator = new UserEmailValidator(userAccountRepository);
         UserAccountExistsValidator userAccountExistsValidator = new UserAccountExistsValidator(userAccountRepository);
 
-        UserSuperAdminDeactivateValidator enablementValidator = new UserSuperAdminDeactivateValidator(userIdentity);
+        AuthorisedUserPermissionsValidator enablementValidator = new AuthorisedUserPermissionsValidator(userIdentity);
         UserDeactivateNotLastInSuperAdminGroupValidator deactivateNotLastSuperAdminValidator
             = new UserDeactivateNotLastInSuperAdminGroupValidator(securityGroupRepository);
 
@@ -128,6 +130,7 @@ class UserManagementServiceImplTest {
         patch.setActive(false);
 
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
+        when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
         when(userAccountRepository.existsById(Mockito.eq(userId))).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
@@ -136,10 +139,11 @@ class UserManagementServiceImplTest {
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
 
         assertEquals(transcriptionId, resultList.getRolledBackTranscriptRequests().get(0));
+        verify(transcriptionService, times(1)).rollbackUserTransactions(Mockito.any());
     }
 
     @Test
-    void testModifyUserWithoutDeactivate() throws IOException {
+    void testModifyUserWithoutActivation() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
         userAccountEntities.get(0).setIsSystemUser(false);
 
@@ -162,6 +166,7 @@ class UserManagementServiceImplTest {
         userAccountEntities.get(0).setSecurityGroupEntities(securityGroupEntitySet);
 
         Integer userId = 1001;
+        when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
         when(userAccountRepository.existsById(Mockito.eq(userId))).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
         when(securityGroupRepository.findById(Mockito.eq(secGroupId))).thenReturn(Optional.of(securityGroupEntity));
@@ -174,6 +179,51 @@ class UserManagementServiceImplTest {
         assertEquals(fullName, resultList.getFullName());
         assertEquals(Arrays.asList(secGroupId), resultList.getSecurityGroupIds());
         assertEquals(emailAddress, resultList.getEmailAddress());
+
+        verify(transcriptionService, times(0)).rollbackUserTransactions(Mockito.any());
+    }
+
+    @Test
+    void testModifyUserWithActivate() throws IOException {
+        List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
+        userAccountEntities.get(0).setIsSystemUser(false);
+
+        UserPatch patch = new UserPatch();
+        patch.setActive(true);
+        String description = "description";
+        String fullName = "this is a full name";
+        String emailAddress = "test@hmcts.net";
+        Integer secGroupId = 1;
+
+        patch.setDescription(description);
+        patch.setFullName(fullName);
+        patch.setEmailAddress(emailAddress);
+        patch.addSecurityGroupIdsItem(secGroupId);
+
+        SecurityGroupEntity securityGroupEntity = new SecurityGroupEntity();
+        securityGroupEntity.setId(secGroupId);
+
+        Set<SecurityGroupEntity> securityGroupEntitySet = new HashSet<>();
+        securityGroupEntitySet.add(securityGroupEntity);
+        userAccountEntities.get(0).setSecurityGroupEntities(securityGroupEntitySet);
+
+        Integer userId = 1001;
+
+        when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        when(userAccountRepository.existsById(Mockito.eq(userId))).thenReturn(true);
+        when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
+        when(securityGroupRepository.findById(Mockito.eq(secGroupId))).thenReturn(Optional.of(securityGroupEntity));
+        when(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(Mockito.notNull())).thenReturn(Arrays.asList(secGroupId));
+
+        UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
+
+        assertNull(resultList.getRolledBackTranscriptRequests());
+        assertEquals(description, resultList.getDescription());
+        assertEquals(fullName, resultList.getFullName());
+        assertEquals(Arrays.asList(secGroupId), resultList.getSecurityGroupIds());
+        assertEquals(emailAddress, resultList.getEmailAddress());
+
+        verify(transcriptionService, times(0)).rollbackUserTransactions(Mockito.any());
     }
 
     private static UserAccountEntity createUserAccount(int id, String emailAddress) {

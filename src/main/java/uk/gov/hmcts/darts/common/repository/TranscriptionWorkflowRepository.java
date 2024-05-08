@@ -22,4 +22,17 @@ public interface TranscriptionWorkflowRepository extends JpaRepository<Transcrip
             GROUP BY tw.transcription.id
             """)
     List<TranscriptionIdsAndLatestWorkflowTs> findWorkflowOwnedBy(String owner);
+
+    @Query("""
+            SELECT distinct tw.transcription
+            FROM TranscriptionWorkflowEntity tw
+            JOIN tw.transcription trans
+            JOIN tw.workflowActor ua
+            WHERE trans.transcriptionStatus.id = :statusId
+            AND ua.id = :userId
+            """)
+    List<TranscriptionEntity> findWorkflowForUserWithTranscriptionState(
+        Integer userId,
+        Integer statusId
+    );
 }

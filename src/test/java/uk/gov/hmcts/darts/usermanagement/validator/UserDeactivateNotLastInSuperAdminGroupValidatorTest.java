@@ -16,9 +16,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
+class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
-    private UserDeactivateNotLastInSuperAdminGroupValidator userDeactivateNotLastSuperAdminValidator;
+    private final UserDeactivateNotLastInSuperAdminGroupValidator userDeactivateNotLastSuperAdminValidator;
 
     SecurityGroupRepository repository;
 
@@ -28,7 +28,7 @@ public class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
     }
 
     @Test
-    public void validateFail() throws Exception {
+    void deactivateUserLastSuperAdmin() throws Exception {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
@@ -46,11 +46,11 @@ public class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
         UserQueryRequest<UserPatch> request = new UserQueryRequest<>(patch, userId);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class, () -> userDeactivateNotLastSuperAdminValidator.validate(request));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
     }
 
     @Test
-    public void validateSuccessUserNotLast() throws Exception {
+    void deactivateUserNotLastSuperAdmin() throws Exception {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 
@@ -71,7 +71,7 @@ public class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
     }
 
     @Test
-    public void validateSuccessActive() throws Exception {
+    void validateSuccessActivate() throws Exception {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         Mockito.when(repository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
 

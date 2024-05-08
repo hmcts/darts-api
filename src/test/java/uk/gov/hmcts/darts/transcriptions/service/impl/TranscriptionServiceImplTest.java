@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -575,12 +574,12 @@ class TranscriptionServiceImplTest {
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
 
         TranscriptionWorkflowEntity transcriptionWorkflowEntityEntity = new TranscriptionWorkflowEntity();
-        List<TranscriptionEntity> transcriptionEntityList = Arrays.asList(transcriptionEntity);
+        transcriptionWorkflowEntityEntity.setTranscription(transcriptionEntity);
 
         when(mockTranscriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.APPROVED.getId())).thenReturn(transcriptionStatusEntity);
-        Mockito.when(mockTranscriptionRepository
-                         .findTranscriptionForUserWithState(eq(entity.getId()), eq(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId())))
-            .thenReturn(transcriptionEntityList);
+        when(mockTranscriptionWorkflowRepository
+                         .findWorkflowForUserWithTranscriptionState(eq(entity.getId()), eq(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId())))
+            .thenReturn(Arrays.asList(transcriptionEntity));
 
         when(mockTranscriptionWorkflowRepository.saveAndFlush(Mockito.notNull()))
             .thenReturn(transcriptionWorkflowEntityEntity);
@@ -589,8 +588,8 @@ class TranscriptionServiceImplTest {
 
         verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
         TranscriptionWorkflowEntity workflowEntity = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        Assertions.assertEquals(transcriptionId, allCaseTranscriptionDocuments.get(0));
-        Assertions.assertEquals(transcriptionStatusEntity, workflowEntity.getTranscriptionStatus());
+        assertEquals(transcriptionId, allCaseTranscriptionDocuments.get(0));
+        assertEquals(transcriptionStatusEntity, workflowEntity.getTranscriptionStatus());
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

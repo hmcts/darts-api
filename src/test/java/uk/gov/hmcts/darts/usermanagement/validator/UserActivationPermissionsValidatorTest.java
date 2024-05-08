@@ -10,21 +10,23 @@ import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
 import java.util.Arrays;
 
-public class UserSuperAdminDeactivateValidatorTest {
+class UserActivationPermissionsValidatorTest {
 
-    private UserActivationPermissionsValidator userEnablementValidator;
+    private final AuthorisedUserPermissionsValidator userEnablementValidator;
 
-    private UserIdentity userIdentity;
+    private final UserIdentity userIdentity;
 
-    public UserSuperAdminDeactivateValidatorTest() {
+    public UserActivationPermissionsValidatorTest() {
         userIdentity = Mockito.mock(UserIdentity.class);
-        userEnablementValidator = new UserActivationPermissionsValidator(userIdentity);
+        userEnablementValidator = new AuthorisedUserPermissionsValidator(userIdentity);
     }
 
     @Test
-    public void testFailActivateTrue() {
+    void testSuperUserActivateTrueFailure() {
         UserPatch patch = new UserPatch();
         patch.setActive(true);
+
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
@@ -32,7 +34,7 @@ public class UserSuperAdminDeactivateValidatorTest {
     }
 
     @Test
-    public void testFailActivateFalseSetDescription() {
+    void testSuperUserActivateFalseSetDescriptionFailure() {
         UserPatch patch = new UserPatch();
         patch.setActive(false);
         patch.setDescription("");
@@ -45,7 +47,7 @@ public class UserSuperAdminDeactivateValidatorTest {
     }
 
     @Test
-    public void testFailActivateFalseSetEmailAddress() {
+    void testSuperUserActivateFalseSetEmailAddressFailure() {
         UserPatch patch = new UserPatch();
         patch.setActive(false);
         patch.setEmailAddress("");
@@ -58,7 +60,7 @@ public class UserSuperAdminDeactivateValidatorTest {
     }
 
     @Test
-    public void testFailActiveFalseSetFullName() {
+    void testSuperUserActiveFalseSetFullNameFailure() {
         UserPatch patch = new UserPatch();
         patch.setActive(false);
         patch.setFullName("");
@@ -71,7 +73,7 @@ public class UserSuperAdminDeactivateValidatorTest {
     }
 
     @Test
-    public void testFailActivateFalseSetGroupIds() {
+    void testSuperUserActivateFalseSetGroupIdsSuccess() {
         UserPatch patch = new UserPatch();
         patch.setActive(false);
         patch.securityGroupIds(Arrays.asList(12));
@@ -84,9 +86,63 @@ public class UserSuperAdminDeactivateValidatorTest {
     }
 
     @Test
-    public void testSuccessDeactivate() {
+    void testSuperUserDeactivateSuccess() {
         UserPatch patch = new UserPatch();
         patch.setActive(false);
+
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+
+        userEnablementValidator.validate(patch);
+    }
+
+    @Test
+    void testSuperAdminActivateFalseSetDescriptionSuccess() {
+        UserPatch patch = new UserPatch();
+        patch.setActive(false);
+        patch.setDescription("");
+
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+
+        userEnablementValidator.validate(patch);
+    }
+
+    @Test
+    void testSuperAdminActivateFalseSetEmailAddressSuccess() {
+        UserPatch patch = new UserPatch();
+        patch.setActive(false);
+        patch.setEmailAddress("");
+
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+
+        userEnablementValidator.validate(patch);
+    }
+
+    @Test
+    void testSuperAdminActiveFalseSetFullNameSuccess() {
+        UserPatch patch = new UserPatch();
+        patch.setActive(false);
+        patch.setFullName("");
+
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+
+        userEnablementValidator.validate(patch);
+    }
+
+    @Test
+    void testSuperAdminActivateFalseSetGroupIdsSuccess() {
+        UserPatch patch = new UserPatch();
+        patch.setActive(false);
+        patch.securityGroupIds(Arrays.asList(12));
+
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+
+        userEnablementValidator.validate(patch);
+    }
+
+    @Test
+    void testSuperAdminActivateSuccess() {
+        UserPatch patch = new UserPatch();
+        patch.setActive(true);
 
         Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
 

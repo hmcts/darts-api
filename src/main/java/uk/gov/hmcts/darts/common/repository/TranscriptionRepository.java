@@ -148,14 +148,5 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         Boolean isManual,
         String requestedBy);
 
-    @Query("""
-        SELECT t
-        FROM TranscriptionEntity t
-        WHERE t.createdBy.id = :userId
-        AND t.transcriptionStatus.id = :statusId
-        """)
-    List<TranscriptionEntity> findTranscriptionForUserWithState(
-        Integer userId,
-        Integer statusId
-    );
+
 }

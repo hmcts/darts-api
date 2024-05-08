@@ -68,7 +68,7 @@ public enum AuthorisationError implements DartsApiError {
     ),
     USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT(
         AuthorisationErrorCode.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getValue(),
-        HttpStatus.FORBIDDEN,
+        HttpStatus.CONFLICT,
         AuthorisationTitleErrors.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getValue()
     );
 
