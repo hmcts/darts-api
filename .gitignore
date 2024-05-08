@@ -2,6 +2,7 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 *.class
+*.hprof
 bin/functionalTest/
 bin/integrationTest/
 bin/main/

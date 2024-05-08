@@ -26,6 +26,7 @@ public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
     private static final String TASK_GEN = "task_gen";
     private static final String AUTOMATED_TASK_SEQ = "aut_seq";
     private static final String TASK_ENABLED = "task_enabled";
+    private static final String BATCH_SIZE = "batch_size";
 
 
     @Id
@@ -49,6 +50,6 @@ public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
     @Column(name = TASK_ENABLED)
     private Boolean taskEnabled;
 
-
-
+    @Column(name = BATCH_SIZE)
+    private Integer batchSize;
 }
