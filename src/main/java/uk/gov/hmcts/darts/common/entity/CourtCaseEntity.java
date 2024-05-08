@@ -31,7 +31,6 @@ import java.util.List;
 public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public static final String COURT_CASE = "courtCase";
-    public static final String VERSION_LABEL = "version_label";
     public static final String CASE_CLOSED_TS = "case_closed_ts";
     public static final String INTERPRETER_USED = "interpreter_used";
     public static final String CASE_CLOSED = "case_closed";
@@ -92,9 +91,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
-    @Column(name = VERSION_LABEL, length = 32)
-    private String legacyVersionLabel;
-
     @Column(name = IS_DELETED)
     private boolean isDeleted;
 
@@ -119,6 +115,15 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         joinColumns = {@JoinColumn(name = "cas_id")},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
+
+    @Column(name = "is_data_anonymised")
+    private boolean isDataAnonymised;
+
+    @Column(name = "data_anonymised_by")
+    private Integer dataAnonymisedBy;
+
+    @Column(name = "data_anonymised_ts")
+    private OffsetDateTime dataAnonymisedTs;
 
     public void addDefence(DefenceEntity defence) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(defence.getName()))) {

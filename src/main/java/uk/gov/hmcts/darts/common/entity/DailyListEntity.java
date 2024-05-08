@@ -37,7 +37,6 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     public static final String DAILY_LIST_SOURCE = "daily_list_source";
     public static final String CREATED_DATE_TIME = "created_ts";
     public static final String LAST_UPDATED_DATE_TIME = "last_modified_ts";
-    public static final String LEGACY_VERSION_LABEL = "version_label";
     public static final String SUPERSEDED = "superseded";
     public static final String TABLE_NAME = "daily_list";
     public static final String DAILY_LIST_CONTENT_JSON = "daily_list_content_json";
@@ -88,11 +87,7 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @Column(name = DAILY_LIST_CONTENT_XML)
     private String xmlContent;
 
-    @Column(name = LEGACY_VERSION_LABEL)
-    private String legacyVersionLabel;
-
     @Column(name = MESSAGE_ID)
     private String messageId;
-
 
 }
