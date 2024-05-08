@@ -12,9 +12,7 @@ import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -34,7 +32,6 @@ public class EventDispatcherImpl implements EventDispatcher {
     private final EventHandlerRepository eventHandlerRepository;
 
     private final LogApi logApi;
-    private final Map<String, EventHandlerEntity> eventHandlerCache = new ConcurrentHashMap<>();
 
     @Override
     public void receive(DartsEvent event) {
@@ -53,13 +50,6 @@ public class EventDispatcherImpl implements EventDispatcher {
     }
 
     private EventHandlerEntity findHandler(DartsEvent event) {
-        String key = event.getType() + "___" + event.getSubType();
-        EventHandlerEntity cachedVersion = eventHandlerCache.get(key);
-        if (cachedVersion != null) {
-            log.trace("cache hit for key {}", key);
-            return cachedVersion;
-        }
-        log.trace("cache miss for key {}", key);
 
         List<EventHandlerEntity> foundMappings = eventHandlerRepository.findByTypeAndSubType(
             event.getType(),
@@ -74,9 +64,7 @@ public class EventDispatcherImpl implements EventDispatcher {
         }
 
         //first entry will be what we want because of ordering in sql will put the default null entry last.
-        EventHandlerEntity eventHandlerEntity = foundMappings.get(0);
-        eventHandlerCache.put(key, eventHandlerEntity);
-        return eventHandlerEntity;
+        return foundMappings.get(0);
     }
 
     private static void logEvent(DartsEvent event, EventHandler foundHandler) {
