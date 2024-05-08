@@ -10,33 +10,32 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class UserSuperAdminDeactivateValidator implements Validator<UserPatch> {
+public class AuthorisedUserPermissionsValidator implements Validator<UserPatch> {
 
     private final UserIdentity userIdentity;
 
     @Override
     public void validate(UserPatch userPatch) {
 
-        // only allow super user to transition from false to true
-        if (userPatch.getActive() != null && userPatch.getActive().equals(true)) {
-            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
-        } else {
-            Set<SecurityRoleEnum> securityRoleEnum = new HashSet<>();
-            securityRoleEnum.add(SecurityRoleEnum.SUPER_ADMIN);
+        Set<SecurityRoleEnum> superAdminRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_ADMIN)));
+        Set<SecurityRoleEnum> superUserRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_USER)));
 
-            if (userIdentity.userHasGlobalAccess(securityRoleEnum)) {
-                if (hasAnythingOtherThanEnablementStateChanged(userPatch)) {
-                    throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
-                }
+        if ((userPatch.getActive() == null || (userPatch.getActive() != null && userPatch.getActive().equals(false)))
+            && userIdentity.userHasGlobalAccess(superUserRole)) {
+            if (hasAnythingOtherThanActivationStateChanged(userPatch)) {
+                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
             }
+        } else if (!userIdentity.userHasGlobalAccess(superAdminRole)) {
+            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
         }
     }
 
-    private boolean hasAnythingOtherThanEnablementStateChanged(UserPatch userPatch) {
+    private boolean hasAnythingOtherThanActivationStateChanged(UserPatch userPatch) {
         return userPatch.getDescription() != null
             || userPatch.getEmailAddress() != null
             || userPatch.getFullName() != null

@@ -12,13 +12,13 @@ import java.util.Arrays;
 
 public class UserSuperAdminDeactivateValidatorTest {
 
-    private UserSuperAdminDeactivateValidator userEnablementValidator;
+    private UserActivationPermissionsValidator userEnablementValidator;
 
     private UserIdentity userIdentity;
 
     public UserSuperAdminDeactivateValidatorTest() {
         userIdentity = Mockito.mock(UserIdentity.class);
-        userEnablementValidator = new UserSuperAdminDeactivateValidator(userIdentity);
+        userEnablementValidator = new UserActivationPermissionsValidator(userIdentity);
     }
 
     @Test
