@@ -155,4 +155,16 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         }
         return hearings.get(0);
     }
+
+    public List<CourtCaseEntity> associatedCourtCases() {
+        List<CourtCaseEntity> allCourtCases = new ArrayList<>();
+
+        var casesFromHearings = hearings.stream().map(HearingEntity::getCourtCase).toList();
+        allCourtCases.addAll(casesFromHearings);
+
+        allCourtCases.addAll(this.courtCases);
+
+        var uniqueCases = io.vavr.collection.List.ofAll(allCourtCases).distinctBy(CourtCaseEntity::getId).toJavaList();
+        return uniqueCases;
+    }
 }

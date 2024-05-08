@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -24,7 +23,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -128,24 +127,14 @@ public class AuthorisationImpl implements Authorisation {
 
     private List<CourthouseEntity> getCourthousesFromTranscription(Integer transcriptionId) {
         Optional<TranscriptionEntity> transcriptionEntityOpt = transcriptionRepository.findById(transcriptionId);
-        List<CourthouseEntity> returnList = new ArrayList<>();
         if (transcriptionEntityOpt.isEmpty()) {
-            return returnList;
+            return Collections.emptyList();
         }
-        TranscriptionEntity transcriptionEntity = transcriptionEntityOpt.get();
-        List<CourtCaseEntity> courtCases = transcriptionEntity.getCourtCases();
-        if (CollectionUtils.isNotEmpty(courtCases)) {
-            CollectionUtils.addAll(returnList, courtCases.stream().map(CourtCaseEntity::getCourthouse).toList());
-        }
-        List<HearingEntity> hearings = transcriptionEntity.getHearings();
-        if (CollectionUtils.isNotEmpty(hearings)) {
-            CollectionUtils.addAll(returnList, hearings.stream()
-                .map(HearingEntity::getCourtCase)
-                .map(CourtCaseEntity::getCourthouse)
-                .toList());
-        }
-        return returnList.stream().distinct().toList();
 
+        TranscriptionEntity transcriptionEntity = transcriptionEntityOpt.get();
+
+        var courtCases = transcriptionEntity.associatedCourtCases();
+        return courtCases.stream().map(CourtCaseEntity::getCourthouse).distinct().toList();
     }
 
     @Override
