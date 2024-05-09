@@ -29,7 +29,7 @@ public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validato
             Set<UserAccountEntity> accountEntities = securityGroupEntityLst.get().getUsers();
 
             // if the super admin group has only 1 user and its the user we are deactivating fail
-            if (securityGroupEntityLst.isPresent() && accountEntities.size() == 1) {
+            if (accountEntities.size() == 1) {
                 Iterator<UserAccountEntity> entity = accountEntities.iterator();
                 UserAccountEntity userAccountEntity = entity.next();
                 if (userAccountEntity.getId().equals(userPatch.getUserId())) {
