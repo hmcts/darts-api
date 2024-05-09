@@ -25,7 +25,7 @@ public class SuperAdminUserStub {
 
         Mockito.when(userIdentity.getUserAccount())
             .thenReturn(user);
-        Mockito.when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN))))
+        Mockito.when(userIdentity.userHasGlobalAccess(any()))
             .thenReturn(true);
 
         return user;
