@@ -148,8 +148,6 @@ pmd {
   toolVersion = "7.1.0"
   sourceSets = [sourceSetsCopy.main]
   reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
   ruleSetFiles = files("config/pmd/main-ruleset.xml")
 }
 
@@ -157,8 +155,6 @@ pmd {
   toolVersion = "7.1.0"
   sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 

@@ -20,7 +20,6 @@
     <exclude name="MethodNamingConventions"/>
     <exclude name="OnlyOneReturn"/>
     <exclude name="TooManyStaticImports"/>
-    <exclude name="DefaultPackage"/>
     <exclude name="CommentDefaultAccessModifier"/>
     <exclude name="LinguisticNaming"/>
     <exclude name="MethodNamingConventions"/>
