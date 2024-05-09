@@ -36,6 +36,8 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
+import uk.gov.hmcts.darts.common.util.MediaEntityTreeNodeImpl;
+import uk.gov.hmcts.darts.common.util.Tree;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
 
@@ -46,7 +48,11 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -125,46 +131,157 @@ public class AudioServiceImpl implements AudioService {
     @Override
     @Transactional
     public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
-        MessageDigest md5Digest;
-        try {
-            md5Digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
-        }
 
-        UUID externalLocation = null;
-        String checksum = null;
+        log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
 
-        ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
-            if (audioFileStream.isEmpty()) {
-                objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
-            } else {
-                externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
-                checksum = fileContentChecksum.calculate(digestInputStream);
+        Collection<MediaEntity> identifiedDuplicate = getDuplicateMediaFile(addAudioMetadataRequest);
+        Optional<Collection<MediaEntity>> audioToVersion = findChangedSizeAudioFilesFromDuplicates(identifiedDuplicate,
+                                                                                                   addAudioMetadataRequest.getFileSize());
+
+        if (identifiedDuplicate.isEmpty() || audioToVersion.isPresent()) {
+
+            MessageDigest md5Digest;
+            try {
+                md5Digest = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
             }
-        } catch (IOException e) {
-            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+
+            UUID externalLocation = null;
+            String checksum = null;
+
+            ObjectRecordStatusEntity objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(STORED.getId());
+            try (var digestInputStream = new DigestInputStream(new BufferedInputStream(audioFileStream.getInputStream()), md5Digest)) {
+                if (audioFileStream.isEmpty()) {
+                    objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
+                } else {
+                    externalLocation = dataManagementApi.saveBlobDataToInboundContainer(digestInputStream);
+                    checksum = fileContentChecksum.calculate(digestInputStream);
+                }
+            } catch (IOException e) {
+                throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+            }
+
+            // if we have not found any duplicate audio files to process lets add a new one
+            if (audioToVersion.isEmpty()) {
+                List<MediaEntity> audioFileToProcess = new ArrayList<MediaEntity>();
+                MediaEntity newEntity = mapper.mapToMedia(addAudioMetadataRequest);
+
+                audioFileToProcess.add(newEntity);
+                audioToVersion = Optional.of(audioFileToProcess);
+
+                log.info("No duplicates found. Uploading new file");
+            } else {
+                log.info("Duplicate audio file has been found with difference in file size");
+            }
+
+            // version the file upload to the database
+            versionUpload(audioToVersion.get(), addAudioMetadataRequest,
+                           externalLocation, checksum, objectRecordStatusEntity);
+        } else {
+            log.info("Duplicate audio upload detected with no difference in file size. Returning 200 with no changes ");
+            for (MediaEntity entity : identifiedDuplicate) {
+                log.info("Duplicate media id {}", entity.getId());
+            }
         }
+    }
 
-        MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
-        savedMedia.setChecksum(checksum);
-        linkAudioToHearingInMetadata(addAudioMetadataRequest, savedMedia);
-        linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
+    private void versionUpload(Collection<MediaEntity> audioToVersion,
+                                AddAudioMetadataRequest addAudioMetadataRequest,
+                                UUID externalLocation, String checksum,
+                                ObjectRecordStatusEntity objectRecordStatusEntity) {
+        for (MediaEntity entity : audioToVersion) {
 
-        saveExternalObjectDirectory(
-            externalLocation,
-            checksum,
-            userIdentity.getUserAccount(),
-            savedMedia,
-            objectRecordStatusEntity
-        );
+            MediaEntity saveEntity = entity;
+
+            // if the media already exists in the database then create a new media file
+            if (entity.getId() != null) {
+                saveEntity = mapper.mapToMedia(addAudioMetadataRequest);
+
+                saveEntity.setChronicleId(entity.getChronicleId());
+                saveEntity.setAntecedentId(entity.getId().toString());
+
+                log.info("Uploading version of duplicate filename {} with antecedent media id {}", entity.getMediaFile(), entity.getId().toString());
+            } else {
+                log.info("New file uploaded {} with filename", entity.getMediaFile());
+
+                saveEntity = mediaRepository.save(saveEntity);
+                saveEntity.setChronicleId(saveEntity.getId().toString());
+            }
+
+            log.info("Saved media id {}", entity.getId());
+
+            saveEntity.setChecksum(checksum);
+            mediaRepository.save(saveEntity);
+
+            linkAudioToHearingInMetadata(addAudioMetadataRequest, entity != saveEntity ? entity : null, saveEntity);
+            linkAudioToHearingByEvent(addAudioMetadataRequest, saveEntity);
+
+            saveExternalObjectDirectory(
+                externalLocation,
+                checksum,
+                userIdentity.getUserAccount(),
+                saveEntity,
+                objectRecordStatusEntity
+            );
+        }
 
         logApi.audioUploaded(addAudioMetadataRequest);
     }
 
+    private Optional<Collection<MediaEntity>> findChangedSizeAudioFilesFromDuplicates(Collection<MediaEntity> duplicates, long size) {
+        Collection<MediaEntity> mediaEntitiesToVersion = new ArrayList<>();
+        for (MediaEntity entity : duplicates) {
+
+            // if file size is not expected
+            if (size != entity.getFileSize()) {
+                mediaEntitiesToVersion.add(entity);
+            }
+        }
+
+        if (!mediaEntitiesToVersion.isEmpty()) {
+            return Optional.of(mediaEntitiesToVersion);
+        }
+
+        return Optional.empty();
+    }
+
+    private List<MediaEntity> getCaseRelatedMediaEntities(List<String> cases, List<MediaEntity> entities) {
+        ArrayList<MediaEntity> entityForCaseLst = new ArrayList<>();
+        for (MediaEntity entity : entities) {
+            List<String> casesForEntity = entity.getCaseNumberList();
+
+            if (cases.size() == casesForEntity.size() && new HashSet<>(casesForEntity).containsAll(cases)) {
+                entityForCaseLst.add(entity);
+            }
+        }
+
+        return entityForCaseLst;
+    }
+
+    private Collection<MediaEntity> getDuplicateMediaFile(AddAudioMetadataRequest addAudioMetadataRequest) {
+        List<MediaEntity> mediaEntities =  mediaRepository.findMediaByDetails(
+             addAudioMetadataRequest.getCourthouse(),
+             addAudioMetadataRequest.getCourtroom(),
+             addAudioMetadataRequest.getChannel(),
+             addAudioMetadataRequest.getFilename(),
+             addAudioMetadataRequest.getStartedAt(),
+             addAudioMetadataRequest.getEndedAt());
+
+        // gets any media entities that relate to the cases.
+        mediaEntities = getCaseRelatedMediaEntities(addAudioMetadataRequest.getCases(), mediaEntities);
+
+        // now lets get the lowest level media objects so that they can act as a basis for the antecedent
+        Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
+        mediaEntities.stream().forEach(entry -> {
+            tree.addNode(new MediaEntityTreeNodeImpl(entry));
+        });
+
+        return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).collect(Collectors.toList());
+    }
+
     @Override
-    public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
+    public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaToReplace, MediaEntity newMedia) {
         for (String caseNumber : addAudioMetadataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                 addAudioMetadataRequest.getCourthouse(),
@@ -173,7 +290,15 @@ public class AudioServiceImpl implements AudioService {
                 DateConverterUtil.toLocalDateTime(addAudioMetadataRequest.getStartedAt()),
                 userIdentity.getUserAccount()
             );
-            hearing.addMedia(savedMedia);
+
+            if (mediaToReplace != null) {
+                // delete the existing media entity hearing link and link to the new media entity instead
+                hearing.getMediaList().removeIf(me -> me.getId().equals(mediaToReplace.getId()));
+            }
+
+            // add the new media
+            hearing.addMedia(newMedia);
+
             hearingRepository.saveAndFlush(hearing);
         }
     }
