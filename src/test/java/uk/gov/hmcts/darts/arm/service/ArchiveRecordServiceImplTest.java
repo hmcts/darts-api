@@ -400,7 +400,7 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.associatedCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
+        when(transcriptionEntity.getAssociatedCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);
@@ -474,7 +474,7 @@ class ArchiveRecordServiceImplTest {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(true);
         when(transcriptionEntity.getHearingDate()).thenReturn(LocalDate.of(2023, 1, 1));
         when(transcriptionEntity.getTranscriptionType()).thenReturn(transcriptionTypeEntity);
-        when(transcriptionEntity.associatedCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
+        when(transcriptionEntity.getAssociatedCourtCases()).thenReturn(List.of(courtCaseEntity1, courtCaseEntity2, courtCaseEntity3));
 
         when(transcriptionDocumentEntity.getId()).thenReturn(1);
         when(transcriptionDocumentEntity.getTranscription()).thenReturn(transcriptionEntity);

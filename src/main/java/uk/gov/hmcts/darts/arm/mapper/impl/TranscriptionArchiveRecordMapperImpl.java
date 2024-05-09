@@ -256,7 +256,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
-        List<CourtCaseEntity> cases = transcriptionDocumentEntity.getTranscription().associatedCourtCases();
+        List<CourtCaseEntity> cases = transcriptionDocumentEntity.getTranscription().getAssociatedCourtCases();
         if (cases.isEmpty()) {
             return null;
         } else if (cases.size() == 1) {

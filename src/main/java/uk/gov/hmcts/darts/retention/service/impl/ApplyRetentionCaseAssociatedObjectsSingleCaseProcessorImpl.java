@@ -98,7 +98,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
         var transcriptionDocuments = transcriptionService.getAllCaseTranscriptionDocuments(courtCase.getId());
 
         for (var transcriptionDoc : transcriptionDocuments) {
-            var cases = transcriptionDoc.getTranscription().associatedCourtCases();
+            var cases = transcriptionDoc.getTranscription().getAssociatedCourtCases();
             if (allClosed(cases)) {
                 var longestRetentionDate = findLongestRetentionDate(cases);
                 if (longestRetentionDate != null) {

@@ -133,7 +133,7 @@ public class AuthorisationImpl implements Authorisation {
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityOpt.get();
 
-        var courtCases = transcriptionEntity.associatedCourtCases();
+        var courtCases = transcriptionEntity.getAssociatedCourtCases();
         return courtCases.stream().map(CourtCaseEntity::getCourthouse).distinct().toList();
     }
 
