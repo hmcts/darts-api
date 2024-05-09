@@ -198,6 +198,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         }
     }
 
+    @SuppressWarnings("PMD.LooseCoupling")
     public <T> void streamFileWithMetaData(InMemoryMultipart multipartFile, T metadata, String url) {
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 

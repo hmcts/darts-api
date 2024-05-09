@@ -232,7 +232,7 @@ class ArchiveRecordServiceImplTest {
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn("Tests/arm/properties/media-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
@@ -300,7 +300,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/all_properties/media-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");
@@ -354,7 +354,7 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(FILE_EXTENSION);
         when(armDataManagementConfiguration.getMediaRecordPropertiesFile()).thenReturn(
             "Tests/arm/properties/invalid_properties_path/media-record.properties");
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(ArchiveRecordServiceImplTest.DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
         when(armDataManagementConfiguration.getDateFormat()).thenReturn(DATE_FORMAT);
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(EODID, "1234_1_1");

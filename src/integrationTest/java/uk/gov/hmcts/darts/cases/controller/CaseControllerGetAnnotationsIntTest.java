@@ -75,7 +75,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         List<Annotation> annotations = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              new TypeReference<List<Annotation>>() {
+                                                              new TypeReference<>() {
                                                               });
 
         annotations.sort(comparing(Annotation::getAnnotationId));
@@ -109,7 +109,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         List<Annotation> annotations = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              new TypeReference<List<Annotation>>() {
+                                                              new TypeReference<>() {
                                                               });
 
         annotations.sort(comparing(Annotation::getAnnotationId));
@@ -145,7 +145,7 @@ class CaseControllerGetAnnotationsIntTest extends IntegrationBase {
             .andReturn();
 
         List<Annotation> annotations = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                              new TypeReference<List<Annotation>>() {
+                                                              new TypeReference<>() {
                                                               });
 
         annotations.sort(comparing(Annotation::getAnnotationId));

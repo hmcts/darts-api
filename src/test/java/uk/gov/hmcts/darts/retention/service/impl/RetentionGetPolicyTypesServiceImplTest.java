@@ -93,7 +93,7 @@ class RetentionGetPolicyTypesServiceImplTest {
 
         when(retentionPolicyTypeRepository.findAll()).thenReturn(List.of(getRetentionPolicyTypeEntity()));
 
-        when(retentionPolicyTypeMapper.mapToModelList(any())).thenReturn(List.of(new RetentionPolicyType[]{createRetentionPolicyType()}));
+        when(retentionPolicyTypeMapper.mapToModelList(any())).thenReturn(List.of(createRetentionPolicyType()));
 
         List<RetentionPolicyType> caseRetentionPolicies = retentionService.getRetentionPolicyTypes();
 

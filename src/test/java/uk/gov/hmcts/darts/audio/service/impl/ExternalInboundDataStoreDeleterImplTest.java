@@ -107,7 +107,7 @@ class ExternalInboundDataStoreDeleterImplTest {
         inboundData2.setId(2);
         inboundData2.setVerificationAttempts(2);
 
-        ArrayList<ExternalObjectDirectoryEntity> inboundDataList = new ArrayList<>();
+        List<ExternalObjectDirectoryEntity> inboundDataList = new ArrayList<>();
         inboundDataList.add(inboundData1);
         inboundDataList.add(inboundData2);
         return inboundDataList;

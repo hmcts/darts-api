@@ -175,6 +175,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings("PMD.CloseResource")
     void downloadTranscriptShouldReturnOkWithMicrosoftWordNew() throws Exception {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -228,6 +229,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
+    @SuppressWarnings("PMD.CloseResource")
     void downloadTranscriptShouldReturnOkWithMicrosoftWordOld() throws Exception {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";

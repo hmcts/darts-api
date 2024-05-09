@@ -77,7 +77,7 @@ class EventDispatcherImplTest {
     }
 
 
-    private static class MockEventHandler implements EventHandler {
+    private final static class MockEventHandler implements EventHandler {
 
         @Override
         public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandlerEntity) {

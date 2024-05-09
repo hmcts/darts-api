@@ -57,6 +57,8 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     private static final OffsetDateTime TIME_20_30 = OffsetDateTime.parse("2023-01-01T20:30Z");
     private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
     private static final OffsetDateTime TIME_14_00 = OffsetDateTime.parse("2023-01-01T14:00Z");
+    private static final String ONE = "1";
+    private static final String TWO = "2";
 
     @Autowired
     private AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder given;
@@ -221,11 +223,11 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         assertEquals(MOCK_COURTHOUSE_NAME, templateParams.get(COURTHOUSE));
         assertEquals(NO_DEFENDANTS, templateParams.get(DEFENDANTS));
 
-        String requestId = "1".equals(templateParams.get(REQUEST_ID)) ? "2" : "1";
-        if ("1".equals(requestId)) {
+        String requestId = ONE.equals(templateParams.get(REQUEST_ID)) ? TWO : ONE;
+        if (ONE.equals(requestId)) {
             assertEquals(MOCK_PLAYBACK_REQUEST_ID, requestId);
         }
-        if ("2".equals(requestId)) {
+        if (TWO.equals(requestId)) {
             assertEquals(MOCK_DOWNLOAD_REQUEST_ID, requestId);
         }
     }

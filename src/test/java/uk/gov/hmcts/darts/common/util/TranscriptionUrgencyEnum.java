@@ -22,7 +22,7 @@ public enum TranscriptionUrgencyEnum {
     private final String  description;
 
     public static TranscriptionUrgencyEnum fromId(Integer id) {
-        for (TranscriptionUrgencyEnum b : TranscriptionUrgencyEnum.values()) {
+        for (TranscriptionUrgencyEnum b : values()) {
             if (b.id.equals(id)) {
                 return b;
             }

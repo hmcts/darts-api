@@ -54,7 +54,7 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
             .andReturn();
 
         List<SecurityGroupWithIdAndRole> groups = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
-                                                                         new TypeReference<List<SecurityGroupWithIdAndRole>>() {
+                                                                         new TypeReference<>() {
                                                                          });
 
         assertFalse(groups.isEmpty());
