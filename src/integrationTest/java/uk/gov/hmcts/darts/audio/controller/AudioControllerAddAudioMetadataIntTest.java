@@ -669,23 +669,29 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
     }
 
-    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) {
-        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, filetype, 100,"case1", "case2", "case3");
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
+                                                          OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, filetype,
+                                     100,"case1", "case2", "case3");
     }
 
-    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse, String courtroom) {
-        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", 100,"case1", "case2", "case3");
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
+                                                          OffsetDateTime endedAt, String courthouse, String courtroom) {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
+                                     "mp2", 100,"case1", "case2", "case3");
     }
 
 
-    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
+                                                          OffsetDateTime endedAt,
         String courthouse, String courtroom,long fileSize) {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", fileSize, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
                                                           String courthouse, String courtroom,  long fileSize, String...casesList) {
-        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", fileSize, casesList);
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
+                                     "mp2", fileSize, casesList);
 
     }
 
