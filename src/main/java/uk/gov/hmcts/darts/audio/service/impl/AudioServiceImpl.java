@@ -48,6 +48,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
@@ -94,6 +95,7 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
+    @SuppressWarnings({"PMD.ExceptionAsFlowControl", "PMD.AvoidRethrowingException"})
     public BinaryData encode(Integer mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
@@ -104,7 +106,12 @@ public class AudioServiceImpl implements AudioService {
             AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
 
             AudioFileInfo encodedAudioFileInfo;
+            try {
             encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
+            } catch (ExecutionException | InterruptedException e) {
+                // For Sonar rule S2142
+                throw e;
+            }
             Path encodedAudioPath = encodedAudioFileInfo.getPath();
 
             mediaBinaryData = fileOperationService.convertFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
