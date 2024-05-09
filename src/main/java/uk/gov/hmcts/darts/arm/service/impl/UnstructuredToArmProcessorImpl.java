@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -33,7 +32,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @Slf4j
-@ConditionalOnExpression("${darts.storage.arm.batch-size} == 0")
 public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmProcessor {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
