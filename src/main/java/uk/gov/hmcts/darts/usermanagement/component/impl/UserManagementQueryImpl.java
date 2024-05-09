@@ -21,6 +21,7 @@ public class UserManagementQueryImpl implements UserManagementQuery {
 
     private final UserAccountRepository userAccountRepository;
 
+    @Override
     public List<UserAccountEntity> getUsers(String emailAddress, List<Integer> userIds) {
         return userAccountRepository.findAll(
             where(notSystemUser())

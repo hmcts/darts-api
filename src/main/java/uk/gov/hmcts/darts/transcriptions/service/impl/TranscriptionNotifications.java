@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -30,6 +31,7 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_STATUS;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -75,6 +77,10 @@ public class TranscriptionNotifications {
                     notifyRequestor(transcriptionEntity, TRANSCRIPTION_AVAILABLE.toString());
                 }
                 auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            }
+            default -> {
+                log.error("Transcription status not recognised.");
+                throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_STATUS);
             }
         }
     }

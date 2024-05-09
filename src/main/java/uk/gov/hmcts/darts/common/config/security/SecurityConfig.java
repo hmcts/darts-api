@@ -39,7 +39,7 @@ import java.util.Map;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Profile("!intTest")
-public class SecurityConfig {
+public final class SecurityConfig {
 
     private final AuthStrategySelector locator;
 
@@ -122,7 +122,7 @@ public class SecurityConfig {
         return Map.entry(issuer, authenticationProvider::authenticate);
     }
 
-    private class AuthorisationTokenExistenceFilter extends OncePerRequestFilter {
+    private final class AuthorisationTokenExistenceFilter extends OncePerRequestFilter {
 
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

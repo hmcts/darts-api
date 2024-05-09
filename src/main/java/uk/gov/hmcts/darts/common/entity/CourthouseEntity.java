@@ -60,7 +60,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     @Column(name = "display_name")
     private String displayName;
 
-    public RegionEntity getRegion() throws IllegalStateException {
+    public RegionEntity getRegion() {
         throwIfStateBad();
 
         if (CollectionUtils.isEmpty(regions)) {
@@ -70,7 +70,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         return regions.stream().findFirst().get();
     }
 
-    public void setRegion(RegionEntity region) throws IllegalStateException {
+    public void setRegion(RegionEntity region) {
         throwIfStateBad();
 
         regions = new LinkedHashSet<>();

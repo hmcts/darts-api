@@ -42,7 +42,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     public DetailedAutomatedTask getAutomatedTaskById(Integer taskId) {
         var maybeAutomatedTask = automatedTaskRepository.findById(taskId);
         if (maybeAutomatedTask.isEmpty()) {
-            throw new DartsApiException(AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND);
+            throw new DartsApiException(AUTOMATED_TASK_NOT_FOUND);
         }
 
         return mapper.mapEntityToDetailedAutomatedTask(maybeAutomatedTask.get());

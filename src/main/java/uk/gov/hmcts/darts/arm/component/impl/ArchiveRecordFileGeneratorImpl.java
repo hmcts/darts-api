@@ -27,12 +27,13 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
 
     private final ObjectMapper objectMapper;
 
+    @Override
     public boolean generateArchiveRecord(ArchiveRecord archiveRecord, File archiveRecordFile, ArchiveRecordType archiveRecordType) {
-        boolean generatedArchiveRecord = false;
         if (isNull(archiveRecord) || isNull(archiveRecordFile)) {
             log.error("Unable to generate {} arm record due to invalid data", archiveRecordType);
             return false;
         }
+        boolean generatedArchiveRecord = false;
         try {
             String archiveRecordOperation = objectMapper.writeValueAsString(archiveRecord.getArchiveRecordOperation());
             String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
@@ -48,6 +49,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
         return generatedArchiveRecord;
     }
 
+    @Override
     public void generateArchiveRecords(List<ArchiveRecord> archiveRecords, File archiveRecordsFile) {
         if (!archiveRecords.isEmpty()) {
             try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordsFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {

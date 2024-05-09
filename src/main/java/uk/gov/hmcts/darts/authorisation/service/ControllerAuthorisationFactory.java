@@ -5,6 +5,6 @@ import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
 
 public interface ControllerAuthorisationFactory {
 
-    ControllerAuthorisation getHandler(final ContextIdEnum contextId);
+    ControllerAuthorisation getHandler(ContextIdEnum contextId);
 
 }

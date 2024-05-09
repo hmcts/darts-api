@@ -13,7 +13,7 @@ public class DartsApiException extends RuntimeException {
 
     private final DartsApiError error;
     private final String detail;
-    private final HashMap<String, Object> customProperties = new HashMap<>();
+    private final Map<String, Object> customProperties = new HashMap<>();
 
     public DartsApiException(DartsApiError error) {
         super(error.getTitle());

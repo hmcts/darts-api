@@ -23,7 +23,7 @@ public enum TranscriptionTypeEnum {
     private final Integer id;
 
     public static TranscriptionTypeEnum fromId(Integer id) {
-        for (TranscriptionTypeEnum b : TranscriptionTypeEnum.values()) {
+        for (TranscriptionTypeEnum b : values()) {
             if (b.id.equals(id)) {
                 return b;
             }

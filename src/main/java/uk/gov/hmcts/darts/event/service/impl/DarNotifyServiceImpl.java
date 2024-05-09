@@ -42,7 +42,9 @@ public class DarNotifyServiceImpl {
         var dartsEvent = event.getDartsEvent();
 
         List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
-        if (!openCaseNumbers.isEmpty()) {
+        if (openCaseNumbers.isEmpty()) {
+            log.info("No open cases for courthouse, ignoring DAR event {}", event.getDartsEvent().getEventId());
+        } else {
             Optional<NodeRegisterEntity> courtroomOpt = nodeRegisterRepository.findDarPcByCourtroomId(event.getCourtRoomId());
             if (courtroomOpt.isEmpty()) {
                 logApi.missingNodeRegistry(dartsEvent);
@@ -61,8 +63,6 @@ public class DarNotifyServiceImpl {
 
             dartsGatewayClient.darNotify(darNotifyEvent);
             log.info("Response from DarNotify for event {} is successful", event.getDartsEvent().getEventId());
-        } else {
-            log.info("No open cases for courthouse, ignoring DAR event {}", event.getDartsEvent().getEventId());
         }
     }
 }

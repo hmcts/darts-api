@@ -66,6 +66,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.GodClass"})
 public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
@@ -122,6 +123,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
             .build();
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
         RecordMetadata metadata = RecordMetadata.builder()
@@ -203,6 +205,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
         return metadata;
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private String mapToString(String key, AnnotationDocumentEntity annotationDocument) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE.getArchiveTypeDescription();

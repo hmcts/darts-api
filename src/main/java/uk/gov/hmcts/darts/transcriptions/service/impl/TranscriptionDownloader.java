@@ -54,15 +54,16 @@ public class TranscriptionDownloader {
         return userIdentity.getUserAccount();
     }
 
+    @SuppressWarnings({"PMD.CloseResource"})
     private InputStreamResource getResourceStreamFor(TranscriptionDocumentEntity latestTranscriptionDocument) {
         try {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(latestTranscriptionDocument);
             return new InputStreamResource(downloadResponseMetaData.getInputStream());
-        } catch (IOException | FileNotDownloadedException e) {
+        } catch (IOException | FileNotDownloadedException ex) {
             log.error("Failed to download transcript file using latestTranscriptionDocument ID {}",
                       latestTranscriptionDocument.getId(),
-                      e);
-            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND);
+                      ex);
+            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND, ex);
         }
     }
 

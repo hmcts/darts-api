@@ -53,6 +53,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
                                                       continuationToken);
     }
 
+    @Override
     public BinaryData getBlobData(String blobPathAndName) {
         return armService.getBlobData(
             armDataManagementConfiguration.getContainerName(),
@@ -81,6 +82,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     }
 
+    @Override
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
         if (Objects.requireNonNull(datastoreContainerType) == DatastoreContainerType.ARM) {
             return Optional.of(armDataManagementConfiguration.getContainerName());

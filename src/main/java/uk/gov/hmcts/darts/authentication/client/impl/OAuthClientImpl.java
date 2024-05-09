@@ -24,6 +24,8 @@ import java.net.URISyntaxException;
 @Component
 public class OAuthClientImpl implements OAuthClient {
     @SneakyThrows({URISyntaxException.class, IOException.class})
+    @SuppressWarnings({"PMD.LooseCoupling", "PMD.UseObjectForClearerAPI"})
+    @Override
     public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
                                          String redirectType, String authCode,
                                          String clientId,

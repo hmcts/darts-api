@@ -122,14 +122,14 @@ public class TranscriptionRequestDetailsValidator implements Validator<Transcrip
 
         final OffsetDateTime mediaEndDateTimeTruncated = mediaEndDateTime.truncatedTo(ChronoUnit.SECONDS);
 
-        return (mediaEndDateTimeTruncated.isEqual(requestEndDateTime) || mediaEndDateTimeTruncated.isAfter(requestEndDateTime));
+        return mediaEndDateTimeTruncated.isEqual(requestEndDateTime) || mediaEndDateTimeTruncated.isAfter(requestEndDateTime);
     }
 
     private boolean isStartTimeEqualOrBefore(OffsetDateTime mediaEndDateTime, OffsetDateTime requestStartDateTime) {
 
         final OffsetDateTime mediaEndDateTimeTruncated = mediaEndDateTime.truncatedTo(ChronoUnit.SECONDS);
 
-        return (mediaEndDateTimeTruncated.isEqual(requestStartDateTime) || mediaEndDateTimeTruncated.isBefore(requestStartDateTime));
+        return mediaEndDateTimeTruncated.isEqual(requestStartDateTime) || mediaEndDateTimeTruncated.isBefore(requestStartDateTime);
     }
 
     private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {

@@ -25,6 +25,7 @@ public class StorageOrderHelper {
     }
 
     @PostConstruct
+    @SuppressWarnings({"PMD.UnusedPrivateMethod"})
     private void populateStorageOrder() {
         List<DatastoreContainerType> newList = new ArrayList<>();
         for (String storageString : storageOrderStringList) {

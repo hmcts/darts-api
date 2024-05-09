@@ -7,6 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
+import java.util.Locale;
+
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
 
 @Component
@@ -18,7 +20,7 @@ public class TranscriptFileValidator {
     public void validate(MultipartFile transcript) {
 
         if (!transcriptionConfigurationProperties.getAllowedExtensions()
-            .contains(FilenameUtils.getExtension(transcript.getOriginalFilename()).toLowerCase())
+            .contains(FilenameUtils.getExtension(transcript.getOriginalFilename()).toLowerCase(Locale.getDefault()))
             || !transcriptionConfigurationProperties.getAllowedContentTypes()
             .contains(transcript.getContentType())
             || transcript.getSize() > transcriptionConfigurationProperties.getMaxFileSize()

@@ -211,6 +211,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         return regionOptional.get();
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private Set<SecurityGroupEntity> checkSecurityGroupsExistAndArePermitted(List<Integer> securityGroupIds) {
         if (securityGroupIds == null) {
             return new HashSet<>();

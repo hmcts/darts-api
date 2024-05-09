@@ -18,6 +18,7 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final UserIdentity userIdentity;
 
+    @Override
     public MediaEntity mapToMedia(AddAudioMetadataRequest addAudioMetadataRequest) {
         MediaEntity media = new MediaEntity();
         media.setStart(addAudioMetadataRequest.getStartedAt());

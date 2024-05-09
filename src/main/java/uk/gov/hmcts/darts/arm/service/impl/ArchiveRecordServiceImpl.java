@@ -49,6 +49,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
 
     @Transactional
+    @Override
     public ArchiveRecordFileInfo generateArchiveRecord(Integer externalObjectDirectoryId, String rawFilename) {
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(false)
@@ -69,7 +70,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
                     generateTranscriptionArchiveRecordFile(externalObjectDirectory, archiveRecordAttempt, archiveRecordFileInfo, rawFilename);
                 } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
                     generateAnnotationArchiveRecordFile(externalObjectDirectory, archiveRecordAttempt, archiveRecordFileInfo, rawFilename);
-                } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
+                } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
                     generateCaseArchiveRecordFile(externalObjectDirectory, archiveRecordAttempt, archiveRecordFileInfo, rawFilename);
                 }
             }
@@ -168,6 +169,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     }
 
     @Transactional
+    @Override
     public ArchiveRecord generateArchiveRecordInfo(Integer externalObjectDirectoryId, String rawFilename) {
 
         ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow(
@@ -181,14 +183,14 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
             result = transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, rawFilename);
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
             result = annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, rawFilename);
-        } else if (nonNull((externalObjectDirectory.getCaseDocument()))) {
+        } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
             result = caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, rawFilename);
         } else {
-            throw new DartsException(String.format("unknown archive record type for EOD %d", externalObjectDirectoryId));
+            throw new DartsException(format("unknown archive record type for EOD %d", externalObjectDirectoryId));
         }
 
         if (result == null) {
-            throw new DartsException(String.format("exception generating archive record for EOD %d", externalObjectDirectoryId));
+            throw new DartsException(format("exception generating archive record for EOD %d", externalObjectDirectoryId));
         } else {
             return result;
         }

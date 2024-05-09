@@ -12,6 +12,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
+@SuppressWarnings({"PMD.FinalFieldCouldBeStatic"})
 public class MediaCreateArchiveRecordOperation implements ArchiveRecordOperation {
 
     @JsonProperty("operation")

@@ -21,6 +21,7 @@ public class ApplyRetentionCaseAssociatedObjectsProcessorImpl implements ApplyRe
     private final CaseRepository caseRepository;
     private final ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl singleCaseProcessor;
 
+    @Override
     public void processApplyRetentionToCaseAssociatedObjects() {
 
         var cases = findCasesNeedingRetentionAppliedToAssociatedObjects();

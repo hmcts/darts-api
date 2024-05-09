@@ -34,7 +34,7 @@ import static java.time.Duration.ofSeconds;
 @Configuration
 @Profile("!in-memory-caching")
 @Slf4j
-public class RedisConnectionConfig {
+public final class RedisConnectionConfig {
 
     @Value("${darts.redis.connection-string}")
     private String redisConnectionString;
@@ -102,7 +102,7 @@ public class RedisConnectionConfig {
         };
     }
 
-    private static class CustomNettyConfig implements NettyCustomizer {
+    private static final class CustomNettyConfig implements NettyCustomizer {
 
         @Override
         public void afterBootstrapInitialized(Bootstrap bootstrap) {

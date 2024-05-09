@@ -91,7 +91,8 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.TooFewBranchesForASwitchStatement", "PMD.SingularField"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.TooFewBranchesForASwitchStatement", "PMD.SingularField", "PMD.CyclomaticComplexity",
+    "PMD.CouplingBetweenObjects"})
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final AutomatedTaskRepository automatedTaskRepository;

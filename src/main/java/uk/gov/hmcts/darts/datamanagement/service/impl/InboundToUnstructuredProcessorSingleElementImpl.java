@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -72,7 +73,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final MediaRepository mediaRepository;
     private final FileContentChecksum fileContentChecksum;
 
-    @SuppressWarnings("java:S4790")
+    @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
     @Override
     @Transactional
     public void processSingleElement(Integer inboundObjectId) {
@@ -149,35 +150,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return unstructuredExternalObjectDirectoryEntity;
     }
 
-    private ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
-        ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        if (inbound.getMedia() != null
-            && unstructured.getMedia() != null
-            && (inbound.getMedia().getId().equals(unstructured.getMedia().getId()))) {
-            externalObjectDirectoryEntity = unstructured;
-
-        }
-        if (inbound.getTranscriptionDocumentEntity() != null
-            && unstructured.getTranscriptionDocumentEntity() != null
-            && (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId()))) {
-            externalObjectDirectoryEntity = unstructured;
-
-        }
-        if (inbound.getAnnotationDocumentEntity() != null
-            && unstructured.getAnnotationDocumentEntity() != null
-            && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
-            externalObjectDirectoryEntity = unstructured;
-
-        }
-        if (inbound.getCaseDocument() != null
-            && unstructured.getCaseDocument() != null
-            && (inbound.getCaseDocument().getId()).equals(unstructured.getCaseDocument().getId())) {
-            externalObjectDirectoryEntity = unstructured;
-        }
-        return externalObjectDirectoryEntity;
-    }
-
+    @SuppressWarnings({"PMD.UnnecessaryBoxing"})
     private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured, Long actualFileSize) {
         MediaEntity mediaEntityLazy = inbound.getMedia();
         if (mediaEntityLazy != null) {
@@ -188,7 +161,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 mediaEntity.getChecksum(),
                 checksum,
                 audioConfigurationProperties.getAllowedMediaFormats(),
-                mediaEntity.getMediaFormat().toLowerCase(),
+                mediaEntity.getMediaFormat().toLowerCase(Locale.getDefault()),
                 audioConfigurationProperties.getMaxFileSize(),
                 actualFileSize
             );
@@ -201,7 +174,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 transcriptionDocumentEntity.getChecksum(),
                 checksum,
                 transcriptionConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(),
+                FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(Locale.getDefault()),
                 transcriptionConfigurationProperties.getMaxFileSize(),
                 Long.valueOf(transcriptionDocumentEntity.getFileSize())
             );
@@ -214,7 +187,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
                 annotationDocumentEntity.getChecksum(),
                 checksum,
                 transcriptionConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(),
+                FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(Locale.getDefault()),
                 transcriptionConfigurationProperties.getMaxFileSize(),
                 Long.valueOf(annotationDocumentEntity.getFileSize())
             );
@@ -222,6 +195,7 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     }
 
+    @SuppressWarnings({"PMD.ConfusingTernary"})
     private void performValidation(
         ExternalObjectDirectoryEntity unstructured,
         String incomingChecksum, String calculatedChecksum,

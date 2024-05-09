@@ -25,6 +25,7 @@ public class EventLoggerServiceImpl implements EventLoggerService {
     private String cppDailyTestEventText;
 
     @Override
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void eventReceived(DartsEvent event) {
         var isPollCheck = false;
         EventSource source = EventSource.UNKNOWN;

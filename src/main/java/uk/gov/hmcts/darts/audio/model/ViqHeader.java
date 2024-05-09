@@ -32,22 +32,22 @@ public class ViqHeader {
     private static final int HOUR_OFFSET = 42;
     private static final int SECONDS_OFFSET = 44;
 
-    byte[] viqHeader;
+    byte[] viqHeaderBytes;
 
     public ViqHeader(Instant instant) {
 
-        viqHeader = new byte[VIQ_HEADER_SIZE];
-        viqHeader[DAY_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getDayOfMonth();
-        viqHeader[MONTH_OFFSET] = (byte) (instant.atOffset(ZoneOffset.UTC).getMonthValue());
-        viqHeader[MINUTE_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getMinute();
-        viqHeader[HOUR_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getHour();
-        viqHeader[SECONDS_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getSecond();
-        viqHeader[VERIFY_OFFSET_0] = (byte) VERIFY_OFFSET_VALUE_0;
-        viqHeader[VERIFY_OFFSET_1] = (byte) VERIFY_OFFSET_VALUE_1;
-        viqHeader[VERIFY_OFFSET_2] = (byte) VERIFY_OFFSET_VALUE_2;
-        viqHeader[VERIFY_OFFSET_3] = (byte) VERIFY_OFFSET_VALUE_3;
-        viqHeader[VERIFY_OFFSET_4] = (byte) VERIFY_OFFSET_VALUE_4;
-        viqHeader[FORMAT_OFFSET_0] = (byte) FORMAT_OFFSET_VALUE_0;
-        viqHeader[FORMAT_OFFSET_1] = (byte) FORMAT_OFFSET_VALUE_1;
+        viqHeaderBytes = new byte[VIQ_HEADER_SIZE];
+        viqHeaderBytes[DAY_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getDayOfMonth();
+        viqHeaderBytes[MONTH_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getMonthValue();
+        viqHeaderBytes[MINUTE_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getMinute();
+        viqHeaderBytes[HOUR_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getHour();
+        viqHeaderBytes[SECONDS_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getSecond();
+        viqHeaderBytes[VERIFY_OFFSET_0] = (byte) VERIFY_OFFSET_VALUE_0;
+        viqHeaderBytes[VERIFY_OFFSET_1] = (byte) VERIFY_OFFSET_VALUE_1;
+        viqHeaderBytes[VERIFY_OFFSET_2] = (byte) VERIFY_OFFSET_VALUE_2;
+        viqHeaderBytes[VERIFY_OFFSET_3] = (byte) VERIFY_OFFSET_VALUE_3;
+        viqHeaderBytes[VERIFY_OFFSET_4] = (byte) VERIFY_OFFSET_VALUE_4;
+        viqHeaderBytes[FORMAT_OFFSET_0] = (byte) FORMAT_OFFSET_VALUE_0;
+        viqHeaderBytes[FORMAT_OFFSET_1] = (byte) FORMAT_OFFSET_VALUE_1;
     }
 }

@@ -53,9 +53,9 @@ class DailyListUpdater {
     private final CurrentTimeHelper currentTimeHelper;
 
 
-    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    @SuppressWarnings({"checkstyle:VariableDeclarationUsageDistance", "PMD.CognitiveComplexity"})
     @Transactional
-    public void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException, IllegalArgumentException {
+    public void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
@@ -139,7 +139,7 @@ class DailyListUpdater {
         return null;
     }
 
-    private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
+    private LocalTime getTimeFromSittingAt(Sitting sitting) {
         if (StringUtils.isNotBlank(sitting.getSittingAt())) {
             return LocalTime.parse(sitting.getSittingAt(), new DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
@@ -150,7 +150,7 @@ class DailyListUpdater {
     }
 
 
-    protected LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
+    protected LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) {
         String rawTime;
         if (StringUtils.isNotBlank(timeMarkingNote)) {
 

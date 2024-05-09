@@ -278,6 +278,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return basePath.resolve(filename);
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private List<List<AudioFileInfo>> getSeparatedAudioFileInfo(List<AudioFileInfo> audioFileInfoList, Duration allowableAudioGap) {
 
         if (audioFileInfoList.isEmpty()) {

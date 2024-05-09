@@ -30,6 +30,7 @@ public class DetsApiServiceImpl implements DetsApiService {
     private final DetsDataManagementConfiguration configuration;
 
     @Override
+    @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadData(UUID blobId) throws FileNotDownloadedException {
         DownloadResponseMetaData downloadResponseMetaData = new FileBasedDownloadResponseMetaData();
         BlobServiceClient serviceClient = blobServiceFactory.getBlobServiceClientWithSasEndpoint(configuration.getSasEndpoint());

@@ -30,6 +30,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
+    @Override
     public void markForDeletion() {
         OffsetDateTime lastModifiedBefore = currentTimeHelper.currentOffsetDateTime().minus(
             hoursInArm,

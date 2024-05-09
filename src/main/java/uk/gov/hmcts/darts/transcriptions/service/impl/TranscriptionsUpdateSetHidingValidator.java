@@ -17,6 +17,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 @Component
 public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpdateValidator {
 
+    @Override
     public boolean validate(Optional<TranscriptionEntity> entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
         return entity.filter(transcriptionEntity -> canChangeHiding(transcriptionEntity, updateTranscriptionsItem)).isPresent();
     }

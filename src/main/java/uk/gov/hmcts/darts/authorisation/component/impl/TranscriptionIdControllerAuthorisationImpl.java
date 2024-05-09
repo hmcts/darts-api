@@ -74,9 +74,9 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
             try {
                 Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());
                 authorisation.authoriseByTranscriptionId(transcriptionId, roles);
-            } catch (NumberFormatException e) {
-                log.error("Unable to parse transcription_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
+            } catch (NumberFormatException ex) {
+                log.error("Unable to parse transcription_id for checkAuthorisation", ex);
+                throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID, ex);
             }
         }
     }

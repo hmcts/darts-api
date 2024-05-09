@@ -9,7 +9,7 @@ public enum ArchiveRecordType {
     ANNOTATION_ARCHIVE_TYPE("Annotation"),
     CASE_ARCHIVE_TYPE("Case");
 
-    private String archiveTypeDescription;
+    private final String archiveTypeDescription;
 
     ArchiveRecordType(String archiveTypeDescription) {
         this.archiveTypeDescription = archiveTypeDescription;

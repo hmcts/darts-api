@@ -37,6 +37,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}")
     private int deletionDays;
 
+    @Override
     public List<TransientObjectDirectoryEntity> markForDeletion() {
 
         List<TransientObjectDirectoryEntity> deletedValues = new ArrayList<>();
@@ -51,7 +52,9 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findAllDeletableTransformedMedia(
             deletionStartDateTime);
-        if (!transformedMediaList.isEmpty()) {
+        if (transformedMediaList.isEmpty()) {
+            log.debug("No transformed media to be marked for deletion");
+        } else {
             for (TransformedMediaEntity transformedMedia : transformedMediaList) {
                 try {
                     List<TransientObjectDirectoryEntity> deleted = singleElementProcessor.markForDeletion(systemUser, transformedMedia);
@@ -62,9 +65,6 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
             }
             Set<MediaRequestEntity> mediaRequests = transformedMediaList.stream().map(TransformedMediaEntity::getMediaRequest).collect(toSet());
             mediaRequests.forEach(mr -> singleElementProcessor.markMediaRequestAsExpired(mr, systemUser));
-
-        } else {
-            log.debug("No transformed media to be marked for deletion");
         }
 
         return deletedValues;

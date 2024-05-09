@@ -51,6 +51,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
     private MediaEntity savedMedia;
+
     @BeforeEach
     void setupData() {
         HearingEntity hearing = dartsDatabase.createHearing(

@@ -16,8 +16,8 @@ public class YourTranscriptsSummaryRowMapper implements RowMapper<YourTranscript
     @Override
     public YourTranscriptsSummary mapRow(ResultSet rs, int rowNum) throws SQLException {
         var summary = new YourTranscriptsSummary(
-            Integer.valueOf(rs.getInt("transcription_id")),
-            Integer.valueOf(rs.getInt("case_id")),
+            rs.getInt("transcription_id"),
+            rs.getInt("case_id"),
             rs.getString("case_number"),
             rs.getString("courthouse_name"),
             rs.getObject("hearing_date", LocalDate.class),
