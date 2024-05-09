@@ -98,7 +98,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private AutomatedTaskProcessorFactory unstructuredToArmProcessor;
 
     @Autowired
-    private AutomatedTaskProcessorFactory processorFactory;
+    private AutomatedTaskProcessorFactory armResponseFilesProcessor;
 
     @Autowired
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
@@ -620,7 +620,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                processorFactory,
+                armResponseFilesProcessor,
                 logApi
             );
 
@@ -652,7 +652,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                processorFactory,
+                armResponseFilesProcessor,
                 logApi
             );
 
