@@ -3,7 +3,6 @@
   "courthouse_id" : $COURTHOUSE_ID,
   "courthouse": "some-courthouse",
   "status": "Approved",
-  "from": "integrationtest.user@example.comUsername",
   "received": "2023-06-20T10:00:00Z",
   "requestor" : {
     "user_id" : 2,

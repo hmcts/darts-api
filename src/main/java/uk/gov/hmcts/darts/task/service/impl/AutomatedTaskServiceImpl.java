@@ -13,10 +13,9 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
@@ -125,9 +124,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
 
-    private final UnstructuredToArmProcessor unstructuredToArmProcessor;
-
-    private final ArmResponseFilesProcessor armResponseFilesProcessor;
+    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
 
     private final ApplyRetentionProcessor applyRetentionProcessor;
 
@@ -424,7 +421,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            unstructuredToArmProcessor,
+            automatedTaskProcessorFactory,
             logApi
         );
         unstructuredToArmAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(unstructuredToArmAutomatedTask));
@@ -438,7 +435,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            armResponseFilesProcessor,
+            automatedTaskProcessorFactory,
             logApi
         );
         processArmResponseFilesTask.setLastCronExpression(getAutomatedTaskCronExpression(processArmResponseFilesTask));
@@ -664,7 +661,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                unstructuredToArmProcessor,
+                automatedTaskProcessorFactory,
                 logApi
             );
             Trigger trigger = createAutomatedTaskTrigger(unstructuredToArmAutomatedTask);
@@ -682,7 +679,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                armResponseFilesProcessor,
+                automatedTaskProcessorFactory,
                 logApi
             );
             Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);

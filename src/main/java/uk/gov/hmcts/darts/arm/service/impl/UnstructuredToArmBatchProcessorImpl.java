@@ -5,7 +5,6 @@ import com.azure.storage.blob.models.BlobStorageException;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -39,7 +38,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 
 @Service
 @Slf4j
-@ConditionalOnExpression("${darts.storage.arm.batch-size} > 0")
 public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToArmProcessor {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArchiveRecordService archiveRecordService;
