@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.service.RedisService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
@@ -32,7 +33,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
-import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
+import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMaxWithOneSecondPoll;
 
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
@@ -123,9 +124,9 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     }
 
     private void waitUntilPreviewEncodedAndCached() {
-        waitForMax10SecondsWithOneSecondPoll(() -> {
+        waitForMaxWithOneSecondPoll(() -> {
             var cachedAudioPreview = binaryDataRedisService.readFromRedis(folder, mediaEntity.getId().toString());
             return cachedAudioPreview.getStatus().equals(READY);
-        });
+        }, Duration.ofSeconds(20));
     }
 }

@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
 import uk.gov.hmcts.darts.tasks.http.api.TasksApi;
+import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
 
@@ -24,10 +24,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 @ConditionalOnProperty(prefix = "darts", name = "api-pod", havingValue = "true")
 public class AutomatedTasksController implements TasksApi {
 
-
     private final AdminAutomatedTaskService adminAutomatedTaskService;
-    private final AuthorisationApi authorisationApi;
-
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
@@ -49,6 +46,14 @@ public class AutomatedTasksController implements TasksApi {
     public ResponseEntity<Void> runAutomatedTask(Integer taskId) {
         adminAutomatedTaskService.runAutomatedTask(taskId);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, securityRoles = {SUPER_ADMIN}, globalAccessSecurityRoles = {SUPER_ADMIN})
+    @Override
+    public ResponseEntity<DetailedAutomatedTask> patchAutomatedTask(Integer taskId, AutomatedTaskPatch automatedTaskPatch) {
+        var automatedTask = adminAutomatedTaskService.updateAutomatedTask(taskId, automatedTaskPatch);
+        return new ResponseEntity<>(automatedTask, HttpStatus.OK);
     }
 }
 
