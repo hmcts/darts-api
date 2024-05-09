@@ -722,7 +722,7 @@ class OutboundFileProcessorImplTest {
 
         when(audioOperationService.merge(any(), any()))
             .thenReturn(mergedAudioFile);
-        
+
         var mediaEntity1 = createMediaEntity(
             TIME_12_00,
             TIME_12_10,
@@ -802,7 +802,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive()
+    void processAudioForPlaybackShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive()
         throws ExecutionException, InterruptedException, IOException {
         AudioFileInfo concatenatedAudioFileInfo = AudioFileInfo.builder().build();
         List<AudioFileInfo> concatenatedAudioFileInfoList = List.of(
@@ -967,11 +967,9 @@ class OutboundFileProcessorImplTest {
             .mediaFile("merged-audio2")
             .build();
 
-        var reEncodedAudioFileInfo1 = firstTrimmedAudioFileInfo;
-        var reEncodedAudioFileInfo2 = secondTrimmedAudioFileInfo;
         when(audioOperationService.reEncode(any(), any()))
-            .thenReturn(reEncodedAudioFileInfo1)
-            .thenReturn(reEncodedAudioFileInfo2);
+            .thenReturn(firstTrimmedAudioFileInfo)
+            .thenReturn(secondTrimmedAudioFileInfo);
 
         when(audioOperationService.merge(any(), any()))
             .thenReturn(mergedAudioFile1)

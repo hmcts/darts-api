@@ -10,4 +10,7 @@ public interface AdminAutomatedTaskService {
     List<AutomatedTaskSummary> getAllAutomatedTasks();
 
     DetailedAutomatedTask getAutomatedTaskById(Integer taskId);
+
+    void runAutomatedTask(Integer taskId);
+
 }

@@ -152,8 +152,6 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearingDate());
         }
         if (nonNull(transcriptionEntity.getTranscriptionUrgency())) {
-            transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
-
             // populate the urgency details
             TranscriptionUrgencyDetails urgencyDetails = new TranscriptionUrgencyDetails();
             urgencyDetails.setPriorityOrder(transcriptionEntity.getTranscriptionUrgency().getPriorityOrder());

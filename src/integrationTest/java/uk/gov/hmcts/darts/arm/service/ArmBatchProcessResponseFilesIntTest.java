@@ -1083,7 +1083,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedTs());
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
@@ -1189,7 +1189,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         when(armDataManagementApi.deleteBlobData(createRecordFilename1)).thenReturn(true);
         when(armDataManagementApi.deleteBlobData(uploadFileFilename1)).thenReturn(true);
 
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedTs());
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(caseDocument.getCreatedDateTime());
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);

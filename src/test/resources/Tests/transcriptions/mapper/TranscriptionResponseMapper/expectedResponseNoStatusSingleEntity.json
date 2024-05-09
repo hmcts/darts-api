@@ -20,7 +20,6 @@
   ],
   "transcript_file_name": "test.doc",
   "hearing_date": "2023-06-20",
-  "urgency": "STANDARD",
   "request_type": "SENTENCING_REMARKS",
   "is_manual": true,
   "case_reporting_restrictions": [],
