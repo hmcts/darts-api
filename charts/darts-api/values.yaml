@@ -82,8 +82,6 @@ java:
           alias: ARM_SAS_ENDPOINT
         - name: DETSSasURLEndpoint
           alias: DETS_SAS_URL_ENDPOINT
-        - name: ArmUrl
-          alias: ARM_URL
         - name: ArmUsername
           alias: ARM_USERNAME
         - name: ArmPassword
@@ -103,6 +101,7 @@ java:
     API_MODE: true
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
+    ARM_URL: https://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
 
 function:
   scaleType: Job
@@ -189,8 +188,6 @@ function:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
-        - name: ArmUrl
-          alias: ARM_URL
         - name: ArmUsername
           alias: ARM_USERNAME
         - name: ArmPassword

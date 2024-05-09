@@ -34,10 +34,6 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
     @JoinColumn(name = "ann_id", nullable = false)
     private AnnotationEntity annotation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ohr_id")
-    private ObjectHiddenReasonEntity objectHiddenReason;
-
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
@@ -66,23 +62,6 @@ public class AnnotationDocumentEntity extends ModifiedBaseEntity {
 
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hidden_by")
-    private UserAccountEntity hiddenBy;
-
-    @Column(name = "hidden_ts")
-    private OffsetDateTime hiddenTs;
-
-    @Column(name = "marked_for_manual_deletion", nullable = false)
-    private boolean markedForManualDeletion;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "marked_for_manual_del_by")
-    private UserAccountEntity markedForManualDelBy;
-
-    @Column(name = "marked_for_manual_del_ts")
-    private OffsetDateTime markedForManualDelTs;
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;

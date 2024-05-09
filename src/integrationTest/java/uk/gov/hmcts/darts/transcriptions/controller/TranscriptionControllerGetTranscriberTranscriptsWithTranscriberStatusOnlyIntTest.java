@@ -42,8 +42,8 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 INSERT INTO darts.courtroom (ctr_id, cth_id, courtroom_name, created_ts, created_by)
                                 VALUES (-1, -1, 'Court 1', NULL, NULL);
                                 INSERT INTO darts.court_case (cas_id, cth_id, evh_id, case_object_id, case_number, case_closed, interpreter_used,
-                                case_closed_ts, version_label, created_ts, created_by, last_modified_ts, last_modified_by)
-                                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL, NULL);
+                                case_closed_ts, created_ts, created_by, last_modified_ts, last_modified_by)
+                                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL);
                                 INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual, judge_hearing_date,
                                 created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL, NULL);
@@ -59,10 +59,10 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
 
                                 -- Transcript Requests: Approved
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
-                                created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date,
+                                created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (41, NULL, 9, NULL, NULL, '2023-11-23 09:00:00+00', '2023-11-23 09:30:00+00', '2023-11-23 16:25:55.297666+00',
-                                '2023-11-23 16:26:20.451054+00', -10, NULL, -10, 1, 3, NULL, true, false);
+                                '2023-11-23 16:26:20.451054+00', -10, -10, 1, 3, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (41,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (41,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -74,10 +74,10 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
 
                                 -- Your work > To do: With Transcriber
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
-                                created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date,
+                                created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (81, NULL, 9, NULL, NULL, '2023-11-23 09:20:00+00', '2023-11-23 09:30:00+00', '2023-11-23 17:45:14.938855+00',
-                                '2023-11-23 17:45:51.1549+00', -10, NULL, -10, 1, 5, NULL, true, false);
+                                '2023-11-23 17:45:51.1549+00', -10, -10, 1, 5, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (81,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (81,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -91,10 +91,10 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
 
                                 -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
                                 INSERT INTO darts.transcription (tra_id, ctr_id, trt_id, transcription_object_id, requestor, start_ts, end_ts,
-                                created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date,
+                                created_ts, last_modified_ts, last_modified_by, created_by, tru_id, trs_id, hearing_date,
                                 is_manual_transcription, hide_request_from_requestor)
                                 VALUES (101, NULL, 9, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00',
-                                '2023-11-24 12:53:42.870475+00', -10, NULL, -10, 1, 6, NULL, true, false);
+                                '2023-11-24 12:53:42.870475+00', -10, -10, 1, 6, NULL, true, false);
                                 INSERT INTO darts.case_transcription_ae (tra_id, cas_id) VALUES (101,-1);
                                 INSERT INTO darts.hearing_transcription_ae (tra_id, hea_id) VALUES (101,-1);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -154,7 +154,6 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                 "hearing_date": "2023-11-17",
                 "transcription_type": "Specified Times",
                 "status": "With Transcriber",
-                "urgency": "Standard",
                 "requested_ts": "2023-11-23T17:45:14.940936Z",
                 "state_change_ts": "2023-11-23T17:45:51.151621Z",
                 "is_manual": true,

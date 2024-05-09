@@ -33,7 +33,18 @@ paths:
         '404':
           $ref: '#/components/responses/AutomatedTaskNotFound'
 
-
+  /admin/automated-tasks/{task_id}/run:
+    post:
+      tags:
+        - Tasks
+      operationId: runAutomatedTask
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '202':
+          description: ACCEPTED
+        '404':
+          $ref: '#/components/responses/AutomatedTaskNotFound'
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -64,8 +75,18 @@ components:
             $ref: './problem.yaml'
           example:
             type: "AUTOMATED_TASK_100"
-            title: "User not found"
+            title: "Automated task not found"
             status: 404
+    AutomatedTaskAlreadyRunning:
+      description: Automated task already running
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            type: "AUTOMATED_TASK_101"
+            title: "Automated task is already running"
+            status: 409
 
   schemas:
     AutomatedTaskSummary:
@@ -130,14 +151,17 @@ components:
       type: string
       enum:
         - "AUTOMATED_TASK_100"
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND ]
+        - "AUTOMATED_TASK_101"
+        - "AUTOMATED_TASK_102"
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED ]
 
     AutomatedTaskTitleErrors:
       type: string
       enum:
         - "The provided task_id does not exist"
-        -
-      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND ]
+        - "The automated task is already running"
+        - "The automated task has not been initialized correctly on application start up and can not be run manually."
+      x-enum-varnames: [ AUTOMATED_TASK_NOT_FOUND, AUTOMATED_TASK_ALREADY_RUNNING, AUTOMATED_TASK_NOT_CONFIGURED ]
 
 
   parameters:

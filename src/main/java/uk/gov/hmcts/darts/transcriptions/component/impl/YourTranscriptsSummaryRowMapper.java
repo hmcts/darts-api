@@ -25,7 +25,6 @@ public class YourTranscriptsSummaryRowMapper implements RowMapper<YourTranscript
             rs.getString("status"),
             rs.getObject("requested_ts", OffsetDateTime.class)
         );
-        summary.setUrgency(rs.getString("transcription_urgency_description"));
 
         if (rs.getInt("transcription_urgency_id") != 0) {
             TranscriptionUrgencyDetails urgencyDetails = new TranscriptionUrgencyDetails();

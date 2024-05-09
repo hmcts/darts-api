@@ -30,7 +30,6 @@ export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD="$(az keyvault secret show --vau
 export AZURE_AD_FUNCTIONAL_TEST_USERNAME="$(az keyvault secret show --vault-name darts-stg --name AzureADFunctionalTestUsername | jq .value -r)"
 export AZURE_AD_FUNCTIONAL_TEST_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name AzureADFunctionalTestPassword | jq .value -r)"
 export ARM_SAS_ENDPOINT="$(az keyvault secret show --vault-name darts-stg --name ARMSasEndpoint | jq .value -r)"
-export ARM_URL="$(az keyvault secret show --vault-name darts-stg --name ArmUrl | jq .value -r)"
 export ARM_USERNAME="$(az keyvault secret show --vault-name darts-stg --name ArmUsername | jq .value -r)"
 export ARM_PASSWORD="$(az keyvault secret show --vault-name darts-stg --name ArmPassword | jq .value -r)"
 export DETS_SAS_URL_ENDPOINT="$(az keyvault secret show --vault-name darts-stg --name DETSSasURLEndpoint | jq .value -r)"

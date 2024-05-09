@@ -232,16 +232,38 @@
 --    add enhanced_auditing to audit table
 --v65 add table audit_heritage
 --v66 amend uploaded_by/ts to created_by/ts on case_document 
---    add hidden_by/ts to annotation_document, case_document, media, transcription_document
+--    add hidden_by/ts to annotation_document, case_document, media, transcription_document (x v68)
 --    add deleted_by/ts to annotation, court_case, media, transcription
---    add marked_for_manual_del_by/ts to annotation_document, case_document, media, transcription_document
+--    add marked_for_manual_del_by/ts to annotation_document, case_document, media, transcription_document (x v68)
 --    add FK on case_document for created_by and last_modified_by
---    add FK on hidden_by to annotation_document, case_document, media, transcription_document
---    add FK on marked_for_manual_del_by to annotation_document, case_document, media, transcription_document
+--    add FK on hidden_by to annotation_document, case_document, media, transcription_document (x v68)
+--    add FK on marked_for_manual_del_by to annotation_document, case_document, media, transcription_document (x v68)
 --    add FK on deleted_by to annotation, court_case, media, transcription
 --    add FK on created_by, last_modified_by on transformed_media
 --v67 add 2 tables to support migration media_linked_legacy_case, event_linked_legacy_case
-
+--v68 remove version_label from court_case,daily_list & report
+--    remove enhanced_auditing from audit 
+--    change name event_linked_legacy_case and media_linked_legacy_case to remove _legacy_
+--    add checked_ts, corrected_ts to case_overflow
+--    add confidence_level, confidence_reason to case_overflow
+--    add batch_size to automated_task
+--    add c_closed_pre_live & c_case_closed_date_pre_live to case_overflow
+--    add is_data_anonymised, data_anonymised_by, data_anonymised_ts on court_case all nullable except court_case
+--    add table object_admin_action, its PK and sequence
+--    remove ohr_id from annotation_document, case_document, media, transcription_document
+--    remove hidden_by and hidden_ts from annotation_document, case_document, media, transcription_document
+--    remove marked_for_manual_del[etion, _by, _ts] from annotation_document, case_document, media, transcription_document
+--    remove 3 FKs from annotation_document ( ohr_id, hidden_by, marked_for_manual_del_by )
+--    remove 3 FKs from case_document ( ohr_id, hidden_by, marked_for_manual_del_by )
+--    remove 3 FKs from media ( ohr_id, hidden_by, marked_for_manual_del_by )
+--    remove 3 FKs from transcription_document ( ohr_id, hidden_by, marked_for_manual_del_by )
+--    add 3 FKs to object_admin_action ( ohr_id, hidden_by, marked_for_manual_del_by )
+--    add 4 FKs to object_admin_action ( ado_id, cad_id, med_id, trd_id )
+--    add object_retrieval_queue, its PK and sequence
+--v69 change 2 column names on the event_linked_case and media_linked_case to match modernised format
+--    add cas_id to event_linked_case and media_linked_case
+--    remove case_number from event and media
+--    remove event_name from event, as evh_id is mandatory event_name should be derived from event_handler
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -263,7 +285,7 @@
 -- defendant                   DFD
 -- event                       EVE
 -- event_handler               EVH
--- event_linked_legacy_case    ELL
+-- event_linked_case           ELC
 -- external_object_directory   EOD
 -- external_service_auth_token ESA
 -- hearing                     HEA
@@ -274,12 +296,14 @@
 -- hearing_transcription_ae    HET
 -- judge                       JUD
 -- media                       MED
--- media_linked_legacy_case    MLL
+-- media_linked_case           MLC
 -- media_request               MER
 -- node_register               NOD
 -- notification                NOT
+-- object_admin_action         OAA
 -- object_hidden_reason        OHR
 -- object_record_status        ORS
+-- object_retrieval_queue      ORQ
 -- prosecutor                  PRN
 -- region                      REG
 -- report                      REP
@@ -356,7 +380,6 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 CREATE TABLE annotation_document
 (ado_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
-,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content 
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
@@ -364,11 +387,6 @@ CREATE TABLE annotation_document
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,hidden_by                   INTEGER
-,hidden_ts                   TIMESTAMP WITH TIME ZONE
-,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
-,marked_for_manual_del_by    INTEGER
-,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -387,7 +405,6 @@ CREATE TABLE audit
 ,cas_id                      INTEGER                       
 ,aua_id                      INTEGER                       NOT NULL
 ,usr_id                      INTEGER                       NOT NULL
-,enhanced_auditing           BOOLEAN                       NOT NULL DEFAULT false
 ,additional_data             CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -481,6 +498,7 @@ CREATE TABLE automated_task
 ,cron_expression             CHARACTER VARYING             NOT NULL
 ,cron_editable               BOOLEAN                       NOT NULL
 ,task_enabled                BOOLEAN                       NOT NULL
+,batch_size                  INTEGER 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -493,17 +511,11 @@ IS 'primary key of automated_task';
 CREATE TABLE case_document 
 (cad_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
-,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,hidden_by                   INTEGER
-,hidden_ts                   TIMESTAMP WITH TIME ZONE
-,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
-,marked_for_manual_del_by    INTEGER
-,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,created_by                  INTEGER                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -545,6 +557,12 @@ CREATE TABLE case_overflow
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE
 ,is_standard_policy          BOOLEAN
 ,is_permanent_policy         BOOLEAN
+,checked_ts                  TIMESTAMP WITH TIME ZONE
+,corrected_ts                TIMESTAMP WITH TIME ZONE
+,confidence_level            INTEGER
+,confidence_reason           CHARACTER VARYING
+,c_closed_pre_live           INTEGER
+,c_case_closed_date_pre_live TIMESTAMP WITH TIME ZONE
 ,audio_folder_object_id      CHARACTER VARYING(16)
 ) TABLESPACE darts_tables;
 
@@ -559,7 +577,9 @@ CREATE TABLE court_case
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
 ,is_retention_updated        BOOLEAN                       NOT NULL  -- flag to indicate retention has been updated
 ,retention_retries           INTEGER
-,version_label               CHARACTER VARYING(32)
+,is_data_anonymised          BOOLEAN                       NOT NULL
+,data_anonymised_by          INTEGER
+,data_anonymised_ts          TIMESTAMP WITH TIME ZONE
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
@@ -589,9 +609,6 @@ IS 'migrated from moj_case_s, converted from numeric to boolean';
 
 COMMENT ON COLUMN court_case.case_closed_ts
 IS 'directly sourced from moj_case_s.c_case_closed_date';
-
-COMMENT ON COLUMN court_case.version_label
-IS 'inherited from dm_sysobject_r, for r_object_type of moj_case, containing the version record';
 
 CREATE TABLE courthouse
 (cth_id                      INTEGER                       NOT NULL
@@ -648,8 +665,7 @@ CREATE TABLE daily_list
 ,daily_list_source           CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)   
 ,daily_list_content_json     CHARACTER VARYING
 ,daily_list_content_xml      CHARACTER VARYING
-,message_id                  CHARACTER VARYING
-,version_label               CHARACTER VARYING(32)  
+,message_id                  CHARACTER VARYING 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -682,9 +698,6 @@ IS 'directly sourced from moj_daily_list_s';
 
 COMMENT ON COLUMN daily_list.daily_list_source
 IS 'directly sourced from moj_daily_list_s';
-
-COMMENT ON COLUMN daily_list.version_label
-IS 'inherited from dm_sysobject_r, for r_object_type of moj_daily_list';
 
 CREATE TABLE defence
 (dfc_id                      INTEGER                       NOT NULL
@@ -725,10 +738,8 @@ CREATE TABLE event
 ,evh_id                      INTEGER                       NOT NULL
 ,event_object_id             CHARACTER VARYING(16)                   -- legacy id of this event
 ,event_id                    INTEGER                       
-,event_name                  CHARACTER VARYING                       -- details of the handler, at point in time the event arose, lots of discussion re import of legacy, retain.
 ,event_text                  CHARACTER VARYING
 ,event_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
-,case_number                 CHARACTER VARYING(32)[] 
 ,message_id                  CHARACTER VARYING
 ,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
 ,version_label               CHARACTER VARYING(32)
@@ -754,9 +765,6 @@ IS 'internal Documentum primary key from moj_event_s';
 
 COMMENT ON COLUMN event.event_id
 IS 'directly sourced from moj_event_s';
-
-COMMENT ON COLUMN event.event_name
-IS 'inherited from dm_sysobect_s.object_name';
 
 COMMENT ON COLUMN event.event_text
 IS 'inherited from moj_annotation_s.c_text';
@@ -804,14 +812,15 @@ IS 'directly sourced from doc_handler';
 COMMENT ON COLUMN event_handler.handler
 IS 'to indicate if the event pertains to reporting restrictions, both application of, and lifting, in order to provide timeline of RR as applied to a case';
 
-CREATE TABLE event_linked_legacy_case
-(ell_id                      INTEGER                       NOT NULL
+CREATE TABLE event_linked_case
+(elc_id                      INTEGER                       NOT NULL
 ,eve_id                      INTEGER                       NOT NULL     -- unenforced FK to event
-,c_courthouse                CHARACTER VARYING(64)         NOT NULL
-,c_case_id                   CHARACTER VARYING(32)         NOT NULL
+,cas_id                      INTEGER                                    -- unenforced and optional FK
+,courthouse_name             CHARACTER VARYING(64)         NOT NULL
+,case_number                 CHARACTER VARYING(32)         NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON TABLE event_linked_legacy_case
+COMMENT ON TABLE event_linked_case
 IS 'content is to be populated via migration';
 
 CREATE TABLE external_object_directory
@@ -996,7 +1005,6 @@ IS 'primary key of judge';
 CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
-,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
 ,clip_id                     CHARACTER VARYING(54)
@@ -1011,16 +1019,10 @@ CREATE TABLE media
 ,file_size                   BIGINT                        NOT NULL
 ,checksum                    CHARACTER VARYING
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,hidden_by                   INTEGER
-,hidden_ts                   TIMESTAMP WITH TIME ZONE
-,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
-,marked_for_manual_del_by    INTEGER
-,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,is_deleted                  BOOLEAN                       NOT NULL DEFAULT false
 ,deleted_by                  INTEGER
 ,deleted_ts                  TIMESTAMP WITH TIME ZONE
 ,media_status                CHARACTER VARYING             NOT NULL
-,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
 ,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
 ,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
@@ -1058,14 +1060,15 @@ IS 'inherited from moj_case_document_s';
 COMMENT ON COLUMN media.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_media';
 
-CREATE TABLE media_linked_legacy_case
-(mll_id                      INTEGER                       NOT NULL
+CREATE TABLE media_linked_case
+(mlc_id                      INTEGER                       NOT NULL
 ,med_id                      INTEGER                       NOT NULL     -- unenforced FK to media
-,c_courthouse                CHARACTER VARYING(64)         NOT NULL
-,c_case_id                   CHARACTER VARYING(32)         NOT NULL
+,cas_id                      INTEGER                                    -- unenforced and optional FK
+,courthouse_name             CHARACTER VARYING(64)         NOT NULL
+,case_number                 CHARACTER VARYING(32)         NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON TABLE event_linked_legacy_case
+COMMENT ON TABLE media_linked_case
 IS 'content is to be populated via migration';
 
 CREATE TABLE media_request
@@ -1162,6 +1165,22 @@ IS 'number of outgoing requests to gov.uk';
 COMMENT ON COLUMN notification.template_values
 IS 'any extra fields not already covered or inferred from the case, in JSON format';
 
+CREATE TABLE object_admin_action
+(oaa_id                      INTEGER                       NOT NULL           
+,ado_id                      INTEGER
+,cad_id                      INTEGER
+,med_id                      INTEGER
+,trd_id                      INTEGER
+,ohr_id                      INTEGER  
+,hidden_by                   INTEGER
+,hidden_ts                   TIMESTAMP WITH TIME ZONE
+,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
+,marked_for_manual_del_by    INTEGER
+,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
+,ticket_reference            CHARACTER VARYING
+,comments                    CHARACTER VARYING
+) TABLESPACE darts_tables;
+
 CREATE TABLE object_hidden_reason
 (ohr_id                      INTEGER                       NOT NULL
 ,ohr_reason                  CHARACTER VARYING             NOT NULL
@@ -1181,6 +1200,22 @@ CREATE TABLE object_record_status
 
 COMMENT ON TABLE object_record_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
+
+CREATE TABLE object_retrieval_queue
+(orq_id                      INTEGER                       NOT NULL
+,med_id                      INTEGER
+,trd_id                      INTEGER
+,parent_object_id            CHARACTER VARYING
+,content_object_id           CHARACTER VARYING
+,clip_id                     CHARACTER VARYING
+,acknowledged_ts             TIMESTAMP WITH TIME ZONE
+,migrated_ts                 TIMESTAMP WITH TIME ZONE
+,status                      CHARACTER VARYING
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
+) TABLESPACE darts_tables;
 
 CREATE TABLE prosecutor
 (prn_id                      INTEGER                       NOT NULL
@@ -1212,7 +1247,6 @@ CREATE TABLE report
 ,report_text                 CHARACTER VARYING
 ,query                       CHARACTER VARYING
 ,recipients                  CHARACTER VARYING
-,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1239,9 +1273,6 @@ IS 'directly sourced from moj_report_s';
 
 COMMENT ON COLUMN report.recipients
 IS 'directly sourced from moj_report_s';
-
-COMMENT ON COLUMN report.version_label
-IS 'inherited from dm_sysobject_r, for r_object_type of moj_report';
 
 CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
@@ -1333,7 +1364,6 @@ IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 CREATE TABLE transcription_document
 (trd_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
-,ohr_id                      INTEGER                                -- set only when is_hidden is true
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content object
 ,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
@@ -1341,11 +1371,6 @@ CREATE TABLE transcription_document
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             
 ,is_hidden                   BOOLEAN                       NOT NULL DEFAULT false
-,hidden_by                   INTEGER
-,hidden_ts                   TIMESTAMP WITH TIME ZONE
-,marked_for_manual_deletion  BOOLEAN                       NOT NULL DEFAULT false
-,marked_for_manual_del_by    INTEGER
-,marked_for_manual_del_ts    TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE      
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1528,8 +1553,8 @@ ALTER TABLE defendant             ADD PRIMARY KEY USING INDEX defendant_pk;
 CREATE UNIQUE INDEX event_pk ON event(eve_id) TABLESPACE darts_indexes;
 ALTER TABLE event                   ADD PRIMARY KEY USING INDEX event_pk;
 
-CREATE UNIQUE INDEX event_linked_legacy_case_pk ON event_linked_legacy_case(ell_id) TABLESPACE darts_indexes;
-ALTER TABLE event_linked_legacy_case  ADD PRIMARY KEY USING INDEX event_linked_legacy_case_pk;
+CREATE UNIQUE INDEX event_linked_case_pk ON event_linked_case(elc_id) TABLESPACE darts_indexes;
+ALTER TABLE event_linked_case  ADD PRIMARY KEY USING INDEX event_linked_case_pk;
 
 CREATE UNIQUE INDEX event_handler_pk ON event_handler(evh_id) TABLESPACE darts_indexes;
 ALTER TABLE event_handler            ADD PRIMARY KEY USING INDEX event_handler_pk;
@@ -1567,8 +1592,8 @@ ALTER TABLE judge                ADD PRIMARY KEY USING INDEX judge_pk;
 CREATE UNIQUE INDEX media_pk ON media(med_id) TABLESPACE darts_indexes;
 ALTER TABLE media                   ADD PRIMARY KEY USING INDEX media_pk;
 
-CREATE UNIQUE INDEX media_linked_legacy_case_pk ON media_linked_legacy_case(mll_id) TABLESPACE darts_indexes;
-ALTER TABLE media_linked_legacy_case  ADD PRIMARY KEY USING INDEX media_linked_legacy_case_pk;
+CREATE UNIQUE INDEX media_linked_case_pk ON media_linked_case(mlc_id) TABLESPACE darts_indexes;
+ALTER TABLE media_linked_case  ADD PRIMARY KEY USING INDEX media_linked_case_pk;
 
 CREATE UNIQUE INDEX media_request_pk ON media_request(mer_id) TABLESPACE darts_indexes;
 ALTER TABLE media_request           ADD PRIMARY KEY USING INDEX media_request_pk;
@@ -1579,11 +1604,17 @@ ALTER TABLE node_register         ADD PRIMARY KEY USING INDEX node_register_pk;
 CREATE UNIQUE INDEX notification_pk ON notification(not_id) TABLESPACE darts_indexes;
 ALTER TABLE notification            ADD PRIMARY KEY USING INDEX notification_pk;
 
+CREATE UNIQUE INDEX object_admin_action_pk ON object_admin_action(oaa_id) TABLESPACE darts_indexes;
+ALTER TABLE object_admin_action ADD PRIMARY KEY USING INDEX object_admin_action_pk;
+
 CREATE UNIQUE INDEX object_hidden_reason_pk ON object_hidden_reason(ohr_id) TABLESPACE darts_indexes;
 ALTER TABLE object_hidden_reason ADD PRIMARY KEY USING INDEX object_hidden_reason_pk;
 
 CREATE UNIQUE INDEX object_record_status_pk ON object_record_status(ors_id) TABLESPACE darts_indexes;
 ALTER TABLE object_record_status ADD PRIMARY KEY USING INDEX object_record_status_pk;
+
+CREATE UNIQUE INDEX object_retrieval_queue_pk ON object_retrieval_queue(orq_id) TABLESPACE darts_indexes;
+ALTER TABLE object_retrieval_queue ADD PRIMARY KEY USING INDEX object_retrieval_queue_pk;
 
 CREATE UNIQUE INDEX prosecutor_pk ON prosecutor(prn_id) TABLESPACE darts_indexes;
 ALTER TABLE prosecutor          ADD PRIMARY KEY USING INDEX prosecutor_pk;
@@ -1643,17 +1674,19 @@ CREATE SEQUENCE eve_seq CACHE 20;
 CREATE SEQUENCE evh_seq CACHE 20;
 CREATE SEQUENCE eod_seq CACHE 20;
 CREATE SEQUENCE elt_seq CACHE 20;
-CREATE SEQUENCE ell_seq CACHE 20;
+CREATE SEQUENCE elc_seq CACHE 20;
 CREATE SEQUENCE esa_seq CACHE 20;
 CREATE SEQUENCE jud_seq CACHE 20;
 CREATE SEQUENCE hea_seq CACHE 20;
 CREATE SEQUENCE med_seq CACHE 20;
-CREATE SEQUENCE mll_seq CACHE 20;
+CREATE SEQUENCE mlc_seq CACHE 20;
 CREATE SEQUENCE mer_seq CACHE 20;
 CREATE SEQUENCE nod_seq CACHE 20 START WITH 50000;   -- sequence for node_register.node_id
 CREATE SEQUENCE not_seq CACHE 20;
+CREATE SEQUENCE oaa_seq CACHE 20;
 CREATE SEQUENCE ohr_seq CACHE 20;
 CREATE SEQUENCE ors_seq CACHE 20;
+CREATE SEQUENCE orq_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
 CREATE SEQUENCE reg_seq CACHE 20;
 CREATE SEQUENCE rep_seq CACHE 20;
@@ -1687,18 +1720,6 @@ FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
 ALTER TABLE annotation_document
 ADD CONSTRAINT annotation_document_annotation_fk
 FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
-
-ALTER TABLE annotation_document
-ADD CONSTRAINT annotation_document_object_hidden_reason_fk
-FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
-
-ALTER TABLE annotation_document
-ADD CONSTRAINT annotation_document_hidden_by_fk
-FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE annotation_document
-ADD CONSTRAINT annotation_document_marked_for_manual_del_by_fk
-FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE audit                
 ADD CONSTRAINT audit_case_fk
@@ -1740,10 +1761,6 @@ ALTER TABLE case_document
 ADD CONSTRAINT case_document_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE case_document
-ADD CONSTRAINT case_document_object_hidden_reason_fk
-FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
-
 ALTER TABLE case_document            
 ADD CONSTRAINT case_document_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -1751,14 +1768,6 @@ FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 ALTER TABLE case_document            
 ADD CONSTRAINT case_document_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE case_document
-ADD CONSTRAINT case_document_hidden_by_fk
-FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE case_document
-ADD CONSTRAINT case_document_marked_for_manual_del_by_fk
-FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_case_fk
@@ -1992,18 +2001,6 @@ ALTER TABLE media
 ADD CONSTRAINT media_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media
-ADD CONSTRAINT media_object_hidden_reason_fk
-FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
-
-ALTER TABLE media
-ADD CONSTRAINT media_hidden_by_fk
-FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE media
-ADD CONSTRAINT media_marked_for_manual_del_by_fk
-FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
-
 ALTER TABLE media   
 ADD CONSTRAINT media_deleted_by_fk
 FOREIGN KEY (deleted_by) REFERENCES user_account(usr_id);
@@ -2047,6 +2044,34 @@ FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 ALTER TABLE notification
 ADD CONSTRAINT notification_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE object_admin_action   
+ADD CONSTRAINT oaa_annotation_document_fk
+FOREIGN KEY (ado_id) REFERENCES annotation_document(ado_id);
+
+ALTER TABLE object_admin_action   
+ADD CONSTRAINT oaa_case_document_fk
+FOREIGN KEY (cad_id) REFERENCES case_document(cad_id);
+
+ALTER TABLE object_admin_action   
+ADD CONSTRAINT oaa_media_fk
+FOREIGN KEY (med_id) REFERENCES media(med_id);
+
+ALTER TABLE object_admin_action   
+ADD CONSTRAINT oaa_transcription_document_fk
+FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
+
+ALTER TABLE object_admin_action
+ADD CONSTRAINT object_admin_action_ohr_id_fk
+FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
+
+ALTER TABLE object_admin_action
+ADD CONSTRAINT object_admin_action_hidden_by_fk
+FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE object_admin_action
+ADD CONSTRAINT object_admin_action_marked_for_manual_del_by_fk
+FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE prosecutor               
 ADD CONSTRAINT prosecutor_court_case_fk
@@ -2119,18 +2144,6 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
-
-ALTER TABLE transcription_document
-ADD CONSTRAINT transcription_document_object_hidden_reason_fk
-FOREIGN KEY (ohr_id) REFERENCES object_hidden_reason(ohr_id);
-
-ALTER TABLE transcription_document
-ADD CONSTRAINT transcription_document_hidden_by_fk
-FOREIGN KEY (hidden_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE transcription_document
-ADD CONSTRAINT transcription_document_marked_for_manual_del_by_fk
-FOREIGN KEY (marked_for_manual_del_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_transcription_fk
@@ -2217,7 +2230,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON daily_list TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defence TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON defendant TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON event_linked_legacy_case TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON event_linked_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event_handler TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_location_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_object_directory TO darts_user;
@@ -2228,7 +2241,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_event_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_media_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON judge TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON media_linked_legacy_case TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON media_linked_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media_request TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON node_register TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON notification TO darts_user;
@@ -2257,6 +2270,7 @@ GRANT SELECT,UPDATE ON  dal_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfd_seq TO darts_user;
 GRANT SELECT,UPDATE ON  elt_seq TO darts_user;
+GRANT SELECT,UPDATE ON  elc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  eod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  esa_seq TO darts_user;
 GRANT SELECT,UPDATE ON  eve_seq TO darts_user;
@@ -2265,6 +2279,7 @@ GRANT SELECT,UPDATE ON  hea_seq TO darts_user;
 GRANT SELECT,UPDATE ON  jud_seq TO darts_user;
 GRANT SELECT,UPDATE ON  med_seq TO darts_user;
 GRANT SELECT,UPDATE ON  mer_seq TO darts_user;
+GRANT SELECT,UPDATE ON  mlc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  nod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  not_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ors_seq TO darts_user;

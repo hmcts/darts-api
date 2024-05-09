@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+@Slf4j
 class AudioOperationServiceIntTest extends IntegrationBase {
 
     private static final String WORKSPACE_DIR = "44887a8c-d918-4907-b9e8-38d5b1bf9c9c";
@@ -425,5 +428,16 @@ class AudioOperationServiceIntTest extends IntegrationBase {
 
     private Path createFile(Path path, String name) throws IOException {
         return Files.createFile(path.resolve(name));
+    }
+
+    @AfterEach
+    void deleteFile() {
+        if (tempDirectory != null) {
+            try {
+                FileUtils.forceDelete(tempDirectory.toFile());
+            } catch (IOException e) {
+                log.error("Unable to delete directory {}", tempDirectory);
+            }
+        }
     }
 }

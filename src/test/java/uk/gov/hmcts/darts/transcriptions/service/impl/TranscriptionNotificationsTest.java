@@ -238,6 +238,37 @@ class TranscriptionNotificationsTest {
     }
 
     @Test
+    void handleNotificationsAndAuditApprovedIsNotManual() {
+        when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
+        var transcriber = new UserAccountEntity();
+        var transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionStatusEntity.setId(TranscriptionStatusEnum.APPROVED.getId());
+        var updateTranscription = new UpdateTranscriptionRequest();
+
+        transcriptionNotifications.handleNotificationsAndAudit(transcriber, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
+
+        verifyNoInteractions(notificationApi);
+        // audit
+        verify(auditApi).recordAudit(AUTHORISE_TRANSCRIPTION, transcriber, caseEntity);
+    }
+
+
+    @Test
+    void handleNotificationsAndAuditRejectedIsNotManual() {
+        when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
+        var transcriber = new UserAccountEntity();
+        var transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionStatusEntity.setId(TranscriptionStatusEnum.REJECTED.getId());
+        var updateTranscription = new UpdateTranscriptionRequest();
+
+        transcriptionNotifications.handleNotificationsAndAudit(transcriber, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
+
+        verifyNoInteractions(notificationApi);
+        // audit
+        verify(auditApi).recordAudit(REJECT_TRANSCRIPTION, transcriber, caseEntity);
+    }
+
+    @Test
     void handleNotificationsAndAuditCompleteIsNotManual() {
         when(transcriptionEntity.getIsManualTranscription()).thenReturn(false);
         var transcriber = new UserAccountEntity();

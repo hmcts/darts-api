@@ -41,12 +41,16 @@ darts:
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8080}
   audio:
+    max-file-duration-minutes: 1440
     concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate
     merge-workspace: ${java.io.tmpdir}/audiotransform/merge
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
-
+    allowed-media-formats:
+      - "mpeg2"
+      - "mp2"
+      - "audio/mpeg"
   transformation:
     service:
       audio:
@@ -72,4 +76,3 @@ logging:
         hmcts:
           darts: DEBUG
   config: classpath:logback-test.xml
-
