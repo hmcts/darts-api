@@ -48,21 +48,21 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         persistedAutomatedTaskEntity.setTaskEnabled(false);
         dartsDatabase.save(persistedAutomatedTaskEntity);
 
-        var resposne = adminAutomatedTaskService.updateAutomatedTask(1, new AutomatedTaskPatch().isActive(true));
+        var response = adminAutomatedTaskService.updateAutomatedTask(1, new AutomatedTaskPatch().isActive(true));
 
         var updatedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         assertThat(updatedAutomatedTaskEntity.getTaskEnabled()).isTrue();
 
-        assertThat(resposne.getId()).isEqualTo(1);
-        assertThat(resposne.getName()).isEqualTo(updatedAutomatedTaskEntity.getTaskName());
-        assertThat(resposne.getDescription()).isEqualTo(updatedAutomatedTaskEntity.getTaskDescription());
-        assertThat(resposne.getCronExpression()).isEqualTo(updatedAutomatedTaskEntity.getCronExpression());
-        assertThat(resposne.getIsActive()).isEqualTo(updatedAutomatedTaskEntity.getTaskEnabled());
-        assertThat(resposne.getIsCronEditable()).isEqualTo(updatedAutomatedTaskEntity.getCronEditable());
-        assertThat(resposne.getCreatedAt()).isEqualTo(updatedAutomatedTaskEntity.getCreatedDateTime());
-        assertThat(resposne.getCreatedBy()).isEqualTo(updatedAutomatedTaskEntity.getCreatedBy().getId());
-        assertThat(resposne.getLastModifiedAt()).isEqualTo(updatedAutomatedTaskEntity.getLastModifiedDateTime());
-        assertThat(resposne.getLastModifiedBy()).isEqualTo(updatedAutomatedTaskEntity.getLastModifiedBy().getId());
+        assertThat(response.getId()).isEqualTo(1);
+        assertThat(response.getName()).isEqualTo(updatedAutomatedTaskEntity.getTaskName());
+        assertThat(response.getDescription()).isEqualTo(updatedAutomatedTaskEntity.getTaskDescription());
+        assertThat(response.getCronExpression()).isEqualTo(updatedAutomatedTaskEntity.getCronExpression());
+        assertThat(response.getIsActive()).isEqualTo(updatedAutomatedTaskEntity.getTaskEnabled());
+        assertThat(response.getIsCronEditable()).isEqualTo(updatedAutomatedTaskEntity.getCronEditable());
+        assertThat(response.getCreatedAt()).isEqualTo(updatedAutomatedTaskEntity.getCreatedDateTime());
+        assertThat(response.getCreatedBy()).isEqualTo(updatedAutomatedTaskEntity.getCreatedBy().getId());
+        assertThat(response.getLastModifiedAt()).isEqualTo(updatedAutomatedTaskEntity.getLastModifiedDateTime());
+        assertThat(response.getLastModifiedBy()).isEqualTo(updatedAutomatedTaskEntity.getLastModifiedBy().getId());
 
         // clean up
         persistedAutomatedTaskEntity.setTaskEnabled(initialValue);
