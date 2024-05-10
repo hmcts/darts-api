@@ -29,7 +29,7 @@ public class UserAccountStub {
 
     private static final int SYSTEM_USER_ID = 0;
     public static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";
-    private static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
+    public static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
     private static final OffsetDateTime LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
