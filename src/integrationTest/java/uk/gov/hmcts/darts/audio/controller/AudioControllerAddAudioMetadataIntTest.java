@@ -713,10 +713,12 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         return addAudioMetadataRequest;
     }
 
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
     private void makeAddAudioCall() throws Exception {
         makeAddAudioCall(1000L);
     }
 
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
     private void makeAddAudioCall(long fileSize, String...casesToMapTo) throws Exception {
         UserAccountEntity testUser = authorisationStub.getSystemUser();
         dartsDatabase.getUserAccountRepository().save(testUser);
@@ -761,7 +763,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             .andReturn();
     }
 
-
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
     private Integer uploadAnotherAudioWithSize(long sizeToUse, String expectedAntecedantId, String expectedChronicleId) throws Exception {
         makeAddAudioCall(sizeToUse);
 

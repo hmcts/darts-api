@@ -10,9 +10,9 @@ public class MediaEntityTreeNodeImpl implements TreeNode {
 
     @Getter
     @EqualsAndHashCode.Exclude
-    private MediaEntity entity;
+    private final MediaEntity entity;
 
-    private Integer id;
+    private final Integer id;
 
     public MediaEntityTreeNodeImpl(MediaEntity entity) {
         this.entity = entity;
