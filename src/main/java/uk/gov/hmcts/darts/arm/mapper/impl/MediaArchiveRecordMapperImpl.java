@@ -67,6 +67,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.GodClass"})
 public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     public static final String CASE_LIST_DELIMITER = "|";
@@ -78,6 +79,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     private DateTimeFormatter dateFormatter;
 
 
+    @Override
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                       String rawFilename) {
         dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
@@ -118,7 +120,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .build();
     }
 
-    @SuppressWarnings("java:S3776")
+    @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         MediaEntity media = externalObjectDirectory.getMedia();
 
@@ -201,6 +203,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         return metadata;
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private String mapToString(String key, MediaEntity media) {
         return switch (key) {
             case OBJECT_TYPE_KEY -> ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription();

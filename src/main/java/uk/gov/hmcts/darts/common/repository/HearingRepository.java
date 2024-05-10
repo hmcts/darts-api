@@ -51,5 +51,6 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         """)
     boolean hearingsExistForCourthouse(Integer courthouseId);
 
+    @Override
     boolean existsById(Integer id);
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthenticationConfigurationPropertiesStrategy;
-import uk.gov.hmcts.darts.common.util.RequestMatcher;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +26,6 @@ public class ExternalAuthConfigurationPropertiesStrategy implements Authenticati
 
     @Override
     public boolean doesMatch(HttpServletRequest req) {
-        return RequestMatcher.URL_MAPPER_EXTERNAL.doesMatch(req);
+        return URL_MAPPER_EXTERNAL.doesMatch(req);
     }
 }

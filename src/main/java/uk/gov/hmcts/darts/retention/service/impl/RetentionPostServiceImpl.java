@@ -31,6 +31,7 @@ import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
@@ -82,6 +83,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         return response;
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private void validation(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase) {
         //No retention can be applied/amended when then case is open
         if (BooleanUtils.isNotTrue(courtCase.getClosed())) {
@@ -110,7 +112,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             //No users can reduce the retention date to earlier than the last Completed automated date.
             LocalDate latestCompletedRetentionDate = lastCompletedAutomatedCaseRetention.getRetainUntil().toLocalDate();
             if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
-                HashMap<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("latest_automated_retention_date", latestCompletedRetentionDate);
                 throw new DartsApiException(
                     RetentionApiError.RETENTION_DATE_TOO_EARLY,
@@ -126,7 +128,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             LocalDate maxRetentionDate = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
             if (newRetentionDate.isAfter(maxRetentionDate)) {
                 RetentionPolicyTypeEntity retentionPolicy = retentionDateHelper.getRetentionPolicy(RetentionPolicyEnum.PERMANENT);
-                HashMap<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("max_duration", retentionPolicy.getDuration());
                 throw new DartsApiException(
                     RetentionApiError.RETENTION_DATE_TOO_LATE,

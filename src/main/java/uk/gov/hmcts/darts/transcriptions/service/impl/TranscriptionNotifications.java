@@ -76,6 +76,9 @@ public class TranscriptionNotifications {
                 }
                 auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
+            default -> {
+                // Do nothing for unmatched status
+            }
         }
     }
 

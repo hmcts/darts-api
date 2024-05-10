@@ -49,6 +49,7 @@ public class HearingsServiceImpl implements HearingsService {
         return getHearingResponseMapper.map(foundHearing);
     }
 
+    @Override
     public HearingEntity getHearingById(Integer hearingId) {
         Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
         if (foundHearingOpt.isEmpty()) {

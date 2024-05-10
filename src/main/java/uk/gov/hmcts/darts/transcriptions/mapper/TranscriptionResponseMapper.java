@@ -30,7 +30,6 @@ import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
@@ -47,7 +46,7 @@ public class TranscriptionResponseMapper {
     public List<TranscriptionTypeResponse> mapToTranscriptionTypeResponses(List<TranscriptionTypeEntity> transcriptionTypeEntities) {
         return emptyIfNull(transcriptionTypeEntities).stream()
             .map(this::mapToTranscriptionTypeResponse)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
@@ -61,7 +60,7 @@ public class TranscriptionResponseMapper {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities) {
         return emptyIfNull(transcriptionUrgencyEntities).stream()
             .map(this::mapToTranscriptionUrgencyResponse)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
@@ -90,6 +89,7 @@ public class TranscriptionResponseMapper {
         return transcriptionWorkflowsResponse;
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private List<TranscriptionWorkflowsComment> mapToTranscriptionComments(List<TranscriptionCommentEntity> transcriptionCommentEntities) {
         List<TranscriptionWorkflowsComment> transcriptionWorkflowsComments = new ArrayList<>();
         for (TranscriptionCommentEntity commentEntity : transcriptionCommentEntities) {

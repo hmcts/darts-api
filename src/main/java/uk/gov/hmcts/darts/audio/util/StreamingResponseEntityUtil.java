@@ -12,7 +12,8 @@ import java.io.InputStream;
 @UtilityClass
 public class StreamingResponseEntityUtil {
 
-    public ResponseEntity<byte[]> createResponseEntity(byte[] bytes, String httpRangeList) throws IOException {
+    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
+    public ResponseEntity<byte[]> createResponseEntity(byte[] bytes, String httpRangeList) {
         long fileSize = bytes.length;
         if (StringUtils.isNotBlank(httpRangeList)) {
             httpRangeList = StringUtils.trim(httpRangeList);
@@ -20,7 +21,7 @@ public class StreamingResponseEntityUtil {
             String[] ranges = rangeListValue.split("-");
             long rangeStart = Long.parseLong(ranges[0]);
             long rangeEnd = getRangeEnd(fileSize, ranges);
-            long requestedContentLength = (rangeEnd - rangeStart) + 1;
+            long requestedContentLength = rangeEnd - rangeStart + 1;
             String contentLengthStr = String.valueOf(requestedContentLength);
             String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
             return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
@@ -43,6 +44,7 @@ public class StreamingResponseEntityUtil {
         return createResponseEntity(bytes, httpRangeList);
     }
 
+    @SuppressWarnings({"PMD.UseVarargs"})
     private static long getRangeEnd(long fileSize, String[] ranges) {
         long rangeEnd;
         if (ranges.length > 1) {

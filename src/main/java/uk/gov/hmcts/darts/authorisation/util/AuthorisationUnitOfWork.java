@@ -44,6 +44,7 @@ public class AuthorisationUnitOfWork {
      * @param suppressDataValidation - flag
      * @param <T>                    - response
      */
+    @SuppressWarnings({"PMD.CognitiveComplexity"})
     public <T> void authoriseWithIds(List<T> objectList, Function<T, String> gatherIdFunction,
                                      ContextIdEnum contextIdEnum,
                                      SecurityRoleEnum[] rolesToValidate, Runnable runnable,

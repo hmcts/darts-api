@@ -72,9 +72,9 @@ public class TransformedMediaIdControllerAuthorisationImpl extends BaseControlle
             try {
                 Integer transformedMedia = Integer.valueOf(transformedMediaIdParamOptional.get());
                 authorisation.authoriseByTransformedMediaId(transformedMedia, roles);
-            } catch (NumberFormatException e) {
-                log.error("Unable to parse transformed_media_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_REQUEST_TRANSFORMED_MEDIA_ID);
+            } catch (NumberFormatException ex) {
+                log.error("Unable to parse transformed_media_id for checkAuthorisation", ex);
+                throw new DartsApiException(BAD_REQUEST_TRANSFORMED_MEDIA_ID, ex);
             }
         }
     }

@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings({"PMD.ShortClassName"})
 public class Tree<T extends TreeNode> extends HashMap<Integer, T> {
 
-    public void addNode(T t) {
-        put(t.getId(), t);
+    public void addNode(T node) {
+        put(node.getId(), node);
     }
 
     public void addNode(Collection<T> nodeCollection) {

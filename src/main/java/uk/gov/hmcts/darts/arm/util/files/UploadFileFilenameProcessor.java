@@ -14,7 +14,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @Slf4j
 public class UploadFileFilenameProcessor {
     private static final int NUMBER_OF_TOKENS = 4;
-    private String uploadFileFilenameAndPath;
+    private final String uploadFileFilenameAndPath;
     private String hashcode;
     private String hashcode2;
     private String status;

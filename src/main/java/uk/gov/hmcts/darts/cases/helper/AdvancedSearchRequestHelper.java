@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity_;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity_;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -266,7 +265,7 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.LiteralsFirstInComparisons"})
     private Join<CourtCaseEntity, HearingEntity> joinHearing(Join<UserAccountCourtCaseEntity, CourtCaseEntity> caseRoot) {
         Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
             CourtCaseEntity_.HEARINGS)).findAny();
@@ -276,25 +275,6 @@ public class AdvancedSearchRequestHelper {
 
     private Join<CourtCaseEntity, JudgeEntity> joinJudge(Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
         return courtCaseJoin.join(CourtCaseEntity_.JUDGES, JoinType.INNER);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Join<HearingEntity, CourtroomEntity> joinCourtroom(Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {
-        Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(courtCaseJoin);
-
-        Optional<Join<HearingEntity, ?>> foundJoin = hearingJoin.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            HearingEntity_.COURTROOM)).findAny();
-        return foundJoin.map(hearingEntityJoin -> (Join<HearingEntity, CourtroomEntity>) hearingEntityJoin)
-            .orElseGet(() -> hearingJoin.join(HearingEntity_.COURTROOM, JoinType.INNER));
-
-    }
-
-    @SuppressWarnings("unchecked")
-    private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Join<UserAccountCourtCaseEntity, CourtCaseEntity> caseRoot) {
-        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
-            CourtroomEntity_.COURTHOUSE)).findAny();
-        return foundJoin.map(join -> (Join<CourtCaseEntity, CourthouseEntity>) join)
-            .orElseGet(() -> caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER));
     }
 
     private Join<CourtCaseEntity, DefendantEntity> joinDefendantEntity(Join<UserAccountCourtCaseEntity, CourtCaseEntity> courtCaseJoin) {

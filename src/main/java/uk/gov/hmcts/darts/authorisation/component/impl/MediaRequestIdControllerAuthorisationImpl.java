@@ -77,9 +77,9 @@ class MediaRequestIdControllerAuthorisationImpl extends BaseControllerAuthorisat
             try {
                 Integer mediaRequestId = Integer.valueOf(mediaRequestIdParamOptional.get());
                 authorisation.authoriseByMediaRequestId(mediaRequestId, roles);
-            } catch (NumberFormatException e) {
-                log.error("Unable to parse audio_request_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID);
+            } catch (NumberFormatException ex) {
+                log.error("Unable to parse audio_request_id for checkAuthorisation", ex);
+                throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID, ex);
             }
         }
     }

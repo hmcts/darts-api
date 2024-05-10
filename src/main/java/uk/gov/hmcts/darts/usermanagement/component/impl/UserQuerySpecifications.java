@@ -5,11 +5,12 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-public class UserQuerySpecifications {
+public final class UserQuerySpecifications {
 
     private UserQuerySpecifications() {
     }
@@ -20,7 +21,7 @@ public class UserQuerySpecifications {
         }
         return (root, query, cb) -> cb.equal(
             cb.upper(root.get(UserAccountEntity_.emailAddress)),
-            emailAddress.toUpperCase());
+            emailAddress.toUpperCase(Locale.getDefault()));
     }
 
     public static Specification<UserAccountEntity> isInIds(List<Integer> userIds) {

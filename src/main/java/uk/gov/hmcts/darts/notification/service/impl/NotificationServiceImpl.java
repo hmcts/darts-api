@@ -173,7 +173,7 @@ public class NotificationServiceImpl implements NotificationService {
                 break;
             }
 
-            GovNotifyRequest govNotifyRequest = null;
+            GovNotifyRequest govNotifyRequest;
             try {
                 logApi.sendingNotification(notification, templateId, notification.getAttempts());
 

@@ -75,6 +75,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private UserAccountEntity userAccount;
 
     @Transactional
+    @Override
     public void processResponseFilesFor(Integer externalObjectDirectoryId) {
         initialisePreloadedObjects();
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).get();
@@ -153,6 +154,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         }
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private void processResponseBlobs(String armInputUploadFilename, List<String> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) {
         String createRecordFilename = null;
         String uploadFilename = null;
@@ -319,6 +321,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         return objectRecordStatusEnum;
     }
 
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private ObjectRecordStatusEnum processUploadFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                            UploadFileFilenameProcessor uploadFileFilenameProcessor,
                                                            ArmResponseUploadFileRecord armResponseUploadFileRecord) {
@@ -346,6 +349,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
         return ObjectRecordStatusEnum.valueOfId(externalObjectDirectory.getStatus().getId());
     }
 
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private ObjectRecordStatusEnum processInvalidLineFileObject(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                                 InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor,
                                                                 ArmResponseInvalidLineRecord armResponseInvalidLineRecord) {

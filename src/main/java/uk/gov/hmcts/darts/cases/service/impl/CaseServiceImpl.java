@@ -97,6 +97,7 @@ public class CaseServiceImpl implements CaseService {
         return casesMapper.mapToSingleCase(caseEntity);
     }
 
+    @Override
     public CourtCaseEntity getCourtCaseById(Integer caseId) {
         return caseRepository.findById(caseId).orElseThrow(() -> new DartsApiException(CaseApiError.CASE_NOT_FOUND));
     }
@@ -129,7 +130,7 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        List<Integer> caseIds = null;
+        List<Integer> caseIds;
         try {
             caseIds = advancedSearchRequestHelper.getMatchingCourtCases(request);
         } catch (AdvancedSearchNoResultsException e) {

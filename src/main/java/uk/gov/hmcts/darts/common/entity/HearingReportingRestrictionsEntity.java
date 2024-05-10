@@ -60,7 +60,7 @@ public class HearingReportingRestrictionsEntity {
     OffsetDateTime eventDateTime;
 
     @Column(name = "case_number")
-    private List<String> caseNumberList = new ArrayList<>();
+    private final List<String> caseNumberList = new ArrayList<>();
 
     @Column(name = "version_label")
     String versionLabel;

@@ -47,6 +47,7 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     @Override
+    @SuppressWarnings({"PMD.CloseResource"})
     public DownloadResponseMetaData downloadArmData(String externalRecordId, String externalFileId) throws FileNotDownloadedException {
         DownloadResponseMetaData responseMetaData = new FileBasedDownloadResponseMetaData();
         feign.Response response = armApiClient.downloadArmData(

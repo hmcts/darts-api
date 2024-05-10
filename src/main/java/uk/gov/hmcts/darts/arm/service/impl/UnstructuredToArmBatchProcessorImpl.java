@@ -43,7 +43,10 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     private final ArchiveRecordService archiveRecordService;
     private final ExternalObjectDirectoryService eodService;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
+    private static final String DARTS_STRING = "darts";
+    private static final String DETS_STRING = "dets";
 
+    @SuppressWarnings({"PMD.ExcessiveParameterList"})
     public UnstructuredToArmBatchProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                                ObjectRecordStatusRepository objectRecordStatusRepository,
                                                ExternalLocationTypeRepository externalLocationTypeRepository,
@@ -69,6 +72,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
     }
 
     @Override
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
     public void processUnstructuredToArm() {
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
@@ -134,9 +138,9 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
     private ExternalLocationTypeEntity getEodSourceLocation() {
         var armClient = armDataManagementConfiguration.getArmClient();
-        if (armClient.equalsIgnoreCase("darts")) {
+        if (DARTS_STRING.equalsIgnoreCase(armClient)) {
             return EodHelper.unstructuredLocation();
-        } else if (armClient.equalsIgnoreCase("dets")) {
+        } else if (DETS_STRING.equalsIgnoreCase(armClient)) {
             return EodHelper.detsLocation();
         } else {
             throw new DartsException(String.format("Invalid arm client '%s'", armClient));
@@ -253,6 +257,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
         }
     }
 
+    @SuppressWarnings({"PMD.ConfusingTernary"})
     private void recoverByUpdatingEodToFailedArmStatus(BatchItem batchItem) {
         if (batchItem.getArmEod() != null) {
             batchItem.undoManifestFileChange();

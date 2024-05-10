@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +48,7 @@ class ExternalOutboundDataStoreDeleterImplTest {
     @BeforeEach
     void setUp() {
         SystemUserHelper systemUserHelper = new SystemUserHelper(userAccountRepository);
-        HashMap<String, String> systemUserGuidMap = new HashMap<>();
+        Map<String, String> systemUserGuidMap = new HashMap<>();
         systemUserGuidMap.put("housekeeping", "123");
         systemUserHelper.setSystemUserGuidMap(systemUserGuidMap);
 

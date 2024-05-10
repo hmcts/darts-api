@@ -49,11 +49,13 @@ public class ExternalObjectDirectoryServiceImpl implements ExternalObjectDirecto
             List.of(EodHelper.unstructuredLocation(), EodHelper.armLocation()));
     }
 
+    @Override
     @Transactional
     public Optional<ExternalObjectDirectoryEntity> eagerLoadExternalObjectDirectory(Integer externalObjectDirectoryId) {
         return eodRepository.findById(externalObjectDirectoryId);
     }
 
+    @Override
     @Transactional
     public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToUpdate, OffsetDateTime timestamp) {
         eodRepository.updateStatus(newStatus, userAccount, idsToUpdate, timestamp);

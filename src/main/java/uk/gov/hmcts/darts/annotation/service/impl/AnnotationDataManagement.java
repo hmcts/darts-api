@@ -53,6 +53,7 @@ public class AnnotationDataManagement {
             UNSTRUCTURED, unstructuredLocation);
     }
 
+    @SuppressWarnings({"PMD.CloseResource"})
     public InputStreamResource download(List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities) {
         try {
             DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(externalObjectDirectoryEntities);
@@ -61,7 +62,7 @@ public class AnnotationDataManagement {
         } catch (IOException | FileNotDownloadedException e) {
             log.error("Failed to download annotation document {}",
                       externalObjectDirectoryEntities.get(0).getAnnotationDocumentEntity().getId(), e);
-            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT);
+            throw new DartsApiException(FAILED_TO_DOWNLOAD_ANNOTATION_DOCUMENT, e);
         }
     }
 

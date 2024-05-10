@@ -28,6 +28,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
 
     private final EntityManager em;
 
+    @Override
     public List<UserAccountEntity> getUsers(String fullName, String emailAddress, Boolean active) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<UserAccountEntity> criteriaQuery = criteriaBuilder.createQuery(UserAccountEntity.class);

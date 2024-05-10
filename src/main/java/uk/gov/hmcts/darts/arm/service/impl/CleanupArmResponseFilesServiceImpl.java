@@ -52,19 +52,15 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
 
     private final List<String> armResponseFilesToBeDeleted = new ArrayList<>();
 
-    private ObjectRecordStatusEntity storedStatus;
-    private ObjectRecordStatusEntity failedArmResponseManifestFileStatus;
-    private ObjectRecordStatusEntity failedArmResponseProcessing;
-    private ObjectRecordStatusEntity failedArmResponseChecksum;
     private UserAccountEntity userAccount;
 
 
     @Override
     public void cleanupResponseFiles() {
-        storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-        failedArmResponseManifestFileStatus = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_MANIFEST_FAILED.getId());
-        failedArmResponseProcessing = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
-        failedArmResponseChecksum = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        ObjectRecordStatusEntity failedArmResponseManifestFileStatus = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_MANIFEST_FAILED.getId());
+        ObjectRecordStatusEntity failedArmResponseProcessing = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
+        ObjectRecordStatusEntity failedArmResponseChecksum = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId());
 
         userAccount = userIdentity.getUserAccount();
 

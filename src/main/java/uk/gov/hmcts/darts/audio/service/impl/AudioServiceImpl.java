@@ -65,6 +65,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.CouplingBetweenObjects", })
 public class AudioServiceImpl implements AudioService {
 
     private final AudioTransformationService audioTransformationService;
@@ -100,6 +101,8 @@ public class AudioServiceImpl implements AudioService {
         return mediaRepository.findAllByHearingIdAndChannel(hearingId, channel);
     }
 
+    @Override
+    @SuppressWarnings({"PMD.ExceptionAsFlowControl", "PMD.AvoidRethrowingException"})
     public BinaryData encode(Integer mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
@@ -111,7 +114,7 @@ public class AudioServiceImpl implements AudioService {
 
             AudioFileInfo encodedAudioFileInfo;
             try {
-                encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
+            encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
                 throw e;
@@ -128,6 +131,7 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     @Transactional
+    @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.CyclomaticComplexity"})
     public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
 
         log.info("Adding audio using metadata {}", addAudioMetadataRequest.toString());
@@ -162,7 +166,7 @@ public class AudioServiceImpl implements AudioService {
 
             // if we have not found any duplicate audio files to process lets add a new one
             if (audioToVersion.isEmpty()) {
-                List<MediaEntity> audioFileToProcess = new ArrayList<MediaEntity>();
+                List<MediaEntity> audioFileToProcess = new ArrayList<>();
                 MediaEntity newEntity = mapper.mapToMedia(addAudioMetadataRequest);
 
                 audioFileToProcess.add(newEntity);
@@ -212,7 +216,7 @@ public class AudioServiceImpl implements AudioService {
             saveEntity.setChecksum(checksum);
             mediaRepository.save(saveEntity);
 
-            linkAudioToHearingInMetadata(addAudioMetadataRequest, entity != saveEntity ? entity : null, saveEntity);
+            linkAudioToHearingInMetadata(addAudioMetadataRequest, entity.equals(saveEntity) ? null : entity, saveEntity);
             linkAudioToHearingByEvent(addAudioMetadataRequest, saveEntity);
 
             saveExternalObjectDirectory(
@@ -244,6 +248,7 @@ public class AudioServiceImpl implements AudioService {
         return Optional.empty();
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.LooseCoupling"})
     private List<MediaEntity> getCaseRelatedMediaEntities(List<String> cases, List<MediaEntity> entities) {
         ArrayList<MediaEntity> entityForCaseLst = new ArrayList<>();
         for (MediaEntity entity : entities) {
@@ -257,6 +262,7 @@ public class AudioServiceImpl implements AudioService {
         return entityForCaseLst;
     }
 
+    @SuppressWarnings({"PMD.LooseCoupling"})
     private Collection<MediaEntity> getDuplicateMediaFile(AddAudioMetadataRequest addAudioMetadataRequest) {
         List<MediaEntity> mediaEntities =  mediaRepository.findMediaByDetails(
              addAudioMetadataRequest.getCourthouse(),
@@ -304,11 +310,9 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
 
-        if (addAudioMetadataRequest.getTotalChannels() == 1) {
-            if (audioConfigurationProperties.getHandheldAudioCourtroomNumbers()
-                .contains(addAudioMetadataRequest.getCourtroom())) {
-                return;
-            }
+        if (addAudioMetadataRequest.getTotalChannels() == 1
+            && audioConfigurationProperties.getHandheldAudioCourtroomNumbers().contains(addAudioMetadataRequest.getCourtroom())) {
+            return;
         }
 
         String courthouse = addAudioMetadataRequest.getCourthouse();

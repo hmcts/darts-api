@@ -20,11 +20,13 @@
     <exclude name="MethodNamingConventions"/>
     <exclude name="OnlyOneReturn"/>
     <exclude name="TooManyStaticImports"/>
-    <exclude name="DefaultPackage"/>
     <exclude name="CommentDefaultAccessModifier"/>
     <exclude name="LinguisticNaming"/>
     <exclude name="MethodNamingConventions"/>
+    <exclude name="UseExplicitTypes"/>
+    <exclude name="LambdaCanBeMethodReference"/>
   </rule>
+
   <rule ref="category/java/codestyle.xml/ClassNamingConventions">
     <properties>
       <!-- same as any other class -->
@@ -46,6 +48,11 @@
     <exclude name="TooManyMethods"/>
     <exclude name="ExcessiveImports"/>
     <exclude name="LawOfDemeter"/>
+  </rule>
+  <rule ref="category/java/design.xml/CouplingBetweenObjects">
+    <properties>
+      <property name="threshold" value="40" />
+    </properties>
   </rule>
   <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
     <properties>

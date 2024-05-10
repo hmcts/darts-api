@@ -33,6 +33,7 @@ public class UserIdentityImpl implements UserIdentity {
     private final UserAccountRepository userAccountRepository;
     private final UserRolesCourthousesRepository userRolesCourthousesRepository;
 
+    @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     private String getEmailAddressFromToken() {
         if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
             Object principalObject = SecurityContextHolder.getContext()
@@ -81,6 +82,7 @@ public class UserIdentityImpl implements UserIdentity {
         return null;
     }
 
+    @Override
     public UserAccountEntity getUserAccount() {
         UserAccountEntity userAccount = null;
         String guid = getGuidFromToken();
@@ -96,6 +98,7 @@ public class UserIdentityImpl implements UserIdentity {
         return userAccount;
     }
 
+    @Override
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
         String emailAddress = null;

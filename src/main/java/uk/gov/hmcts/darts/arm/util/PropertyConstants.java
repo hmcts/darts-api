@@ -6,7 +6,7 @@ import lombok.experimental.UtilityClass;
  * Contains a list of the internal keys to be mapped against ARMS expected keys.
  */
 @UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor", "java:S1118"})
+@SuppressWarnings({"HideUtilityClassConstructor", "java:S1118", "PMD.MissingStaticMethodInNonInstantiatableClass"})
 public final class PropertyConstants {
 
     public static class ArchiveRecordCoreProperties {

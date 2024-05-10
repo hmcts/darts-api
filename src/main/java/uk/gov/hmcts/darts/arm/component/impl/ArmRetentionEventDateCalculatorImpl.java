@@ -29,35 +29,34 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     private final UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    private UserAccountEntity userAccount;
-
     @Transactional
+    @Override
     public boolean calculateRetentionEventDate(Integer externalObjectDirectoryId) {
-        userAccount = userIdentity.getUserAccount();
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
         try {
             ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.findById(externalObjectDirectoryId).orElseThrow();
             OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
-                if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) != 0) {
+                if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
+                    externalObjectDirectory.setUpdateRetention(false);
+                    externalObjectDirectory.setLastModifiedBy(userAccount);
+                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
+                    return true;
+                } else {
                     log.debug("Updating retention date for ARM EOD {} ", externalObjectDirectoryId);
                     UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(
                         String.valueOf(externalObjectDirectoryId), armRetentionDate);
-                    if (!updateMetadataResponse.isError()) {
+                    if (updateMetadataResponse.isError()) {
+                        log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
+                                  externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
+                    } else {
                         externalObjectDirectory.setEventDateTs(armRetentionDate);
                         externalObjectDirectory.setUpdateRetention(false);
                         externalObjectDirectory.setLastModifiedBy(userAccount);
                         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                         return true;
-                    } else {
-                        log.error("Unable set retention date for ARM EOD {} due to error(s) {}",
-                                  externalObjectDirectoryId, StringUtils.join(updateMetadataResponse.getResponseStatusMessages(), ", "));
-                    }
-                } else {
-                    externalObjectDirectory.setUpdateRetention(false);
-                    externalObjectDirectory.setLastModifiedBy(userAccount);
-                    externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
-                    return true;
+                     }
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
@@ -69,7 +68,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
     }
 
     private OffsetDateTime getDocumentRetentionDate(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        OffsetDateTime retentionDate = null;
+        OffsetDateTime retentionDate;
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             retentionDate = externalObjectDirectoryEntity.getMedia().getRetainUntilTs();
         } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {

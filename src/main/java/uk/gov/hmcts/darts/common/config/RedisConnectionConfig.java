@@ -102,7 +102,7 @@ public class RedisConnectionConfig {
         };
     }
 
-    private static class CustomNettyConfig implements NettyCustomizer {
+    private static final class CustomNettyConfig implements NettyCustomizer {
 
         @Override
         public void afterBootstrapInitialized(Bootstrap bootstrap) {

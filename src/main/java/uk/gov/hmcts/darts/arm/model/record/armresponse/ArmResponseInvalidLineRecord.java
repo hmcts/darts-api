@@ -10,6 +10,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @NoArgsConstructor
+@SuppressWarnings({"PMD.FinalFieldCouldBeStatic"})
 public class ArmResponseInvalidLineRecord {
     @JsonProperty("operation")
     private final String operation = INVALID_LINE;

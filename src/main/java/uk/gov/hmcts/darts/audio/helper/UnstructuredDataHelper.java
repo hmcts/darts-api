@@ -42,10 +42,10 @@ public class UnstructuredDataHelper {
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
 
-    private static final List<CompletableFuture> jobsList = new ArrayList<>();
+    private static final List<CompletableFuture> JOBS_LIST = new ArrayList<>();
 
     public  List<CompletableFuture> getJobsList() {
-        return jobsList;
+        return JOBS_LIST;
     }
 
     @Transactional
@@ -138,11 +138,11 @@ public class UnstructuredDataHelper {
     }
 
     public void addToJobsList(CompletableFuture<Void> saveToUnstructuredFuture) {
-        jobsList.add(saveToUnstructuredFuture);
+        JOBS_LIST.add(saveToUnstructuredFuture);
     }
 
     public void waitForAllJobsToFinish() {
-        jobsList.forEach(CompletableFuture::join);
-        jobsList.clear();
+        JOBS_LIST.forEach(CompletableFuture::join);
+        JOBS_LIST.clear();
     }
 }

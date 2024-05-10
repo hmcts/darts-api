@@ -20,6 +20,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
     private final UserIdentity userIdentity;
 
     @Override
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     public Integer registerDevices(String nodeType, String courthouse, String courtRoom, String hostName, String ipAddress, String macAddress) {
         CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtRoom);
         NodeRegisterEntity nodeRegisterEntity = new NodeRegisterEntity();

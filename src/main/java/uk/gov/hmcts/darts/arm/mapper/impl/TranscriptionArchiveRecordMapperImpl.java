@@ -76,6 +76,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity"})
 public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
@@ -153,7 +154,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
             .build();
     }
 
-    @SuppressWarnings("java:S3776")
+    @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
 

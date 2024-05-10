@@ -115,8 +115,9 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder(FFMPEG);
-        command.append(COMMAND_INPUT).append(path1)
+        StringBuilder command = new StringBuilder(52);
+        command.append(FFMPEG)
+            .append(COMMAND_INPUT).append(path1)
             .append(COMMAND_INPUT).append(path2)
             .append(" -filter_complex [0:a][1:a]concat=n=2:v=0:a=1 ")
             .append(outputPath);
@@ -172,8 +173,9 @@ class AudioOperationServiceIntTest extends IntegrationBase {
             outputPath
         );
 
-        StringBuilder command = new StringBuilder(FFMPEG);
-        command.append(COMMAND_INPUT).append(path1)
+        StringBuilder command = new StringBuilder(62);
+        command.append(FFMPEG)
+            .append(COMMAND_INPUT).append(path1)
             .append(COMMAND_INPUT).append(path2)
             .append(COMMAND_INPUT).append(path3)
             .append(COMMAND_INPUT).append(path4)

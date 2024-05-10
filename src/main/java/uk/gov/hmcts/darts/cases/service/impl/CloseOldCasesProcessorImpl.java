@@ -77,26 +77,25 @@ public class CloseOldCasesProcessorImpl implements CloseOldCasesProcessor {
                 //look for the last event and use that date
                 closeCaseInDbAndAddRetention(courtCase, eventList.get(0).getCreatedDateTime());
             }
-        } else if (!courtCase.getHearings().isEmpty()) {
+        } else if (courtCase.getHearings().isEmpty()) {
+            //set to created date
+            closeCaseInDbAndAddRetention(courtCase, courtCase.getCreatedDateTime());
+        } else {
             //look for the last audio and use its recorded date
             List<MediaEntity> mediaList = new ArrayList<>();
             for (HearingEntity hearingEntity : courtCase.getHearings()) {
                 mediaList.addAll(hearingEntity.getMediaList());
             }
-            if (!mediaList.isEmpty()) {
-                mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
-                closeCaseInDbAndAddRetention(courtCase, mediaList.get(0).getCreatedDateTime());
-            } else {
+            if (mediaList.isEmpty()) {
                 //look for the last hearing date and use that
                 courtCase.getHearings().sort(Comparator.comparing(HearingEntity::getHearingDate).reversed());
                 HearingEntity lastHearingEntity = courtCase.getHearings().get(0);
                 closeCaseInDbAndAddRetention(courtCase, OffsetDateTime.of(lastHearingEntity.getHearingDate().atStartOfDay(), ZoneOffset.UTC));
-            }
-        } else {
-            //set to created date
-            closeCaseInDbAndAddRetention(courtCase, courtCase.getCreatedDateTime());
+            } else {
+                mediaList.sort(Comparator.comparing(MediaEntity::getCreatedDateTime).reversed());
+                closeCaseInDbAndAddRetention(courtCase, mediaList.get(0).getCreatedDateTime());
+           }
         }
-
 
     }
 

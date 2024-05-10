@@ -49,6 +49,7 @@ public class DartsGatewayStub {
         WireMock.reset();
     }
 
+    @SuppressWarnings("PMD.DoNotUseThreads")
     private static void wait(int millis) {
         try {
             Thread.sleep(millis);

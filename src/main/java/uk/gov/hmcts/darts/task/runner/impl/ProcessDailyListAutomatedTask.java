@@ -20,7 +20,7 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     protected String taskName = PROCESS_DAILY_LIST_TASK_NAME.getTaskName();
     private DailyListProcessor dailyListProcessor;
 
-    private List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
+    private final List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, LogApi logApi) {
