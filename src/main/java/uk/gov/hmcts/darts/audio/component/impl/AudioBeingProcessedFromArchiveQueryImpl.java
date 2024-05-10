@@ -10,8 +10,8 @@ import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.DETS;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DELETED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Component
@@ -25,42 +25,35 @@ public class AudioBeingProcessedFromArchiveQueryImpl implements AudioBeingProces
         return jdbcTemplate.query(
             """
                 SELECT
-                    med.med_id,
-                    eod_unstructured.eod_id AS unstructured_eod_id,
-                    eod_arm.eod_id          AS arm_eod_id
+                    hem.med_id,
+                    eod_arm.eod_id as arm_eod_id
                 FROM
-                    darts.hearing hea
-                JOIN
                     darts.hearing_media_ae hem
-                ON
-                    hea.hea_id = hem.hea_id
-                JOIN
-                    darts.media med
-                ON
-                    med.med_id = hem.med_id
-                JOIN
-                    darts.external_object_directory eod_unstructured
-                ON
-                    med.med_id = eod_unstructured.med_id
-                AND eod_unstructured.elt_id = :unstructured_elt_id
-                AND eod_unstructured.ors_id = :unstructured_ors_id
                 JOIN
                     darts.external_object_directory eod_arm
                 ON
-                    med.med_id = eod_arm.med_id
-                AND eod_arm.elt_id = :arm_elt_id
-                AND eod_arm.ors_id = :arm_ors_id
+                    hem.med_id = eod_arm.med_id
                 WHERE
-                    hea.hea_id = :hea_id
+                    eod_arm.ors_id = :stored_ors_id
+                AND
+                    eod_arm.elt_id = :arm_elt_id
+                AND
+                    hem.hea_id = :hea_id
+                AND NOT EXISTS
+                (
+                  SELECT eod_other.eod_id
+                  FROM darts.external_object_directory eod_other
+                  WHERE eod_arm.med_id = eod_other.med_id
+                  AND eod_other.elt_id IN (:other_elt_id)
+                )
                 ORDER BY
-                    med.med_id ASC
+                    hem.med_id ASC
                 """,
             new MapSqlParameterSource()
                 .addValue("hea_id", hearingId)
-                .addValue("unstructured_elt_id", UNSTRUCTURED.getId())
-                .addValue("unstructured_ors_id", DELETED.getId())
                 .addValue("arm_elt_id", ARM.getId())
-                .addValue("arm_ors_id", STORED.getId()),
+                .addValue("other_elt_id", List.of(UNSTRUCTURED.getId(), DETS.getId()))
+                .addValue("stored_ors_id", STORED.getId()),
             rowMapper
         );
     }

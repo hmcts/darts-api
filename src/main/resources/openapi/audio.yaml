@@ -194,6 +194,9 @@ components:
           type: boolean
         is_available:
           type: boolean
+        file_size:
+          type: integer
+          format: int64
     AddAudioMetadataRequest:
       type: object
       required:
