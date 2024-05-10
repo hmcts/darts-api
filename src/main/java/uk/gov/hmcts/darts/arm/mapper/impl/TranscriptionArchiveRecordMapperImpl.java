@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.util.PropertyFileLoader;
-import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -82,8 +81,6 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private static final String CASE_LIST_DELIMITER = "|";
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    private final TranscriptionService transcriptionService;
 
     private final CurrentTimeHelper currentTimeHelper;
     private Properties transcriptionRecordProperties;
@@ -259,7 +256,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     }
 
     private String getCaseNumbers(TranscriptionDocumentEntity transcriptionDocumentEntity) {
-        List<CourtCaseEntity> cases = transcriptionService.getTranscriptionDocumentsCases(transcriptionDocumentEntity);
+        List<CourtCaseEntity> cases = transcriptionDocumentEntity.getTranscription().getAssociatedCourtCases();
         if (cases.isEmpty()) {
             return null;
         } else if (cases.size() == 1) {
