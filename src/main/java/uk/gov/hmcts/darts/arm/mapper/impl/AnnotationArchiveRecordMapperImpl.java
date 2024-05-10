@@ -126,11 +126,14 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
+        OffsetDateTime retainUntilTs = annotationDocument.getRetainUntilTs();
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getAnnotationRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(annotationDocument.getUploadedDateTime()))
+            .eventDate(formatDateTime(nonNull(retainUntilTs)
+                                          ? retainUntilTs.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears())
+                                          : annotationDocument.getUploadedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(annotationDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))

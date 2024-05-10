@@ -123,12 +123,15 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         MediaEntity media = externalObjectDirectory.getMedia();
+        OffsetDateTime retainUntilTs = media.getRetainUntilTs();
 
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getMediaRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(media.getCreatedDateTime()))
+            .eventDate(formatDateTime(nonNull(retainUntilTs)
+                                          ? retainUntilTs.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears())
+                                          : media.getCreatedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(media.getMediaFile())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
