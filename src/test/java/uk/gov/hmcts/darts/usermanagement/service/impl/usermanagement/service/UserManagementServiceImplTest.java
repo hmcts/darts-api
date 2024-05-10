@@ -40,7 +40,6 @@ import java.util.Set;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +106,7 @@ class UserManagementServiceImplTest {
     void testGetUser() throws IOException {
         List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
-        when(userManagementQuery.getUsers(eq(EXISTING_EMAIL_ADDRESS), eq(null))).thenReturn(userAccountEntities);
+        when(userManagementQuery.getUsers(EXISTING_EMAIL_ADDRESS, null)).thenReturn(userAccountEntities);
 
         List<UserWithIdAndTimestamps> resultList = service.getUsers(EXISTING_EMAIL_ADDRESS, null);
 
@@ -132,7 +131,7 @@ class UserManagementServiceImplTest {
         SecurityGroupEntity securityGroupEntity = Mockito.mock(SecurityGroupEntity.class);
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
-        when(userAccountRepository.existsById(Mockito.eq(userId))).thenReturn(true);
+        when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
         when(transcriptionService.rollbackUserTransactions(userAccountEntities.get(0))).thenReturn(Arrays.asList(transcriptionId));
 
@@ -167,9 +166,9 @@ class UserManagementServiceImplTest {
 
         Integer userId = 1001;
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
-        when(userAccountRepository.existsById(Mockito.eq(userId))).thenReturn(true);
+        when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
-        when(securityGroupRepository.findById(Mockito.eq(secGroupId))).thenReturn(Optional.of(securityGroupEntity));
+        when(securityGroupRepository.findById(secGroupId)).thenReturn(Optional.of(securityGroupEntity));
         when(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(Mockito.notNull())).thenReturn(Arrays.asList(secGroupId));
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
@@ -210,9 +209,9 @@ class UserManagementServiceImplTest {
         Integer userId = 1001;
 
         when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
-        when(userAccountRepository.existsById(Mockito.eq(userId))).thenReturn(true);
+        when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
-        when(securityGroupRepository.findById(Mockito.eq(secGroupId))).thenReturn(Optional.of(securityGroupEntity));
+        when(securityGroupRepository.findById(secGroupId)).thenReturn(Optional.of(securityGroupEntity));
         when(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(Mockito.notNull())).thenReturn(Arrays.asList(secGroupId));
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);

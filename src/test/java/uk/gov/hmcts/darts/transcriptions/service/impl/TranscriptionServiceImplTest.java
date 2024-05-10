@@ -578,7 +578,7 @@ class TranscriptionServiceImplTest {
 
         when(mockTranscriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.APPROVED.getId())).thenReturn(transcriptionStatusEntity);
         when(mockTranscriptionWorkflowRepository
-                         .findWorkflowForUserWithTranscriptionState(eq(entity.getId()), eq(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId())))
+                         .findWorkflowForUserWithTranscriptionState(entity.getId(), TranscriptionStatusEnum.WITH_TRANSCRIBER.getId()))
             .thenReturn(Arrays.asList(transcriptionEntity));
 
         when(mockTranscriptionWorkflowRepository.saveAndFlush(Mockito.notNull()))
