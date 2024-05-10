@@ -218,6 +218,51 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
+  /event-mappings/{event_handler_id}:
+    get:
+      tags:
+        - Event
+      summary: An Endpoint which allows admin users to request an event mapping
+      description: |-
+        An Endpoint which allows admin users to request an event mapping using event handler id
+      parameters:
+        - in: path
+          name: event_handler_id
+          schema:
+            type: integer
+          description: "event_handler_id is the internal event handler id for the handler."
+          required: true
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventMapping'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Not Found - Event mapping not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "EVENT_MAPPING_REQUEST_101"
+                title: "The requested event mapping cannot be found"
+                status: 404
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 
 components:
   schemas:
@@ -322,6 +367,30 @@ components:
           type: string
         message:
           type: string
+
+    EventMapping:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        sub_type:
+          type: string
+        name:
+          type: string
+        handler:
+          type: string
+        is_active:
+          type: boolean
+        has_restrictions:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-05-09T14:26:31.118Z"
+        has_events:
+          type: boolean
 
     ###################################################################################################################
     # PRIMITIVES
