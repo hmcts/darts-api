@@ -39,7 +39,7 @@ import java.util.Map;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Profile("!intTest")
-public final class SecurityConfig {
+public class SecurityConfig {
 
     private final AuthStrategySelector locator;
 
