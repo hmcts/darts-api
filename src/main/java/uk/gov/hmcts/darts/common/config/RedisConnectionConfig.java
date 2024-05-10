@@ -34,7 +34,7 @@ import static java.time.Duration.ofSeconds;
 @Configuration
 @Profile("!in-memory-caching")
 @Slf4j
-public final class RedisConnectionConfig {
+public class RedisConnectionConfig {
 
     @Value("${darts.redis.connection-string}")
     private String redisConnectionString;
