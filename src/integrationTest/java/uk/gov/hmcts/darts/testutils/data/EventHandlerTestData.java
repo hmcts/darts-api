@@ -20,6 +20,7 @@ public class EventHandlerTestData {
         entity.setCreatedDateTime(OffsetDateTime.now());
         entity.setCreatedBy(userAccountEntity);
         entity.setActive(true);
+        entity.setIsReportingRestriction(false);
 
         return entity;
     }
