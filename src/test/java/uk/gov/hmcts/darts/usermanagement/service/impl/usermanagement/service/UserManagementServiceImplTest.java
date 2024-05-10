@@ -11,8 +11,10 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.SecurityRoleMatcher;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
@@ -40,6 +42,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -165,7 +168,7 @@ class UserManagementServiceImplTest {
         userAccountEntities.get(0).setSecurityGroupEntities(securityGroupEntitySet);
 
         Integer userId = 1001;
-        when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+        when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true, false);
         when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
         when(securityGroupRepository.findById(secGroupId)).thenReturn(Optional.of(securityGroupEntity));

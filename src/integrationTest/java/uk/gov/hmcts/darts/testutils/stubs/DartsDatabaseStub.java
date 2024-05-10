@@ -644,6 +644,15 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
+    public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEnum... securityGroupsEnum) {
+        for (SecurityGroupEnum securityGroup : securityGroupsEnum) {
+            Optional<SecurityGroupEntity> superUserGroupEntity
+                = securityGroupRepository.findByGroupNameIgnoreCase(securityGroup.getName());
+            addUserToGroup(userAccount, superUserGroupEntity.get());
+        }
+    }
+
+    @Transactional
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
         securityGroup.getUsers().add(userAccount);
         userAccount.getSecurityGroupEntities().add(securityGroup);

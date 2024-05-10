@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.SecurityRoleMatcher;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
 import java.util.Arrays;
@@ -39,7 +41,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.setDescription("");
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER)))).thenReturn(true);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
@@ -52,7 +54,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.setEmailAddress("");
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER)))).thenReturn(true);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
@@ -65,7 +67,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.setFullName("");
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER)))).thenReturn(true);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
@@ -78,7 +80,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.securityGroupIds(Arrays.asList(12));
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER)))).thenReturn(true);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
@@ -90,7 +92,7 @@ class UserActivationPermissionsValidatorTest {
         UserPatch patch = new UserPatch();
         patch.setActive(false);
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER)))).thenReturn(true);
 
         userEnablementValidator.validate(patch);
     }
@@ -101,7 +103,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.setDescription("");
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true);
 
         userEnablementValidator.validate(patch);
     }
@@ -112,7 +114,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.setEmailAddress("");
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true);
 
         userEnablementValidator.validate(patch);
     }
@@ -123,7 +125,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.setFullName("");
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true);
 
         userEnablementValidator.validate(patch);
     }
@@ -134,7 +136,7 @@ class UserActivationPermissionsValidatorTest {
         patch.setActive(false);
         patch.securityGroupIds(Arrays.asList(12));
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(false, true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true);
 
         userEnablementValidator.validate(patch);
     }
@@ -144,7 +146,7 @@ class UserActivationPermissionsValidatorTest {
         UserPatch patch = new UserPatch();
         patch.setActive(true);
 
-        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.notNull())).thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(Mockito.argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN)))).thenReturn(true);
 
         userEnablementValidator.validate(patch);
     }

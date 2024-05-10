@@ -35,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
@@ -87,14 +88,7 @@ class UserControllerTest extends IntegrationBase {
         UserAccountEntity userAccountEntity = UserAccountTestData.minimalUserAccount();
         userAccountEntity = userAccountRepository.save(userAccountEntity);
 
-        // add user to the super admin group
-        Optional<SecurityGroupEntity> groupEntity
-            = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        HashSet<UserAccountEntity> entitiesSet = new HashSet<>();
-        entitiesSet.add(userAccountEntity);
-
-        groupEntity.get().setUsers(entitiesSet);
-        dartsDatabase.addUserToGroup(userAccountEntity, groupEntity.get());
+        dartsDatabase.addUserToGroup(userAccountEntity, SecurityGroupEnum.SUPER_ADMIN);
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
@@ -109,7 +103,7 @@ class UserControllerTest extends IntegrationBase {
         // now run the test to disable the user
         UserPatch userPatch = new UserPatch();
         userPatch.setActive(false);
-
+        userPatch.setDescription("");
         List<TranscriptionWorkflowEntity> workflowEntityBefore
             = dartsDatabase.getTranscriptionWorkflowRepository().findByTranscriptionOrderByWorkflowTimestampDesc(transcription);
         Assertions.assertFalse(containsApprovedWorkflow(workflowEntityBefore));
@@ -152,7 +146,7 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super user group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_USER.getName());
-        HashSet<UserAccountEntity> entitiesSet = new HashSet<>();
+        Set<UserAccountEntity> entitiesSet = new HashSet<>();
         entitiesSet.add(userAccountEntity);
 
         groupEntity.get().setUsers(entitiesSet);
@@ -214,7 +208,7 @@ class UserControllerTest extends IntegrationBase {
         // add user to the super admin group
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
-        HashSet<UserAccountEntity> entitiesSet = new HashSet<>();
+        Set<UserAccountEntity> entitiesSet = new HashSet<>();
         entitiesSet.add(userAccountEntity);
 
         groupEntity.get().setUsers(entitiesSet);
@@ -362,9 +356,8 @@ class UserControllerTest extends IntegrationBase {
         Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getErrorTypeNumeric(), problem.getType().toString());
     }
 
-
     private boolean containsApprovedWorkflow(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {
         return transcriptionWorkflowEntities.stream().anyMatch(e -> e.getTranscriptionStatus().getId()
-            == TranscriptionStatusEnum.APPROVED.getId());
+            .equals(TranscriptionStatusEnum.APPROVED.getId()));
     }
 }

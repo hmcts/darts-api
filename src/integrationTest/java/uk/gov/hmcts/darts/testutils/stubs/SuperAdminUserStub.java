@@ -1,15 +1,14 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.util.SecurityRoleMatcher;
 
 import java.util.Collections;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -38,6 +37,8 @@ public class SuperAdminUserStub {
             .thenReturn(user);
         Mockito.when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN))))
             .thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER))))
+            .thenReturn(true);
 
         return user;
     }
@@ -63,19 +64,5 @@ public class SuperAdminUserStub {
             .thenReturn(false);
 
         return user;
-    }
-
-    public class SecurityRoleMatcher implements ArgumentMatcher<Set<SecurityRoleEnum>> {
-
-        private final SecurityRoleEnum assertRole;
-
-        SecurityRoleMatcher(SecurityRoleEnum assertRole) {
-            this.assertRole = assertRole;
-        }
-
-        @Override
-        public boolean matches(Set<SecurityRoleEnum> roleSet) {
-            return roleSet.stream().anyMatch(e -> e == assertRole);
-        }
     }
 }

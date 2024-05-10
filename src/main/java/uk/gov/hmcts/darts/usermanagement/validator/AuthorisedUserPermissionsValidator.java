@@ -21,17 +21,17 @@ public class AuthorisedUserPermissionsValidator implements Validator<UserPatch> 
 
     @Override
     public void validate(UserPatch userPatch) {
-
-        Set<SecurityRoleEnum> superAdminRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_ADMIN)));
         Set<SecurityRoleEnum> superUserRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_USER)));
-
-        if ((userPatch.getActive() == null || (userPatch.getActive() != null && userPatch.getActive().equals(false)))
-            && userIdentity.userHasGlobalAccess(superUserRole)) {
-            if (hasAnythingOtherThanActivationStateChanged(userPatch)) {
+        Set<SecurityRoleEnum> superAdminRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_ADMIN)));
+        if (!userIdentity.userHasGlobalAccess(superAdminRole)) {
+            if (userPatch.getActive() == null || (userPatch.getActive() != null && userPatch.getActive().equals(false))
+                && userIdentity.userHasGlobalAccess(superUserRole)) {
+                if (hasAnythingOtherThanActivationStateChanged(userPatch)) {
+                    throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
+                }
+            } else if (userPatch.getActive() != null) {
                 throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
             }
-        } else if (!userIdentity.userHasGlobalAccess(superAdminRole)) {
-            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
         }
     }
 
