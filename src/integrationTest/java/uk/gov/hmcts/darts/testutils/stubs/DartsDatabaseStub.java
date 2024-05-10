@@ -104,6 +104,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEventHandlerWith;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
 
 @Service
@@ -717,6 +718,13 @@ public class DartsDatabaseStub {
         annotation.addHearing(save(someMinimalHearing()));
         save(annotation);
         return annotation;
+    }
+
+    @Transactional
+    public EventHandlerEntity createEventHandlerData() {
+        var eventHandler = createEventHandlerWith("Dummy integration test handler", "99999", "8888");
+        save(eventHandler);
+        return eventHandler;
     }
 
     public SecurityGroupEntity getSecurityGroupRef(int id) {

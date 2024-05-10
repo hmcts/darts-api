@@ -11,7 +11,7 @@
     "client_identifier": "<EODID>",
     "contributor": "NEWCASTLE & Int Test Courtroom 2",
     "bf_001": "Transcription",
-    "bf_002": "Case1",
+    "bf_002": "Case1|Case2",
     "bf_003": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "bf_004": "2023-09-23T00:00:00Z",
     "bf_005": "C3CCA7021CF79B42F245AF350601C284",

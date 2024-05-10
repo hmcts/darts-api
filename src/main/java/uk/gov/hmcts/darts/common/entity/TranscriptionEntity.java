@@ -155,4 +155,21 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         }
         return hearings.get(0);
     }
+
+    /**
+     * Get the court cases associated with this transcription, considering both hearings and directly related courts cases.
+     * The case_transcription_ae table will be populated by migration team for those transcription where there is no hearing details available in Legacy system.
+     * There are transcriptions in legacy where we don't have hearing dates available so those will be put into case_transcription_ae table
+     */
+    public List<CourtCaseEntity> getAssociatedCourtCases() {
+        List<CourtCaseEntity> allCourtCases = new ArrayList<>();
+
+        var casesFromHearings = hearings.stream().map(HearingEntity::getCourtCase).toList();
+        allCourtCases.addAll(casesFromHearings);
+
+        allCourtCases.addAll(this.courtCases);
+
+        var uniqueCases = io.vavr.collection.List.ofAll(allCourtCases).distinctBy(CourtCaseEntity::getId).toJavaList();
+        return uniqueCases;
+    }
 }

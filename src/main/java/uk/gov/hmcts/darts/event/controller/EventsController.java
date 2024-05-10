@@ -19,9 +19,11 @@ import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.model.EventsResponse;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.event.service.EventMappingService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -31,6 +33,7 @@ import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @Slf4j
@@ -44,6 +47,7 @@ public class EventsController implements EventApi {
 
     private final EventDispatcher eventDispatcher;
     private final DartsEventMapper dartsEventMapper;
+    private final EventMappingService eventMappingService;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -90,7 +94,17 @@ public class EventsController implements EventApi {
         List<CourtLog> courtLogs = courtLogsService.getCourtLogs(courthouse, caseNumber, startDateTime, endDateTime);
 
         return new ResponseEntity<>(courtLogs, HttpStatus.OK);
+    }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<EventMapping> adminGetEventMappings(Integer eventHandlerId) {
+
+        EventMapping eventMapping = eventMappingService.getEventMapping(eventHandlerId);
+
+        return new ResponseEntity<>(eventMapping, HttpStatus.OK);
     }
 
 }

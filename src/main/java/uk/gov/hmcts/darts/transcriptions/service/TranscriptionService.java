@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -63,8 +62,6 @@ public interface TranscriptionService {
     void closeTranscription(Integer transcriptionId, String transcriptionComment);
 
     List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId);
-
-    List<CourtCaseEntity> getTranscriptionDocumentsCases(TranscriptionDocumentEntity transcriptionDocumentEntity);
 
     List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent);
 

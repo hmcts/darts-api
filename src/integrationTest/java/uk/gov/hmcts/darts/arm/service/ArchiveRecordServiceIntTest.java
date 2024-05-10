@@ -220,6 +220,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         authorisationStub.givenTestSchema();
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var courtCase = authorisationStub.getCourtCaseEntity();
+        courtCase.setCaseNumber("Case2");
+        dartsDatabase.getCaseRepository().save(courtCase);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
             testUser,
             courtCase,
@@ -285,6 +287,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         authorisationStub.givenTestSchema();
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var courtCase = authorisationStub.getCourtCaseEntity();
+        courtCase.setCaseNumber("Case2");
+        dartsDatabase.getCaseRepository().save(courtCase);
         var transcriptionEntity = dartsDatabase.getTranscriptionStub().createAndSaveAwaitingAuthorisationTranscription(
             testUser,
             courtCase,
