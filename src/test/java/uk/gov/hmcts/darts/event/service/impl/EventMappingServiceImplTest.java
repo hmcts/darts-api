@@ -26,13 +26,13 @@ class EventMappingServiceImplTest {
     EventHandlerRepository eventHandlerRepository;
 
     @InjectMocks
-    EventMappingServiceImpl eventDispatcher;
+    EventMappingServiceImpl eventMappingServiceImpl;
 
     @Test
     void handleGetEventMappingRequestWhenNoEventHandlerMapping() {
         when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        var exception = assertThrows(DartsApiException.class, () -> eventDispatcher.getEventMapping(1));
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.getEventMapping(1));
 
         assertEquals(
             "No event handler could be found in the database for event handler id: 1.",
@@ -56,7 +56,7 @@ class EventMappingServiceImplTest {
 
         when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.of(eventHandlerEntity));
 
-        EventMapping result = eventDispatcher.getEventMapping(1);
+        EventMapping result = eventMappingServiceImpl.getEventMapping(1);
 
         assertEquals(eventHandlerEntity.getId(), result.getId());
         assertEquals(eventHandlerEntity.getType(), result.getType());

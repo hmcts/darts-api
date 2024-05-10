@@ -223,6 +223,7 @@ paths:
       tags:
         - Event
       summary: An Endpoint which allows admin users to request an event mapping
+      operationId: adminGetEventMappings
       description: |-
         An Endpoint which allows admin users to request an event mapping using event handler id
       parameters:

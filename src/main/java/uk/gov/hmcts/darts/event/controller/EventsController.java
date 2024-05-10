@@ -100,7 +100,7 @@ public class EventsController implements EventApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN})
-    public ResponseEntity<EventMapping> eventMappingsEventHandlerIdGet(Integer eventHandlerId) {
+    public ResponseEntity<EventMapping> adminGetEventMappings(Integer eventHandlerId) {
 
         EventMapping eventMapping = eventMappingService.getEventMapping(eventHandlerId);
 

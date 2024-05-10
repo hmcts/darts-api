@@ -2,22 +2,23 @@ package uk.gov.hmcts.darts.event.controller;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
 class EventControllerGetEventsMappingTest extends IntegrationBase  {
@@ -28,17 +29,14 @@ class EventControllerGetEventsMappingTest extends IntegrationBase  {
     private transient MockMvc mockMvc;
 
     @Autowired
-    private SuperAdminUserStub superAdminUserStub;
+    private GivenBuilder given;
 
-    @MockBean
-    private UserIdentity mockUserIdentity;
-
-    @Test
-    void eventMappingsGetEndpoint() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.INCLUDE)
+    void allowSuperAdminToGetEventMappings(SecurityRoleEnum role) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         var entity = dartsDatabase.createEventHandlerData();
-
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, entity.getId());
 
@@ -53,27 +51,21 @@ class EventControllerGetEventsMappingTest extends IntegrationBase  {
             .andExpect(jsonPath("$.created_at").exists());
     }
 
-    @Test
-    void eventMappingsEndpointShouldReturnForbiddenError() throws Exception {
-        when(mockUserIdentity.getUserAccount()).thenReturn(null);
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
+    void disallowsAllUsersExceptSuperAdminToPatchAutomatedTasks(SecurityRoleEnum role) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, 1);
 
-        MvcResult response = mockMvc.perform(requestBuilder)
+        mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
             .andReturn();
-
-        String actualResponse = response.getResponse().getContentAsString();
-
-        String expectedResponse = """
-            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
     void eventMappingsEndpointShouldReturn404ErrorWhenEventMappingDoesNotExist() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, 1_000_099);
 
