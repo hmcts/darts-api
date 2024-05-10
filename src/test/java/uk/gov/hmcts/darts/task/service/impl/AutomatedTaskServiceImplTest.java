@@ -29,13 +29,16 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -209,6 +212,42 @@ class AutomatedTaskServiceImplTest {
         automatedTaskService.reloadTaskByName("DailyListHousekeeping");
 
         verify(taskScheduler).schedule(automatedTask, trigger);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
+    void failedTask() {
+        when(mockAutomatedTaskConfigurationProperties.getSystemUserEmail()).thenReturn("system@darts.test");
+
+        var failingAutomatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties,
+            logApi) {
+            @Override
+            protected void runTask() {
+                throw new RuntimeException("Task failed");
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public String getTaskName() {
+                return "FailedTask";
+            }
+        };
+
+        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
+            failingAutomatedTask,
+            "*/7 * * * * *"
+        );
+        when(mockAutomatedTaskRepository.findByTaskName(failingAutomatedTask.getTaskName()))
+            .thenReturn(Optional.of(expectedAutomatedTaskEntity));
+
+        failingAutomatedTask.run();
+        verify(logApi, times(1)).taskFailed(any(UUID.class), eq("FailedTask"));
     }
 
     @Test

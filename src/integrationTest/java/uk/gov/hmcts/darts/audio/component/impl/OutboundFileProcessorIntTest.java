@@ -341,7 +341,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         Path audioPath11 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test11.mp2"), REPLACE_EXISTING);
         Path audioPath12 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test12.mp2"), REPLACE_EXISTING);
 
-        LinkedHashMap<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
+        Map<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
         mediaEntityToDownloadLocation.put(mediaEntity1, audioPath);
         mediaEntityToDownloadLocation.put(mediaEntity2, audioPath2);
         mediaEntityToDownloadLocation.put(mediaEntity3, audioPath3);
@@ -496,7 +496,7 @@ class OutboundFileProcessorIntTest extends IntegrationBase {
         Path audioPath11 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test11.mp2"), REPLACE_EXISTING);
         Path audioPath12 = Files.copy(audioFileTest.toPath(), createFile(tempDirectory, "audio-test12.mp2"), REPLACE_EXISTING);
 
-        LinkedHashMap<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
+        Map<MediaEntity, Path> mediaEntityToDownloadLocation = new LinkedHashMap<>();
         mediaEntityToDownloadLocation.put(mediaEntity1, audioPath);
         mediaEntityToDownloadLocation.put(mediaEntity2, audioPath2);
         mediaEntityToDownloadLocation.put(mediaEntity3, audioPath3);

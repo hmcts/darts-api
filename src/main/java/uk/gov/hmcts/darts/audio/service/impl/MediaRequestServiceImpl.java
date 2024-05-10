@@ -71,6 +71,7 @@ import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTe
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@SuppressWarnings({"PMD.CouplingBetweenObjects"})
 public class MediaRequestServiceImpl implements MediaRequestService {
 
     private final HearingRepository hearingRepository;
@@ -96,7 +97,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
-        nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, MediaRequestStatus.COMPLETED));
+        nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, COMPLETED));
         return nonAccessedResponse;
     }
 
@@ -192,7 +193,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         if (transformedMediaRepository.findByMediaRequestId(mediaRequest.getId()).isEmpty()) {
             log.debug("There are no more TransformedMediaEntities associated with media_request_id {}, so deleting.", mediaRequest.getId());
-            mediaRequest.setStatus(MediaRequestStatus.DELETED);
+            mediaRequest.setStatus(DELETED);
             mediaRequestRepository.saveAndFlush(mediaRequest);
         }
     }
@@ -387,7 +388,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity) {
 
-        mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
+        mediaRequestEntity.setStatus(COMPLETED);
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }

@@ -26,7 +26,7 @@ public interface AuthProviderConfigurationProperties {
 
             return JWKSourceBuilder.create(jwksUrl).build();
         } catch (MalformedURLException malformedUrlException) {
-            throw new AuthenticationException("Sorry authentication jwks URL is incorrect");
+            throw new AuthenticationException("Sorry authentication jwks URL is incorrect", malformedUrlException);
         }
     }
 }

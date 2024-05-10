@@ -145,14 +145,21 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
      */
     private DownloadResponseMetaData getDataFromStorage(List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException {
         List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
-        StringBuilder logBuilder = new StringBuilder("Starting to search for files with " + storedEodEntities.size() + " eodEntities\n");
+        StringBuilder logBuilder = new StringBuilder(134);
+        logBuilder.append("Starting to search for files with ")
+            .append(storedEodEntities.size())
+            .append(" eodEntities\n");
 
         ExternalObjectDirectoryEntity eodEntityToDelete = null;
         for (DatastoreContainerType datastoreContainerType : storageOrder) {
-            logBuilder.append("checking container " + datastoreContainerType.name() + "\n");
+            logBuilder.append("checking container ")
+                .append(datastoreContainerType.name())
+                .append('\n');
             ExternalObjectDirectoryEntity eodEntity = findCorrespondingEodEntityForStorageLocation(storedEodEntities, datastoreContainerType);
             if (eodEntity == null) {
-                logBuilder.append("matching eodEntity not found for " + datastoreContainerType.name() + "\n");
+                logBuilder.append("matching eodEntity not found for ")
+                    .append(datastoreContainerType.name())
+                    .append('\n');
                 continue;
             }
             if (datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
@@ -160,7 +167,9 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             }
             Optional<BlobContainerDownloadable> container = getSupportedContainer(datastoreContainerType);
             if (container.isEmpty()) {
-                logBuilder.append("Supporting Container " + datastoreContainerType.name() + " not found\n");
+                logBuilder.append("Supporting Container ")
+                    .append(datastoreContainerType.name())
+                    .append(" not found\n");
                 continue;
             }
             log.info("Downloading blob id {} from container {}", eodEntity.getExternalLocation(), datastoreContainerType.name());
@@ -173,19 +182,21 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 return downloadResponseMetaData;
             } catch (FileNotDownloadedException | IOException e) {
                 String logMessage = MessageFormat.format("Could not download file for eodEntity ''{0,number,#}''", eodEntity.getId());
-                logBuilder.append(logMessage + "\n");
+                logBuilder.append(logMessage)
+                    .append('\n');
                 log.error(logMessage, e);
             }
         }
         throw new FileNotDownloadedException(logBuilder.toString());
     }
 
+    @SuppressWarnings({"PMD.CloseResource", "PMD.AvoidFileStream"})
     private void processUnstructuredData(
         DatastoreContainerType datastoreContainerType,
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntity,
         ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
-        if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
+        if (datastoreContainerType.equals(ARM)) {
 
             String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
             File targetFile = new File(tempBlobPath);
@@ -203,6 +214,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         }
     }
 
+    @SuppressWarnings({"PMD.CloseResource"})
     private void createUnstructuredData(
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntityToDelete,

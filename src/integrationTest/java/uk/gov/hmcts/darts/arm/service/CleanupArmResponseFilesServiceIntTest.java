@@ -51,7 +51,6 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     private CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
     private MediaEntity savedMedia;
-    private ExternalObjectDirectoryEntity armEod;
 
     @BeforeEach
     void setupData() {
@@ -75,7 +74,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_AndStateStored() {
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -127,7 +126,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFileAndStateManifestFailed() {
 
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             ARM_RESPONSE_MANIFEST_FAILED,
             ARM,
@@ -283,7 +282,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_UploadFile_ForMultipleAttempts() {
 
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -348,7 +347,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @Test
     void cleanupResponseFilesSuccessWithFiles_InputUpload_CreateRecord_InvalidLine() {
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -400,7 +399,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesFailsWithOnlyResponseFileInputUpload() {
 
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -440,7 +439,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesWith2InputUploadResponseFilesWithDifferentTransferAttempts() {
 
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,
@@ -507,7 +506,7 @@ class CleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @Test
     void cleanupResponseFilesFailsToDeleteResponseFiles() {
 
-        armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
             STORED,
             ARM,

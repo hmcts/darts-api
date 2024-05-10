@@ -32,6 +32,7 @@ public class DetsDataManagementApiImpl implements DetsDataManagementApi {
         throw new FileNotDownloadedException("Container for " + container.name() + " not found in DETS.");
     }
 
+    @Override
     public Optional<String> getContainerName(DatastoreContainerType datastoreContainerType) {
         if (Objects.requireNonNull(datastoreContainerType) == DatastoreContainerType.DETS) {
             return Optional.of(detsManagementConfiguration.getContainerName());

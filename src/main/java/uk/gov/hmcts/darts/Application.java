@@ -29,6 +29,7 @@ public class Application implements CommandLineRunner {
         log.info("Default TimeZone: {}", TimeZone.getDefault().getID());
     }
 
+    @SuppressWarnings({"PMD.CloseResource"})
     public static void main(final String[] args) {
         final var application = new SpringApplication(Application.class);
         final var instance = application.run(args);

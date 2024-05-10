@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.arm.model.blobs.ContinuationTokenBlobs;
 import uk.gov.hmcts.darts.arm.service.ArmService;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
@@ -96,7 +98,11 @@ class ArmServiceFunctionalTest {
         List<String> blobs = armService.listSubmissionBlobsUsingBatch(armContainerName, FUNCTIONAL_TEST, batchSize);
         for (String blobPathAndName : blobs) {
             log.info("Blob about to be deleted {}", blobPathAndName);
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            try {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            } catch (AzureDeleteBlobException e) {
+                fail("Exception " + e);
+            }
         }
 
         assertFalse(blobs.isEmpty());
@@ -121,7 +127,11 @@ class ArmServiceFunctionalTest {
             log.info("Total blobs {}", continuationTokenBlobs.getBlobNamesAndPaths().size());
             allBlobs.addAll(continuationTokenBlobs.getBlobNamesAndPaths());
             for (String blobPathAndName : continuationTokenBlobs.getBlobNamesAndPaths()) {
-                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+                try {
+                    armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+                } catch (AzureDeleteBlobException e) {
+                    fail("Exception " + e);
+                }
             }
         } while (nonNull(continuationToken));
 
@@ -145,12 +155,20 @@ class ArmServiceFunctionalTest {
 
         for (String blobName : armSubmissionBlobsToBeDeleted) {
             String blobPathAndName = armSubmissionDropZone + blobName;
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            try {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            } catch (AzureDeleteBlobException e) {
+                fail("Exception " + e);
+            }
         }
         armSubmissionBlobsToBeDeleted.clear();
 
         for (String blobPathAndName : armBlobsWithPathToBeDeleted) {
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            try {
+                armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+            } catch (AzureDeleteBlobException e) {
+                fail("Exception " + e);
+            }
         }
         armBlobsWithPathToBeDeleted.clear();
     }

@@ -7,6 +7,8 @@ import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
+import java.util.Locale;
+
 @UtilityClass
 public class GetAudioRequestResponseMapper {
 
@@ -27,7 +29,7 @@ public class GetAudioRequestResponseMapper {
         response.setOutputFilename(transformedMedia.getOutputFilename());
         uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat outputFormat = transformedMedia.getOutputFormat();
         if (outputFormat != null) {
-            response.setOutputFormat(AudioRequestOutputFormat.fromValue(outputFormat.toString().toUpperCase()));
+            response.setOutputFormat(AudioRequestOutputFormat.fromValue(outputFormat.toString().toUpperCase(Locale.getDefault())));
         }
 
         return response;

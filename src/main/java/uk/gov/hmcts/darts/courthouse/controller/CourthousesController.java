@@ -46,8 +46,8 @@ public class CourthousesController implements CourthousesApi {
         try {
             AdminCourthouse adminCourthouse = courthouseService.getAdminCourtHouseById(courthouseId);
             return new ResponseEntity<>(adminCourthouse, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NOT_FOUND, ex);
         }
     }
 

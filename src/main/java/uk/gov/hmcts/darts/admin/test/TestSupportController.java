@@ -54,6 +54,7 @@ import static org.springframework.http.HttpStatus.OK;
 @Slf4j
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "darts.testing-support-endpoints", name = "enabled", havingValue = "true")
+@SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.TestClassWithoutTestCases"})
 public class TestSupportController {
 
     private final SessionFactory sessionFactory;
@@ -72,7 +73,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.CloseResource"})
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
         Session session = sessionFactory.openSession();
@@ -135,6 +136,7 @@ public class TestSupportController {
                 .executeUpdate();
     }
 
+    @SuppressWarnings({"PMD.UnusedFormalParameter"})
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
         session.createNativeQuery("""
                                           delete from darts.security_group_courthouse_ae where cth_id in
@@ -225,8 +227,8 @@ public class TestSupportController {
 
             auditRepository.saveAndFlush(audit);
             return new ResponseEntity<>(CREATED);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(BAD_REQUEST);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(BAD_REQUEST, "Audit request failed", ex);
         }
     }
 

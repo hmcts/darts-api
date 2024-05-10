@@ -201,6 +201,7 @@ function:
     DARTS_GATEWAY_URL: http://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
     ACTIVE_DIRECTORY_B2C_BASE_URI: https://hmctsstgextid.b2clogin.com
     ACTIVE_DIRECTORY_B2C_AUTH_URI: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
+    ARM_URL: https://darts-stub-services.{{ .Values.global.environment }}.platform.hmcts.net
 
   secrets:
     DARTS_API_DB_CONNECTION_STRING:

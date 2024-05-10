@@ -370,6 +370,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
             .header("Content-Type", "application/json");
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private Integer createSecurityGroup(String name, String displayName) throws Exception {
         String content = """
             {

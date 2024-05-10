@@ -104,7 +104,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
 
         var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER);
         assertThat(notifications).extracting("emailAddress")
-            .hasSameElementsAs(List.of(transcriber.getEmailAddress(), REQUESTER_EMAIL));
+            .hasSameElementsAs(List.of(transcriber.getEmailAddress()));
 
     }
 

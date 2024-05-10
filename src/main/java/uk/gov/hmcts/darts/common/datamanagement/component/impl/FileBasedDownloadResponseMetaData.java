@@ -27,6 +27,7 @@ public class FileBasedDownloadResponseMetaData extends DownloadResponseMetaData 
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidFileStream")
     public OutputStream getOutputStream(StorageConfiguration configuration) throws IOException {
         if (outputStream == null) {
             Files.createDirectories(Path.of(configuration.getTempBlobWorkspace()));

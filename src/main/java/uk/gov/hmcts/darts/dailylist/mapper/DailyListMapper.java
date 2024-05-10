@@ -60,7 +60,7 @@ public class DailyListMapper {
                 dailyListEntity.getId(),
                 e
             );
-            throw new DartsApiException(DailyListError.INTERNAL_ERROR);
+            throw new DartsApiException(DailyListError.INTERNAL_ERROR, e);
         }
     }
 }

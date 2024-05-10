@@ -51,6 +51,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
     @Value("${darts.retention.overridable-fixed-policy-keys}")
     List<String> overridableFixedPolicyKeys;
 
+    @SuppressWarnings({"PMD.ExcessiveParameterList"})
     public StopAndCloseHandler(RetrieveCoreObjectService retrieveCoreObjectService,
                                EventRepository eventRepository,
                                HearingRepository hearingRepository,

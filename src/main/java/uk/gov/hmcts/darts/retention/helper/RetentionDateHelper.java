@@ -29,7 +29,7 @@ public class RetentionDateHelper {
     private static final int POLICY_STRING_DAY_LOCATION = 4;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
-    private Pattern policyFormat = Pattern.compile("^\\d+Y\\d+M\\d+D$");
+    private static final Pattern POLICY_FORMAT = Pattern.compile("^\\d+Y\\d+M\\d+D$");
 
     @Value("${darts.retention.overridable-fixed-policy-keys}")
     List<String> overridableFixedPolicyKeys;
@@ -58,7 +58,7 @@ public class RetentionDateHelper {
     }
 
     public LocalDate applyPolicyString(LocalDate dateToAppend, String policyString) {
-        if (StringUtils.isBlank(policyString) || !policyFormat.matcher(policyString).matches()) {
+        if (StringUtils.isBlank(policyString) || !POLICY_FORMAT.matcher(policyString).matches()) {
             throw new DartsApiException(
                 RetentionApiError.INTERNAL_SERVER_ERROR,
                 MessageFormat.format("PolicyString ''{0}'', is not in the required format.", policyString)

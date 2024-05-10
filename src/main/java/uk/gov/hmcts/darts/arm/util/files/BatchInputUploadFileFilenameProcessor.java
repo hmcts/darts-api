@@ -16,7 +16,7 @@ public class BatchInputUploadFileFilenameProcessor {
 
     private static final int NUMBER_OF_TOKENS = 5;
     private static final String FILE_EXTENSION_SEPARATOR = ".";
-    private String batchMetadataFilenameAndPath;
+    private final String batchMetadataFilenameAndPath;
     private String batchMetadataFilename;
     private String prefix;
     private String uuidString;

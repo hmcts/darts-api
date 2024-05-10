@@ -101,7 +101,10 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         verifySecurityTokenWithNoUserStateWhenNoUserAccount();
     }
 
+
     // DetachedTestCase - workaround for BadJWSException: Signed JWT rejected: Invalid signature
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+
     private void verifySecurityTokenWithNoUserStateWhenNoUserAccount() throws Exception {
         reset(mockAuthorisationApi);
 

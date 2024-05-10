@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Properties;
 
 import static java.util.Objects.isNull;
@@ -61,6 +60,7 @@ import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropert
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.GodClass"})
 public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
 
     private static final String CASE_LIST_DELIMITER = "|";
@@ -134,13 +134,14 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             .build();
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getCaseRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(caseDocument.getCreatedTs()))
+            .eventDate(formatDateTime(caseDocument.getCreatedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(caseDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
@@ -221,7 +222,7 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             case FILE_TYPE_KEY -> caseDocument.getFileType();
             case HEARING_DATE_KEY -> getHearingDate(caseDocument);
             case CHECKSUM_KEY -> caseDocument.getChecksum();
-            case CREATED_DATE_TIME_KEY -> formatDateTime(caseDocument.getCreatedTs());
+            case CREATED_DATE_TIME_KEY -> formatDateTime(caseDocument.getCreatedDateTime());
             case COURTHOUSE_KEY -> getCourthouse(caseDocument);
             default -> null;
         };
@@ -267,9 +268,4 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
             default -> null;
         };
     }
-
-    private String caseListToString(List<String> caseNumberList) {
-        return String.join(CASE_LIST_DELIMITER, caseNumberList);
-    }
-
 }

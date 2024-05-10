@@ -70,9 +70,9 @@ public class AnnotationIdControllerAuthorisationImpl extends BaseControllerAutho
             try {
                 Integer annotationId = Integer.valueOf(annotationIdParamOptional.get());
                 authorisation.authoriseByAnnotationId(annotationId, roles);
-            } catch (NumberFormatException e) {
-                log.error("Unable to parse annotation_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_REQUEST_ANNOTATION_ID);
+            } catch (NumberFormatException ex) {
+                log.error("Unable to parse annotation_id for checkAuthorisation", ex);
+                throw new DartsApiException(BAD_REQUEST_ANNOTATION_ID, ex);
             }
         }
     }

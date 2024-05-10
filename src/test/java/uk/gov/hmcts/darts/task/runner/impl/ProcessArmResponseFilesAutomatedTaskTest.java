@@ -6,8 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
+import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
+
+import java.util.Optional;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessArmResponseFilesAutomatedTaskTest {
@@ -17,18 +24,28 @@ class ProcessArmResponseFilesAutomatedTaskTest {
     private ArmResponseFilesProcessorImpl armResponseFilesProcessor;
     @Mock
     private LogApi logApi;
+    @Mock
+    private AutomatedTaskRepository automatedTaskRepository;
+    @Mock
+    private AutomatedTaskProcessorFactory processorFactory;
 
     @Test
     void runTask() {
+        AutomatedTaskEntity automatedTask = new AutomatedTaskEntity();
+        automatedTask.setId(1);
+        automatedTask.setTaskName("ProcessArmResponseFiles");
         // given
         ProcessArmResponseFilesAutomatedTask processArmResponseFilesAutomatedTask =
             new ProcessArmResponseFilesAutomatedTask(
-                null,
+                automatedTaskRepository,
                 lockProvider,
                 null,
-                armResponseFilesProcessor,
+                processorFactory,
                 logApi
             );
+
+        when(automatedTaskRepository.findByTaskName("ProcessArmResponseFiles")).thenReturn(Optional.of(automatedTask));
+        when(processorFactory.createArmResponseFilesProcessor(false)).thenReturn(armResponseFilesProcessor);
 
         // when
         processArmResponseFilesAutomatedTask.runTask();

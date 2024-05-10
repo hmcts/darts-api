@@ -102,6 +102,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
 
+    @Override
     public List<SecurityGroupWithIdAndRoleAndUsers> getSecurityGroups(List<Integer> roleIds, Integer courthouseId, Integer userId, Boolean singletonUser) {
 
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
@@ -135,7 +136,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         } else {
             //throw a 404 not found
             throw new DartsApiException(
-                UserManagementError.SECURITY_GROUP_NOT_FOUND,
+                SECURITY_GROUP_NOT_FOUND,
                 String.format("Security group id %d not found", securityGroupId));
         }
 
@@ -287,6 +288,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         return securityGroupEntities;
     }
 
+    @SuppressWarnings({"PMD.UselessParentheses"})
     private List<SecurityGroupEntity> filterSecurityGroupEntitiesBySingleUser(
         List<SecurityGroupEntity> securityGroupEntities, Boolean singletonUser) {
 

@@ -8,6 +8,8 @@ import uk.gov.hmcts.darts.annotation.errors.AnnotationApiError;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.util.Locale;
+
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -19,7 +21,7 @@ public class FileTypeValidator implements Validator<MultipartFile> {
 
     @Override
     public void validate(MultipartFile file) {
-        var uploadedFileExtension = requireNonNull(getExtension(file.getOriginalFilename())).toLowerCase();
+        var uploadedFileExtension = requireNonNull(getExtension(file.getOriginalFilename())).toLowerCase(Locale.getDefault());
         if (!config.getAllowedExtensions().contains(uploadedFileExtension)) {
             throw new DartsApiException(AnnotationApiError.BAD_REQUEST_DOC_TYPE);
         }

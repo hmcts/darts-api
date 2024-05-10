@@ -30,6 +30,7 @@ public class RequestValidator {
     This is to try to calculate if the search terms are too broad. E.g. adding a judge name with just 2 letters is too broad,
     and doesn't get counted.
      */
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private static void checkComplexity(GetCasesSearchRequest request) {
         int totalPoints = 0;
         //give a point for every letter more than 3
@@ -41,12 +42,14 @@ public class RequestValidator {
         totalPoints += (request.getDateFrom() != null || request.getDateTo() != null) ? 1 : 0;
         totalPoints += StringUtils.length(request.getEventTextContains()) >= 3 ? 1 : 0;
 
-        if (totalPoints < 3) {
+        int three = 3;
+        if (totalPoints < three) {
             throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }
     }
 
 
+    @SuppressWarnings({"PMD.UnnecessaryVarargsArrayCreation"})
     private static void checkNoCriteriaProvided(GetCasesSearchRequest request) {
         if (BooleanUtils.and(new boolean[]{
             StringUtils.isBlank(request.getCaseNumber()),

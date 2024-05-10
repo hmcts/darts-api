@@ -35,7 +35,7 @@ class ViqHeaderTest {
 
         var instant = Instant.parse("2023-04-28T09:23:11Z");
 
-        byte[] header = new ViqHeader(instant).getViqHeader();
+        byte[] header = new ViqHeader(instant).getViqHeaderBytes();
 
         assertThat(header.length).isEqualTo(1024);
         assertThat(header[VERIFY_OFFSET_0]).isEqualTo((byte) VERIFY_OFFSET_VALUE_0);

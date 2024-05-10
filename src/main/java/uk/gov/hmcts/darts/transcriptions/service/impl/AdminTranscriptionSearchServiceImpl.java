@@ -21,6 +21,7 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     private final TranscriptionSearchQuery transcriptionSearchQuery;
 
     @Override
+    @SuppressWarnings({"PMD.NullAssignment"})
     public List<TranscriptionSearchResponse> searchTranscriptions(TranscriptionSearchRequest request) {
         // If the owner filter is provided, we prefetch the ids of all the transcriptions owned by that owner.
         // This avoids using a sub query in the search query and improves performance.  These ids are then used
@@ -40,10 +41,10 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         var transcriptionIds = new ArrayList<Integer>();
         if (request.getTranscriptionId() != null) {
             transcriptionIds.add(request.getTranscriptionId());
-        } else if (!isEmpty(transcriptionsIdsForOwner)) {
-            transcriptionIds.addAll(transcriptionsIdsForOwner);
-        } else {
+        } else if (isEmpty(transcriptionsIdsForOwner)) {
             transcriptionIds = null;
+        } else {
+            transcriptionIds.addAll(transcriptionsIdsForOwner);
         }
 
         return transcriptionSearchQuery.searchTranscriptions(request, transcriptionIds).stream()

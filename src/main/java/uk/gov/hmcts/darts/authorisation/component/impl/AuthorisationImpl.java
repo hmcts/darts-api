@@ -60,9 +60,9 @@ public class AuthorisationImpl implements Authorisation {
             final List<CourthouseEntity> courthouses = List.of(caseRepository.getReferenceById(caseId)
                                                                    .getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find Case-Courthouse for checkAuthorisation", e);
-            throw new DartsApiException(CASE_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            log.error("Unable to find Case-Courthouse for checkAuthorisation", ex);
+            throw new DartsApiException(CASE_NOT_FOUND, ex);
         }
     }
 
@@ -72,9 +72,9 @@ public class AuthorisationImpl implements Authorisation {
             final List<CourthouseEntity> courthouses = List.of(hearingRepository.getReferenceById(hearingId)
                                                                    .getCourtroom().getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find Hearing-Courtroom-Courthouse for checkAuthorisation", e);
-            throw new DartsApiException(HEARING_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            log.error("Unable to find Hearing-Courtroom-Courthouse for checkAuthorisation", ex);
+            throw new DartsApiException(HEARING_NOT_FOUND, ex);
         }
     }
 
@@ -84,9 +84,9 @@ public class AuthorisationImpl implements Authorisation {
             final List<CourthouseEntity> courthouses = List.of(mediaRequestRepository.getReferenceById(mediaRequestId)
                                                                    .getHearing().getCourtroom().getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find MediaRequest-Hearing-Courtroom-Courthouse for checkAuthorisation", e);
-            throw new DartsApiException(MEDIA_REQUEST_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            log.error("Unable to find MediaRequest-Hearing-Courtroom-Courthouse for checkAuthorisation", ex);
+            throw new DartsApiException(MEDIA_REQUEST_NOT_FOUND, ex);
         }
     }
 
@@ -105,13 +105,14 @@ public class AuthorisationImpl implements Authorisation {
                     .collect(Collectors.toUnmodifiableList()),
                 securityRoles
             );
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find Media-Hearing-Courtroom-Courthouse for checkAuthorisation", e);
-            throw new DartsApiException(MEDIA_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            log.error("Unable to find Media-Hearing-Courtroom-Courthouse for checkAuthorisation", ex);
+            throw new DartsApiException(MEDIA_NOT_FOUND, ex);
         }
     }
 
     @Override
+    @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
     public void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = getCourthousesFromTranscription(transcriptionId);
@@ -119,9 +120,9 @@ public class AuthorisationImpl implements Authorisation {
                 throw new EntityNotFoundException();
             }
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation. TranscriptionId={}", transcriptionId, e);
-            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation. TranscriptionId={}", transcriptionId, ex);
+            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND, ex);
         }
     }
 
@@ -153,9 +154,9 @@ public class AuthorisationImpl implements Authorisation {
             final List<CourthouseEntity> courthouses = List.of(transformedMediaRepository.getReferenceById(transformedMediaId)
                                                                    .getMediaRequest().getHearing().getCourtroom().getCourthouse());
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find TransformedMedia-MediaRequest-Hearing-Courtroom-Courthouse for checkAuthorisation", e);
-            throw new DartsApiException(TRANSFORMED_MEDIA_NOT_FOUND);
+        } catch (EntityNotFoundException ex) {
+            log.error("Unable to find TransformedMedia-MediaRequest-Hearing-Courtroom-Courthouse for checkAuthorisation", ex);
+            throw new DartsApiException(TRANSFORMED_MEDIA_NOT_FOUND, ex);
         }
     }
 

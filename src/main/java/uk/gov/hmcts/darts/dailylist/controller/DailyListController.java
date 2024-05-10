@@ -57,8 +57,8 @@ public class DailyListController implements DailyListsApi {
         DailyListJsonObject jsonDocument;
         try {
             jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
-        } catch (JsonProcessingException e) {
-            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST);
+        } catch (JsonProcessingException ex) {
+            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }
 
         DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
@@ -78,6 +78,7 @@ public class DailyListController implements DailyListsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     public ResponseEntity<PostDailyListResponse> dailylistsPost(
         String sourceSystem,
         String courthouse,
@@ -93,8 +94,8 @@ public class DailyListController implements DailyListsApi {
         if (jsonDoc.isPresent()) {
             try {
                 jsonDocument = objectMapper.readValue(jsonDoc.get(), DailyListJsonObject.class);
-            } catch (JsonProcessingException e) {
-                throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST);
+            } catch (JsonProcessingException ex) {
+                throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
             }
         }
 
@@ -114,6 +115,7 @@ public class DailyListController implements DailyListsApi {
 
     }
 
+    @Override
     public ResponseEntity<Void> dailylistsHousekeepingPost() {
         dailyListService.runHouseKeeping();
         return new ResponseEntity<>(HttpStatus.OK);

@@ -44,7 +44,4 @@ public class ReportEntity extends CreatedModifiedBaseEntity {
     @Column(name = "recipients")
     private String recipients;
 
-    @Column(name = "version_label", length = 32)
-    private String legacyVersionLabel;
-
 }

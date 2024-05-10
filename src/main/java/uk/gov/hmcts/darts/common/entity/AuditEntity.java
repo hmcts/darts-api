@@ -37,9 +37,6 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "usr_id", nullable = false)
     private UserAccountEntity user;
 
-    @Column(name = "enhanced_auditing")
-    private boolean enhancedAuditing;
-
     @Column(name = "additional_data")
     private String additionalData;
 }

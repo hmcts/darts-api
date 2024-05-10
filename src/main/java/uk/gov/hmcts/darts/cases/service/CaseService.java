@@ -30,5 +30,5 @@ public interface CaseService {
 
     List<Transcript> getTranscriptsByCaseId(Integer caseId);
 
-    public List<Annotation> getAnnotations(Integer caseId);
+    List<Annotation> getAnnotations(Integer caseId);
 }

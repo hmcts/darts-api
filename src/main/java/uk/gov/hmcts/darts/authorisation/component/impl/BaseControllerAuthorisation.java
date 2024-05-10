@@ -11,7 +11,7 @@ import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIAB
 
 @Component
 @NoArgsConstructor
-abstract class BaseControllerAuthorisation {
+class BaseControllerAuthorisation {
 
     public static final String BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE =
         "Unable to extract the %s in request path, query or header params for this Authorisation endpoint: %s";
