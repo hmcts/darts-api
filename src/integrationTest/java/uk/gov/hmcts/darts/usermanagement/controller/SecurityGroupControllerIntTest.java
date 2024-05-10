@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.util.Set;
 
@@ -29,6 +30,8 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
     public static final String ADMIN_SECURITY_GROUPS_ENDPOINT_URL = "/admin/security-groups";
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    private UserAccountStub userAccountStub;
     @MockBean
     private UserIdentity userIdentity;
     @Autowired
@@ -150,7 +153,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = String.format("""
                 [
                   {
-                    "user_ids":[-46],
+                    "user_ids":[],
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
@@ -198,7 +201,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = String.format("""
                 [
                   {
-                    "user_ids":[-46],
+                    "user_ids":[],
                     "id":-17,
                     "security_role_id":10,
                     "global_access":true,
@@ -421,6 +424,41 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                       }
                   ]
             """;
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getSecurityGroupsByCourthouseIdShouldSucceedAndReturnFilteredGroupsWithoutSystemUsers() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        var courthouseEntity = dartsDatabase.createCourthouseUnlessExists(TEST_COURTHOUSE_NAME);
+        addCourthouseToSecurityGroup(courthouseEntity, -4);
+
+        // add 2 users - system/non-system. only expect to see non-system in response
+        userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
+            .queryParam("courthouse_id", courthouseEntity.getId().toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+
+        String expectedJson = String.format("""
+                [
+                  {
+                    "user_ids":[3],
+                    "id":-4,
+                    "security_role_id":4,
+                    "global_access":false,
+                    "display_state":true,
+                    "courthouse_ids":[%s],
+                    "name":"Test Transcriber"
+                  }
+                ]
+            """, courthouseEntity.getId().toString());
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

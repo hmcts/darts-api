@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_ALLOWED;
@@ -176,7 +178,38 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     }
 
     private void patchSecurityGroupUsers(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
+
         List<Integer> userIds = securityGroupPatch.getUserIds();
+        if (userIds != null && !userIds.isEmpty()) {
+            // get a list of system users for security group
+            List<Integer> systemUserIds = securityGroupEntity
+                .getUsers()
+                .stream()
+                .filter(user -> user.getIsSystemUser())
+                .map(UserAccountEntity::getId)
+                .toList();
+
+            // filter the incoming list to remove system users
+            List<UserAccountEntity> patchUsers = userAccountRepository
+                .findByIdIn(securityGroupPatch.getUserIds());
+
+            if (patchUsers.isEmpty()) {
+                throw new DartsApiException(
+                    UserManagementError.USER_NOT_FOUND,
+                    String.format("No User accounts found for patch user IDs %s", securityGroupPatch.getUserIds()));
+            }
+
+            List<Integer> patchNonSystemUserIds = patchUsers
+                .stream().filter(user -> !user.getIsSystemUser())
+                .map(UserAccountEntity::getId)
+                .toList();
+
+            // join the 2 lists - distinct
+            userIds = Stream.concat(systemUserIds.stream(), patchNonSystemUserIds.stream())
+                .distinct()
+                .collect(Collectors.toList());
+        }
+
         if (userIds != null) {
             securityGroupEntity.getUsers().forEach(userAccountEntity -> userAccountEntity.getSecurityGroupEntities().remove(securityGroupEntity));
             securityGroupEntity.getUsers().clear();

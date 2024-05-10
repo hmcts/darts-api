@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -306,6 +307,23 @@ public class UserAccountStub {
         user.getSecurityGroupEntities().add(superUserGroup);
 
         return userAccountRepository.saveAndFlush(user);
+    }
+
+    @Transactional
+    public List<UserAccountEntity> createAuthorisedIntegrationTestUsersSystemAndNonSystem(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+
+        var testUserNonSystem = getIntegrationTestUserAccountEntity();
+        testUserNonSystem.getSecurityGroupEntities().add(securityGroupEntity);
+        testUserNonSystem = userAccountRepository.saveAndFlush(testUserNonSystem);
+
+        var testUserSystem = getSeparateIntegrationTestUserAccountEntity();
+        testUserSystem.getSecurityGroupEntities().add(securityGroupEntity);
+        testUserSystem.setIsSystemUser(true);
+        testUserSystem = userAccountRepository.saveAndFlush(testUserSystem);
+
+        return Arrays.asList(testUserNonSystem, testUserSystem);
     }
 
 }
