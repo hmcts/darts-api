@@ -16,6 +16,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     name = "arm-api-client",
     url = "${darts.storage.arm-api.url}"
 )
+@SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement"})
 public interface ArmApiClient {
 
     @PostMapping(value = "${darts.storage.arm-api.update-metadata-path}",
@@ -26,6 +27,7 @@ public interface ArmApiClient {
                                                           @RequestBody UpdateMetadataRequest updateMetadataRequest);
 
     @GetMapping(value = "${darts.storage.arm-api.download-data-path}")
+    @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     feign.Response downloadArmData(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                         @PathVariable("cabinet_id") String cabinetId,
                                         @PathVariable("record_id") String externalRecordId,

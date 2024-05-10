@@ -21,7 +21,7 @@ public enum TranscriptionStatusEnum {
     private final Integer id;
 
     public static TranscriptionStatusEnum fromId(Integer id) {
-        for (TranscriptionStatusEnum b : TranscriptionStatusEnum.values()) {
+        for (TranscriptionStatusEnum b : values()) {
             if (b.id.equals(id)) {
                 return b;
             }

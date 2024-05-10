@@ -28,6 +28,7 @@ public class DailyListPostValidator {
         }
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private void validateXmlRequest(DailyListPostRequest request) {
         if (StringUtils.isBlank(request.getDailyListXml())) {
             throw new DartsApiException(DailyListError.XML_OR_JSON_NEEDS_TO_BE_PROVIDED);

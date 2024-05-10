@@ -28,6 +28,7 @@ import java.util.Set;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.ConfusingTernary"})
 public class AuthorisationAspect {
 
     private final ControllerAuthorisationFactory controllerAuthorisationFactory;
@@ -48,6 +49,7 @@ public class AuthorisationAspect {
         return handleRequestBodyAuthorisationAdvice(joinPoint, body);
     }
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     @Around("authorisationPointcut() && withinControllerPointcut() && args(@RequestBody body)")
     public Object handleRequestBodyAuthorisationAdvice(ProceedingJoinPoint joinPoint, Object body)
         throws Throwable {
@@ -88,6 +90,7 @@ public class AuthorisationAspect {
     }
 
     @Before("authorisationPointcut() && withinControllerPointcut()")
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     public void handleRequestParametersAuthorisationAdvice(JoinPoint joinPoint) {
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
             .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);

@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
+import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -13,15 +14,15 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_A
 public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTask {
 
     protected String taskName = UNSTRUCTURED_TO_ARM_TASK_NAME.getTaskName();
-    private final UnstructuredToArmProcessor unstructuredToArmProcessor;
+    private final AutomatedTaskProcessorFactory automatedTaskProcessorFactory;
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                           LockProvider lockProvider,
                                           AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                          UnstructuredToArmProcessor processor,
+                                          AutomatedTaskProcessorFactory processor,
                                           LogApi logApi) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
-        this.unstructuredToArmProcessor = processor;
+        this.automatedTaskProcessorFactory = processor;
     }
 
     @Override
@@ -31,6 +32,9 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
 
     @Override
     protected void runTask() {
+        boolean inBatchMode = isAutomatedTaskInBatchMode(taskName);
+
+        UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(inBatchMode);
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
 

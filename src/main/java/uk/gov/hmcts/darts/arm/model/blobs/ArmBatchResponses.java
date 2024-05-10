@@ -17,14 +17,14 @@ import java.util.Map;
 @Setter
 public class ArmBatchResponses {
 
-    private Map<Integer, ArmResponseBatchData> armBatchResponses = new HashMap<>();
+    private Map<Integer, ArmResponseBatchData> armBatchResponseMap = new HashMap<>();
 
     public void addResponseBatchData(Integer externalObjectDirectoryId,
                                      ArmResponseCreateRecord armResponseCreateRecord,
                                      CreateRecordFilenameProcessor createRecordFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
-        armBatchResponses.get(externalObjectDirectoryId).setArmResponseCreateRecord(armResponseCreateRecord);
-        armBatchResponses.get(externalObjectDirectoryId).setCreateRecordFilenameProcessor(createRecordFilenameProcessor);
+        armBatchResponseMap.get(externalObjectDirectoryId).setArmResponseCreateRecord(armResponseCreateRecord);
+        armBatchResponseMap.get(externalObjectDirectoryId).setCreateRecordFilenameProcessor(createRecordFilenameProcessor);
     }
 
 
@@ -32,24 +32,24 @@ public class ArmBatchResponses {
                                      ArmResponseInvalidLineRecord armResponseInvalidLineRecord,
                                      InvalidLineFileFilenameProcessor invalidLineFileFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
-        armBatchResponses.get(externalObjectDirectoryId).setArmResponseInvalidLineRecord(armResponseInvalidLineRecord);
-        armBatchResponses.get(externalObjectDirectoryId).setInvalidLineFileFilenameProcessor(invalidLineFileFilenameProcessor);
+        armBatchResponseMap.get(externalObjectDirectoryId).setArmResponseInvalidLineRecord(armResponseInvalidLineRecord);
+        armBatchResponseMap.get(externalObjectDirectoryId).setInvalidLineFileFilenameProcessor(invalidLineFileFilenameProcessor);
     }
 
     public void addResponseBatchData(Integer externalObjectDirectoryId,
                                      ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                      UploadFileFilenameProcessor uploadFileFilenameProcessor) {
         createArmBatchResponseIfNotExists(externalObjectDirectoryId);
-        armBatchResponses.get(externalObjectDirectoryId).setArmResponseUploadFileRecord(armResponseUploadFileRecord);
-        armBatchResponses.get(externalObjectDirectoryId).setUploadFileFilenameProcessor(uploadFileFilenameProcessor);
+        armBatchResponseMap.get(externalObjectDirectoryId).setArmResponseUploadFileRecord(armResponseUploadFileRecord);
+        armBatchResponseMap.get(externalObjectDirectoryId).setUploadFileFilenameProcessor(uploadFileFilenameProcessor);
     }
 
     private void createArmBatchResponseIfNotExists(Integer externalObjectDirectoryId) {
-        if (!armBatchResponses.containsKey(externalObjectDirectoryId)) {
+        if (!armBatchResponseMap.containsKey(externalObjectDirectoryId)) {
             ArmResponseBatchData armResponseBatchData = ArmResponseBatchData.builder()
                 .externalObjectDirectoryId(externalObjectDirectoryId)
                 .build();
-            armBatchResponses.put(externalObjectDirectoryId, armResponseBatchData);
+            armBatchResponseMap.put(externalObjectDirectoryId, armResponseBatchData);
         }
     }
 }

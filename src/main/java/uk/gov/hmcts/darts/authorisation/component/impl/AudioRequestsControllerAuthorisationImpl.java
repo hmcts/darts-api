@@ -37,6 +37,7 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     }
 
     @Override
+    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> requestTypeParamOptional = getEntityParamOptional(request, REQUEST_TYPE);
         if (requestTypeParamOptional.isPresent()) {
@@ -47,6 +48,7 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     }
 
     @Override
+    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
         Optional<String> optionalId = idToAuthorise.get();
         if (optionalId.isPresent()) {
@@ -57,12 +59,14 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     }
 
     @Override
+    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
         String requestType = jsonNode.path(REQUEST_TYPE).textValue();
         roles = setDownloadRequestSecurityRoles(roles, requestType);
         authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
     }
 
+    @SuppressWarnings({"PMD.AvoidReassigningParameters"})
     private static Set<SecurityRoleEnum> setDownloadRequestSecurityRoles(Set<SecurityRoleEnum> roles, String requestType) {
         if (DOWNLOAD_REQUEST_TYPE.equals(requestType)) {
             roles = new HashSet<>();

@@ -31,6 +31,7 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
 
     @Override
     @Transactional(value = Transactional.TxType.REQUIRED)
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.UnnecessaryAnnotationValueElement"})
     public void validate(CourthousePatch patch, Integer id) {
         var courthouseEntity = repository.findById(id)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
@@ -45,22 +46,18 @@ public class CourthousePatchValidator implements BiValidator<CourthousePatch, In
             }
         }
 
-        if (nonNull(patch.getDisplayName())) {
-            if (repository.existsByDisplayNameIgnoreCaseAndIdNot(patch.getDisplayName(), id)) {
-                throw new DartsApiException(COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
-            }
+        if (nonNull(patch.getDisplayName()) && repository.existsByDisplayNameIgnoreCaseAndIdNot(patch.getDisplayName(), id)) {
+            throw new DartsApiException(COURTHOUSE_DISPLAY_NAME_PROVIDED_ALREADY_EXISTS);
         }
 
-        if (nonNull(patch.getRegionId())) {
-            if (!regionRepository.existsById(patch.getRegionId())) {
-                throw new DartsApiException(CourthouseApiError.REGION_ID_DOES_NOT_EXIST);
-            }
+        if (nonNull(patch.getRegionId()) && !regionRepository.existsById(patch.getRegionId())) {
+            throw new DartsApiException(CourthouseApiError.REGION_ID_DOES_NOT_EXIST);
         }
 
-        if (nonNull(patch.getSecurityGroupIds()) && !patch.getSecurityGroupIds().isEmpty()) {
-            if (!securityGroupRepository.existsAllByIdIn(new HashSet<>(patch.getSecurityGroupIds()))) {
-                throw new DartsApiException(CourthouseApiError.SECURITY_GROUP_ID_DOES_NOT_EXIST);
-            }
+        if (nonNull(patch.getSecurityGroupIds())
+            && !patch.getSecurityGroupIds().isEmpty()
+            && !securityGroupRepository.existsAllByIdIn(new HashSet<>(patch.getSecurityGroupIds()))) {
+            throw new DartsApiException(CourthouseApiError.SECURITY_GROUP_ID_DOES_NOT_EXIST);
         }
     }
 }

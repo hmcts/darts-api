@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
+import uk.gov.hmcts.darts.common.util.LogUtil;
 import uk.gov.hmcts.darts.testutils.InMemoryMultipart;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -47,7 +49,13 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import static ch.qos.logback.classic.Level.toLevel;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -148,6 +156,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(2, media.getTotalChannels());
             assertEquals(3, media.getCaseNumberList().size());
             assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
+            assertEquals(media.getId().toString(), media.getChronicleId());
+            assertNull(media.getAntecedentId());
         }
 
         List<HearingEntity> hearingsInAnotherCourtroom = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate(
@@ -156,16 +166,166 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             STARTED_AT.toLocalDate()
         );
         assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
+
         HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
     }
 
     @Test
+    void addAudioMetadataDifferentCases() throws Exception {
+        makeAddAudioCall(1000, "case1");
+
+        List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
+
+        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
+        for (HearingEntity hearing : allHearings) {
+            if (hearing.getCourtCase().getCaseNumber().contains("case1")) {
+                addAudioLinkedHearings.add(hearing);
+            }
+        }
+        assertEquals(1, addAudioLinkedHearings.size());
+
+        MediaEntity mediaFirst = null;
+        for (HearingEntity hearing : addAudioLinkedHearings) {
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearing.getId());
+            mediaFirst = mediaEntities.get(0);
+            assertEquals(1, mediaEntities.size());
+            assertEquals(STARTED_AT, mediaFirst.getStart());
+            assertEquals(STARTED_AT, mediaFirst.getEnd());
+            assertEquals(1, mediaFirst.getChannel());
+            assertEquals(2, mediaFirst.getTotalChannels());
+            assertEquals(1, mediaFirst.getCaseNumberList().size());
+            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(mediaFirst.getCourtroom().getId()).get().getName());
+            assertEquals(mediaFirst.getId().toString(), mediaFirst.getChronicleId());
+            assertNull(mediaFirst.getAntecedentId());
+        }
+
+        makeAddAudioCall(1000, "case2");
+
+        addAudioLinkedHearings = new ArrayList<>();
+        allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
+
+        for (HearingEntity hearing : allHearings) {
+            if (hearing.getCourtCase().getCaseNumber().contains("case2")) {
+                addAudioLinkedHearings.add(hearing);
+            }
+        }
+        assertEquals(1, addAudioLinkedHearings.size());
+
+        MediaEntity mediaSecond = null;
+        for (HearingEntity hearing : addAudioLinkedHearings) {
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearing.getId());
+            mediaSecond = mediaEntities.get(0);
+            assertEquals(1, mediaEntities.size());
+            assertEquals(STARTED_AT, mediaSecond.getStart());
+            assertEquals(STARTED_AT, mediaSecond.getEnd());
+            assertEquals(1, mediaSecond.getChannel());
+            assertEquals(2, mediaSecond.getTotalChannels());
+            assertEquals(1, mediaSecond.getCaseNumberList().size());
+            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(mediaSecond.getCourtroom().getId()).get().getName());
+            assertEquals(mediaSecond.getId().toString(), mediaSecond.getChronicleId());
+            assertNull(mediaSecond.getAntecedentId());
+        }
+
+        assertNotSame(mediaFirst, mediaSecond);
+    }
+
+    @Test
+    void addAudioMetadataDuplicate() throws Exception {
+        makeAddAudioCall();
+        makeAddAudioCall();
+
+        List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
+
+        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
+        for (HearingEntity hearing : allHearings) {
+            if (hearing.getCourtCase().getCaseNumber().contains("case")) {
+                addAudioLinkedHearings.add(hearing);
+            }
+        }
+        assertEquals(3, addAudioLinkedHearings.size());
+
+        for (HearingEntity hearing : addAudioLinkedHearings) {
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearing.getId());
+            MediaEntity media = mediaEntities.get(0);
+            assertEquals(1, mediaEntities.size());
+            assertEquals(STARTED_AT, media.getStart());
+            assertEquals(STARTED_AT, media.getEnd());
+            assertEquals(1, media.getChannel());
+            assertEquals(2, media.getTotalChannels());
+            assertEquals(3, media.getCaseNumberList().size());
+            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
+            assertEquals(media.getId().toString(), media.getChronicleId());
+            assertNull(media.getAntecedentId());
+            assertEquals(media.getId().toString(), media.getChronicleId());
+        }
+
+        List<HearingEntity> hearingsInAnotherCourtroom = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate(
+            "bristol",
+            "2",
+            STARTED_AT.toLocalDate()
+        );
+        assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
+
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearingEntity.getId());
+        assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
+
+        assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
+                                   .searchLogs("Duplicate audio upload detected", toLevel(
+            Level.INFO_INT)).isEmpty());
+    }
+
+    @Test
+    void addAudioMetadataVersionedDueToDuplicateFileSizeDifference() throws Exception {
+        makeAddAudioCall();
+
+        List<HearingEntity> allHearings = dartsDatabase.getHearingRepository()
+            .findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
+
+        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
+        for (HearingEntity hearing : allHearings) {
+            if (hearing.getCourtCase().getCaseNumber().contains("case")) {
+                addAudioLinkedHearings.add(hearing);
+            }
+        }
+        assertEquals(3, addAudioLinkedHearings.size());
+
+        MediaEntity originalMedia = null;
+        for (HearingEntity hearing : addAudioLinkedHearings) {
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearing.getId());
+
+            assertEquals(1, mediaEntities.size());
+
+            originalMedia = mediaEntities.get(0);
+            assertEquals(STARTED_AT, originalMedia.getStart());
+            assertEquals(STARTED_AT, originalMedia.getEnd());
+            assertEquals(1, originalMedia.getChannel());
+            assertEquals(2, originalMedia.getTotalChannels());
+            assertEquals(3, originalMedia.getCaseNumberList().size());
+            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(originalMedia.getCourtroom().getId()).get().getName());
+            assertEquals(originalMedia.getId().toString(), originalMedia.getChronicleId());
+            assertNull(originalMedia.getAntecedentId());
+        }
+
+        List<HearingEntity> hearingsInAnotherCourtroom = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate(
+            "bristol",
+            "2",
+            STARTED_AT.toLocalDate()
+        );
+        assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
+
+        Integer newMedia = uploadAnotherAudioWithSize(1001L, originalMedia.getId().toString(), originalMedia.getId().toString());
+        Integer newMedia2 = uploadAnotherAudioWithSize(1002L, newMedia.toString(), originalMedia.getId().toString());
+        assertNotEquals(newMedia, newMedia2);
+    }
+
+    @Test
     void addAudioBeyondAudioFileSizeThresholdExceeded() throws Exception {
-        InMemoryMultipart audioFile =  InMemoryMultipart.getMultiPartOfRandomisedLengthKb(
+        InMemoryMultipart audioFile = InMemoryMultipart.getMultiPartOfRandomisedLengthKb(
             "file",
-            "audio.mp3",
+            "audio.mp2",
             // add one onto the threshold so we are going to fail
             addAudioThreshold.toBytes() + 1
         );
@@ -187,29 +347,15 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT.plusMinutes(20), "Bristol", "1");
 
         try {
-            streamFileWithMetaData(audioFile,  addAudioMetadataRequest, "http://localhost:" + port + "/audios");
+            streamFileWithMetaData(audioFile, addAudioMetadataRequest, "http://localhost:" + port + "/audios");
             Assertions.fail();
         } catch (RestClientException restClientException) {
             String expectedJson = """
-            400 : "{"title":"Bad Request","status":400,"detail":"Maximum upload size exceeded"}"
-            """;
+                400 : "{"title":"Bad Request","status":400,"detail":"Maximum upload size exceeded"}"
+                """;
 
             assertEquals(expectedJson.trim(), restClientException.getMessage());
         }
-    }
-
-    public <T> void streamFileWithMetaData(InMemoryMultipart multipartFile, T metadata, String url) {
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        map.put("metadata", Collections.singletonList(metadata));
-        map.put("file", List.of(multipartFile.getResource()));
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-
-        restTemplate.postForEntity(url, requestEntity, String.class);
     }
 
     @Test
@@ -523,12 +669,34 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(AudioApiError.UNEXPECTED_FILE_TYPE.getTitle(), problem.getTitle());
     }
 
-    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse, String courtroom) {
-        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2");
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
+                                                          OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, filetype,
+                                     100,"case1", "case2", "case3");
+    }
+
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
+                                                          OffsetDateTime endedAt, String courthouse, String courtroom) {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
+                                     "mp2", 100,"case1", "case2", "case3");
+    }
+
+
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
+                                                          OffsetDateTime endedAt,
+        String courthouse, String courtroom,long fileSize) {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", fileSize, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom, String filetype) {
+                                                          String courthouse, String courtroom,  long fileSize, String...casesList) {
+        return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
+                                     "mp2", fileSize, casesList);
+
+    }
+
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
+                                                          String courthouse, String courtroom, String filetype, long fileSize, String...casesList) {
         AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
         addAudioMetadataRequest.startedAt(startedAt);
         addAudioMetadataRequest.endedAt(endedAt);
@@ -538,10 +706,122 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         addAudioMetadataRequest.filename("test");
         addAudioMetadataRequest.courthouse(courthouse);
         addAudioMetadataRequest.courtroom(courtroom);
-        addAudioMetadataRequest.cases(List.of("case1", "case2", "case3"));
+        addAudioMetadataRequest.cases(List.of(casesList));
         addAudioMetadataRequest.setMediaFile("media file");
-        addAudioMetadataRequest.setFileSize(1000L);
+        addAudioMetadataRequest.setFileSize(fileSize);
         addAudioMetadataRequest.setChecksum("calculatedchecksum");
         return addAudioMetadataRequest;
+    }
+
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
+    private void makeAddAudioCall() throws Exception {
+        makeAddAudioCall(1000L);
+    }
+
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
+    private void makeAddAudioCall(long fileSize, String...casesToMapTo) throws Exception {
+        UserAccountEntity testUser = authorisationStub.getSystemUser();
+        dartsDatabase.getUserAccountRepository().save(testUser);
+
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", DateConverterUtil.toLocalDateTime(STARTED_AT));
+        eventStub.createEvent(hearingAfter, 10, STARTED_AT.plusMinutes(20), "LOG");
+
+        AddAudioMetadataRequest addAudioMetadataRequest;
+        if (casesToMapTo.length == 0) {
+            addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", fileSize);
+        } else {
+            addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, STARTED_AT, "Bristol", "1", fileSize, casesToMapTo);
+        }
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp2",
+            "audio/mpeg",
+            IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
+                                                                 .getResource("sample6.mp2").getFile()))));
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
+
+        mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
+    private Integer uploadAnotherAudioWithSize(long sizeToUse, String expectedAntecedantId, String expectedChronicleId) throws Exception {
+        makeAddAudioCall(sizeToUse);
+
+        List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate("bristol", "1", STARTED_AT.toLocalDate());
+
+        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
+        for (HearingEntity hearing : allHearings) {
+            if (hearing.getCourtCase().getCaseNumber().contains("case")) {
+                addAudioLinkedHearings.add(hearing);
+            }
+        }
+        assertEquals(3, addAudioLinkedHearings.size());
+
+        MediaEntity media = null;
+        for (HearingEntity hearing : addAudioLinkedHearings) {
+            List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearing.getId());
+
+            assertEquals(1, mediaEntities.size());
+
+            media = mediaEntities.get(0);
+            assertEquals(STARTED_AT, media.getStart());
+            assertEquals(STARTED_AT, media.getEnd());
+            assertEquals(1, media.getChannel());
+            assertEquals(2, media.getTotalChannels());
+            assertEquals(3, media.getCaseNumberList().size());
+            assertEquals("1", dartsDatabase.getCourtroomRepository().findById(media.getCourtroom().getId()).get().getName());
+            assertEquals(expectedChronicleId, media.getChronicleId());
+            assertEquals(expectedAntecedantId, media.getAntecedentId());
+        }
+
+        List<HearingEntity> hearingsInAnotherCourtroom = dartsDatabase.getHearingRepository().findByCourthouseCourtroomAndDate(
+            "bristol",
+            "2",
+            STARTED_AT.toLocalDate()
+        );
+        assertEquals(1, hearingsInAnotherCourtroom.size());//should have hearingDifferentCourtroom
+        HearingEntity hearingEntity = hearingsInAnotherCourtroom.get(0);
+        List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearingEntity.getId());
+        assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
+        assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
+                        .searchLogs("Uploading version of duplicate", toLevel(
+                            Level.INFO_INT)).isEmpty());
+
+        return media.getId();
+    }
+
+    @SuppressWarnings("PMD.LooseCoupling")
+    public <T> void streamFileWithMetaData(InMemoryMultipart multipartFile, T metadata, String url) {
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        map.put("metadata", Collections.singletonList(metadata));
+        map.put("file", List.of(multipartFile.getResource()));
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+
+        restTemplate.postForEntity(url, requestEntity, String.class);
     }
 }

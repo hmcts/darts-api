@@ -98,6 +98,7 @@ public class RetentionPolicyTypeServiceImpl implements RetentionPolicyTypeServic
     }
 
     @Override
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     public RetentionPolicyType editRetentionPolicyType(Integer id, AdminPatchRetentionRequest adminPatchRetentionRequest) {
         RetentionPolicyTypeEntity targetEntity = retentionPolicyTypeRepository.findById(id)
             .orElseThrow(() -> new DartsApiException(RETENTION_POLICY_TYPE_ID_NOT_FOUND));

@@ -221,7 +221,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+                                                                                              new TypeReference<>(){});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
     }
 }

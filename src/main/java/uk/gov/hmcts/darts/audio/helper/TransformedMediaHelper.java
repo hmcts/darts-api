@@ -55,7 +55,6 @@ public class TransformedMediaHelper {
     private final NotificationApi notificationApi;
     private final UserAccountRepository userAccountRepository;
 
-
     private static final String NO_DEFENDANTS = "There are no defendants for this hearing";
     private static final String NOT_AVAILABLE = "N/A";
 
@@ -104,6 +103,7 @@ public class TransformedMediaHelper {
         return entity;
     }
 
+    @SuppressWarnings({"PMD.CognitiveComplexity"})
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
                            CourtCaseEntity courtCase,
                            String notificationTemplateName) {

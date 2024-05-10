@@ -146,6 +146,7 @@ class AudioServiceImplTest {
         OffsetDateTime endedAt = OffsetDateTime.now();
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        mediaEntity.setId(10);
         when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         MockMultipartFile audioFile = new MockMultipartFile(
@@ -161,7 +162,7 @@ class AudioServiceImplTest {
 
         // Then
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
-        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+        verify(mediaRepository, times(2)).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
         verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
 
@@ -196,6 +197,7 @@ class AudioServiceImplTest {
         OffsetDateTime endedAt = OffsetDateTime.now();
 
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        mediaEntity.setId(10);
         when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         ObjectRecordStatusEntity failedStatus = new ObjectRecordStatusEntity();
@@ -330,7 +332,7 @@ class AudioServiceImplTest {
             any(),
             any()
         )).thenReturn(hearing);
-        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
     }

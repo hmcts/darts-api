@@ -145,6 +145,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userWithIdAndLastLogin;
     }
 
+    @Override
     public UserWithIdAndTimestamps getUserById(Integer userId) {
         Optional<UserAccountEntity> entity = userAccountRepository.findById(userId);
         if (entity.isPresent()) {

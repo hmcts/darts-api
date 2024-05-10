@@ -14,14 +14,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
-import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
 import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -155,19 +153,13 @@ class DataManagementServiceImplTest {
 
     @Test
     void testDownloadData() throws Exception {
-        try (OutputStream stream = mock(OutputStream.class)) {
 
-            when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
-            when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
-            when(blobClient.exists()).thenReturn(true);
-            when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
+        when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
+        when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(blobClient.exists()).thenReturn(true);
+        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
 
-            try (DownloadResponseMetaData downloadResponseMetaData = dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED,
-                                                                                                        BLOB_CONTAINER_NAME,
-                                                                                                        BLOB_ID)) {
-                verify(blobClient, times(1)).downloadStream(any());
-            }
-
-        }
+        dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID);
+        verify(blobClient, times(1)).downloadStream(any());
     }
 }

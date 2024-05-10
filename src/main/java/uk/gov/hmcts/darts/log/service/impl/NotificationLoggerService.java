@@ -10,7 +10,7 @@ public interface NotificationLoggerService {
 
     void sentNotification(NotificationEntity notification, String templateId, Integer attempts);
 
-    void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException e);
+    void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException ex);
 
-    void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e);
+    void failedNotification(NotificationEntity notification, String templateId, NotificationClientException ex);
 }

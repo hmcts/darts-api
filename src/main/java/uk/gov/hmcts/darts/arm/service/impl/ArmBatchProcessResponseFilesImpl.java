@@ -10,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -71,7 +70,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnExpression("${darts.storage.arm.batch-size} > 0")
+@SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity", "PMD.CouplingBetweenObjects"})
 public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcessor {
 
     private static final String UNABLE_TO_UPDATE_EOD = "Unable to update EOD";
@@ -167,17 +166,17 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     }
 
     private boolean isResponseCompletedAndCleaned(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return (externalObjectDirectory.isResponseCleaned()
-            && isCompletedStatus(externalObjectDirectory.getStatus()));
+        return externalObjectDirectory.isResponseCleaned()
+            && isCompletedStatus(externalObjectDirectory.getStatus());
     }
 
     private boolean isCompletedStatus(ObjectRecordStatusEntity status) {
         if (nonNull(status)) {
             ObjectRecordStatusEnum statusEnum = ObjectRecordStatusEnum.valueOfId(status.getId());
-            return (STORED.equals(statusEnum)
+            return STORED.equals(statusEnum)
                 || ARM_RESPONSE_PROCESSING_FAILED.equals(statusEnum)
                 || ARM_RESPONSE_MANIFEST_FAILED.equals(statusEnum)
-                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(statusEnum));
+                || ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.equals(statusEnum);
         }
         return false;
     }
@@ -229,7 +228,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     }
 
     private void processBatchResponseFiles(ArmBatchResponses armBatchResponses) {
-        armBatchResponses.getArmBatchResponses().values().forEach(
+        armBatchResponses.getArmBatchResponseMap().values().forEach(
             armResponseBatchData -> {
                 if (nonNull(armResponseBatchData.getInvalidLineFileFilenameProcessor())
                     && (nonNull(armResponseBatchData.getCreateRecordFilenameProcessor())
@@ -519,6 +518,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         return uploadNewFileRecord;
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private static ResponseFilenames getArmResponseFilenames(List<String> responseFiles, String manifestName) {
         ResponseFilenames responseFilenames = new ResponseFilenames();
         for (String responseFile : responseFiles) {

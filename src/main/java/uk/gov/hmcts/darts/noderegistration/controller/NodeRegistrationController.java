@@ -32,6 +32,8 @@ public class NodeRegistrationController implements DevicesApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {MID_TIER, DAR_PC})
+    @SuppressWarnings({"PMD.UnnecessaryAnnotationValueElement", "PMD.UseObjectForClearerAPI"})
+    @Override
     public ResponseEntity<PostNodeRegistrationResponse> registerDevicesPost(
         @Parameter(name = "node_type", description = "The type of device being registered, might just be DAR", in = ParameterIn.QUERY)
         @Valid @RequestParam(value = "node_type") String nodeType,

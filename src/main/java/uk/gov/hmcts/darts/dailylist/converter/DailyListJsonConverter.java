@@ -25,9 +25,9 @@ public class DailyListJsonConverter implements Converter<String, DailyListJsonOb
         }
         try {
             return objectMapper.readValue(from, DailyListJsonObject.class);
-        } catch (JsonProcessingException e) {
-            log.error("An Error has occurred trying to parse the json ", e);
-            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST);
+        } catch (JsonProcessingException ex) {
+            log.error("An Error has occurred trying to parse the json ", ex);
+            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }
     }
 }

@@ -80,6 +80,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
     }
 
     @Override
+    @SuppressWarnings({"PMD.NPathComplexity"})
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
         boolean entityExists = false;
         if (checkEntityExists(jsonNode, hearingIdControllerAuthorisation.getEntityIdParam())) {

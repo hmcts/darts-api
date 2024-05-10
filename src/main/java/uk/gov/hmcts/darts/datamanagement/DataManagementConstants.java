@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.datamanagement;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-@SuppressWarnings({"HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor", "PMD.MissingStaticMethodInNonInstantiatableClass"})
 public class DataManagementConstants {
 
     @UtilityClass

@@ -20,6 +20,8 @@ public class AddAudioFileValidator implements Validator<MultipartFile> {
 
     private final AudioConfigurationProperties properties;
 
+    @Override
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     public void validate(MultipartFile addAudioFileRequest) {
         if (addAudioFileRequest.getSize() <= 0) {
             throw new DartsApiException(AudioApiError.AUDIO_NOT_PROVIDED);
@@ -44,7 +46,7 @@ public class AddAudioFileValidator implements Validator<MultipartFile> {
                 throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
             }
         } catch (IOException ioException) {
-            throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
+            throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE, ioException);
         }
     }
 

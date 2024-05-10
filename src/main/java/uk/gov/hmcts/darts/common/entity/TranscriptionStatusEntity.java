@@ -15,10 +15,6 @@ import lombok.Setter;
 @Setter
 public class TranscriptionStatusEntity {
 
-    public TranscriptionStatusEntity(Integer id) {
-        this.setId(id);
-    }
-
     @Id
     @Column(name = "trs_id", nullable = false)
     private Integer id;
@@ -28,4 +24,8 @@ public class TranscriptionStatusEntity {
 
     @Column(name = "display_name", nullable = false)
     private String displayName;
+
+    public TranscriptionStatusEntity(Integer id) {
+        this.setId(id);
+    }
 }

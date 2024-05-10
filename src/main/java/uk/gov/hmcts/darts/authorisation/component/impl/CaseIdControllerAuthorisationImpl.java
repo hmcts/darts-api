@@ -73,9 +73,9 @@ class CaseIdControllerAuthorisationImpl extends BaseControllerAuthorisation
             try {
                 Integer caseId = Integer.valueOf(caseIdParamOptional.get());
                 authorisation.authoriseByCaseId(caseId, roles);
-            } catch (NumberFormatException e) {
-                log.error("Unable to parse case_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_REQUEST_CASE_ID);
+            } catch (NumberFormatException ex) {
+                log.error("Unable to parse case_id for checkAuthorisation", ex);
+                throw new DartsApiException(BAD_REQUEST_CASE_ID, ex);
             }
         }
     }

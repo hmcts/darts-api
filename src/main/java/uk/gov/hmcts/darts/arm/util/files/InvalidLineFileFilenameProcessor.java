@@ -14,7 +14,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 @Slf4j
 public class InvalidLineFileFilenameProcessor {
     private static final int NUMBER_OF_TOKENS = 4;
-    private String invalidLineFileFilenameAndPath;
+    private final String invalidLineFileFilenameAndPath;
     private String hashcode;
     private String hashcode2;
     private String status;

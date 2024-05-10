@@ -14,7 +14,7 @@ import java.util.Map;
 @Setter
 @EqualsAndHashCode
 public class DailyListLogJobReport {
-    private Map<JobStatusType, Integer> mapOfJobResultCount = new HashMap<JobStatusType, Integer>();
+    private Map<JobStatusType, Integer> mapOfJobResultCount = new HashMap<>();
 
     public static final int ZERO_ENTRIES = 0;
 

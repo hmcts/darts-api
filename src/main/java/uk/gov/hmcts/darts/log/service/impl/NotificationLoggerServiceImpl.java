@@ -30,16 +30,16 @@ public class NotificationLoggerServiceImpl implements NotificationLoggerService 
     }
 
     @Override
-    public void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
+    public void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException ex) {
         log.info("Notification GovNotify error, retrying: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}, error={}",
                  notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId, notification.getStatus(),
-                 notification.getAttempts(), e.getMessage());
+                 notification.getAttempts(), ex.getMessage());
     }
 
     @Override
-    public void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
+    public void failedNotification(NotificationEntity notification, String templateId, NotificationClientException ex) {
         log.info("Notification failed to send: notificationId={}, type={}, caseId={}, templateId={}, status={}, attemptNo={}, error={}",
                  notification.getId(), notification.getEventId(), notification.getCourtCase().getId(), templateId, notification.getStatus(),
-                 notification.getAttempts(), e.getMessage());
+                 notification.getAttempts(), ex.getMessage());
     }
 }

@@ -59,6 +59,7 @@ class RetentionControllerGetByCaseIdTest extends IntegrationBase {
         shouldGetRetentionsOk();
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private void shouldGetRetentionsOk() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,

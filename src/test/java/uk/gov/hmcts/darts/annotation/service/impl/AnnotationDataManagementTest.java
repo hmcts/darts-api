@@ -127,6 +127,7 @@ class AnnotationDataManagementTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.CloseResource")
     void throwsIfDownloadAnnotationDocumentInputStreamFails() throws FileNotDownloadedException, IOException {
         var mockFileBasedDownloadResponseMetaData = mock(FileBasedDownloadResponseMetaData.class);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(mockFileBasedDownloadResponseMetaData);

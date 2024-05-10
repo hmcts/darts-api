@@ -78,6 +78,7 @@ public class ArmServiceImpl implements ArmService {
         return blobPathAndName;
     }
 
+    @Override
     public List<String> listSubmissionBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
@@ -93,6 +94,7 @@ public class ArmServiceImpl implements ArmService {
      * @return list of the blobs in the response dropzone containing the specified filename with full path
      *     e.g. returns: dropzone/DARTS/response/123_456_1_2d50a0bbde794e0ea9f4918aafeaccde_1_iu.rsp
      */
+    @Override
     public List<String> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
@@ -124,18 +126,21 @@ public class ArmServiceImpl implements ArmService {
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
     }
 
+    @Override
     public List<String> listSubmissionBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
         return listBlobsUsingBatch(containerClient, prefix, batchSize);
     }
 
+    @Override
     public List<String> listResponseBlobsUsingBatch(String containerName, String filename, Integer batchSize) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
         return listBlobsUsingBatch(containerClient, prefix, batchSize);
     }
 
+    @SuppressWarnings({"PMD.CloseResource"})
     private List<String> listBlobsUsingBatch(BlobContainerClient blobContainerClient, String blobPathAndName, Integer batchSize) {
         List<String> files = new ArrayList<>();
         log.debug("About to list files for {} with batch size {}", blobPathAndName, batchSize);
@@ -166,6 +171,7 @@ public class ArmServiceImpl implements ArmService {
         return item -> consumer.accept(counter.getAndIncrement(), item);
     }
 
+    @Override
     public ContinuationTokenBlobs listSubmissionBlobsWithMarker(String containerName, String filename, Integer batchSize,
                                                                 String continuationToken) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -174,6 +180,7 @@ public class ArmServiceImpl implements ArmService {
         return listBlobsWithMarker(containerClient, prefix, batchSize, continuationToken);
     }
 
+    @Override
     public ContinuationTokenBlobs listResponseBlobsWithMarker(String containerName, String filename, Integer batchSize,
                                                               String continuationToken) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -226,6 +233,7 @@ public class ArmServiceImpl implements ArmService {
         }
     }
 
+    @Override
     public BinaryData getBlobData(String containerName, String blobPathAndName) {
 
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -238,6 +246,7 @@ public class ArmServiceImpl implements ArmService {
     }
 
     @Override
+    @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
     public boolean deleteBlobData(String containerName, String blobPathAndName) {
         try {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);

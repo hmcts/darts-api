@@ -39,9 +39,6 @@ class NotificationServiceImplTest {
     @Mock
     private LogApi logApi;
 
-    private NotificationServiceImpl notificationService;
-
-
     @BeforeEach
     void setUp() {
         lenient().when(notificationRepo.findByStatusIn(anyList())).thenReturn(someListOfNotifications());
@@ -49,7 +46,7 @@ class NotificationServiceImplTest {
 
     @Test
     void doesntSendNotificationWhenNotificationsDisabled() {
-        notificationService = notificationServiceNotInAtsModeAndNotificationsDisabled();
+        NotificationServiceImpl notificationService = notificationServiceNotInAtsModeAndNotificationsDisabled();
 
         notificationService.sendNotificationToGovNotify();
 
@@ -58,7 +55,7 @@ class NotificationServiceImplTest {
 
     @Test
     void doesntSendNotificationWhenInAtsMode() {
-        notificationService = notificationServiceInAtsModeAndNotificationsEnabled();
+        NotificationServiceImpl notificationService = notificationServiceInAtsModeAndNotificationsEnabled();
 
         notificationService.sendNotificationToGovNotify();
 
@@ -67,7 +64,7 @@ class NotificationServiceImplTest {
 
     @Test
     void sendsNotificationWhenNotificationsEnabledAndNotInAtsMode() throws NotificationClientException {
-        notificationService = notificationServiceNotInAtsModeAndNotificationsEnabled();
+        NotificationServiceImpl notificationService = notificationServiceNotInAtsModeAndNotificationsEnabled();
 
         notificationService.sendNotificationToGovNotify();
 

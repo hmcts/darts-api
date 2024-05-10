@@ -53,6 +53,7 @@ public class LogApiImpl implements LogApi {
         logJobService.logJobReport(report);
     }
 
+    @Override
     public void atsProcessingUpdate(MediaRequestEntity mediaRequestEntity) {
         atsLoggerService.atsProcessingUpdate(mediaRequestEntity);
     }
@@ -88,13 +89,13 @@ public class LogApiImpl implements LogApi {
     }
 
     @Override
-    public void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
-        notificationLoggerService.errorRetryingNotification(notification, templateId, e);
+    public void errorRetryingNotification(NotificationEntity notification, String templateId, NotificationClientException ex) {
+        notificationLoggerService.errorRetryingNotification(notification, templateId, ex);
     }
 
     @Override
-    public void failedNotification(NotificationEntity notification, String templateId, NotificationClientException e) {
-        notificationLoggerService.failedNotification(notification, templateId, e);
+    public void failedNotification(NotificationEntity notification, String templateId, NotificationClientException ex) {
+        notificationLoggerService.failedNotification(notification, templateId, ex);
     }
 
     @Override

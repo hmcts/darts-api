@@ -540,7 +540,7 @@ class DataManagementFacadeImplTest {
     }
 
     private BlobContainerDownloadable setupDownloadableContainer(DatastoreContainerType containerType,
-                                                                 boolean processSuccess) throws Exception {
+                                                                 boolean processSuccess) throws FileNotDownloadedException {
         BlobContainerDownloadable downloadable = mock(BlobContainerDownloadable.class);
 
         BinaryData data = BinaryData.fromString("Test String");

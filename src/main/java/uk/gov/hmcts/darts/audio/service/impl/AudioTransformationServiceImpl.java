@@ -60,6 +60,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"PMD.ExceptionAsFlowControl"})
 public class AudioTransformationServiceImpl implements AudioTransformationService {
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
@@ -149,7 +150,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
      *
      * @param requestId The id of the AudioRequest to be processed.
      */
-    @SuppressWarnings("PMD.AvoidRethrowingException")
+    @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
     private void processAudioRequest(Integer requestId) {
 
         log.info("Starting processing for audio request id: {}", requestId);
@@ -268,6 +269,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
+    @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes"})
     public Path retrieveFromStorageAndSaveToTempWorkspace(MediaEntity mediaEntity) throws IOException {
 
         try (DownloadResponseMetaData downloadResponseMetaData = dataManagementFacade.retrieveFileFromStorage(mediaEntity)) {

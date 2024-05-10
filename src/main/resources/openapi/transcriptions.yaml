@@ -1200,8 +1200,6 @@ components:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         status:
           type: string
-        from:
-          type: string
         received:
           type: string
           format: date-time

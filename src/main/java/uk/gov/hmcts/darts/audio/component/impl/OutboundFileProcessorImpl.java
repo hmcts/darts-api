@@ -34,11 +34,13 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private final AudioOperationService audioOperationService;
     private final AudioConfigurationProperties audioConfigurationProperties;
+    private static final int ONE = 1;
+    private static final int TWO = 2;
 
     /**
      * Group the provided media/audio into logical groups in preparation for zipping with OutboundFileZipGenerator.
@@ -72,11 +74,11 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             ));
         }
 
-        if (numberOfSessions > 2) {
+        if (numberOfSessions > TWO) {
             finalisedAudioSessions.addAll(groupedAudioSessions.subList(1, numberOfSessions - 1)); // no need to trim mid session
         }
 
-        if (numberOfSessions > 1) {
+        if (numberOfSessions > ONE) {
             finalisedAudioSessions.add(trimAll(
                 groupedAudioSessions.get(numberOfSessions - 1), // trim end of session
                 mediaRequestStartTime,
@@ -88,6 +90,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     @Override
+    @SuppressWarnings({"PMD.CognitiveComplexity"})
     public List<AudioFileInfo> processAudioForPlaybacks(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
                                                         OffsetDateTime mediaRequestStartTime,
                                                         OffsetDateTime mediaRequestEndTime)
@@ -122,7 +125,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                         mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
                         mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
                     );
-                    concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
+                    concatenatedAndMergedAudioFileInfos.add(reEncode(trimmedAudio));
                 } else {
                     throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
                 }
@@ -152,8 +155,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
                 // collect number in each start time group
                 List<Integer> numberOfStartTimesList = new ArrayList<>();
-                boolean numberOfChannelsMatch = false;
-                boolean startTimesMatch = false;
+                boolean numberOfChannelsMatch;
+                boolean startTimesMatch;
                 audioFileInfosByStartTime.forEach((startTime, audioFileInfoList) -> numberOfStartTimesList.add(audioFileInfoList.size()));
 
                 numberOfChannelsMatch = numberOfChannelsList.stream().allMatch(numberOfChannelsList.get(0)::equals);
@@ -213,6 +216,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             && groupedAudioFileInfo.getEndTime().equals(ungroupedAudioFileInfo.getEndTime());
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private List<ChannelAudio> concatenateByChannelWithGaps(List<AudioFileInfo> audioFileInfos)
         throws ExecutionException, InterruptedException, IOException {
 
@@ -293,6 +297,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.reEncode(StringUtils.EMPTY, audioFileInfo);
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
         List<ChannelAudio> concatenationsList = new ArrayList<>();
         if (isNotEmpty(channelsList)) {
@@ -308,6 +313,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return concatenationsList;
     }
 
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
     private static List<ChannelAudio> convertChannelsListToFilesList(List<AudioFileInfo> audioFileInfosByChannel) {
 
         List<ChannelAudio> audioFileInfoByFileList = new ArrayList<>();

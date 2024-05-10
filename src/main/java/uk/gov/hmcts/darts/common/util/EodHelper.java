@@ -80,25 +80,25 @@ public class EodHelper {
 
     @PostConstruct
     public void init() {
-        EodHelper.unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
-        EodHelper.armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).orElseThrow();
-        EodHelper.detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).orElseThrow();
-        EodHelper.inboundLocation = eltRepository.findById(ExternalLocationTypeEnum.INBOUND.getId()).orElseThrow();
+        unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
+        armLocation = eltRepository.findById(ExternalLocationTypeEnum.ARM.getId()).orElseThrow();
+        detsLocation = eltRepository.findById(ExternalLocationTypeEnum.DETS.getId()).orElseThrow();
+        inboundLocation = eltRepository.findById(ExternalLocationTypeEnum.INBOUND.getId()).orElseThrow();
 
-        EodHelper.storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
-        EodHelper.markForDeletionStatus = orsRepository.findById(MARKED_FOR_DELETION.getId()).orElseThrow();
-        EodHelper.failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
-        EodHelper.armProcessingResponseFilesStatus = orsRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();
-        EodHelper.failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
-        EodHelper.failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
-        EodHelper.armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
-        EodHelper.armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
-        EodHelper.armResponseProcessingFailedStatus = orsRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).orElseThrow();
-        EodHelper.armResponseManifestFailedStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
-        EodHelper.armResponseChecksumVerificationFailedStatus = orsRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).orElseThrow();
-        EodHelper.awaitingVerificationStatus = orsRepository.findById(AWAITING_VERIFICATION.getId()).orElseThrow();
+        storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
+        markForDeletionStatus = orsRepository.findById(MARKED_FOR_DELETION.getId()).orElseThrow();
+        failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
+        armProcessingResponseFilesStatus = orsRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();
+        failedArmManifestFileStatus = orsRepository.findById(ARM_MANIFEST_FAILED.getId()).orElseThrow();
+        failedArmResponseManifestFileStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
+        armIngestionStatus = orsRepository.findById(ARM_INGESTION.getId()).orElseThrow();
+        armDropZoneStatus = orsRepository.findById(ARM_DROP_ZONE.getId()).orElseThrow();
+        armResponseProcessingFailedStatus = orsRepository.findById(ARM_RESPONSE_PROCESSING_FAILED.getId()).orElseThrow();
+        armResponseManifestFailedStatus = orsRepository.findById(ARM_RESPONSE_MANIFEST_FAILED.getId()).orElseThrow();
+        armResponseChecksumVerificationFailedStatus = orsRepository.findById(ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED.getId()).orElseThrow();
+        awaitingVerificationStatus = orsRepository.findById(AWAITING_VERIFICATION.getId()).orElseThrow();
 
-        EodHelper.failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
+        failedArmStatuses = List.of(failedArmRawDataStatus, failedArmManifestFileStatus, failedArmResponseManifestFileStatus);
 
     }
 

@@ -88,12 +88,12 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA},
         globalAccessSecurityRoles = {JUDGE, SUPER_ADMIN, SUPER_USER, RCJ_APPEALS, TRANSLATION_QA})
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
-        AddAudioResponse addAudioResponse;
-        MediaRequestEntity audioRequest;
-
         if (mediaRequestService.isUserDuplicateAudioRequest(audioRequestDetails)) {
             throw new DartsApiException(AudioRequestsApiError.DUPLICATE_MEDIA_REQUEST);
         }
+
+        AddAudioResponse addAudioResponse;
+        MediaRequestEntity audioRequest;
 
         audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
         addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);

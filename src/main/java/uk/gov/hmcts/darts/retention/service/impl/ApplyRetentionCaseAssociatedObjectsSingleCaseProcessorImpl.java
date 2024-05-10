@@ -36,6 +36,7 @@ public class ApplyRetentionCaseAssociatedObjectsSingleCaseProcessorImpl implemen
     private final CaseDocumentRepository caseDocumentRepository;
 
     @Transactional
+    @Override
     public void processApplyRetentionToCaseAssociatedObjects(Integer caseId) {
 
         log.info("applying retention to associated objects for case id '{}'", caseId);

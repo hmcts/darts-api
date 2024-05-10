@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @NoRepositoryBean
 @SuppressWarnings({"InterfaceTypeParameterName"})
-public interface ReadOnlyRepository<T, ID> extends Repository<T, ID> {
+public interface ReadOnlyRepository<T, I> extends Repository<T, I> {
 
     List<T> findAll();
 
@@ -19,7 +19,7 @@ public interface ReadOnlyRepository<T, ID> extends Repository<T, ID> {
 
     Page<T> findAll(Pageable pageable);
 
-    Optional<T> findById(ID id);
+    Optional<T> findById(I id);
 
     long count();
 }

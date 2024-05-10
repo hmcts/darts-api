@@ -93,6 +93,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
@@ -107,7 +108,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     public static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
@@ -248,6 +249,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
 
+    @SuppressWarnings({"PMD.CyclomaticComplexity"})
     private void validateUpdateTranscription(TranscriptionEntity transcription,
                                              UpdateTranscriptionRequest updateTranscription, Boolean allowSelfApprovalOrRejection, boolean isAdmin) {
 
@@ -360,7 +362,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscriptionRequest updateTranscription = new UpdateTranscriptionRequest();
-            updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
+            updateTranscription.setTranscriptionStatusId(CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
             updateTranscription(transcriptionId, updateTranscription, false);
             log.debug("Closed off transcription {}", transcriptionId);
@@ -467,6 +469,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return getTranscriptionTranscriberCounts;
     }
 
+    @Override
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
         if (TRUE.equals(assigned)) {
             return transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
@@ -514,9 +517,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
         List<TranscriptionStatusEntity> transcriptionStatuses = new ArrayList<>();
-        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.CLOSED.getId()));
-        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.COMPLETE.getId()));
-        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.REJECTED.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(CLOSED.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(COMPLETE.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(REJECTED.getId()));
         return transcriptionStatuses;
     }
 
@@ -544,16 +547,16 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         List<UpdateTranscriptionsItem> processedUpdates = getTranscriptionForIds(getTranscriptionIdsForEntities(processed), request);
         unprocessedUpdates.removeAll(processedUpdates);
 
-        // return a partial success
-        if (!unprocessedUpdates.isEmpty() && !processedUpdates.isEmpty()) {
+        if (processedUpdates.isEmpty()) {
+            log.error("All transcription updates failed");
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS);
+        } else if (!unprocessedUpdates.isEmpty()) {
+            // return a partial success
             for (UpdateTranscriptionsItem unprocessedUpdateItem : unprocessedUpdates) {
                 log.error("Transcription update failed for transcription {}", unprocessedUpdateItem.getTranscriptionId());
             }
 
             throw PartialFailureException.getPartialPayloadJson(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS, unprocessedUpdates);
-        } else if (processedUpdates.isEmpty()) {
-            log.error("All transcription updates failed");
-            throw new DartsApiException(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS);
         }
 
         return processedUpdates;

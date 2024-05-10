@@ -25,6 +25,7 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
 
 
 @Slf4j
@@ -144,6 +145,21 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     protected abstract void runTask();
 
     protected abstract void handleException(Exception exception);
+
+    protected Optional<AutomatedTaskEntity> getAutomatedTaskDetails(String taskName) {
+        return automatedTaskRepository.findByTaskName(taskName);
+    }
+
+    protected boolean isAutomatedTaskInBatchMode(String taskName) {
+        Optional<AutomatedTaskEntity> automatedTaskEntity = getAutomatedTaskDetails(taskName);
+
+        if (automatedTaskEntity.isPresent()) {
+            AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
+            return nonNull(automatedTask.getBatchSize()) && automatedTask.getBatchSize() > 0;
+        }
+
+        return false;
+    }
 
     private void preRunTask() {
         setupUserAuthentication();

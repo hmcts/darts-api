@@ -32,6 +32,20 @@ paths:
           $ref: '#/components/responses/AutomatedTaskResponse'
         '404':
           $ref: '#/components/responses/AutomatedTaskNotFound'
+    patch:
+      tags:
+        - Tasks
+      operationId: patchAutomatedTask
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        $ref: '#/components/requestBodies/AutomatedTaskPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AutomatedTaskResponse'
+        '404':
+          $ref: '#/components/responses/AutomatedTaskNotFound'
+
 
   /admin/automated-tasks/{task_id}/run:
     post:
@@ -52,6 +66,13 @@ paths:
 
 components:
 
+  requestBodies:
+    AutomatedTaskPatchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AutomatedTaskPatch'
   responses:
     AutomatedTasksResponse:
       description: 'Success'
@@ -89,6 +110,13 @@ components:
             status: 409
 
   schemas:
+    AutomatedTaskPatch:
+      type: object
+      required:
+        - is_active
+      properties:
+        is_active:
+          $ref: '#/components/schemas/IsActive'
     AutomatedTaskSummary:
       type: object
       properties:

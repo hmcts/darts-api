@@ -69,6 +69,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     }
 
     @Override
+    @SuppressWarnings({"PMD.ExceptionAsFlowControl"})
     public String generatePlaylist(Set<PlaylistInfo> playlistInfos, String outputFileLocation) {
         String playlistFile;
         Playlist playlist = new Playlist();
@@ -156,7 +157,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
 
         try {
-            FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeader());
+            FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeaderBytes());
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), Files.readAllBytes(audioFileInfo.getPath()), true);
         } catch (Exception exception) {
             log.error("Unable to generate viq header for file: {}", viqOutputFile, exception);
