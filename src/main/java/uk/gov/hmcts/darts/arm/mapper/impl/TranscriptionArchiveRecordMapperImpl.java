@@ -154,12 +154,14 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     @SuppressWarnings({"java:S3776", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
-
+        OffsetDateTime retainUntilTs = transcriptionDocument.getRetainUntilTs();
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getTranscriptionRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(transcriptionDocument.getUploadedDateTime()))
+            .eventDate(formatDateTime(nonNull(retainUntilTs)
+                                          ? retainUntilTs.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears())
+                                          : transcriptionDocument.getUploadedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(transcriptionDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
