@@ -46,7 +46,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
         UserQueryRequest<UserPatch> request = new UserQueryRequest<>(patch, userId);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class, () -> userDeactivateNotLastSuperAdminValidator.validate(request));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
     }
 
     @Test

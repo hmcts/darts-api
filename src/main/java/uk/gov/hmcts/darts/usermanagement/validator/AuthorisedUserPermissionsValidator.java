@@ -9,8 +9,6 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Component
@@ -21,16 +19,16 @@ public class AuthorisedUserPermissionsValidator implements Validator<UserPatch> 
 
     @Override
     public void validate(UserPatch userPatch) {
-        Set<SecurityRoleEnum> superUserRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_USER)));
-        Set<SecurityRoleEnum> superAdminRole = new HashSet<>(List.of((SecurityRoleEnum.SUPER_ADMIN)));
+        Set<SecurityRoleEnum> superUserRole = Set.of(SecurityRoleEnum.SUPER_USER);
+        Set<SecurityRoleEnum> superAdminRole = Set.of(SecurityRoleEnum.SUPER_ADMIN);
         if (!userIdentity.userHasGlobalAccess(superAdminRole)) {
-            if (userPatch.getActive() == null || (userPatch.getActive() != null && userPatch.getActive().equals(false))
+            if (userPatch.getActive() == null || userPatch.getActive().equals(false)
                 && userIdentity.userHasGlobalAccess(superUserRole)) {
                 if (hasAnythingOtherThanActivationStateChanged(userPatch)) {
-                    throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
+                    throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT);
                 }
             } else if (userPatch.getActive() != null) {
-                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT);
+                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT);
             }
         }
     }

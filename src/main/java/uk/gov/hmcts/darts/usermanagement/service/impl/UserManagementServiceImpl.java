@@ -32,7 +32,6 @@ import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperA
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -189,7 +188,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             // and remove user from security groups
             if (active.equals(Boolean.FALSE)) {
                 unassignUserFromGroupsTheyArePartOf(userAccountEntity);
-                rolledBackTranscriptionsList = transcriptionService.rollbackUserTransactions(userAccountEntity);
+                rolledBackTranscriptionsList = transcriptionService.rollbackUserTranscriptions(userAccountEntity);
             }
         }
 
@@ -205,12 +204,11 @@ public class UserManagementServiceImpl implements UserManagementService {
         return rolledBackTranscriptionsList;
     }
 
-    private void unassignUserFromGroupsTheyArePartOf(UserAccountEntity entity) {
-        Set<SecurityGroupEntity> groupEntities = entity.getSecurityGroupEntities();
-        Iterator<SecurityGroupEntity> iterator = groupEntities.iterator();
-        while (iterator.hasNext()) {
-            SecurityGroupEntity groupEntity = iterator.next();
-            groupEntity.getUsers().remove(entity);
+    private void unassignUserFromGroupsTheyArePartOf(UserAccountEntity userAccount) {
+        Set<SecurityGroupEntity> groupEntities = userAccount.getSecurityGroupEntities();
+        userAccount.getSecurityGroupEntities().clear();
+        for (SecurityGroupEntity groupEntity : groupEntities) {
+            groupEntity.getUsers().remove(userAccount);
             securityGroupRepository.save(groupEntity);
         }
     }

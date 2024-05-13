@@ -70,6 +70,6 @@ public interface TranscriptionService {
                                                                  TranscriptionStatusEntity transcriptionStatus,
                                                                  String workflowComment);
 
-    List<Integer> rollbackUserTransactions(UserAccountEntity entity);
+    List<Integer> rollbackUserTranscriptions(UserAccountEntity entity);
 
 }

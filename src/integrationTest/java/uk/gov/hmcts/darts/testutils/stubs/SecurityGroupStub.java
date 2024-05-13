@@ -33,7 +33,7 @@ public class SecurityGroupStub {
     }
 
     @Transactional
-    public boolean isPartOfAny(Integer userId) {
+    public boolean isPartOfAnySecurityGroup(Integer userId) {
         return !getGroupsForUser(userId).isEmpty();
     }
 

@@ -117,7 +117,7 @@ class UserControllerTest extends IntegrationBase {
         Optional<UserAccountEntity> fndUserIdentity = dartsDatabase.getUserAccountRepository().findById(userAccountEntity.getId());
         Assertions.assertTrue(fndUserIdentity.isPresent());
 
-        Assertions.assertFalse(securityGroupStub.isPartOfAny(fndUserIdentity.get().getId()));
+        Assertions.assertFalse(securityGroupStub.isPartOfAnySecurityGroup(fndUserIdentity.get().getId()));
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -179,7 +179,7 @@ class UserControllerTest extends IntegrationBase {
         Optional<UserAccountEntity> fndUserIdentity = dartsDatabase.getUserAccountRepository().findById(userAccountEntity.getId());
         Assertions.assertTrue(fndUserIdentity.isPresent());
 
-        Assertions.assertFalse(securityGroupStub.isPartOfAny(fndUserIdentity.get().getId()));
+        Assertions.assertFalse(securityGroupStub.isPartOfAnySecurityGroup(fndUserIdentity.get().getId()));
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -297,7 +297,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getErrorTypeNumeric(), problem.getType().toString());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     @Test
@@ -325,7 +325,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getErrorTypeNumeric(), problem.getType().toString());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     @Test
@@ -353,7 +353,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getErrorTypeNumeric(), problem.getType().toString());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     private boolean containsApprovedWorkflow(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {

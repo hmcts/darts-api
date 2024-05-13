@@ -143,6 +143,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
 
+    private static final String OWNER_DISABLED_COMMENT_MESSAGE = "Owner was disabled";
+
     @Override
     @Transactional
     public RequestTranscriptionResponse saveTranscriptionRequest(
@@ -576,7 +578,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public List<Integer> rollbackUserTransactions(UserAccountEntity entity) {
+    public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
         List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
             .findWorkflowForUserWithTranscriptionState(entity.getId(),
                                                        TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
@@ -588,7 +590,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             saveTranscriptionWorkflow(entity, transcription,
                                       transcriptionStatusRepository.getReferenceById(
                                           TranscriptionStatusEnum.APPROVED.getId()),
-                                      "Owner was disabled");
+                                      OWNER_DISABLED_COMMENT_MESSAGE);
             transcriptionIds.add(transcription.getId());
         }
 

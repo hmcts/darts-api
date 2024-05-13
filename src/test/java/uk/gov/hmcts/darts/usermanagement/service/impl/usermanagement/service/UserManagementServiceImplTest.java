@@ -136,12 +136,12 @@ class UserManagementServiceImplTest {
         when(securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName())).thenReturn(Optional.of(securityGroupEntity));
         when(userAccountRepository.existsById(userId)).thenReturn(true);
         when(userAccountRepository.findById(userId)).thenReturn(Optional.of(userAccountEntities.get(0)));
-        when(transcriptionService.rollbackUserTransactions(userAccountEntities.get(0))).thenReturn(Arrays.asList(transcriptionId));
+        when(transcriptionService.rollbackUserTranscriptions(userAccountEntities.get(0))).thenReturn(Arrays.asList(transcriptionId));
 
         UserWithIdAndTimestamps resultList = service.modifyUser(userId, patch);
 
         assertEquals(transcriptionId, resultList.getRolledBackTranscriptRequests().get(0));
-        verify(transcriptionService, times(1)).rollbackUserTransactions(Mockito.any());
+        verify(transcriptionService, times(1)).rollbackUserTranscriptions(Mockito.any());
     }
 
     @Test
@@ -182,7 +182,7 @@ class UserManagementServiceImplTest {
         assertEquals(Arrays.asList(secGroupId), resultList.getSecurityGroupIds());
         assertEquals(emailAddress, resultList.getEmailAddress());
 
-        verify(transcriptionService, times(0)).rollbackUserTransactions(Mockito.any());
+        verify(transcriptionService, times(0)).rollbackUserTranscriptions(Mockito.any());
     }
 
     @Test
@@ -225,7 +225,7 @@ class UserManagementServiceImplTest {
         assertEquals(Arrays.asList(secGroupId), resultList.getSecurityGroupIds());
         assertEquals(emailAddress, resultList.getEmailAddress());
 
-        verify(transcriptionService, times(0)).rollbackUserTransactions(Mockito.any());
+        verify(transcriptionService, times(0)).rollbackUserTranscriptions(Mockito.any());
     }
 
     private static UserAccountEntity createUserAccount(int id, String emailAddress) {

@@ -584,7 +584,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository.saveAndFlush(Mockito.notNull()))
             .thenReturn(transcriptionWorkflowEntityEntity);
 
-        var allCaseTranscriptionDocuments = transcriptionService.rollbackUserTransactions(entity);
+        var allCaseTranscriptionDocuments = transcriptionService.rollbackUserTranscriptions(entity);
 
         verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
         TranscriptionWorkflowEntity workflowEntity = transcriptionWorkflowEntityArgumentCaptor.getValue();

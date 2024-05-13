@@ -645,15 +645,6 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEnum... securityGroupsEnum) {
-        for (SecurityGroupEnum securityGroup : securityGroupsEnum) {
-            Optional<SecurityGroupEntity> superUserGroupEntity
-                = securityGroupRepository.findByGroupNameIgnoreCase(securityGroup.getName());
-            addUserToGroup(userAccount, superUserGroupEntity.get());
-        }
-    }
-
-    @Transactional
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEntity securityGroup) {
         securityGroup.getUsers().add(userAccount);
         userAccount.getSecurityGroupEntities().add(securityGroup);
@@ -665,10 +656,7 @@ public class DartsDatabaseStub {
     public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEnum securityGroup) {
         Optional<SecurityGroupEntity> groupEntity
             = securityGroupRepository.findByGroupNameIgnoreCase(securityGroup.getName());
-        groupEntity.get().getUsers().add(userAccount);
-        userAccount.getSecurityGroupEntities().add(groupEntity.get());
-        securityGroupRepository.saveAndFlush(groupEntity.get());
-        userAccountRepository.saveAndFlush(userAccount);
+        addUserToGroup(userAccount, groupEntity.get());
     }
 
     @Transactional

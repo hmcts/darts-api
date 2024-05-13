@@ -32,7 +32,7 @@ class UserActivationPermissionsValidatorTest {
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
     }
 
     @Test
@@ -45,7 +45,7 @@ class UserActivationPermissionsValidatorTest {
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
     }
 
     @Test
@@ -58,7 +58,7 @@ class UserActivationPermissionsValidatorTest {
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
     }
 
     @Test
@@ -71,7 +71,7 @@ class UserActivationPermissionsValidatorTest {
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
     }
 
     @Test
@@ -84,7 +84,7 @@ class UserActivationPermissionsValidatorTest {
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_FOR_PAYLOAD_ENDPOINT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
     }
 
     @Test
