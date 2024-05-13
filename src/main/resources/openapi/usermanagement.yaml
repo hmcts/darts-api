@@ -297,6 +297,39 @@ paths:
                 title: User is not authorised for this endpoint
                 status: 403
 
+  /admin/transcriptions:
+    get:
+      tags:
+        - Transcription
+      summary: Requester / Approver view for Transcript requests
+      operationId: getTranscriptionsForUser
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: requested_at_from
+          schema:
+            type: string
+            format: date-time
+          description: The date and time that the transcription was created and beyond
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/GetTranscriptionsResponse'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "USER_MANAGEMENT_108"
+                title: "The provided transcription does not exist"
+                status: 404
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -387,7 +420,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SecurityGroupWithIdAndRoleAndUsers'
-
+    GetTranscriptionsResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TranscriptionDetails'
     BadUserRequest:
       description: Bad Request
       content:
@@ -620,6 +658,34 @@ components:
             $ref: '#/components/schemas/UserId'
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
+
+    TranscriptionDetails:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranscriptionDetail'
+
+    TranscriptionDetail:
+      type: object
+      properties:
+        transcription_id:
+          type: integer
+        case_number:
+          type: string
+        courthouse_id:
+          type: integer
+        hearing_date:
+          type: string
+          format: date
+        requested_at:
+          type: string
+          format: date-time
+        transcription_status_id:
+          type: integer
+        is_manual_transcription:
+          type: boolean
     SecurityGroupPostRequest:
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
@@ -668,7 +734,8 @@ components:
         - "USER_MANAGEMENT_105"
         - "USER_MANAGEMENT_106"
         - "USER_MANAGEMENT_107"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED, SECURITY_GROUP_NOT_ALLOWED, DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED ]
+        - "USER_MANAGEMENT_108"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED, SECURITY_GROUP_NOT_ALLOWED, DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED, TRANSCRIPTION_NOT_FOUND ]
 
     UserManagementTitleErrors:
       type: string
@@ -681,8 +748,8 @@ components:
         - "Duplicate security group names are not permitted"
         - "A Security Group of this type is not allowed to be created"
         - "Duplicate security group display name are not permitted"
-      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED, SECURITY_GROUP_NOT_ALLOWED, DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED ]
-
+        - "Transcription does not exist"
+      x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, INVALID_EMAIL_FORMAT, SECURITY_GROUP_NOT_FOUND, COURTHOUSE_NOT_FOUND, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED, SECURITY_GROUP_NOT_ALLOWED, DUPLICATE_SECURITY_GROUP_DISPLAY_NAME_NOT_PERMITTED, TRANSCRIPTION_NOT_FOUND ]
 
     Role:
       type: object
