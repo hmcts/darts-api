@@ -615,6 +615,10 @@ components:
         created_at:
           type: string
           format: date-time
+        rolled_back_transcript_requests:
+          type: array
+          items:
+            type: integer
       allOf:
         - $ref: '#/components/schemas/User'
     UserAuthorisation403_107ErrorCode:

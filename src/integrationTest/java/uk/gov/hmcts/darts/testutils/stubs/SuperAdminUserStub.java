@@ -5,10 +5,13 @@ import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.util.SecurityRoleMatcher;
 
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +30,30 @@ public class SuperAdminUserStub {
         return user;
     }
 
+    public UserAccountEntity givenSystemAdminIsAuthorised(UserIdentity userIdentity) {
+        var user = userAccountStub.createSuperAdminUser();
+
+        Mockito.when(userIdentity.getUserAccount())
+            .thenReturn(user);
+        Mockito.when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_ADMIN))))
+            .thenReturn(true);
+        Mockito.when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER))))
+            .thenReturn(true);
+
+        return user;
+    }
+
+    public UserAccountEntity givenSystemUserIsAuthorised(UserIdentity userIdentity) {
+        var user = userAccountStub.createSuperUser();
+
+        Mockito.when(userIdentity.getUserAccount())
+            .thenReturn(user);
+        Mockito.when(userIdentity.userHasGlobalAccess(argThat(new SecurityRoleMatcher(SecurityRoleEnum.SUPER_USER))))
+            .thenReturn(true);
+
+        return user;
+    }
+
     public UserAccountEntity givenUserIsNotAuthorised(UserIdentity userIdentity) {
         var user = userAccountStub.getIntegrationTestUserAccountEntity();
         user.setSecurityGroupEntities(Collections.emptySet());
@@ -38,5 +65,4 @@ public class SuperAdminUserStub {
 
         return user;
     }
-
 }

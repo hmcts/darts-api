@@ -6,7 +6,7 @@
     "publisher": "DARTS",
     "region": "GBR",
     "recordDate": "2023-09-23T13:00:00Z",
-    "event_date": "<UPLOADED_DATE_TIME>",
+    "event_date": "<EVENT_DATE_TIME>",
     "title": "test_case_document.docx",
     "client_identifier": "<EODID>",
     "contributor": "Bristol",

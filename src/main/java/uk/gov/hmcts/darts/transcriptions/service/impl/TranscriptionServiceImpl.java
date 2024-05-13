@@ -143,6 +143,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionResponseMapper transcriptionResponseMapper;
     private final TranscriptionDownloader transcriptionDownloader;
 
+    private static final String OWNER_DISABLED_COMMENT_MESSAGE = "Owner was disabled";
+
     @Override
     @Transactional
     public RequestTranscriptionResponse saveTranscriptionRequest(
@@ -306,7 +308,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
-    private TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
+    public TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                                                   TranscriptionEntity transcription,
                                                                   TranscriptionStatusEntity transcriptionStatus,
                                                                   String workflowComment) {
@@ -573,6 +575,26 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             }
         }
         return uniqueTranscriptionDocuments;
+    }
+
+    @Override
+    public List<Integer> rollbackUserTranscriptions(UserAccountEntity entity) {
+        List<TranscriptionEntity> transcriptionWorkflowEntities = transcriptionWorkflowRepository
+            .findWorkflowForUserWithTranscriptionState(entity.getId(),
+                                                       TranscriptionStatusEnum.WITH_TRANSCRIBER.getId());
+
+        List<Integer> transcriptionIds = new ArrayList<>();
+
+        // add the workflows back
+        for (TranscriptionEntity transcription : transcriptionWorkflowEntities) {
+            saveTranscriptionWorkflow(entity, transcription,
+                                      transcriptionStatusRepository.getReferenceById(
+                                          TranscriptionStatusEnum.APPROVED.getId()),
+                                      OWNER_DISABLED_COMMENT_MESSAGE);
+            transcriptionIds.add(transcription.getId());
+        }
+
+        return transcriptionIds;
     }
 
     private List<TranscriptionEntity> processTranscriptionUpdates(List<UpdateTranscriptionsItem> request) {

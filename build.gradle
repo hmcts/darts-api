@@ -58,7 +58,10 @@ sourceSets {
   integrationTest {
     java {
       compileClasspath += main.output
+      // test added in order to share test utilities i.e. matchers etc
+      compileClasspath += test.output
       runtimeClasspath += main.output
+      runtimeClasspath += test.output
       srcDir file('src/integrationTest/java')
     }
     resources.srcDir file('src/integrationTest/resources')
