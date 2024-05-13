@@ -137,11 +137,14 @@ public class CaseArchiveRecordMapperImpl implements CaseArchiveRecordMapper {
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     private RecordMetadata createArchiveRecordMetadata(ExternalObjectDirectoryEntity externalObjectDirectory) {
         CaseDocumentEntity caseDocument = externalObjectDirectory.getCaseDocument();
+        OffsetDateTime retainUntilTs = caseDocument.getRetainUntilTs();
         RecordMetadata metadata = RecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getCaseRecordClass())
             .recordDate(formatDateTime(currentTimeHelper.currentOffsetDateTime()))
-            .eventDate(formatDateTime(caseDocument.getCreatedDateTime()))
+            .eventDate(formatDateTime(nonNull(retainUntilTs)
+                                          ? retainUntilTs.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears())
+                                          : caseDocument.getCreatedDateTime()))
             .region(armDataManagementConfiguration.getRegion())
             .title(caseDocument.getFileName())
             .clientId(String.valueOf(externalObjectDirectory.getId()))
