@@ -80,7 +80,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -128,7 +128,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -175,7 +175,7 @@ class PatchUserIntTest extends IntegrationBase {
     // Regression test to cover bug DMP-2459
     @Test
     void patchUserShouldSucceedWhenAnExistingDescriptionIsRemoved() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -222,7 +222,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfChangeWithInvalidDataIsAttempted() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -256,7 +256,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedAndClearSecurityGroupsWhenAccountGetsDisabledAndNoSecurityGroupsAreExplicitlyProvided() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -324,7 +324,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenSecurityGroupsAreUpdated() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -368,7 +368,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedIfEmailAddressChangeDifferent() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -389,7 +389,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserSameEmailShouldBeOkAndDataShouldRemainUnchanged() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
@@ -408,7 +408,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserDuplicateEmailShouldFail() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        UserAccountEntity user = superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         createEnabledUserAccountEntity(user);
         UserAccountEntity secondAccount = createEnabledUserAccountEntity(user, SECOND_EMAIL_ADDRESS);
@@ -447,7 +447,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfProvidedUserIsASystemUser() throws Exception {
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenSystemAdminIsAuthorised(userIdentity);
 
         UserAccountEntity userAccountEntity = accountStub.getSystemUserAccountEntity();
 

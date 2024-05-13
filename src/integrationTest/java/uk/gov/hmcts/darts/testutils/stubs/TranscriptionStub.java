@@ -46,6 +46,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
@@ -85,6 +86,24 @@ public class TranscriptionStub {
             transcriptionStatus,
             Optional.of(transcriptionUrgencyEntity),
             authorisedIntegrationTestUser
+        );
+    }
+
+    public TranscriptionEntity createTranscription(HearingEntity hearing, UserAccountEntity userAccountEntity) {
+        return createTranscription(hearing, userAccountEntity, APPROVED);
+    }
+
+    public TranscriptionEntity createTranscription(HearingEntity hearing, UserAccountEntity userAccountEntity, TranscriptionStatusEnum statusEnum) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(statusEnum);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
+
+        return createAndSaveTranscriptionEntity(
+            hearing,
+            transcriptionType,
+            transcriptionStatus,
+            Optional.of(transcriptionUrgencyEntity),
+            userAccountEntity
         );
     }
 
@@ -228,6 +247,24 @@ public class TranscriptionStub {
             null,
             associatedUrgency
         );
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    @Transactional
+    public TranscriptionEntity createAndSaveWithTranscriberTranscription(UserAccountEntity userAccountEntity,
+                                                                   CourtCaseEntity courtCaseEntity,
+                                                                   HearingEntity hearingEntity,
+                                                                   OffsetDateTime workflowTimestamp,
+                                                                   Boolean hideRequestFromRequester) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
+            userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(WITH_TRANSCRIBER),
+            null
+        );
+        transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 

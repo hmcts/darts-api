@@ -157,7 +157,7 @@ class DataManagementServiceImplTest {
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(blobClient.exists()).thenReturn(true);
-        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn("tempWorkspace");
+        when(dataManagementConfiguration.getTempBlobWorkspace()).thenReturn(System.getProperty("java.io.tmpdir") + "/tempWorkspace");
 
         dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID);
         verify(blobClient, times(1)).downloadStream(any());
