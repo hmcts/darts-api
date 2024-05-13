@@ -5,8 +5,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
@@ -19,10 +17,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
@@ -47,10 +43,6 @@ class ArmBatchProcessResponseFilesImplTest {
     public static final String RESPONSE_FILENAME_EXTENSION = "a360";
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
 
     @Mock
     private ArmDataManagementApi armDataManagementApi;
@@ -73,9 +65,6 @@ class ArmBatchProcessResponseFilesImplTest {
     private AnnotationDocumentRepository annotationDocumentRepository;
     @Mock
     private CaseDocumentRepository caseDocumentRepository;
-
-    @Captor
-    private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
