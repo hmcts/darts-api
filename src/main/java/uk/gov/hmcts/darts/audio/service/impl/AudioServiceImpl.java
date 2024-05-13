@@ -363,7 +363,7 @@ public class AudioServiceImpl implements AudioService {
             audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
         for (AudioMetadata audioMetadataItem : audioMetadata) {
-            if (archivedArmRecords.stream().anyMatch(archived -> audioMetadataItem.getId().equals(archived.mediaId()))) {
+            if (isMediaArchived(audioMetadataItem, archivedArmRecords) && isValidFileSize()) {
                 audioMetadataItem.setIsArchived(true);
             } else {
                 audioMetadataItem.setIsArchived(false);
@@ -385,5 +385,13 @@ public class AudioServiceImpl implements AudioService {
         for (AudioMetadata audioMetadataItem : audioMetadataList) {
             audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
         }
+    }
+
+    private boolean isMediaArchived(AudioMetadata audioMetadataItem, List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords) {
+        return archivedArmRecords.stream().anyMatch(archived -> audioMetadataItem.getId().equals(archived.mediaId()));
+    }
+
+    private boolean isValidFileSize() {
+        return false;
     }
 }
