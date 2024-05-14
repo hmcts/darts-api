@@ -95,53 +95,57 @@ public class ManualTaskService {
         return automatedTasks;
     }
 
-    
+
     private void addProcessDailyListToTaskRegistrar() {
-        ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+        var manualTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             dailyListProcessor,
             logApi
         );
-        automatedTasks.add(processDailyListAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addInboundAudioDeleterToTaskRegistrar() {
-        InboundAudioDeleterAutomatedTask inboundAudioDeleterAutomatedTask = new InboundAudioDeleterAutomatedTask(
+        var manualTask = new InboundAudioDeleterAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             inboundAudioDeleterProcessor,
             logApi
         );
-        automatedTasks.add(inboundAudioDeleterAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addOutboundAudioDeleterToTaskRegistrar() {
-        OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
+        var manualTask = new OutboundAudioDeleterAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             outboundAudioDeleterProcessor,
             logApi
         );
-        automatedTasks.add(outboundAudioDeleterAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addInboundToUnstructuredTaskRegistrar() {
-        InboundToUnstructuredAutomatedTask inboundToUnstructuredAutomatedTask = new InboundToUnstructuredAutomatedTask(
+        var manualTask = new InboundToUnstructuredAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             inboundToUnstructuredProcessor,
             logApi
         );
-        automatedTasks.add(inboundToUnstructuredAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addExternalDataStoreDeleterToTaskRegistrar() {
-        ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask = new ExternalDataStoreDeleterAutomatedTask(
+        var manualTask = new ExternalDataStoreDeleterAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
@@ -150,113 +154,123 @@ public class ManualTaskService {
             outboundDataStoreDeleter,
             logApi
         );
-        automatedTasks.add(externalDataStoreDeleterAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar() {
-        CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
+        var manualTask = new CloseUnfinishedTranscriptionsAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             transcriptionsProcessor,
             logApi
         );
-        automatedTasks.add(closeUnfinishedTranscriptionsAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar() {
-        UnstructuredAudioDeleterAutomatedTask unstructuredAudioDeleterAutomatedTask = new UnstructuredAudioDeleterAutomatedTask(
+        var manualTask = new UnstructuredAudioDeleterAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             unstructuredAudioDeleterProcessor,
             logApi
         );
-        automatedTasks.add(unstructuredAudioDeleterAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addUnstructuredToArmTaskRegistrar() {
-        UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask = new UnstructuredToArmAutomatedTask(
+        var manualTask = new UnstructuredToArmAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             automatedTaskProcessorFactory,
             logApi
         );
-        automatedTasks.add(unstructuredToArmAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addProcessArmResponseFilesTaskRegistrar() {
-        ProcessArmResponseFilesAutomatedTask processArmResponseFilesTask = new ProcessArmResponseFilesAutomatedTask(
+        var manualTask = new ProcessArmResponseFilesAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             automatedTaskProcessorFactory,
             logApi
         );
-        automatedTasks.add(processArmResponseFilesTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addApplyRetentionToTaskRegistrar() {
-        ApplyRetentionAutomatedTask applyRetentionAutomatedTask = new ApplyRetentionAutomatedTask(
+        var manualTask = new ApplyRetentionAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             applyRetentionProcessor,
             logApi
         );
-        automatedTasks.add(applyRetentionAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addCaseObjectApplyRetentionToTaskRegistrar() {
-        var applyRetentionCaseAssociatedObjectsAutomatedTask = new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
+        var manualTask = new ApplyRetentionCaseAssociatedObjectsAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             applyRetentionCaseAssociatedObjectsProcessor,
             logApi
         );
-        automatedTasks.add(applyRetentionCaseAssociatedObjectsAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addCleanupArmResponseFilesTaskRegistrar() {
-        CleanupArmResponseFilesAutomatedTask cleanupArmResponseFilesAutomatedTask = new CleanupArmResponseFilesAutomatedTask(
+        var manualTask = new CleanupArmResponseFilesAutomatedTask(
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
             cleanupArmResponseFilesService,
             logApi
         );
-        automatedTasks.add(cleanupArmResponseFilesAutomatedTask);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addCloseOldCasesTaskRegistrar() {
-        CloseOldCasesAutomatedTask closeOldCasesAutomatedTask = new CloseOldCasesAutomatedTask(automatedTaskRepository,
-                                                                                               lockProvider,
-                                                                                               automatedTaskConfigurationProperties,
-                                                                                               closeOldCasesProcessor,
-                                                                                               logApi);
-        automatedTasks.add(closeOldCasesAutomatedTask);
+        var manualTask = new CloseOldCasesAutomatedTask(automatedTaskRepository,
+                                                        lockProvider,
+                                                        automatedTaskConfigurationProperties,
+                                                        closeOldCasesProcessor,
+                                                        logApi);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
     private void addDailyListHouseKeepingToTaskRegistrar() {
-        DailyListAutomatedTask dailyListTask = new DailyListAutomatedTask(automatedTaskRepository,
-                                                                          lockProvider,
-                                                                          automatedTaskConfigurationProperties,
-                                                                          dailyListService,
-                                                                          logApi);
-        automatedTasks.add(dailyListTask);
+        var manualTask = new DailyListAutomatedTask(automatedTaskRepository,
+                                                    lockProvider,
+                                                    automatedTaskConfigurationProperties,
+                                                    dailyListService,
+                                                    logApi);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
 
     private void addArmRetentionEventDateCalculatorToTaskRegister() {
-        ArmRetentionEventDateCalculatorAutomatedTask armRetentionEventDateCalculatorAutomatedTask =
-            new ArmRetentionEventDateCalculatorAutomatedTask(automatedTaskRepository,
-                                                             lockProvider,
-                                                             automatedTaskConfigurationProperties,
-                                                             armRetentionEventDateProcessor,
-                                                             logApi);
-        automatedTasks.add(armRetentionEventDateCalculatorAutomatedTask);
+        var manualTask = new ArmRetentionEventDateCalculatorAutomatedTask(automatedTaskRepository,
+                                                                          lockProvider,
+                                                                          automatedTaskConfigurationProperties,
+                                                                          armRetentionEventDateProcessor,
+                                                                          logApi);
+        manualTask.setManualTask();
+        automatedTasks.add(manualTask);
     }
 
 }
