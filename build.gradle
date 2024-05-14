@@ -289,7 +289,7 @@ repositories {
 
 ext {
   log4JVersion = "2.23.1"
-  tomcatEmbedVersion = "10.1.23"
+  tomcatEmbedVersion = "10.1.24"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -415,7 +415,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.2'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.5'
+  testImplementation group: 'io.projectreactor', name: 'reactor-test', version: '3.6.6'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
   testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.2.1'
