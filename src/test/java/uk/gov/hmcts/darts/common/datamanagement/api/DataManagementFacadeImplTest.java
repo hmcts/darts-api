@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRetrievalQueueEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Vector;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -58,6 +60,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -345,6 +349,39 @@ class DataManagementFacadeImplTest {
             () -> dmFacade.retrieveFileFromStorage(mediaEntity)
         );
 
+        verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(any());
+        assertTrue(exception.getMessage().contains("No storedEodEntities found for mediaId"));
+    }
+
+    @Test
+    void duplicateObjectRetrievalQueueNotAddedWhenRetrieveFileFromStorageMediaEmpty() throws Exception {
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        blobContainerDownloadables.add(setupDownloadableContainer(DatastoreContainerType.ARM, false));
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setContentObjectId("2");
+        mediaEntity.setClipId("clip-id");
+
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+
+        when(objectRetrievalQueueRepository.findMatchingObjectRetrievalQueuedItems(mediaEntity,
+                                                                                   null,
+                                                                                   mediaEntity.getId().toString(),
+                                                                                   mediaEntity.getContentObjectId(),
+                                                                                   mediaEntity.getClipId())).thenReturn(Optional.of(objectRetrievalQueueEntity));
+        // make the assertion on the response
+        var exception = assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+        );
+
+        verify(objectRetrievalQueueRepository, times(0)).saveAndFlush(any());
         assertTrue(exception.getMessage().contains("No storedEodEntities found for mediaId"));
     }
 
