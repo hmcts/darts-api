@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,17 +10,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TranscriptionUrgencyEnum;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
@@ -228,4 +235,126 @@ class TranscriptionResponseMapperTest {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
+    @Test
+    void mapTransactionEntityToTransactionDetails() {
+
+        LocalDate hearingDate = LocalDate.now();
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setHearingDate(hearingDate);
+
+        Integer courthouseId = 300;
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setId(courthouseId);
+
+        CourtroomEntity courtroomEntity = new CourtroomEntity();
+        courtroomEntity.setCourthouse(courthouseEntity);
+
+        hearingEntity.setCourtroom(courtroomEntity);
+
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(TranscriptionStatusEnum.COMPLETE.getId());
+
+        String caseNumber = "casenumber";
+        CourtCaseEntity caseEntity = new CourtCaseEntity();
+        caseEntity.setCaseNumber(caseNumber);
+
+        List<HearingEntity> hearingEntityList = new ArrayList<>();
+
+        // create the transaction to be mapped
+        Integer transactionId = 200;
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(transactionId);
+        transcriptionEntity.setHearings(hearingEntityList);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStatus);
+        transcriptionEntity.setIsManualTranscription(false);
+        hearingEntity.setCourtCase(caseEntity);
+        transcriptionEntity.getHearings().add(hearingEntity);
+
+        // run test and make the assertions
+        GetTranscriptionDetailResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
+        assertEquals(transactionId, fndResponse.getTranscriptionId());
+        assertEquals(TranscriptionStatusEnum.COMPLETE.getId(), fndResponse.getTranscriptionStatusId());
+        assertEquals(false, fndResponse.getIsManualTranscription());
+        assertEquals(caseNumber, fndResponse.getCaseNumber());
+        assertEquals(hearingDate, fndResponse.getHearingDate());
+        assertEquals(courthouseId, fndResponse.getCourthouseId());
+    }
+
+    @Test
+    void mapTransactionEntityNoHearingToTransactionDetails() {
+
+        Integer courthouseId = 300;
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setId(courthouseId);
+
+        CourtroomEntity courtroomEntity = new CourtroomEntity();
+        courtroomEntity.setCourthouse(courthouseEntity);
+
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(TranscriptionStatusEnum.COMPLETE.getId());
+
+        String caseNumber = "casenumber";
+        CourtCaseEntity caseEntity = new CourtCaseEntity();
+        caseEntity.setCaseNumber(caseNumber);
+        caseEntity.setCourthouse(courthouseEntity);
+
+        List<HearingEntity> hearingEntityList = new ArrayList<>();
+
+        // create the transaction to be mapped
+        Integer transactionId = 200;
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(transactionId);
+        transcriptionEntity.setHearings(hearingEntityList);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStatus);
+        transcriptionEntity.setIsManualTranscription(false);
+        transcriptionEntity.getCourtCases().add(caseEntity);
+
+        // run test and make the assertions
+        GetTranscriptionDetailResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
+        assertEquals(transactionId, fndResponse.getTranscriptionId());
+        assertEquals(TranscriptionStatusEnum.COMPLETE.getId(), fndResponse.getTranscriptionStatusId());
+        assertEquals(false, fndResponse.getIsManualTranscription());
+        assertEquals(caseNumber, fndResponse.getCaseNumber());
+        Assertions.assertNull(fndResponse.getHearingDate());
+        assertEquals(courthouseId, fndResponse.getCourthouseId());
+    }
+
+    @Test
+    void mapTransactionEntityNoCaseToTransactionDetails() {
+        LocalDate hearingDate = LocalDate.now();
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setHearingDate(hearingDate);
+
+        Integer courthouseId = 300;
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setId(courthouseId);
+
+        CourtroomEntity courtroomEntity = new CourtroomEntity();
+        courtroomEntity.setCourthouse(courthouseEntity);
+
+        hearingEntity.setCourtroom(courtroomEntity);
+
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(TranscriptionStatusEnum.COMPLETE.getId());
+
+        List<HearingEntity> hearingEntityList = new ArrayList<>();
+
+        // create the transaction to be mapped
+        Integer transactionId = 200;
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(transactionId);
+        transcriptionEntity.setHearings(hearingEntityList);
+        transcriptionEntity.setTranscriptionStatus(transcriptionStatus);
+        transcriptionEntity.setIsManualTranscription(false);
+        transcriptionEntity.getHearings().add(hearingEntity);
+
+        // run test and make the assertions
+        GetTranscriptionDetailResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
+        assertEquals(transactionId, fndResponse.getTranscriptionId());
+        assertEquals(TranscriptionStatusEnum.COMPLETE.getId(), fndResponse.getTranscriptionStatusId());
+        assertEquals(false, fndResponse.getIsManualTranscription());
+        Assertions.assertNull(fndResponse.getCaseNumber());
+        assertEquals(hearingDate, fndResponse.getHearingDate());
+        assertEquals(courthouseId, fndResponse.getCourthouseId());
+    }
 }

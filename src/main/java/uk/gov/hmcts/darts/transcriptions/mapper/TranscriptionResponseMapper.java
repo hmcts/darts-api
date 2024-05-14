@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsReposito
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
@@ -232,5 +233,31 @@ public class TranscriptionResponseMapper {
         } else {
             return null;
         }
+    }
+
+
+    public GetTranscriptionDetailResponse mapTransactionEntityToTransactionDetails(TranscriptionEntity transcriptionEntity) {
+        GetTranscriptionDetailResponse details = new GetTranscriptionDetailResponse();
+
+        if (transcriptionEntity.getTranscriptionStatus() != null) {
+            details.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());
+        }
+
+        details.setTranscriptionId(transcriptionEntity.getId());
+        details.setIsManualTranscription(transcriptionEntity.getIsManualTranscription());
+
+        if (transcriptionEntity.getCourtCase() != null) {
+            details.setCaseNumber(transcriptionEntity.getCourtCase().getCaseNumber());
+        }
+
+        if (transcriptionEntity.getHearing() != null) {
+            details.setCourthouseId(transcriptionEntity.getHearing().getCourtroom().getCourthouse().getId());
+            details.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+        } else if (transcriptionEntity.getCourtCase() != null) {
+            details.setCourthouseId(transcriptionEntity.getCourtCase().getCourthouse().getId());
+        }
+
+        details.requestedAt(transcriptionEntity.getCreatedDateTime());
+        return details;
     }
 }

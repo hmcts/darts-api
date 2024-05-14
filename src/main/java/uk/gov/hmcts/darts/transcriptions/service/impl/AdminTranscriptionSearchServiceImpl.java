@@ -2,23 +2,34 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSearchService {
 
     private final TranscriptionSearchQuery transcriptionSearchQuery;
+
+    private final TranscriptionRepository transcriptionRepository;
+
+    private final TranscriptionResponseMapper transcriptionMapper;
 
     @Override
     @SuppressWarnings({"PMD.NullAssignment"})
@@ -50,6 +61,23 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         return transcriptionSearchQuery.searchTranscriptions(request, transcriptionIds).stream()
             .map(this::toTranscriptionSearchResponse)
             .toList();
+    }
+
+    @Override
+    public List<GetTranscriptionDetailResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
+        List<GetTranscriptionDetailResponse> detailResponseList = new ArrayList<>();
+
+        List<TranscriptionEntity> entityList = transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, requestedAtFrom);
+
+        if (entityList.isEmpty()) {
+            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND);
+        }
+
+        for (TranscriptionEntity transcriptionEntity : entityList) {
+            detailResponseList.add(transcriptionMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity));
+        }
+
+        return detailResponseList;
     }
 
     private TranscriptionSearchResponse toTranscriptionSearchResponse(TranscriptionSearchResult transcriptionSearchResult) {

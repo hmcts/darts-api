@@ -790,7 +790,45 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GetTranscriptionWorkflowsResponse'
-
+  /admin/transcriptions:
+    get:
+      tags:
+        - Transcription
+      summary: Get Transcript requests
+      operationId: getTranscriptionsForUser
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: requested_at_from
+          schema:
+            type: string
+            format: date-time
+          description: The date and time that the transcription was created and beyond
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetTranscriptionDetailResponse'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "USER_MANAGEMENT_108"
+                title: "The provided transcription does not exist"
+                status: 404
 components:
   schemas:
     TranscriptionSearchRequest:
@@ -1286,6 +1324,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TranscriptionWorkflowsComment'
+
+    GetTranscriptionDetailResponse:
+      type: object
+      properties:
+        transcription_id:
+          type: integer
+        case_number:
+          type: string
+        courthouse_id:
+          type: integer
+        hearing_date:
+          type: string
+          format: date
+        requested_at:
+          type: string
+          format: date-time
+        transcription_status_id:
+          type: integer
+        is_manual_transcription:
+          type: boolean
 
     TranscriptionsErrorCode:
       type: string
