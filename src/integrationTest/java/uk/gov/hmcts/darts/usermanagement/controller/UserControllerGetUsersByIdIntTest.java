@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.util.Set;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -81,6 +82,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
 
         Problem problem = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
 
+        assertNull(problem.getDetail());
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getHttpStatus().value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
