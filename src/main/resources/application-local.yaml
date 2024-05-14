@@ -8,8 +8,7 @@ spring:
     username: darts
     password: darts
   flyway:
-    locations: xxx
-#    locations: classpath:db/migration/common,db/migration/postgres,db/migration/local
+    locations: classpath:db/migration/common,db/migration/postgres,db/migration/local
   jpa:
     show-sql: true
     hibernate:
