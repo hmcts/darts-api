@@ -24,5 +24,4 @@ public interface AutomatedTaskService {
 
     AutomatedTaskStatus getAutomatedTaskStatus(String taskName);
 
-    List<AbstractLockableAutomatedTask> getAutomatedTasks();
 }
