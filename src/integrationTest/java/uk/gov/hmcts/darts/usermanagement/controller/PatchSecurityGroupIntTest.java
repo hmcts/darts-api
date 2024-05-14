@@ -176,6 +176,29 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     }
 
     @Test
+    void patchSecurityGroupShouldSucceedWhenProvidedWithEmptyUserIds() throws Exception {
+        String name = "security group name" + UUID.randomUUID();
+        String displayName = "security group display name" + UUID.randomUUID();
+        Integer id = createSecurityGroup(name, displayName);
+
+        String patchContent = String.format("{\"user_ids\": []}");
+
+        MockHttpServletRequestBuilder patchRequest = buildPatchRequest(id)
+            .content(patchContent);
+
+        mockMvc.perform(patchRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.name").value(name))
+            .andExpect(jsonPath("$.display_name").value(displayName))
+            .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
+            .andExpect(jsonPath("$.global_access").value(false))
+            .andExpect(jsonPath("$.security_role_id").isNumber())
+            .andExpect(jsonPath("$.courthouse_ids").isEmpty())
+            .andReturn();
+    }
+
+    @Test
     void patchSecurityGroupsShouldFailWithUnauthorizedUser() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
@@ -403,6 +426,10 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
     }
 
     private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email) {
+        return createEnabledUserAccountEntity(user, email, false);
+    }
+
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email, boolean isSystemUser) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName("user name");
         userAccountEntity.setUserFullName("user full name");
@@ -410,7 +437,7 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
         userAccountEntity.setUserDescription("Description");
         userAccountEntity.setActive(true);
 
-        userAccountEntity.setIsSystemUser(false);
+        userAccountEntity.setIsSystemUser(isSystemUser);
         userAccountEntity.setCreatedBy(user);
         userAccountEntity.setLastModifiedBy(user);
 
