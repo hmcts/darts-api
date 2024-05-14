@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @AutoConfigureMockMvc
 class EventControllerPostEventMappingTest extends IntegrationBase  {
 
-    private static final String EVENT_MAPPINGS_ENDPOINT = "/event-mappings";
+    private static final String EVENT_MAPPINGS_ENDPOINT = "/admin/event-mappings";
 
     @Autowired
     private transient MockMvc mockMvc;

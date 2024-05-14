@@ -7,33 +7,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 
-import java.time.OffsetDateTime;
-
-import static java.time.OffsetDateTime.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EventHandlerMapperTest {
 
-    public static final OffsetDateTime SOME_OFFSET_DATE_TIME = parse("2020-01-01T00:00:00Z");
-    public static final UserAccountEntity USER_ACCOUNT_ENTITY = new UserAccountEntity();
+    private static final UserAccountEntity USER_ACCOUNT_ENTITY = new UserAccountEntity();
 
     @Mock
     private AuthorisationApi authorisationApi;
-    @Mock
-    private CurrentTimeHelper currentTimeHelper;
 
     private EventHandlerMapper eventHandlerMapper;
 
     private void setUp() {
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(SOME_OFFSET_DATE_TIME);
         when(authorisationApi.getCurrentUser()).thenReturn(USER_ACCOUNT_ENTITY);
 
-        eventHandlerMapper = new EventHandlerMapper(authorisationApi, currentTimeHelper);
+        eventHandlerMapper = new EventHandlerMapper(authorisationApi);
     }
 
     @Test
@@ -48,7 +40,6 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("handler", eventMapping.getHandler())
             .hasFieldOrPropertyWithValue("isReportingRestriction", eventMapping.getHasRestrictions())
             .hasFieldOrPropertyWithValue("active", true)
-            .hasFieldOrPropertyWithValue("createdDateTime", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
     }
 
@@ -65,13 +56,12 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("handler", "DartsEventNullHandler")
             .hasFieldOrPropertyWithValue("isReportingRestriction", eventMapping.getHasRestrictions())
             .hasFieldOrPropertyWithValue("active", true)
-            .hasFieldOrPropertyWithValue("createdDateTime", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
     }
 
     @Test
     void mapsEventHandlerEntityToEventMappingCorrectly() {
-        eventHandlerMapper = new EventHandlerMapper(authorisationApi, currentTimeHelper);
+        eventHandlerMapper = new EventHandlerMapper(authorisationApi);
 
         var eventHandlerEntity = someEventHandlerEntity();
 
@@ -83,7 +73,6 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("handler", eventHandlerEntity.getHandler())
             .hasFieldOrPropertyWithValue("hasRestrictions", eventHandlerEntity.getIsReportingRestriction())
             .hasFieldOrPropertyWithValue("isActive", true)
-            .hasFieldOrPropertyWithValue("createdAt", SOME_OFFSET_DATE_TIME)
             .hasFieldOrPropertyWithValue("hasEvents", null);
     }
 
@@ -106,7 +95,6 @@ class EventHandlerMapperTest {
         eventHandlerEntity.setHandler("Standard Handler");
         eventHandlerEntity.setIsReportingRestriction(false);
         eventHandlerEntity.setActive(true);
-        eventHandlerEntity.setCreatedDateTime(SOME_OFFSET_DATE_TIME);
         return eventHandlerEntity;
     }
 }

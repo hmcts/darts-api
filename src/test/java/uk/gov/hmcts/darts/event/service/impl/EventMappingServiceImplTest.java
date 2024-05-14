@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EventMappingServiceImplTest {
 
-    public static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 5, 01, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 5, 01, 10, 0, 0, 0, ZoneOffset.UTC);
     @Mock
     EventHandlerRepository eventHandlerRepository;
 

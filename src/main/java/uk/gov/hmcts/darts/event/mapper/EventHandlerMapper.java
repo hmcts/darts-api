@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
 public class EventHandlerMapper {
 
     private final AuthorisationApi authorisationApi;
-    private final CurrentTimeHelper currentTimeHelper;
 
     public EventHandlerEntity mapFromEventMappingAndMakeActive(EventMapping eventMapping) {
         var eventHandlerEntity = new EventHandlerEntity();
@@ -25,7 +24,6 @@ public class EventHandlerMapper {
         eventHandlerEntity.setIsReportingRestriction(eventMapping.getHasRestrictions());
         eventHandlerEntity.setActive(true);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
-        eventHandlerEntity.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
         eventHandlerEntity.setCreatedBy(currentUser);
 
         return eventHandlerEntity;

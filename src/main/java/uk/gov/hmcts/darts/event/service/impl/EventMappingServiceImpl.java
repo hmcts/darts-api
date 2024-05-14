@@ -23,10 +23,10 @@ import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_MAPPING_DUPLIC
 @RequiredArgsConstructor
 public class EventMappingServiceImpl implements EventMappingService {
 
-    public static final String NO_HANDLER_IN_DB_MESSAGE = "No event handler could be found in the database for event handler id: %s.";
-    public static final String HANDLER_ALREADY_EXISTS_MESSAGE = "Event handler mapping already exists for type: %s and subtype: %s.";
+    private static final String NO_HANDLER_IN_DB_MESSAGE = "No event handler could be found in the database for event handler id: %s.";
+    private static final String HANDLER_ALREADY_EXISTS_MESSAGE = "Event handler mapping already exists for type: %s and subtype: %s.";
 
-    public static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
+    private static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
 
     private final EventHandlerRepository eventHandlerRepository;
     private final EventHandlerMapper eventHandlerMapper;

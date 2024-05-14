@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.event.model.EventErrorCode;
 import uk.gov.hmcts.darts.event.model.EventTitleErrors;
-import uk.gov.hmcts.darts.event.model.PostEventMappingErrorCode;
 
 @Getter
 @RequiredArgsConstructor
@@ -23,12 +22,12 @@ public enum EventError implements DartsApiError {
         EventTitleErrors.EVENT_HANDLER_NOT_FOUND_IN_DB.toString()
     ),
     EVENT_MAPPING_DUPLICATE_IN_DB(
-        PostEventMappingErrorCode.DUPLICATE_EVENT_MAPPING.getValue(),
+        EventErrorCode.DUPLICATE_EVENT_MAPPING.getValue(),
         HttpStatus.CONFLICT,
         EventTitleErrors.DUPLICATE_EVENT_MAPPING.toString()
     ),
     EVENT_HANDLER_NAME_DOES_NOT_EXIST(
-        PostEventMappingErrorCode.INVALID_HANDLER_MAPPING_NAME.getValue(),
+        EventErrorCode.INVALID_HANDLER_MAPPING_NAME.getValue(),
         HttpStatus.BAD_REQUEST,
         EventTitleErrors.INVALID_HANDLER_MAPPING_NAME.toString()
     );

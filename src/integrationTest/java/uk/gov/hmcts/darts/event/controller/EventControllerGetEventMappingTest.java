@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 @AutoConfigureMockMvc
 class EventControllerGetEventMappingTest extends IntegrationBase  {
 
-    private static final String EVENT_MAPPINGS_ENDPOINT = "/event-mappings/{event_handler_id}";
+    private static final String EVENT_MAPPINGS_ENDPOINT = "/admin/event-mappings/{event_handler_id}";
 
     @Autowired
     private transient MockMvc mockMvc;
