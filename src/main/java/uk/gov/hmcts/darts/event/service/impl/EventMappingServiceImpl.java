@@ -11,11 +11,13 @@ import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NAME_DOES_NOT_EXIST;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NOT_FOUND_IN_DB;
+import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_MAPPING_DOES_NOT_EXIST_IN_DB;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_MAPPING_DUPLICATE_IN_DB;
 
 @Service
@@ -25,7 +27,7 @@ public class EventMappingServiceImpl implements EventMappingService {
 
     private static final String NO_HANDLER_IN_DB_MESSAGE = "No event handler could be found in the database for event handler id: %s.";
     private static final String HANDLER_ALREADY_EXISTS_MESSAGE = "Event handler mapping already exists for type: %s and subtype: %s.";
-
+    private static final String HANDLER_DOES_NOT_EXIST_MESSAGE = "Event handler mapping does not exist for type: %s and subtype: %s.";
     private static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
 
     private final EventHandlerRepository eventHandlerRepository;
@@ -35,7 +37,14 @@ public class EventMappingServiceImpl implements EventMappingService {
 
     @Override
     public EventMapping postEventMapping(EventMapping eventMapping, Boolean isRevision) {
-        if (doesActiveEventMappingExist(eventMapping.getType(), eventMapping.getSubType())) {
+        List<EventHandlerEntity> activeMappings = getActiveMappingsForTypeAndSubtype(eventMapping.getType(), eventMapping.getSubType());
+        if (isUpdateToExistingMappingRequest(isRevision) && !doesActiveEventMappingExist(activeMappings)) {
+            throw new DartsApiException(
+                EVENT_MAPPING_DOES_NOT_EXIST_IN_DB,
+                format(HANDLER_DOES_NOT_EXIST_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
+            );
+        }
+        if (!isUpdateToExistingMappingRequest(isRevision) && doesActiveEventMappingExist(activeMappings)) {
             throw new DartsApiException(
                 EVENT_MAPPING_DUPLICATE_IN_DB,
                 format(HANDLER_ALREADY_EXISTS_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
@@ -51,12 +60,28 @@ public class EventMappingServiceImpl implements EventMappingService {
             }
             var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
 
+            if (isUpdateToExistingMappingRequest(isRevision)) {
+                updatePreviousVersionsToInactive(activeMappings);
+            }
+
             return eventHandlerMapper.mapToEventMappingResponse(createdEventHandler);
         }
     }
 
-    private boolean doesActiveEventMappingExist(String type, String subType) {
-        return eventHandlerRepository.doesActiveMappingForTypeAndSubtypeExist(type, subType);
+    private void updatePreviousVersionsToInactive(List<EventHandlerEntity> activeMappings) {
+        for (EventHandlerEntity mapping : activeMappings) {
+            mapping.setActive(false);
+        }
+
+        eventHandlerRepository.saveAllAndFlush(activeMappings);
+    }
+
+    private boolean doesActiveEventMappingExist(List<EventHandlerEntity> activeMappings) {
+        return activeMappings != null && !activeMappings.isEmpty();
+    }
+
+    private List<EventHandlerEntity> getActiveMappingsForTypeAndSubtype(String type, String subType) {
+        return eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(type, subType);
     }
 
     private boolean doesEventHandlerNameExist(String handlerName) {
@@ -93,5 +118,9 @@ public class EventMappingServiceImpl implements EventMappingService {
         mapping.setCreatedAt(eventEntity.getCreatedDateTime());
 
         return mapping;
+    }
+
+    private boolean isUpdateToExistingMappingRequest(Boolean isRevision) {
+        return isRevision != null && isRevision;
     }
 }

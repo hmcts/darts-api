@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,6 +92,33 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
             .andExpect(jsonPath("$.is_active", Matchers.is(true)))
             .andExpect(jsonPath("$.has_restrictions", Matchers.is(true)))
             .andExpect(jsonPath("$.created_at").exists());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.INCLUDE)
+    void allowSuperAdminToPostEventMappingsWithIsRevisionTrueAndMakePreviousRevisionInactive(SecurityRoleEnum role) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+
+        var entity = dartsDatabase.createEventHandlerData();
+
+        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT + "?is_revision=true")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/events/EventControllerPostEventMappingTest/createEventMappingRevisionTruePost.json"));
+
+        mockMvc.perform(requestBuilder).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.type", Matchers.is("99999")))
+            .andExpect(jsonPath("$.sub_type", Matchers.is("8888")))
+            .andExpect(jsonPath("$.name", Matchers.is("My Test Event")))
+            .andExpect(jsonPath("$.handler", Matchers.is("DarStartHandler")))
+            .andExpect(jsonPath("$.is_active", Matchers.is(true)))
+            .andExpect(jsonPath("$.has_restrictions", Matchers.is(true)))
+            .andExpect(jsonPath("$.created_at").exists());
+
+        var updatedPreviousActiveMapping = dartsDatabase.findEventHandlerMappingFor(entity.getId());
+
+        assertFalse(updatedPreviousActiveMapping.getActive());
     }
 
     @ParameterizedTest
@@ -178,6 +206,20 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
                 "tests/events/EventControllerPostEventMappingTest/createEventMappingDuplicatePost.json"));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isConflict())
+            .andReturn();
+    }
+
+    @Test
+    void eventMappingsPostEndpointShouldReturn409ErrorWhenEventMappingDoesNotExistForIsRevisionTrue() throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
+
+        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT + "?is_revision=true")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/events/EventControllerPostEventMappingTest/createEventMappingUnknownMappingForRevisionPost.json"));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())

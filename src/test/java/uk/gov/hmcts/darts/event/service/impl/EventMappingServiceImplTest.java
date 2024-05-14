@@ -2,11 +2,15 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.testcontainers.shaded.org.checkerframework.checker.nullness.qual.Nullable;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -52,6 +57,9 @@ class EventMappingServiceImplTest {
     @Captor
     ArgumentCaptor<EventHandlerEntity> eventHandlerEntityArgumentCaptor;
 
+    @Captor
+    ArgumentCaptor<List<EventHandlerEntity>> eventHandlerEntitiesArgumentCaptor;
+
     private final EventMapping eventMapping = someEventMapping();
 
     private final EventHandlerEntity eventHandlerEntity = someEventHandlerEntity();
@@ -70,7 +78,7 @@ class EventMappingServiceImplTest {
 
         eventMappingServiceImpl.postEventMapping(eventMapping, null);
 
-        verify(eventHandlerRepository).doesActiveMappingForTypeAndSubtypeExist(anyString(), anyString());
+        verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString());
         verify(eventHandlerRepository).saveAndFlush(eventHandlerEntityArgumentCaptor.capture());
         verifyNoMoreInteractions(eventHandlerRepository);
 
@@ -78,6 +86,31 @@ class EventMappingServiceImplTest {
 
         assertEquals(FIXED_DATETIME, savedEventHandlerEntity.getCreatedDateTime());
         assertEquals(eventHandlerEntity.getCreatedBy(), savedEventHandlerEntity.getCreatedBy());
+    }
+
+    @Test
+    void handleRequestToSaveRevisionToEventMappingAndMakePreviousRevisionInactive() {
+        setupHandlers();
+        when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+
+        eventMappingServiceImpl.postEventMapping(eventMapping, true);
+
+        verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString());
+        verify(eventHandlerRepository).saveAndFlush(eventHandlerEntityArgumentCaptor.capture());
+        verify(eventHandlerRepository).saveAllAndFlush(eventHandlerEntitiesArgumentCaptor.capture());
+
+        verifyNoMoreInteractions(eventHandlerRepository);
+
+        EventHandlerEntity savedEventHandlerEntity = eventHandlerEntityArgumentCaptor.getValue();
+
+        assertEquals(FIXED_DATETIME, savedEventHandlerEntity.getCreatedDateTime());
+        assertEquals(eventHandlerEntity.getCreatedBy(), savedEventHandlerEntity.getCreatedBy());
+
+        List<EventHandlerEntity> updatedEVentHandlerEntities = eventHandlerEntitiesArgumentCaptor.getValue();
+        for (EventHandlerEntity updatedEntity : updatedEVentHandlerEntities) {
+            assertFalse(updatedEntity.getActive());
+        }
     }
 
     @Test
@@ -94,14 +127,28 @@ class EventMappingServiceImplTest {
         );
     }
 
-    @Test
-    void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExists() {
-        when(eventHandlerRepository.doesActiveMappingForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(true);
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"false"})
+    void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExistsAndIsRevisionFalse(@Nullable Boolean isRevision) {
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
-        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, null));
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, isRevision));
 
         assertEquals(
             "Event handler mapping already exists for type: 12345 and subtype: 9876.",
+            exception.getDetail()
+        );
+    }
+
+    @Test
+    void handleRequestToSaveEventMappingForHandlerMappingThatDoesNotAlreadyExistsAndIsRevisionTrue() {
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(null);
+
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, true));
+
+        assertEquals(
+            "Event handler mapping does not exist for type: 12345 and subtype: 9876.",
             exception.getDetail()
         );
     }
