@@ -16,10 +16,12 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRetrievalQueueEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRetrievalQueueRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 
@@ -35,6 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -50,6 +53,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private final UnstructuredDataHelper unstructuredDataHelper;
     private final DataManagementConfiguration dataManagementConfiguration;
     private final ArmApiServiceImpl armApiService;
+    private final ObjectRetrievalQueueRepository objectRetrievalQueueRepository;
 
     @Override
     public DownloadResponseMetaData retrieveFileFromStorage(MediaEntity mediaEntity) throws FileNotDownloadedException {
@@ -58,6 +62,13 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         if (CollectionUtils.isEmpty(storedEodEntities)) {
             String errorMessage = MessageFormat.format("No storedEodEntities found for mediaId {0,number,#}", mediaEntity.getId());
             log.error(errorMessage);
+
+            createOrUpdateRetrievalQueue(mediaEntity,
+                                         null,
+                                         mediaEntity.getId().toString(),
+                                         mediaEntity.getContentObjectId(),
+                                         mediaEntity.getClipId());
+
             throw new FileNotDownloadedException(errorMessage);
         }
         try {
@@ -77,6 +88,13 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             String errorMessage = MessageFormat.format("No storedEodEntities found for transcriptionDocumentId {0,number,#}",
                                                        transcriptionDocumentEntity.getId());
             log.error(errorMessage);
+
+            createOrUpdateRetrievalQueue(null,
+                                         transcriptionDocumentEntity,
+                                         transcriptionDocumentEntity.getTranscription().getId().toString(),
+                                         transcriptionDocumentEntity.getContentObjectId(),
+                                         transcriptionDocumentEntity.getClipId());
+
             throw new FileNotDownloadedException(errorMessage);
         }
         try {
@@ -145,21 +163,14 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
      */
     private DownloadResponseMetaData getDataFromStorage(List<ExternalObjectDirectoryEntity> storedEodEntities) throws FileNotDownloadedException {
         List<DatastoreContainerType> storageOrder = storageOrderHelper.getStorageOrder();
-        StringBuilder logBuilder = new StringBuilder(134);
-        logBuilder.append("Starting to search for files with ")
-            .append(storedEodEntities.size())
-            .append(" eodEntities\n");
+        StringBuilder logBuilder = new StringBuilder("Starting to search for files with " + storedEodEntities.size() + " eodEntities\n");
 
         ExternalObjectDirectoryEntity eodEntityToDelete = null;
         for (DatastoreContainerType datastoreContainerType : storageOrder) {
-            logBuilder.append("checking container ")
-                .append(datastoreContainerType.name())
-                .append('\n');
+            logBuilder.append("checking container " + datastoreContainerType.name() + "\n");
             ExternalObjectDirectoryEntity eodEntity = findCorrespondingEodEntityForStorageLocation(storedEodEntities, datastoreContainerType);
             if (eodEntity == null) {
-                logBuilder.append("matching eodEntity not found for ")
-                    .append(datastoreContainerType.name())
-                    .append('\n');
+                logBuilder.append("matching eodEntity not found for " + datastoreContainerType.name() + "\n");
                 continue;
             }
             if (datastoreContainerType.equals(DatastoreContainerType.UNSTRUCTURED)) {
@@ -167,9 +178,7 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
             }
             Optional<BlobContainerDownloadable> container = getSupportedContainer(datastoreContainerType);
             if (container.isEmpty()) {
-                logBuilder.append("Supporting Container ")
-                    .append(datastoreContainerType.name())
-                    .append(" not found\n");
+                logBuilder.append("Supporting Container " + datastoreContainerType.name() + " not found\n");
                 continue;
             }
             log.info("Downloading blob id {} from container {}", eodEntity.getExternalLocation(), datastoreContainerType.name());
@@ -182,21 +191,19 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                 return downloadResponseMetaData;
             } catch (FileNotDownloadedException | IOException e) {
                 String logMessage = MessageFormat.format("Could not download file for eodEntity ''{0,number,#}''", eodEntity.getId());
-                logBuilder.append(logMessage)
-                    .append('\n');
+                logBuilder.append(logMessage + "\n");
                 log.error(logMessage, e);
             }
         }
         throw new FileNotDownloadedException(logBuilder.toString());
     }
 
-    @SuppressWarnings({"PMD.CloseResource", "PMD.AvoidFileStream"})
     private void processUnstructuredData(
         DatastoreContainerType datastoreContainerType,
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntity,
         ExternalObjectDirectoryEntity eodEntityToDelete) throws IOException {
-        if (datastoreContainerType.equals(ARM)) {
+        if (datastoreContainerType.equals(DatastoreContainerType.ARM)) {
 
             String tempBlobPath = dataManagementConfiguration.getTempBlobWorkspace() + "/" + UUID.randomUUID();
             File targetFile = new File(tempBlobPath);
@@ -214,7 +221,6 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
         }
     }
 
-    @SuppressWarnings({"PMD.CloseResource"})
     private void createUnstructuredData(
         DownloadResponseMetaData downloadResponseMetaData,
         ExternalObjectDirectoryEntity eodEntityToDelete,
@@ -245,6 +251,52 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
     private Optional<BlobContainerDownloadable> getSupportedContainer(DatastoreContainerType typeToFind) {
         return supportedDownloadableContainers.stream().filter(type -> type.getContainerName(typeToFind).isPresent())
             .findAny();
+    }
+
+    private void createOrUpdateRetrievalQueue(MediaEntity mediaEntity,
+                                              TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                              String parentObjectId,
+                                              String contentObjectId,
+                                              String clipId) {
+
+        var doesObjectRetrievalQueueExist = objectRetrievalQueueRepository.findMatchingObjectRetrievalQueuedItems(mediaEntity,
+                                                                                                                  transcriptionDocumentEntity,
+                                                                                                                  parentObjectId,
+                                                                                                                  contentObjectId,
+                                                                                                                  clipId);
+
+        if (doesObjectRetrievalQueueExist.isPresent()) {
+            log.info("Object retrieval queue items already exists. No action taken");
+            return;
+        }
+
+        createExternalRetrievalQueueEntity(mediaEntity,
+                                           transcriptionDocumentEntity,
+                                           parentObjectId,
+                                           contentObjectId,
+                                           clipId);
+    }
+
+    private void createExternalRetrievalQueueEntity(MediaEntity media,
+                                                    TranscriptionDocumentEntity transcriptionDocumentEntity,
+                                                    String parentObjectId,
+                                                    String contentObjectId,
+                                                    String clipId) {
+
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+
+        if (nonNull(media)) {
+            objectRetrievalQueueEntity.setMedia(media);
+        }
+        if (nonNull(transcriptionDocumentEntity)) {
+            objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
+        }
+
+        objectRetrievalQueueEntity.setParentObjectId(parentObjectId);
+        objectRetrievalQueueEntity.setContentObjectId(contentObjectId);
+        objectRetrievalQueueEntity.setClipId(clipId);
+
+        objectRetrievalQueueRepository.saveAndFlush(objectRetrievalQueueEntity);
     }
 
 }
