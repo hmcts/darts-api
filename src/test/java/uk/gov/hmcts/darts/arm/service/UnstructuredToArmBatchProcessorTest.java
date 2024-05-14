@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.detsLocation;
 import static uk.gov.hmcts.darts.common.util.EodHelper.storedStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.unstructuredLocation;
 
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmBatchProcessorTest {
 

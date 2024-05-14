@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.task.service;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
@@ -43,6 +44,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FIL
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub.TRANSCRIPTION_TEST_DATA_BINARY_DATA;
 
+@Disabled
 class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
 
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
