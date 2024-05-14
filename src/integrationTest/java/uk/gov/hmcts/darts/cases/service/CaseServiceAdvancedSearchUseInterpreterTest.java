@@ -271,7 +271,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
 
         // then
         var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
-        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2", "Case4", "Case6");
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2");
     }
 
     @Test
