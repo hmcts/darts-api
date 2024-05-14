@@ -1,0 +1,7 @@
+{
+  "type": "34295",
+  "sub_type": "1028",
+  "name": "My Test Event",
+  "handler": "Test Handler",
+  "has_restrictions": true
+}

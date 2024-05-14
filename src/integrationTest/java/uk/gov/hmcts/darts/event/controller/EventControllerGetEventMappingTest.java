@@ -21,9 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
-class EventControllerGetEventsMappingTest extends IntegrationBase  {
+class EventControllerGetEventMappingTest extends IntegrationBase  {
 
-    private static final String EVENT_MAPPINGS_ENDPOINT = "/event-mappings/{event_handler_id}";
+    private static final String EVENT_MAPPINGS_ENDPOINT = "/admin/event-mappings/{event_handler_id}";
 
     @Autowired
     private transient MockMvc mockMvc;
@@ -53,7 +53,7 @@ class EventControllerGetEventsMappingTest extends IntegrationBase  {
 
     @ParameterizedTest
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
-    void disallowsAllUsersExceptSuperAdminToPatchAutomatedTasks(SecurityRoleEnum role) throws Exception {
+    void disallowsAllUsersExceptSuperAdminToGetEventMappings(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, 1);
