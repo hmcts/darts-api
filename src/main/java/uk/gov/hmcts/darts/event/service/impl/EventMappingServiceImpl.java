@@ -120,6 +120,7 @@ public class EventMappingServiceImpl implements EventMappingService {
         return mapping;
     }
 
+    @SuppressWarnings({"java:S2259"})
     private boolean isUpdateToExistingMappingRequest(Boolean isRevision) {
         return isRevision != null && isRevision;
     }
