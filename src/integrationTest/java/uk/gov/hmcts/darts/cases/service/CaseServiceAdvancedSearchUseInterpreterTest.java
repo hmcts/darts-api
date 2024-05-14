@@ -255,12 +255,12 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         // given
         var securityGroup = SecurityGroupTestData.buildGroupForRole(APPROVER);
         securityGroup.setGlobalAccess(true);
-        securityGroup.setUseInterpreter(true);
+        securityGroup.setUseInterpreter(false);
         assignSecurityGroupToUser(user, securityGroup);
 
         var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
         securityGroupSwansea.setGlobalAccess(false);
-        securityGroupSwansea.setUseInterpreter(false);
+        securityGroupSwansea.setUseInterpreter(true);
         assignSecurityGroupToUser(user, securityGroupSwansea);
 
         userAccountRepository.save(user);
@@ -271,7 +271,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
 
         // then
         var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
-        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2");
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2", "Case3", "Case4", "Case5", "Case6");
     }
 
     @Test
