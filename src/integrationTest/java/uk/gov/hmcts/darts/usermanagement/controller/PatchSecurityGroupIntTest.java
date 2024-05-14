@@ -177,13 +177,10 @@ class PatchSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void patchSecurityGroupShouldSucceedWhenProvidedWithEmptyUserIds() throws Exception {
-        UserAccountEntity user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
         String name = "security group name" + UUID.randomUUID();
         String displayName = "security group display name" + UUID.randomUUID();
         Integer id = createSecurityGroup(name, displayName);
-
-        UserAccountEntity user1 = createEnabledUserAccountEntity(user, "email1");
-        UserAccountEntity user2 = createEnabledUserAccountEntity(user, "email2", true);
 
         String patchContent = String.format("{\"user_ids\": []}");
 
