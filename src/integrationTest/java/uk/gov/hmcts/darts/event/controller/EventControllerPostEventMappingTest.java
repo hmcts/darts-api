@@ -78,8 +78,9 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
     void allowSuperAdminToPostEventMappingsWithIsRevisionFalse(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
-        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT + "?is_revision=false")
+        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam("is_revision", "false")
             .content(getContentsFromFile(
                 "tests/events/EventControllerPostEventMappingTest/createEventMappingRevisionFalsePost.json"));
 
@@ -101,8 +102,9 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
 
         var entity = dartsDatabase.createEventHandlerData();
 
-        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT + "?is_revision=true")
+        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam("is_revision", "true")
             .content(getContentsFromFile(
                 "tests/events/EventControllerPostEventMappingTest/createEventMappingRevisionTruePost.json"));
 
@@ -216,8 +218,9 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
     void eventMappingsPostEndpointShouldReturn409ErrorWhenEventMappingDoesNotExistForIsRevisionTrue() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
-        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT + "?is_revision=true")
+        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam("is_revision", "true")
             .content(getContentsFromFile(
                 "tests/events/EventControllerPostEventMappingTest/createEventMappingUnknownMappingForRevisionPost.json"));
 

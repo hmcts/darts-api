@@ -38,13 +38,13 @@ public class EventMappingServiceImpl implements EventMappingService {
     @Override
     public EventMapping postEventMapping(EventMapping eventMapping, Boolean isRevision) {
         List<EventHandlerEntity> activeMappings = getActiveMappingsForTypeAndSubtype(eventMapping.getType(), eventMapping.getSubType());
-        if (isUpdateToExistingMappingRequest(isRevision) && !doesActiveEventMappingExist(activeMappings)) {
+        if (isRevision && !doesActiveEventMappingExist(activeMappings)) {
             throw new DartsApiException(
                 EVENT_MAPPING_DOES_NOT_EXIST_IN_DB,
                 format(HANDLER_DOES_NOT_EXIST_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
             );
         }
-        if (!isUpdateToExistingMappingRequest(isRevision) && doesActiveEventMappingExist(activeMappings)) {
+        if (!isRevision && doesActiveEventMappingExist(activeMappings)) {
             throw new DartsApiException(
                 EVENT_MAPPING_DUPLICATE_IN_DB,
                 format(HANDLER_ALREADY_EXISTS_MESSAGE, eventMapping.getType(), eventMapping.getSubType())
@@ -58,11 +58,11 @@ public class EventMappingServiceImpl implements EventMappingService {
                     format(NO_HANDLER_WITH_NAME_IN_DB_MESSAGE, eventHandlerEntity.getHandler())
                 );
             }
-            var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
-
-            if (isUpdateToExistingMappingRequest(isRevision)) {
+            if (isRevision) {
                 updatePreviousVersionsToInactive(activeMappings);
             }
+
+            var createdEventHandler = eventHandlerRepository.saveAndFlush(eventHandlerEntity);
 
             return eventHandlerMapper.mapToEventMappingResponse(createdEventHandler);
         }
@@ -81,7 +81,7 @@ public class EventMappingServiceImpl implements EventMappingService {
     }
 
     private List<EventHandlerEntity> getActiveMappingsForTypeAndSubtype(String type, String subType) {
-        return eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(type, subType);
+        return eventHandlerRepository.findActiveMappingsForTypeAndSubtype(type, subType);
     }
 
     private boolean doesEventHandlerNameExist(String handlerName) {
@@ -118,10 +118,5 @@ public class EventMappingServiceImpl implements EventMappingService {
         mapping.setCreatedAt(eventEntity.getCreatedDateTime());
 
         return mapping;
-    }
-
-    @SuppressWarnings({"java:S2259"})
-    private boolean isUpdateToExistingMappingRequest(Boolean isRevision) {
-        return isRevision != null && isRevision;
     }
 }

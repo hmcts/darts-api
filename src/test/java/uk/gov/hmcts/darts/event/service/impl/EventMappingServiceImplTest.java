@@ -78,7 +78,7 @@ class EventMappingServiceImplTest {
 
         eventMappingServiceImpl.postEventMapping(eventMapping, null);
 
-        verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString());
+        verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtype(anyString(), anyString());
         verify(eventHandlerRepository).saveAndFlush(eventHandlerEntityArgumentCaptor.capture());
         verifyNoMoreInteractions(eventHandlerRepository);
 
@@ -92,11 +92,11 @@ class EventMappingServiceImplTest {
     void handleRequestToSaveRevisionToEventMappingAndMakePreviousRevisionInactive() {
         setupHandlers();
         when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
-        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
         eventMappingServiceImpl.postEventMapping(eventMapping, true);
 
-        verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString());
+        verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtype(anyString(), anyString());
         verify(eventHandlerRepository).saveAndFlush(eventHandlerEntityArgumentCaptor.capture());
         verify(eventHandlerRepository).saveAllAndFlush(eventHandlerEntitiesArgumentCaptor.capture());
 
@@ -131,7 +131,7 @@ class EventMappingServiceImplTest {
     @NullSource
     @ValueSource(strings = {"false"})
     void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExistsAndIsRevisionFalse(@Nullable Boolean isRevision) {
-        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, isRevision));
 
@@ -143,7 +143,7 @@ class EventMappingServiceImplTest {
 
     @Test
     void handleRequestToSaveEventMappingForHandlerMappingThatDoesNotAlreadyExistsAndIsRevisionTrue() {
-        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtypeExist(anyString(), anyString())).thenReturn(null);
+        when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(null);
 
         var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, true));
 

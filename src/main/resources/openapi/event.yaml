@@ -227,8 +227,10 @@ paths:
       parameters:
         - in: query
           name: is_revision
+          required: false
           schema:
             type: boolean
+            default: false
           description: "parameter to indicate if the request is an update to an existing mapping"
       description: |-
         Events in DARTS are mapped to handlers. This endpoint creates a new event mapping or creates a new revision of an existing mapping.

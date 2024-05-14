@@ -27,7 +27,7 @@ public interface EventHandlerRepository extends JpaRepository<EventHandlerEntity
         AND eh.subType = :subType
         AND eh.active = true
         """)
-    List<EventHandlerEntity> findActiveMappingsForTypeAndSubtypeExist(String type, String subType);
+    List<EventHandlerEntity> findActiveMappingsForTypeAndSubtype(String type, String subType);
 
 
 }
