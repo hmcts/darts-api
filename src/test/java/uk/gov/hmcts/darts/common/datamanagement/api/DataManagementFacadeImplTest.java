@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.Vector;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -370,11 +369,12 @@ class DataManagementFacadeImplTest {
                                                                                objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
                                                                                dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
 
-        when(objectRetrievalQueueRepository.findMatchingObjectRetrievalQueuedItems(mediaEntity,
+        when(objectRetrievalQueueRepository.findMatchingObjectRetrievalQueueItem(mediaEntity,
                                                                                    null,
                                                                                    mediaEntity.getId().toString(),
                                                                                    mediaEntity.getContentObjectId(),
-                                                                                   mediaEntity.getClipId())).thenReturn(Optional.of(objectRetrievalQueueEntity));
+                                                                                   mediaEntity.getClipId())
+                                                                                    ).thenReturn(Optional.of(objectRetrievalQueueEntity));
         // make the assertion on the response
         var exception = assertThrows(
             FileNotDownloadedException.class,

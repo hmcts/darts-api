@@ -259,11 +259,11 @@ public class DataManagementFacadeImpl implements DataManagementFacade {
                                               String contentObjectId,
                                               String clipId) {
 
-        var doesObjectRetrievalQueueExist = objectRetrievalQueueRepository.findMatchingObjectRetrievalQueuedItems(mediaEntity,
-                                                                                                                  transcriptionDocumentEntity,
-                                                                                                                  parentObjectId,
-                                                                                                                  contentObjectId,
-                                                                                                                  clipId);
+        var doesObjectRetrievalQueueExist = objectRetrievalQueueRepository.findMatchingObjectRetrievalQueueItem(mediaEntity,
+                                                                                                                transcriptionDocumentEntity,
+                                                                                                                parentObjectId,
+                                                                                                                contentObjectId,
+                                                                                                                clipId);
 
         if (doesObjectRetrievalQueueExist.isPresent()) {
             log.info("Object retrieval queue items already exists. No action taken");

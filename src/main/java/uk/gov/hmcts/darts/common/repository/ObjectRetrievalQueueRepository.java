@@ -20,7 +20,7 @@ public interface ObjectRetrievalQueueRepository extends JpaRepository<ObjectRetr
             or orq.transcriptionDocument = :transcriptionDocument)
         """
     )
-    Optional<ObjectRetrievalQueueEntity> findMatchingObjectRetrievalQueuedItems(MediaEntity media,
+    Optional<ObjectRetrievalQueueEntity> findMatchingObjectRetrievalQueueItem(MediaEntity media,
                                                                                    TranscriptionDocumentEntity transcriptionDocument,
                                                                                    String parentObjectId,
                                                                                    String contentObjectId,
