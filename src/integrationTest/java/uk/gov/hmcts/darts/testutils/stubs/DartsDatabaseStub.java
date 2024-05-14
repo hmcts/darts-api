@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -649,6 +650,13 @@ public class DartsDatabaseStub {
         userAccount.getSecurityGroupEntities().add(securityGroup);
         securityGroupRepository.save(securityGroup);
         userAccountRepository.save(userAccount);
+    }
+
+    @Transactional
+    public void addUserToGroup(UserAccountEntity userAccount, SecurityGroupEnum securityGroup) {
+        Optional<SecurityGroupEntity> groupEntity
+            = securityGroupRepository.findByGroupNameIgnoreCase(securityGroup.getName());
+        addUserToGroup(userAccount, groupEntity.get());
     }
 
     @Transactional

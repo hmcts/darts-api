@@ -2,7 +2,10 @@ package uk.gov.hmcts.darts.transcriptions.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
@@ -61,4 +64,12 @@ public interface TranscriptionService {
     List<TranscriptionDocumentEntity> getAllCaseTranscriptionDocuments(Integer caseId);
 
     List<GetTranscriptionWorkflowsResponse> getTranscriptionWorkflows(Integer transcriptionId, Boolean isCurrent);
+
+    TranscriptionWorkflowEntity saveTranscriptionWorkflow(UserAccountEntity userAccount,
+                                                                 TranscriptionEntity transcription,
+                                                                 TranscriptionStatusEntity transcriptionStatus,
+                                                                 String workflowComment);
+
+    List<Integer> rollbackUserTranscriptions(UserAccountEntity entity);
+
 }

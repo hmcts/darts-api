@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -338,12 +339,13 @@ class AudioServiceImplTest {
     }
 
     @Test
+    @Disabled("temporarily replaced by test isArchivedFeatureIsTemporarilyDisabledAndSetToAlwaysReturnsFalse")
     void whenAudioMetadataListContainsMediaIdsReturnedByQuery_thenIsArchivedWillBeTrue() {
         int mediaId = 1;
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
         List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
-        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2, 3);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2);
         List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
         when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
@@ -351,6 +353,22 @@ class AudioServiceImplTest {
         audioService.setIsArchived(audioMetadataList, 1);
 
         assertEquals(true, audioMetadataList.get(0).getIsArchived());
+    }
+
+    @Test
+    void isArchivedFeatureIsTemporarilyDisabledAndSetToAlwaysReturnsFalse() {
+        int mediaId = 1;
+        AudioMetadata audioMetadata = new AudioMetadata();
+        audioMetadata.setId(mediaId);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
+        AudioBeingProcessedFromArchiveQueryResult audioRequest = new AudioBeingProcessedFromArchiveQueryResult(mediaId, 2);
+        List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
+
+        when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
+
+        audioService.setIsArchived(audioMetadataList, 1);
+
+        assertEquals(false, audioMetadataList.get(0).getIsArchived());
     }
 
     @Test

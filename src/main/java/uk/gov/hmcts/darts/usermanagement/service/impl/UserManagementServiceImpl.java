@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.validation.UserQueryRequest;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
@@ -24,11 +26,14 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserTypeValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.AuthorisedUserPermissionsValidator;
+import uk.gov.hmcts.darts.usermanagement.validator.UserDeactivateNotLastInSuperAdminGroupValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,6 +54,9 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final Validator<User> userEmailValidator;
     private final UserAccountExistsValidator userAccountExistsValidator;
     private final UserTypeValidator userTypeValidator;
+    private final AuthorisedUserPermissionsValidator userActivationPermissionsValidator;
+    private final UserDeactivateNotLastInSuperAdminGroupValidator userNotLastSuperAdminValidator;
+    private final TranscriptionService transcriptionService;
 
     @Override
     @Transactional
@@ -84,12 +92,25 @@ public class UserManagementServiceImpl implements UserManagementService {
     public UserWithIdAndTimestamps modifyUser(Integer userId, UserPatch userPatch) {
         userAccountExistsValidator.validate(userId);
         userTypeValidator.validate(userId);
+        userActivationPermissionsValidator.validate(userPatch);
+        userNotLastSuperAdminValidator.validate(new UserQueryRequest<>(userPatch, userId));
 
-        UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
-            .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
+        List<Integer> rolledBackTranscriptions;
+        Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
+        if (userAccountEntity.isPresent()) {
+            rolledBackTranscriptions = updatedUserAccount(userPatch, userAccountEntity.get());
+        } else {
+            throw new NoSuchElementException("No value present");
+        }
 
-        UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
-        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
+        UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity.get());
+
+        // lets add the rolled back transcription ids
+        if (!rolledBackTranscriptions.isEmpty()) {
+            user.setRolledBackTranscriptRequests(rolledBackTranscriptions);
+        }
+
+        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.get().getSecurityGroupEntities());
         user.setSecurityGroupIds(securityGroupIds);
 
         return user;
@@ -135,12 +156,15 @@ public class UserManagementServiceImpl implements UserManagementService {
             String.format("User id %d not found", userId));
     }
 
-    private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
-        updateEntity(userPatch, userEntity);
-        return userAccountRepository.save(userEntity);
+    private List<Integer> updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
+        List<Integer> rolledBackTranscriptions = updateEntity(userPatch, userEntity);
+        userAccountRepository.save(userEntity);
+        return rolledBackTranscriptions;
     }
 
-    private void updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
+    private List<Integer> updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
+        List<Integer> rolledBackTranscriptionsList = new ArrayList<>();
+
         if (userPatch.getEmailAddress() != null && !userPatch.getEmailAddress().equals(userAccountEntity.getEmailAddress())) {
             userEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress()));
             userAccountEntity.setEmailAddress(userPatch.getEmailAddress());
@@ -159,6 +183,13 @@ public class UserManagementServiceImpl implements UserManagementService {
         Boolean active = userPatch.getActive();
         if (active != null) {
             userAccountEntity.setActive(active);
+
+            // if we are disabling the use then disable the transcriptions
+            // and remove user from security groups
+            if (active.equals(Boolean.FALSE)) {
+                unassignUserFromGroupsTheyArePartOf(userAccountEntity);
+                rolledBackTranscriptionsList = transcriptionService.rollbackUserTranscriptions(userAccountEntity);
+            }
         }
 
         if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
@@ -169,6 +200,17 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         userAccountEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
         userAccountEntity.setLastModifiedDateTime(OffsetDateTime.now());
+
+        return rolledBackTranscriptionsList;
+    }
+
+    private void unassignUserFromGroupsTheyArePartOf(UserAccountEntity userAccount) {
+        Set<SecurityGroupEntity> groupEntities = userAccount.getSecurityGroupEntities();
+        userAccount.getSecurityGroupEntities().clear();
+        for (SecurityGroupEntity groupEntity : groupEntities) {
+            groupEntity.getUsers().remove(userAccount);
+            securityGroupRepository.save(groupEntity);
+        }
     }
 
     private void mapSecurityGroupsToUserEntity(List<Integer> securityGroups, UserAccountEntity userAccountEntity) {
