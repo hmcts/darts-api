@@ -2,15 +2,11 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testcontainers.shaded.org.checkerframework.checker.nullness.qual.Nullable;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -76,7 +72,7 @@ class EventMappingServiceImplTest {
         setupHandlers();
         when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
 
-        eventMappingServiceImpl.postEventMapping(eventMapping, null);
+        eventMappingServiceImpl.postEventMapping(eventMapping, false);
 
         verify(eventHandlerRepository).findActiveMappingsForTypeAndSubtype(anyString(), anyString());
         verify(eventHandlerRepository).saveAndFlush(eventHandlerEntityArgumentCaptor.capture());
@@ -119,7 +115,7 @@ class EventMappingServiceImplTest {
         when(eventHandlerMapper.mapFromEventMappingAndMakeActive(any())).thenReturn(eventHandlerEntity);
         eventHandlerEntity.setHandler("Random handler");
 
-        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, null));
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, false));
 
         assertEquals(
             "No event handler with name Random handler could be found in the database.",
@@ -127,13 +123,11 @@ class EventMappingServiceImplTest {
         );
     }
 
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"false"})
-    void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExistsAndIsRevisionFalse(@Nullable Boolean isRevision) {
+    @Test
+    void handleRequestToSaveEventMappingForHandlerMappingThatAlreadyExistsAndIsRevisionFalse() {
         when(eventHandlerRepository.findActiveMappingsForTypeAndSubtype(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
 
-        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, isRevision));
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.postEventMapping(eventMapping, false));
 
         assertEquals(
             "Event handler mapping already exists for type: 12345 and subtype: 9876.",
