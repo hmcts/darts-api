@@ -748,10 +748,23 @@ public class DartsDatabaseStub {
         set lock_until = (?)
         where name = (?)
         """;
-        entityManager.createNativeQuery(updateRowForTaskSql, Integer.class)
+        var numOfRowsUpdated = entityManager.createNativeQuery(updateRowForTaskSql, Integer.class)
             .setParameter(1, taskReleaseDateTime)
             .setParameter(2, taskName)
             .executeUpdate();
+
+        if (numOfRowsUpdated == 0) {
+            var insertRowForTaskSql = """
+            insert into darts.shedlock (name, lock_until, locked_at, locked_by)
+            values ((?), (?), (?), (?))
+            """;
+            entityManager.createNativeQuery(insertRowForTaskSql, Integer.class)
+                .setParameter(1, taskName)
+                .setParameter(2, taskReleaseDateTime)
+                .setParameter(3, OffsetDateTime.now())
+                .setParameter(4, "some-user")
+                .executeUpdate();
+        }
     }
 
 }
