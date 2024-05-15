@@ -27,8 +27,8 @@ public class AuthorisedUserPermissionsValidator implements Validator<UserPatch> 
                 if (hasAnythingOtherThanActivationStateChanged(userPatch)) {
                     throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT);
                 }
-            } else if (userPatch.getActive() != null) {
-                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT);
+            } else if (userPatch.getActive() != null && userPatch.getActive().equals(true)) {
+                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER);
             }
         }
     }
