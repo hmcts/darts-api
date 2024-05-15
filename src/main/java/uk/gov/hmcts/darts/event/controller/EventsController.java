@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.event.model.EventsResponse;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
+import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -48,6 +49,7 @@ public class EventsController implements EventApi {
     private final EventDispatcher eventDispatcher;
     private final DartsEventMapper dartsEventMapper;
     private final EventMappingService eventMappingService;
+    private final EventHandlerEnumerator eventHandlers;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -94,6 +96,23 @@ public class EventsController implements EventApi {
         List<CourtLog> courtLogs = courtLogsService.getCourtLogs(courthouse, caseNumber, startDateTime, endDateTime);
 
         return new ResponseEntity<>(courtLogs, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<EventMapping> adminPostEventMapping(EventMapping eventMapping, Boolean isRevision) {
+
+        return new ResponseEntity<>(eventMappingService.postEventMapping(eventMapping, isRevision), HttpStatus.CREATED);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<List<String>> adminGetEventHandlers() {
+        return new ResponseEntity<>(eventHandlers.obtainHandlers(), HttpStatus.OK);
     }
 
     @Override

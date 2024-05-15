@@ -21,5 +21,13 @@ public interface EventHandlerRepository extends JpaRepository<EventHandlerEntity
         """)
     List<EventHandlerEntity> findByTypeAndSubType(String type, String subType);
 
+    @Query("""
+        SELECT eh FROM EventHandlerEntity eh
+        WHERE eh.type = :type
+        AND eh.subType = :subType
+        AND eh.active = true
+        """)
+    List<EventHandlerEntity> findActiveMappingsForTypeAndSubtype(String type, String subType);
+
 
 }

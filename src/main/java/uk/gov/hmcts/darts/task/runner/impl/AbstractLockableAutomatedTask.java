@@ -50,13 +50,18 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     private ThreadLocal<UUID> executionId;
 
+    private boolean isManualTask = false;
+
+    public void setManualTask() {
+        this.isManualTask = true;
+    }
+
     protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, LogApi logApi) {
         this.automatedTaskRepository = automatedTaskRepository;
         this.lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
         this.logApi = logApi;
-
     }
 
     private void setupUserAuthentication() {
@@ -80,7 +85,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
                 AutomatedTaskEntity automatedTask = automatedTaskEntity.get();
                 String dbCronExpression = automatedTask.getCronExpression();
                 // Check the cron expression hasn't been changed in the database by another instance, if so skip this run
-                if (getLastCronExpression().equals(dbCronExpression)) {
+                if (isManualTask || getLastCronExpression().equals(dbCronExpression)) {
                     if (TRUE.equals(automatedTask.getTaskEnabled())) {
                         logApi.taskStarted(executionId.get(), this.getTaskName());
                         lockingTaskExecutor.executeWithLock(new LockedTask(), getLockConfiguration());

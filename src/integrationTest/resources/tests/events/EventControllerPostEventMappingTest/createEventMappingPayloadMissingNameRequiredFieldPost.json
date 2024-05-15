@@ -1,0 +1,6 @@
+{
+  "type": "12345",
+  "sub_type": "9876",
+  "handler": "DarStartHandler",
+  "has_restrictions": true
+}

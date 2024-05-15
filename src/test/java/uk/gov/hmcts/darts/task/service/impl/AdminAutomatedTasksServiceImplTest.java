@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
-import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -32,7 +31,7 @@ class AdminAutomatedTasksServiceImplTest {
     @Mock
     private AutomatedTasksMapper mapper;
     @Mock
-    private AutomatedTaskService automatedTaskService;
+    private ManualTaskService manualTaskService;
     @Mock
     private AutomatedTaskRunner automatedTaskRunner;
     @Mock
@@ -47,7 +46,7 @@ class AdminAutomatedTasksServiceImplTest {
         adminAutomatedTaskService = new AdminAutomatedTasksServiceImpl(
             automatedTaskRepository,
             mapper,
-            automatedTaskService,
+            manualTaskService,
             automatedTaskRunner,
             currentTimeHelper
         );
@@ -60,7 +59,7 @@ class AdminAutomatedTasksServiceImplTest {
     void invokesTaskWhenTaskIsNotLocked() {
         when(automatedTaskRepository.findById(1)).thenReturn(anAutomatedTaskEntityWithName("some-task-name"));
         when(automatedTaskRepository.findLockedUntilForTask("some-task-name")).thenReturn(anSqlDateInThePast());
-        when(automatedTaskService.getAutomatedTasks()).thenReturn(List.of(someAutomatedTask));
+        when(manualTaskService.getAutomatedTasks()).thenReturn(List.of(someAutomatedTask));
 
         adminAutomatedTaskService.runAutomatedTask(1);
 

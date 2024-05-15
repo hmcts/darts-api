@@ -19,12 +19,15 @@ import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupWithIdAndRoleAndUsersMapper;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupPatch;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -281,6 +284,7 @@ class SecurityGroupServiceImplTest {
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setId(1);
+        userAccountEntity.setIsSystemUser(false);
 
         Set<UserAccountEntity> userAccountEntitySet = new HashSet<>();
         userAccountEntitySet.add(userAccountEntity);
@@ -354,5 +358,51 @@ class SecurityGroupServiceImplTest {
         assertEquals(1, securityGroupEntity.getUsers().iterator().next().getId());
     }
 
+    @Test
+    void testUpdateUsersExcludesSystemUsers() {
+
+        SecurityGroupEntity securityGroupEntity = createSecurityGroupEntity(1, 1, 1);
+
+        // two system users added to security group
+        Set<UserAccountEntity> userAccountEntitySet = securityGroupEntity.getUsers();
+        UserAccountEntity userAccountEntity2 = new UserAccountEntity();
+        userAccountEntity2.setId(2);
+        userAccountEntity2.setIsSystemUser(true);
+        userAccountEntitySet.add(userAccountEntity2);
+        UserAccountEntity userAccountEntity3 = new UserAccountEntity();
+        userAccountEntity3.setId(3);
+        userAccountEntity3.setIsSystemUser(true);
+        userAccountEntitySet.add(userAccountEntity3);
+        securityGroupEntity.setUsers(userAccountEntitySet);
+
+        UserAccountEntity userAccountEntity10 = new UserAccountEntity();
+        userAccountEntity10.setId(10);
+        userAccountEntity10.setIsSystemUser(false);
+        UserAccountEntity userAccountEntity11 = new UserAccountEntity();
+        userAccountEntity11.setId(11);
+        userAccountEntity11.setIsSystemUser(true);
+        UserAccountEntity userAccountEntity12 = new UserAccountEntity();
+        userAccountEntity12.setId(12);
+        userAccountEntity12.setIsSystemUser(false);
+
+        SecurityGroupPatch securityGroupPatch = new SecurityGroupPatch();
+
+        // three user ids added to patch - 11 is a system user
+        securityGroupPatch.setUserIds(Arrays.asList(10,11,12));
+
+        when(userAccountRepository.findByIdIn(any()))
+            .thenReturn(Arrays.asList(userAccountEntity10, userAccountEntity11, userAccountEntity12));
+        when(userAccountRepository.findById(2)).thenReturn(Optional.of(userAccountEntity2));
+        when(userAccountRepository.findById(3)).thenReturn(Optional.of(userAccountEntity3));
+        when(userAccountRepository.findById(10)).thenReturn(Optional.of(userAccountEntity10));
+        when(userAccountRepository.findById(12)).thenReturn(Optional.of(userAccountEntity12));
+
+        securityGroupService.updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
+
+        // resulting security group should contain
+        // - the 2 system users from the original security group
+        // - plus 2 new (non-system) users from the patch
+        assertEquals(4, securityGroupEntity.getUsers().size());
+    }
 
 }
