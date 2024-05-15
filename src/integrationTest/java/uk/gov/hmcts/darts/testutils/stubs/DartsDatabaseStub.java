@@ -710,9 +710,14 @@ public class DartsDatabaseStub {
 
     @Transactional
     public EventHandlerEntity createEventHandlerData() {
-        var eventHandler = createEventHandlerWith("Dummy integration test handler", "99999", "8888");
+        var eventHandler = createEventHandlerWith("DarStartHandler", "99999", "8888");
         save(eventHandler);
         return eventHandler;
+    }
+
+    @Transactional
+        public EventHandlerEntity findEventHandlerMappingFor(Integer eventHandlerMappingId) {
+        return eventHandlerRepository.findById(eventHandlerMappingId).orElseThrow();
     }
 
     public SecurityGroupEntity getSecurityGroupRef(int id) {

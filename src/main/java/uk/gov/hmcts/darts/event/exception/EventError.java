@@ -26,6 +26,11 @@ public enum EventError implements DartsApiError {
         HttpStatus.CONFLICT,
         EventTitleErrors.DUPLICATE_EVENT_MAPPING.toString()
     ),
+    EVENT_MAPPING_DOES_NOT_EXIST_IN_DB(
+        EventErrorCode.NO_EVENT_MAPPING.getValue(),
+        HttpStatus.CONFLICT,
+        EventTitleErrors.NO_EVENT_MAPPING.toString()
+    ),
     EVENT_HANDLER_NAME_DOES_NOT_EXIST(
         EventErrorCode.INVALID_HANDLER_MAPPING_NAME.getValue(),
         HttpStatus.BAD_REQUEST,
