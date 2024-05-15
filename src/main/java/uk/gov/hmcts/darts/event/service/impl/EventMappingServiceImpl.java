@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
