@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class UserAccountStub {
 
     private static final int SYSTEM_USER_ID = 0;
     public static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";
-    private static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
+    public static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
     private static final OffsetDateTime LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
     private static final OffsetDateTime CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
@@ -306,6 +307,23 @@ public class UserAccountStub {
         user.getSecurityGroupEntities().add(superUserGroup);
 
         return userAccountRepository.saveAndFlush(user);
+    }
+
+    @Transactional
+    public List<UserAccountEntity> createAuthorisedIntegrationTestUsersSystemAndNonSystem(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+
+        var testUserNonSystem = getIntegrationTestUserAccountEntity();
+        testUserNonSystem.getSecurityGroupEntities().add(securityGroupEntity);
+        testUserNonSystem = userAccountRepository.saveAndFlush(testUserNonSystem);
+
+        var testUserSystem = getSeparateIntegrationTestUserAccountEntity();
+        testUserSystem.getSecurityGroupEntities().add(securityGroupEntity);
+        testUserSystem.setIsSystemUser(true);
+        testUserSystem = userAccountRepository.saveAndFlush(testUserSystem);
+
+        return Arrays.asList(testUserNonSystem, testUserSystem);
     }
 
 }

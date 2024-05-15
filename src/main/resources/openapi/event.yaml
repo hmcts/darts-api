@@ -227,8 +227,10 @@ paths:
       parameters:
         - in: query
           name: is_revision
+          required: false
           schema:
             type: boolean
+            default: false
           description: "parameter to indicate if the request is an update to an existing mapping"
       description: |-
         Events in DARTS are mapped to handlers. This endpoint creates a new event mapping or creates a new revision of an existing mapping.
@@ -333,6 +335,35 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
+  /admin/event-handlers:
+    get:
+      tags:
+        - Event
+      summary: All event handlers
+      operationId: adminGetEventHandlers
+      description: |-
+        An Endpoint which allows admin users to request a list of all event handler names that exist
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventHandlers'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 
 components:
   schemas:
@@ -387,7 +418,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/CourtLog'
-
 
     DartsEvent:
       type: object
@@ -472,6 +502,14 @@ components:
         has_events:
           type: boolean
 
+    EventHandlers:
+      type: array
+      items:
+        $ref: '#/components/schemas/EventHandler'
+
+    EventHandler:
+      type: string
+
     ###################################################################################################################
     # PRIMITIVES
     ###################################################################################################################
@@ -510,7 +548,8 @@ components:
           - "EVENT_101"
           - "EVENT_102"
           - "EVENT_103"
-      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME]
+          - "EVENT_104"
+      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME]
 
     EventTitleErrors:
         type: string
@@ -518,6 +557,7 @@ components:
           - "Data on the event could not be reconciled with Darts records"
           - "No event handler found in database"
           - "Event mapping already exists in database"
+          - "Event mapping not found in database"
           - "Handler name does not exist"
-        x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME]
+        x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME]
 

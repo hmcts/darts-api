@@ -45,7 +45,7 @@ class EventControllerGetEventMappingTest extends IntegrationBase  {
             .andExpect(jsonPath("$.type", Matchers.is("99999")))
             .andExpect(jsonPath("$.sub_type", Matchers.is("8888")))
             .andExpect(jsonPath("$.name", Matchers.is("some-desc")))
-            .andExpect(jsonPath("$.handler", Matchers.is("Dummy integration test handler")))
+            .andExpect(jsonPath("$.handler", Matchers.is("DarStartHandler")))
             .andExpect(jsonPath("$.is_active", Matchers.is(true)))
             .andExpect(jsonPath("$.has_restrictions", Matchers.is(false)))
             .andExpect(jsonPath("$.created_at").exists());

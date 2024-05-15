@@ -44,8 +44,7 @@ class GetSecurityGroupIntTest extends IntegrationBase {
 
         mockMvc.perform(get(ENDPOINT_URL, securityGroupId))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.user_ids").isNotEmpty())
-            .andExpect(jsonPath("$.user_ids[0]").isNumber())
+            .andExpect(jsonPath("$.user_ids").isEmpty())
             .andExpect(jsonPath("$.id").value(securityGroupId))
             .andExpect(jsonPath("$.security_role_id").value(SecurityRoleEnum.SUPER_USER.getId()))
             .andExpect(jsonPath("$.global_access").value(true))
