@@ -181,40 +181,43 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private void patchSecurityGroupUsers(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
 
         List<Integer> userIds = securityGroupPatch.getUserIds();
-        if (userIds != null) {
-            // get a list of system users for security group
-            List<Integer> systemUserIds = securityGroupEntity
-                .getUsers()
-                .stream()
-                .filter(user -> user.getIsSystemUser())
-                .map(UserAccountEntity::getId)
-                .toList();
-
-            // filter the incoming list to remove system users
-            List<UserAccountEntity> patchUsers = userAccountRepository
-                .findByIdIn(securityGroupPatch.getUserIds());
-
-            if (userIds.size() > 0 && patchUsers.isEmpty()) {
-                throw new DartsApiException(
-                    UserManagementError.USER_NOT_FOUND,
-                    String.format("No User accounts found for patch user IDs %s", securityGroupPatch.getUserIds()));
-            }
-
-            List<Integer> patchNonSystemUserIds = patchUsers
-                .stream().filter(user -> !user.getIsSystemUser())
-                .map(UserAccountEntity::getId)
-                .toList();
-
-            // join the 2 lists - distinct
-            userIds = Stream.concat(systemUserIds.stream(), patchNonSystemUserIds.stream())
-                .distinct()
-                .collect(Collectors.toList());
+        if (userIds == null) {
+            return;
         }
 
-        if (userIds != null) {
+        // get a list of system users for security group
+        List<Integer> systemUserIds = securityGroupEntity
+            .getUsers()
+            .stream()
+            .filter(user -> user.getIsSystemUser())
+            .map(UserAccountEntity::getId)
+            .toList();
+
+        // check that users exist
+        List<UserAccountEntity> patchUsers = userAccountRepository
+            .findByIdIn(securityGroupPatch.getUserIds());
+
+        if (userIds.size() > 0 && patchUsers.isEmpty()) {
+            throw new DartsApiException(
+                UserManagementError.USER_NOT_FOUND,
+                String.format("No User accounts found for patch user IDs %s", securityGroupPatch.getUserIds()));
+        }
+
+        // filter the incoming list to remove system users
+        List<Integer> patchNonSystemUserIds = patchUsers
+            .stream().filter(user -> !user.getIsSystemUser())
+            .map(UserAccountEntity::getId)
+            .toList();
+
+        // join the 2 lists - distinct
+        List<Integer> combinedUserIds = Stream.concat(systemUserIds.stream(), patchNonSystemUserIds.stream())
+            .distinct()
+            .collect(Collectors.toList());
+
+        if (combinedUserIds != null) {
             securityGroupEntity.getUsers().forEach(userAccountEntity -> userAccountEntity.getSecurityGroupEntities().remove(securityGroupEntity));
             securityGroupEntity.getUsers().clear();
-            for (Integer userId : userIds) {
+            for (Integer userId : combinedUserIds) {
                 Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
                 if (userAccountEntity.isPresent()) {
                     userAccountEntity.get().getSecurityGroupEntities().add(securityGroupEntity);
