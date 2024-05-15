@@ -32,7 +32,7 @@ class UserActivationPermissionsValidatorTest {
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class,
                                                        () -> userEnablementValidator.validate(patch));
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getTitle(), ex.getMessage());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getTitle(), ex.getMessage());
     }
 
     @Test

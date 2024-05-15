@@ -33,7 +33,7 @@ public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validato
                 Iterator<UserAccountEntity> entity = accountEntities.iterator();
                 UserAccountEntity userAccountEntity = entity.next();
                 if (userAccountEntity.getId().equals(userPatch.getUserId())) {
-                    throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT);
+                    throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
                 }
             }
         }

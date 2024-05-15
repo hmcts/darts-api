@@ -289,7 +289,7 @@ class UserControllerTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(patch(ENDPOINT_URL + userAccountEntity.getId())
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(userPatch)))
-            .andExpect(status().is(409))
+            .andExpect(status().is(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getHttpStatus().value()))
             .andReturn();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -297,7 +297,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
+        Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     @Test
@@ -317,7 +317,7 @@ class UserControllerTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(patch(ENDPOINT_URL + userAccountEntity.getId())
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(userPatch)))
-            .andExpect(status().is(409))
+            .andExpect(status().is(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getHttpStatus().value()))
             .andReturn();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -345,7 +345,7 @@ class UserControllerTest extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(patch(ENDPOINT_URL + userAccountEntity.getId())
                                                   .header("Content-Type", "application/json")
                                                   .content(objectMapper.writeValueAsString(userPatch)))
-            .andExpect(status().is(409))
+            .andExpect(status().is(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getHttpStatus().value()))
             .andReturn();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -353,7 +353,7 @@ class UserControllerTest extends IntegrationBase {
 
         Problem problem = mapper.readValue(mvcResult.getResponse().getContentAsString(),
                                            Problem.class);
-        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getErrorTypeNumeric(), problem.getType().toString());
+        Assertions.assertEquals(AuthorisationError.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getErrorTypeNumeric(), problem.getType().toString());
     }
 
     private boolean containsApprovedWorkflow(List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {

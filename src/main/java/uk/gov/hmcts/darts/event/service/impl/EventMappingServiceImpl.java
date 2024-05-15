@@ -89,7 +89,15 @@ public class EventMappingServiceImpl implements EventMappingService {
     }
 
     @Override
-    public EventMapping getEventMapping(Integer id) {
+    public List<EventMapping> getEventMappings() {
+        return eventHandlerRepository.findAll().stream()
+            .map(this::mapToEventMapping)
+            .toList();
+    }
+
+
+    @Override
+    public EventMapping getEventMappingById(Integer id) {
 
         Optional<EventHandlerEntity> eventHandler = eventHandlerRepository.findById(id);
 

@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -147,6 +148,16 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
             return courtCases.get(0);
         }
         return null;
+    }
+
+    public Optional<CourthouseEntity> getCourtHouse() {
+        if (getHearing() != null) {
+            return Optional.of(getHearing().getCourtroom().getCourthouse());
+        } else if (getCourtCase() != null) {
+            return Optional.of(getCourtCase().getCourthouse());
+        }
+
+        return Optional.empty();
     }
 
     public HearingEntity getHearing() {

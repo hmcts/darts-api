@@ -68,8 +68,18 @@ public enum AuthorisationError implements DartsApiError {
     ),
     USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT(
         AuthorisationErrorCode.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getValue(),
-        HttpStatus.CONFLICT,
+        HttpStatus.FORBIDDEN,
         AuthorisationTitleErrors.USER_NOT_AUTHORISED_TO_USE_PAYLOAD_CONTENT.getValue()
+    ),
+    UNABLE_TO_DEACTIVATE_USER(
+        AuthorisationErrorCode.UNABLE_TO_DEACTIVATE_USER.getValue(),
+        HttpStatus.CONFLICT,
+        AuthorisationTitleErrors.UNABLE_TO_DEACTIVATE_USER.getValue()
+    ),
+    USER_NOT_AUTHORISED_TO_ACTIVATE_USER(
+        AuthorisationErrorCode.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getValue(),
+        HttpStatus.FORBIDDEN,
+        AuthorisationTitleErrors.USER_NOT_AUTHORISED_TO_ACTIVATE_USER.getValue()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";
