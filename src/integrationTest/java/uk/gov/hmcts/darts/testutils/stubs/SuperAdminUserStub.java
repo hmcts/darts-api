@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.util.SecurityRoleMatcher;
 
 import java.util.Collections;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -25,6 +26,17 @@ public class SuperAdminUserStub {
         Mockito.when(userIdentity.getUserAccount())
             .thenReturn(user);
         Mockito.when(userIdentity.userHasGlobalAccess(any()))
+            .thenReturn(true);
+
+        return user;
+    }
+
+    public UserAccountEntity givenUserIsAuthorised(UserIdentity userIdentity, SecurityRoleEnum roleEnum) {
+        var user = userAccountStub.createSuperAdminUser();
+
+        Mockito.when(userIdentity.getUserAccount())
+            .thenReturn(user);
+        Mockito.when(userIdentity.userHasGlobalAccess(Set.of(roleEnum)))
             .thenReturn(true);
 
         return user;

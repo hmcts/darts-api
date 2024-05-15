@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError;
 import uk.gov.hmcts.darts.task.service.AdminAutomatedTaskService;
-import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskSummary;
 import uk.gov.hmcts.darts.tasks.model.DetailedAutomatedTask;
@@ -29,7 +28,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
 
     private final AutomatedTaskRepository automatedTaskRepository;
     private final AutomatedTasksMapper mapper;
-    private final AutomatedTaskService automatedTaskService;
+    private final ManualTaskService manualTaskService;
     private final AutomatedTaskRunner automatedTaskRunner;
     private final CurrentTimeHelper currentTimeHelper;
 
@@ -59,7 +58,7 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             throw new DartsApiException(AUTOMATED_TASK_ALREADY_RUNNING);
         }
 
-        var automatedTask = automatedTaskService.getAutomatedTasks().stream()
+        var automatedTask = manualTaskService.getAutomatedTasks().stream()
             .filter(task -> task.getTaskName().equals(automatedTaskEntity.getTaskName()))
             .findFirst();
 

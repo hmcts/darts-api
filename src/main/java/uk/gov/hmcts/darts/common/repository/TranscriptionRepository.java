@@ -148,5 +148,20 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         Boolean isManual,
         String requestedBy);
 
-
+    @Query("""
+        SELECT distinct t
+        FROM TranscriptionEntity t
+        WHERE t.requestor = str(:userId)
+        AND ((:onOrAfterCreatedDate IS NULL) OR 
+        (:onOrAfterCreatedDate IS NOT NULL AND t.createdDateTime >= :onOrAfterCreatedDate))
+        UNION
+        SELECT distinct trans 
+        FROM TranscriptionWorkflowEntity twfe
+        JOIN twfe.transcription trans
+        JOIN twfe.workflowActor user
+        WHERE user.id = :userId
+        AND ((:onOrAfterCreatedDate IS NULL) OR 
+        (:onOrAfterCreatedDate IS NOT NULL AND trans.createdDateTime >= :onOrAfterCreatedDate))
+        """)
+    List<TranscriptionEntity> findTranscriptionForUserOnOrAfterDate(Integer userId, OffsetDateTime onOrAfterCreatedDate);
 }
