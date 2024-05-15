@@ -190,7 +190,7 @@ A local jacoco coverage report can be generated using the following command:-
 The report will be available under ./build/jacocoHtml/index.html. The report incorporates both unit test
 and integration test coverage
 
-### Running the application in docker (without darts-gateway & darts-stub-services)
+### Running the application locally in docker (without darts-gateway & darts-stub-services)
 
 Create the image of the application by executing the following command:
 
@@ -208,6 +208,7 @@ Run the distribution (created in `build/install/darts-api` directory) by executi
 
 ```bash
   docker-compose -f docker-compose-local.yml up darts-api darts-db darts-redis
+  
 ```
 
 This will start the API container exposing the application's port
@@ -249,6 +250,18 @@ To stop all services, use:
 ```bash
 ./bin/dcdown
 ```
+
+### Running the application locally - (this can be used to debug the application through intellij if required)
+
+1. Ensure the environments variables are set, as described in the 'Environment variables' section. Set the 'spring.profiles.active' to 'local'
+
+2. Start the service as follows:
+
+ ```bash
+ docker compose -f docker-compose-local.yml up darts-redis
+ ```
+
+3. Start the darts-api either through Intellij selecting the appropriate run configuration or through gradle.
 
 ### Alternative script to run application
 
@@ -307,19 +320,14 @@ created by these tests. To this end the following conventions should be used:
   with `func-`. There is a random case_number generator that will provide case_numbers with this prefix. These cases and
   their associated hearings and events will be cleaned up automatically after the test has executed.
 
+
 ## Caching
 
 Redis has been configured as the default caching provider. When running docker-compose with the local configuration a
 Redis container will be started. If starting the darts-api from Intellij or the command line you have the following
 options:
 
-1. Start the Redis service as follows:
-
- ```bash
- docker compose -f docker-compose-local.yml up darts-redis
- ```
-
-Then start the darts-api ensuring that the `local` profile is activated.
+1. Follow instructions under 'Running the application locally'
 
 2. Alternatively the darts-api can be run using a simple in-memory cache by starting the application with the
    profile `in-memory-caching`.

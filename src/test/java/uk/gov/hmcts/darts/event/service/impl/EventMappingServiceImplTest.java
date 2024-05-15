@@ -151,13 +151,45 @@ class EventMappingServiceImplTest {
     void handleGetEventMappingRequestWhenNoEventHandlerMapping() {
         when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.getEventMapping(1));
+        var exception = assertThrows(DartsApiException.class, () -> eventMappingServiceImpl.getEventMappingById(1));
 
         assertEquals(
             "No event handler could be found in the database for event handler id: 1.",
             exception.getDetail()
         );
         verify(eventHandlerRepository).findById(1);
+    }
+
+    @Test
+    void getEventMappings() {
+        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
+        eventHandlerEntity.setId(1);
+        eventHandlerEntity.setType("12345");
+        eventHandlerEntity.setSubType("987");
+        eventHandlerEntity.setEventName("Test event");
+        eventHandlerEntity.setHandler("Standard Handler");
+        eventHandlerEntity.setActive(true);
+        eventHandlerEntity.setIsReportingRestriction(false);
+        OffsetDateTime now = OffsetDateTime.now();
+        eventHandlerEntity.setCreatedDateTime(now);
+
+        EventHandlerEntity eventHandlerEntity2 = new EventHandlerEntity();
+
+        when(eventHandlerRepository.findAll()).thenReturn(List.of(eventHandlerEntity, eventHandlerEntity2));
+
+        List<EventMapping> result = eventMappingServiceImpl.getEventMappings();
+
+        assertEquals(2, result.size());
+        assertEquals(eventHandlerEntity.getId(), result.get(0).getId());
+        assertEquals(eventHandlerEntity.getType(), result.get(0).getType());
+        assertEquals(eventHandlerEntity.getSubType(), result.get(0).getSubType());
+        assertEquals(eventHandlerEntity.getEventName(), result.get(0).getName());
+        assertEquals(eventHandlerEntity.getHandler(), result.get(0).getHandler());
+        assertEquals(eventHandlerEntity.getActive(), result.get(0).getIsActive());
+        assertEquals(eventHandlerEntity.getIsReportingRestriction(), result.get(0).getHasRestrictions());
+        assertEquals(eventHandlerEntity.getCreatedDateTime(), result.get(0).getCreatedAt());
+
+        verify(eventHandlerRepository).findAll();
     }
 
     @Test
@@ -175,7 +207,7 @@ class EventMappingServiceImplTest {
 
         when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.of(eventHandlerEntity));
 
-        EventMapping result = eventMappingServiceImpl.getEventMapping(1);
+        EventMapping result = eventMappingServiceImpl.getEventMappingById(1);
 
         assertEquals(eventHandlerEntity.getId(), result.getId());
         assertEquals(eventHandlerEntity.getType(), result.getType());
