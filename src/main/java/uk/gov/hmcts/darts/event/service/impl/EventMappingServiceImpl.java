@@ -91,13 +91,9 @@ public class EventMappingServiceImpl implements EventMappingService {
 
     @Override
     public List<EventMapping> getEventMappings() {
-        List<EventHandlerEntity> eventHandlerEntities = eventHandlerRepository.findAll();
-
-        List<EventMapping> eventMappings = new ArrayList<>();
-        for (EventHandlerEntity entity : eventHandlerEntities) {
-            eventMappings.add(mapToEventMapping(entity));
-        }
-        return eventMappings;
+        return eventHandlerRepository.findAll().stream()
+            .map(this::mapToEventMapping)
+            .toList();
     }
 
 
