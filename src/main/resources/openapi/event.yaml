@@ -219,6 +219,33 @@ paths:
                 $ref: './problem.yaml'
 
   /admin/event-mappings:
+    get:
+      tags:
+        - Event
+      summary: All event mappings
+      operationId: adminGetEventMappings
+      description: |-
+        An Endpoint which allows admin users to request a list of all event mappings
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventMappings'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
     post:
       tags:
         - Event
@@ -294,7 +321,7 @@ paths:
       tags:
         - Event
       summary: An Endpoint which allows admin users to request an event mapping
-      operationId: adminGetEventMappings
+      operationId: adminGetEventMappingById
       description: |-
         An Endpoint which allows admin users to request an event mapping using event handler id
       parameters:
@@ -467,6 +494,11 @@ components:
           type: string
         message:
           type: string
+
+    EventMappings:
+      type: array
+      items:
+        $ref: '#/components/schemas/EventMapping'
 
     EventMapping:
       type: object

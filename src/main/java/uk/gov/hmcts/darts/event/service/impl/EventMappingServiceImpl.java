@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,7 +90,19 @@ public class EventMappingServiceImpl implements EventMappingService {
     }
 
     @Override
-    public EventMapping getEventMapping(Integer id) {
+    public List<EventMapping> getEventMappings() {
+        List<EventHandlerEntity> eventHandlerEntities = eventHandlerRepository.findAll();
+
+        List<EventMapping> eventMappings = new ArrayList<>();
+        for (EventHandlerEntity entity : eventHandlerEntities) {
+            eventMappings.add(mapToEventMapping(entity));
+        }
+        return eventMappings;
+    }
+
+
+    @Override
+    public EventMapping getEventMappingById(Integer id) {
 
         Optional<EventHandlerEntity> eventHandler = eventHandlerRepository.findById(id);
 
