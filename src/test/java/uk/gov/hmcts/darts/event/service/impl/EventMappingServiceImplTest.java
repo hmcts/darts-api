@@ -231,6 +231,27 @@ class EventMappingServiceImplTest {
 
     }
 
+    @Test
+    void deleteEventMappingById() {
+        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
+        eventHandlerEntity.setId(1);
+        eventHandlerEntity.setType("12345");
+        eventHandlerEntity.setSubType("987");
+        eventHandlerEntity.setEventName("Test event");
+        eventHandlerEntity.setHandler("Standard Handler");
+        eventHandlerEntity.setActive(true);
+        eventHandlerEntity.setIsReportingRestriction(false);
+        OffsetDateTime now = OffsetDateTime.now();
+        eventHandlerEntity.setCreatedDateTime(now);
+
+        when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.of(eventHandlerEntity));
+        when(eventRepository.eventsExistForEventTypeId(anyInt())).thenReturn(false);
+
+        eventMappingServiceImpl.deleteEventMapping(1);
+
+        verify(eventHandlerRepository).delete(eventHandlerEntity);
+    }
+
     private EventMapping someEventMapping() {
         EventMapping eventMapping = new EventMapping();
         eventMapping.setType("12345");
