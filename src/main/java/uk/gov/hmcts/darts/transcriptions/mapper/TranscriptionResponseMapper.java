@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsReposito
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
-import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
@@ -236,8 +236,8 @@ public class TranscriptionResponseMapper {
     }
 
 
-    public GetTranscriptionDetailResponse mapTransactionEntityToTransactionDetails(TranscriptionEntity transcriptionEntity) {
-        GetTranscriptionDetailResponse details = new GetTranscriptionDetailResponse();
+    public GetTranscriptionDetailAdminResponse mapTransactionEntityToTransactionDetails(TranscriptionEntity transcriptionEntity) {
+        GetTranscriptionDetailAdminResponse details = new GetTranscriptionDetailAdminResponse();
 
         if (transcriptionEntity.getTranscriptionStatus() != null) {
             details.setTranscriptionStatusId(transcriptionEntity.getTranscriptionStatus().getId());

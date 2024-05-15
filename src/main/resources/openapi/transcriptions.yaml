@@ -818,7 +818,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GetTranscriptionDetailResponse'
+                  $ref: '#/components/schemas/GetTranscriptionDetailAdminResponse'
         '404':
           description: Not Found Error
           content:
@@ -1325,7 +1325,7 @@ components:
           items:
             $ref: '#/components/schemas/TranscriptionWorkflowsComment'
 
-    GetTranscriptionDetailResponse:
+    GetTranscriptionDetailAdminResponse:
       type: object
       properties:
         transcription_id:

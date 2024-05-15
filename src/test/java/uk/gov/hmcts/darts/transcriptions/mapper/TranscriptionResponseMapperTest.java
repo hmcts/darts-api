@@ -26,7 +26,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
-import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
@@ -271,7 +271,7 @@ class TranscriptionResponseMapperTest {
         transcriptionEntity.getHearings().add(hearingEntity);
 
         // run test and make the assertions
-        GetTranscriptionDetailResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
+        GetTranscriptionDetailAdminResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
         assertEquals(transactionId, fndResponse.getTranscriptionId());
         assertEquals(TranscriptionStatusEnum.COMPLETE.getId(), fndResponse.getTranscriptionStatusId());
         assertEquals(false, fndResponse.getIsManualTranscription());
@@ -310,7 +310,7 @@ class TranscriptionResponseMapperTest {
         transcriptionEntity.getCourtCases().add(caseEntity);
 
         // run test and make the assertions
-        GetTranscriptionDetailResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
+        GetTranscriptionDetailAdminResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
         assertEquals(transactionId, fndResponse.getTranscriptionId());
         assertEquals(TranscriptionStatusEnum.COMPLETE.getId(), fndResponse.getTranscriptionStatusId());
         assertEquals(false, fndResponse.getIsManualTranscription());
@@ -349,7 +349,7 @@ class TranscriptionResponseMapperTest {
         transcriptionEntity.getHearings().add(hearingEntity);
 
         // run test and make the assertions
-        GetTranscriptionDetailResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
+        GetTranscriptionDetailAdminResponse fndResponse = transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity);
         assertEquals(transactionId, fndResponse.getTranscriptionId());
         assertEquals(TranscriptionStatusEnum.COMPLETE.getId(), fndResponse.getTranscriptionStatusId());
         assertEquals(false, fndResponse.getIsManualTranscription());

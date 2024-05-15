@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.testutils.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
-import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -77,8 +77,8 @@ class TranscriptionIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        GetTranscriptionDetailResponse[] transcriptionResponses
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailResponse[].class);
+        GetTranscriptionDetailAdminResponse[] transcriptionResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailAdminResponse[].class);
 
         Assertions.assertEquals(1, transcriptionResponses.length);
         Assertions.assertNotNull(transcriptionResponses[0].getHearingDate());
@@ -107,8 +107,8 @@ class TranscriptionIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        GetTranscriptionDetailResponse[] transcriptionResponses = objectMapper
-            .readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailResponse[].class);
+        GetTranscriptionDetailAdminResponse[] transcriptionResponses = objectMapper
+            .readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailAdminResponse[].class);
 
         Assertions.assertEquals(1, transcriptionResponses.length);
         Assertions.assertNull(transcriptionResponses[0].getHearingDate());
@@ -140,8 +140,8 @@ class TranscriptionIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        GetTranscriptionDetailResponse[] transcriptionResponses = objectMapper
-            .readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailResponse[].class);
+        GetTranscriptionDetailAdminResponse[] transcriptionResponses = objectMapper
+            .readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailAdminResponse[].class);
 
         Assertions.assertEquals(1, transcriptionResponses.length);
         Assertions.assertNotNull(transcriptionResponses[0].getHearingDate());
@@ -185,8 +185,8 @@ class TranscriptionIntTest extends IntegrationBase {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        GetTranscriptionDetailResponse[] transcriptionResponses
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailResponse[].class);
+        GetTranscriptionDetailAdminResponse[] transcriptionResponses
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDetailAdminResponse[].class);
 
         Assertions.assertEquals(2, transcriptionResponses.length);
         Assertions.assertNotNull(transcriptionResponses[0].getHearingDate());

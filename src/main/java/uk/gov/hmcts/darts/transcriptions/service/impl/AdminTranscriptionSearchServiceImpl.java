@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
-import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
@@ -64,8 +64,8 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     }
 
     @Override
-    public List<GetTranscriptionDetailResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
-        List<GetTranscriptionDetailResponse> detailResponseList = new ArrayList<>();
+    public List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
+        List<GetTranscriptionDetailAdminResponse> detailResponseList = new ArrayList<>();
 
         List<TranscriptionEntity> entityList = transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, requestedAtFrom);
 
