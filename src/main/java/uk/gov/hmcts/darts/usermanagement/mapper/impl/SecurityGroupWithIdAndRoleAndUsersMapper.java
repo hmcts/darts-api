@@ -7,6 +7,8 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class SecurityGroupWithIdAndRoleAndUsersMapper {
@@ -19,7 +21,8 @@ public class SecurityGroupWithIdAndRoleAndUsersMapper {
         securityGroupWithIdAndRoleAndUsers.setSecurityRoleId(securityGroupEntity.getSecurityRoleEntity().getId());
         securityGroupWithIdAndRoleAndUsers.setCourthouseIds(
             securityGroupEntity.getCourthouseEntities().stream().map(CourthouseEntity::getId).sorted().toList());
-        securityGroupWithIdAndRoleAndUsers.setUserIds(securityGroupEntity.getUsers().stream().map(UserAccountEntity::getId).sorted().toList());
+        List<UserAccountEntity> nonSystemUsers = securityGroupEntity.getUsers().stream().filter(user -> !user.getIsSystemUser()).toList();
+        securityGroupWithIdAndRoleAndUsers.setUserIds(nonSystemUsers.stream().map(UserAccountEntity::getId).sorted().toList());
 
         return securityGroupWithIdAndRoleAndUsers;
     }

@@ -45,7 +45,9 @@ public class SecurityGroupCourthouseMapper {
         securityGroupWithIdAndRoleAndUsers.setCourthouseIds(courthouseEntities
             .stream().map(CourthouseEntity::getId).sorted().collect(Collectors.toList()));
         Set<UserAccountEntity> users = securityGroupEntity.getUsers();
-        securityGroupWithIdAndRoleAndUsers.setUserIds(users.stream().map(UserAccountEntity::getId).sorted().collect(Collectors.toList()));
+
+        List<UserAccountEntity> nonSystemUsers = securityGroupEntity.getUsers().stream().filter(user -> !user.getIsSystemUser()).toList();
+        securityGroupWithIdAndRoleAndUsers.setUserIds(nonSystemUsers.stream().map(UserAccountEntity::getId).sorted().toList());
 
         return securityGroupWithIdAndRoleAndUsers;
     }
