@@ -335,6 +335,35 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
+  /admin/event-handlers:
+    get:
+      tags:
+        - Event
+      summary: All event handlers
+      operationId: adminGetEventHandlers
+      description: |-
+        An Endpoint which allows admin users to request a list of all event handler names that exist
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventHandlers'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 
 components:
   schemas:
@@ -389,7 +418,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/CourtLog'
-
 
     DartsEvent:
       type: object
@@ -473,6 +501,14 @@ components:
           example: "2024-05-09T14:26:31.118Z"
         has_events:
           type: boolean
+
+    EventHandlers:
+      type: array
+      items:
+        $ref: '#/components/schemas/EventHandler'
+
+    EventHandler:
+      type: string
 
     ###################################################################################################################
     # PRIMITIVES
