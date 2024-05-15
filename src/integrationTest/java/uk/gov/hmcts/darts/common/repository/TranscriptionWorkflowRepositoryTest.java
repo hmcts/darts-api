@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
-import org.junit.jupiter.api.Assertions;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,10 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TranscriptionWorkflowRepositoryTest  extends IntegrationBase {
     @Autowired
@@ -62,18 +66,18 @@ class TranscriptionWorkflowRepositoryTest  extends IntegrationBase {
     void testFindWorkflowForUserWithTranscriptionState() {
         List<TranscriptionEntity> fndTranscriptionLst = transcriptionWorkflowRepository
             .findWorkflowForUserWithTranscriptionState(accountEntity.getId(), transcriptionEntity.getTranscriptionStatus().getId());
-        Assertions.assertEquals(1, fndTranscriptionLst.size());
-        Assertions.assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
-        Assertions.assertNotNull(transcriptionEntity.getHearing().getHearingDate());
-        Assertions.assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
-        Assertions.assertTrue(fndTranscriptionLst.get(0).getIsManualTranscription());
-        Assertions.assertEquals(transcriptionEntity.getCourtCase().getCaseNumber(),
+        assertEquals(1, fndTranscriptionLst.size());
+        assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
+        assertNotNull(transcriptionEntity.getHearing().getHearingDate());
+        assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
+        assertTrue(fndTranscriptionLst.get(0).getIsManualTranscription());
+        assertEquals(transcriptionEntity.getCourtCase().getCaseNumber(),
                                 fndTranscriptionLst.get(0).getCourtCase().getCaseNumber());
-        Assertions.assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(),
+        assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(),
                                 fndTranscriptionLst.get(0).getTranscriptionStatus().getId());
-        Assertions.assertEquals(transcriptionEntity.getCourtCase().getCourthouse().getId(),
+        assertEquals(transcriptionEntity.getCourtCase().getCourthouse().getId(),
                                 fndTranscriptionLst.get(0).getCourtCase().getCourthouse().getId());
-        Assertions.assertNotNull(transcriptionEntity.getCreatedDateTime());
+        assertNotNull(transcriptionEntity.getCreatedDateTime());
     }
 
     @Test
@@ -81,18 +85,18 @@ class TranscriptionWorkflowRepositoryTest  extends IntegrationBase {
         List<TranscriptionEntity> fndTranscriptionLst = transcriptionRepository
             .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
                                                    null);
-        Assertions.assertEquals(1, fndTranscriptionLst.size());
-        Assertions.assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
-        Assertions.assertNotNull(transcriptionEntity.getHearing().getHearingDate());
-        Assertions.assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
-        Assertions.assertTrue(fndTranscriptionLst.get(0).getIsManualTranscription());
-        Assertions.assertEquals(transcriptionEntity.getCourtCase().getCaseNumber(),
+        assertEquals(1, fndTranscriptionLst.size());
+        assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
+        assertNotNull(transcriptionEntity.getHearing().getHearingDate());
+        assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
+        assertTrue(fndTranscriptionLst.get(0).getIsManualTranscription());
+        assertEquals(transcriptionEntity.getCourtCase().getCaseNumber(),
                                 fndTranscriptionLst.get(0).getCourtCase().getCaseNumber());
-        Assertions.assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(),
+        assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(),
                                 fndTranscriptionLst.get(0).getTranscriptionStatus().getId());
-        Assertions.assertEquals(transcriptionEntity.getCourtCase().getCourthouse().getId(),
+        assertEquals(transcriptionEntity.getCourtCase().getCourthouse().getId(),
                                 fndTranscriptionLst.get(0).getCourtCase().getCourthouse().getId());
-        Assertions.assertNotNull(transcriptionEntity.getCreatedDateTime());
+        assertNotNull(transcriptionEntity.getCreatedDateTime());
     }
 
     @Test
@@ -100,17 +104,17 @@ class TranscriptionWorkflowRepositoryTest  extends IntegrationBase {
         List<TranscriptionEntity> fndTranscriptionLst = transcriptionRepository
             .findTranscriptionForUserOnOrAfterDate(accountEntity.getId(),
                                                    transcriptionEntity.getCreatedDateTime());
-        Assertions.assertEquals(1, fndTranscriptionLst.size());
-        Assertions.assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
-        Assertions.assertNotNull(transcriptionEntity.getHearing().getHearingDate());
-        Assertions.assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
-        Assertions.assertTrue(fndTranscriptionLst.get(0).getIsManualTranscription());
-        Assertions.assertEquals(transcriptionEntity.getCourtCase().getCaseNumber(),
+        assertEquals(1, fndTranscriptionLst.size());
+        assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
+        assertNotNull(transcriptionEntity.getHearing().getHearingDate());
+        assertEquals(transcriptionEntity.getId(), fndTranscriptionLst.get(0).getId());
+        assertTrue(fndTranscriptionLst.get(0).getIsManualTranscription());
+        assertEquals(transcriptionEntity.getCourtCase().getCaseNumber(),
                                 fndTranscriptionLst.get(0).getCourtCase().getCaseNumber());
-        Assertions.assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(),
+        assertEquals(TranscriptionStatusEnum.WITH_TRANSCRIBER.getId(),
                                 fndTranscriptionLst.get(0).getTranscriptionStatus().getId());
-        Assertions.assertEquals(transcriptionEntity.getCourtCase().getCourthouse().getId(),
+        assertEquals(transcriptionEntity.getCourtCase().getCourthouse().getId(),
                                 fndTranscriptionLst.get(0).getCourtCase().getCourthouse().getId());
-        Assertions.assertNotNull(transcriptionEntity.getCreatedDateTime());
+        assertNotNull(transcriptionEntity.getCreatedDateTime());
     }
 }

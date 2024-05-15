@@ -80,8 +80,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
         TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
 
-        MvcResult mvcResult = mockMvc.perform(get(getEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(),
-                                                       null)))
+        MvcResult mvcResult = mockMvc.perform(get(getEndpointUrl(transcriptionEntity.getCreatedBy().getId().toString(), null)))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
