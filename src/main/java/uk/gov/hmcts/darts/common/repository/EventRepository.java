@@ -19,10 +19,14 @@ public interface EventRepository extends JpaRepository<EventEntity, Integer> {
         """)
     List<EventEntity> findAllByHearingId(Integer hearingId);
 
-    @Query(value = """
-        SELECT * FROM darts.event e
-        where e.case_number = :caseNumber
-        order by e.created_ts
-        """, nativeQuery = true)
-    List<EventEntity> findAllByCaseNumberOrderByCreatedDate(String caseNumber);
+    @Query("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM EventEntity ee, EventHandlerEntity ehe
+                WHERE ee.eventType = ehe
+                AND ehe.id = :eventHandlerId
+            )
+        """)
+    boolean doesEventHandlerHaveEvents(int eventHandlerId);
+
 }

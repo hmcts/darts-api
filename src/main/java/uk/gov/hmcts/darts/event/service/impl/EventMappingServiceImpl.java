@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventHandlerMapper;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
@@ -30,6 +31,7 @@ public class EventMappingServiceImpl implements EventMappingService {
     private static final String HANDLER_DOES_NOT_EXIST_MESSAGE = "Event handler mapping does not exist for type: %s and subtype: %s.";
     private static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
 
+    private final EventRepository eventRepository;
     private final EventHandlerRepository eventHandlerRepository;
     private final EventHandlerMapper eventHandlerMapper;
 
@@ -95,14 +97,15 @@ public class EventMappingServiceImpl implements EventMappingService {
             .toList();
     }
 
-
     @Override
     public EventMapping getEventMappingById(Integer id) {
 
         Optional<EventHandlerEntity> eventHandler = eventHandlerRepository.findById(id);
 
         if (eventHandler.isPresent()) {
-            return mapToEventMapping(eventHandler.get());
+            EventMapping eventMapping = mapToEventMapping(eventHandler.get());
+            eventMapping.setHasEvents(eventRepository.doesEventHandlerHaveEvents(eventMapping.getId()));
+            return eventMapping;
         } else {
             log.warn(format(NO_HANDLER_IN_DB_MESSAGE, id));
             throw new DartsApiException(

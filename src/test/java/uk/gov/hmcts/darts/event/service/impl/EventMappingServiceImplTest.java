@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -11,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventHandlerMapper;
 import uk.gov.hmcts.darts.event.model.EventMapping;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
@@ -37,6 +40,9 @@ class EventMappingServiceImplTest {
     private static final OffsetDateTime FIXED_DATETIME = OffsetDateTime.of(2024, 5, 01, 10, 0, 0, 0, ZoneOffset.UTC);
     @Mock
     EventHandlerRepository eventHandlerRepository;
+
+    @Mock
+    EventRepository eventRepository;
 
     @Mock
     private EventHandlerMapper eventHandlerMapper;
@@ -192,8 +198,9 @@ class EventMappingServiceImplTest {
         verify(eventHandlerRepository).findAll();
     }
 
-    @Test
-    void getEventMappingById() {
+    @ParameterizedTest
+    @ValueSource(strings = {"true", "false"})
+    void getEventMappingById(boolean hasEvents) {
         EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
         eventHandlerEntity.setId(1);
         eventHandlerEntity.setType("12345");
@@ -206,6 +213,7 @@ class EventMappingServiceImplTest {
         eventHandlerEntity.setCreatedDateTime(now);
 
         when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.of(eventHandlerEntity));
+        when(eventRepository.doesEventHandlerHaveEvents(anyInt())).thenReturn(hasEvents);
 
         EventMapping result = eventMappingServiceImpl.getEventMappingById(1);
 
@@ -217,6 +225,7 @@ class EventMappingServiceImplTest {
         assertEquals(eventHandlerEntity.getActive(), result.getIsActive());
         assertEquals(eventHandlerEntity.getIsReportingRestriction(), result.getHasRestrictions());
         assertEquals(eventHandlerEntity.getCreatedDateTime(), result.getCreatedAt());
+        assertEquals(hasEvents, result.getHasEvents());
 
         verify(eventHandlerRepository).findById(1);
 

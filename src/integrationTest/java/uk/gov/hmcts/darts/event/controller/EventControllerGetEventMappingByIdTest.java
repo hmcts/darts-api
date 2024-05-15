@@ -11,9 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.time.OffsetDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,6 +28,11 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 class EventControllerGetEventMappingByIdTest extends IntegrationBase  {
 
     private static final String EVENT_MAPPINGS_ENDPOINT = "/admin/event-mappings/{event_handler_id}";
+
+    private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
+    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTROOM = "some-courtroom";
+    private static final String SOME_CASE_ID = "1";
 
     @Autowired
     private transient MockMvc mockMvc;
@@ -36,18 +45,48 @@ class EventControllerGetEventMappingByIdTest extends IntegrationBase  {
     void allowSuperAdminToGetEventMappingById(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
-        var entity = dartsDatabase.createEventHandlerData();
+        var eventHandlerEntity = dartsDatabase.createEventHandlerData();
 
-        MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, entity.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, eventHandlerEntity.getId());
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$.id", Matchers.is(entity.getId())))
+            .andExpect(jsonPath("$.id", Matchers.is(eventHandlerEntity.getId())))
             .andExpect(jsonPath("$.type", Matchers.is("99999")))
             .andExpect(jsonPath("$.sub_type", Matchers.is("8888")))
             .andExpect(jsonPath("$.name", Matchers.is("some-desc")))
             .andExpect(jsonPath("$.handler", Matchers.is("DarStartHandler")))
             .andExpect(jsonPath("$.is_active", Matchers.is(true)))
             .andExpect(jsonPath("$.has_restrictions", Matchers.is(false)))
+            .andExpect(jsonPath("$.has_events", Matchers.is(false)))
+            .andExpect(jsonPath("$.created_at").exists());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.INCLUDE)
+    void allowSuperAdminToGetEventMappingByIdWithEventsLinkedToHandler(SecurityRoleEnum role) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_ID,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
+        );
+
+        var eventHandlerEntity = dartsDatabase.createEventHandlerData();
+        dartsDatabase.createEvent(hearingEntity, eventHandlerEntity.getId());
+
+        MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, eventHandlerEntity.getId());
+
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", Matchers.is(eventHandlerEntity.getId())))
+            .andExpect(jsonPath("$.type", Matchers.is("99999")))
+            .andExpect(jsonPath("$.sub_type", Matchers.is("8888")))
+            .andExpect(jsonPath("$.name", Matchers.is("some-desc")))
+            .andExpect(jsonPath("$.handler", Matchers.is("DarStartHandler")))
+            .andExpect(jsonPath("$.is_active", Matchers.is(true)))
+            .andExpect(jsonPath("$.has_restrictions", Matchers.is(false)))
+            .andExpect(jsonPath("$.has_events", Matchers.is(true)))
             .andExpect(jsonPath("$.created_at").exists());
     }
 
