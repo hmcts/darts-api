@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
@@ -20,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.dailylist.mapper.CitizenNameMapper;
 import uk.gov.hmcts.darts.dailylist.model.CitizenName;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
@@ -27,6 +31,7 @@ import uk.gov.hmcts.darts.dailylist.model.Defendant;
 import uk.gov.hmcts.darts.dailylist.model.Hearing;
 import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
+import uk.gov.hmcts.darts.dailylist.util.CitizenNameComparator;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -51,7 +56,9 @@ class DailyListUpdater {
     private final ObjectMapper objectMapper;
     private final SystemUserHelper systemUserHelper;
     private final CurrentTimeHelper currentTimeHelper;
+    private CitizenNameMapper citizenNameMapper;
 
+    private CitizenNameComparator citizenNameComparator;
 
     @SuppressWarnings({"checkstyle:VariableDeclarationUsageDistance", "PMD.CognitiveComplexity"})
     @Transactional
@@ -197,10 +204,12 @@ class DailyListUpdater {
         }
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
-        advocates.forEach(advocate ->
-                              courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                                  buildFullName(advocate.getName()), courtCase, dailyListSystemUser)));
-
+        advocates.forEach(advocate -> {
+            if (!isProsecutor(courtCase, advocate)) {
+                      courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                          citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
+            }
+        });
     }
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
@@ -210,8 +219,10 @@ class DailyListUpdater {
                 if (counselDetails == null) {
                     continue;
                 }
-                courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(counselDetails.getName()), courtCase, dailyListSystemUser));
+                if  (!isDefenders(courtCase, counselDetails)) {
+                    courtCase.addDefence(retrieveCoreObjectService.createDefence(
+                        citizenNameMapper.getCitizenName(counselDetails.getName()), courtCase, dailyListSystemUser));
+                }
             }
         }
     }
@@ -219,11 +230,13 @@ class DailyListUpdater {
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
-            courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
-                buildFullName(defendant.getPersonalDetails().getName()),
-                courtCase,
-                dailyListSystemUser
-            ));
+            if (!isDefendantInCase(courtCase, defendant)) {
+                courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
+                    citizenNameMapper.getCitizenName(defendant.getPersonalDetails().getName()),
+                    courtCase,
+                    dailyListSystemUser
+                ));
+            }
         }
     }
 
@@ -235,7 +248,38 @@ class DailyListUpdater {
         }
     }
 
-    private String buildFullName(CitizenName citizenName) {
-        return citizenName.getCitizenNameForename() + " " + citizenName.getCitizenNameSurname();
+    private boolean isDefenders(CourtCaseEntity courtCase, PersonalDetails defenders) {
+        boolean existingDefendant = false;
+        for (DefenceEntity defenceEntity : courtCase.getDefenceList()) {
+            if (citizenNameComparator.compare(defenders.getName(), citizenNameMapper.getCitizenName(defenceEntity.getName())) == 0) {
+                existingDefendant = true;
+            }
+        }
+
+        return existingDefendant;
     }
+
+    private boolean isDefendantInCase(CourtCaseEntity courtCase, Defendant defendant) {
+        boolean existingDefendant = false;
+        for (DefendantEntity defendantEntity : courtCase.getDefendantList()) {
+            if (citizenNameComparator.compare(defendant.getPersonalDetails().getName(), citizenNameMapper.getCitizenName(defendantEntity.getName())) == 0) {
+                existingDefendant = true;
+            }
+        }
+
+        return existingDefendant;
+    }
+
+    private boolean isProsecutor(CourtCaseEntity courtCase, PersonalDetails prosecutor) {
+        boolean existingDefendant = false;
+        for (ProsecutorEntity prosecutorEntity : courtCase.getProsecutorList()) {
+
+            if (citizenNameComparator.compare(prosecutor.getName(), citizenNameMapper.getCitizenName(prosecutorEntity.getName())) == 0) {
+                existingDefendant = true;
+            }
+        }
+
+        return existingDefendant;
+    }
+
 }
