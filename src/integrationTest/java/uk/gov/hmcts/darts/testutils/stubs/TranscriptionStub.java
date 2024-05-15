@@ -163,8 +163,12 @@ public class TranscriptionStub {
                                                                 Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
                                                                 UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCourtroom(hearing.getCourtroom());
-        transcription.addHearing(hearing);
+
+        if (hearing != null) {
+            transcription.setCourtroom(hearing.getCourtroom());
+            transcription.addHearing(hearing);
+        }
+
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);
 
@@ -174,11 +178,17 @@ public class TranscriptionStub {
             transcription.setTranscriptionUrgency(null);
         }
 
+        transcription.setCreatedDateTime(now());
+        transcription.setRequestor(testUser.getId().toString());
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
-        hearing.getTranscriptions().add(transcription);
+
+        if (hearing != null) {
+            hearing.getTranscriptions().add(transcription);
+        }
+
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
