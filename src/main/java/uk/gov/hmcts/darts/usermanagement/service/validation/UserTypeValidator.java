@@ -23,7 +23,7 @@ public class UserTypeValidator implements Validator<Integer> {
         if (accountEntity.isPresent() && accountEntity.get().getIsSystemUser()) {
             throw new DartsApiException(
                 UserManagementError.USER_NOT_FOUND,
-                String.format("User id %d is a system user", userId));
+                String.format("User id %d not found", userId));
         }
     }
 }
