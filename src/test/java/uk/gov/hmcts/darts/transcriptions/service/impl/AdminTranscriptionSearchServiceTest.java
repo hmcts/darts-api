@@ -10,13 +10,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
-import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -45,10 +46,15 @@ class AdminTranscriptionSearchServiceTest {
     @Mock
     private TranscriptionResponseMapper transcriptionResponseMapper;
 
+    @Mock
+    private UserAccountExistsValidator userAccountExistsValidator;
+
     @BeforeEach
     void setUp() {
         adminTranscriptionSearchService
-            = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery, transcriptionRepository, transcriptionResponseMapper);
+            = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery,
+                                                      transcriptionRepository, transcriptionResponseMapper,
+                                                      userAccountExistsValidator);
     }
 
     @Test
@@ -136,11 +142,24 @@ class AdminTranscriptionSearchServiceTest {
         when(transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, dateTimeOfSearch))
             .thenReturn(new ArrayList<>());
 
+        List<GetTranscriptionDetailAdminResponse> fndTranscriptions = adminTranscriptionSearchService
+                .getTranscriptionsForUser(userId, dateTimeOfSearch);
+
+        Assertions.assertTrue(fndTranscriptions.isEmpty());
+    }
+
+    @Test
+    void testGetTranscriptionDetailsUserNotExist() {
+        Integer userId = 200;
+        OffsetDateTime dateTimeOfSearch = OffsetDateTime.now();
+
+        Mockito.doThrow(new DartsApiException(UserManagementError.USER_NOT_FOUND)).when(userAccountExistsValidator).validate(userId);
+
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class, () -> {
             adminTranscriptionSearchService
                 .getTranscriptionsForUser(userId, dateTimeOfSearch);
         });
-        Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND, exception.getError());
+        Assertions.assertEquals(UserManagementError.USER_NOT_FOUND, exception.getError());
     }
 
     private static Set<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {

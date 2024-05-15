@@ -794,7 +794,7 @@ paths:
     get:
       tags:
         - Transcription
-      summary: Get Transcript requests
+      summary: Admin Get Transcript requests
       operationId: getTranscriptionsForUser
       parameters:
         - in: query

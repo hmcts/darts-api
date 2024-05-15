@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
@@ -251,11 +253,11 @@ public class TranscriptionResponseMapper {
         }
 
         if (transcriptionEntity.getHearing() != null) {
-            details.setCourthouseId(transcriptionEntity.getHearing().getCourtroom().getCourthouse().getId());
             details.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
-        } else if (transcriptionEntity.getCourtCase() != null) {
-            details.setCourthouseId(transcriptionEntity.getCourtCase().getCourthouse().getId());
         }
+
+        Optional<CourthouseEntity> courthouseEntityOptional = transcriptionEntity.getCourtHouse();
+        courthouseEntityOptional.ifPresent(courthouseEntity -> details.setCourthouseId(courthouseEntity.getId()));
 
         details.requestedAt(transcriptionEntity.getCreatedDateTime());
         return details;

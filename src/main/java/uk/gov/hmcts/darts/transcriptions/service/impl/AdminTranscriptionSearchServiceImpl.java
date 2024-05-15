@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
+import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -19,7 +19,6 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +29,8 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     private final TranscriptionRepository transcriptionRepository;
 
     private final TranscriptionResponseMapper transcriptionMapper;
+
+    private final UserAccountExistsValidator userAccountExistsValidator;
 
     @Override
     @SuppressWarnings({"PMD.NullAssignment"})
@@ -67,11 +68,10 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     public List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
         List<GetTranscriptionDetailAdminResponse> detailResponseList = new ArrayList<>();
 
-        List<TranscriptionEntity> entityList = transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, requestedAtFrom);
+        // throw an en exception if the user does not exist
+        userAccountExistsValidator.validate(userId);
 
-        if (entityList.isEmpty()) {
-            throw new DartsApiException(TRANSCRIPTION_NOT_FOUND);
-        }
+        List<TranscriptionEntity> entityList = transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, requestedAtFrom);
 
         for (TranscriptionEntity transcriptionEntity : entityList) {
             detailResponseList.add(transcriptionMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity));
