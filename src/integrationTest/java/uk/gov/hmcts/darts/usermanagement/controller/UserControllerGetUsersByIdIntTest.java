@@ -82,9 +82,9 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
 
         Problem problem = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), Problem.class);
 
-        assertNull(problem.getDetail());
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getHttpStatus().value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND.getErrorTypeNumeric(), problem.getType().toString());
+        Assertions.assertEquals("User id " + userAccountEntity.getId() + " not found", problem.getDetail());
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));
         verifyNoMoreInteractions(mockUserIdentity);
     }
