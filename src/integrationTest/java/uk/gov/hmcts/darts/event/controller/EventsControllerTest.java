@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
+import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
@@ -44,6 +45,9 @@ class EventsControllerTest {
 
     @MockBean
     private EventMappingService eventMappingService;
+
+    @MockBean
+    private EventHandlerEnumerator eventHandlerEnumerator;
 
     @Test
     void eventsApiPostEndpoint() throws Exception {
