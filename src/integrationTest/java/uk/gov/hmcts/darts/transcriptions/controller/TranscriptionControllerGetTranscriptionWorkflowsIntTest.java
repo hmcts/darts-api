@@ -13,14 +13,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.net.URI;
@@ -47,6 +44,8 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
     private UserIdentity mockUserIdentity;
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    private TranscriptionStub transcriptionStub;
     private TranscriptionEntity transcription;
 
     @BeforeEach
@@ -66,15 +65,15 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.save(transcription);
 
-        createWorkflowEntity(transcription,
+        var transcriptionWorkflow1 = transcriptionStub.createAndSaveTranscriptionWorkflow(transcription,
                              OffsetDateTime.of(2024, 4, 23, 10, 0, 0, 0, ZoneOffset.UTC),
-                             dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED),
-                             "comment1");
+                             transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow1, "comment1", transcription.getCreatedBy());
 
-        createWorkflowEntity(transcription,
+        var transcriptionWorkflow2 = transcriptionStub.createAndSaveTranscriptionWorkflow(transcription,
                              OffsetDateTime.of(2024, 4, 24, 12, 0, 0, 0, ZoneOffset.UTC),
-                             dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED),
-                             "comment2");
+                             transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+        transcriptionStub.createAndSaveTranscriptionWorkflowComment(transcriptionWorkflow2, "comment2", transcription.getCreatedBy());
     }
 
     @Test
@@ -152,33 +151,5 @@ class TranscriptionControllerGetTranscriptionWorkflowsIntTest extends Integratio
             """;
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    private void createWorkflowEntity(TranscriptionEntity transcription,
-                                                             OffsetDateTime workflowTimestamp,
-                                                             TranscriptionStatusEntity status,
-                                                             String comment) {
-
-        TranscriptionWorkflowEntity workflowEntity = new TranscriptionWorkflowEntity();
-        workflowEntity.setTranscription(transcription);
-        workflowEntity.setWorkflowActor(transcription.getCreatedBy());
-        workflowEntity.setWorkflowTimestamp(workflowTimestamp);
-        workflowEntity.setTranscriptionStatus(status);
-
-        dartsDatabase.save(workflowEntity);
-
-        addCommentToWorkflow(workflowEntity, comment, transcription.getCreatedBy());
-    }
-
-    private void addCommentToWorkflow(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
-        TranscriptionCommentEntity commentEntity = new TranscriptionCommentEntity();
-        commentEntity.setTranscription(workflowEntity.getTranscription());
-        commentEntity.setTranscriptionWorkflow(workflowEntity);
-        commentEntity.setComment(comment);
-        commentEntity.setCommentTimestamp(workflowEntity.getWorkflowTimestamp());
-        commentEntity.setAuthorUserId(userAccount.getId());
-        commentEntity.setLastModifiedBy(userAccount);
-        commentEntity.setCreatedBy(userAccount);
-        dartsDatabase.save(commentEntity);
     }
 }

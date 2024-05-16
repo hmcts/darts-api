@@ -768,7 +768,7 @@ paths:
     get:
       tags:
         - Transcription
-      summary: Return all transcription workflow records in descending workflow timestamp chronological order
+      summary: Return the transcription history - all transcription workflow records with their comments and the transcription comments not associated to a workflow, in descending workflow timestamp chronological order
       parameters:
         - in: query
           name: is_current
