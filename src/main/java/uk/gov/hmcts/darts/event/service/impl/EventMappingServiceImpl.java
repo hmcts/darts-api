@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_INACTIVE;
+import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_MAPPING_INACTIVE;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_MAPPING_IN_USE;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NAME_DOES_NOT_EXIST;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NOT_FOUND_IN_DB;
@@ -152,7 +152,7 @@ public class EventMappingServiceImpl implements EventMappingService {
             String errorMessage = MessageFormat.format(HANDLER_IS_INACTIVE_MESSAGE, id);
             log.warn(errorMessage);
             throw new DartsApiException(
-                EVENT_HANDLER_INACTIVE,
+                EVENT_HANDLER_MAPPING_INACTIVE,
                 errorMessage
             );
         }

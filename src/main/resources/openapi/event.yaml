@@ -93,7 +93,7 @@ paths:
                   description: type+subType has not been found in the database
                   value:
                     type: EVENT_101
-                    title: No event handler found in database
+                    title: No event handler mapping found in database
                     status: 404
                     detail: "No event handler could be found for messageId: 100 type: 407301 and subtype: 108081"
 
@@ -397,7 +397,7 @@ paths:
                 $ref: './problem.yaml'
               example:
                 type: "EVENT_101"
-                title: "No event handler found in database"
+                title: "No event handler mapping found in database"
                 status: 404
                 detail: "No event handler could be found in the database for event handler id: 123."
         '409':
@@ -657,7 +657,7 @@ components:
       type: string
       enum:
         - "Data on the event could not be reconciled with Darts records"
-        - "No event handler found in database"
+        - "No event handler mapping found in database"
         - "Event mapping already exists in database"
         - "Event mapping not found in database"
         - "Handler name does not exist"

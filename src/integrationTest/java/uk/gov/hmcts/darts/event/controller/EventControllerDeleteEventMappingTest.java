@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.event.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -18,7 +21,6 @@ import java.time.LocalDateTime;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
 class EventControllerDeleteEventMappingTest extends IntegrationBase {
@@ -39,9 +41,10 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
     }
 
-    @Test
-    void wrongPermission() throws Exception {
-        given.anAuthenticatedUserWithGlobalAccessAndRole(TRANSLATION_QA);
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
+    void wrongPermission(SecurityRoleEnum role) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
         var entity = dartsDatabase.createEventHandlerData();
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
         MvcResult response = mockMvc.perform(requestBuilder)
@@ -128,7 +131,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
         String expectedResponse = """
             {
               "type":"EVENT_101",
-              "title": "No event handler found in database",
+              "title": "No event handler mapping found in database",
               "status": 404,
               "detail": "No event handler could be found in the database for event handler id: -1."
             }

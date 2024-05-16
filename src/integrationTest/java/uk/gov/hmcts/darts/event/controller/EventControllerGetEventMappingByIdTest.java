@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 @AutoConfigureMockMvc
-class EventControllerGetEventMappingByIdTest extends IntegrationBase  {
+class EventControllerGetEventMappingByIdTest extends IntegrationBase {
 
     private static final String EVENT_MAPPINGS_ENDPOINT = "/admin/event-mappings/{event_handler_id}";
 
@@ -117,7 +117,7 @@ class EventControllerGetEventMappingByIdTest extends IntegrationBase  {
         String expectedResponse = """
             {
               "type":"EVENT_101",
-              "title": "No event handler found in database",
+              "title": "No event handler mapping found in database",
               "status": 404,
               "detail": "No event handler could be found in the database for event handler id: 1000099."
             }

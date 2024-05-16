@@ -233,7 +233,6 @@ class EventMappingServiceImplTest {
 
     @Test
     void deleteEventMappingById() {
-        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
         eventHandlerEntity.setId(1);
         eventHandlerEntity.setType("12345");
         eventHandlerEntity.setSubType("987");
