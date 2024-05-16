@@ -93,7 +93,7 @@ paths:
                   description: type+subType has not been found in the database
                   value:
                     type: EVENT_101
-                    title: No event handler found in database
+                    title: No event handler mapping found in database
                     status: 404
                     detail: "No event handler could be found for messageId: 100 type: 407301 and subtype: 108081"
 
@@ -361,6 +361,74 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+    delete:
+      tags:
+        - Event
+      summary: An Endpoint which allows admin users to delete an event mapping
+      operationId: adminDeleteEventMappings
+      description: |-
+        An Endpoint which allows admin users to delete an event mapping using event handler id
+      parameters:
+        - in: path
+          name: event_handler_id
+          schema:
+            type: integer
+          description: "event_handler_id is the internal event handler id for the handler."
+          required: true
+
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_109"
+                title: "User is not authorised for this endpoint"
+                status: 403
+        '404':
+          description: Not Found - Event mapping not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "EVENT_101"
+                title: "No event handler mapping found in database"
+                status: 404
+                detail: "No event handler could be found in the database for event handler id: 123."
+        '409':
+          description: The mapping is inactive, so cannot be deleted.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              examples:
+                inactive:
+                  summary: Inactive
+                  description: The event handler mapping is marked as inactive
+                  value:
+                    type: "EVENT_105"
+                    title: "The mapping is inactive, so cannot be deleted"
+                    status: 409
+                    detail: Event handler mapping 379 cannot be deleted because it is inactive.
+                has_events:
+                  summary: Has Events
+                  description: The event handler has processed events
+                  value:
+                    type: "EVENT_106"
+                    title: "The mapping has already processed events, so cannot be deleted"
+                    status: 409
+                    detail: Event handler mapping 10 already has processed events, so cannot be deleted.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /admin/event-handlers:
     get:
@@ -576,20 +644,24 @@ components:
     EventErrorCode:
       type: string
       enum:
-          - "EVENT_100"
-          - "EVENT_101"
-          - "EVENT_102"
-          - "EVENT_103"
-          - "EVENT_104"
-      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME]
+        - "EVENT_100"
+        - "EVENT_101"
+        - "EVENT_102"
+        - "EVENT_103"
+        - "EVENT_104"
+        - "EVENT_105"
+        - "EVENT_106"
+      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME, MAPPING_INACTIVE, MAPPING_IN_USE ]
 
     EventTitleErrors:
-        type: string
-        enum:
-          - "Data on the event could not be reconciled with Darts records"
-          - "No event handler found in database"
-          - "Event mapping already exists in database"
-          - "Event mapping not found in database"
-          - "Handler name does not exist"
-        x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME]
+      type: string
+      enum:
+        - "Data on the event could not be reconciled with Darts records"
+        - "No event handler mapping found in database"
+        - "Event mapping already exists in database"
+        - "Event mapping not found in database"
+        - "Handler name does not exist"
+        - "The mapping is inactive, so cannot be deleted"
+        - "The mapping has already processed events, so cannot be deleted"
+      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB, DUPLICATE_EVENT_MAPPING, NO_EVENT_MAPPING, INVALID_HANDLER_MAPPING_NAME, MAPPING_INACTIVE, MAPPING_IN_USE ]
 

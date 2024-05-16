@@ -10,4 +10,6 @@ public interface EventMappingService {
     List<EventMapping> getEventMappings();
 
     EventMapping getEventMappingById(Integer id);
+
+    void deleteEventMapping(Integer id);
 }
