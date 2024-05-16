@@ -82,7 +82,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
                "type": "EVENT_105",
                "title": "The mapping is inactive, so cannot be deleted",
                "status": 409,
-               "detail": "Event handler 379 cannot be deleted because it is inactive."
+               "detail": "Event handler mapping 379 cannot be deleted because it is inactive."
             }
             """;
 
@@ -109,7 +109,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
               "type": "EVENT_106",
               "title": "The mapping has already processed events, so cannot be deleted",
               "status": 409,
-              "detail": "Event handler 10 already has processed events, so cannot be deleted."
+              "detail": "Event handler mapping 10 already has processed events, so cannot be deleted."
             }
             """;
 

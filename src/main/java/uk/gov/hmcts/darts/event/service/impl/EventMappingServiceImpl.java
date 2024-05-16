@@ -33,8 +33,8 @@ public class EventMappingServiceImpl implements EventMappingService {
     private static final String HANDLER_ALREADY_EXISTS_MESSAGE = "Event handler mapping already exists for type: %s and subtype: %s.";
     private static final String HANDLER_DOES_NOT_EXIST_MESSAGE = "Event handler mapping does not exist for type: %s and subtype: %s.";
     private static final String NO_HANDLER_WITH_NAME_IN_DB_MESSAGE = "No event handler with name %s could be found in the database.";
-    private static final String HANDLER_IS_INACTIVE_MESSAGE = "Event handler {0} cannot be deleted because it is inactive.";
-    private static final String HANDLER_IN_USE_MESSAGE = "Event handler {0} already has processed events, so cannot be deleted.";
+    private static final String MAPPING_IS_INACTIVE_MESSAGE = "Event handler mapping {0} cannot be deleted because it is inactive.";
+    private static final String MAPPING_IN_USE_MESSAGE = "Event handler mapping {0} already has processed events, so cannot be deleted.";
 
     private final EventRepository eventRepository;
     private final EventHandlerRepository eventHandlerRepository;
@@ -149,7 +149,7 @@ public class EventMappingServiceImpl implements EventMappingService {
 
         EventHandlerEntity eventHandler = eventHandlerOpt.get();
         if (!eventHandler.getActive()) {
-            String errorMessage = MessageFormat.format(HANDLER_IS_INACTIVE_MESSAGE, id);
+            String errorMessage = MessageFormat.format(MAPPING_IS_INACTIVE_MESSAGE, id);
             log.warn(errorMessage);
             throw new DartsApiException(
                 EVENT_HANDLER_MAPPING_INACTIVE,
@@ -159,7 +159,7 @@ public class EventMappingServiceImpl implements EventMappingService {
 
         boolean eventsExistForEventType = eventRepository.doesEventHandlerHaveEvents(id);
         if (eventsExistForEventType) {
-            String errorMessage = MessageFormat.format(HANDLER_IN_USE_MESSAGE, id);
+            String errorMessage = MessageFormat.format(MAPPING_IN_USE_MESSAGE, id);
             log.warn(errorMessage);
             throw new DartsApiException(
                 EVENT_HANDLER_MAPPING_IN_USE,
