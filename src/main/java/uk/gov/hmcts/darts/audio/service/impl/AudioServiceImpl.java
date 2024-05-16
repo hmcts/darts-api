@@ -77,7 +77,10 @@ public class AudioServiceImpl implements AudioService {
             Path encodedAudioPath = encodedAudioFileInfo.getPath();
 
             mediaBinaryData = fileOperationService.convertFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
-        } catch (ExecutionException | InterruptedException | IOException exception) {
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+        } catch (ExecutionException | IOException exception) {
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
 
