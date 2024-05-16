@@ -501,7 +501,7 @@ public class TranscriptionStub {
         transcriptionWorkflowRepository.saveAndFlush(requestedTranscriptionWorkflowEntity);
 
         if (nonNull(comment)) {
-            final var transcriptionComment = createTranscriptionComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
+            final var transcriptionComment = createTranscriptionWorkflowComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
             transcriptionCommentRepository.save(transcriptionComment);
 
             requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
@@ -520,8 +520,8 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    public TranscriptionCommentEntity createTranscriptionComment(TranscriptionWorkflowEntity workflowEntity, String comment,
-                                                                 UserAccountEntity userAccountEntity) {
+    public TranscriptionCommentEntity createTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity, String comment,
+                                                                         UserAccountEntity userAccountEntity) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setTranscription(workflowEntity.getTranscription());
         transcriptionCommentEntity.setTranscriptionWorkflow(workflowEntity);
@@ -533,8 +533,22 @@ public class TranscriptionStub {
         return transcriptionCommentEntity;
     }
 
-    public TranscriptionCommentEntity createAndSaveTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
-        var transcriptionComment = createTranscriptionComment(workflowEntity, comment, userAccount);
+    public TranscriptionCommentEntity createAndSaveTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity,
+                                                                                String comment, UserAccountEntity userAccount) {
+        var transcriptionComment = createTranscriptionWorkflowComment(workflowEntity, comment, userAccount);
+        return transcriptionCommentRepository.save(transcriptionComment);
+    }
+
+    public TranscriptionCommentEntity createAndSaveTranscriptionCommentNotAssociatedToWorkflow(TranscriptionEntity transcription,
+                                                                                               OffsetDateTime commentTimestamp,
+                                                                                               String comment) {
+        TranscriptionCommentEntity transcriptionComment = new TranscriptionCommentEntity();
+        transcriptionComment.setTranscription(transcription);
+        transcriptionComment.setComment(comment);
+        transcriptionComment.setCommentTimestamp(commentTimestamp);
+        transcriptionComment.setAuthorUserId(transcription.getCreatedBy().getId());
+        transcriptionComment.setLastModifiedBy(transcription.getCreatedBy());
+        transcriptionComment.setCreatedBy(transcription.getCreatedBy());
         return transcriptionCommentRepository.save(transcriptionComment);
     }
 

@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionWorkflowsComment;
 import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,10 +76,22 @@ public class TranscriptionResponseMapper {
     }
 
     public List<GetTranscriptionWorkflowsResponse> mapToTranscriptionWorkflowsResponse(
-        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities) {
-        return emptyIfNull(transcriptionWorkflowEntities).stream()
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities,
+        List<TranscriptionCommentEntity> migratedTranscriptionComments
+    ) {
+
+        List<GetTranscriptionWorkflowsResponse> result = new ArrayList<>();
+
+        List<GetTranscriptionWorkflowsResponse> responseFromTranscriptionWorkflows = transcriptionWorkflowEntities.stream()
             .map(this::mapToTranscriptionWorkflows)
-            .collect(toList());
+            .toList();
+        result.addAll(responseFromTranscriptionWorkflows);
+
+        var responseFromMigratedComments = migratedTranscriptionComments.stream().map(this::mapMigratedCommentToTranscriptionWorkflows).toList();
+        result.addAll(responseFromMigratedComments);
+
+        result.sort(byTranscriptionWorkflowTs().reversed());
+        return result;
     }
 
     private GetTranscriptionWorkflowsResponse mapToTranscriptionWorkflows(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
@@ -88,6 +101,16 @@ public class TranscriptionResponseMapper {
         transcriptionWorkflowsResponse.setStatusId(transcriptionWorkflowEntity.getTranscriptionStatus().getId());
         transcriptionWorkflowsResponse.setWorkflowTs(transcriptionWorkflowEntity.getWorkflowTimestamp());
         transcriptionWorkflowsResponse.setComments(mapToTranscriptionComments(transcriptionWorkflowEntity.getTranscriptionComments()));
+
+        return transcriptionWorkflowsResponse;
+    }
+
+    private GetTranscriptionWorkflowsResponse mapMigratedCommentToTranscriptionWorkflows(TranscriptionCommentEntity transcriptionComment) {
+
+        GetTranscriptionWorkflowsResponse transcriptionWorkflowsResponse = new GetTranscriptionWorkflowsResponse();
+        transcriptionWorkflowsResponse.setWorkflowActor(transcriptionComment.getAuthorUserId());
+        transcriptionWorkflowsResponse.setWorkflowTs(transcriptionComment.getCommentTimestamp());
+        transcriptionWorkflowsResponse.setComments(mapToTranscriptionComments(List.of(transcriptionComment)));
 
         return transcriptionWorkflowsResponse;
     }
@@ -103,6 +126,10 @@ public class TranscriptionResponseMapper {
             transcriptionWorkflowsComments.add(transcriptionWorkflowsComment);
         }
         return transcriptionWorkflowsComments;
+    }
+
+    private Comparator<GetTranscriptionWorkflowsResponse> byTranscriptionWorkflowTs() {
+        return Comparator.comparing(GetTranscriptionWorkflowsResponse::getWorkflowTs);
     }
 
     public GetTranscriptionByIdResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {
