@@ -56,9 +56,8 @@ class DailyListUpdater {
     private final ObjectMapper objectMapper;
     private final SystemUserHelper systemUserHelper;
     private final CurrentTimeHelper currentTimeHelper;
-    private CitizenNameMapper citizenNameMapper;
-
-    private CitizenNameComparator citizenNameComparator;
+    private final CitizenNameMapper citizenNameMapper;
+    private final CitizenNameComparator citizenNameComparator;
 
     @SuppressWarnings({"checkstyle:VariableDeclarationUsageDistance", "PMD.CognitiveComplexity"})
     @Transactional

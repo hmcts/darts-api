@@ -11,7 +11,7 @@ import java.util.Comparator;
 @RequiredArgsConstructor
 public class CitizenNameComparator implements Comparator<CitizenName> {
 
-    private CitizenNameMapper mapper;
+    private final CitizenNameMapper mapper;
 
     public int compare(CitizenName o1, CitizenName o2) {
 
