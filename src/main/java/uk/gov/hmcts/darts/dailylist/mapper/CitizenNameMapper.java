@@ -12,16 +12,21 @@ public class CitizenNameMapper {
 
     private static final String NAME_DELIMITER = " ";
 
+    private static final int FORENAME_INDEX = 0;
+
+    private static final int SURNAME_INDEX = 1;
+
     public CitizenName getCitizenName(String name) {
         String[] citizenName = name.split(NAME_DELIMITER);
         CitizenName retCitizenName = new CitizenName();
 
-        if (citizenName.length > 0) {
-            retCitizenName.setCitizenNameForename(citizenName[0]);
-            retCitizenName.setCitizenNameSurname(citizenName[1]);
+        if (citizenName.length == 2) {
+            retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
+            retCitizenName.setCitizenNameSurname(citizenName[SURNAME_INDEX]);
+        } else if (citizenName.length == 1) {
+            retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
         }
 
-        retCitizenName.setCitizenNameForename(citizenName[0]);
         return retCitizenName;
     }
 
