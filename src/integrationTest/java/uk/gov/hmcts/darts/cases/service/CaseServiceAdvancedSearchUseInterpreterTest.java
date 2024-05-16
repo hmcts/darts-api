@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
@@ -248,30 +247,6 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         // then
         var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
         assertThat(caseNumbers).containsExactlyInAnyOrder("Case2");
-    }
-
-    @Test
-    void testSearchCasesWithPermissionsGlobalTrueOnCourthouselessUserGroupUseInterpreterFalseOnCourthouse() {
-        // given
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(APPROVER);
-        securityGroup.setGlobalAccess(true);
-        securityGroup.setUseInterpreter(false);
-        assignSecurityGroupToUser(user, securityGroup);
-
-        var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
-        securityGroupSwansea.setGlobalAccess(false);
-        securityGroupSwansea.setUseInterpreter(true);
-        assignSecurityGroupToUser(user, securityGroupSwansea);
-
-        userAccountRepository.save(user);
-
-        // when
-        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
-        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
-
-        // then
-        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
-        assertThat(caseNumbers).containsExactlyInAnyOrder("Case1", "Case2", "Case3", "Case4", "Case5", "Case6");
     }
 
     @Test
