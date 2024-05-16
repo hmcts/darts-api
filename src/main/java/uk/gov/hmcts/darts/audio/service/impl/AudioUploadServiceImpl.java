@@ -42,7 +42,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -217,11 +216,11 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
         // now lets get the lowest level media objects so that they can act as a basis for the antecedent
         Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
-        mediaEntities.stream().forEach(entry -> {
-            tree.addNode(new MediaEntityTreeNodeImpl(entry));
-        });
+        mediaEntities.stream().forEach(entry ->
+            tree.addNode(new MediaEntityTreeNodeImpl(entry))
+        );
 
-        return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).collect(Collectors.toList());
+        return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).toList();
     }
 
     @Override
@@ -270,7 +269,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         var associatedHearings = courtLogs.stream()
             .flatMap(h -> h.getHearingEntities().stream())
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
 
         for (var hearing : associatedHearings) {
             if (!hearing.getMediaList().contains(savedMedia)) {
