@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.event.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
@@ -29,7 +30,7 @@ public class EventHandlerMapper {
     }
 
     private String getHandlerMappingOrNullHandler(String handler) {
-        return handler != null ? handler : DartsEventNullHandler.class.getSimpleName();
+        return StringUtils.isNotBlank(handler) ? handler : DartsEventNullHandler.class.getSimpleName();
     }
 
     public EventMapping mapToEventMappingResponse(EventHandlerEntity eventHandlerEntity) {
