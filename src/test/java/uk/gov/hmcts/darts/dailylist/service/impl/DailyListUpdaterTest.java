@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.common.util.TestUtils;
+import uk.gov.hmcts.darts.dailylist.mapper.CitizenNameMapper;
+import uk.gov.hmcts.darts.dailylist.util.CitizenNameComparator;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -51,6 +53,10 @@ class DailyListUpdaterTest {
     private SystemUserHelper systemUserHelper;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+    @Mock
+    private CitizenNameMapper citizenNameMapper;
+    @Mock
+    private CitizenNameComparator citizenNameComparator;
 
     private DailyListUpdater dailyListUpdater;
 
@@ -63,7 +69,8 @@ class DailyListUpdaterTest {
     void setUp() {
         ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
         dailyListUpdater = new DailyListUpdater(retrieveCoreObjectService, courthouseRepository,
-                                                hearingRepository, objectMapper, systemUserHelper, currentTimeHelper);
+                                                hearingRepository, objectMapper, systemUserHelper,
+                                                currentTimeHelper, citizenNameMapper, citizenNameComparator);
     }
 
     @Test
