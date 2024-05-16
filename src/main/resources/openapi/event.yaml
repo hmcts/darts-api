@@ -409,7 +409,7 @@ paths:
               examples:
                 inactive:
                   summary: Inactive
-                  description: The event handler is marked as inactive
+                  description: The event handler mapping is marked as inactive
                   value:
                     type: "EVENT_105"
                     title: "The mapping is inactive, so cannot be deleted"
