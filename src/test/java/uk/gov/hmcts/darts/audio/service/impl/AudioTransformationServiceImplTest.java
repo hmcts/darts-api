@@ -256,8 +256,8 @@ class AudioTransformationServiceImplTest {
 
     @Test
     void filterMediaByMediaRequestDatesWithStartDateExactRequestAndEndDateExactRequest() {
-        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_21, TIME_12_40, TIME_13_00, TIME_13_01);
-        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_20, TIME_13_00);
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
             mediaEntities,
             mediaRequestEntity
