@@ -245,7 +245,7 @@ class EventMappingServiceImplTest {
         eventHandlerEntity.setCreatedDateTime(now);
 
         when(eventHandlerRepository.findById(anyInt())).thenReturn(Optional.of(eventHandlerEntity));
-        when(eventRepository.eventsExistForEventTypeId(anyInt())).thenReturn(false);
+        when(eventRepository.doesEventHandlerHaveEvents(anyInt())).thenReturn(false);
 
         eventMappingServiceImpl.deleteEventMapping(1);
 

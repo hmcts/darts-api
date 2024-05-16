@@ -38,7 +38,6 @@ public class EventMappingServiceImpl implements EventMappingService {
 
     private final EventRepository eventRepository;
     private final EventHandlerRepository eventHandlerRepository;
-    private final EventRepository eventRepository;
     private final EventHandlerMapper eventHandlerMapper;
     private final EventHandlerEnumerator eventHandlers;
 
@@ -158,7 +157,7 @@ public class EventMappingServiceImpl implements EventMappingService {
             );
         }
 
-        boolean eventsExistForEventType = eventRepository.eventsExistForEventTypeId(id);
+        boolean eventsExistForEventType = eventRepository.doesEventHandlerHaveEvents(id);
         if (eventsExistForEventType) {
             String errorMessage = MessageFormat.format(HANDLER_IN_USE_MESSAGE, id);
             log.warn(errorMessage);
