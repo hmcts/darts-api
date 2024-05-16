@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
+import uk.gov.hmcts.darts.audio.service.AudioUploadService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audio.validation.AddAudioFileValidator;
 import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 public class AudioController implements AudioApi {
 
     private final AudioService audioService;
+    private final AudioUploadService audioUploadService;
     private final AudioResponseMapper audioResponseMapper;
     private final AudioPreviewService audioPreviewService;
     private final AddAudioMetaDataValidator addAudioMetaDataValidator;
@@ -74,7 +76,7 @@ public class AudioController implements AudioApi {
         addAudioMetaDataValidator.validate(metadata);
         multipartFileValidator.validate(file);
 
-        audioService.addAudio(file, metadata);
+        audioUploadService.addAudio(file, metadata);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
