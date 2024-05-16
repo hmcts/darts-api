@@ -32,7 +32,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
     private GivenBuilder given;
 
     @Test
-    void DeleteOk() throws Exception {
+    void deleteOk() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
         var entity = dartsDatabase.createEventHandlerData();
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
