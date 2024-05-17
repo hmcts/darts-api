@@ -2,10 +2,10 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 
@@ -20,16 +20,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = LastAccessedDeletionDayCalculator.class)
-@ActiveProfiles({"dev", "h2db"})
+@ExtendWith(MockitoExtension.class)
 class LastAccessedDeletionDayCalculatorTest {
-    @MockBean
+    @Mock
     private BankHolidaysService bankHolidaysService;
 
-    @MockBean
+    @Mock
     private CurrentTimeHelper currentTimeHelper;
 
-    @Autowired
+    @InjectMocks
     private LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
 
     @BeforeEach
