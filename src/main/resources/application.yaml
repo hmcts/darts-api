@@ -86,7 +86,7 @@ spring:
     properties:
       hibernate:
         default_schema: ${spring.datasource.schema}
-#        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           lob:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types

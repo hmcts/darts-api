@@ -1,16 +1,20 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:darts;TIME ZONE=UTC;DATABASE_TO_UPPER=false;
+    url: jdbc:h2:mem:darts;MODE=postgreSQL;TIME ZONE=UTC;DATABASE_TO_UPPER=false;
     username: sa
     password: password
     driverClassName: org.h2.Driver
   h2:
     console.enabled: true
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
+        jdbc:
+          time_zone=UTC:
+        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
     show-sql: false
   flyway:
