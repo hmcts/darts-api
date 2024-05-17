@@ -69,7 +69,8 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     private String getArmBearerToken() {
-        log.debug("Get ARM Bearer Token with Username: {}, Password: {}", armApiConfigurationProperties.getArmUsername(), armApiConfigurationProperties.getArmPassword());
+        log.debug("Get ARM Bearer Token with Username: {}, Password: {}", armApiConfigurationProperties.getArmUsername(),
+                  armApiConfigurationProperties.getArmPassword());
         ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
             armApiConfigurationProperties.getArmUsername(),
             armApiConfigurationProperties.getArmPassword(),
