@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:darts;MODE=postgreSQL;TIME ZONE=UTC;DATABASE_TO_UPPER=false;
+    url: jdbc:h2:file:./data/darts;MODE=postgreSQL;TIME ZONE=UTC;DATABASE_TO_UPPER=false;
     username: sa
     password: password
     driverClassName: org.h2.Driver

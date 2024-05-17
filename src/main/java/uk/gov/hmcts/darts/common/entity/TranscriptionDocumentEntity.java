@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import uk.gov.hmcts.darts.common.entity.base.ModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -53,7 +54,7 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity {
     @JoinColumn(name = "uploaded_by", nullable = false)
     private UserAccountEntity uploadedBy;
 
-    @CreationTimestamp
+    @CreationTimestamp(source = SourceType.DB)
     @Column(name = "uploaded_ts", nullable = false)
     private OffsetDateTime uploadedDateTime;
 

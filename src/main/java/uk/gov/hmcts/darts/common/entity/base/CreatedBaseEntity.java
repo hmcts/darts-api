@@ -8,6 +8,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
@@ -17,7 +18,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class CreatedBaseEntity {
-    @CreationTimestamp
+    @CreationTimestamp(source = SourceType.DB)
     @Column(name = "created_ts")
     private OffsetDateTime createdDateTime;
 
