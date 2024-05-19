@@ -52,8 +52,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final CaseDocumentRepository caseDocumentRepository;
 
     @Override
-    public ArmResponseFilesProcessor createArmResponseFilesProcessor(boolean batchMode) {
-        if (batchMode) {
+    public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
+        if (batchSize > 0) {
             return new ArmBatchProcessResponseFilesImpl(
                 externalObjectDirectoryRepository,
                 armDataManagementApi,
@@ -66,7 +66,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
                 mediaRepository,
                 transcriptionDocumentRepository,
                 annotationDocumentRepository,
-                caseDocumentRepository
+                caseDocumentRepository,
+                batchSize
             );
         }
 
@@ -78,8 +79,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     }
 
     @Override
-    public UnstructuredToArmProcessor createUnstructuredToArmProcessor(boolean batchMode) {
-        if (batchMode) {
+    public UnstructuredToArmProcessor createUnstructuredToArmProcessor(int batchSize) {
+        if (batchSize > 0) {
             return new UnstructuredToArmBatchProcessorImpl(
                 externalObjectDirectoryRepository,
                 objectRecordStatusRepository,
@@ -91,7 +92,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
                 fileOperationService,
                 archiveRecordService,
                 eodService,
-                archiveRecordFileGenerator
+                archiveRecordFileGenerator,
+                batchSize
             );
         }
 

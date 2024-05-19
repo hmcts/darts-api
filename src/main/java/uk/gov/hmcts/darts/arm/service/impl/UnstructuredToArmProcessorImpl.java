@@ -55,7 +55,7 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                                           FileOperationService fileOperationService,
                                           ArchiveRecordService archiveRecordService) {
         super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi,
-              armDataManagementApi, fileOperationService);
+              armDataManagementApi, fileOperationService, 0);
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.archiveRecordService = archiveRecordService;
     }

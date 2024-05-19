@@ -5,7 +5,7 @@ import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 
 public interface AutomatedTaskProcessorFactory {
 
-    ArmResponseFilesProcessor createArmResponseFilesProcessor(boolean batchMode);
+    ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize);
 
-    UnstructuredToArmProcessor createUnstructuredToArmProcessor(boolean batchMode);
+    UnstructuredToArmProcessor createUnstructuredToArmProcessor(int batchSize);
 }

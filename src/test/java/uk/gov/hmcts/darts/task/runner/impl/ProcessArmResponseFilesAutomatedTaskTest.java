@@ -34,6 +34,7 @@ class ProcessArmResponseFilesAutomatedTaskTest {
         AutomatedTaskEntity automatedTask = new AutomatedTaskEntity();
         automatedTask.setId(1);
         automatedTask.setTaskName("ProcessArmResponseFiles");
+        automatedTask.setBatchSize(10);
         // given
         ProcessArmResponseFilesAutomatedTask processArmResponseFilesAutomatedTask =
             new ProcessArmResponseFilesAutomatedTask(
@@ -45,7 +46,7 @@ class ProcessArmResponseFilesAutomatedTaskTest {
             );
 
         when(automatedTaskRepository.findByTaskName("ProcessArmResponseFiles")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createArmResponseFilesProcessor(false)).thenReturn(armResponseFilesProcessor);
+        when(processorFactory.createArmResponseFilesProcessor(10)).thenReturn(armResponseFilesProcessor);
 
         // when
         processArmResponseFilesAutomatedTask.runTask();

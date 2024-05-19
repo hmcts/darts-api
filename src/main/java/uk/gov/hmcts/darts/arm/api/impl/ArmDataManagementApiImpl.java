@@ -39,17 +39,17 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public List<String> listResponseBlobsUsingBatch(String prefix) {
+    public List<String> listResponseBlobsUsingBatch(String prefix, int batchSize) {
         return armService.listResponseBlobsUsingBatch(armDataManagementConfiguration.getContainerName(),
                                                       prefix,
-                                                      armDataManagementConfiguration.getBatchSize());
+                                                      batchSize);
     }
 
     @Override
-    public ContinuationTokenBlobs listResponseBlobsUsingMarker(String prefix, String continuationToken) {
+    public ContinuationTokenBlobs listResponseBlobsUsingMarker(String prefix, int batchSize, String continuationToken) {
         return armService.listResponseBlobsWithMarker(armDataManagementConfiguration.getContainerName(),
                                                       prefix,
-                                                      armDataManagementConfiguration.getBatchSize(),
+                                                      batchSize,
                                                       continuationToken);
     }
 

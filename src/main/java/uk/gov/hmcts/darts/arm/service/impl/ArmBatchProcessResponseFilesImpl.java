@@ -4,13 +4,12 @@ import com.azure.core.util.BinaryData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ResponseFilenames;
@@ -67,8 +66,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@Service
-@RequiredArgsConstructor
+@Component
 @Slf4j
 @SuppressWarnings({"PMD.GodClass", "PMD.CyclomaticComplexity", "PMD.CouplingBetweenObjects"})
 public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcessor {
@@ -86,7 +84,31 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final CaseDocumentRepository caseDocumentRepository;
+    private Integer batchSize;
+
     private UserAccountEntity userAccount;
+
+    public ArmBatchProcessResponseFilesImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository, ArmDataManagementApi armDataManagementApi,
+                                            FileOperationService fileOperationService, ArmDataManagementConfiguration armDataManagementConfiguration,
+                                            ObjectMapper objectMapper, UserIdentity userIdentity, CurrentTimeHelper currentTimeHelper,
+                                            ExternalObjectDirectoryService externalObjectDirectoryService, MediaRepository mediaRepository,
+                                            TranscriptionDocumentRepository transcriptionDocumentRepository,
+                                            AnnotationDocumentRepository annotationDocumentRepository, CaseDocumentRepository caseDocumentRepository,
+                                            Integer batchSize) {
+        this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
+        this.armDataManagementApi = armDataManagementApi;
+        this.fileOperationService = fileOperationService;
+        this.armDataManagementConfiguration = armDataManagementConfiguration;
+        this.objectMapper = objectMapper;
+        this.userIdentity = userIdentity;
+        this.currentTimeHelper = currentTimeHelper;
+        this.externalObjectDirectoryService = externalObjectDirectoryService;
+        this.mediaRepository = mediaRepository;
+        this.transcriptionDocumentRepository = transcriptionDocumentRepository;
+        this.annotationDocumentRepository = annotationDocumentRepository;
+        this.caseDocumentRepository = caseDocumentRepository;
+        this.batchSize = batchSize;
+    }
 
     @Override
     public void processResponseFiles() {
@@ -97,7 +119,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
             String continuationToken = getContinuationToken();
-            continuationTokenBlobs = armDataManagementApi.listResponseBlobsUsingMarker(prefix, continuationToken);
+            continuationTokenBlobs = armDataManagementApi.listResponseBlobsUsingMarker(prefix, batchSize, continuationToken);
         } catch (Exception e) {
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }

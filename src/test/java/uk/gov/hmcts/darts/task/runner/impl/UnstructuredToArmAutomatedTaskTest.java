@@ -51,7 +51,7 @@ class UnstructuredToArmAutomatedTaskTest {
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createUnstructuredToArmProcessor(false)).thenReturn(unstructuredToArmProcessor);
+        when(processorFactory.createUnstructuredToArmProcessor(0)).thenReturn(unstructuredToArmProcessor);
 
         unstructuredToArmAutomatedTask.runTask();
 
@@ -64,7 +64,7 @@ class UnstructuredToArmAutomatedTaskTest {
         AutomatedTaskEntity automatedTask = new AutomatedTaskEntity();
         automatedTask.setId(1);
         automatedTask.setTaskName("UnstructuredToArmDataStore");
-        automatedTask.setBatchSize(1);
+        automatedTask.setBatchSize(10);
 
         UnstructuredToArmAutomatedTask unstructuredToArmAutomatedTask =
             new UnstructuredToArmAutomatedTask(
@@ -76,7 +76,7 @@ class UnstructuredToArmAutomatedTaskTest {
             );
 
         when(automatedTaskRepository.findByTaskName("UnstructuredToArmDataStore")).thenReturn(Optional.of(automatedTask));
-        when(processorFactory.createUnstructuredToArmProcessor(true)).thenReturn(unstructuredToArmBatchProcessor);
+        when(processorFactory.createUnstructuredToArmProcessor(10)).thenReturn(unstructuredToArmBatchProcessor);
 
         unstructuredToArmAutomatedTask.runTask();
 
