@@ -28,6 +28,10 @@ update darts.automated_task
 set cron_expression = '0 0 1 * * *';
 
 update darts.automated_task
-set cron_expression = '0 */5 * * * *'
-where task_name in ('UnstructuredToArmDataStore','InboundToUnstructuredDataStore');
+set cron_expression = '10/60 * * * * *'
+where task_name in ('InboundToUnstructuredDataStore');
+
+update darts.automated_task
+set cron_expression = '30/60 * * * * *'
+where task_name in ('UnstructuredToArmDataStore');
 
