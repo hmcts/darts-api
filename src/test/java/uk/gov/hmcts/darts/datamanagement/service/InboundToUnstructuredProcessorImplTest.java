@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
@@ -32,11 +33,14 @@ class InboundToUnstructuredProcessorImplTest {
     @Mock
     InboundToUnstructuredProcessorSingleElement singleElementProcessor;
 
+    @Mock
+    AuditApi auditApi;
+
     @BeforeEach
     void setUp() {
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
                                                                                 objectRecordStatusRepository, externalLocationTypeRepository,
-                                                                                singleElementProcessor);
+                                                                                singleElementProcessor, auditApi);
     }
 
     @Test
