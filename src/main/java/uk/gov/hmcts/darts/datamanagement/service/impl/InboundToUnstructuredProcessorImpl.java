@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -37,6 +40,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final InboundToUnstructuredProcessorSingleElement singleElementProcessor;
+    private final AuditApi auditApi;
 
     @Value("${darts.data-management.inbound-to-unstructured-limit: 100}")
     private Integer limit;
@@ -59,13 +63,18 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private void processAllStoredInboundExternalObjectsOneCall() {
+        var system = new UserAccountEntity();
+        system.setId(0);
         try {
             log.info("BEFORE SLEEP");
+            auditApi.recordAudit(AuditActivity.MOVE_COURTROOM, system, null);
             Thread.sleep(30000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         log.info("AFTER SLEEP");
+        auditApi.recordAudit(AuditActivity.APPLY_RETENTION, system, null);
+
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodIdsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                             getStatus(STORED), getType(UNSTRUCTURED), 3, limit);
         int count = 1;
