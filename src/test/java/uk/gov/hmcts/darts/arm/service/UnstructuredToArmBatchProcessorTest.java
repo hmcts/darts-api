@@ -75,9 +75,9 @@ class UnstructuredToArmBatchProcessorTest {
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
     @Mock(answer = RETURNS_DEEP_STUBS)
-    Path manifestFilePath;
+    private Path manifestFilePath;
     @Mock
-    File manifestFile;
+    private File manifestFile;
 
     private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
 
@@ -88,6 +88,8 @@ class UnstructuredToArmBatchProcessorTest {
 
     @BeforeEach
     void setUp() throws IOException {
+
+        int batchSize = 5;
 
         unstructuredToArmProcessor = new UnstructuredToArmBatchProcessorImpl(
             externalObjectDirectoryRepository,
@@ -100,7 +102,8 @@ class UnstructuredToArmBatchProcessorTest {
             fileOperationService,
             archiveRecordService,
             eodService,
-            archiveRecordFileGenerator
+            archiveRecordFileGenerator,
+            batchSize
         );
 
         lenient().when(fileOperationService.createFile(any(), any(), anyBoolean())).thenReturn(manifestFilePath);
@@ -112,7 +115,6 @@ class UnstructuredToArmBatchProcessorTest {
     void testDartsArmClientConfigInBatchQuery() {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         doReturn(armLocation()).when(eod1).getExternalLocationType();
@@ -142,7 +144,6 @@ class UnstructuredToArmBatchProcessorTest {
     void testDetsArmClientConfigInBatchQuery() {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("dets");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
         doReturn(armLocation()).when(eod1).getExternalLocationType();
@@ -172,7 +173,6 @@ class UnstructuredToArmBatchProcessorTest {
     void testUnknownArmClientConfigInBatchQuery() {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("unknown");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
 
         //then
         assertThrows(DartsException.class, () -> unstructuredToArmProcessor.processUnstructuredToArm());
@@ -182,7 +182,6 @@ class UnstructuredToArmBatchProcessorTest {
     void testPaginatedBatchQuery() throws IOException {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(eodService.findFailedStillRetriableArmEods(any())).thenReturn(List.of(eod1, eod2));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(any(), any(), any(), any())).thenReturn(emptyList());
 
@@ -199,13 +198,13 @@ class UnstructuredToArmBatchProcessorTest {
             armLocation(),
             Pageable.ofSize(3)
         );
+
     }
 
     @Test
     void testManifestFileName() throws IOException {
         //given
         when(armDataManagementConfiguration.getArmClient()).thenReturn("darts");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn("/temp_workspace");

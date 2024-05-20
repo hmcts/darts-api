@@ -31,9 +31,8 @@ public class ProcessArmResponseFilesAutomatedTask extends AbstractLockableAutoma
 
     @Override
     protected void runTask() {
-        boolean inBatchMode = isAutomatedTaskInBatchMode(taskName);
-
-        ArmResponseFilesProcessor armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(inBatchMode);
+        Integer batchSize = getAutomatedTaskBatchSize(taskName);
+        ArmResponseFilesProcessor armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(batchSize);
         armResponseFilesProcessor.processResponseFiles();
     }
 
