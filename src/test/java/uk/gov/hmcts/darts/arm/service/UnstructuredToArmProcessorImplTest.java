@@ -102,9 +102,10 @@ class UnstructuredToArmProcessorImplTest {
     @TempDir
     private File tempDirectory;
 
+
     @BeforeEach
     void setUp() {
-
+        Integer batchSize = null;
         unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
@@ -114,7 +115,8 @@ class UnstructuredToArmProcessorImplTest {
             userIdentity,
             armDataManagementConfiguration,
             fileOperationService,
-            archiveRecordService
+            archiveRecordService,
+            batchSize
         );
 
     }

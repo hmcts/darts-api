@@ -106,7 +106,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
             userIdentity,
             armDataManagementConfiguration,
             fileOperationService,
-            archiveRecordService
+            archiveRecordService,
+            batchSize
         );
     }
 }

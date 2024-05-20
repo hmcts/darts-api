@@ -83,7 +83,7 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final CaseDocumentRepository caseDocumentRepository;
-    private Integer batchSize;
+    private final Integer batchSize;
 
     private UserAccountEntity userAccount;
 
