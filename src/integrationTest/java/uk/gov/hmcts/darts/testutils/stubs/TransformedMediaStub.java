@@ -17,22 +17,31 @@ public class TransformedMediaStub {
     private final UserAccountStub userAccountStub;
 
     public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequestEntity) {
-        return createTransformedMediaEntity(mediaRequestEntity, null, null, null);
+        return createTransformedMediaEntity(mediaRequestEntity, null, null, null, null, null);
     }
 
     public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequestEntity, String filename, OffsetDateTime expiry,
                                                                OffsetDateTime lastAccessed) {
+        return createTransformedMediaEntity(mediaRequestEntity, filename, expiry, lastAccessed, null, null);
+    }
+
+    public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequestEntity, String filename, OffsetDateTime expiry,
+                                                               OffsetDateTime lastAccessed, AudioRequestOutputFormat fileFormat, Integer fileSizeBytes) {
         TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
         transformedMediaEntity.setMediaRequest(mediaRequestEntity);
         transformedMediaEntity.setStartTime(mediaRequestEntity.getStartTime());
         transformedMediaEntity.setEndTime(mediaRequestEntity.getEndTime());
-        transformedMediaEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        transformedMediaEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        transformedMediaEntity.setLastModifiedBy(mediaRequestEntity.getLastModifiedBy());
+        transformedMediaEntity.setCreatedBy(mediaRequestEntity.getCreatedBy());
         transformedMediaEntity.setCreatedDateTime(mediaRequestEntity.getCreatedDateTime());
         transformedMediaEntity.setOutputFilename(filename);
+        transformedMediaEntity.setOutputFilesize(fileSizeBytes);
+
+        transformedMediaEntity.setOutputFormat(fileFormat);
         if (filename != null) {
             transformedMediaEntity.setOutputFormat(AudioRequestOutputFormat.ZIP);
         }
+
         transformedMediaEntity.setExpiryTime(expiry);
         transformedMediaEntity.setLastAccessed(lastAccessed);
         return transformedMediaRepository.saveAndFlush(transformedMediaEntity);

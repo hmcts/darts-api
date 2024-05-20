@@ -175,8 +175,128 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
+  /admin/transformed-medias/search:
+    post:
+      tags:
+        - Audio
+      summary: Search for transformed media
+      operationId: searchForTransformedMedia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchTransformedMediaRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchTransformedMediaResponse'
 components:
   schemas:
+    SearchTransformedMediaRequest:
+      type: object
+      properties:
+        media_request_id:
+          type: integer
+          description: 'The media request id'
+        case_number:
+          type: string
+          description: 'The case number'
+        courthouse_display_name:
+          type: String
+          description: 'The court house display name'
+        total_channels:
+          type: integer
+          description: 'Number of channels making up the complete audio that this recording is part of'
+        hearing_date:
+          type: date
+          description: 'The hearing date'
+        owner:
+          type: string
+          description: 'The owner string'
+        courthouse:
+          type: string
+          description: 'Courthouse the audio was recorded in'
+        requested_by:
+          type: string
+          description: 'The media requestor'
+        requested_at_from:
+          type: date
+          description: 'The size of the file in bytes'
+        requested_at_to:
+          type: date
+          description: 'Checksum to ensure integrity of file'
+
+    SearchTransformedMediaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The transformed media id'
+        file_name:
+          type: string
+          description: 'The file name'
+        file_format:
+          type: string
+          description: 'The file format'
+        file_size_bytes:
+          type: integer
+          description: 'The file size in bytes'
+        media_request:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: 'The media request id'
+            requested_at:
+              type: string
+              format: date-time
+              description: 'Requested media at'
+            owner_user_id:
+              type: integer
+              description: 'Requested owner'
+            requested_by_user_id:
+              type: integer
+              description: 'Requested by user id'
+        case:
+          type: object
+          description: 'The case related details'
+          properties:
+            id:
+              type: integer
+              description: 'The case  id'
+            case_number:
+              type: string
+              description: 'The case number'
+        courthouse:
+          type: object
+          description: 'The courthouse related details'
+          properties:
+            id:
+              type: integer
+              description: 'The court house id'
+            display_name:
+              type: string
+              description: 'The case display name'
+        hearing:
+          type: object
+          description: 'The hearing details'
+          properties:
+            id:
+              type: integer
+              description: 'The hearing id'
+            hearing_date:
+              type: date
+              description: 'The hearing date'
+        last_accessed_at:
+          type: string
+          format: date-time
+          description: 'Last accessed at'
+
     AudioMetadata:
       type: object
       properties:

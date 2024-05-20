@@ -15,6 +15,8 @@ import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
+import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaRequest;
+import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
@@ -29,6 +31,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -95,5 +98,13 @@ public class AudioController implements AudioApi {
             return StreamingResponseEntityUtil.createResponseEntity(audioPreview.getAudio(), httpRangeList);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @Override
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    public ResponseEntity<List<SearchTransformedMediaResponse>> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest) {
+        List<SearchTransformedMediaResponse> foundTransformedMediaResponse = audioService.searchForTransformedMedia(getTransformedMediaRequest);
+
+        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }
 }

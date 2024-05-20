@@ -57,6 +57,17 @@ public class UserAccountStub {
         }
     }
 
+    public UserAccountEntity createSystemUserAccount(String username) {
+        var newUser = new UserAccountEntity();
+        newUser.setUserName(username);
+        newUser.setEmailAddress(username + "@example.com");
+        newUser.setActive(true);
+        newUser.setAccountGuid(UUID.randomUUID().toString());
+        newUser.setIsSystemUser(true);
+        newUser.setUserFullName(newUser.getUserName());
+        return userAccountRepository.saveAndFlush(newUser);
+    }
+
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
         List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
         if (userAccounts.isEmpty()) {

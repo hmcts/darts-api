@@ -4,6 +4,8 @@ import com.azure.core.util.BinaryData;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
+import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaRequest;
+import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.util.List;
@@ -24,4 +26,6 @@ public interface AudioService {
     void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId);
 
     void setIsAvailable(List<AudioMetadata> audioMetadata);
+
+    List<SearchTransformedMediaResponse> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest);
 }

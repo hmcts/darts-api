@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -58,4 +59,30 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         """)
     List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
 
+    @Query("""
+        SELECT tm
+            FROM TransformedMediaEntity tm
+            JOIN tm.mediaRequest media
+            JOIN media.hearing hearing
+            JOIN hearing.courtCase courtCase
+            JOIN hearing.courtroom courtroom
+            JOIN courtroom.courthouse courthouse
+        WHERE
+           (:mediaId IS NULL OR (:mediaId IS NOT NULL AND media.id=:mediaId)) AND
+           (:caseNumber IS NULL  OR (:caseNumber IS NOT NULL AND courtCase.caseNumber=:caseNumber)) AND
+           (:courtHouseDisplayName IS NULL OR (:courtHouseDisplayName IS NOT NULL AND courthouse.displayName like CONCAT('%', :courtHouseDisplayName, '%'))) AND
+           (:hearingDate IS NULL OR (:hearingDate IS NOT NULL AND hearing.hearingDate=:hearingDate )) AND
+           (:owner IS NULL OR (:owner IS NOT NULL AND media.currentOwner.userFullName like CONCAT('%', :owner, '%'))) AND
+           (:requestedBy IS NULL OR (:requestedBy IS NOT NULL AND tm.createdBy.userFullName like CONCAT('%', :requestedBy, '%'))) AND
+           (:requestedAtFrom IS NULL OR (:requestedAtFrom IS NOT NULL AND tm.createdDateTime >= :requestedAtFrom)) AND
+           (:requestedAtTo IS NULL OR (:requestedAtTo IS NOT NULL AND tm.createdDateTime <= :requestedAtTo))
+           """)
+    List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
+                                                      String caseNumber,
+                                                      String courtHouseDisplayName,
+                                                      LocalDate hearingDate,
+                                                      String owner,
+                                                      String requestedBy,
+                                                      OffsetDateTime requestedAtFrom,
+                                                      OffsetDateTime requestedAtTo);
 }

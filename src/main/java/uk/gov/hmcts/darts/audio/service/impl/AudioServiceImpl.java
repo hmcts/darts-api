@@ -10,10 +10,13 @@ import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.mapper.GetAudioRequestResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
+import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaRequest;
+import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -23,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -32,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
@@ -47,7 +52,10 @@ import java.nio.file.Path;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -85,6 +93,7 @@ public class AudioServiceImpl implements AudioService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
     private final LogApi logApi;
+    private final TransformedMediaRepository transformedMediaRepository;
 
     private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return AudioFileInfo.builder()
@@ -385,6 +394,19 @@ public class AudioServiceImpl implements AudioService {
         for (AudioMetadata audioMetadataItem : audioMetadataList) {
             audioMetadataItem.setIsAvailable(mediaIdsStoredInUnstructured.contains(audioMetadataItem.getId()));
         }
+    }
+
+    @Override
+    public List<SearchTransformedMediaResponse> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest) {
+        List<TransformedMediaEntity> mediaEntities = transformedMediaRepository.findTransformedMedia(getTransformedMediaRequest.getMediaRequestId(),
+                                                                                                     getTransformedMediaRequest.getCaseNumber(),
+                                                                                                     getTransformedMediaRequest.getCourthouseDisplayName(),
+                                                                                                     getTransformedMediaRequest.getHearingDate(),
+                                                                                                     getTransformedMediaRequest.getOwner(),
+                                                                                                     getTransformedMediaRequest.getRequestedBy(),
+                                                                                                     OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC),
+                                                                                                     OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtTo(), LocalTime.MIN, ZoneOffset.UTC));
+        return GetAudioRequestResponseMapper.mapSearchResults(mediaEntities);
     }
 
     private boolean isMediaArchived(AudioMetadata audioMetadataItem, List<AudioBeingProcessedFromArchiveQueryResult> archivedArmRecords) {
