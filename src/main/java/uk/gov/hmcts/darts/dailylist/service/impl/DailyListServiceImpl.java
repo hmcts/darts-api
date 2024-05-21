@@ -105,20 +105,6 @@ public class DailyListServiceImpl implements DailyListService {
     @Transactional
     @Override
     public void runHouseKeeping() {
-        var system = new UserAccountEntity();
-        system.setId(0);
-        try {
-            log.info("BEFORE SLEEP");
-            auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, system, null);
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
-        log.info("AFTER SLEEP");
-
-        auditApi.recordAudit(AuditActivity.AUDIO_PLAYBACK, system, null);
-
         if (housekeepingEnabled) {
             LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
             log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
