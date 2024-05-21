@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -250,15 +251,16 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
     }
 
     private void assertResponseEquality(SearchTransformedMediaResponse response, TransformedMediaEntity entity) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
         Assertions.assertEquals(response.getId(), entity.getId());
         Assertions.assertEquals(AudioRequestOutputFormat.ZIP.name(), entity.getOutputFormat().name());
         Assertions.assertEquals(response.getFileName(), entity.getOutputFilename());
         Assertions.assertEquals(response.getFileSizeBytes(), entity.getOutputFilesize());
-        Assertions.assertEquals(response.getLastAccessedAt(),
-                                entity.getLastAccessed().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime());
+        Assertions.assertEquals(dateTimeFormatter.format(response.getLastAccessedAt()),
+                                dateTimeFormatter.format(entity.getLastAccessed().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
         Assertions.assertEquals(response.getMediaRequest().getId(), entity.getMediaRequest().getId());
-        Assertions.assertEquals(response.getMediaRequest().getRequestedAt(),
-                                entity.getMediaRequest().getCreatedDateTime().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime());
+        Assertions.assertEquals(dateTimeFormatter.format(response.getMediaRequest().getRequestedAt()),
+                                dateTimeFormatter.format(entity.getMediaRequest().getCreatedDateTime().atZoneSameInstant(ZoneId.of("UTC")).toOffsetDateTime()));
         Assertions.assertEquals(response.getMediaRequest().getOwnerUserId(),
                                 entity.getMediaRequest().getCurrentOwner().getId());
         Assertions.assertEquals(response.getMediaRequest().getRequestedByUserId(), entity.getMediaRequest().getRequestor().getId());
