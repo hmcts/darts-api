@@ -112,6 +112,7 @@ public class DailyListServiceImpl implements DailyListService {
             auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, system, null);
             Thread.sleep(30000);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
         log.info("AFTER SLEEP");
