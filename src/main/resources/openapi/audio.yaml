@@ -209,18 +209,12 @@ components:
         courthouse_display_name:
           type: String
           description: 'The court house display name'
-        total_channels:
-          type: integer
-          description: 'Number of channels making up the complete audio that this recording is part of'
         hearing_date:
           type: date
           description: 'The hearing date'
         owner:
           type: string
           description: 'The owner string'
-        courthouse:
-          type: string
-          description: 'Courthouse the audio was recorded in'
         requested_by:
           type: string
           description: 'The media requestor'
