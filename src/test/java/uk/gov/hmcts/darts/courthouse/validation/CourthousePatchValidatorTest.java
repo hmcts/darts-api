@@ -118,7 +118,6 @@ class CourthousePatchValidatorTest {
         when(courthouseRepository.findById(1)).thenReturn(Optional.of(targetCourthouse));
         when(courthouseRepository.existsByCourthouseNameIgnoreCaseAndIdNot("some-name", 1)).thenReturn(false);
         when(courthouseRepository.existsByDisplayNameIgnoreCaseAndIdNot("some-display-name", 1)).thenReturn(false);
-        when(caseRepository.existsByCourthouse(targetCourthouse)).thenReturn(false);
         when(securityGroupRepository.existsAllByIdIn(Set.of(1, 2, 3))).thenReturn(true);
         when(regionRepository.existsById(1)).thenReturn(true);
 

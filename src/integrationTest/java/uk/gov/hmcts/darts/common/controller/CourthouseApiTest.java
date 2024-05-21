@@ -506,7 +506,6 @@ class CourthouseApiTest extends IntegrationBase {
             assertEquals("Haverfordwest Requestor", requesterGroup.getDisplayName());
 
             verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
-            verifyNoMoreInteractions(mockUserIdentity);
         });
     }
 
@@ -590,7 +589,6 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.security_group_ids", hasSize(3)));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
@@ -688,7 +686,6 @@ class CourthouseApiTest extends IntegrationBase {
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test

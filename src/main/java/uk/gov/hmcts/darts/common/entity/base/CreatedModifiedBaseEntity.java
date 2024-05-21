@@ -8,6 +8,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
@@ -21,6 +22,7 @@ public class CreatedModifiedBaseEntity extends CreatedBaseEntity {
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
 
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by")
     private UserAccountEntity lastModifiedBy;
