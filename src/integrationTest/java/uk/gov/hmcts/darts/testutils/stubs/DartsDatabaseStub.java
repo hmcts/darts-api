@@ -519,6 +519,14 @@ public class DartsDatabaseStub {
         return dailyListRepository.saveAll(asList(dailyListEntity));
     }
 
+    @Transactional
+    public MediaRequestEntity saveWithTransientEntities(MediaRequestEntity mediaRequestEntity) {
+        save(mediaRequestEntity.getHearing());
+        save(mediaRequestEntity.getRequestor());
+        save(mediaRequestEntity.getCurrentOwner());
+        return save(mediaRequestEntity);
+    }
+
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
