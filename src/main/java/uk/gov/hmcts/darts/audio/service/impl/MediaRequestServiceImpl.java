@@ -359,11 +359,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (getTransformedMediaRequest != null) {
 
             OffsetDateTime requestedAtFrom = getTransformedMediaRequest.getRequestedAtFrom()
-                != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(),
-                                                                                                                         LocalTime.MIN, ZoneOffset.UTC) : null;
+                != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(),LocalTime.MIN, ZoneOffset.UTC) : null;
             OffsetDateTime requestedAtTo = getTransformedMediaRequest.getRequestedAtTo()
-                != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtTo(),
-                                                                                                                         LocalTime.MIN, ZoneOffset.UTC) : null;
+                != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC) : null;
 
             mediaEntities = transformedMediaRepository.findTransformedMedia(getTransformedMediaRequest.getMediaRequestId(),
                                                                                                          getTransformedMediaRequest.getCaseNumber(),

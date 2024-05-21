@@ -45,8 +45,19 @@ public class TransformedMediaStub {
         transformedMediaEntity.setMediaRequest(mediaRequestEntity);
         transformedMediaEntity.setStartTime(mediaRequestEntity.getStartTime());
         transformedMediaEntity.setEndTime(mediaRequestEntity.getEndTime());
-        transformedMediaEntity.setLastModifiedBy(mediaRequestEntity.getLastModifiedBy());
-        transformedMediaEntity.setCreatedBy(mediaRequestEntity.getCreatedBy());
+
+        if (mediaRequestEntity.getLastModifiedBy() != null) {
+            transformedMediaEntity.setLastModifiedBy(mediaRequestEntity.getLastModifiedBy());
+        } else {
+            transformedMediaEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        }
+
+        if (mediaRequestEntity.getCreatedBy() != null) {
+            transformedMediaEntity.setCreatedBy(mediaRequestEntity.getCreatedBy());
+        } else {
+            transformedMediaEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        }
+
         transformedMediaEntity.setCreatedDateTime(mediaRequestEntity.getCreatedDateTime());
         transformedMediaEntity.setOutputFilename(filename);
         transformedMediaEntity.setOutputFilesize(fileSizeBytes);
