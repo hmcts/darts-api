@@ -7,7 +7,6 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @UtilityClass

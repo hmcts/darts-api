@@ -74,8 +74,8 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
            (:hearingDate IS NULL OR (:hearingDate IS NOT NULL AND hearing.hearingDate=:hearingDate )) AND
            (:owner IS NULL OR (:owner IS NOT NULL AND media.currentOwner.userFullName like CONCAT('%', :owner, '%'))) AND
            (:requestedBy IS NULL OR (:requestedBy IS NOT NULL AND tm.createdBy.userFullName like CONCAT('%', :requestedBy, '%'))) AND
-           (:requestedAtFrom IS NULL OR (:requestedAtFrom IS NOT NULL AND tm.createdDateTime >= :requestedAtFrom)) AND
-           (:requestedAtTo IS NULL OR (:requestedAtTo IS NOT NULL AND tm.createdDateTime <= :requestedAtTo))
+           ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (:requestedAtFrom IS NOT NULL AND tm.createdDateTime >= :requestedAtFrom)) AND
+           ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (:requestedAtTo IS NOT NULL AND tm.createdDateTime <= :requestedAtTo))
            """)
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,

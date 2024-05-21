@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.audio.repository;
 
 public enum TransformedMediaSubStringQueryEnum {
     COURT_HOUSE("Court Name:",  "post courthouse"),
-    OWNER( "Owner", "post owner"),
+    OWNER("Owner", "post owner"),
     REQUESTED_BY("Requested By", "post requested by");
 
     private final String prefix;
@@ -22,15 +22,15 @@ public enum TransformedMediaSubStringQueryEnum {
         return prefix + content;
     }
 
-    public String getQueryStringPostfix(String content) {
-        return content + postfix ;
-    }
-
     public String getQueryStringPrefix() {
         return prefix;
     }
 
     public String getQueryStringPostfix() {
         return postfix;
+    }
+
+    public String getQueryStringPostfix(String content) {
+        return content + postfix;
     }
 }

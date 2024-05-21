@@ -39,7 +39,7 @@ public class MediaRequestStub {
         HearingEntity hearing = hearingStub.createHearing(courtName, "Int Test Courtroom 2",
                                                           caseNumber, hearingDate);
 
-        return mediaRequestRepository.save(
+        return  mediaRequestRepository.save(
             AudioTestData.createCurrentMediaRequest(
                 hearing,
                 owner,

@@ -125,8 +125,7 @@ class AudioServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             audioBeingProcessedFromArchiveQuery,
-            logApi,
-            transformedMediaRepository
+            logApi
         );
     }
 
