@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -30,6 +32,7 @@ public class DailyListServiceImpl implements DailyListService {
     private final DailyListRepository dailyListRepository;
     private final DailyListMapper dailyListMapper;
     private final UserIdentity userIdentity;
+    private final AuditApi auditApi;
 
     @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
     private int housekeepingDays;
@@ -102,6 +105,19 @@ public class DailyListServiceImpl implements DailyListService {
     @Transactional
     @Override
     public void runHouseKeeping() {
+        var system = new UserAccountEntity();
+        system.setId(0);
+        try {
+            log.info("BEFORE SLEEP");
+            auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, system, null);
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("AFTER SLEEP");
+
+        auditApi.recordAudit(AuditActivity.AUDIO_PLAYBACK, system, null);
+
         if (housekeepingEnabled) {
             LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
             log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);

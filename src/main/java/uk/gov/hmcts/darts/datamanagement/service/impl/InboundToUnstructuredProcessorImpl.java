@@ -73,8 +73,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             throw new RuntimeException(e);
         }
         log.info("AFTER SLEEP");
-        auditApi.recordAudit(AuditActivity.APPLY_RETENTION, system, null);
 
+        auditApi.recordAudit(AuditActivity.EXPORT_AUDIO, system, null);
         List<Integer> inboundList = externalObjectDirectoryRepository.findEodIdsForTransfer(getStatus(STORED), getType(INBOUND),
                                                                                             getStatus(STORED), getType(UNSTRUCTURED), 3, limit);
         int count = 1;
