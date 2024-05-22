@@ -17,8 +17,6 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaRequest;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -103,15 +101,6 @@ public class AudioController implements AudioApi {
             return StreamingResponseEntityUtil.createResponseEntity(audioPreview.getAudio(), httpRangeList);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-
-    @Override
-
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
-    public ResponseEntity<List<SearchTransformedMediaResponse>> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest) {
-        List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchForTransformedMedia(getTransformedMediaRequest);
-
-        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)

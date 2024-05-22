@@ -3,11 +3,11 @@ package uk.gov.hmcts.darts.audio.service;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaRequest;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.io.InputStream;

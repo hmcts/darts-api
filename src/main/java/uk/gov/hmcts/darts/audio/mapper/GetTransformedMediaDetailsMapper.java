@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.audio.mapper;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponseCase;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponseCourthouse;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponseHearing;
-import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponseMediaRequest;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCase;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCourthouse;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseHearing;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseMediaRequest;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.util.ArrayList;
