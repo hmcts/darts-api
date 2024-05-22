@@ -33,6 +33,6 @@ where task_name in ('InboundToUnstructuredDataStore');
 
 update darts.automated_task
 set cron_expression = '30/60 * * * * *'
-where task_name in ('DailyListHousekeeping');
+where task_name in ('ApplyRetention');
 
 
