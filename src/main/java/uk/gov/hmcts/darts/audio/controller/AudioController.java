@@ -12,11 +12,14 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
+import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
+import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audio.validation.AddAudioFileValidator;
 import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
@@ -29,6 +32,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -51,6 +55,9 @@ public class AudioController implements AudioApi {
     private final AudioPreviewService audioPreviewService;
     private final AddAudioMetaDataValidator addAudioMetaDataValidator;
     private final AddAudioFileValidator multipartFileValidator;
+    private final MediaRequestService mediaRequestService;
+    private final TransformedMediaMapper transformedMediaMapper;
+
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -95,5 +102,14 @@ public class AudioController implements AudioApi {
             return StreamingResponseEntityUtil.createResponseEntity(audioPreview.getAudio(), httpRangeList);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<GetTransformedMediaResponse> adminGetTransformedMedia(Integer transformedMediaId) {
+        var transformedMedia = mediaRequestService.getTransformedMediaById(transformedMediaId);
+        GetTransformedMediaResponse response = transformedMediaMapper.mapToGetTransformedMediaResponse(transformedMedia);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
