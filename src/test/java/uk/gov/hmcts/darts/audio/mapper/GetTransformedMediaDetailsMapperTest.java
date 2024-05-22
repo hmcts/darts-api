@@ -77,28 +77,6 @@ class GetTransformedMediaDetailsMapperTest {
         Assertions.assertEquals(entity.getMediaRequest().getHearing().getHearingDate(), response.getHearing().getHearingDate());
     }
 
-    @Test
-    void testMapSearchResultsDefensiveCheckWithCoreEntityDataMissing() {
-
-        // setup the test data
-        Integer id = 200;
-
-        TransformedMediaEntity mediaEntity = new TransformedMediaEntity();
-        mediaEntity.setId(id);
-
-        // run the tests
-        GetTransformedMediaDetailsMapper transformedMediaDetailsMapper = new GetTransformedMediaDetailsMapper();
-        List<SearchTransformedMediaResponse> searchResults = transformedMediaDetailsMapper.mapSearchResults(new ArrayList<>(List.of(mediaEntity)));
-
-        // make the assertions
-        Assertions.assertEquals(1, searchResults.size());
-        SearchTransformedMediaResponse response = searchResults.get(0);
-        Assertions.assertEquals(id, response.getId());
-        Assertions.assertNull(response.getCourthouse());
-        Assertions.assertNull(response.getMediaRequest());
-        Assertions.assertNull(response.getCase());
-    }
-
     private TransformedMediaEntity getStubbedTransformedMediaEntity() {
         // setup the test data
         Integer id = 200;

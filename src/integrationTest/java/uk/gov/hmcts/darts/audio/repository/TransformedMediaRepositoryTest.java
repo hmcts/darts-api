@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.util.List;
+import java.util.Locale;
 
 class TransformedMediaRepositoryTest extends IntegrationBase {
 
@@ -78,7 +79,8 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
             null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null, null, null);
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE
+                .getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -100,7 +102,8 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
             null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null, null, null);
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE
+                .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -155,7 +158,9 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
             null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toLowerCase(), null, null, null);
+            TransformedMediaSubStringQueryEnum.OWNER
+                .getQueryStringPostfix(Integer.toString(nameMatchIndex))
+                .toLowerCase(Locale.getDefault()), null, null, null);
 
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
@@ -177,7 +182,8 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
             null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null);
+            TransformedMediaSubStringQueryEnum.OWNER
+                .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null);
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
 
@@ -221,7 +227,7 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
             null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)).toUpperCase(), null, null);
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)).toUpperCase(Locale.getDefault()), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -243,7 +249,7 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
             null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)).toLowerCase(), null, null);
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)).toLowerCase(Locale.getDefault()), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }

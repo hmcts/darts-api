@@ -70,7 +70,8 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         WHERE
            (:mediaId IS NULL OR (:mediaId IS NOT NULL AND media.id=:mediaId)) AND
            (:caseNumber IS NULL  OR (:caseNumber IS NOT NULL AND courtCase.caseNumber=:caseNumber)) AND
-           (:courtHouseDisplayName IS NULL OR (:courtHouseDisplayName IS NOT NULL AND courthouse.displayName ILIKE CONCAT('%', :courtHouseDisplayName, '%'))) AND
+           (:courtHouseDisplayName IS NULL OR (:courtHouseDisplayName IS NOT NULL AND courthouse.displayName 
+           ILIKE CONCAT('%', :courtHouseDisplayName, '%'))) AND
            (:hearingDate IS NULL OR (:hearingDate IS NOT NULL AND hearing.hearingDate=:hearingDate )) AND
            (:owner IS NULL OR (:owner IS NOT NULL AND media.currentOwner.userFullName ILIKE CONCAT('%', :owner, '%'))) AND
            (:requestedBy IS NULL OR (:requestedBy IS NOT NULL AND tm.createdBy.userFullName ILIKE CONCAT('%', :requestedBy, '%'))) AND
