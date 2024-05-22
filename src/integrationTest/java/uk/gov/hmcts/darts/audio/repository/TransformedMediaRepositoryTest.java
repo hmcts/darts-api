@@ -73,12 +73,34 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
     }
 
     @Test
+    void testFindTransformedMediaWithCourtDisplayNameCaseInsensitiveSubstringPrefixMatchOne() {
+        int nameMatchIndex = 13;
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformedMedia(
+            null, null,
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null, null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
     void testFindTransformedMediaWithCourtDisplayNameSubstringPostFixMatchOne() {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
                 null, null,
                 TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaWithCourtDisplayNameCaseInsensitiveSubstringPostFixMatchOne() {
+        int nameMatchIndex = 13;
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformedMedia(
+            null, null,
+            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null, null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
@@ -128,12 +150,34 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
     }
 
     @Test
+    void testFindTransformedMediaWithOwnerCaseInsensitivePrefix() {
+        int nameMatchIndex = 13;
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformedMedia(
+            null, null, null, null,
+            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toLowerCase(), null, null, null);
+
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
     void testFindTransformedMediaWithOwnerPostfix() {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null,
-                TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
+            null, null, null, null,
+            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaWithOwnerCaseInsensitivePostfix() {
+        int nameMatchIndex = 13;
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformedMedia(
+            null, null, null, null,
+            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null);
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
 
@@ -172,12 +216,34 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
     }
 
     @Test
+    void testFindTransformedMediaWithRequestedByCaseInsensitivePrefix() {
+        int nameMatchIndex = 13;
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformedMedia(
+            null, null, null, null, null,
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)).toUpperCase(), null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
     void testFindTransformedMediaWithRequestedByPostfix() {
         int nameMatchIndex = 13;
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
-                null, null, null, null, null,
-                TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)), null, null);
+            null, null, null, null, null,
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)), null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    }
+
+    @Test
+    void testFindTransformedMediaWithRequestedByCaseInsensitivePostfix() {
+        int nameMatchIndex = 13;
+        List<TransformedMediaEntity> transformedMediaEntityList
+            = transformedMediaRepository.findTransformedMedia(
+            null, null, null, null, null,
+            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)).toLowerCase(), null, null);
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
     }
