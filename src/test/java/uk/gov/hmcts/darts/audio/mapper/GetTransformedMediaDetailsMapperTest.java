@@ -51,6 +51,33 @@ class GetTransformedMediaDetailsMapperTest {
     }
 
     @Test
+    void testMapSearchResult() {
+        TransformedMediaEntity entity = getStubbedTransformedMediaEntity();
+
+        // run the tests
+        GetTransformedMediaDetailsMapper transformedMediaDetailsMapper = new GetTransformedMediaDetailsMapper();
+        SearchTransformedMediaResponse response = transformedMediaDetailsMapper.mapSearchResults(entity);
+
+        // make the assertions
+        Assertions.assertEquals(entity.getId(), response.getId());
+        Assertions.assertEquals(entity.getOutputFilesize(), response.getFileSizeBytes());
+        Assertions.assertEquals(entity.getLastAccessed(), response.getLastAccessedAt());
+        Assertions.assertEquals(AudioRequestOutputFormat.ZIP.name(), response.getFileFormat());
+        Assertions.assertEquals(entity.getOutputFilename(), response.getFileName());
+        Assertions.assertEquals(entity.getMediaRequest().getId(), response.getMediaRequest().getId());
+        Assertions.assertEquals(entity.getCreatedDateTime(), response.getMediaRequest().getRequestedAt());
+        Assertions.assertEquals(entity.getMediaRequest().getRequestor().getId(), response.getMediaRequest().getRequestedByUserId());
+        Assertions.assertEquals(entity.getMediaRequest().getCurrentOwner().getId(), response.getMediaRequest().getOwnerUserId());
+        Assertions.assertEquals(entity.getMediaRequest().getHearing().getCourtCase().getId(), response.getCase().getId());
+        Assertions.assertEquals(entity.getMediaRequest().getHearing().getCourtCase().getCaseNumber(), response.getCase().getCaseNumber());
+        Assertions.assertEquals(entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId(), response.getCourthouse().getId());
+        Assertions.assertEquals(entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getDisplayName(),
+                                response.getCourthouse().getDisplayName());
+        Assertions.assertEquals(entity.getMediaRequest().getHearing().getId(), response.getHearing().getId());
+        Assertions.assertEquals(entity.getMediaRequest().getHearing().getHearingDate(), response.getHearing().getHearingDate());
+    }
+
+    @Test
     void testMapSearchResultsDefensiveCheckWithCoreEntityDataMissing() {
 
         // setup the test data

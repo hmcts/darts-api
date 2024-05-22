@@ -166,8 +166,8 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
-    public ResponseEntity<List<SearchTransformedMediaResponse>> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest) {
-        List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchForTransformedMedia(getTransformedMediaRequest);
+    public ResponseEntity<List<SearchTransformedMediaResponse>> searchForTransformedMedia(SearchTransformedMediaRequest searchTransformedMediaRequest) {
+        List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchRequest(searchTransformedMediaRequest);
 
         return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }

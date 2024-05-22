@@ -449,6 +449,7 @@ paths:
       summary: Search for transformed media
       operationId: searchForTransformedMedia
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -726,16 +727,16 @@ components:
           description: 'The hearing date'
         owner:
           type: string
-          description: 'The owner string'
+          description: 'The media owner'
         requested_by:
           type: string
-          description: 'The media requestor'
+          description: 'The person that requested the media'
         requested_at_from:
           type: date
-          description: 'The size of the file in bytes'
+          description: 'The start date range that the media was requested'
         requested_at_to:
           type: date
-          description: 'Checksum to ensure integrity of file'
+          description: 'The end date range that the media was requested'
 
     SearchTransformedMediaResponse:
       type: object
@@ -787,7 +788,7 @@ components:
               description: 'The court house id'
             display_name:
               type: string
-              description: 'The case display name'
+              description: 'The court house display name'
         hearing:
           type: object
           description: 'The hearing details'

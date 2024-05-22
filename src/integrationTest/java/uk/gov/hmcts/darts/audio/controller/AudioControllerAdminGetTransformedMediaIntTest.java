@@ -215,32 +215,19 @@ class AudioControllerAdminGetTransformedMediaIntTest extends IntegrationBase {
     }
 
     @Test
-    void testNoRequestReturnsAllResults() throws Exception  {
-        List<TransformedMediaEntity> transformedMediaEntityList = transformedMediaStub.generateTransformedMediaEntities(4);
-
-        superAdminUserStub.givenUserIsAuthorised(userIdentity);
-
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
+    void testNoRequestPayloadReturnsABadRequest() throws Exception {
+        mockMvc.perform(post(ENDPOINT_URL)
                                                   .header("Content-Type", "application/json"))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().isBadRequest())
             .andReturn();
-
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
-
-        SearchTransformedMediaResponse[] transformedMediaResponses
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTransformedMediaResponse[].class);
-        Assertions.assertEquals(transformedMediaEntityList.size(), transformedMediaResponses.length);
-
-        for (SearchTransformedMediaResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTransformMediaEntity(response.getId(), transformedMediaEntityList));
-        }
     }
 
     @Test
     void testAuthorisationProblem() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
 
-        mockMvc.perform(post(ENDPOINT_URL).header("Content-Type", "application/json"))
+        mockMvc.perform(post(ENDPOINT_URL).header("Content-Type", "application/json").header("Content-Type", "application/json")
+                            .content("{}"))
             .andExpect(status().isForbidden())
             .andReturn();
     }

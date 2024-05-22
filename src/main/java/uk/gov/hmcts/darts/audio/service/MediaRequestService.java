@@ -46,7 +46,7 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity);
 
-    List<SearchTransformedMediaResponse> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest);
+    List<SearchTransformedMediaResponse> searchRequest(SearchTransformedMediaRequest getTransformedMediaRequest);
 
     TransformedMediaEntity getTransformedMediaById(Integer id);
 }

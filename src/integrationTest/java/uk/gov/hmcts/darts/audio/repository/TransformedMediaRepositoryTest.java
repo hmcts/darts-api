@@ -200,7 +200,8 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
                 null, null, null, null, null, null,
-                generatedMediaEntities.get(fromAtPosition).getCreatedDateTime(), generatedMediaEntities.get(fromAtPosition).getCreatedDateTime());
+                generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(),
+                generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
         Assertions.assertEquals(generatedMediaEntities
                                     .get(fromAtPosition).getId(), transformedMediaEntityList.get(0).getId());
@@ -212,7 +213,7 @@ class TransformedMediaRepositoryTest extends IntegrationBase {
         List<TransformedMediaEntity> transformedMediaEntityList
             = transformedMediaRepository.findTransformedMedia(
                 null, null, null, null, null,
-                null, generatedMediaEntities.get(fromAtPosition).getCreatedDateTime(), null);
+                null, generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(), null);
         Assertions.assertEquals(GENERATION_COUNT - fromAtPosition, transformedMediaEntityList.size());
         Assertions.assertTrue(transformedMediaStub
                                   .getTransformedMediaIds(transformedMediaEntityList)
