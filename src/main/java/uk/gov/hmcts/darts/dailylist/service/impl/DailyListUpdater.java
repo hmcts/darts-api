@@ -204,7 +204,7 @@ class DailyListUpdater {
         List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate -> {
-            if (!isProsecutor(courtCase, advocate)) {
+            if (!isExistingProsecutor(courtCase, advocate)) {
                       courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
                           citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
             }
@@ -218,7 +218,7 @@ class DailyListUpdater {
                 if (counselDetails == null) {
                     continue;
                 }
-                if  (!isDefenders(courtCase, counselDetails)) {
+                if  (!isExistingDefenders(courtCase, counselDetails)) {
                     courtCase.addDefence(retrieveCoreObjectService.createDefence(
                         citizenNameMapper.getCitizenName(counselDetails.getName()), courtCase, dailyListSystemUser));
                 }
@@ -229,7 +229,7 @@ class DailyListUpdater {
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         for (Defendant defendant : defendants) {
-            if (!isDefendantInCase(courtCase, defendant)) {
+            if (!isExistingDefendant(courtCase, defendant)) {
                 courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
                     citizenNameMapper.getCitizenName(defendant.getPersonalDetails().getName()),
                     courtCase,
@@ -247,10 +247,10 @@ class DailyListUpdater {
         }
     }
 
-    private boolean isDefenders(CourtCaseEntity courtCase, PersonalDetails defenders) {
+    private boolean isExistingDefenders(CourtCaseEntity courtCase, PersonalDetails defenders) {
         boolean existingDefendant = false;
         for (DefenceEntity defenceEntity : courtCase.getDefenceList()) {
-            if (citizenNameComparator.compare(defenders.getName(), citizenNameMapper.getCitizenName(defenceEntity.getName())) == 0) {
+            if (isEqual(defenders.getName(), citizenNameMapper.getCitizenName(defenceEntity.getName()))) {
                 existingDefendant = true;
             }
         }
@@ -258,10 +258,10 @@ class DailyListUpdater {
         return existingDefendant;
     }
 
-    private boolean isDefendantInCase(CourtCaseEntity courtCase, Defendant defendant) {
+    private boolean isExistingDefendant(CourtCaseEntity courtCase, Defendant defendant) {
         boolean existingDefendant = false;
         for (DefendantEntity defendantEntity : courtCase.getDefendantList()) {
-            if (citizenNameComparator.compare(defendant.getPersonalDetails().getName(), citizenNameMapper.getCitizenName(defendantEntity.getName())) == 0) {
+            if (isEqual(defendant.getPersonalDetails().getName(), citizenNameMapper.getCitizenName(defendantEntity.getName()))) {
                 existingDefendant = true;
             }
         }
@@ -269,16 +269,20 @@ class DailyListUpdater {
         return existingDefendant;
     }
 
-    private boolean isProsecutor(CourtCaseEntity courtCase, PersonalDetails prosecutor) {
+    private boolean isExistingProsecutor(CourtCaseEntity courtCase, PersonalDetails prosecutor) {
         boolean existingDefendant = false;
         for (ProsecutorEntity prosecutorEntity : courtCase.getProsecutorList()) {
 
-            if (citizenNameComparator.compare(prosecutor.getName(), citizenNameMapper.getCitizenName(prosecutorEntity.getName())) == 0) {
+            if (isEqual(prosecutor.getName(), citizenNameMapper.getCitizenName(prosecutorEntity.getName()))) {
                 existingDefendant = true;
             }
         }
 
         return existingDefendant;
+    }
+
+    private boolean isEqual(CitizenName name1, CitizenName name2) {
+        return citizenNameComparator.compare(name1, name2) == 0;
     }
 
 }

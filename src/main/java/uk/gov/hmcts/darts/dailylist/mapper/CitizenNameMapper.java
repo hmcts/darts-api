@@ -20,17 +20,39 @@ public class CitizenNameMapper {
         String[] citizenName = name.split(NAME_DELIMITER);
         CitizenName retCitizenName = new CitizenName();
 
-        if (citizenName.length == 2) {
+        if (citizenName.length == 1) {
             retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
-            retCitizenName.setCitizenNameSurname(citizenName[SURNAME_INDEX]);
-        } else if (citizenName.length == 1) {
+            retCitizenName.setCitizenNameSurname("");
+        } else if (citizenName.length > 1) {
             retCitizenName.setCitizenNameForename(citizenName[FORENAME_INDEX]);
+            retCitizenName.setCitizenNameSurname(getSurnames(citizenName));
         }
 
         return retCitizenName;
     }
 
     public String getCitizenName(CitizenName citizenName) {
-        return citizenName.getCitizenNameForename() + NAME_DELIMITER + citizenName.getCitizenNameSurname();
+        String returnName = "";
+        if (citizenName.getCitizenNameForename() != null) {
+            returnName =  citizenName.getCitizenNameForename();
+            if (citizenName.getCitizenNameSurname() != null && !citizenName.getCitizenNameSurname().isEmpty()) {
+                returnName = returnName + NAME_DELIMITER + citizenName.getCitizenNameSurname();
+            }
+        }
+
+        return returnName;
     }
+
+    private String getSurnames(String[] citizenNameParts) {
+        String surname = "";
+        surname = surname.concat(citizenNameParts[SURNAME_INDEX]);
+        for (int position = 0; position < citizenNameParts.length; position++) {
+            if (position > SURNAME_INDEX) {
+                surname = surname.concat(NAME_DELIMITER).concat(citizenNameParts[position]);
+            }
+        }
+
+        return surname;
+    }
+
 }
