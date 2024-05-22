@@ -76,6 +76,11 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     @Override
     public void run() {
+        if (automatedTaskConfigurationProperties.isStopRunning()) {
+            log.info("Not running task {}, SIGTERM received", getTaskName());
+            return;
+        }
+
         executionId = ThreadLocal.withInitial(UUID::randomUUID);
         preRunTask();
         try {

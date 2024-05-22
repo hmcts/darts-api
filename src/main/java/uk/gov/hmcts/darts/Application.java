@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.util.TimeZone;
 
@@ -24,6 +25,8 @@ public class Application implements CommandLineRunner {
 
     private final AudioApi audioApi;
 
+    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+
     @PostConstruct
     public void started() {
         TimeZone.setDefault(TimeZone.getTimeZone(UTC));
@@ -34,6 +37,7 @@ public class Application implements CommandLineRunner {
     @PreDestroy
     public void preDestroy() {
         log.info("****************** PRE DESTROY ********************");
+        automatedTaskConfigurationProperties.setStopRunning(true);
     }
 
     @SuppressWarnings({"PMD.CloseResource"})

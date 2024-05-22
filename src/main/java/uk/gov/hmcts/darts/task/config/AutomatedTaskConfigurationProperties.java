@@ -10,4 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AutomatedTaskConfigurationProperties {
 
     private String systemUserEmail;
+
+    private boolean stopRunning;
 }
