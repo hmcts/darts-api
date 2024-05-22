@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminRespon
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
@@ -235,5 +237,16 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<List<GetTranscriptionDetailAdminResponse>> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom) {
         return new ResponseEntity<>(adminTranscriptionSearchService.getTranscriptionsForUser(userId, requestedAtFrom),
         HttpStatus.OK);
+    }
+
+    @Override
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    public ResponseEntity<List<SearchTranscriptionDocumentResponse>> searchForTranscriptionMedia(
+        SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
+
+        List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchRequest(searchTransformedMediaRequest);
+
+        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
+        return TranscriptionApi.super.searchForTranscriptionMedia(searchTranscriptionDocumentRequest);
     }
 }

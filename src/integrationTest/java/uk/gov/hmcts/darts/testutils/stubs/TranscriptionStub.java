@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -23,17 +25,24 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.testutils.data.UserAccountTestData;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +78,13 @@ public class TranscriptionStub {
     private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final CourtroomStub courtroomStub;
+    private final CourthouseStub courthouseStub;
+    private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final CourtCaseStub courtCaseStub;
+
+    private static final String CASE_NUMBER_PREFIX = "CaseNumber";
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -559,4 +575,91 @@ public class TranscriptionStub {
     private ObjectRecordStatusEntity getStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
+
+/**
+ * generates test data. The following will be used for generation:-
+ * Unique owner and requested by users for each transformed media record
+ * Unique court house with unique name for each transformed media record
+ * Unique case number with unique case number for each transformed media record
+ * Unique hearing date starting with today with an incrementing day for each transformed media record
+ * Unique requested date with an incrementing hour for each transformed media record
+ * Unique file name with unique name for each transformed media record
+ * @param count The number of transformed media objects that are to be generated
+ * @return The list of generated media entities in chronological order
+ */
+public List<TranscriptionCommentEntity> generateTransformedMediaEntities(int count, int hearingCount, int caseCount, boolean hidden, boolean isManualTranscription) {
+
+    UserAccountEntity accountEntity = UserAccountTestData.minimalUserAccount();
+    userAccountRepository.save(accountEntity);
+
+    CourtroomEntity courtroomEntity = courtroomStub.createCourtroomUnlessExists("Newcastle", "room_a");
+    CourthouseEntity courthouse = courthouseStub.createCourthouseUnlessExists("");
+    HearingEntity hearingEntity =  retrieveCoreObjectService.retrieveOrCreateHearing(
+        courtroomEntity.getCourthouse().getCourthouseName(),
+        courtroomEntity.getName(),
+        "c1",
+        LocalDateTime.of(2020, 6, 20, 10, 0, 0)
+        userAccountRepository.getReferenceById(0)
+    );
+
+    CourtCaseEntity caseEntity = courtCaseStub.createAndSaveMinimalCourtCase();
+    caseEntity.setCaseNumber("");
+
+    List<TranscriptionDocumentEntity> retTransformerMediaLst = new ArrayList<>();
+    OffsetDateTime hoursBefore = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime hoursAfter = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime requestedDate = OffsetDateTime.now(ZoneOffset.UTC);
+    LocalDateTime hearingDate = LocalDateTime.now(ZoneOffset.UTC);
+
+    int fileSize = 1;
+    for (int transformedMediaCount = 0; transformedMediaCount < count; transformedMediaCount++) {
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+
+        UserAccountEntity owner = userAccountStub.createSystemUserAccount(
+            TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(transformedMediaCount)));
+        UserAccountEntity requestedBy = userAccountStub.createSystemUserAccount(
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(transformedMediaCount)));
+
+        String courtName = TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(Integer.toString(transformedMediaCount));
+        String caseNumber = CASE_NUMBER_PREFIX + transformedMediaCount;
+
+
+        retTransformerMediaLst.add(createTransformedMediaEntity(mediaRequest, fileName, null, requestedDate, fileFormat, fileSize));
+        fileSize = fileSize + 1;
+        hoursBefore = hoursBefore.minusHours(1);
+        hoursAfter = hoursAfter.plusHours(1);
+        hearingDate = hearingDate.plusDays(count);
+        requestedDate = requestedDate.plusDays(1);
+
+    }
+    return retTransformerMediaLst;
+}
+
+public List<Integer> getExpectedStartingFrom(int startingFromIndex, List<TransformedMediaEntity> generatedMediaEntities) {
+    List<Integer> fndMediaIds = new ArrayList<>();
+    for (int position = 0; position < generatedMediaEntities.size(); position++) {
+        if (position >= startingFromIndex) {
+            fndMediaIds.add(generatedMediaEntities.get(position).getId());
+        }
+    }
+
+    return fndMediaIds;
+}
+
+public List<Integer> getExpectedTo(int toIndex, List<TransformedMediaEntity> generatedMediaEntities) {
+    List<Integer> fndMediaIds = new ArrayList<>();
+    for (int position = 0; position < generatedMediaEntities.size(); position++) {
+        if (position <= toIndex) {
+            fndMediaIds.add(generatedMediaEntities.get(position).getId());
+        }
+    }
+
+    return fndMediaIds;
+}
+
+public List<Integer> getTransformedMediaIds(List<TransformedMediaEntity> entities) {
+    return entities.stream().map(e -> e.getId()).collect(Collectors.toList());
+}
+
 }

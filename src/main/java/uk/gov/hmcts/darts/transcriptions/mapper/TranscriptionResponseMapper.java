@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminRespon
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCase;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -289,4 +291,58 @@ public class TranscriptionResponseMapper {
         details.requestedAt(transcriptionEntity.getCreatedDateTime());
         return details;
     }
-}
+
+    import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCase;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCourthouse;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseHearing;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseMediaRequest;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+    @Component
+    public class GetTransformedMediaDetailsMapper {
+        public List<SearchTransformedMediaResponse> mapSearchResults(List<TransformedMediaEntity> entityList) {
+            List<SearchTransformedMediaResponse> mappedDetails = new ArrayList<>();
+            for (TransformedMediaEntity entity : entityList) {
+                mappedDetails.add(mapSearchResults(entity));
+            }
+
+            return mappedDetails;
+        }
+
+        public SearchTranscriptionDocumentResponse mapSearchResults(TranscriptionDocumentEntity entity) {
+            SearchTranscriptionDocumentResponse transformedMediaDetails = new SearchTranscriptionDocumentResponse();
+            transformedMediaDetails.setTranscriptionDocumentId(entity.getId());
+            transformedMediaDetails.setTranscriptionId(entity.getTranscription().getId());
+
+            if (entity.getTranscription() != null && entity.getTranscription().getCourtCases() != null)  {
+                SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
+                caseResponse.setId(entity.getTranscription().getCourtCases());
+                caseResponse.setCaseNumber(entity.getMediaRequest().getHearing().getCourtCase().getCaseNumber());
+                transformedMediaDetails.setCase(caseResponse);
+            }
+
+            if (entity.getMediaRequest() != null && entity.getMediaRequest().getHearing() != null
+                && entity.getMediaRequest().getHearing().getCourtroom() != null) {
+                SearchTransformedMediaResponseCourthouse courthouseResponse = new SearchTransformedMediaResponseCourthouse();
+                courthouseResponse.setId(entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId());
+                courthouseResponse.setDisplayName(entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getDisplayName());
+                transformedMediaDetails.setCourthouse(courthouseResponse);
+            }
+
+            if (entity.getMediaRequest() != null && entity.getMediaRequest().getHearing() != null) {
+                SearchTransformedMediaResponseHearing hearingResponse = new SearchTransformedMediaResponseHearing();
+                hearingResponse.setId(entity.getMediaRequest().getHearing().getId());
+                hearingResponse.setHearingDate(entity.getMediaRequest().getHearing().getHearingDate());
+                transformedMediaDetails.setHearing(hearingResponse);
+            }
+
+            return transformedMediaDetails;
+        }
+
+
+    }
