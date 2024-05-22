@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
+import uk.gov.hmcts.darts.arm.service.ExternalObjectDirectoryService;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -92,14 +93,32 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
     @SpyBean
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
     private UserAccountEntity testUser;
+    private static final Integer BATCH_SIZE = 5;
 
     @Autowired
+    private ExternalObjectDirectoryService eodService;
+
     private UnstructuredToArmBatchProcessorImpl unstructuredToArmProcessor;
 
     @BeforeEach
     void setupData() {
         testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        unstructuredToArmProcessor = new UnstructuredToArmBatchProcessorImpl(
+            externalObjectDirectoryRepository,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            dataManagementApi,
+            armDataManagementApi,
+            userIdentity,
+            armDataManagementConfiguration,
+            fileOperationService,
+            archiveRecordService,
+            eodService,
+            archiveRecordFileGenerator,
+            BATCH_SIZE
+        );
     }
 
     @Test
@@ -138,7 +157,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
             armDropZoneStatus(),
             armLocation()
         );
-        assertThat(foundMediaList.size()).isEqualTo(armDataManagementConfiguration.getBatchSize());
+        assertThat(foundMediaList.size()).isEqualTo(BATCH_SIZE);
         assertThat(
             eodRepository.findMediaIdsByInMediaIdStatusAndType(List.of(medias.get(0).getId()), storedStatus(), unstructuredLocation())
         )

@@ -489,10 +489,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         var transcriptionWorkflows = transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(transcription.get());
 
         if (nonNull(isCurrent) && TRUE.equals(isCurrent)) {
-            return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(transcriptionWorkflows.get(0)));
+            return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(transcriptionWorkflows.get(0)), Collections.emptyList());
         }
 
-        return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(transcriptionWorkflows);
+        // migrated transcription comments are not associated to a transcription workflow
+        List<TranscriptionCommentEntity> migratedTranscriptionComments =
+            transcriptionCommentRepository.getByTranscriptionAndTranscriptionWorkflowIsNull(transcription.get());
+
+        return transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(transcriptionWorkflows, migratedTranscriptionComments);
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,

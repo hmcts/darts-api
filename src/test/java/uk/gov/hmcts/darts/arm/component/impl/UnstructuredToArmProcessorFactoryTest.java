@@ -92,7 +92,7 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   annotationDocumentRepository,
                                                   caseDocumentRepository);
 
-        var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(true);
+        var unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(10);
 
         assertEquals(UnstructuredToArmBatchProcessorImpl.class, unstructuredToArmProcessor.getClass());
     }
@@ -119,7 +119,7 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   annotationDocumentRepository,
                                                   caseDocumentRepository);
 
-        var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(false);
+        var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(0);
 
         assertEquals(ArmResponseFilesProcessorImpl.class, armResponseFilesProcessor.getClass());
     }
@@ -146,7 +146,7 @@ class UnstructuredToArmProcessorFactoryTest {
                                                   annotationDocumentRepository,
                                                   caseDocumentRepository);
 
-        var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(true);
+        var armResponseFilesProcessor = automatedTaskProcessorFactory.createArmResponseFilesProcessor(10);
 
         assertEquals(ArmBatchProcessResponseFilesImpl.class, armResponseFilesProcessor.getClass());
     }

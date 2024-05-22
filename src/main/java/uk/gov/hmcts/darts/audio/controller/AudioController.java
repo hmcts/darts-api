@@ -12,9 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
+import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
+import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audio.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
@@ -56,6 +58,7 @@ public class AudioController implements AudioApi {
     private final AddAudioMetaDataValidator addAudioMetaDataValidator;
     private final AddAudioFileValidator multipartFileValidator;
     private final MediaRequestService mediaRequestService;
+    private final TransformedMediaMapper transformedMediaMapper;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -103,10 +106,20 @@ public class AudioController implements AudioApi {
     }
 
     @Override
+
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
     public ResponseEntity<List<SearchTransformedMediaResponse>> searchForTransformedMedia(SearchTransformedMediaRequest getTransformedMediaRequest) {
         List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchForTransformedMedia(getTransformedMediaRequest);
 
         return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
+    }
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<GetTransformedMediaResponse> adminGetTransformedMedia(Integer transformedMediaId) {
+        var transformedMedia = mediaRequestService.getTransformedMediaById(transformedMediaId);
+        GetTransformedMediaResponse response = transformedMediaMapper.mapToGetTransformedMediaResponse(transformedMedia);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 }

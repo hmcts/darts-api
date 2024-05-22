@@ -61,6 +61,12 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceImplTest {
+    private static final OffsetDateTime TIME_09_59 = OffsetDateTime.parse("2023-01-01T09:59Z");
+    private static final OffsetDateTime TIME_10_00 = OffsetDateTime.parse("2023-01-01T10:00Z");
+    private static final OffsetDateTime TIME_10_05 = OffsetDateTime.parse("2023-01-01T11:05Z");
+    private static final OffsetDateTime TIME_10_10 = OffsetDateTime.parse("2023-01-01T11:59Z");
+    private static final OffsetDateTime TIME_10_15 = OffsetDateTime.parse("2023-01-01T11:59Z");
+    private static final OffsetDateTime TIME_10_20 = OffsetDateTime.parse("2023-01-01T11:59Z");
     private static final OffsetDateTime TIME_11_59 = OffsetDateTime.parse("2023-01-01T11:59Z");
     private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
@@ -323,6 +329,34 @@ class AudioTransformationServiceImplTest {
             mediaRequestEntity
         );
         assertEquals(0, mediaEntitiesResult.size());
+    }
+
+    @Test
+    void filterMediaByMediaRequestDatesWithRequestStartTimeMatchesAnAudioEndTime() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_09_59, TIME_10_00, TIME_10_05, TIME_10_10, TIME_10_15, TIME_10_20);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_10_00, TIME_10_10);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(1, mediaEntitiesResult.size());
+        assertEquals(TIME_10_05, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_10_10, mediaEntitiesResult.get(0).getEnd());
+    }
+
+    @Test
+    void filterMediaByMediaRequestDatesWithRequestEndTimeMatchesAnAudioStartTime() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_09_59, TIME_10_00, TIME_10_05, TIME_10_10, TIME_10_15, TIME_10_20);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_09_59, TIME_10_15);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+            mediaEntities,
+            mediaRequestEntity
+        );
+
+        assertEquals(2, mediaEntitiesResult.size());
+        assertEquals(TIME_09_59, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_10_10, mediaEntitiesResult.get(1).getEnd());
     }
 
     private List<MediaEntity> createMediaEntities(OffsetDateTime startTime1, OffsetDateTime endTime1,

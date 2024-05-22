@@ -49,4 +49,9 @@ public class MediaRequestStub {
                 audioRequestType, status, requestedDate
             ));
     }
+
+    @Transactional
+    public MediaRequestEntity createAndSaveMediaRequestEntity(UserAccountEntity requestor) {
+        return createAndLoadMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD, MediaRequestStatus.COMPLETED);
+    }
 }

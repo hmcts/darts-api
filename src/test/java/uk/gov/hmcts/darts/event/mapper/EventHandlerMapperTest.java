@@ -2,6 +2,9 @@ package uk.gov.hmcts.darts.event.mapper;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -43,11 +46,13 @@ class EventHandlerMapperTest {
             .hasFieldOrPropertyWithValue("createdBy", USER_ACCOUNT_ENTITY);
     }
 
-    @Test
-    void mapsEventMapperToEventHandlerEntityCorrectlyWhenHandlerIsEmpty() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void mapsEventMapperToEventHandlerEntityCorrectlyWhenHandlerIsEmpty(String handlerName) {
         setUp();
         var eventMapping = someEventMapping();
-        eventMapping.setHandler(null);
+        eventMapping.setHandler(handlerName);
 
         assertThat(eventHandlerMapper.mapFromEventMappingAndMakeActive(eventMapping))
             .hasFieldOrPropertyWithValue("type", eventMapping.getType())

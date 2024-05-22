@@ -768,7 +768,7 @@ paths:
     get:
       tags:
         - Transcription
-      summary: Return all transcription workflow records in descending workflow timestamp chronological order
+      summary: Return the transcription history - all transcription workflow records with their comments and the transcription comments not associated to a workflow, in descending workflow timestamp chronological order
       parameters:
         - in: query
           name: is_current
@@ -1309,15 +1309,19 @@ components:
 
     GetTranscriptionWorkflowsResponse:
       type: object
+      description: note - migrated transcription comments (which are not associated to a transcription workflow) have been "hacked" into this response
       properties:
         workflow_actor:
+          description: this corresponds to the transcription comment author for migrated comments
           type: integer
           example: 0
         status_id:
           type: integer
+          description: this is null for migrated comments
           example: 0
         workflow_ts:
           type: string
+          description: this corresponds to the transcription comment ts for migrated comments
           format: date-time
           example: 2024-0415T12:00:00Z
         comments:

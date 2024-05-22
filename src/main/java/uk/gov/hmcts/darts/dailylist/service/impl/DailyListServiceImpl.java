@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
-import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
@@ -44,39 +43,23 @@ public class DailyListServiceImpl implements DailyListService {
      */
     public PostDailyListResponse saveDailyListToDatabase(DailyListPostRequest postRequest) {
         if (postRequest.getDailyListJson() == null) {
-            return saveDailyListXmlToDatabase(postRequest);
+            return saveDailyListXml(postRequest);
         }
 
-        DailyListJsonObject dailyList = postRequest.getDailyListJson();
-
-        String uniqueId = dailyList.getDocumentId().getUniqueId();
-        Optional<DailyListEntity> existingRecordOpt = dailyListRepository.findByUniqueId(uniqueId);
-        DailyListEntity savedDailyListEntity;
-        String listingCourthouse = dailyList.getCrownCourt().getCourtHouseName();
-        UserAccountEntity user = userIdentity.getUserAccount();
-        if (existingRecordOpt.isPresent()) {
-            //update the record
-            savedDailyListEntity = existingRecordOpt.get();
-            dailyListMapper.updateDailyListEntity(postRequest, listingCourthouse, savedDailyListEntity);
-        } else {
-            //insert new record
-            savedDailyListEntity = dailyListMapper.createDailyListEntity(
-                postRequest,
-                listingCourthouse
-            );
-            savedDailyListEntity.setCreatedBy(user);
-        }
+        var savedDailyListEntity = dailyListMapper.createDailyListFromJson(postRequest);
+        var user = userIdentity.getUserAccount();
+        savedDailyListEntity.setCreatedBy(user);
         savedDailyListEntity.setLastModifiedBy(user);
         dailyListRepository.saveAndFlush(savedDailyListEntity);
-        PostDailyListResponse postDailyListResponse = new PostDailyListResponse();
+
+        var postDailyListResponse = new PostDailyListResponse();
         postDailyListResponse.setDalId(savedDailyListEntity.getId());
+
         return postDailyListResponse;
     }
 
-    public PostDailyListResponse saveDailyListXmlToDatabase(DailyListPostRequest postRequest) {
-        Optional<DailyListEntity> existingRecordOpt = dailyListRepository.findByUniqueId(postRequest.getUniqueId());
-        DailyListEntity dailyListEntity;
-        dailyListEntity = existingRecordOpt.orElseGet(DailyListEntity::new);
+    private PostDailyListResponse saveDailyListXml(DailyListPostRequest postRequest) {
+        var dailyListEntity = new DailyListEntity();
 
         dailyListEntity.setListingCourthouse(postRequest.getCourthouse());
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
@@ -107,7 +90,7 @@ public class DailyListServiceImpl implements DailyListService {
         }
 
         DailyListEntity foundDailyList = foundDailyListOpt.get();
-        dailyListMapper.updateDailyListEntity(patchRequest, foundDailyList);
+        dailyListMapper.updateDailyListEntity(foundDailyList, patchRequest.getDailyListJson());
         foundDailyList.setLastModifiedBy(userIdentity.getUserAccount());
         dailyListRepository.saveAndFlush(foundDailyList);
 

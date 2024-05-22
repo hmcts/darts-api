@@ -32,9 +32,8 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
 
     @Override
     protected void runTask() {
-        boolean inBatchMode = isAutomatedTaskInBatchMode(taskName);
-
-        UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(inBatchMode);
+        Integer batchSize = getAutomatedTaskBatchSize(taskName);
+        UnstructuredToArmProcessor unstructuredToArmProcessor = automatedTaskProcessorFactory.createUnstructuredToArmProcessor(batchSize);
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
 
