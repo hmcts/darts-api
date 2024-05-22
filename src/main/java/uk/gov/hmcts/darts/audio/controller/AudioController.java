@@ -103,6 +103,7 @@ public class AudioController implements AudioApi {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
     public ResponseEntity<GetTransformedMediaResponse> adminGetTransformedMedia(Integer transformedMediaId) {
