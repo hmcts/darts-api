@@ -6,10 +6,9 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
-import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
-
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.io.InputStream;
