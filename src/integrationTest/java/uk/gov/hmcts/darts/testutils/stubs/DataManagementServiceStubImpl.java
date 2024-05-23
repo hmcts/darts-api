@@ -95,6 +95,13 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
+    public void copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+        logStubUsageWarning();
+
+        log.info("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
+    }
+
+    @Override
     public void addMetaData(BlobClient client, Map<String, String> metadata) {
 
     }

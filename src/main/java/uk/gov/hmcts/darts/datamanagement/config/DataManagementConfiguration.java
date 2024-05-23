@@ -2,8 +2,10 @@ package uk.gov.hmcts.darts.datamanagement.config;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 
 import java.time.Duration;
@@ -12,6 +14,9 @@ import java.time.Duration;
 @Configuration
 @Getter
 public class DataManagementConfiguration extends StorageConfiguration {
+
+    @Autowired
+    private Environment environment;
 
     @Value("${darts.storage.blob.client.connection-string}")
     private String blobStorageAccountConnectionString;
@@ -44,5 +49,16 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.blob.temp-blob-workspace}")
     public void setTempBlobWorkspace(String tempBlobWorkspace) {
         super.setTempBlobWorkspace(tempBlobWorkspace);
+    }
+
+    public String getBlobStorageSasUrl(String containerName) {
+//        if (containerName.equals(inboundContainerName)) {
+//            return inboundBlobStorageSasUrl;
+//        } else if (containerName.equals(unstructuredContainerName)) {
+//            return unstructuredBlobStorageSasUrl;
+//        } else {
+//            throw new RuntimeException(String.format("SAS URL not found for container name '%s'", containerName));
+//        }
+        return environment.getProperty(String.format("darts.storage.blob.sas-url.%s", containerName));
     }
 }

@@ -16,8 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.datamanagement.component.DataManagementAzureClientFactory;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
+import uk.gov.hmcts.darts.util.AzCopyUtil;
 
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
@@ -29,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +51,8 @@ class DataManagementServiceImplTest {
     private DataManagementAzureClientFactory dataManagementFactory;
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
+    @Mock
+    private AzCopyUtil azCopyUtil;
     @InjectMocks
     private DataManagementServiceImpl dataManagementService;
     private BlobContainerClient blobContainerClient;
@@ -59,8 +65,8 @@ class DataManagementServiceImplTest {
         blobContainerClient = mock(BlobContainerClient.class);
         blobClient = mock(BlobClient.class);
         serviceClient = mock(BlobServiceClient.class);
-        when(dataManagementFactory.getBlobServiceClient(Mockito.notNull())).thenReturn(serviceClient);
-        when(dataManagementConfiguration.getBlobStorageAccountConnectionString()).thenReturn("connection");
+        lenient().when(dataManagementFactory.getBlobServiceClient(Mockito.notNull())).thenReturn(serviceClient);
+        lenient().when(dataManagementConfiguration.getBlobStorageAccountConnectionString()).thenReturn("connection");
     }
 
     @Test
@@ -153,7 +159,6 @@ class DataManagementServiceImplTest {
 
     @Test
     void testDownloadData() throws Exception {
-
         when(dataManagementFactory.getBlobContainerClient(BLOB_CONTAINER_NAME, serviceClient)).thenReturn(blobContainerClient);
         when(dataManagementFactory.getBlobClient(any(), any())).thenReturn(blobClient);
         when(blobClient.exists()).thenReturn(true);
@@ -161,5 +166,34 @@ class DataManagementServiceImplTest {
 
         dataManagementService.downloadData(DatastoreContainerType.UNSTRUCTURED, BLOB_CONTAINER_NAME, BLOB_ID);
         verify(blobClient, times(1)).downloadStream(any());
+    }
+
+    @Test
+    void testCopyData() {
+        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-inbound-container"))
+            .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
+        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-unstructured"))
+            .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
+        UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
+
+        dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId);
+
+        verify(azCopyUtil).copy(
+            "https://dartssastg.blob....net/darts-inbound-container/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D",
+            "https://dartssastg.blob....net/darts-unstructured/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D"
+        );
+    }
+
+    @Test
+    void testCopyDataRethrowsExceptionsAsDartsApiException() {
+        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-inbound-container"))
+            .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
+        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-unstructured"))
+            .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
+        UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
+        doThrow(RuntimeException.class).when(azCopyUtil).copy(any(), any());
+
+        assertThrows(DartsException.class, () ->
+            dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId));
     }
 }

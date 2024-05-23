@@ -246,6 +246,9 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+      sas-url:
+        darts-inbound-container: ${DARTS_INBOUND_STORAGE_SAS_URL:sddss}
+        darts-unstructured: ${DARTS_UNSTRUCTURED_STORAGE_SAS_URL:ddddd}
       delete:
         timeout: 60
     search:

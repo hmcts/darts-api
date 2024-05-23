@@ -25,6 +25,7 @@ public class EodHelperMocks {
     @Mock private ExternalLocationTypeEntity detsLocation;
 
     @Mock private ObjectRecordStatusEntity storedStatus;
+    @Mock private ObjectRecordStatusEntity failureStatus;
     @Mock private ObjectRecordStatusEntity markForDeletionStatus;
     @Mock private ObjectRecordStatusEntity armIngestionStatus;
     @Mock private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
@@ -72,6 +73,9 @@ public class EodHelperMocks {
         mockedEodHelper.when(EodHelper::storedStatus).thenReturn(storedStatus);
         lenient().when(storedStatus.getId()).thenReturn(ObjectRecordStatusEnum.STORED.getId());
         lenient().when(storedStatus.getDescription()).thenReturn("Stored");
+        mockedEodHelper.when(EodHelper::failureStatus).thenReturn(failureStatus);
+        lenient().when(failureStatus.getId()).thenReturn(ObjectRecordStatusEnum.FAILURE.getId());
+        lenient().when(failureStatus.getDescription()).thenReturn("Failure");
         mockedEodHelper.when(EodHelper::markForDeletionStatus).thenReturn(markForDeletionStatus);
         lenient().when(markForDeletionStatus.getId()).thenReturn(ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
         lenient().when(markForDeletionStatus.getDescription()).thenReturn("marked for Deletion");
