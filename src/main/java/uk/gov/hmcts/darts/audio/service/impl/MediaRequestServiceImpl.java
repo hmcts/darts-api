@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
+import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
@@ -27,7 +28,10 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audiorequests.model.TransformedMediaDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
@@ -54,7 +58,9 @@ import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 import java.io.InputStream;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -88,6 +94,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
     private final AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
     private final CurrentTimeHelper currentTimeHelper;
+    private final GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
+    private final MediaRequestMapper mediaRequestMapper;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -102,7 +110,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public MediaRequestEntity getMediaRequestById(Integer id) {
+    public MediaRequestEntity getMediaRequestEntityById(Integer id) {
         return mediaRequestRepository.findById(id).orElseThrow(
             () -> new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND));
     }
@@ -110,7 +118,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus status) {
-        MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
+        MediaRequestEntity mediaRequestEntity = getMediaRequestEntityById(id);
         mediaRequestEntity.setStatus(status);
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
@@ -346,6 +354,27 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return downloadOrPlayback(transformedMediaId, AuditActivity.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
     }
 
+    @Override
+    public List<SearchTransformedMediaResponse> searchRequest(SearchTransformedMediaRequest getTransformedMediaRequest) {
+        List<TransformedMediaEntity> mediaEntities = null;
+        OffsetDateTime requestedAtFrom = getTransformedMediaRequest.getRequestedAtFrom()
+            != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(),LocalTime.MIN, ZoneOffset.UTC) : null;
+        OffsetDateTime requestedAtTo = getTransformedMediaRequest.getRequestedAtTo()
+            != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC) : null;
+
+        mediaEntities = transformedMediaRepository.findTransformedMedia(getTransformedMediaRequest.getMediaRequestId(),
+                                                                                                     getTransformedMediaRequest.getCaseNumber(),
+                                                                                                     getTransformedMediaRequest.getCourthouseDisplayName(),
+                                                                                                     getTransformedMediaRequest.getHearingDate(),
+                                                                                                     getTransformedMediaRequest.getOwner(),
+                                                                                                     getTransformedMediaRequest.getRequestedBy(),
+                                                                                                     requestedAtFrom,
+                                                                                                     requestedAtTo);
+
+
+        return getTransformedMediaDetailsMapper.mapSearchResults(mediaEntities);
+    }
+
     private InputStream downloadOrPlayback(Integer transformedMediaId, AuditActivity auditActivity, AudioRequestType expectedType) {
         final TransformedMediaEntity transformedMediaEntity = getTransformedMediaById(transformedMediaId);
         MediaRequestEntity mediaRequestEntity = transformedMediaEntity.getMediaRequest();
@@ -391,6 +420,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setStatus(COMPLETED);
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
+    @Override
+    public MediaRequest getMediaRequestById(Integer mediaRequestId) {
+        return mediaRequestMapper.mediaRequestFrom(getMediaRequestEntityById(mediaRequestId));
     }
 
     private UserAccountEntity getUserAccount() {

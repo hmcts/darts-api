@@ -235,7 +235,7 @@ class AudioTransformationServiceImplTest {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
             .thenReturn(Optional.of(mockMediaRequestEntity));
-        when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
+        when(mockMediaRequestService.getMediaRequestEntityById(1)).thenReturn(mockMediaRequestEntity);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
 
         assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());
@@ -246,7 +246,7 @@ class AudioTransformationServiceImplTest {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
             .thenReturn(Optional.of(mockMediaRequestEntity));
-        when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
+        when(mockMediaRequestService.getMediaRequestEntityById(1)).thenReturn(mockMediaRequestEntity);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
         when(mockMediaRequestEntity.getRequestType()).thenReturn(DOWNLOAD);
 

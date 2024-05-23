@@ -161,7 +161,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         UUID blobId;
 
         try {
-            mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+            mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(requestId);
             hearingEntity = mediaRequestEntity.getHearing();
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
