@@ -6,9 +6,12 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
+import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 
 public interface MediaRequestService {
@@ -42,6 +45,8 @@ public interface MediaRequestService {
     InputStream playback(Integer transformedMediaId);
 
     MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity);
+
+    List<SearchTransformedMediaResponse> searchRequest(SearchTransformedMediaRequest getTransformedMediaRequest);
 
     TransformedMediaEntity getTransformedMediaById(Integer id);
 }

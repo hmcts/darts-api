@@ -15,10 +15,17 @@ public class AudioTestData {
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                         OffsetDateTime startTime, OffsetDateTime endTime,
                                                         AudioRequestType audioRequestType, MediaRequestStatus status) {
+
+        return createCurrentMediaRequest(hearingEntity, requestor, requestor, startTime, endTime, audioRequestType, status, OffsetDateTime.now());
+    }
+
+    public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity owner, UserAccountEntity requestor,
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
+                                                        AudioRequestType audioRequestType, MediaRequestStatus status, OffsetDateTime requestedDate) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
-        mediaRequestEntity.setCurrentOwner(requestor);
+        mediaRequestEntity.setCurrentOwner(owner);
         mediaRequestEntity.setStatus(status);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
@@ -26,6 +33,8 @@ public class AudioTestData {
         mediaRequestEntity.setEndTime(endTime);
         mediaRequestEntity.setCreatedBy(requestor);
         mediaRequestEntity.setLastModifiedBy(requestor);
+        mediaRequestEntity.setCreatedDateTime(requestedDate);
+
         return mediaRequestEntity;
     }
 
