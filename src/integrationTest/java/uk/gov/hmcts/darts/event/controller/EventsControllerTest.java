@@ -16,7 +16,6 @@ import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventMappingService;
 import uk.gov.hmcts.darts.event.service.handler.EventHandlerEnumerator;
-import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
@@ -40,9 +39,6 @@ class EventsControllerTest {
 
     @MockBean
     private AudioApi audioApi;
-
-    @MockBean
-    private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
 
     @MockBean
     private DartsEventMapper dartsEventMapper;
