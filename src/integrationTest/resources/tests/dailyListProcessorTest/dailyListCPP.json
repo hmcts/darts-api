@@ -65,6 +65,13 @@
                       "citizen_name_surname": "CPP",
                       "citizen_name_requested_name": ""
                     }
+                  },
+                  {
+                    "name": {
+                      "citizen_name_forename": "ProsecutorName",
+                      "citizen_name_surname": "CPP",
+                      "citizen_name_requested_name": ""
+                    }
                   }
                 ]
               },
@@ -87,6 +94,47 @@
                     }
                   ],
                   "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "DefenceName",
+                        "citizen_name_surname": "CPP",
+                        "citizen_name_requested_name": ""
+                      }
+                    },
+                    {
+                      "name": {
+                        "citizen_name_forename": "DefenceName",
+                        "citizen_name_surname": "CPP",
+                        "citizen_name_requested_name": ""
+                      }
+                    }
+                  ]
+                },
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "DefendantName",
+                      "citizen_name_surname": "CPP",
+                      "citizen_name_requested_name": ""
+                    },
+                    "is_masked": "false"
+                  },
+                  "urn": "42GD2391421",
+                  "charges": [
+                    {
+                      "indictment_count_number": 1,
+                      "cjsoffence_code": "CA03014",
+                      "offence_statement": "Fail    / refuse give assistance to person executing Communications Act search warrant"
+                    }
+                  ],
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "DefenceName",
+                        "citizen_name_surname": "CPP",
+                        "citizen_name_requested_name": ""
+                      }
+                    },
                     {
                       "name": {
                         "citizen_name_forename": "DefenceName",
