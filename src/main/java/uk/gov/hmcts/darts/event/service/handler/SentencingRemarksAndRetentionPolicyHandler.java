@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 
 import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.transcriptionRequestDetailsFrom;
@@ -57,12 +59,22 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
         transcriptionRequestDetails.setTranscriptionTypeId(SENTENCING_REMARKS.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(STANDARD.getId());
 
-        var transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(transcriptionRequestDetails, false);
+        try {
+            var transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(transcriptionRequestDetails, false);
+            var updateTranscription = new UpdateTranscriptionRequest();
+            updateTranscription.setTranscriptionStatusId(APPROVED.getId());
+            updateTranscription.setWorkflowComment("Transcription Automatically approved");
+            transcriptionsApi.updateTranscription(transcriptionResponse.getTranscriptionId(), updateTranscription);
 
-        var updateTranscription = new UpdateTranscriptionRequest();
-        updateTranscription.setTranscriptionStatusId(APPROVED.getId());
-        updateTranscription.setWorkflowComment("Transcription Automatically approved");
-        transcriptionsApi.updateTranscription(transcriptionResponse.getTranscriptionId(), updateTranscription);
+        } catch (DartsApiException dartsException) {
+            //duplicate transcriptions can be safely ignored.
+            if (dartsException.getError().equals(TranscriptionApiError.DUPLICATE_TRANSCRIPTION)) {
+                log.warn("EventId {} caused a duplicate Transcription Request, which has been ignored.", hearingAndEvent.getEventEntity().getId());
+            } else {
+                throw dartsException;
+            }
+
+        }
 
         // store retention information for potential future use
         if (dartsEvent.getRetentionPolicy() != null) {
