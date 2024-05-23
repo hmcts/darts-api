@@ -5,7 +5,7 @@ java:
   devcpuRequests: "250m"
   devmemoryLimits: "2Gi"
   devcpuLimits: "1500m"
-  terminationGracePeriodSeconds: 60
+  terminationGracePeriodSeconds: 120
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
     darts:

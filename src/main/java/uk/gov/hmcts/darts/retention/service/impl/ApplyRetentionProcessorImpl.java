@@ -38,7 +38,7 @@ public class ApplyRetentionProcessorImpl implements ApplyRetentionProcessor {
         try {
             log.info("BEFORE SLEEP");
             auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, system, null);
-            Thread.sleep(30000);
+            Thread.sleep(45000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
