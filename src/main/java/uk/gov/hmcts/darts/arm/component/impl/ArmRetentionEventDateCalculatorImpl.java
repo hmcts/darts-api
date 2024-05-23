@@ -38,7 +38,8 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
             OffsetDateTime retentionDate = getDocumentRetentionDate(externalObjectDirectory);
             if (nonNull(retentionDate)) {
                 OffsetDateTime armRetentionDate = retentionDate.minusYears(armDataManagementConfiguration.getEventDateAdjustmentYears());
-                if (armRetentionDate.truncatedTo(MILLIS).compareTo(externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
+                if (nonNull(externalObjectDirectory.getEventDateTs()) && armRetentionDate.truncatedTo(MILLIS).compareTo(
+                    externalObjectDirectory.getEventDateTs().truncatedTo(MILLIS)) == 0) {
                     externalObjectDirectory.setUpdateRetention(false);
                     externalObjectDirectory.setLastModifiedBy(userAccount);
                     externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
@@ -56,7 +57,7 @@ public class ArmRetentionEventDateCalculatorImpl implements ArmRetentionEventDat
                         externalObjectDirectory.setLastModifiedBy(userAccount);
                         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
                         return true;
-                     }
+                    }
                 }
             } else {
                 log.warn("Retention date has not be set for EOD {}", externalObjectDirectoryId);
