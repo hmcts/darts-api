@@ -37,7 +37,6 @@ public class Application implements CommandLineRunner {
     @PreDestroy
     public void preDestroy() {
         log.info("****************** PRE DESTROY ********************");
-        automatedTaskConfigurationProperties.setStopRunning(true);
     }
 
     @SuppressWarnings({"PMD.CloseResource"})
