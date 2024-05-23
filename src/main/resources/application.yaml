@@ -1,6 +1,7 @@
 server:
   port: 4550
   max-http-request-header-size: 10MB
+  shutdown: graceful
 
 management:
   endpoint:
@@ -16,6 +17,8 @@ springdoc:
   packagesToScan: uk.gov.hmcts.darts
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 2m
   config:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
