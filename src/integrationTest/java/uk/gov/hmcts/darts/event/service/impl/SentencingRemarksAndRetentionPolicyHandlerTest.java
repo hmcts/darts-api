@@ -151,8 +151,8 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
         var endTime = startTime.plusHours(2);
         return new DartsEvent()
             .messageId("some-message-id")
-            .type("40730")
-            .subType("10808")
+            .type("40750")
+            .subType("11527")
             .courthouse(courthouseName)
             .caseNumbers(List.of(SOME_CASE_NUMBER))
             .courtroom(SOME_COURTROOM)
