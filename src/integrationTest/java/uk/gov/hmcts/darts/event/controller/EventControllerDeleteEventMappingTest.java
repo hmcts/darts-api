@@ -82,10 +82,11 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
                "type": "EVENT_105",
                "title": "The mapping is inactive, so cannot be deleted",
                "status": 409,
+               "detail": "Event handler mapping %s cannot be deleted because it is inactive."
             }
-            """;
+            """.formatted(entity.getId());
 
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT.withExtensible(true));
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
 
