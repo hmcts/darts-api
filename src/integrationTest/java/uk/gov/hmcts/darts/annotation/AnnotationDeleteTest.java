@@ -21,11 +21,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
-import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
+import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
 class AnnotationDeleteTest extends IntegrationBase {

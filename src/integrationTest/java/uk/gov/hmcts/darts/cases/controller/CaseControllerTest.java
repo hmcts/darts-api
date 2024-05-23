@@ -17,8 +17,8 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,16 +39,16 @@ import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.testutils.TestUtils.substituteHearingDateWithToday;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.testutils.data.DefenceTestData.createListOfDefenceForCase;
-import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createListOfDefendantsForCase;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createListOfJudges;
-import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createListOfProsecutor;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.substituteHearingDateWithToday;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.DefenceTestData.createListOfDefenceForCase;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createListOfDefendantsForCase;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createListOfJudges;
+import static uk.gov.hmcts.darts.test.common.data.ProsecutorTestData.createListOfProsecutor;
 
 @AutoConfigureMockMvc
 @Transactional

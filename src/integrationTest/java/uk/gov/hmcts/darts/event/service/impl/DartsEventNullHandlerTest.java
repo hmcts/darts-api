@@ -17,7 +17,7 @@ import java.util.List;
 
 import static java.time.OffsetDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class DartsEventNullHandlerTest extends IntegrationBase {
 

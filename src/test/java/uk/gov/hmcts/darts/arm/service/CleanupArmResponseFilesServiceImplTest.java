@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
+import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;

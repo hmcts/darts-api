@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
+import uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armLocation;
-import static uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData.TEST_EXTERNAL_OBJECT_DIRECTORY_ID;
+import static uk.gov.hmcts.darts.testutils.ExternalObjectDirectoryTestData.TEST_EXTERNAL_OBJECT_DIRECTORY_ID;
 
 @ExtendWith(MockitoExtension.class)
 class ArmRetentionEventDateProcessorImplTest {

@@ -46,6 +46,15 @@ sourceSets {
     java.srcDir "$buildDir/generated/openapi/src/main/java"
   }
 
+  testCommon {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+      srcDir file('src/testCommon/java')
+    }
+    resources.srcDir file('src/testCommon/resources')
+  }
+
   functionalTest {
     java {
       compileClasspath += main.output
@@ -58,10 +67,9 @@ sourceSets {
   integrationTest {
     java {
       compileClasspath += main.output
-      // test added in order to share test utilities i.e. matchers etc
-      compileClasspath += test.output
+      compileClasspath += testCommon.output
       runtimeClasspath += main.output
-      runtimeClasspath += test.output
+      runtimeClasspath += testCommon.output
       srcDir file('src/integrationTest/java')
     }
     resources.srcDir file('src/integrationTest/resources')
@@ -75,6 +83,17 @@ sourceSets {
     }
     resources.srcDir file('src/smokeTest/resources')
   }
+
+  test {
+    java {
+      compileClasspath += main.output
+      compileClasspath += testCommon.output
+      runtimeClasspath += main.output
+      runtimeClasspath += testCommon.output
+      srcDir file('src/test/java')
+    }
+    resources.srcDir file('src/test/resources')
+  }
 }
 
 idea {
@@ -85,6 +104,8 @@ idea {
     testResources.from(sourceSets.functionalTest.resources.srcDirs)
     testSources.from(sourceSets.smokeTest.allSource.srcDirs)
     testResources.from(sourceSets.smokeTest.resources.srcDirs)
+    testSources.from(sourceSets.testCommon.allSource.srcDirs)
+    testResources.from(sourceSets.testCommon.resources.srcDirs)
   }
 }
 
@@ -93,16 +114,22 @@ configurations.configureEach {
 }
 
 configurations {
+  testCommonImplementation.extendsFrom testImplementation
+
   functionalTestImplementation.extendsFrom testImplementation
   functionalTestRuntimeOnly.extendsFrom runtimeOnly
 
-  integrationTestImplementation.extendsFrom testImplementation
+  integrationTestImplementation.extendsFrom testCommonImplementation
   integrationTestRuntimeOnly.extendsFrom runtimeOnly
 
   smokeTestImplementation.extendsFrom testImplementation
   smokeTestRuntimeOnly.extendsFrom runtimeOnly
 
   openapispecifications
+}
+
+tasks.named('processTestResources', Copy) {
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType(JavaCompile).configureEach {

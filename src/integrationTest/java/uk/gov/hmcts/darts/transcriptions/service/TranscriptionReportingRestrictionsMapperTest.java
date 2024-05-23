@@ -16,11 +16,11 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createSomeMinimalCase;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_11_1981_DB_ID;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createSomeMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
