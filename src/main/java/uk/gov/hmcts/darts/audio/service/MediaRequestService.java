@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -18,7 +19,7 @@ public interface MediaRequestService {
 
     AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId);
 
-    MediaRequestEntity getMediaRequestById(Integer id);
+    MediaRequestEntity getMediaRequestEntityById(Integer id);
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus mediaRequestStatus);
 
@@ -49,4 +50,6 @@ public interface MediaRequestService {
     List<SearchTransformedMediaResponse> searchRequest(SearchTransformedMediaRequest getTransformedMediaRequest);
 
     TransformedMediaEntity getTransformedMediaById(Integer id);
+
+    MediaRequest getMediaRequestById(Integer mediaRequestId);
 }

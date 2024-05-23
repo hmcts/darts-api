@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
@@ -94,6 +95,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
     private final CurrentTimeHelper currentTimeHelper;
     private final GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
+    private final MediaRequestMapper mediaRequestMapper;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -108,7 +110,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public MediaRequestEntity getMediaRequestById(Integer id) {
+    public MediaRequestEntity getMediaRequestEntityById(Integer id) {
         return mediaRequestRepository.findById(id).orElseThrow(
             () -> new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND));
     }
@@ -116,7 +118,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus status) {
-        MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
+        MediaRequestEntity mediaRequestEntity = getMediaRequestEntityById(id);
         mediaRequestEntity.setStatus(status);
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
@@ -418,6 +420,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setStatus(COMPLETED);
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
+    @Override
+    public MediaRequest getMediaRequestById(Integer mediaRequestId) {
+        return mediaRequestMapper.mediaRequestFrom(getMediaRequestEntityById(mediaRequestId));
     }
 
     private UserAccountEntity getUserAccount() {
