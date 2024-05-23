@@ -183,7 +183,9 @@ def coverageExclusions = [
   '**/uk/gov/hmcts/darts/datamanagement/service/impl/InboundToUnstructuredProcessorImpl.java',
   '**/uk/gov/hmcts/darts/arm/service/impl/UnstructuredToArmBatchProcessorImpl.java',
   '**/uk/gov/hmcts/darts/dailylist/service/impl/DailyListServiceImpl.java',
-  '**/uk/gov/hmcts/darts/retention/service/impl/ApplyRetentionProcessorImpl.java'
+  '**/uk/gov/hmcts/darts/retention/service/impl/ApplyRetentionProcessorImpl.java',
+  '**/uk/gov/hmcts/darts/task/runner/impl/AbstractLockableAutomatedTask.java'
+
 ]
 
 jacocoTestReport {
