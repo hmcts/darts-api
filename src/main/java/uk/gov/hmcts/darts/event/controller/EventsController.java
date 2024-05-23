@@ -137,4 +137,13 @@ public class EventsController implements EventApi {
         return new ResponseEntity<>(eventMapping, HttpStatus.OK);
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<Void> adminDeleteEventMappings(Integer eventHandlerId) {
+        eventMappingService.deleteEventMapping(eventHandlerId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

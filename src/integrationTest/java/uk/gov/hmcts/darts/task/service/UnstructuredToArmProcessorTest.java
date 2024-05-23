@@ -74,6 +74,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
+        int batchSize = 0;
         unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
@@ -83,7 +84,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             userIdentity,
             armDataManagementConfiguration,
             fileOperationService,
-            archiveRecordService
+            archiveRecordService,
+            batchSize
         );
 
     }

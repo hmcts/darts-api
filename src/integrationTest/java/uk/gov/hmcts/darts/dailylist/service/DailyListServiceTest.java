@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static java.util.Comparator.comparing;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -101,12 +102,16 @@ class DailyListServiceTest extends IntegrationBase {
         request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, "someXml", null, null, dailyList, "some-message-id");
         service.saveDailyListToDatabase(request);
 
-        List<DailyListEntity> resultList = dailyListRepository.findAll();
-        assertEquals(1, resultList.size());
-        DailyListEntity dailyListEntity = resultList.get(0);
+        var resultList = dailyListRepository.findAll().stream()
+            .sorted(comparing(DailyListEntity::getId).reversed())
+            .toList();
 
-        String expectedResponseLocation = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse.json";
-        checkExpectedResponse(dailyListEntity, expectedResponseLocation);
+        assertEquals(2, resultList.size());
+
+        String expectedResponseLocation1 = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse.json";
+        String expectedResponseLocation2 = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse2.json";
+        checkExpectedResponse(resultList.get(0), expectedResponseLocation1);
+        checkExpectedResponse(resultList.get(1), expectedResponseLocation2);
     }
 
     @Test
@@ -127,7 +132,7 @@ class DailyListServiceTest extends IntegrationBase {
         DailyListPostRequest request2 = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null, null, null, dailyList2, "some-message-id");
         service.saveDailyListToDatabase(request2);
         List<DailyListEntity> resultList = dailyListRepository.findAll();
-        assertEquals(1, resultList.size());
+        assertEquals(2, resultList.size());
         DailyListEntity dailyListEntity = resultList.get(0);
 
         checkExpectedResponse(

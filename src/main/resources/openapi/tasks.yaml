@@ -59,6 +59,8 @@ paths:
           description: ACCEPTED
         '404':
           $ref: '#/components/responses/AutomatedTaskNotFound'
+        '409':
+          $ref: '#/components/responses/AutomatedTaskAlreadyRunning'
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS

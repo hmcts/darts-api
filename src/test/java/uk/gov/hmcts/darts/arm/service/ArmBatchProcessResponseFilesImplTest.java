@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.EodHelper.armDropZoneStatus;
@@ -73,6 +72,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
     private ArmBatchProcessResponseFilesImpl armBatchProcessResponseFiles;
 
+    private static final Integer BATCH_SIZE = 2;
 
     @BeforeEach
     void setupData() {
@@ -92,7 +92,8 @@ class ArmBatchProcessResponseFilesImplTest {
             mediaRepository,
             transcriptionDocumentRepository,
             annotationDocumentRepository,
-            caseDocumentRepository
+            caseDocumentRepository,
+            BATCH_SIZE
         );
 
     }
@@ -107,7 +108,7 @@ class ArmBatchProcessResponseFilesImplTest {
 
         // given
         String continuationToken = null;
-        lenient().when(armDataManagementConfiguration.getBatchSize()).thenReturn(2);
+
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(RESPONSE_FILENAME_EXTENSION);
 
@@ -126,7 +127,8 @@ class ArmBatchProcessResponseFilesImplTest {
         ContinuationTokenBlobs continuationTokenBlobs = ContinuationTokenBlobs.builder()
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
 

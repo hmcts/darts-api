@@ -1,6 +1,6 @@
 {
 	"info": {
-      "_postman_id": "4fe530af-6f67-48c9-8c09-8f973c022c6b",
+		"_postman_id": "2ec376dc-36f4-4ba1-9056-72f3a1a6bfd2",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "30362290"
@@ -767,52 +767,52 @@
 								}
 							},
 							"response": []
-                        },
-                      {
-                        "name": "POST DailyLists Run",
-                        "request": {
-                          "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                              {
-                                "key": "token",
-                                "value": "{{global_access_token}}",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "method": "POST",
-                          "header": [
-                            {
-                              "key": "xml_document",
-                              "value": "",
-                              "type": "default",
-                              "disabled": true
-                            },
-                            {
-                              "key": "json_document",
-                              "value": "{  \"document_id\": {    \"document_name\": \"DailyList_457_20210219174938.xml\",    \"unique_id\": \"CSDDL1613756980160\",    \"document_type\": \"DL\",    \"time_stamp\": \"2021-02-19T17:49:38.391+01:00\"  },  \"list_header\": {    \"list_category\": \"Criminal\",    \"start_date\": \"2021-02-23\",    \"end_date\": \"2021-02-23\",    \"version\": \"NOT VERSIONED\",    \"published_time\": \"2021-02-19T17:49:38.767Z\"  },  \"crown_court\": {    \"court_house_type\": \"Crown Court\",    \"court_house_code\": {      \"court_house_short_name\": \"SWANS\",      \"code\": 457    },    \"court_house_name\": \"SWANSEA\"  },  \"court_lists\": [    {      \"court_house\": {        \"court_house_type\": \"Crown Court\",        \"court_house_code\": {          \"court_house_short_name\": \"SWANS\",          \"code\": 457        },        \"court_house_name\": \"SWANSEA\"      },      \"sittings\": [        {          \"court_room_number\": \"1\",          \"sitting_sequence_no\": 1,          \"sitting_at\": \"11:00:00\",          \"sitting_priority\": \"T\",          \"judiciary\": [            {              \"citizen_name_forename\": \"JudgeName\",              \"citizen_name_surname\": \"Surname\",              \"citizen_name_requested_name\": \"Judgename Surname\"            }          ],          \"hearings\": [            {              \"hearing_sequence_number\": 1,              \"hearing_details\": {                \"hearing_type\": \"PTR\",                \"hearing_description\": \"For Pre-Trial Review\",                \"hearing_date\": \"2020-06-20\"              },              \"time_marking_note\": \"NOT BEFORE 11:00 AM\",              \"case_number\": \"Case1\",              \"prosecution\": {                \"prosecuting_authority\": \"Crown Prosecution Service\",                \"prosecuting_reference\": \"Crown Prosecution Service\",                \"prosecuting_organisation\": {                  \"organisation_name\": \"Crown Prosecution Service\"                },                \"advocates\": [                  {                    \"name\": {                      \"citizen_name_forename\": \"ProsecutorName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    }                  }                ]              },              \"defendants\": [                {                  \"personal_details\": {                    \"name\": {                      \"citizen_name_forename\": \"DefendantName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    },                    \"is_masked\": \"false\"                  },                  \"urn\": \"42GD2391421\",                  \"charges\": [                    {                      \"indictment_count_number\": 1,                      \"cjsoffence_code\": \"CA03014\",                      \"offence_statement\": \"Fail    / refuse give assistance to person executing Communications Act search warrant\"                    }                  ],                  \"counsel\": [                    {                      \"name\": {                        \"citizen_name_forename\": \"DefenceName\",                        \"citizen_name_surname\": \"Surname\",                        \"citizen_name_requested_name\": \"\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}",
-                              "type": "default"
-                            }
-                          ],
-                          "url": {
-                            "raw": "{{serverUrl}}/dailylists/run?listing_courthouse=YORK",
-                            "host": [
-                              "{{serverUrl}}"
-                            ],
-                            "path": [
-                              "dailylists",
-                              "run"
-                            ],
-                            "query": [
-                              {
-                                "key": "listing_courthouse",
-                                "value": "YORK"
-                              }
-                            ]
-                          }
-                        },
-                        "response": []
+						},
+						{
+							"name": "POST DailyLists Run",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "xml_document",
+										"value": "",
+										"type": "default",
+										"disabled": true
+									},
+									{
+										"key": "json_document",
+										"value": "{  \"document_id\": {    \"document_name\": \"DailyList_457_20210219174938.xml\",    \"unique_id\": \"CSDDL1613756980160\",    \"document_type\": \"DL\",    \"time_stamp\": \"2021-02-19T17:49:38.391+01:00\"  },  \"list_header\": {    \"list_category\": \"Criminal\",    \"start_date\": \"2021-02-23\",    \"end_date\": \"2021-02-23\",    \"version\": \"NOT VERSIONED\",    \"published_time\": \"2021-02-19T17:49:38.767Z\"  },  \"crown_court\": {    \"court_house_type\": \"Crown Court\",    \"court_house_code\": {      \"court_house_short_name\": \"SWANS\",      \"code\": 457    },    \"court_house_name\": \"SWANSEA\"  },  \"court_lists\": [    {      \"court_house\": {        \"court_house_type\": \"Crown Court\",        \"court_house_code\": {          \"court_house_short_name\": \"SWANS\",          \"code\": 457        },        \"court_house_name\": \"SWANSEA\"      },      \"sittings\": [        {          \"court_room_number\": \"1\",          \"sitting_sequence_no\": 1,          \"sitting_at\": \"11:00:00\",          \"sitting_priority\": \"T\",          \"judiciary\": [            {              \"citizen_name_forename\": \"JudgeName\",              \"citizen_name_surname\": \"Surname\",              \"citizen_name_requested_name\": \"Judgename Surname\"            }          ],          \"hearings\": [            {              \"hearing_sequence_number\": 1,              \"hearing_details\": {                \"hearing_type\": \"PTR\",                \"hearing_description\": \"For Pre-Trial Review\",                \"hearing_date\": \"2020-06-20\"              },              \"time_marking_note\": \"NOT BEFORE 11:00 AM\",              \"case_number\": \"Case1\",              \"prosecution\": {                \"prosecuting_authority\": \"Crown Prosecution Service\",                \"prosecuting_reference\": \"Crown Prosecution Service\",                \"prosecuting_organisation\": {                  \"organisation_name\": \"Crown Prosecution Service\"                },                \"advocates\": [                  {                    \"name\": {                      \"citizen_name_forename\": \"ProsecutorName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    }                  }                ]              },              \"defendants\": [                {                  \"personal_details\": {                    \"name\": {                      \"citizen_name_forename\": \"DefendantName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    },                    \"is_masked\": \"false\"                  },                  \"urn\": \"42GD2391421\",                  \"charges\": [                    {                      \"indictment_count_number\": 1,                      \"cjsoffence_code\": \"CA03014\",                      \"offence_statement\": \"Fail    / refuse give assistance to person executing Communications Act search warrant\"                    }                  ],                  \"counsel\": [                    {                      \"name\": {                        \"citizen_name_forename\": \"DefenceName\",                        \"citizen_name_surname\": \"Surname\",                        \"citizen_name_requested_name\": \"\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{serverUrl}}/dailylists/run?listing_courthouse=YORK",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists",
+										"run"
+									],
+									"query": [
+										{
+											"key": "listing_courthouse",
+											"value": "YORK"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -960,6 +960,54 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "swansea event Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/admin/event-mappings/:event_handler_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"event-mappings",
+								":event_handler_id"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "event_handler_id",
+									"value": "21"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1873,50 +1921,50 @@
 			"name": "Transcriptions",
 			"item": [
 				{
-                  "name": "/admin/transcriptions/{transcription_id}",
-                  "request": {
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": [
-                        {
-                          "key": "token",
-                          "value": "{{access_token}}",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "method": "PATCH",
-                    "header": [],
-                    "body": {
-                      "mode": "raw",
-                      "raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
-                      "options": {
-                        "raw": {
-                          "language": "json"
-                        }
-                      }
-                    },
-                    "url": {
-                      "raw": "{{serverUrl}}/admin/transcriptions/:transcription_id",
-                      "host": [
-                        "{{serverUrl}}"
-                      ],
-                      "path": [
-                        "admin",
-                        "transcriptions",
-                        ":transcription_id"
-                      ],
-                      "variable": [
-                        {
-                          "key": "transcription_id",
-                          "value": "61"
-                        }
-                      ]
-                    }
-                  },
-                  "response": []
-                },
-              {
+					"name": "/admin/transcriptions/{transcription_id}",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/admin/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "61"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/transcriptions",
 					"request": {
 						"method": "POST",
@@ -2453,67 +2501,67 @@
 			]
 		},
 		{
-          "name": "Authentication",
-          "item": [
-            {
-              "name": "/userstate",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{access_token}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "accept",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{serverUrl}}/userstate",
-                  "host": [
-                    "{{serverUrl}}"
-                  ],
-                  "path": [
-                    "userstate"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ]
-        },
-      {
-        "name": "get server info",
-        "event": [
-          {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test(\"Status code is 200\", function () {",
-                "    pm.response.to.have.status(200);",
-                "});"
-              ],
-              "type": "text/javascript"
-            }
-          }
-        ],
-        "request": {
-          "method": "GET",
-          "header": [],
-          "url": {
-            "raw": "{{serverUrl}}/info",
-            "host": [
-              "{{serverUrl}}"
-            ],
-            "path": [
-              "info"
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "/userstate",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/userstate",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"userstate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "get server info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{serverUrl}}/info",
+					"host": [
+						"{{serverUrl}}"
+					],
+					"path": [
+						"info"
 					]
 				}
 			},

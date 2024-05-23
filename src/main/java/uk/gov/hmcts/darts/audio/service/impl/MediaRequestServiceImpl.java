@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
-import uk.gov.hmcts.darts.audio.mapper.TransformedMediaDetailsMapper;
+import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -84,7 +84,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final NotificationApi notificationApi;
     private final AuditApi auditApi;
     private final TransformedMediaRepository transformedMediaRepository;
-    private final TransformedMediaDetailsMapper transformedMediaDetailsMapper;
+    private final TransformedMediaMapper transformedMediaMapper;
     private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
     private final AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
     private final CurrentTimeHelper currentTimeHelper;
@@ -250,7 +250,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     private List<TransformedMediaDetails> getTransformedMediaDetails(Integer userId, Boolean expired) {
         List<TransformedMediaDetailsDto> transformedMediaDetailsDtoList = transformedMediaRepository.findTransformedMediaDetails(userId, expired);
-        return transformedMediaDetailsMapper.mapToTransformedMediaDetails(transformedMediaDetailsDtoList);
+        return transformedMediaMapper.mapToTransformedMediaDetails(transformedMediaDetailsDtoList);
     }
 
     private List<MediaRequestDetails> getMediaRequestDetails(Integer userId, Boolean expired) {
@@ -397,7 +397,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return userIdentity.getUserAccount();
     }
 
-    private TransformedMediaEntity getTransformedMediaById(Integer id) {
+    @Override
+    public TransformedMediaEntity getTransformedMediaById(Integer id) {
         return transformedMediaRepository.findById(id).orElseThrow(
             () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
     }

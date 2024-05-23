@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
 import java.io.InputStream;
 import java.util.Optional;
@@ -42,4 +43,5 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity);
 
+    TransformedMediaEntity getTransformedMediaById(Integer id);
 }
