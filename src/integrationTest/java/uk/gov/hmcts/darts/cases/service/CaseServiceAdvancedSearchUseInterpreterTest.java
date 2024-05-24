@@ -17,17 +17,17 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j

@@ -20,9 +20,9 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.log.util.DailyListLogJobReport;
+import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TestUtils;
-import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -40,7 +40,7 @@ import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.FAILED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.IGNORED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PARTIALLY_PROCESSED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PROCESSED;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @Slf4j
 class DailyListProcessorTest extends IntegrationBase {

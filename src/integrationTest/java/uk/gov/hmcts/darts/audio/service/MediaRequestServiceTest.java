@@ -24,7 +24,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.testutils.data.MediaRequestTestData.minimalRequestData;
+import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {
 

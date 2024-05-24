@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
-import uk.gov.hmcts.darts.testutils.data.CaseTestData;
+import uk.gov.hmcts.darts.test.common.data.CaseTestData;
 
 import java.time.LocalDateTime;
 import java.util.List;

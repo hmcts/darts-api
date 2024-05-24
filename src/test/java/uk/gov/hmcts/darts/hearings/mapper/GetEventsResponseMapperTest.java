@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.time.LocalTime;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 class GetEventsResponseMapperTest {
 

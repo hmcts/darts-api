@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
 /**
  * This class is a test implementation of DataManagementService, intended to mimic the basic behaviour of Azure

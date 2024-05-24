@@ -9,8 +9,8 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.gov.hmcts.darts.common.util.LogUtil;
-import uk.gov.hmcts.darts.common.util.MemoryLogAppender;
+import uk.gov.hmcts.darts.test.common.LogUtil;
+import uk.gov.hmcts.darts.test.common.MemoryLogAppender;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 @AutoConfigureWireMock(files = "file:src/integrationTest/resources/wiremock")

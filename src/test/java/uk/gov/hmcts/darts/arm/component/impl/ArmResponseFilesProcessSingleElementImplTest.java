@@ -24,7 +24,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.common.util.TestUtils;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 
 import java.io.File;
 import java.io.IOException;

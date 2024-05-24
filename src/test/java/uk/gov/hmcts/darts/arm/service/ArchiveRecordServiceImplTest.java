@@ -68,8 +68,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getObjectMapper;
 
 @SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)

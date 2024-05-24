@@ -42,7 +42,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
 

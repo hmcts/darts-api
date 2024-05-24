@@ -21,9 +21,9 @@ import java.util.UUID;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
-import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
-import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
+import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
+import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaFor;
+import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaWith;
 
 @Transactional
 @Service

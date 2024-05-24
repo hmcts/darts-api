@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.util.SecurityRoleMatcher;
+import uk.gov.hmcts.darts.test.common.SecurityRoleMatcher;
 
 import java.util.Collections;
 import java.util.Set;
