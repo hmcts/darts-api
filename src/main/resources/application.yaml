@@ -121,6 +121,11 @@ darts:
       - "mpeg2"
       - "mp2"
       - "audio/mpeg"
+      - "a00"
+      - "a01"
+      - "a02"
+      - "a03"
+      - "application/octet-stream"
     max-file-size: 524288000
     pre-amble-duration: 30
     post-amble-duration: 30

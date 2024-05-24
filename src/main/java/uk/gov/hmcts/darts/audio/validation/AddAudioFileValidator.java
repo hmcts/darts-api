@@ -33,6 +33,7 @@ public class AddAudioFileValidator implements Validator<MultipartFile> {
 
         String extension = FilenameUtils.getExtension(addAudioFileRequest.getOriginalFilename());
         if (!isWhiteListedFileType(extension, properties)) {
+            log.warn("A file with extension {} has been rejected.", extension);
             throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
         }
 
@@ -43,6 +44,7 @@ public class AddAudioFileValidator implements Validator<MultipartFile> {
                 = tika.detect(addAudioFileRequest.getInputStream());
 
             if (!isWhiteListedFileType(mimeType, properties)) {
+                log.warn("A file with mimeType {} has been rejected.", mimeType);
                 throw new DartsApiException(AudioApiError.UNEXPECTED_FILE_TYPE);
             }
         } catch (IOException ioException) {
