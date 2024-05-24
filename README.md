@@ -126,6 +126,8 @@ export ARM_SAS_ENDPOINT=
 export ARM_URL=
 export ARM_USERNAME=
 export ARM_PASSWORD=
+export DARTS_INBOUND_STORAGE_SAS_URL=
+export DARTS_UNSTRUCTURED_STORAGE_SAS_URL=
 ```
 
 ### Storage Account
