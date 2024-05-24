@@ -37,7 +37,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 class InboundToUnstructuredProcessorSingleElementImplTest {
 
     private static final Integer INBOUND_ID = 5555;
-    private static final UUID externalLocationUUID = UUID.randomUUID();
+    private static final UUID EXTERNAL_LOCATION_UUID = UUID.randomUUID();
     private static final String INBOUND_CONTAINER_NAME = "darts-inbound-container";
     private static final String UNSTRUCTURED_CONTAINER_NAME = "darts-unstructured";
     @Mock
@@ -82,7 +82,7 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     void processInboundToUnstructuredAnnotation() {
 
         when(externalObjectDirectoryEntityInbound.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
-        when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(externalLocationUUID);
+        when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -98,13 +98,13 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     void processInboundToUnstructuredCaseDocument() {
 
         when(externalObjectDirectoryEntityInbound.getCaseDocument()).thenReturn(caseDocumentEntity);
-        when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(externalLocationUUID);
+        when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(EXTERNAL_LOCATION_UUID);
         when(caseDocumentEntity.getId()).thenReturn(44);
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        verify(dataManagementService).copyBlobData(INBOUND_CONTAINER_NAME, UNSTRUCTURED_CONTAINER_NAME, externalLocationUUID);
+        verify(dataManagementService).copyBlobData(INBOUND_CONTAINER_NAME, UNSTRUCTURED_CONTAINER_NAME, EXTERNAL_LOCATION_UUID);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
         ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
