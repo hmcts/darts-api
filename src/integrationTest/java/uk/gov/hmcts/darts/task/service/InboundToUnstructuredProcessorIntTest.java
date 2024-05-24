@@ -13,9 +13,11 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.DataManagementServiceStubImpl;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,7 +91,7 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     void processInboundTranscriptionDocumentToUnstructured() {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND);
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
 
         var existingUnstructuredStored = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(existingUnstructuredStored).isEmpty();
@@ -107,11 +109,11 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void skipsProcessInboundTranscriptionDocumentToUnstructuredWhenAlreadyStoredInUnstructured() {
+    void skipsProcessInboundToUnstructuredWhenAlreadyStoredInUnstructured() {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND);
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
@@ -132,11 +134,11 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void processInboundTranscriptionDocumentToUnstructuredWhenFailedInUnstructured() {
+    void processAgainInboundToUnstructuredWhenFailedInUnstructured() {
         // given
         var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
-        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND);
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, UUID.randomUUID());
 
         dartsDatabase.getExternalObjectDirectoryStub().createAndSaveExternalObjectDirectory(
             transcription.getTranscriptionDocumentEntities().get(0).getId(),
@@ -154,5 +156,23 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
         var unstructuredAfterProcessing = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
         assertThat(unstructuredAfterProcessing).hasSize(1);
         assertThat(unstructuredAfterProcessing.get(0).getId()).isEqualTo(unstructuredBeforeProcessing.get(0).getId());
+    }
+
+    @Test
+    void processInboundObjectSetsUnstructuredToFailureStatusOnCopyFailure() {
+        // given
+        var transcription = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
+        dartsDatabase.getTranscriptionStub().updateTranscriptionWithDocument(transcription, STORED, INBOUND, DataManagementServiceStubImpl.FAILURE_UUID);
+
+        var existingUnstructuredStored = eodRepository.findByStatusAndType(storedStatus(), unstructuredLocation());
+        assertThat(existingUnstructuredStored).isEmpty();
+
+        // when
+        inboundToUnstructuredProcessor.processInboundToUnstructured();
+
+        // then
+        var createdUnstructuredFailed = eodRepository.findByStatusAndType(failureStatus(), unstructuredLocation());
+        assertThat(createdUnstructuredFailed).hasSize(1);
+        assertThat(createdUnstructuredFailed.get(0).getTransferAttempts()).isEqualTo(1);
     }
 }

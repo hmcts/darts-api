@@ -6,30 +6,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
 
-import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl.FAILURE_STATES_LIST;
 
 
@@ -44,8 +35,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
     private final UserAccountRepository userAccountRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
@@ -57,20 +46,20 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundExternalObjectDirectory);
 
-        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
+        unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
         try {
-            var uuid = inboundExternalObjectDirectory.getExternalLocation();
-            dataManagementService.copyBlobData(getInboundContainerName(), getUnstructuredContainerName(), uuid);
+            UUID externalLocation = inboundExternalObjectDirectory.getExternalLocation();
+            dataManagementService.copyBlobData(getInboundContainerName(), getUnstructuredContainerName(), externalLocation);
             unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
-            unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+            unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalLocation);
+            unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
             log.debug("Saved unstructured stored EOD with Id: {}", unstructuredExternalObjectDirectoryEntity.getId());
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
         } catch (Exception e) {
             log.error("Failed to move file from inbound store to unstructured store. EOD id: {}", inboundExternalObjectDirectory.getId(), e);
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
+            unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.failureStatus());
             setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
         } finally {
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
@@ -119,8 +108,8 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         ExternalObjectDirectoryEntity externalObjectDirectory) {
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        unstructuredExternalObjectDirectoryEntity.setExternalLocationType(getType(UNSTRUCTURED));
-        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
+        unstructuredExternalObjectDirectoryEntity.setExternalLocationType(EodHelper.unstructuredLocation());
+        unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
         unstructuredExternalObjectDirectoryEntity.setVerificationAttempts(INITIAL_VERIFICATION_ATTEMPTS);
         MediaEntity mediaEntity = externalObjectDirectory.getMedia();
@@ -139,9 +128,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         if (caseDocumentEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setCaseDocument(caseDocumentEntity);
         }
-        OffsetDateTime now = OffsetDateTime.now();
-        unstructuredExternalObjectDirectoryEntity.setCreatedDateTime(now);
-        unstructuredExternalObjectDirectoryEntity.setLastModifiedDateTime(now);
         var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
         unstructuredExternalObjectDirectoryEntity.setCreatedBy(systemUser);
         unstructuredExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
@@ -155,13 +141,5 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     private String getUnstructuredContainerName() {
         return dataManagementConfiguration.getUnstructuredContainerName();
-    }
-
-    private ExternalLocationTypeEntity getType(ExternalLocationTypeEnum type) {
-        return externalLocationTypeRepository.getReferenceById(type.getId());
-    }
-
-    private ObjectRecordStatusEntity getStatus(ObjectRecordStatusEnum status) {
-        return objectRecordStatusRepository.getReferenceById(status.getId());
     }
 }

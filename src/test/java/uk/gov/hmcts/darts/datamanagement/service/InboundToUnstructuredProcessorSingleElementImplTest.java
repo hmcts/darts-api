@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,20 +13,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.impl.EodHelperMocks;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorSingleElementImpl;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,10 +43,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ObjectRecordStatusRepository objectRecordStatusRepository;
-    @Mock
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
     private DataManagementService dataManagementService;
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
@@ -59,12 +57,13 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
     private CaseDocumentEntity caseDocumentEntity;
     @Mock
     ExternalObjectDirectoryEntity externalObjectDirectoryEntityInbound;
-    @Mock
-    ExternalLocationTypeEntity externalLocationTypeUnstructured;
-    @Mock
-    ObjectRecordStatusEntity objectRecordStatusEntityAwaiting;
-    @Mock
-    ObjectRecordStatusEntity objectRecordStatusEntityStored;
+
+    private static final EodHelperMocks EOD_HELPER_MOCKS = new EodHelperMocks();
+
+    @AfterAll
+    public static void close() {
+        EOD_HELPER_MOCKS.close();
+    }
 
     @BeforeEach
     void setUp() {
@@ -72,23 +71,18 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorSingleElementImpl(dataManagementService, dataManagementConfiguration,
-                                                                                             userAccountRepository, objectRecordStatusRepository,
-                                                                                             externalLocationTypeRepository,
+                                                                                             userAccountRepository,
                                                                                              externalObjectDirectoryRepository);
-        when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.of(externalObjectDirectoryEntityInbound));
-        when(dataManagementConfiguration.getInboundContainerName()).thenReturn(INBOUND_CONTAINER_NAME);
-        when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn(UNSTRUCTURED_CONTAINER_NAME);
+        lenient().when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.of(externalObjectDirectoryEntityInbound));
+        lenient().when(dataManagementConfiguration.getInboundContainerName()).thenReturn(INBOUND_CONTAINER_NAME);
+        lenient().when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn(UNSTRUCTURED_CONTAINER_NAME);
     }
 
     @Test
     void processInboundToUnstructuredAnnotation() {
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalObjectDirectoryEntityInbound.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(externalLocationUUID);
-        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -106,9 +100,6 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         when(externalObjectDirectoryEntityInbound.getCaseDocument()).thenReturn(caseDocumentEntity);
         when(externalObjectDirectoryEntityInbound.getExternalLocation()).thenReturn(externalLocationUUID);
         when(caseDocumentEntity.getId()).thenReturn(44);
-        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
@@ -120,4 +111,13 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
 
         assertEquals(STORED.getId(), savedStatus.getId());
     }
+
+    @Test
+    void processingThrowsExceptionIfInboundObjectIsNotFound() {
+
+        when(externalObjectDirectoryRepository.findById(INBOUND_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID));
+    }
+
 }

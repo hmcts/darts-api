@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -39,6 +40,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 @Profile("intTest")
 public class DataManagementServiceStubImpl implements DataManagementService {
 
+    // use this UUID to request stub throwing an exception
+    public static final UUID FAILURE_UUID = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
     private final DataManagementConfiguration dataManagementConfiguration;
 
     @Value("${darts.audio.transformation.service.audio.file:#{null}}")
@@ -97,6 +100,10 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     @Override
     public void copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
         logStubUsageWarning();
+
+        if (sourceBlobId.equals(FAILURE_UUID)) {
+            throw new DartsException("Exception thrown since copy requested with failure UUID");
+        }
 
         log.info("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
     }
