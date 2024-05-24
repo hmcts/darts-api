@@ -10,7 +10,7 @@ import java.time.Instant;
 
 @Slf4j
 @Component
-public class AzCopyUtil {
+public class AzureCopyUtil {
 
     @SneakyThrows
     public void copy(String source, String destination) {
@@ -30,6 +30,9 @@ public class AzCopyUtil {
                 //limiting info included in the exception to avoid potential leak of the source and destination sas tokens
                 throw new IOException("Failed to execute azcopy");
             }
+        } catch (InterruptedException ie) {
+            log.error("InterruptedException: ", ie);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             throw new IOException("Failed to execute azcopy");
         }

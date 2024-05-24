@@ -23,7 +23,7 @@ import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
-import uk.gov.hmcts.darts.util.AzCopyUtil;
+import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +50,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     private final DataManagementAzureClientFactory blobServiceFactory;
 
-    private final AzCopyUtil azCopyUtil;
+    private final AzureCopyUtil azureCopyUtil;
 
 
     /**
@@ -147,7 +147,7 @@ public class DataManagementServiceImpl implements DataManagementService {
             String sourceBlobSasUrl = buildBlobSasUrl(sourceContainerName, sourceContainerSasUrl, sourceBlobId.toString());
             String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, sourceBlobId.toString());
 
-            azCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
+            azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
 
             log.info("Copy completed from '{}' to '{}' for external object directory Id: {}", sourceContainerName, destinationContainerName, sourceBlobId);
         } catch (Exception e) {

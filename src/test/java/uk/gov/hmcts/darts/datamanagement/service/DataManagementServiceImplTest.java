@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
-import uk.gov.hmcts.darts.util.AzCopyUtil;
+import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
@@ -52,7 +52,7 @@ class DataManagementServiceImplTest {
     @Mock
     private DataManagementConfiguration dataManagementConfiguration;
     @Mock
-    private AzCopyUtil azCopyUtil;
+    private AzureCopyUtil azureCopyUtil;
     @InjectMocks
     private DataManagementServiceImpl dataManagementService;
     private BlobContainerClient blobContainerClient;
@@ -178,7 +178,7 @@ class DataManagementServiceImplTest {
 
         dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId);
 
-        verify(azCopyUtil).copy(
+        verify(azureCopyUtil).copy(
             "https://dartssastg.blob....net/darts-inbound-container/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D",
             "https://dartssastg.blob....net/darts-unstructured/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D"
         );
@@ -191,7 +191,7 @@ class DataManagementServiceImplTest {
         when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
         UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
-        doThrow(RuntimeException.class).when(azCopyUtil).copy(any(), any());
+        doThrow(RuntimeException.class).when(azureCopyUtil).copy(any(), any());
 
         assertThrows(DartsException.class, () ->
             dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId));

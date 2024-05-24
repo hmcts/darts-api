@@ -81,6 +81,7 @@ public class EodHelper {
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
 
 
+    @SuppressWarnings("java:S2696")
     @PostConstruct
     public void init() {
         unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
