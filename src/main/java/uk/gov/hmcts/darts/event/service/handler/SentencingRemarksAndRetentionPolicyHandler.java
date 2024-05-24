@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -48,7 +47,6 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
     }
 
     @Override
-    @Transactional
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var hearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
