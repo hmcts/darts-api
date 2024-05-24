@@ -170,9 +170,9 @@ class DataManagementServiceImplTest {
 
     @Test
     void testCopyData() {
-        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-inbound-container"))
+        when(dataManagementConfiguration.getContainerSasUrl("darts-inbound-container"))
             .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
-        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-unstructured"))
+        when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
         UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
 
@@ -186,9 +186,9 @@ class DataManagementServiceImplTest {
 
     @Test
     void testCopyDataRethrowsExceptionsAsDartsApiException() {
-        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-inbound-container"))
+        when(dataManagementConfiguration.getContainerSasUrl("darts-inbound-container"))
             .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
-        when(dataManagementConfiguration.getBlobStorageSasUrl("darts-unstructured"))
+        when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
         UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
         doThrow(RuntimeException.class).when(azCopyUtil).copy(any(), any());

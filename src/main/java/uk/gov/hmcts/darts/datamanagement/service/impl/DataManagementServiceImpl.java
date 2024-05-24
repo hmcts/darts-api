@@ -142,8 +142,8 @@ public class DataManagementServiceImpl implements DataManagementService {
     @Override
     public void copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
         try {
-            String sourceContainerSasUrl = dataManagementConfiguration.getBlobStorageSasUrl(sourceContainerName);
-            String destinationContainerSasUrl = dataManagementConfiguration.getBlobStorageSasUrl(destinationContainerName);
+            String sourceContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(sourceContainerName);
+            String destinationContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(destinationContainerName);
             String sourceBlobSasUrl = buildBlobSasUrl(sourceContainerName, sourceContainerSasUrl, sourceBlobId.toString());
             String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, sourceBlobId.toString());
 

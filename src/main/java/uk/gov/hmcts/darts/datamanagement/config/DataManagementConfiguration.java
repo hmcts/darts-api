@@ -51,14 +51,7 @@ public class DataManagementConfiguration extends StorageConfiguration {
         super.setTempBlobWorkspace(tempBlobWorkspace);
     }
 
-    public String getBlobStorageSasUrl(String containerName) {
-//        if (containerName.equals(inboundContainerName)) {
-//            return inboundBlobStorageSasUrl;
-//        } else if (containerName.equals(unstructuredContainerName)) {
-//            return unstructuredBlobStorageSasUrl;
-//        } else {
-//            throw new RuntimeException(String.format("SAS URL not found for container name '%s'", containerName));
-//        }
+    public String getContainerSasUrl(String containerName) {
         return environment.getProperty(String.format("darts.storage.blob.sas-url.%s", containerName));
     }
 }

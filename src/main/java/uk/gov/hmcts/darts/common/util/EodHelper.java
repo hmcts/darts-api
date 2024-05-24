@@ -118,7 +118,6 @@ public class EodHelper {
         return Arrays.stream(orsEntitiesToCompareTo).map(ObjectRecordStatusEntity::getId).anyMatch(orsToCompareTo -> orsToCompareTo.equals(ors.getId()));
     }
 
-    //TODO remove
     @Transactional
     public void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity user, List<Integer> idsToBeUpdated, OffsetDateTime timestamp) {
         eodRepository.updateStatus(
