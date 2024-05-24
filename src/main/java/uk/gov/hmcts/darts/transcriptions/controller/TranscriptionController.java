@@ -244,9 +244,9 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<List<SearchTranscriptionDocumentResponse>> searchForTranscriptionMedia(
         SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
 
-        List<SearchTransformedMediaResponse> foundTransformedMediaResponse = mediaRequestService.searchRequest(searchTransformedMediaRequest);
+        List<SearchTranscriptionDocumentResponse> foundTransformedMediaResponse =
+            adminTranscriptionSearchService.searchTranscriptions(searchTranscriptionDocumentRequest);
 
         return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
-        return TranscriptionApi.super.searchForTranscriptionMedia(searchTranscriptionDocumentRequest);
     }
 }

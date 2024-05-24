@@ -24,6 +24,14 @@ public class CaseTestData {
         return courtCaseEntity;
     }
 
+    public static CourtCaseEntity createSomeMinimalCase(String caseNumber) {
+        var courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        courtCaseEntity.setCaseNumber(caseNumber);
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
+        return courtCaseEntity;
+    }
     // Not a minimal case. refactor
     public static CourtCaseEntity someMinimalCase() {
         var courtCaseEntity = new CourtCaseEntity();

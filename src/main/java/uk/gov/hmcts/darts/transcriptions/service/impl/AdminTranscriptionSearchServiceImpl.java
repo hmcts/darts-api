@@ -3,9 +3,13 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
@@ -13,7 +17,9 @@ import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +33,8 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     private final TranscriptionSearchQuery transcriptionSearchQuery;
 
     private final TranscriptionRepository transcriptionRepository;
+
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     private final TranscriptionResponseMapper transcriptionMapper;
 
@@ -62,6 +70,27 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         return transcriptionSearchQuery.searchTranscriptions(request, transcriptionIds).stream()
             .map(this::toTranscriptionSearchResponse)
             .toList();
+    }
+
+    @Override
+    public List<SearchTranscriptionDocumentResponse> searchTranscriptions(SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
+        OffsetDateTime requestedAtFrom = searchTranscriptionDocumentRequest.getRequestedAtFrom()
+            != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
+        OffsetDateTime requestedAtTo = searchTranscriptionDocumentRequest.getRequestedAtTo()
+            != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC) : null;
+
+        List<TranscriptionDocumentResult> results = transcriptionDocumentRepository.findTranscriptionMedia(
+            searchTranscriptionDocumentRequest.getCaseNumber(),
+            searchTranscriptionDocumentRequest.getCourthouseDisplayName(),
+            searchTranscriptionDocumentRequest.getHearingDate(),
+            searchTranscriptionDocumentRequest.getRequestedBy(),
+            requestedAtFrom,
+            requestedAtTo,
+            searchTranscriptionDocumentRequest.getIsManualTranscription(),
+            searchTranscriptionDocumentRequest.getOwner()
+        );
+
+        return transcriptionMapper.mapSearchTranscriptions(results);
     }
 
     @Override

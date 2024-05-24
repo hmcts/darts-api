@@ -1,11 +1,17 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 
 import java.util.List;
+import java.util.Locale;
 
 public class TranscriptionDocumentTest extends IntegrationBase {
 
@@ -15,291 +21,553 @@ public class TranscriptionDocumentTest extends IntegrationBase {
     @Autowired
     private TranscriptionDocumentRepository transcriptionDocumentRepository;
 
-    private List<TranscriptionDocumentRepository> generatedDocumentEntities;
+    private List<TranscriptionDocumentEntity> generatedDocumentEntities;
 
-    private static final int GENERATION_COUNT = 20;
+    private static final int GENERATION_COUNT = 2;
+
+    private static final int GENERATION_HEARING_PER_TRANSCRIPTION = 1;
+
+    private static final int GENERATION_CASES_PER_TRANSCRIPTION = 2;
 
     @BeforeEach
     public void before() {
-        generatedDocumentEntities = transcriptionStub.generateTransformedMediaEntities(GENERATION_COUNT);
+        generatedDocumentEntities = transcriptionStub
+            .generateTranscriptionEntities(GENERATION_COUNT, GENERATION_HEARING_PER_TRANSCRIPTION, GENERATION_CASES_PER_TRANSCRIPTION, false, false, true);
     }
 
     @Test
-    void testFindTransformedMediaWithoutAnyParameters() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
+    void testFindTranscriptionDocumentWithCaseNumber() {
+        int nameMatchIndex = 0;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository
+            .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
+                                        .getTranscription().getCourtCases().get(0).getCaseNumber(),null,null,null,null,null, null, null);
+        Assertions.assertEquals(1, transformedMediaEntityList.size());
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithoutAnyParameters() {
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(null,
+                                                                     null,null,null,null,null, null, null);
+        Assertions.assertEquals(4, transformedMediaEntityList.size());
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithoutAnyParametersNoHearingCourtCaseWorkflow() {
+        dartsDatabase.clearDatabaseInThisOrder();;
+
+        generatedDocumentEntities = transcriptionStub
+            .generateTranscriptionEntities(GENERATION_COUNT, 0, 0,
+                                           false, true, false);
+
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(null,
+                                                                      null,null,null,null,null, null, null);
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   null)));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   null)));
+
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithCourtDisplayNameSubstringPrefixMatchOne() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
+                .getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithCourtDisplayNameCaseInsensitiveSubstringPrefixMatchOne() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,
+            TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
+                .getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null, null);
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithCourtDisplayNameSubstringPostFixMatchOne() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,
+            TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null, null);
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithCourtDisplayNameCaseInsensitiveSubstringPostFixMatchOne() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,
+            TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
+                .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null, null);
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithCourtDisplayNameSubstringMatchAll() {
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,
+            TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(2),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(3),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithHearingCourthouseDisplayNameNoTranscriptionCourtHouseSubstringMatchAll() {
+        dartsDatabase.clearDatabaseInThisOrder();
+
+        generatedDocumentEntities = transcriptionStub
+            .generateTranscriptionEntities(GENERATION_COUNT, GENERATION_HEARING_PER_TRANSCRIPTION, GENERATION_CASES_PER_TRANSCRIPTION, false, true, true);
+
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,
+            TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(2),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(3),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithHearingDate() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null,
+            generatedDocumentEntities.get(1).getTranscription().getHearings().get(0).getHearingDate(), null, null, null, null, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithManualTranscription() {
+
+        dartsDatabase.clearDatabaseInThisOrder();;
+
+        generatedDocumentEntities = transcriptionStub
+            .generateTranscriptionEntities(2, 0, 0, false, false, false);
+
+       List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null,
+            null, null, null, null, false, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   null)));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   null)));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithOwnerExact() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null, null, null,
+            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)));
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithOwnerPrefix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null, null, null,
+            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex)));
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithOwnerCaseInsensitivePrefix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null, null, null,
             null, null, null,
-            null, null, null, null, null);
-        Assertions.assertEquals(generatedMediaEntities.size(), transformedMediaEntityList.size());
-        Assertions.assertTrue(transformedMediaStub.getTransformedMediaIds(transformedMediaEntityList)
-                                  .containsAll(transformedMediaStub.getTransformedMediaIds(generatedMediaEntities)));
+            TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex).toLowerCase(Locale.getDefault())));
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+
     }
 
     @Test
-    void testFindTransformedMediaWithId() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(generatedMediaEntities.get(0).getId(), null, null, null, null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(0).getId(), transformedMediaEntityList.size());
+    void testFindTranscriptionDocumentWithOwnerPostfix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null, null, null,
+            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)));
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
     }
 
     @Test
-    void testFindTransformedMediaWithCaseNumber() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, generatedMediaEntities.get(3).getMediaRequest().getHearing().getCourtCase().getCaseNumber(), null, null, null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(transformedMediaEntityList.get(0).getId(), generatedMediaEntities.get(3).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithCourtDisplayNameSubstringPrefixMatchOne() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithCourtDisplayNameCaseInsensitiveSubstringPrefixMatchOne() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithCourtDisplayNameSubstringPostFixMatchOne() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithCourtDisplayNameCaseInsensitiveSubstringPostFixMatchOne() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithCourtDisplayNameSubstringMatchAll() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,
-            TransformedMediaSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null);
-        Assertions.assertEquals(GENERATION_COUNT, transformedMediaEntityList.size());
-        Assertions.assertTrue(transformedMediaStub.getTransformedMediaIds(transformedMediaEntityList)
-                                  .containsAll(transformedMediaStub.getTransformedMediaIds(generatedMediaEntities)));
-    }
-
-    @Test
-    void testFindTransformedMediaWithHearingDate() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
+    void testFindTranscriptionDocumentWithOwnerCaseInsensitivePostfix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null, null, null, null,
             null, null, null,
-            generatedMediaEntities.get(3).getMediaRequest().getHearing().getHearingDate(), null, null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(3).getId(), transformedMediaEntityList.get(0).getId());
+            TranscriptionDocumentSubStringQueryEnum.OWNER
+                .getQueryStringPostfix(Integer.toString(nameMatchIndex).toLowerCase(Locale.getDefault())));
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+
     }
 
     @Test
-    void testFindTransformedMediaWithOwnerExact() {
-        int nameMatchIndex = 3;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
+    void testFindTranscriptionDocumentWithOwnerSubstringMatchAll() {
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
             null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)), null, null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+            null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix());
+        Assertions.assertEquals(4, transformedMediaEntityList.size());
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(2),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(3),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+ }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedByExact() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(null,
+                                                                     null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(nameMatchIndex)), null, null, null, null);
+
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
     }
 
     @Test
-    void testFindTransformedMediaWithOwnerPrefix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
+    void testFindTranscriptionDocumentWithRequestedByPrefix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(null,
+                                                                     null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePrefix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(null,
+                                                                     null,  null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer
+                                                                                          .toString(nameMatchIndex))
+                                                                         .toUpperCase(Locale.getDefault()), null, null, null, null);
+
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedByPostfix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,  null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(1)), null, null, null, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePostfix() {
+        int nameMatchIndex = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,  null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY
+                .getQueryStringPostfix(Integer.toString(1).toLowerCase(Locale.getDefault())), null, null, null, null);
+        Assertions.assertEquals(2, transformedMediaEntityList.size());
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedBySubstringMatchAll() {
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,  null, null,
+            TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null, null, null);
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(2),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(3),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedAtFromAndRequestedAtToSameDay() {
+        int fromAtPosition = 0;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
             null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
+            generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(),
+            generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null);
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+    }
 
+    @Test
+    void testFindTranscriptionDocumentWithRequestedAtFrom() {
+        int fromAtPosition = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,  null, null,
+            null, generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null, null);
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithRequestedAtTo() {
+        int toPosition = 1;
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository.findTranscriptionMedia(null,
+                                                              null, null,
+                                                                     null, null,
+                                                                     generatedDocumentEntities.get(toPosition)
+                                                                         .getTranscription().getCreatedDateTime(), null, null);
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(0),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(1),
+                                                 getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(2),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
+        Assertions.assertTrue(assertResultEquals(transformedMediaEntityList.get(3),
+                                                 getExpectedResult(generatedDocumentEntities.get(1),
+                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithAllQueryParameters() {
+        List<TranscriptionDocumentResult> transformedMediaEntityList
+            = transcriptionDocumentRepository
+            .findTranscriptionMedia(generatedDocumentEntities.get(0).getTranscription()
+                                                                  .getCourtCase().getCaseNumber(),
+                                    generatedDocumentEntities.get(0).getTranscription().getCourtroom().getCourthouse().getDisplayName(),
+                                                                      generatedDocumentEntities.get(0).getTranscription().getHearings().get(0).getHearingDate(),
+                                                                      generatedDocumentEntities.get(0).getTranscription().getCreatedBy().getUserFullName(),
+                                                                      generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(),
+                                                                      generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(), false,
+                                                                      generatedDocumentEntities.get(0).getTranscription().getTranscriptionWorkflowEntities()
+                                        .get(0).getWorkflowActor().getUserFullName());
         Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+        Assertions.assertEquals(generatedDocumentEntities.get(0).getId(),
+                                transformedMediaEntityList.get(0).transcriptionDocumentId());
     }
 
-    @Test
-    void testFindTransformedMediaWithOwnerCaseInsensitivePrefix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toLowerCase(), null, null, null);
-
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
+    private boolean assertResultEquals(TranscriptionDocumentResult asserted, TranscriptionDocumentResult expected) {
+        Assertions.assertEquals(expected.transcriptionDocumentId(), asserted.transcriptionDocumentId());
+        Assertions.assertEquals(expected.transcriptionId(), asserted.transcriptionId());
+        Assertions.assertEquals(expected.caseNumber(), asserted.caseNumber());
+        Assertions.assertEquals(expected.caseId(), asserted.caseId());
+        Assertions.assertEquals(expected.courthouseId(), asserted.courthouseId());
+        Assertions.assertEquals(expected.courthouseDisplayName(), asserted.courthouseDisplayName());
+        Assertions.assertEquals(expected.hearingCourthouseId(), asserted.hearingCourthouseId());
+        Assertions.assertEquals(expected.hearingCourthouseDisplayName(), asserted.hearingCourthouseDisplayName());
+        Assertions.assertEquals(expected.hearingId(), asserted.hearingId());
+        Assertions.assertEquals(expected.hearingDate(), asserted.hearingDate());
+        Assertions.assertEquals(expected.isManualTranscription(), asserted.isManualTranscription());
+        Assertions.assertEquals(expected.isHidden(), asserted.isHidden());
+        return true;
     }
 
-    @Test
-    void testFindTransformedMediaWithOwnerPostfix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null);
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithOwnerCaseInsensitivePostfix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(), null, null, null);
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithOwnerSubstringMatchAll() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,  null, null,
-            TransformedMediaSubStringQueryEnum.OWNER.getQueryStringPostfix(), null, null, null);
-        Assertions.assertEquals(GENERATION_COUNT, transformedMediaEntityList.size());
-        Assertions.assertTrue(transformedMediaStub
-                                  .getTransformedMediaIds(transformedMediaEntityList)
-                                  .containsAll(transformedMediaStub.getTransformedMediaIds(generatedMediaEntities)));
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedByExact() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(nameMatchIndex)), null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedByPrefix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)), null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedByCaseInsensitivePrefix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(13)).toUpperCase(), null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedByPostfix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)), null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedByCaseInsensitivePostfix() {
-        int nameMatchIndex = 13;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(13)).toLowerCase(), null, null);
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities.get(nameMatchIndex).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedBySubstringMatchAll() {
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null,  null, null, null,
-            TransformedMediaSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null);
-        Assertions.assertEquals(GENERATION_COUNT, transformedMediaEntityList.size());
-        Assertions.assertTrue(transformedMediaStub
-                                  .getTransformedMediaIds(transformedMediaEntityList)
-                                  .containsAll(transformedMediaStub.getTransformedMediaIds(generatedMediaEntities)));
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedAtFromAndRequestedAtToSameDay() {
-        int fromAtPosition = 3;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null, null,
-            generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(),
-            generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime());
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(generatedMediaEntities
-                                    .get(fromAtPosition).getId(), transformedMediaEntityList.get(0).getId());
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedAtFrom() {
-        int fromAtPosition = 3;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(
-            null, null, null, null, null,
-            null, generatedMediaEntities.get(fromAtPosition).getMediaRequest().getCreatedDateTime(), null);
-        Assertions.assertEquals(GENERATION_COUNT - fromAtPosition, transformedMediaEntityList.size());
-        Assertions.assertTrue(transformedMediaStub
-                                  .getTransformedMediaIds(transformedMediaEntityList)
-                                  .containsAll(transformedMediaStub.getExpectedStartingFrom(fromAtPosition, generatedMediaEntities)));
-    }
-
-    @Test
-    void testFindTransformedMediaWithRequestedAtTo() {
-        int toPosition = 3;
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(null, null,
-                                                              null, null, null, null, null, generatedMediaEntities.get(toPosition).getCreatedDateTime());
-        Assertions.assertEquals(toPosition + 1, transformedMediaEntityList.size());
-        Assertions.assertTrue(transformedMediaStub
-                                  .getTransformedMediaIds(transformedMediaEntityList)
-                                  .containsAll(transformedMediaStub.getExpectedTo(toPosition, generatedMediaEntities)));
-    }
-
-    @Test
-    void testFindTransformedMediaWithAllQueryParameters() {
-        TransformedMediaEntity transformedMediaEntityFind = generatedMediaEntities.get(1);
-        List<TransformedMediaEntity> transformedMediaEntityList
-            = transformedMediaRepository.findTransformedMedia(transformedMediaEntityFind.getId(), transformedMediaEntityFind.getMediaRequest()
-            .getHearing().getCourtCase().getCaseNumber(), transformedMediaEntityFind.getMediaRequest()
-                                                                  .getHearing().getCourtroom().getCourthouse().getDisplayName(), transformedMediaEntityFind.getMediaRequest()
-                                                                  .getHearing().getHearingDate(), transformedMediaEntityFind.getMediaRequest()
-                                                                  .getCurrentOwner().getUserFullName(), transformedMediaEntityFind.getCreatedBy().getUserFullName(), transformedMediaEntityFind.getMediaRequest()
-                                                                  .getCreatedBy().getCreatedDateTime(), generatedMediaEntities.get(1).getCreatedDateTime());
-        Assertions.assertEquals(1, transformedMediaEntityList.size());
-        Assertions.assertEquals(transformedMediaEntityFind.getId(), transformedMediaEntityList.get(0).getId());
+    private TranscriptionDocumentResult getExpectedResult(TranscriptionDocumentEntity transformedMediaEntity, CourtCaseEntity caseEntity) {
+        return new TranscriptionDocumentResult(transformedMediaEntity.getId(),
+                                                                             transformedMediaEntity.getTranscription().getId(),
+                                                                             caseEntity != null ? caseEntity.getId() : null,
+                                                                             caseEntity != null ? caseEntity.getCaseNumber() : null,
+                                                                             transformedMediaEntity.getTranscription().getCourtroom() != null
+                                                                                 ? transformedMediaEntity
+                                                                                 .getTranscription().getCourtroom().getCourthouse().getId() : null,
+                                                                             transformedMediaEntity.getTranscription().getCourtroom() != null
+                                                                               ? transformedMediaEntity
+                                                                                 .getTranscription().getCourtroom().getCourthouse().getDisplayName() : null,
+                                                                             transformedMediaEntity.getTranscription().getHearing() != null
+                                                                                 ? transformedMediaEntity
+                                                                                 .getTranscription().getHearing().getCourtroom().getCourthouse().getId() : null,
+                                                                             transformedMediaEntity.getTranscription().getHearing() != null
+                                                                                 ? transformedMediaEntity
+                                                                                 .getTranscription().getHearing()
+                                                                                 .getCourtroom().getCourthouse().getDisplayName() : null,
+                                                                             transformedMediaEntity.getTranscription().getHearing() != null
+                                                                                 ? transformedMediaEntity
+                                                                                 .getTranscription().getHearing().getId() : null,
+                                                                             transformedMediaEntity.getTranscription().getHearing() != null
+                                                                                 ? transformedMediaEntity
+                                                                                 .getTranscription().getHearing().getHearingDate() : null,
+                                                                             transformedMediaEntity.getTranscription().getIsManualTranscription(),
+                                                                             transformedMediaEntity.isHidden()
+        );
     }
 }

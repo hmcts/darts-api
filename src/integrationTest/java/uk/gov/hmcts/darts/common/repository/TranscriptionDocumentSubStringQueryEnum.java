@@ -9,7 +9,7 @@ public enum TranscriptionDocumentSubStringQueryEnum {
 
     private final String postfix;
 
-    TransformedMediaSubStringQueryEnum(String prefix, String postfix) {
+    TranscriptionDocumentSubStringQueryEnum(String prefix, String postfix) {
         this.prefix = prefix;
         this.postfix = postfix;
     }

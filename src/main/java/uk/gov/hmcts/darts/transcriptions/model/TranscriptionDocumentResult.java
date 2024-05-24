@@ -1,22 +1,39 @@
 package uk.gov.hmcts.darts.transcriptions.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.time.LocalDate;
+import java.util.Objects;
 
-@RequiredArgsConstructor
-@Getter
-public class TranscriptionDocumentResponse {
-    private Integer transcriptionDocumentId;
-    private Integer transcriptionId;
-    private Integer caseId;
-    private String caseNumber;
-    private Integer courthouseId;
-    private String courthouseDisplayName;
-    private Integer hearingId;
-    private LocalDate hearingDate;
-    private boolean isManualTranscription;
-    private boolean isHidden;
+public record TranscriptionDocumentResult(
+    Integer transcriptionDocumentId,
+    Integer transcriptionId,
+    Integer caseId,
+    String caseNumber,
+    Integer courthouseId,
+    String courthouseDisplayName,
+    Integer hearingCourthouseId,
+    String hearingCourthouseDisplayName,
+    Integer hearingId,
+    LocalDate hearingDate,
+    boolean isManualTranscription,
+    boolean isHidden
+) {
 
+    @SuppressWarnings({"PMD.SimplifyBooleanReturns"})
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof TranscriptionDocumentResult transcriptionDocumentResult)) {
+            return false;
+        }
+        return transcriptionDocumentResult.transcriptionId.equals(this.transcriptionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(transcriptionId);
+    }
 }

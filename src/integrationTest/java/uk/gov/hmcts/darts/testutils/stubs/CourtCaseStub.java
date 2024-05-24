@@ -32,6 +32,13 @@ public class CourtCaseStub {
         return caseRepository.save(courtCase);
     }
 
+    @Transactional
+    public CourtCaseEntity createAndSaveMinimalCourtCase(String caseNumber) {
+
+        var courtCase = CaseTestData.createSomeMinimalCase(caseNumber);
+        return caseRepository.save(courtCase);
+    }
+
     /**
      * Creates a CourtCaseEntity. Passes the created case to the client for further customisations before saving
      */

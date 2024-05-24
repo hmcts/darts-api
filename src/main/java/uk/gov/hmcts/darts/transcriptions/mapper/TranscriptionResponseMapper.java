@@ -26,6 +26,9 @@ import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCase;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCourthouse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseHearing;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -292,57 +295,44 @@ public class TranscriptionResponseMapper {
         return details;
     }
 
-    import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
-import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCase;
-import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCourthouse;
-import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseHearing;
-import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseMediaRequest;
-import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
+    public SearchTranscriptionDocumentResponse mapSearchTranscriptions(TranscriptionDocumentResult transcriptionDocumentResponse) {
+        SearchTranscriptionDocumentResponse transformedMediaDetails = new SearchTranscriptionDocumentResponse();
+        transformedMediaDetails.setTranscriptionDocumentId(transcriptionDocumentResponse.transcriptionDocumentId());
+        transformedMediaDetails.setTranscriptionId(transcriptionDocumentResponse.transcriptionId());
 
-import java.util.ArrayList;
-import java.util.List;
+        transformedMediaDetails.isManualTranscription(transcriptionDocumentResponse.isManualTranscription());
+        transformedMediaDetails.isHidden(transcriptionDocumentResponse.isHidden());
 
-    @Component
-    public class GetTransformedMediaDetailsMapper {
-        public List<SearchTransformedMediaResponse> mapSearchResults(List<TransformedMediaEntity> entityList) {
-            List<SearchTransformedMediaResponse> mappedDetails = new ArrayList<>();
-            for (TransformedMediaEntity entity : entityList) {
-                mappedDetails.add(mapSearchResults(entity));
-            }
-
-            return mappedDetails;
+        if (transcriptionDocumentResponse.caseId() != null) {
+            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
+            caseResponse.setId(transcriptionDocumentResponse.caseId());
+            caseResponse.setCaseNumber(transcriptionDocumentResponse.caseNumber());
+            transformedMediaDetails.setCase(caseResponse);
         }
 
-        public SearchTranscriptionDocumentResponse mapSearchResults(TranscriptionDocumentEntity entity) {
-            SearchTranscriptionDocumentResponse transformedMediaDetails = new SearchTranscriptionDocumentResponse();
-            transformedMediaDetails.setTranscriptionDocumentId(entity.getId());
-            transformedMediaDetails.setTranscriptionId(entity.getTranscription().getId());
-
-            if (entity.getTranscription() != null && entity.getTranscription().getCourtCases() != null)  {
-                SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
-                caseResponse.setId(entity.getTranscription().getCourtCases());
-                caseResponse.setCaseNumber(entity.getMediaRequest().getHearing().getCourtCase().getCaseNumber());
-                transformedMediaDetails.setCase(caseResponse);
-            }
-
-            if (entity.getMediaRequest() != null && entity.getMediaRequest().getHearing() != null
-                && entity.getMediaRequest().getHearing().getCourtroom() != null) {
-                SearchTransformedMediaResponseCourthouse courthouseResponse = new SearchTransformedMediaResponseCourthouse();
-                courthouseResponse.setId(entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getId());
-                courthouseResponse.setDisplayName(entity.getMediaRequest().getHearing().getCourtroom().getCourthouse().getDisplayName());
-                transformedMediaDetails.setCourthouse(courthouseResponse);
-            }
-
-            if (entity.getMediaRequest() != null && entity.getMediaRequest().getHearing() != null) {
-                SearchTransformedMediaResponseHearing hearingResponse = new SearchTransformedMediaResponseHearing();
-                hearingResponse.setId(entity.getMediaRequest().getHearing().getId());
-                hearingResponse.setHearingDate(entity.getMediaRequest().getHearing().getHearingDate());
-                transformedMediaDetails.setHearing(hearingResponse);
-            }
-
-            return transformedMediaDetails;
+        if (transcriptionDocumentResponse.courthouseId() != null) {
+            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
+            courthouseResponse.setId(transcriptionDocumentResponse.courthouseId());
+            courthouseResponse.setDisplayName(transcriptionDocumentResponse.courthouseDisplayName());
+            transformedMediaDetails.setCourthouse(courthouseResponse);
         }
 
+        if (transcriptionDocumentResponse.hearingId() != null) {
+            SearchTranscriptionDocumentResponseHearing hearingResponse = new SearchTranscriptionDocumentResponseHearing();
+            hearingResponse.setId(transcriptionDocumentResponse.hearingId());
+            hearingResponse.setHearingDate(transcriptionDocumentResponse.hearingDate());
+            transformedMediaDetails.setHearing(hearingResponse);
+        }
 
+        return transformedMediaDetails;
     }
+
+    public List<SearchTranscriptionDocumentResponse> mapSearchTranscriptions(List<TranscriptionDocumentResult> entityList) {
+        List<SearchTranscriptionDocumentResponse> mappedDetails = new ArrayList<>();
+        for (TranscriptionDocumentResult entity : entityList) {
+            mappedDetails.add(mapSearchTranscriptions(entity));
+        }
+
+        return mappedDetails;
+    }
+}

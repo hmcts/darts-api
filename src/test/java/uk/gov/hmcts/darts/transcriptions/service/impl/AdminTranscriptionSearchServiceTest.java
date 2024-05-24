@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
@@ -44,6 +45,9 @@ class AdminTranscriptionSearchServiceTest {
     private TranscriptionRepository transcriptionRepository;
 
     @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+
+    @Mock
     private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @Mock
@@ -53,7 +57,9 @@ class AdminTranscriptionSearchServiceTest {
     void setUp() {
         adminTranscriptionSearchService
             = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery,
-                                                      transcriptionRepository, transcriptionResponseMapper,
+                                                      transcriptionRepository,
+                                                      transcriptionDocumentRepository,
+                                                      transcriptionResponseMapper,
                                                       userAccountExistsValidator);
     }
 
