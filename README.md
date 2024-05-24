@@ -56,6 +56,8 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | AAD_TENANT_ID_JUSTICE                    | AzureADTenantIdJustice                    |
 | AAD_CLIENT_ID_JUSTICE                    | AzureADClientIdJustice                    |
 | AAD_CLIENT_SECRET_JUSTICE                | AzureADClientSecretJustice                |
+| DARTS_INBOUND_STORAGE_SAS_URL            | DartsInboundStorageSasUrl                 |
+| DARTS_UNSTRUCTURED_STORAGE_SAS_URL       | DartsUnstructuredStorageSasUrl            |
 
 There are few attributes which doesn't use Azure Keyvault secrets. Those environment variable values are controlled dynamically via Flux config
 
