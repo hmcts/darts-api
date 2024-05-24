@@ -41,7 +41,7 @@ public class TranscriptionDownloader {
             .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+        auditApi.recordForUserAndCase(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         return DownloadTranscriptResponse.builder()
             .resource(getResourceStreamFor(latestTranscriptionDocument))

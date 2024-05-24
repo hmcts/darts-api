@@ -125,7 +125,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         doNothing().when(mockAuditApi)
-            .recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            .recordForUserAndCase(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -224,7 +224,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
-        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordForUserAndCase(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
 
     }
 
@@ -278,7 +278,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
-        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordForUserAndCase(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockDataManagementFacade).retrieveFileFromStorage(any(TranscriptionDocumentEntity.class));
         verify(mockFileBasedDownloadResponseMetaData).getInputStream();
         verifyNoMoreInteractions(mockAuditApi, mockDataManagementFacade, mockFileBasedDownloadResponseMetaData);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -75,6 +76,9 @@ class UserManagementServiceImplTest {
     @Mock
     UserIdentity userIdentity;
 
+    @Mock
+    AuditApi auditApi;
+
     @BeforeEach
     void setUp() {
         UserAccountMapper mapper = new UserAccountMapperImpl();
@@ -100,7 +104,8 @@ class UserManagementServiceImplTest {
             userTypeValidator,
             enablementValidator,
             deactivateNotLastSuperAdminValidator,
-            transcriptionService
+            transcriptionService,
+            auditApi
         );
     }
 

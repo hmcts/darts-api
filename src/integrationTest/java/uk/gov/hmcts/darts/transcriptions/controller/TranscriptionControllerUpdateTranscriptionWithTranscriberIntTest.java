@@ -93,7 +93,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         testUserId = testUser.getId();
 
         doNothing().when(mockAuditApi)
-            .recordAudit(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            .recordForUserAndCase(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -130,7 +130,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        verify(mockAuditApi).recordAudit(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordForUserAndCase(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -248,7 +248,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        verify(mockAuditApi).recordAudit(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordForUserAndCase(ACCEPT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
 }

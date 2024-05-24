@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
@@ -50,6 +51,8 @@ class SecurityGroupServiceImplTest {
     SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
     @Mock
     SecurityGroupCreationValidation securityGroupCreationValidation;
+    @Mock
+    AuditApi auditApi;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +64,8 @@ class SecurityGroupServiceImplTest {
             securityGroupMapper,
             securityGroupCourthouseMapper,
             securityGroupWithIdAndRoleAndUsersMapper,
-            securityGroupCreationValidation
+            securityGroupCreationValidation,
+            auditApi
         );
     }
 

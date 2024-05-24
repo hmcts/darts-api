@@ -181,7 +181,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
 
         caseRetentionRepository.saveAndFlush(caseRetention);
-        auditApi.recordAudit(
+        auditApi.recordForUserAndCase(
             AuditActivity.APPLY_RETENTION,
             userAccount,
             courtCase
