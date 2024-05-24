@@ -251,6 +251,7 @@ darts:
         darts-unstructured: ${DARTS_UNSTRUCTURED_STORAGE_SAS_URL}
       delete:
         timeout: 60
+      az-copy-executable: /usr/bin/azcopy
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:

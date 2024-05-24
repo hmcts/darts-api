@@ -45,6 +45,9 @@ public class DataManagementConfiguration extends StorageConfiguration {
     @Value("${darts.storage.blob.delete.timeout:60}")
     private int deleteTimeout;
 
+    @Value("${darts.storage.blob.az-copy-executable}")
+    private String azCopyExecutable;
+
     @Override
     @Value("${darts.storage.blob.temp-blob-workspace}")
     public void setTempBlobWorkspace(String tempBlobWorkspace) {

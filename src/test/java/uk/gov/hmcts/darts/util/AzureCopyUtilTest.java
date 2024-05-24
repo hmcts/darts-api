@@ -11,6 +11,7 @@ class AzureCopyUtilTest {
     @Test
     void testExceptionMessageDoesNotIncludeSourceOrDestinationInfoToAvoidSecretsLeak() {
         AzureCopyUtil azureCopyUtil = new AzureCopyUtil();
+
         String sourceSasUrl = "someSasUrl";
         String destinationSasUrl = "someOtherSasUrl";
 

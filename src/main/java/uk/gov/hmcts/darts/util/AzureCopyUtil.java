@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.util;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -12,11 +14,14 @@ import java.time.Instant;
 @Component
 public class AzureCopyUtil {
 
+    @Autowired
+    DataManagementConfiguration config;
+
     @SneakyThrows
     public void copy(String source, String destination) {
         try {
             ProcessBuilder builder = new ProcessBuilder();
-            builder.command("/usr/bin/azcopy", "copy", source, destination);
+            builder.command(config.getAzCopyExecutable(), "copy", source, destination);
 
             var startTime = Instant.now();
             log.debug("copy of blob started at {}", startTime);
