@@ -148,7 +148,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             request.getEndTime(),
             request.getRequestType()
         );
-        auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
+        auditApi.record(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
         return mediaRequest;
     }
 
@@ -382,7 +382,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         final UUID blobId = getBlobId(transformedMediaEntity);
 
-        auditApi.recordAudit(
+        auditApi.record(
             auditActivity,
             this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
