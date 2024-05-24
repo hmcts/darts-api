@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
-class SentencingRemarksAndRetentionPolicyHandlerTest2 extends IntegrationBase {
+class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBase {
 
     private static final String SOME_CASE_NUMBER = "CASE1";
     private static final String SWANSEA_COURTHOUSE = "SWANSEA";
