@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.util;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 
@@ -12,10 +12,10 @@ import java.time.Instant;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AzureCopyUtil {
 
-    @Autowired
-    DataManagementConfiguration config;
+    private final DataManagementConfiguration config;
 
     @SneakyThrows
     public void copy(String source, String destination) {
@@ -36,10 +36,10 @@ public class AzureCopyUtil {
                 throw new IOException("Failed to execute azcopy");
             }
         } catch (InterruptedException ie) {
-            log.error("InterruptedException: ", ie);
             Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to execute azure copy - interrupted", ie);
         } catch (Exception e) {
-            throw new IOException("Failed to execute azcopy");
+            throw new IOException("Failed to execute azure copy");
         }
     }
 }
