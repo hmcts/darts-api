@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.DailyListStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.LocalDate;
@@ -32,8 +31,6 @@ class DailyListPostControllerV2Test extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/dailylists/v2";
 
-    @Autowired
-    protected DailyListStub dailyListStub;
     @Autowired
     private transient MockMvc mockMvc;
     @MockBean
