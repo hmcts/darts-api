@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.dailylist.validation;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -15,14 +15,14 @@ class DailyListPostValidatorTest {
 
     @Test
     void ok_justJson() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListJson(new DailyListJsonObject());
         DailyListPostValidator.validate(request);
     }
 
     @Test
     void ok_Xml() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
@@ -36,7 +36,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void ok_XmlAndJson() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
@@ -50,7 +50,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingUniqueId() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setSourceSystem("CPP");
         request.setCourthouse("test");
@@ -63,7 +63,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingXml() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
         request.setCourthouse("test");
@@ -76,7 +76,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingSourceSystem() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setCourthouse("test");
@@ -89,7 +89,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingCourthouse() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
@@ -102,7 +102,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingHearingDate() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
@@ -116,7 +116,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingPublishedDateTime() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
@@ -129,7 +129,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void error_Xml_missingMessageId() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("CPP");
@@ -142,7 +142,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void shouldThrowExceptionWhenJsonAndSourceSystemInvalid() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setSourceSystem("RUB");
@@ -155,7 +155,7 @@ class DailyListPostValidatorTest {
 
     @Test
     void shouldSuccessfullyValidateWhenJsonAndNoSourceSystem() {
-        DailyListPostRequest request = new DailyListPostRequest();
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal();
         request.setDailyListXml("test");
         request.setUniqueId("test");
         request.setCourthouse("test");

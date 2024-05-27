@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class DailyListMapper {
 
     private final ObjectMapper objectMapper;
 
-    public DailyListEntity createDailyListFromJson(DailyListPostRequest postRequest) {
+    public DailyListEntity createDailyListFromJson(DailyListPostRequestInternal postRequest) {
         var dailyListEntity = new DailyListEntity();
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
         dailyListEntity.setSource(postRequest.getSourceSystem());

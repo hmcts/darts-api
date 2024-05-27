@@ -15,9 +15,12 @@ import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.http.api.DailyListsApi;
+import uk.gov.hmcts.darts.dailylist.mapper.DailyListPostRequestMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
+import uk.gov.hmcts.darts.dailylist.model.PatchDailyListRequest;
+import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
@@ -44,6 +47,7 @@ public class DailyListController implements DailyListsApi {
 
     private final DailyListService dailyListService;
     private final DailyListProcessor processor;
+    private final DailyListPostRequestMapper dailyListPostRequestMapper;
 
     ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
     ObjectMapper objectMapper = objectMapperConfig.objectMapper();
@@ -99,7 +103,7 @@ public class DailyListController implements DailyListsApi {
             }
         }
 
-        DailyListPostRequest postRequest = new DailyListPostRequest();
+        DailyListPostRequestInternal postRequest = new DailyListPostRequestInternal();
         postRequest.setSourceSystem(sourceSystem);
         postRequest.setCourthouse(courthouse);
         postRequest.setDailyListXml(xmlDocument);
@@ -130,5 +134,36 @@ public class DailyListController implements DailyListsApi {
         }
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT, CPP})
+    public ResponseEntity<PostDailyListResponse> dailylistsV2Patch(PatchDailyListRequest patchDailyListRequest) {
+        DailyListJsonObject jsonDocument;
+        try {
+            jsonDocument = objectMapper.readValue(patchDailyListRequest.getJsonString(), DailyListJsonObject.class);
+        } catch (JsonProcessingException ex) {
+            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
+        }
+
+        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
+        dailyListPatchRequest.setDailyListId(patchDailyListRequest.getDalId());
+        dailyListPatchRequest.setDailyListJson(jsonDocument);
+        PostDailyListResponse postDailyListResponse = dailyListService.updateDailyListInDatabase(dailyListPatchRequest);
+        return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT, CPP})
+    public ResponseEntity<PostDailyListResponse> dailylistsV2Post(PostDailyListRequest postDailyListRequest) {
+        DailyListPostRequestInternal internalRequest = dailyListPostRequestMapper.map(postDailyListRequest);
+        DailyListPostValidator.validate(internalRequest);
+        PostDailyListResponse postDailyListResponse = dailyListService.saveDailyListToDatabase(internalRequest);
+        return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
+
     }
 }
