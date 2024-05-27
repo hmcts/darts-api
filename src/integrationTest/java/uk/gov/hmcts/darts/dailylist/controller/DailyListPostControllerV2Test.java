@@ -79,8 +79,6 @@ class DailyListPostControllerV2Test extends IntegrationBase {
     @Test
     void shouldSuccessfullyPostDailyListWhenXmlAndValidQueryParams() throws Exception {
 
-        String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
-
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
@@ -94,7 +92,7 @@ class DailyListPostControllerV2Test extends IntegrationBase {
         request.setUniqueId(uniqueId);
         request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         request.setMessageId(messageId);
-        request.setXmlDocument(xmlString);
+        request.setXmlDocument("<?xml version=\"1.0\"?><dummy></dummy>");
 
         String requestBody = objectMapper.writeValueAsString(request);
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
