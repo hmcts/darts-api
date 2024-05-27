@@ -155,6 +155,16 @@
 				{
 					"name": "/audios",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -169,7 +179,7 @@
 									"key": "file",
 									"contentType": "audio/mpeg",
 									"type": "file",
-									"src": "sample.mp2"
+									"src": "/Users/chrismagowan/Documents/DARTS/audio/T20190024_04-02-2021/daudio/localaudio/T2019/0024/0001/0001.a00"
 								},
 								{
 									"key": "metadata",
@@ -769,6 +779,117 @@
 							"response": []
 						},
 						{
+							"name": "POST DailyLists v2 json",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "xml_document",
+										"value": "",
+										"type": "default",
+										"disabled": true
+									},
+									{
+										"key": "json_document",
+										"value": "{  \"document_id\": {    \"document_name\": \"DailyList_457_20210219174938.xml\",    \"unique_id\": \"CSDDL1613756980160\",    \"document_type\": \"DL\",    \"time_stamp\": \"2021-02-19T17:49:38.391+01:00\"  },  \"list_header\": {    \"list_category\": \"Criminal\",    \"start_date\": \"2021-02-23\",    \"end_date\": \"2021-02-23\",    \"version\": \"NOT VERSIONED\",    \"published_time\": \"2021-02-19T17:49:38.767Z\"  },  \"crown_court\": {    \"court_house_type\": \"Crown Court\",    \"court_house_code\": {      \"court_house_short_name\": \"SWANS\",      \"code\": 457    },    \"court_house_name\": \"SWANSEA\"  },  \"court_lists\": [    {      \"court_house\": {        \"court_house_type\": \"Crown Court\",        \"court_house_code\": {          \"court_house_short_name\": \"SWANS\",          \"code\": 457        },        \"court_house_name\": \"SWANSEA\"      },      \"sittings\": [        {          \"court_room_number\": \"1\",          \"sitting_sequence_no\": 1,          \"sitting_at\": \"11:00:00\",          \"sitting_priority\": \"T\",          \"judiciary\": [            {              \"citizen_name_forename\": \"JudgeName\",              \"citizen_name_surname\": \"Surname\",              \"citizen_name_requested_name\": \"Judgename Surname\"            }          ],          \"hearings\": [            {              \"hearing_sequence_number\": 1,              \"hearing_details\": {                \"hearing_type\": \"PTR\",                \"hearing_description\": \"For Pre-Trial Review\",                \"hearing_date\": \"2020-06-20\"              },              \"time_marking_note\": \"NOT BEFORE 11:00 AM\",              \"case_number\": \"Case1\",              \"prosecution\": {                \"prosecuting_authority\": \"Crown Prosecution Service\",                \"prosecuting_reference\": \"Crown Prosecution Service\",                \"prosecuting_organisation\": {                  \"organisation_name\": \"Crown Prosecution Service\"                },                \"advocates\": [                  {                    \"name\": {                      \"citizen_name_forename\": \"ProsecutorName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    }                  }                ]              },              \"defendants\": [                {                  \"personal_details\": {                    \"name\": {                      \"citizen_name_forename\": \"DefendantName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    },                    \"is_masked\": \"false\"                  },                  \"urn\": \"42GD2391421\",                  \"charges\": [                    {                      \"indictment_count_number\": 1,                      \"cjsoffence_code\": \"CA03014\",                      \"offence_statement\": \"Fail    / refuse give assistance to person executing Communications Act search warrant\"                    }                  ],                  \"counsel\": [                    {                      \"name\": {                        \"citizen_name_forename\": \"DefenceName\",                        \"citizen_name_surname\": \"Surname\",                        \"citizen_name_requested_name\": \"\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"source_system\": \"XHB\",\n  \"json_string\": \"{  \\\"document_id\\\": {    \\\"document_name\\\": \\\"DailyList_457_20210219174938.xml\\\",    \\\"unique_id\\\": \\\"CSDDL1613756980160\\\",    \\\"document_type\\\": \\\"DL\\\",    \\\"time_stamp\\\": \\\"2021-02-19T17:49:38.391+01:00\\\"  },  \\\"list_header\\\": {    \\\"list_category\\\": \\\"Criminal\\\",    \\\"start_date\\\": \\\"2021-02-23\\\",    \\\"end_date\\\": \\\"2021-02-23\\\",    \\\"version\\\": \\\"NOT VERSIONED\\\",    \\\"published_time\\\": \\\"2021-02-19T17:49:38.767Z\\\"  },  \\\"crown_court\\\": {    \\\"court_house_type\\\": \\\"Crown Court\\\",    \\\"court_house_code\\\": {      \\\"court_house_short_name\\\": \\\"SWANS\\\",      \\\"code\\\": 457    },    \\\"court_house_name\\\": \\\"SWANSEA\\\"  },  \\\"court_lists\\\": [    {      \\\"court_house\\\": {        \\\"court_house_type\\\": \\\"Crown Court\\\",        \\\"court_house_code\\\": {          \\\"court_house_short_name\\\": \\\"SWANS\\\",          \\\"code\\\": 457        },        \\\"court_house_name\\\": \\\"SWANSEA\\\"      },      \\\"sittings\\\": [        {          \\\"court_room_number\\\": \\\"1\\\",          \\\"sitting_sequence_no\\\": 1,          \\\"sitting_at\\\": \\\"11:00:00\\\",          \\\"sitting_priority\\\": \\\"T\\\",          \\\"judiciary\\\": [            {              \\\"citizen_name_forename\\\": \\\"JudgeName\\\",              \\\"citizen_name_surname\\\": \\\"Surname\\\",              \\\"citizen_name_requested_name\\\": \\\"Judgename Surname\\\"            }          ],          \\\"hearings\\\": [            {              \\\"hearing_sequence_number\\\": 1,              \\\"hearing_details\\\": {                \\\"hearing_type\\\": \\\"PTR\\\",                \\\"hearing_description\\\": \\\"For Pre-Trial Review\\\",                \\\"hearing_date\\\": \\\"2020-06-20\\\"              },              \\\"time_marking_note\\\": \\\"NOT BEFORE 11:00 AM\\\",              \\\"case_number\\\": \\\"Case1\\\",              \\\"prosecution\\\": {                \\\"prosecuting_authority\\\": \\\"Crown Prosecution Service\\\",                \\\"prosecuting_reference\\\": \\\"Crown Prosecution Service\\\",                \\\"prosecuting_organisation\\\": {                  \\\"organisation_name\\\": \\\"Crown Prosecution Service\\\"                },                \\\"advocates\\\": [                  {                    \\\"name\\\": {                      \\\"citizen_name_forename\\\": \\\"ProsecutorName\\\",                      \\\"citizen_name_surname\\\": \\\"Surname\\\",                      \\\"citizen_name_requested_name\\\": \\\"\\\"                    }                  }                ]              },              \\\"defendants\\\": [                {                  \\\"personal_details\\\": {                    \\\"name\\\": {                      \\\"citizen_name_forename\\\": \\\"DefendantName\\\",                      \\\"citizen_name_surname\\\": \\\"Surname\\\",                      \\\"citizen_name_requested_name\\\": \\\"\\\"                    },                    \\\"is_masked\\\": \\\"false\\\"                  },                  \\\"urn\\\": \\\"42GD2391421\\\",                  \\\"charges\\\": [                    {                      \\\"indictment_count_number\\\": 1,                      \\\"cjsoffence_code\\\": \\\"CA03014\\\",                      \\\"offence_statement\\\": \\\"Fail    \\/ refuse give assistance to person executing Communications Act search warrant\\\"                    }                  ],                  \\\"counsel\\\": [                    {                      \\\"name\\\": {                        \\\"citizen_name_forename\\\": \\\"DefenceName\\\",                        \\\"citizen_name_surname\\\": \\\"Surname\\\",                        \\\"citizen_name_requested_name\\\": \\\"\\\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{serverUrl}}/dailylists/v2",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists",
+										"v2"
+									],
+									"query": [
+										{
+											"key": "source_system",
+											"value": "CPP",
+											"disabled": true
+										},
+										{
+											"key": "courthouse",
+											"value": "liverpool",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST DailyLists v2 XML",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"source_system\": \"XHB\",\n  \"courthouse\": \"SWANSEA\",\n  \"hearing_date\": \"2024-05-25\",\n  \"unique_id\": \"ABC-123\",\n  \"published_ts\": \"2024-05-24T09:00:00+01:00\",\n  \"message_id\": \"some-message-id-example\",\n  \"xml_document\": \"<cs:DailyList xmlns:cs=\\\"http://www.courtservice.gov.uk/schemas/courtservice\\\" xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" xsi:schemaLocation=\\\"http://www.courtservice.gov.uk/schemas/courtservice DailyList-v5-2.xsd\\\" xmlns:apd=\\\"http://www.govtalk.gov.uk/people/AddressAndPersonalDetails\\\">    <cs:DocumentID>      <cs:DocumentName>DL 16/05/2024 7296012</cs:DocumentName>      <cs:UniqueID>DL 16/05/2024 7296012</cs:UniqueID>      <cs:DocumentType>DL</cs:DocumentType>      <cs:TimeStamp>2024-05-16T11:48:07.610+01:00</cs:TimeStamp>      <cs:Version>1.0</cs:Version>      <cs:SecurityClassification>NPM</cs:SecurityClassification>      <cs:SellByDate>2010-12-15</cs:SellByDate>      <cs:XSLstylesheetURL>http://www.courtservice.gov.uk/transforms/courtservice/dailyListHtml.xsl</cs:XSLstylesheetURL>    </cs:DocumentID>    <cs:ListHeader>      <cs:ListCategory>Criminal</cs:ListCategory>      <cs:StartDate>2024-05-16</cs:StartDate>      <cs:EndDate>2024-05-16</cs:EndDate>      <cs:Version>FINAL v1</cs:Version>      <cs:CRESTprintRef>MCD/112585</cs:CRESTprintRef>      <cs:PublishedTime>2024-05-16T11:48:07.610+01:00</cs:PublishedTime>      <cs:CRESTlistID>12298</cs:CRESTlistID>    </cs:ListHeader>    <cs:CrownCourt>      <cs:CourtHouseType>Crown Court</cs:CourtHouseType>      <cs:CourtHouseCode CourtHouseShortName=\\\"Harrow Crown Court\\\">10005</cs:CourtHouseCode>      <cs:CourtHouseName>Harrow Crown Court</cs:CourtHouseName>      <cs:CourtHouseAddress>        <apd:Line>THE CROWN COURT AT HARROW</apd:Line>        <apd:Line>Wharf Rd</apd:Line>        <apd:Line>Frimley Green</apd:Line>        <apd:Line>Camberley</apd:Line>        <apd:PostCode>GU16 6PT</apd:PostCode>      </cs:CourtHouseAddress>      <cs:CourtHouseDX>DX 12345 HARROW</cs:CourtHouseDX>      <cs:CourtHouseTelephone>01252 836464</cs:CourtHouseTelephone>      <cs:CourtHouseFax>01252 836464</cs:CourtHouseFax>    </cs:CrownCourt>    <cs:CourtLists>      <cs:CourtList>        <cs:CourtHouse>          <cs:CourtHouseType>Crown Court</cs:CourtHouseType>          <cs:CourtHouseCode>10005</cs:CourtHouseCode>          <cs:CourtHouseName>Harrow Crown Court</cs:CourtHouseName>        </cs:CourtHouse>        <cs:Sittings>          <cs:Sitting>            <cs:CourtRoomNumber>1</cs:CourtRoomNumber>            <cs:SittingSequenceNo>1</cs:SittingSequenceNo>            <cs:SittingAt>17:00:00</cs:SittingAt>            <cs:SittingPriority>T</cs:SittingPriority>            <cs:Judiciary>              <cs:Judge>                <apd:CitizenNameForeame>Judge N1</apd:CitizenNameForeame>                <apd:CitizenNameSurname>Judge N3</apd:CitizenNameSurname>                <apd:CitizenNameRequestedName>Judge N2</apd:CitizenNameRequestedName>                <cs:CRESTjudgeID>0</cs:CRESTjudgeID>              </cs:Judge>            </cs:Judiciary>            <cs:Hearings>              <cs:Hearing>                <cs:HearingSequenceNumber>1</cs:HearingSequenceNumber>                <cs:HearingDetails HearingType=\\\"TRL\\\">                  <cs:HearingDescription>For Trial</cs:HearingDescription>                  <cs:HearingDate>2024-05-16</cs:HearingDate>                </cs:HearingDetails>                <cs:CRESThearingID>1</cs:CRESThearingID>                <cs:TimeMarkingNote>17:00 AM</cs:TimeMarkingNote>                <cs:CaseNumber>T7296111</cs:CaseNumber>                <cs:Prosecution ProsecutingAuthority=\\\"Crown Prosecution Service\\\">                  <cs:ProsecutingReference>CPS</cs:ProsecutingReference>                  <cs:ProsecutingOrganisation>                    <cs:OrganisationName>Crown Prosecution Service</cs:OrganisationName>                  </cs:ProsecutingOrganisation>                </cs:Prosecution>                <cs:CommittingCourt>                  <cs:CourtHouseType>Magistrates Court</cs:CourtHouseType>                  <cs:CourtHouseCode CourtHouseShortName=\\\"BAM\\\">2725</cs:CourtHouseCode>                  <cs:CourtHouseName>BARNET MAGISTRATES COURT</cs:CourtHouseName>                  <cs:CourtHouseAddress>                    <apd:Line>7C HIGH STREET</apd:Line>                    <apd:Line>-</apd:Line>                    <apd:Line>BARNET</apd:Line>                    <apd:PostCode>EN5 5UE</apd:PostCode>                  </cs:CourtHouseAddress>                  <cs:CourtHouseDX>DX 8626 BARNET</cs:CourtHouseDX>                  <cs:CourtHouseTelephone>02084419042</cs:CourtHouseTelephone>                </cs:CommittingCourt>                <cs:Defendants>                  <cs:Defendant>                    <cs:PersonalDetails>                      <cs:Name>                        <apd:CitizenNameForename>Franz</apd:CitizenNameForename>                        <apd:CitizenNameSurname>KAFKA</apd:CitizenNameSurname>                        <apd:CitizenNameRequestedName>Franz</apd:CitizenNameRequestedName>                      </cs:Name>                      <cs:IsMasked>no</cs:IsMasked>                      <cs:DateOfBirth>                        <apd:BirthDate>1962-06-12</apd:BirthDate>                        <apd:VerifiedBy>not verified</apd:VerifiedBy>                      </cs:DateOfBirth>                      <cs:Sex>male</cs:Sex>                      <cs:Address>                        <apd:Line>ADDRESS LINE 1</apd:Line>                        <apd:Line>ADDRESS LINE 2</apd:Line>                        <apd:Line>ADDRESS LINE 3</apd:Line>                        <apd:Line>ADDRESS LINE 4</apd:Line>                        <apd:Line>SOMETOWN, SOMECOUNTY</apd:Line>                        <apd:PostCode>GU12 7RT</apd:PostCode>                      </cs:Address>                    </cs:PersonalDetails>                    <cs:ASNs>                      <cs:ASN>0723XH1000000262665K</cs:ASN>                    </cs:ASNs>                    <cs:CRESTdefendantID>29161</cs:CRESTdefendantID>                    <cs:PNCnumber>20123456789L</cs:PNCnumber>                    <cs:URN>T7296111</cs:URN>                    <cs:CustodyStatus>In custody</cs:CustodyStatus>                  </cs:Defendant>                </cs:Defendants>              </cs:Hearing>            </cs:Hearings>          </cs:Sitting>        </cs:Sittings>      </cs:CourtList>    </cs:CourtLists>  </cs:DailyList>\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{serverUrl}}/dailylists/v2",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists",
+										"v2"
+									],
+									"query": [
+										{
+											"key": "source_system",
+											"value": "CPP",
+											"disabled": true
+										},
+										{
+											"key": "courthouse",
+											"value": "liverpool",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "POST DailyLists Run",
 							"request": {
 								"auth": {
@@ -822,6 +943,16 @@
 						{
 							"name": "Post DailyLists",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PATCH",
 								"header": [
 									{
@@ -842,6 +973,50 @@
 										{
 											"key": "dal_id",
 											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Post DailyLists v2",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"dal_id\": 31354,\n  \"json_string\": \"{  \\\"document_id\\\": {    \\\"document_name\\\": \\\"DailyList_457_20210219174938.xml\\\",    \\\"unique_id\\\": \\\"CSDDL1613756980160\\\",    \\\"document_type\\\": \\\"DL\\\",    \\\"time_stamp\\\": \\\"2021-02-19T17:49:38.391+01:00\\\"  },  \\\"list_header\\\": {    \\\"list_category\\\": \\\"Criminal\\\",    \\\"start_date\\\": \\\"2021-02-23\\\",    \\\"end_date\\\": \\\"2021-02-23\\\",    \\\"version\\\": \\\"NOT VERSIONED\\\",    \\\"published_time\\\": \\\"2021-02-19T17:49:38.767Z\\\"  },  \\\"crown_court\\\": {    \\\"court_house_type\\\": \\\"Crown Court\\\",    \\\"court_house_code\\\": {      \\\"court_house_short_name\\\": \\\"SWANS\\\",      \\\"code\\\": 457    },    \\\"court_house_name\\\": \\\"SWANSEA\\\"  },  \\\"court_lists\\\": [    {      \\\"court_house\\\": {        \\\"court_house_type\\\": \\\"Crown Court\\\",        \\\"court_house_code\\\": {          \\\"court_house_short_name\\\": \\\"SWANS\\\",          \\\"code\\\": 457        },        \\\"court_house_name\\\": \\\"SWANSEA\\\"      },      \\\"sittings\\\": [        {          \\\"court_room_number\\\": \\\"1\\\",          \\\"sitting_sequence_no\\\": 1,          \\\"sitting_at\\\": \\\"11:00:00\\\",          \\\"sitting_priority\\\": \\\"T\\\",          \\\"judiciary\\\": [            {              \\\"citizen_name_forename\\\": \\\"JudgeName\\\",              \\\"citizen_name_surname\\\": \\\"Surname\\\",              \\\"citizen_name_requested_name\\\": \\\"Judgename Surname\\\"            }          ],          \\\"hearings\\\": [            {              \\\"hearing_sequence_number\\\": 1,              \\\"hearing_details\\\": {                \\\"hearing_type\\\": \\\"PTR\\\",                \\\"hearing_description\\\": \\\"For Pre-Trial Review\\\",                \\\"hearing_date\\\": \\\"2020-06-20\\\"              },              \\\"time_marking_note\\\": \\\"NOT BEFORE 11:00 AM\\\",              \\\"case_number\\\": \\\"Case1\\\",              \\\"prosecution\\\": {                \\\"prosecuting_authority\\\": \\\"Crown Prosecution Service\\\",                \\\"prosecuting_reference\\\": \\\"Crown Prosecution Service\\\",                \\\"prosecuting_organisation\\\": {                  \\\"organisation_name\\\": \\\"Crown Prosecution Service\\\"                },                \\\"advocates\\\": [                  {                    \\\"name\\\": {                      \\\"citizen_name_forename\\\": \\\"ProsecutorName\\\",                      \\\"citizen_name_surname\\\": \\\"Surname\\\",                      \\\"citizen_name_requested_name\\\": \\\"\\\"                    }                  }                ]              },              \\\"defendants\\\": [                {                  \\\"personal_details\\\": {                    \\\"name\\\": {                      \\\"citizen_name_forename\\\": \\\"DefendantName\\\",                      \\\"citizen_name_surname\\\": \\\"Surname\\\",                      \\\"citizen_name_requested_name\\\": \\\"\\\"                    },                    \\\"is_masked\\\": \\\"false\\\"                  },                  \\\"urn\\\": \\\"42GD2391421\\\",                  \\\"charges\\\": [                    {                      \\\"indictment_count_number\\\": 1,                      \\\"cjsoffence_code\\\": \\\"CA03014\\\",                      \\\"offence_statement\\\": \\\"Fail    \\/ refuse give assistance to person executing Communications Act search warrant\\\"                    }                  ],                  \\\"counsel\\\": [                    {                      \\\"name\\\": {                        \\\"citizen_name_forename\\\": \\\"DefenceName\\\",                        \\\"citizen_name_surname\\\": \\\"Surname\\\",                        \\\"citizen_name_requested_name\\\": \\\"\\\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}\"\n} ",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{serverUrl}}/dailylists/v2",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists",
+										"v2"
+									],
+									"query": [
+										{
+											"key": "dal_id",
+											"value": "1",
+											"disabled": true
 										}
 									]
 								}
@@ -919,6 +1094,108 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
+								},
+								"url": {
+									"raw": "{{serverUrl}}/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "swansea start recording",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');",
+											"pm.environment.set(\"timestamp\", moment().format(\"YYYY-MM-DDTHH:mm:ssZ\"));",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"10100\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"31\",\n  \"case_numbers\": [\n    \"chris_audio_test_1\"\n  ],\n  \"event_text\": \"case called on\",\n  \"date_time\": \"{{timestamp}}\"\n}"
+								},
+								"url": {
+									"raw": "{{serverUrl}}/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "swansea stop recording",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');",
+											"pm.environment.set(\"timestamp\", moment().format(\"YYYY-MM-DDTHH:mm:ssZ\"));",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1200\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"32\",\n  \"case_numbers\": [\n    \"chris_audio_test_1\"\n  ],\n  \"event_text\": \"hearing ended\",\n  \"date_time\": \"{{timestamp}}\"\n}"
 								},
 								"url": {
 									"raw": "{{serverUrl}}/events",
