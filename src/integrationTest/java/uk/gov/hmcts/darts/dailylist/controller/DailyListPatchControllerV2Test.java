@@ -42,10 +42,6 @@ class DailyListPatchControllerV2Test extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-    private static String getExpectedResponse() {
-        return "{\"type\":\"DAILYLIST_101\",\"title\":\"Either xml_document or json_document or both needs to be provided.\",\"status\":400}";
-    }
-
     @Test
     void success() throws Exception {
 
