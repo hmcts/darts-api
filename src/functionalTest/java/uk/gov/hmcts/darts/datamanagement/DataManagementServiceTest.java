@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.datamanagement;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-@Slf4j
+
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

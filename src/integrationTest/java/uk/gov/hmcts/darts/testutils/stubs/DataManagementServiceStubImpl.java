@@ -105,7 +105,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
             throw new DartsException("Exception thrown since copy requested with failure UUID");
         }
 
-        log.info("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
+        log.debug("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
     }
 
     @Override

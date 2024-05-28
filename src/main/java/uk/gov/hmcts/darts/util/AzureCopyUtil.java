@@ -39,7 +39,7 @@ public class AzureCopyUtil {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Failed to execute azure copy - interrupted", ie);
         } catch (Exception e) {
-            throw new IOException("Failed to execute azure copy");
+            throw new IOException("Failed to execute azure copy", e);
         }
     }
 }
