@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.util;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.exception.DartsException;
@@ -17,7 +16,6 @@ public class AzureCopyUtil {
 
     private final DataManagementConfiguration config;
 
-    @SneakyThrows
     public void copy(String source, String destination) {
         try {
             ProcessBuilder builder = new ProcessBuilder();
