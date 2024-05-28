@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
-import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DataManagementServiceStubImpl;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
