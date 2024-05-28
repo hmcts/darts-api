@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,6 +48,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -153,15 +155,21 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @SuppressWarnings({"PMD.AvoidRethrowingException", "PMD.CyclomaticComplexity"})
     private void processAudioRequest(Integer requestId) {
 
-        log.info("Starting processing for audio request id: {}", requestId);
-        mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
-
         MediaRequestEntity mediaRequestEntity = null;
         HearingEntity hearingEntity = null;
         UUID blobId;
 
         try {
+            Random random = SecureRandom.getInstanceStrong();
+            Thread.sleep(random.nextInt(500));
             mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(requestId);
+            if (PROCESSING.equals(mediaRequestEntity.getStatus())) {
+                return;
+            }
+
+            log.info("Starting processing for audio request id: {}", requestId);
+            mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
+
             hearingEntity = mediaRequestEntity.getHearing();
 
             logApi.atsProcessingUpdate(mediaRequestEntity);
@@ -200,6 +208,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 generatedAudioFiles = generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
+                Thread.currentThread().interrupt();
                 throw e;
             }
 
@@ -245,6 +254,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             }
 
             logApi.atsProcessingUpdate(updatedMediaRequest);
+            Thread.currentThread().interrupt();
         }
     }
 
