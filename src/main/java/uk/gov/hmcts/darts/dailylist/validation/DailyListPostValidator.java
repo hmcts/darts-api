@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -13,7 +13,7 @@ import static java.util.Objects.nonNull;
 @UtilityClass
 public class DailyListPostValidator {
 
-    public void validate(DailyListPostRequest request) {
+    public void validate(DailyListPostRequestInternal request) {
         if (isNull(request.getDailyListJson())) {
             validateXmlRequest(request);
         } else {
@@ -29,7 +29,7 @@ public class DailyListPostValidator {
     }
 
     @SuppressWarnings({"PMD.CyclomaticComplexity"})
-    private void validateXmlRequest(DailyListPostRequest request) {
+    private void validateXmlRequest(DailyListPostRequestInternal request) {
         if (StringUtils.isBlank(request.getDailyListXml())) {
             throw new DartsApiException(DailyListError.XML_OR_JSON_NEEDS_TO_BE_PROVIDED);
         }
@@ -49,6 +49,5 @@ public class DailyListPostValidator {
         if (!sourceSystem.equals(SourceType.CPP.toString()) && !sourceSystem.equals(SourceType.XHB.toString())) {
             throw new DartsApiException(DailyListError.INVALID_SOURCE_SYSTEM);
         }
-
     }
 }

@@ -10,7 +10,7 @@ import java.time.OffsetDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DailyListPostRequest {
+public class DailyListPostRequestInternal {
 
     String sourceSystem;
     String courthouse;

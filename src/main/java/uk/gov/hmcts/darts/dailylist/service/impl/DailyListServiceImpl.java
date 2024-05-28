@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 
@@ -41,7 +41,7 @@ public class DailyListServiceImpl implements DailyListService {
     /*
     Retrieve the new Daily List, and store it in the database.
      */
-    public PostDailyListResponse saveDailyListToDatabase(DailyListPostRequest postRequest) {
+    public PostDailyListResponse saveDailyListToDatabase(DailyListPostRequestInternal postRequest) {
         if (postRequest.getDailyListJson() == null) {
             return saveDailyListXml(postRequest);
         }
@@ -58,7 +58,7 @@ public class DailyListServiceImpl implements DailyListService {
         return postDailyListResponse;
     }
 
-    private PostDailyListResponse saveDailyListXml(DailyListPostRequest postRequest) {
+    private PostDailyListResponse saveDailyListXml(DailyListPostRequestInternal postRequest) {
         var dailyListEntity = new DailyListEntity();
 
         dailyListEntity.setListingCourthouse(postRequest.getCourthouse());
