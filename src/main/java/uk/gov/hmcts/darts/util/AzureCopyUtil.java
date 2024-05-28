@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -33,13 +33,13 @@ public class AzureCopyUtil {
 
             if (exitValue != 0) {
                 //limiting info included in the exception to avoid potential leak of the source and destination sas tokens
-                throw new IOException("Failed to execute azcopy");
+                throw new DartsException("Failed to execute azcopy");
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Failed to execute azure copy - interrupted", ie);
+            throw new DartsException("Failed to execute azure copy - interrupted", ie);
         } catch (Exception e) {
-            throw new IOException("Failed to execute azure copy", e);
+            throw new DartsException("Failed to execute azure copy", e);
         }
     }
 }

@@ -4,9 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -27,7 +26,7 @@ class AzureCopyUtilTest {
 
         assertThatThrownBy(() ->
                                azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)
-        ).isInstanceOf(IOException.class)
+        ).isInstanceOf(DartsException.class)
             .hasMessageNotContaining(sourceSasUrl)
             .hasMessageNotContaining(destinationSasUrl);
     }
@@ -44,7 +43,7 @@ class AzureCopyUtilTest {
 
         assertThatThrownBy(() ->
                                azureCopyUtil.copy(sourceSasUrl, destinationSasUrl)
-        ).isInstanceOf(RuntimeException.class)
+        ).isInstanceOf(DartsException.class)
             .hasMessageNotContaining(sourceSasUrl)
             .hasMessageNotContaining(destinationSasUrl);
     }
