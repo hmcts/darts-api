@@ -72,8 +72,7 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
             .toList();
     }
 
-    @Override
-    public List<SearchTranscriptionDocumentResponse> searchTranscriptions(SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
+    public List<SearchTranscriptionDocumentResponse> searchTranscriptionDocument(SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
         OffsetDateTime requestedAtFrom = searchTranscriptionDocumentRequest.getRequestedAtFrom()
             != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
         OffsetDateTime requestedAtTo = searchTranscriptionDocumentRequest.getRequestedAtTo()
@@ -90,7 +89,7 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
             searchTranscriptionDocumentRequest.getOwner()
         );
 
-        return transcriptionMapper.mapSearchTranscriptions(results);
+        return transcriptionMapper.mapSearchTranscriptionDocumentResults(results);
     }
 
     @Override

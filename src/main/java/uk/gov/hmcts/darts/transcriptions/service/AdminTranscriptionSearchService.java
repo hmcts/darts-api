@@ -14,7 +14,7 @@ public interface AdminTranscriptionSearchService {
     List<TranscriptionSearchResponse> searchTranscriptions(TranscriptionSearchRequest request);
 
 
-    List<SearchTranscriptionDocumentResponse> searchTranscriptions(SearchTranscriptionDocumentRequest request);
+    List<SearchTranscriptionDocumentResponse> searchTranscriptionDocument(SearchTranscriptionDocumentRequest request);
 
     List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom);
 }

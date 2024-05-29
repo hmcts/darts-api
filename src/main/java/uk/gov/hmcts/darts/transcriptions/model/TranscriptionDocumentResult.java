@@ -29,7 +29,11 @@ public record TranscriptionDocumentResult(
         if (!(other instanceof TranscriptionDocumentResult transcriptionDocumentResult)) {
             return false;
         }
-        return transcriptionDocumentResult.transcriptionId.equals(this.transcriptionId);
+        return transcriptionDocumentResult.transcriptionDocumentId.equals(transcriptionDocumentId)
+            && transcriptionDocumentResult.transcriptionId.equals(transcriptionId)
+            && transcriptionDocumentResult.caseId != null && transcriptionDocumentResult.caseId.equals(caseId)
+            && transcriptionDocumentResult.hearingId != null && transcriptionDocumentResult.hearingId.equals(hearingId)
+            && transcriptionDocumentResult.courthouseId != null && transcriptionDocumentResult.courthouseId.equals(courthouseId);
     }
 
     @Override

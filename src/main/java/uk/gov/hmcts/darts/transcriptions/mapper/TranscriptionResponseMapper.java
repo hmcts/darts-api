@@ -295,7 +295,7 @@ public class TranscriptionResponseMapper {
         return details;
     }
 
-    public SearchTranscriptionDocumentResponse mapSearchTranscriptions(TranscriptionDocumentResult transcriptionDocumentResponse) {
+    public SearchTranscriptionDocumentResponse mapSearchTranscriptionDocumentResult(TranscriptionDocumentResult transcriptionDocumentResponse) {
         SearchTranscriptionDocumentResponse transformedMediaDetails = new SearchTranscriptionDocumentResponse();
         transformedMediaDetails.setTranscriptionDocumentId(transcriptionDocumentResponse.transcriptionDocumentId());
         transformedMediaDetails.setTranscriptionId(transcriptionDocumentResponse.transcriptionId());
@@ -310,10 +310,16 @@ public class TranscriptionResponseMapper {
             transformedMediaDetails.setCase(caseResponse);
         }
 
+        // prioritise the courthouse that is connected directly transcription
         if (transcriptionDocumentResponse.courthouseId() != null) {
             SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
             courthouseResponse.setId(transcriptionDocumentResponse.courthouseId());
             courthouseResponse.setDisplayName(transcriptionDocumentResponse.courthouseDisplayName());
+            transformedMediaDetails.setCourthouse(courthouseResponse);
+        } else if  (transcriptionDocumentResponse.hearingCourthouseId() != null) {
+            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
+            courthouseResponse.setId(transcriptionDocumentResponse.hearingCourthouseId());
+            courthouseResponse.setDisplayName(transcriptionDocumentResponse.hearingCourthouseDisplayName());
             transformedMediaDetails.setCourthouse(courthouseResponse);
         }
 
@@ -327,10 +333,10 @@ public class TranscriptionResponseMapper {
         return transformedMediaDetails;
     }
 
-    public List<SearchTranscriptionDocumentResponse> mapSearchTranscriptions(List<TranscriptionDocumentResult> entityList) {
+    public List<SearchTranscriptionDocumentResponse> mapSearchTranscriptionDocumentResults(List<TranscriptionDocumentResult> entityList) {
         List<SearchTranscriptionDocumentResponse> mappedDetails = new ArrayList<>();
         for (TranscriptionDocumentResult entity : entityList) {
-            mappedDetails.add(mapSearchTranscriptions(entity));
+            mappedDetails.add(mapSearchTranscriptionDocumentResult(entity));
         }
 
         return mappedDetails;

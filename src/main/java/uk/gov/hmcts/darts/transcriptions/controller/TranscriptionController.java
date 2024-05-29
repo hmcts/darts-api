@@ -240,12 +240,12 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     @Override
-    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<List<SearchTranscriptionDocumentResponse>> searchForTranscriptionMedia(
         SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
 
         List<SearchTranscriptionDocumentResponse> foundTransformedMediaResponse =
-            adminTranscriptionSearchService.searchTranscriptions(searchTranscriptionDocumentRequest);
+            adminTranscriptionSearchService.searchTranscriptionDocument(searchTranscriptionDocumentRequest);
 
         return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
     }

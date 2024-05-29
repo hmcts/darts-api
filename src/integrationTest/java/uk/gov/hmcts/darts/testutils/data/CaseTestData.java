@@ -32,6 +32,7 @@ public class CaseTestData {
         courtCaseEntity.setInterpreterUsed(false);
         return courtCaseEntity;
     }
+
     // Not a minimal case. refactor
     public static CourtCaseEntity someMinimalCase() {
         var courtCaseEntity = new CourtCaseEntity();

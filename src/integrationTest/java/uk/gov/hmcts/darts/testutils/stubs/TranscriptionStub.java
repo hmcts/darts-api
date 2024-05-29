@@ -24,28 +24,20 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentSubStringQueryEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
@@ -62,6 +54,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.GodClass")
 public class TranscriptionStub {
 
     public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
@@ -78,12 +71,6 @@ public class TranscriptionStub {
     private final UserAccountStub userAccountStub;
     private final HearingStub hearingStub;
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
-    private final UserAccountRepository userAccountRepository;
-    private final CourtroomStub courtroomStub;
-    private final RetrieveCoreObjectService retrieveCoreObjectService;
-    private final CourtCaseStub courtCaseStub;
-
-    private static final String CASE_NUMBER_PREFIX = "CaseNumber";
 
     public TranscriptionEntity createMinimalTranscription() {
         return createTranscription(hearingStub.createMinimalHearing());
@@ -145,13 +132,13 @@ public class TranscriptionStub {
         UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(courtCase
                                                                                                                   .getCourthouse());
         return createAndSaveTranscriptionEntity(null,
-            List.of(courtCase),
-            null,
-            transcriptionType,
-            transcriptionStatus,
-            transcriptionUrgencyEntity,
-            authorisedIntegrationTestUser,
-            null, true
+                                                List.of(courtCase),
+                                                null,
+                                                transcriptionType,
+                                                transcriptionStatus,
+                                                transcriptionUrgencyEntity,
+                                                authorisedIntegrationTestUser,
+                                                null, true
         );
     }
 
@@ -231,6 +218,7 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
+
     public TranscriptionEntity createAndSaveTranscriptionEntity(List<HearingEntity> hearing, List<CourtCaseEntity> courtCase,
                                                                 CourtroomEntity courtroomEntity,
                                                                 TranscriptionTypeEntity transcriptionType,
@@ -266,6 +254,23 @@ public class TranscriptionStub {
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(isManualTranscription);
+        transcription.setHideRequestFromRequestor(false);
+        return transcriptionRepository.saveAndFlush(transcription);
+    }
+
+    public TranscriptionEntity createAndSaveTranscriptionEntity(CourtCaseEntity courtCase,
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                UserAccountEntity testUser) {
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.addCase(courtCase);
+        transcription.setTranscriptionType(transcriptionType);
+        transcription.setTranscriptionStatus(transcriptionStatus);
+        transcription.setTranscriptionUrgency(transcriptionUrgency);
+        transcription.setCreatedBy(testUser);
+        transcription.setLastModifiedBy(testUser);
+        transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
         return transcriptionRepository.saveAndFlush(transcription);
     }
@@ -323,10 +328,10 @@ public class TranscriptionStub {
 
     @Transactional
     public TranscriptionEntity createAndSaveWithTranscriberTranscription(UserAccountEntity userAccountEntity,
-                                                                   CourtCaseEntity courtCaseEntity,
-                                                                   HearingEntity hearingEntity,
-                                                                   OffsetDateTime workflowTimestamp,
-                                                                   Boolean hideRequestFromRequester) {
+                                                                         CourtCaseEntity courtCaseEntity,
+                                                                         HearingEntity hearingEntity,
+                                                                         OffsetDateTime workflowTimestamp,
+                                                                         Boolean hideRequestFromRequester) {
         var transcriptionEntity = this.createTranscriptionWithStatus(
             userAccountEntity,
             courtCaseEntity,
@@ -416,8 +421,8 @@ public class TranscriptionStub {
     }
 
     public TranscriptionWorkflowEntity createAndSaveTranscriptionWorkflow(TranscriptionEntity transcription,
-                                      OffsetDateTime workflowTimestamp,
-                                      TranscriptionStatusEntity transcriptionStatus) {
+                                                                          OffsetDateTime workflowTimestamp,
+                                                                          TranscriptionStatusEntity transcriptionStatus) {
 
         var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedBy(), workflowTimestamp, transcriptionStatus);
 
@@ -619,134 +624,5 @@ public class TranscriptionStub {
 
     private ObjectRecordStatusEntity getStatusEntity(ObjectRecordStatusEnum objectRecordStatusEnum) {
         return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
-    }
-
-    /**
-     * generates test data. The following will be used for generation:-
-     * Unique owner and requested by users for each transformed media record
-     * Unique court house with unique name for each transformed media record
-     * Unique case number with unique case number for each transformed media record
-     * Unique hearing date starting with today with an incrementing day for each transformed media record
-     * Unique requested date with an incrementing hour for each transformed media record
-     * Unique file name with unique name for each transformed media record
-     * @param count The number of transformed media objects that are to be generated
-     * @return The list of generated media entities in chronological order
-     */
-    public List<TranscriptionDocumentEntity> generateTranscriptionEntities(int count,
-                                                                           int hearingCount,
-                                                                           int caseCount,
-                                                                           boolean isManualTranscription,
-                                                                           boolean nocourhouse,
-                                                                           boolean associatedWorkflow) {
-
-        List<TranscriptionDocumentEntity> retTransformerMediaLst = new ArrayList<>();
-        OffsetDateTime hoursBefore = OffsetDateTime.now(ZoneOffset.UTC);
-        OffsetDateTime hoursAfter = OffsetDateTime.now(ZoneOffset.UTC);
-        OffsetDateTime requestedDate = OffsetDateTime.now(ZoneOffset.UTC);
-        LocalDateTime hearingDate = LocalDateTime.now(ZoneOffset.UTC);
-
-        int fileSize = 1;
-        for (int transriptionDocumentCount = 0; transriptionDocumentCount < count; transriptionDocumentCount++) {
-
-            UserAccountEntity owner = userAccountStub.createSystemUserAccount(
-                TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(transriptionDocumentCount)));
-
-            List<HearingEntity> hearingEntityList = new ArrayList<>();
-            List<CourtCaseEntity> caseEntityList = new ArrayList<>();
-
-            // add the cases to the transcription
-            for (int i = 0; i < caseCount; i++) {
-                CourtCaseEntity caseEntity = courtCaseStub.createAndSaveMinimalCourtCase("Case Number" + transriptionDocumentCount + i);
-                caseEntityList.add(caseEntity);
-            }
-
-            CourtroomEntity courtroomEntity = courtroomStub.createCourtroomUnlessExists(
-                TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(Integer.toString(transriptionDocumentCount)),
-                                                                                         TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
-                                                                                             .getQueryString(Integer.toString(transriptionDocumentCount)));
-
-
-            for (int i = 0; i < hearingCount; i++) {
-                HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
-                    courtroomEntity.getCourthouse().getCourthouseName(),
-                    courtroomEntity.getName(),
-                    caseEntityList.get(0).getCaseNumber(),
-                    hearingDate,
-                    userAccountRepository.getReferenceById(0)
-                );
-
-                hearingEntityList.add(hearingEntity);
-            }
-
-            UserAccountEntity requestedBy = userAccountStub.createSystemUserAccount(
-                TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryString(Integer.toString(transriptionDocumentCount)));
-
-            TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-            transcriptionDocumentEntity.setHidden(false);
-            transcriptionDocumentEntity.setFileName("File name " + count);
-            transcriptionDocumentEntity.setFileType("File type " + count);
-            transcriptionDocumentEntity.setFileSize(100);
-            transcriptionDocumentEntity.setChecksum("");
-            transcriptionDocumentEntity.setUploadedBy(requestedBy);
-            transcriptionDocumentEntity.setLastModifiedBy(requestedBy);
-
-            TranscriptionWorkflowEntity workflowEntity = null;
-
-            if (associatedWorkflow) {
-                workflowEntity = new TranscriptionWorkflowEntity();
-                workflowEntity.setWorkflowActor(owner);
-                workflowEntity.setTranscriptionStatus(mapToTranscriptionStatusEntity(APPROVED));
-                workflowEntity.setWorkflowTimestamp(OffsetDateTime.now());
-            }
-
-            TranscriptionEntity transcriptionEntity = createTranscription(hearingEntityList,
-                                                                          caseEntityList,
-                                                                          !nocourhouse ? courtroomEntity : null,
-                                                                          requestedBy, workflowEntity, isManualTranscription);
-
-
-            transcriptionDocumentEntity.setTranscription(transcriptionEntity);
-            transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntity);
-
-
-            fileSize = fileSize + 1;
-            hoursBefore = hoursBefore.minusHours(1);
-            hoursAfter = hoursAfter.plusHours(1);
-            hearingDate = hearingDate.plusDays(count);
-            requestedDate = requestedDate.plusDays(1);
-            retTransformerMediaLst.add(transcriptionDocumentEntity);
-        }
-
-        return retTransformerMediaLst;
-    }
-
-    public List<Integer> getExpectedStartingFrom(int startingFromIndex, List<TranscriptionDocumentEntity> generatedMediaEntities) {
-        List<Integer> fndMediaIds = new ArrayList<>();
-        for (int position = 0; position < generatedMediaEntities.size(); position++) {
-            if (position >= startingFromIndex) {
-                fndMediaIds.add(generatedMediaEntities.get(position).getId());
-            }
-        }
-
-        return fndMediaIds;
-    }
-
-    public List<Integer> getExpectedTo(int toIndex, List<TranscriptionDocumentEntity> generatedMediaEntities) {
-        List<Integer> fndMediaIds = new ArrayList<>();
-        for (int position = 0; position < generatedMediaEntities.size(); position++) {
-            if (position <= toIndex) {
-                fndMediaIds.add(generatedMediaEntities.get(position).getId());
-            }
-        }
-
-        return fndMediaIds;
-    }
-
-    public List<Integer> getTransformedMediaIds(List<TranscriptionDocumentEntity> entities) {
-        return entities.stream().map(e -> e.getId()).collect(Collectors.toList());
-    }
-
-    public List<Integer> getTransformedMediaResultIds(List<TranscriptionDocumentResult> entities) {
-        return entities.stream().map(e -> e.transcriptionDocumentId()).collect(Collectors.toList());
     }
 }
