@@ -365,13 +365,13 @@ public class TranscriptionStub {
 
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                ObjectRecordStatusEnum status,
-                                                               ExternalLocationTypeEnum location) {
+                                                               ExternalLocationTypeEnum location,
+                                                               UUID eodExternalLocation) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
-        final UUID externalLocation = UUID.randomUUID();
 
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
@@ -380,7 +380,7 @@ public class TranscriptionStub {
                                                transcriptionEntity.getCreatedBy(),
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
-                                               externalLocation,
+                                               eodExternalLocation,
                                                getChecksum());
     }
 

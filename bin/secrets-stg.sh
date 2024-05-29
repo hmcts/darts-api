@@ -38,3 +38,5 @@ export AAD_CLIENT_ID_JUSTICE="$(az keyvault secret show --vault-name darts-stg -
 export AAD_CLIENT_SECRET_JUSTICE="$(az keyvault secret show --vault-name darts-stg --name AzureADClientSecretJustice | jq .value -r)"
 export MAX_FILE_UPLOAD_SIZE_MEGABYTES="$(az keyvault secret show --vault-name darts-stg --name MaxFileUploadSizeInMegabytes | jq .value -r)"
 export MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES="$(az keyvault secret show --vault-name darts-stg --name MaxFileUploadRequestSizeInMegabytes | jq .value -r)"
+export DARTS_INBOUND_STORAGE_SAS_URL="$(az keyvault secret show --vault-name darts-stg --name DartsInboundStorageSasUrl | jq .value -r)"
+export DARTS_UNSTRUCTURED_STORAGE_SAS_URL="$(az keyvault secret show --vault-name darts-stg --name DartsUnstructuredStorageSasUrl | jq .value -r)"
