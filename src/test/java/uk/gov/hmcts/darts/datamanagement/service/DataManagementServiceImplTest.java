@@ -176,11 +176,11 @@ class DataManagementServiceImplTest {
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
         UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
 
-        dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId);
+        UUID destinationUuid = dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId);
 
         verify(azureCopyUtil).copy(
             "https://dartssastg.blob....net/darts-inbound-container/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D",
-            "https://dartssastg.blob....net/darts-unstructured/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D"
+            "https://dartssastg.blob....net/darts-unstructured/" + destinationUuid.toString() + "?sp=r&st=2024-05-23T13...%3D"
         );
     }
 

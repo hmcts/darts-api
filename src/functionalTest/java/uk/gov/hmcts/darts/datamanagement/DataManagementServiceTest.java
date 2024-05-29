@@ -126,20 +126,20 @@ class DataManagementServiceTest {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
-        var uniqueBlobName = dataManagementService.saveBlobData(dataManagementConfiguration.getInboundContainerName(), data);
+        var sourceUuid = dataManagementService.saveBlobData(dataManagementConfiguration.getInboundContainerName(), data);
 
-        dataManagementService.copyBlobData(
+        UUID destinationUuid = dataManagementService.copyBlobData(
             dataManagementConfiguration.getInboundContainerName(),
             dataManagementConfiguration.getUnstructuredContainerName(),
-            uniqueBlobName);
+            sourceUuid);
 
         var blobData = dataManagementService.getBlobData(
-            dataManagementConfiguration.getInboundContainerName(),
-            uniqueBlobName
+            dataManagementConfiguration.getUnstructuredContainerName(),
+            destinationUuid
         );
 
-        dataManagementService.deleteBlobData(dataManagementConfiguration.getInboundContainerName(), uniqueBlobName);
-        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), uniqueBlobName);
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getInboundContainerName(), sourceUuid);
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), destinationUuid);
 
         assertEquals(TEST_BINARY_STRING, blobData.toString());
     }

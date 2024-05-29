@@ -24,7 +24,7 @@ public interface DataManagementService {
 
     BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata);
 
-    void copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId);
+    UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId);
 
     void addMetaData(BlobClient client, Map<String, String> metadata);
 

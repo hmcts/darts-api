@@ -98,7 +98,7 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public void copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+    public UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
         logStubUsageWarning();
 
         if (sourceBlobId.equals(FAILURE_UUID)) {
@@ -106,6 +106,8 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         }
 
         log.debug("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
+
+        return UUID.randomUUID();
     }
 
     @Override

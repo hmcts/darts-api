@@ -140,16 +140,18 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public void copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+    public UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
         try {
             String sourceContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(sourceContainerName);
             String destinationContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(destinationContainerName);
             String sourceBlobSasUrl = buildBlobSasUrl(sourceContainerName, sourceContainerSasUrl, sourceBlobId.toString());
-            String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, sourceBlobId.toString());
+            UUID destinationUuid = UUID.randomUUID();
+            String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, destinationUuid.toString());
 
             azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
 
             log.info("Copy completed from '{}' to '{}' for external object directory Id: {}", sourceContainerName, destinationContainerName, sourceBlobId);
+            return destinationUuid;
         } catch (Exception e) {
             throw new DartsException(String.format("Exception copying file from '%s' to '%s'. External object directory Id: %s",
                     sourceContainerName, destinationContainerName, sourceBlobId), e);
