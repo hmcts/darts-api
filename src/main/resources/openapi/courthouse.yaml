@@ -219,11 +219,9 @@ components:
             created_date_time:
               type: string
               format: date-time
-              example: "2024-02-09T14:26:31.118Z"
             last_modified_date_time:
               type: string
               format: date-time
-              example: "2024-02-09T14:26:31.118Z"
     ExtendedCourthousePost:
       allOf:
         - $ref: '#/components/schemas/CourthousePost'
@@ -234,11 +232,9 @@ components:
             created_date_time:
               type: string
               format: date-time
-              example: "2024-02-09T14:26:31.118Z"
             last_modified_date_time:
               type: string
               format: date-time
-              example: "2024-02-09T14:26:31.118Z"
 
     CourtList:
       type: array
