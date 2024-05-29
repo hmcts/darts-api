@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRole;
-import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRoleAndCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @Component
 public class GivenBuilder {

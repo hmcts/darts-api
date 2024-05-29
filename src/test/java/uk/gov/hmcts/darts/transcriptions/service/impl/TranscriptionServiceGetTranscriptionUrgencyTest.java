@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.util.List;
 
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionServiceGetTranscriptionUrgencyTest {

@@ -40,12 +40,16 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
     protected final FileOperationService fileOperationService;
     protected UserAccountEntity userAccount;
 
+    protected final Integer batchSize;
+
     protected AbstractUnstructuredToArmProcessor(ObjectRecordStatusRepository objectRecordStatusRepository,
-                                              UserIdentity userIdentity,
-                                              ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                              ExternalLocationTypeRepository externalLocationTypeRepository,
-                                              DataManagementApi dataManagementApi,
-                                              ArmDataManagementApi armDataManagementApi, FileOperationService fileOperationService) {
+                                                 UserIdentity userIdentity,
+                                                 ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
+                                                 ExternalLocationTypeRepository externalLocationTypeRepository,
+                                                 DataManagementApi dataManagementApi,
+                                                 ArmDataManagementApi armDataManagementApi,
+                                                 FileOperationService fileOperationService,
+                                                 Integer batchSize) {
         this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.userIdentity = userIdentity;
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
@@ -53,6 +57,7 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
         this.dataManagementApi = dataManagementApi;
         this.armDataManagementApi = armDataManagementApi;
         this.fileOperationService = fileOperationService;
+        this.batchSize = batchSize;
     }
 
     protected ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory,

@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.minimalTranscription;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.minimalTranscription;
 
 @Component
 @SuppressWarnings("VariableDeclarationUsageDistance")

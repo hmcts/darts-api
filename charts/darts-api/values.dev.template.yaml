@@ -89,6 +89,10 @@ java:
           alias: ARM_USERNAME
         - name: ArmPassword
           alias: ARM_PASSWORD
+        - name: DartsInboundStorageSasUrl
+          alias: DARTS_INBOUND_STORAGE_SAS_URL
+        - name: DartsUnstructuredStorageSasUrl
+          alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true

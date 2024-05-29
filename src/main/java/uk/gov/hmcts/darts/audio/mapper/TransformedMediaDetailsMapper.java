@@ -16,4 +16,5 @@ public interface TransformedMediaDetailsMapper {
 
     @ValueMapping(source = "DELETED", target = MappingConstants.NULL)
     uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus map(MediaRequestStatus status);
+
 }

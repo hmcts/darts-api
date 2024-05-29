@@ -52,6 +52,8 @@ services:
       - ACTIVE_DIRECTORY_B2C_AUTH_URI=https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com
       - MAX_FILE_UPLOAD_SIZE_MEGABYTES=350
       - MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES=360
+      - DARTS_INBOUND_STORAGE_SAS_URL
+      - DARTS_UNSTRUCTURED_STORAGE_SAS_URL
     build:
       context: .
       dockerfile: Dockerfile
@@ -95,7 +97,7 @@ services:
 
   darts-redis:
     container_name: darts-redis
-    image: redis:7.2.4-alpine
+    image: redis:7.2.5-alpine
     restart: always
     ports:
       - "6379:6379"

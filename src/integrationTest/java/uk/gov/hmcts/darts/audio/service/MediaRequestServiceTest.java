@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,10 +24,10 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {
 
-    public static final String TEST_FILENAME = "test-filename";
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
 
@@ -56,7 +57,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -76,7 +77,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -98,7 +99,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -119,7 +120,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -155,7 +156,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
 
     void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
-        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(-3));
+        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestEntityById(-3));
     }
 
     @Test
@@ -166,17 +167,17 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertNotNull(mediaRequestEntity);
 
         mediaRequestService.deleteAudioRequest(request.getId());
-        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(request.getId()));
+        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestEntityById(request.getId()));
     }
 
     @Test
 
     void shouldSetDownloadFileNameAndFormat() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1));
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
     }
@@ -184,7 +185,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
 
     void shouldSetPlaybackFileNameAndFormat() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1));
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestEntityById(1));
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
     }
@@ -195,7 +196,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
         var request = mediaRequestService.saveAudioRequest(requestDetails);
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestEntityById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
 
         var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
@@ -211,4 +212,21 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertFalse(isDuplicateRequest);
     }
 
+    @Test
+    void getsMediaRequestById() {
+        var persistedMediaRequest = dartsDatabase.saveWithTransientEntities(minimalRequestData());
+
+        var mediaRequestResponse = mediaRequestService.getMediaRequestById(persistedMediaRequest.getId());
+
+        assertThat(mediaRequestResponse.getId()).isEqualTo(persistedMediaRequest.getId());
+        assertThat(mediaRequestResponse.getStartAt()).isEqualTo(persistedMediaRequest.getStartTime());
+        assertThat(mediaRequestResponse.getEndAt()).isEqualTo(persistedMediaRequest.getEndTime());
+        assertThat(mediaRequestResponse.getRequestedAt()).isEqualTo(persistedMediaRequest.getCreatedDateTime());
+        assertThat(mediaRequestResponse.getOwnerId()).isEqualTo(persistedMediaRequest.getCurrentOwner().getId());
+        assertThat(mediaRequestResponse.getRequestedById()).isEqualTo(persistedMediaRequest.getRequestor().getId());
+        assertThat(mediaRequestResponse.getCourtroom().getId()).isEqualTo(persistedMediaRequest.getHearing().getCourtroom().getId());
+        assertThat(mediaRequestResponse.getCourtroom().getName()).isEqualTo(persistedMediaRequest.getHearing().getCourtroom().getName());
+        assertThat(mediaRequestResponse.getHearing().getId()).isEqualTo(persistedMediaRequest.getHearing().getId());
+        assertThat(mediaRequestResponse.getHearing().getHearingDate()).isEqualTo(persistedMediaRequest.getHearing().getHearingDate());
+    }
 }

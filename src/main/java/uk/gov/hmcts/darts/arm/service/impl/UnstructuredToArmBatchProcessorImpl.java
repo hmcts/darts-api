@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -36,7 +35,6 @@ import static uk.gov.hmcts.darts.common.util.EodHelper.equalsAnyStatus;
 import static uk.gov.hmcts.darts.common.util.EodHelper.isEqual;
 
 
-@Service
 @Slf4j
 public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToArmProcessor {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -57,14 +55,16 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
                                                FileOperationService fileOperationService,
                                                ArchiveRecordService archiveRecordService,
                                                ExternalObjectDirectoryService eodService,
-                                               ArchiveRecordFileGenerator archiveRecordFileGenerator) {
+                                               ArchiveRecordFileGenerator archiveRecordFileGenerator,
+                                               Integer batchSize) {
         super(objectRecordStatusRepository,
               userIdentity,
               externalObjectDirectoryRepository,
               externalLocationTypeRepository,
               dataManagementApi,
               armDataManagementApi,
-              fileOperationService);
+              fileOperationService,
+              batchSize);
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.archiveRecordService = archiveRecordService;
         this.eodService = eodService;
@@ -77,9 +77,7 @@ public class UnstructuredToArmBatchProcessorImpl extends AbstractUnstructuredToA
 
         log.info("Started running ARM Batch Push processing at: {}", OffsetDateTime.now());
 
-        List<ExternalObjectDirectoryEntity> allPendingSourceToArmEntities = getArmExternalObjectDirectoryEntities(
-            armDataManagementConfiguration.getBatchSize()
-        );
+        List<ExternalObjectDirectoryEntity> allPendingSourceToArmEntities = getArmExternalObjectDirectoryEntities(batchSize);
 
         log.info("Found {} pending entities to process from source '{}'", allPendingSourceToArmEntities.size(), getEodSourceLocation().getDescription());
 

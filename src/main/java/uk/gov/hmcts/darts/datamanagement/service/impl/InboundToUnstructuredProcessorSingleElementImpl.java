@@ -1,53 +1,26 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
-import com.azure.storage.blob.models.BlobStorageException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.util.FileContentChecksum;
+import uk.gov.hmcts.darts.common.util.EodHelper;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessorSingleElement;
-import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
-import java.io.FileInputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_EMPTY_FILE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl.FAILURE_STATES_LIST;
 
 
@@ -56,69 +29,41 @@ import static uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructur
 @Slf4j
 public class InboundToUnstructuredProcessorSingleElementImpl implements InboundToUnstructuredProcessorSingleElement {
 
-    @Value("${darts.storage.inbound.temp-blob-workspace}")
-    private String inboundWorkspace;
-
     private static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
     private static final int INITIAL_TRANSFER_ATTEMPTS = 1;
 
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
     private final UserAccountRepository userAccountRepository;
-    private final ObjectRecordStatusRepository objectRecordStatusRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
-    private final AudioConfigurationProperties audioConfigurationProperties;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final MediaRepository mediaRepository;
-    private final FileContentChecksum fileContentChecksum;
 
     @SuppressWarnings({"java:S4790", "PMD.AvoidFileStream"})
     @Override
     @Transactional
     public void processSingleElement(Integer inboundObjectId) {
         ExternalObjectDirectoryEntity inboundExternalObjectDirectory = externalObjectDirectoryRepository.findById(inboundObjectId)
-            .orElseThrow(() -> new NoSuchElementException(format("external object directory not found with id: %d", inboundObjectId)));
+            .orElseThrow(() -> new NoSuchElementException(format("EOD not found with id: %d", inboundObjectId)));
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingInUnstructuredFailed(inboundExternalObjectDirectory);
 
-        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
+        unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-        Path tempFile = null;
         try {
-            tempFile = dataManagementService.downloadBlobToFile(getInboundContainerName(),
-                                                                      inboundExternalObjectDirectory.getExternalLocation(),
-                                                                      inboundWorkspace);
-
-            var calculatedChecksum = fileContentChecksum.calculate(tempFile);
-            long size = Files.size(tempFile);
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity, size);
-
-            if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
-                // upload file
-                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), new FileInputStream(tempFile.toFile()));
-                unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
-                unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
-                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
-                log.debug("Saving unstructured stored EOD for media ID: {}", unstructuredExternalObjectDirectoryEntity.getId());
-                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-                log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
-            }
-        } catch (BlobStorageException e) {
-            log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
-                      getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId()
-            );
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
-            setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            UUID inboundExternalLocation = inboundExternalObjectDirectory.getExternalLocation();
+            UUID unstructuredExternalLocation = dataManagementService.copyBlobData(
+                getInboundContainerName(), getUnstructuredContainerName(), inboundExternalLocation);
+            unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
+            unstructuredExternalObjectDirectoryEntity.setExternalLocation(unstructuredExternalLocation);
+            unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.storedStatus());
+            log.debug("Saved unstructured stored EOD with Id: {}", unstructuredExternalObjectDirectoryEntity.getId());
+            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+            log.debug("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
         } catch (Exception e) {
-            log.error("Failed to move from inboundExternalObjectDirectory to unstructuredExternalObjectDirectoryEntity for EOD ID: {}, with error: {}",
-                      inboundExternalObjectDirectory.getId(), e.getMessage(), e
-            );
-            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
+            log.error("Failed to move file from inbound store to unstructured store. EOD id: {}", inboundExternalObjectDirectory.getId(), e);
+            unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.failureStatus());
             setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
         } finally {
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-            delete(tempFile);
         }
     }
 
@@ -150,76 +95,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         return unstructuredExternalObjectDirectoryEntity;
     }
 
-    @SuppressWarnings({"PMD.UnnecessaryBoxing"})
-    private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured, Long actualFileSize) {
-        MediaEntity mediaEntityLazy = inbound.getMedia();
-        if (mediaEntityLazy != null) {
-            MediaEntity mediaEntity = mediaRepository.findById(mediaEntityLazy.getId()).orElseThrow(
-                () -> new RuntimeException("Media not found: " + mediaEntityLazy.getId()));
-            performValidation(
-                unstructured,
-                mediaEntity.getChecksum(),
-                checksum,
-                audioConfigurationProperties.getAllowedMediaFormats(),
-                mediaEntity.getMediaFormat().toLowerCase(Locale.getDefault()),
-                audioConfigurationProperties.getMaxFileSize(),
-                actualFileSize
-            );
-        }
-
-        TranscriptionDocumentEntity transcriptionDocumentEntity = inbound.getTranscriptionDocumentEntity();
-        if (transcriptionDocumentEntity != null) {
-            performValidation(
-                unstructured,
-                transcriptionDocumentEntity.getChecksum(),
-                checksum,
-                transcriptionConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(Locale.getDefault()),
-                transcriptionConfigurationProperties.getMaxFileSize(),
-                Long.valueOf(transcriptionDocumentEntity.getFileSize())
-            );
-        }
-
-        AnnotationDocumentEntity annotationDocumentEntity = inbound.getAnnotationDocumentEntity();
-        if (annotationDocumentEntity != null) {
-            performValidation(
-                unstructured,
-                annotationDocumentEntity.getChecksum(),
-                checksum,
-                transcriptionConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(Locale.getDefault()),
-                transcriptionConfigurationProperties.getMaxFileSize(),
-                Long.valueOf(annotationDocumentEntity.getFileSize())
-            );
-        }
-
-    }
-
-    @SuppressWarnings({"PMD.ConfusingTernary"})
-    private void performValidation(
-        ExternalObjectDirectoryEntity unstructured,
-        String incomingChecksum, String calculatedChecksum,
-        List<String> allowedMediaFormats, String mediaFormat,
-        Integer maxFileSize, Long fileSize) {
-        if (incomingChecksum == null || !calculatedChecksum.equalsIgnoreCase(incomingChecksum)) {
-            log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
-                      incomingChecksum, calculatedChecksum, unstructured.getId()
-            );
-            unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
-        } else if (!allowedMediaFormats.contains(mediaFormat)) {
-            log.error("Media format failed, format {} not in allowed list for unstructured EOD {}", mediaFormat, unstructured.getId());
-            unstructured.setStatus(getStatus(FAILURE_FILE_TYPE_CHECK_FAILED));
-        } else if (fileSize > maxFileSize) {
-            log.error("File size failed, file size {} exceeds max file size {} for unstructured EOD {} ", fileSize, maxFileSize, unstructured.getId());
-            unstructured.setStatus(getStatus(FAILURE_FILE_SIZE_CHECK_FAILED));
-        } else if (0 == fileSize) {
-            log.error("Empty file failed, the file is empty for unstructured EOD {}", unstructured.getId());
-            unstructured.setStatus(getStatus(FAILURE_EMPTY_FILE));
-        }
-
-        setNumTransferAttempts(unstructured);
-    }
-
     private void setNumTransferAttempts(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
         if (FAILURE_STATES_LIST.contains(unstructuredExternalObjectDirectoryEntity.getStatus().getId())) {
             int numAttempts = INITIAL_TRANSFER_ATTEMPTS;
@@ -234,8 +109,8 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         ExternalObjectDirectoryEntity externalObjectDirectory) {
 
         ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        unstructuredExternalObjectDirectoryEntity.setExternalLocationType(getType(UNSTRUCTURED));
-        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
+        unstructuredExternalObjectDirectoryEntity.setExternalLocationType(EodHelper.unstructuredLocation());
+        unstructuredExternalObjectDirectoryEntity.setStatus(EodHelper.awaitingVerificationStatus());
         unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
         unstructuredExternalObjectDirectoryEntity.setVerificationAttempts(INITIAL_VERIFICATION_ATTEMPTS);
         MediaEntity mediaEntity = externalObjectDirectory.getMedia();
@@ -254,9 +129,6 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
         if (caseDocumentEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setCaseDocument(caseDocumentEntity);
         }
-        OffsetDateTime now = OffsetDateTime.now();
-        unstructuredExternalObjectDirectoryEntity.setCreatedDateTime(now);
-        unstructuredExternalObjectDirectoryEntity.setLastModifiedDateTime(now);
         var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
         unstructuredExternalObjectDirectoryEntity.setCreatedBy(systemUser);
         unstructuredExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
@@ -270,22 +142,5 @@ public class InboundToUnstructuredProcessorSingleElementImpl implements InboundT
 
     private String getUnstructuredContainerName() {
         return dataManagementConfiguration.getUnstructuredContainerName();
-    }
-
-    private ExternalLocationTypeEntity getType(ExternalLocationTypeEnum type) {
-        return externalLocationTypeRepository.getReferenceById(type.getId());
-    }
-
-    private ObjectRecordStatusEntity getStatus(ObjectRecordStatusEnum status) {
-        return objectRecordStatusRepository.getReferenceById(status.getId());
-    }
-
-    private static void delete(Path tempFile) {
-        if (tempFile != null) {
-            var deleted = tempFile.toFile().delete();
-            if (!deleted) {
-                log.error("Failed to delete temp file at {}", tempFile.toAbsolutePath());
-            }
-        }
     }
 }

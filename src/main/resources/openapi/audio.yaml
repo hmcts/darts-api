@@ -175,6 +175,42 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
+  /admin/transformed-medias/{id}:
+    get:
+      tags:
+        - Audio
+      summary: Admin get transformed media
+      operationId: adminGetTransformedMedia
+      description: Returns a specific transformed media details
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTransformedMediaResponse'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_103"
+                title: "The requested transformed media cannot be found"
+                status: 404
 components:
   schemas:
     AudioMetadata:
@@ -262,6 +298,21 @@ components:
           description: 'List of associated case numbers'
           minItems: 1
           maxLength: 255
+    GetTransformedMediaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        file_name:
+          type: string
+        file_format:
+          type: string
+        file_size_bytes:
+          type: integer
+        case_id:
+          type: integer
+        media_request_id:
+          type: integer
 
     AddAudioErrorCode:
       type: string

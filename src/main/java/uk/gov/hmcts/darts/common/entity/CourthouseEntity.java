@@ -15,16 +15,24 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 @Entity
 @Table(name = "courthouse")
 @Getter
 @Setter
+@Audited
+@AuditTable("courthouse_aud")
 public class CourthouseEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -41,15 +49,20 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     @EqualsAndHashCode.Include
     private String courthouseName;
 
+    @NotAudited
     @OneToMany(mappedBy = "courthouse")
     private List<CourtroomEntity> courtrooms;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @AuditJoinTable(name = "security_group_courthouse_ae_aud")
     @ManyToMany
     @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "cth_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
 
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @AuditJoinTable(name = "courthouse_region_ae_aud")
     @ManyToMany
     @JoinTable(name = "courthouse_region_ae",
         joinColumns = {@JoinColumn(name = "cth_id")},

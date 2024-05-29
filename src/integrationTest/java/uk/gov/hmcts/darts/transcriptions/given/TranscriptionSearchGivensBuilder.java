@@ -15,7 +15,7 @@ import java.util.Random;
 
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.generate;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionWorkflowTestData.workflowForTranscription;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionWorkflowTestData.workflowForTranscription;
 
 @Component
 abstract class TranscriptionSearchGivensBuilder {

@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.arm.service.impl;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
@@ -30,7 +29,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_MANIFES
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-@Service
 @Slf4j
 public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmProcessor {
 
@@ -53,9 +51,10 @@ public class UnstructuredToArmProcessorImpl extends AbstractUnstructuredToArmPro
                                           UserIdentity userIdentity,
                                           ArmDataManagementConfiguration armDataManagementConfiguration,
                                           FileOperationService fileOperationService,
-                                          ArchiveRecordService archiveRecordService) {
+                                          ArchiveRecordService archiveRecordService,
+                                          Integer batchSize) {
         super(objectRecordStatusRepository, userIdentity, externalObjectDirectoryRepository, externalLocationTypeRepository, dataManagementApi,
-              armDataManagementApi, fileOperationService);
+              armDataManagementApi, fileOperationService, batchSize);
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.archiveRecordService = archiveRecordService;
     }

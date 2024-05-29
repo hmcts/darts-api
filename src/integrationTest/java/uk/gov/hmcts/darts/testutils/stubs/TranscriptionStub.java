@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
-import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -342,27 +342,36 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
+    public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcription,
                                                                          UserAccountEntity user,
-                                                                         OffsetDateTime timestamp,
+                                                                         OffsetDateTime workflowTimestamp,
                                                                          TranscriptionStatusEntity transcriptionStatus) {
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
-        transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
-        transcriptionWorkflowEntity.setTranscriptionStatus(transcriptionStatus);
-        transcriptionWorkflowEntity.setWorkflowActor(user);
-        transcriptionWorkflowEntity.setWorkflowTimestamp(timestamp);
-        return transcriptionWorkflowEntity;
+        TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
+        transcriptionWorkflow.setTranscription(transcription);
+        transcriptionWorkflow.setTranscriptionStatus(transcriptionStatus);
+        transcriptionWorkflow.setWorkflowActor(user);
+        transcriptionWorkflow.setWorkflowTimestamp(workflowTimestamp);
+        return transcriptionWorkflow;
+    }
+
+    public TranscriptionWorkflowEntity createAndSaveTranscriptionWorkflow(TranscriptionEntity transcription,
+                                      OffsetDateTime workflowTimestamp,
+                                      TranscriptionStatusEntity transcriptionStatus) {
+
+        var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedBy(), workflowTimestamp, transcriptionStatus);
+
+        return transcriptionWorkflowRepository.save(transcriptionWorkflow);
     }
 
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                ObjectRecordStatusEnum status,
-                                                               ExternalLocationTypeEnum location) {
+                                                               ExternalLocationTypeEnum location,
+                                                               UUID eodExternalLocation) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
-        final UUID externalLocation = UUID.randomUUID();
 
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
@@ -371,7 +380,7 @@ public class TranscriptionStub {
                                                transcriptionEntity.getCreatedBy(),
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
-                                               externalLocation,
+                                               eodExternalLocation,
                                                getChecksum());
     }
 
@@ -492,7 +501,7 @@ public class TranscriptionStub {
         transcriptionWorkflowRepository.saveAndFlush(requestedTranscriptionWorkflowEntity);
 
         if (nonNull(comment)) {
-            final var transcriptionComment = createTranscriptionComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
+            final var transcriptionComment = createTranscriptionWorkflowComment(requestedTranscriptionWorkflowEntity, comment, userAccountEntity);
             transcriptionCommentRepository.save(transcriptionComment);
 
             requestedTranscriptionWorkflowEntity.getTranscriptionComments().add(transcriptionComment);
@@ -511,15 +520,36 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    public TranscriptionCommentEntity createTranscriptionComment(TranscriptionWorkflowEntity workflowEntity, String comment,
-                                                                 UserAccountEntity userAccountEntity) {
+    public TranscriptionCommentEntity createTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity, String comment,
+                                                                         UserAccountEntity userAccountEntity) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setTranscription(workflowEntity.getTranscription());
         transcriptionCommentEntity.setTranscriptionWorkflow(workflowEntity);
         transcriptionCommentEntity.setComment(comment);
+        transcriptionCommentEntity.setCommentTimestamp(workflowEntity.getWorkflowTimestamp());
+        transcriptionCommentEntity.setAuthorUserId(userAccountEntity.getId());
         transcriptionCommentEntity.setLastModifiedBy(userAccountEntity);
         transcriptionCommentEntity.setCreatedBy(userAccountEntity);
         return transcriptionCommentEntity;
+    }
+
+    public TranscriptionCommentEntity createAndSaveTranscriptionWorkflowComment(TranscriptionWorkflowEntity workflowEntity,
+                                                                                String comment, UserAccountEntity userAccount) {
+        var transcriptionComment = createTranscriptionWorkflowComment(workflowEntity, comment, userAccount);
+        return transcriptionCommentRepository.save(transcriptionComment);
+    }
+
+    public TranscriptionCommentEntity createAndSaveTranscriptionCommentNotAssociatedToWorkflow(TranscriptionEntity transcription,
+                                                                                               OffsetDateTime commentTimestamp,
+                                                                                               String comment) {
+        TranscriptionCommentEntity transcriptionComment = new TranscriptionCommentEntity();
+        transcriptionComment.setTranscription(transcription);
+        transcriptionComment.setComment(comment);
+        transcriptionComment.setCommentTimestamp(commentTimestamp);
+        transcriptionComment.setAuthorUserId(transcription.getCreatedBy().getId());
+        transcriptionComment.setLastModifiedBy(transcription.getCreatedBy());
+        transcriptionComment.setCreatedBy(transcription.getCreatedBy());
+        return transcriptionCommentRepository.save(transcriptionComment);
     }
 
     private ExternalLocationTypeEntity getLocationEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {

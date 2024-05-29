@@ -27,7 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
 class NotificationServiceTest extends IntegrationBase {

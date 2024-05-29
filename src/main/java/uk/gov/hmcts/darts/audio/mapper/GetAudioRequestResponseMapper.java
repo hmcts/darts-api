@@ -34,5 +34,4 @@ public class GetAudioRequestResponseMapper {
 
         return response;
     }
-
 }

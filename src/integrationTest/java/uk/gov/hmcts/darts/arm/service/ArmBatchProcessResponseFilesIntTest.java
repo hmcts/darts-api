@@ -32,8 +32,8 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
@@ -57,7 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @SuppressWarnings({"VariableDeclarationUsageDistance", "PMD.NcssCount", "ExcessiveImports"})
 class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
@@ -103,6 +103,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
     private ArmResponseFilesProcessor armBatchProcessResponseFiles;
     private String continuationToken;
 
+    private static final Integer BATCH_SIZE = 10;
+
 
     @BeforeEach
     void setupData() {
@@ -119,7 +121,8 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             mediaRepository,
             transcriptionDocumentRepository,
             annotationDocumentRepository,
-            caseDocumentRepository
+            caseDocumentRepository,
+            BATCH_SIZE
         );
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -185,7 +188,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -242,7 +245,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -286,7 +288,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia5.getVerificationAttempts());
         assertFalse(foundMedia5.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verify(armDataManagementApi).listResponseBlobs(hashcode1);
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
@@ -379,7 +381,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -419,7 +421,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -540,7 +541,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -595,7 +596,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -685,7 +685,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp", hashcode1);
@@ -722,7 +722,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -789,7 +788,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -815,7 +814,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -830,7 +828,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(String.valueOf(armEod.getId()), foundTranscriptionEod.getExternalRecordId());
         assertTrue(foundTranscriptionEod.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verify(armDataManagementApi).listResponseBlobs(hashcode1);
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
@@ -893,7 +891,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -919,7 +917,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -974,7 +971,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -1000,7 +997,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -1015,7 +1011,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(String.valueOf(armEod.getId()), foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verify(armDataManagementApi).listResponseBlobs(hashcode1);
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
@@ -1062,7 +1058,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp", hashcode1);
@@ -1088,7 +1084,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -1103,7 +1098,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(String.valueOf(armEod.getId()), foundAnnotationEod.getExternalRecordId());
         assertTrue(foundAnnotationEod.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verify(armDataManagementApi).listResponseBlobs(hashcode1);
 
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
@@ -1150,7 +1145,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
         String hashcode1 = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename1 = String.format("dropzone/DARTS/response/%s_a17b9015-e6ad-77c5-8d1e-13259aae1895_invalid_1_cr.rsp", hashcode1);
         String uploadFileFilename1 = String.format("dropzone/DARTS/response/%s_04e6bc3b-952a-79b6-8362-13259aae1895_invalid_1_uf.rsp", hashcode1);
@@ -1194,7 +1189,6 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
@@ -1233,10 +1227,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
             .blobNamesAndPaths(blobNamesAndPaths)
             .build();
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenReturn(continuationTokenBlobs);
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenReturn(continuationTokenBlobs);
 
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
 
         // when
@@ -1252,7 +1245,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
@@ -1276,10 +1269,9 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         armEod1.setManifestFile(manifestFile1);
         dartsDatabase.save(armEod1);
 
-        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, continuationToken)).thenThrow(new AzureException());
+        when(armDataManagementApi.listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken)).thenThrow(new AzureException());
 
         when(armDataManagementConfiguration.getContinuationTokenDuration()).thenReturn("PT1M");
-        when(armDataManagementConfiguration.getBatchSize()).thenReturn(5);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(PREFIX);
 
         // when
@@ -1295,7 +1287,7 @@ class ArmBatchProcessResponseFilesIntTest extends IntegrationBase {
         assertEquals(1, foundMedia.getVerificationAttempts());
         assertFalse(foundMedia.isResponseCleaned());
 
-        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, continuationToken);
+        verify(armDataManagementApi).listResponseBlobsUsingMarker(PREFIX, BATCH_SIZE, continuationToken);
         verifyNoMoreInteractions(armDataManagementApi);
     }
 

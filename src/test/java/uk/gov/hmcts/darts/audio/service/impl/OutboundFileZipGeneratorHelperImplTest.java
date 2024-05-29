@@ -53,9 +53,9 @@ import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHe
 import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.REQUEST_TYPE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.START_TIME_README_LABEL;
 import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
-import static uk.gov.hmcts.darts.common.util.TestUtils.readTempFileContent;
-import static uk.gov.hmcts.darts.common.util.TestUtils.searchBytePattern;
-import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.readTempFileContent;
+import static uk.gov.hmcts.darts.test.common.TestUtils.searchBytePattern;
+import static uk.gov.hmcts.darts.test.common.TestUtils.unmarshalXmlFile;
 
 
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports"})

@@ -16,4 +16,5 @@ public interface AudioService {
     void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId);
 
     void setIsAvailable(List<AudioMetadata> audioMetadata);
+
 }

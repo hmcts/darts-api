@@ -43,8 +43,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
 @SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)

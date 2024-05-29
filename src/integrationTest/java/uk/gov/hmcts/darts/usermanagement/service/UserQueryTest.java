@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 class UserQueryTest extends IntegrationBase {
 

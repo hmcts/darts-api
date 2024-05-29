@@ -43,7 +43,9 @@ def secrets = [
                 secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
                 secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
                 secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
-                secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT')
+                secret('DETSSasURLEndpoint', 'DETS_SAS_URL_ENDPOINT'),
+                secret('DartsInboundStorageSasUrl', 'DARTS_INBOUND_STORAGE_SAS_URL'),
+                secret('DartsUnstructuredStorageSasUrl', 'DARTS_UNSTRUCTURED_STORAGE_SAS_URL')
         ],
 ]
 

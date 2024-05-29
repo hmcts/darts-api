@@ -12,6 +12,65 @@ servers:
 
 
 paths:
+  /dailylists/v2:
+    post:
+      tags:
+        - DailyLists
+      summary: Send Daily List
+      description: XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
+      requestBody:
+        $ref: '#/components/requestBodies/PostDailyListRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDailyListResponse'
+
+        '400':
+          description: Bad Request - Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+    patch:
+      tags:
+        - DailyLists
+      summary: Update existing DailyList
+      requestBody:
+        $ref: '#/components/requestBodies/PatchDailyListRequest'
+
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDailyListResponse'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
   /dailylists:
     post:
       tags:
@@ -211,12 +270,18 @@ components:
   #-----------------#
 
   requestBodies:
-    CreateCase:
+    PostDailyListRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Sitting'
+            $ref: '#/components/schemas/PostDailyListRequest'
+    PatchDailyListRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PatchDailyListRequest'
 
 
     #-----------------#
@@ -224,6 +289,56 @@ components:
     #-----------------#
 
   schemas:
+    PostDailyListRequest:
+      type: object
+      properties:
+        source_system:
+          type: string
+          description: "The source system that has sent the message. Must be CPP or XHB"
+        courthouse:
+          type: string
+          description: "The courthouse that the dailyList represents. <p>
+                        **Conditional mandatory**, required if json_string not provided"
+        hearing_date:
+          type: string
+          format: date
+          description: "The date that the dailyList represents. <p>
+                      **Conditional mandatory**, required if json_string not provided"
+        unique_id:
+          type: string
+          description: "The uniqueId. <p>
+                      **Conditional mandatory**, required if json_string not provided"
+        published_ts:
+          type: string
+          format: date-time
+          description: "The date that the dailyList was published. <p>
+                      **Conditional mandatory**, required if json_string not provided"
+        message_id:
+          type: string
+          description: "The message id of the event. <p>
+                      **Conditional mandatory**, required if json_string not provided"
+        xml_document:
+          type: string
+          description: "XML representation of the 'document' received in the addDocument request.<p>
+          **Conditional mandatory** either this or json_string needs to be provided, or both. This will not be parsed but just stored in the database as a string"
+        json_string:
+          type: string
+          description: "JSON representation of the 'document' received in the addDocument request.<p>
+          **Conditional mandatory** either this or xml_document needs to be provided, or both."
+
+    PatchDailyListRequest:
+      type: object
+      required:
+        - dal_id
+        - json_string
+      properties:
+        dal_id:
+          type: integer
+        json_string:
+          type: string
+          description: "JSON representation of the 'document' received in the addDocument request."
+
+
     PostDailyListJson:
       $ref: '#/components/schemas/DailyListJsonObject'
     PostDailyListResponse:
@@ -480,24 +595,24 @@ components:
       x-enum-varnames: [DAILYLIST_COURT_HOUSE_NOT_FOUND, DAILYLIST_DOCUMENT_CANT_BE_PARSED, DAILYLIST_PROCESSOR_NOT_FOUND]
 
     DailyListErrorCode:
-     type: string
-     enum:
-      - "DAILYLIST_100"
-      - "DAILYLIST_101"
-      - "DAILYLIST_102"
-      - "DAILYLIST_103"
-      - "DAILYLIST_104"
-      - "DAILYLIST_105"
-     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
+      type: string
+      enum:
+        - "DAILYLIST_100"
+        - "DAILYLIST_101"
+        - "DAILYLIST_102"
+        - "DAILYLIST_103"
+        - "DAILYLIST_104"
+        - "DAILYLIST_105"
+      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
 
     DailyListTitleErrors:
-     type: string
-     enum:
-      - "Failed to process daily list"
-      - "Either xml_document or json_document or both needs to be provided."
-      - "If xml_document is being provided without json_document, then courthouse, hearing_date, published_ts and unique_id also need to be provided."
-      - "The provided Daily List Id could not be found."
-      - "An Internal Server Error has occurred."
-      - "Invalid source system. Should be CPP or XHB."
-     x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
+      type: string
+      enum:
+        - "Failed to process daily list"
+        - "Either xml_document or json_document or both needs to be provided."
+        - "If xml_document is being provided without json_document, then courthouse, hearing_date, published_ts and unique_id also need to be provided."
+        - "The provided Daily List Id could not be found."
+        - "An Internal Server Error has occurred."
+        - "Invalid source system. Should be CPP or XHB."
+      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR, INVALID_SOURCE_SYSTEM ]
 

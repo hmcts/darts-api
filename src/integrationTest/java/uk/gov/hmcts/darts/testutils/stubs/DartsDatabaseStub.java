@@ -7,11 +7,13 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.commons.JUnitException;
+import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -79,9 +81,9 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
-import uk.gov.hmcts.darts.testutils.data.AudioTestData;
-import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
-import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
+import uk.gov.hmcts.darts.test.common.data.AudioTestData;
+import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
+import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -102,10 +104,10 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.data.AnnotationTestData.minimalAnnotationEntity;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEventHandlerWith;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.someMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEventHandlerWith;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHearing;
 
 @Service
 @AllArgsConstructor
@@ -217,6 +219,7 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
+        auditRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -516,6 +519,14 @@ public class DartsDatabaseStub {
         return dailyListRepository.saveAll(asList(dailyListEntity));
     }
 
+    @Transactional
+    public MediaRequestEntity saveWithTransientEntities(MediaRequestEntity mediaRequestEntity) {
+        save(mediaRequestEntity.getHearing());
+        save(mediaRequestEntity.getRequestor());
+        save(mediaRequestEntity.getCurrentOwner());
+        return save(mediaRequestEntity);
+    }
+
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
@@ -767,4 +778,11 @@ public class DartsDatabaseStub {
         }
     }
 
+    public List<AuditEntity> findAudits() {
+        return auditRepository.findAll();
+    }
+
+    public Revisions<Long, CourthouseEntity> findCourthouseRevisionsFor(Integer id) {
+        return courthouseRepository.findRevisions(id);
+    }
 }

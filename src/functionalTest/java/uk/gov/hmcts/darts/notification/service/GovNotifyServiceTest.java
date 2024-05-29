@@ -187,7 +187,7 @@ class GovNotifyServiceTest {
 
                 Due to unforeseen errors, your audio recording order has failed.
 
-                To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
+                To resolve this issue, email DTS-ITServiceDesk@justice.gov.uk quoting TheRequestID, and provide them with the following information:
 
                 ## Case details
 

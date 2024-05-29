@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
@@ -42,6 +44,8 @@ class DataManagementServiceTest {
 
     @Autowired
     DataManagementService dataManagementService;
+    @Autowired
+    DataManagementConfiguration dataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
@@ -114,6 +118,30 @@ class DataManagementServiceTest {
 
         assertTrue(uuid instanceof UUID);
         assertTrue(StringUtils.isNotEmpty(uuid.toString()));
+    }
+
+    @Test
+    void copyBetweenStorageContainers() throws AzureDeleteBlobException {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+
+        var sourceUuid = dataManagementService.saveBlobData(dataManagementConfiguration.getInboundContainerName(), data);
+
+        UUID destinationUuid = dataManagementService.copyBlobData(
+            dataManagementConfiguration.getInboundContainerName(),
+            dataManagementConfiguration.getUnstructuredContainerName(),
+            sourceUuid);
+
+        var blobData = dataManagementService.getBlobData(
+            dataManagementConfiguration.getUnstructuredContainerName(),
+            destinationUuid
+        );
+
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getInboundContainerName(), sourceUuid);
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), destinationUuid);
+
+        assertEquals(TEST_BINARY_STRING, blobData.toString());
     }
 
 }

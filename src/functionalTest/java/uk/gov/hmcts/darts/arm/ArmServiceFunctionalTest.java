@@ -116,7 +116,7 @@ class ArmServiceFunctionalTest {
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
         uploadBatchedSubmissionBlobs(data);
-        Integer batchSize = 3;
+        Integer batchSize = 10;
         String continuationToken = null;
         List<String> allBlobs = new ArrayList<>();
         do {

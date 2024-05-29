@@ -5,8 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
@@ -31,6 +33,8 @@ class TranscriptionServiceGetWorkflowsTest {
     @Mock
     private TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     @Mock
+    private TranscriptionCommentRepository transcriptionCommentRepository;
+    @Mock
     private TranscriptionResponseMapper transcriptionResponseMapper;
     @Mock
     private GetTranscriptionWorkflowsResponse mockTranscriptionWorkflowResponse;
@@ -40,6 +44,8 @@ class TranscriptionServiceGetWorkflowsTest {
     TranscriptionWorkflowEntity mockTranscriptionWorkflowEntity;
     @Mock
     TranscriptionWorkflowEntity mockTranscriptionWorkflowEntity2;
+    @Mock
+    TranscriptionCommentEntity transcriptionComment;
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
 
@@ -47,7 +53,7 @@ class TranscriptionServiceGetWorkflowsTest {
     void getCurrentTranscriptionWorkflowSuccess() {
         when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
         when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(getListOfTranscriptionWorkflows());
-        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(mockTranscriptionWorkflowEntity)))
+        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(List.of(mockTranscriptionWorkflowEntity), List.of()))
             .thenReturn(List.of(mockTranscriptionWorkflowResponse));
 
         List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, true);
@@ -59,9 +65,11 @@ class TranscriptionServiceGetWorkflowsTest {
 
     @Test
     void getTranscriptionWorkflowSuccess() {
-        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(new TranscriptionEntity()));
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        when(transcriptionRepository.findById(anyInt())).thenReturn(Optional.of(transcription));
         when(transcriptionWorkflowRepository.findByTranscriptionOrderByWorkflowTimestampDesc(any())).thenReturn(getListOfTranscriptionWorkflows());
-        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(getListOfTranscriptionWorkflows()))
+        when(transcriptionCommentRepository.getByTranscriptionAndTranscriptionWorkflowIsNull(any())).thenReturn(List.of(transcriptionComment));
+        when(transcriptionResponseMapper.mapToTranscriptionWorkflowsResponse(getListOfTranscriptionWorkflows(), List.of(transcriptionComment)))
             .thenReturn(List.of(mockTranscriptionWorkflowResponse, mockTranscriptionWorkflowResponse2));
 
         List<GetTranscriptionWorkflowsResponse> transcriptionWorkflows = transcriptionService.getTranscriptionWorkflows(1, false);
@@ -69,6 +77,7 @@ class TranscriptionServiceGetWorkflowsTest {
         assertEquals(2, transcriptionWorkflows.size());
         verify(transcriptionRepository, times(1)).findById(anyInt());
         verify(transcriptionWorkflowRepository, times(1)).findByTranscriptionOrderByWorkflowTimestampDesc(any());
+        verify(transcriptionCommentRepository).getByTranscriptionAndTranscriptionWorkflowIsNull(transcription);
     }
 
     @Test
