@@ -22,9 +22,9 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.TestUtils;
+import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.TestUtils;
-import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -35,14 +35,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendantForCaseWithName;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.DefendantTestData.createDefendantForCaseWithName;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createHearingWithDefaults;
+import static uk.gov.hmcts.darts.test.common.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.stubs.UserAccountStub.INTEGRATION_TEST_USER_EMAIL;
 
 @Slf4j

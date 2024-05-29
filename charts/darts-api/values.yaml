@@ -90,6 +90,10 @@ java:
           alias: MAX_FILE_UPLOAD_SIZE_MEGABYTES
         - name: MaxFileUploadRequestSizeInMegabytes
           alias: MAX_FILE_UPLOAD_REQUEST_SIZE_MEGABYTES
+        - name: DartsInboundStorageSasUrl
+          alias: DARTS_INBOUND_STORAGE_SAS_URL
+        - name: DartsUnstructuredStorageSasUrl
+          alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -192,6 +196,10 @@ function:
           alias: ARM_USERNAME
         - name: ArmPassword
           alias: ARM_PASSWORD
+        - name: DartsInboundStorageSasUrl
+          alias: DARTS_INBOUND_STORAGE_SAS_URL
+        - name: DartsUnstructuredStorageSasUrl
+          alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
   environment:
     ATS_MODE: true
     API_MODE: false

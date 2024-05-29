@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class DailyListServiceImpSaveDailyListTest {
@@ -60,11 +60,11 @@ class DailyListServiceImpSaveDailyListTest {
 
     @Test
     void ok_WhenCodeNotMatchExceptionThrown() throws IOException {
-        when(dailyListMapper.createDailyListFromJson(any(DailyListPostRequest.class)))
+        when(dailyListMapper.createDailyListFromJson(any(DailyListPostRequestInternal.class)))
             .thenReturn(new DailyListEntity());
 
-        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), null, null, null,
-                                                                null, null, getDailyListJson(), "some-message-id");
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal(SourceType.CPP.toString(), null, null, null,
+                                                                                null, null, getDailyListJson(), "some-message-id");
         service.saveDailyListToDatabase(request);
 
         //make sure an exception is not thrown.
@@ -77,11 +77,11 @@ class DailyListServiceImpSaveDailyListTest {
         UserAccountEntity user = new UserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(user);
 
-        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
-                                                                "uniqueId",
-                                                                OffsetDateTime.now(),
-                                                                null,
-                                                                "some-message-id"
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
+                                                                                "uniqueId",
+                                                                                OffsetDateTime.now(),
+                                                                                null,
+                                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 
@@ -102,14 +102,14 @@ class DailyListServiceImpSaveDailyListTest {
     void ok_JsonCreateDailyList() throws IOException {
         UserAccountEntity user = new UserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(user);
-        when(dailyListMapper.createDailyListFromJson(any(DailyListPostRequest.class)))
+        when(dailyListMapper.createDailyListFromJson(any(DailyListPostRequestInternal.class)))
             .thenReturn(new DailyListEntity());
 
-        DailyListPostRequest request = new DailyListPostRequest(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
-                                                                "uniqueId",
-                                                                OffsetDateTime.now(),
-                                                                getDailyListJson(),
-                                                                "some-message-id"
+        DailyListPostRequestInternal request = new DailyListPostRequestInternal(SourceType.CPP.toString(), "Swansea", LocalDate.now(), "Thexml",
+                                                                                "uniqueId",
+                                                                                OffsetDateTime.now(),
+                                                                                getDailyListJson(),
+                                                                                "some-message-id"
         );
         service.saveDailyListToDatabase(request);
 

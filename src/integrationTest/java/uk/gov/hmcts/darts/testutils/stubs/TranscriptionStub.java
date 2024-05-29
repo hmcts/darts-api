@@ -29,7 +29,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
-import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -431,13 +431,13 @@ public class TranscriptionStub {
 
     public TranscriptionEntity updateTranscriptionWithDocument(TranscriptionEntity transcriptionEntity,
                                                                ObjectRecordStatusEnum status,
-                                                               ExternalLocationTypeEnum location) {
+                                                               ExternalLocationTypeEnum location,
+                                                               UUID eodExternalLocation) {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 10;
         final ObjectRecordStatusEntity objectRecordStatusEntity = getStatusEntity(status);
         final ExternalLocationTypeEntity externalLocationTypeEntity = getLocationEntity(location);
-        final UUID externalLocation = UUID.randomUUID();
 
         return updateTranscriptionWithDocument(transcriptionEntity,
                                                fileName,
@@ -446,7 +446,7 @@ public class TranscriptionStub {
                                                transcriptionEntity.getCreatedBy(),
                                                objectRecordStatusEntity,
                                                externalLocationTypeEntity,
-                                               externalLocation,
+                                               eodExternalLocation,
                                                getChecksum());
     }
 

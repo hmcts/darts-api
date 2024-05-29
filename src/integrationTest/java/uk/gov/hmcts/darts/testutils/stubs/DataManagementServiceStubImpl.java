@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -27,7 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
 /**
  * This class is a test implementation of DataManagementService, intended to mimic the basic behaviour of Azure
@@ -39,6 +40,8 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getFile;
 @Profile("intTest")
 public class DataManagementServiceStubImpl implements DataManagementService {
 
+    // use this UUID to request stub throwing an exception
+    public static final UUID FAILURE_UUID = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
     private final DataManagementConfiguration dataManagementConfiguration;
 
     @Value("${darts.audio.transformation.service.audio.file:#{null}}")
@@ -92,6 +95,19 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         blobClientBuilder.containerName(containerName);
         log.warn("Returning random UUID to mimic successful upload: {}", uuid);
         return blobClientBuilder.buildClient();
+    }
+
+    @Override
+    public UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+        logStubUsageWarning();
+
+        if (sourceBlobId.equals(FAILURE_UUID)) {
+            throw new DartsException("Exception thrown since copy requested with failure UUID");
+        }
+
+        log.debug("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
+
+        return UUID.randomUUID();
     }
 
     @Override

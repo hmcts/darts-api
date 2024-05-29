@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
-import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEventHandlerWith;
+import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.createEventHandlerWith;
 
 @AutoConfigureMockMvc
 class EventsControllerPostEventsTest extends IntegrationBase {

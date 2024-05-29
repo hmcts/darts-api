@@ -271,9 +271,9 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
         tr2.addHearing(hear2);
         transcriptionRepository.save(tr2);
 
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND);
-        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND);
-        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND);
+        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
+        transcriptionStub.updateTranscriptionWithDocument(tr1, STORED, INBOUND, UUID.randomUUID());
+        transcriptionStub.updateTranscriptionWithDocument(tr2, STORED, INBOUND, UUID.randomUUID());
 
         var trDoc1 = tr1.getTranscriptionDocumentEntities().get(0);
         eodStub.createAndSaveExternalObjectDirectory(trDoc1.getId(), EodHelper.armDropZoneStatus(), EodHelper.armLocation());

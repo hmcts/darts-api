@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings({"PMD.DoNotUseThreads"})
 class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {

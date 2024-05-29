@@ -14,7 +14,7 @@ import java.net.URI;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
 class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {

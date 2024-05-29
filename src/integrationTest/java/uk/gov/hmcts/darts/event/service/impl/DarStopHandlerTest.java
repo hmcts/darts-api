@@ -21,7 +21,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 class DarStopHandlerTest extends IntegrationBaseWithGatewayStub {
 

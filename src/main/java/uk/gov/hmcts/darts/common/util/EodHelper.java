@@ -27,6 +27,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONS
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
@@ -64,6 +65,8 @@ public class EodHelper {
     @Getter
     private static ObjectRecordStatusEntity storedStatus;
     @Getter
+    private static ObjectRecordStatusEntity failureStatus;
+    @Getter
     private static ObjectRecordStatusEntity markForDeletionStatus;
     @Getter
     private static ObjectRecordStatusEntity armResponseProcessingFailedStatus;
@@ -78,6 +81,7 @@ public class EodHelper {
     private static List<ObjectRecordStatusEntity> failedArmStatuses;
 
 
+    @SuppressWarnings("java:S2696")
     @PostConstruct
     public void init() {
         unstructuredLocation = eltRepository.findById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()).orElseThrow();
@@ -86,6 +90,7 @@ public class EodHelper {
         inboundLocation = eltRepository.findById(ExternalLocationTypeEnum.INBOUND.getId()).orElseThrow();
 
         storedStatus = orsRepository.findById(STORED.getId()).orElseThrow();
+        failureStatus = orsRepository.findById(FAILURE.getId()).orElseThrow();
         markForDeletionStatus = orsRepository.findById(MARKED_FOR_DELETION.getId()).orElseThrow();
         failedArmRawDataStatus = orsRepository.findById(ARM_RAW_DATA_FAILED.getId()).orElseThrow();
         armProcessingResponseFilesStatus = orsRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).orElseThrow();

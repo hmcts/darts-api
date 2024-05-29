@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
+import static uk.gov.hmcts.darts.test.common.data.MediaTestData.createMediaWith;
 
 @Component
 @RequiredArgsConstructor

@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData;
+import uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -55,6 +55,17 @@ public class UserAccountStub {
             newUser.setIsSystemUser(true);
             return userAccountRepository.saveAndFlush(newUser);
         }
+    }
+
+    public UserAccountEntity createSystemUserAccount(String username) {
+        var newUser = new UserAccountEntity();
+        newUser.setUserName(username);
+        newUser.setEmailAddress(username + "@example.com");
+        newUser.setActive(true);
+        newUser.setAccountGuid(UUID.randomUUID().toString());
+        newUser.setIsSystemUser(true);
+        newUser.setUserFullName(newUser.getUserName());
+        return userAccountRepository.saveAndFlush(newUser);
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
@@ -325,16 +336,4 @@ public class UserAccountStub {
 
         return Arrays.asList(testUserNonSystem, testUserSystem);
     }
-
-    public UserAccountEntity createSystemUserAccount(String username) {
-        var newUser = new UserAccountEntity();
-        newUser.setUserName(username);
-        newUser.setEmailAddress(username + "@example.com");
-        newUser.setActive(true);
-        newUser.setAccountGuid(UUID.randomUUID().toString());
-        newUser.setIsSystemUser(true);
-        newUser.setUserFullName(newUser.getUserName());
-        return userAccountRepository.saveAndFlush(newUser);
-    }
-
 }

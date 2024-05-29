@@ -17,8 +17,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -336,7 +336,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
         for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transformedMediaEntityList));
+            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
         }
     }
 
@@ -363,7 +363,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
         for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transformedMediaEntityList));
+            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
         }
     }
 
@@ -421,7 +421,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentResponse[].class);
         assertEquals(1, transformedMediaResponses.length);
         assertResponseEquality(transformedMediaResponses[0],
-                               getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transformedMediaEntityList));
+                               getTranscriptionDocumentEntity(transformedMediaResponses[0].getTranscriptionDocumentId(), transcriptionDocumentResults));
 
     }
 
@@ -444,7 +444,7 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         assertEquals(transcriptionDocumentResults.size(), transformedMediaResponses.length);
 
         for (SearchTranscriptionDocumentResponse response : transformedMediaResponses) {
-            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transformedMediaEntityList));
+            assertResponseEquality(response, getTranscriptionDocumentEntity(response.getTranscriptionDocumentId(), transcriptionDocumentResults));
         }
     }
 

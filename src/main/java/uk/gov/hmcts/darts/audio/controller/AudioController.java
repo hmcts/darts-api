@@ -58,7 +58,6 @@ public class AudioController implements AudioApi {
     private final MediaRequestService mediaRequestService;
     private final TransformedMediaMapper transformedMediaMapper;
 
-
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
@@ -111,5 +110,6 @@ public class AudioController implements AudioApi {
         var transformedMedia = mediaRequestService.getTransformedMediaById(transformedMediaId);
         GetTransformedMediaResponse response = transformedMediaMapper.mapToGetTransformedMediaResponse(transformedMedia);
         return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 }

@@ -20,12 +20,12 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.someMinimalEventHandler;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_11_1981_DB_ID;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_39_1933_DB_ID;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.SECTION_4_1981_DB_ID;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.EventHandlerTestData.someMinimalEventHandler;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_11_1981_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_39_1933_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.SECTION_4_1981_DB_ID;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.someReportingRestrictionId;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
 
 class GetHearingResponseMapperIntTest extends IntegrationBase {
 

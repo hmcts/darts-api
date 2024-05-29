@@ -13,7 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getFile;
+import static uk.gov.hmcts.darts.test.common.TestUtils.getFile;
 
 @Slf4j
 class FileContentChecksumTest {

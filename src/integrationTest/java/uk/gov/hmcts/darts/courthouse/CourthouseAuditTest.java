@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.data.history.RevisionMetadata.RevisionType.INSERT;
 import static org.springframework.data.history.RevisionMetadata.RevisionType.UPDATE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
 
 class CourthouseAuditTest extends IntegrationBase {
 

@@ -37,8 +37,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
-import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateTime;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
+import static uk.gov.hmcts.darts.test.common.data.CommonTestData.createOffsetDateTime;
+import static uk.gov.hmcts.darts.test.common.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})

@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.someTranscriptionForHearing;
+import static uk.gov.hmcts.darts.test.common.data.HearingTestData.createSomeMinimalHearing;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionTestData.someTranscriptionForHearing;
 
 @Component
 public class ModernisedTranscriptionSearchGivensBuilder extends TranscriptionSearchGivensBuilder {

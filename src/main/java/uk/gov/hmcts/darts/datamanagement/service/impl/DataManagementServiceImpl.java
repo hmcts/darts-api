@@ -19,9 +19,11 @@ import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseM
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.FileBasedDownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
+import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.util.AzureCopyUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +49,8 @@ public class DataManagementServiceImpl implements DataManagementService {
     private final DataManagementConfiguration dataManagementConfiguration;
 
     private final DataManagementAzureClientFactory blobServiceFactory;
+
+    private final AzureCopyUtil azureCopyUtil;
 
 
     /**
@@ -135,6 +139,25 @@ public class DataManagementServiceImpl implements DataManagementService {
         return client;
     }
 
+    @Override
+    public UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+        try {
+            String sourceContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(sourceContainerName);
+            String destinationContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(destinationContainerName);
+            String sourceBlobSasUrl = buildBlobSasUrl(sourceContainerName, sourceContainerSasUrl, sourceBlobId.toString());
+            UUID destinationUuid = UUID.randomUUID();
+            String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, destinationUuid.toString());
+
+            azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
+
+            log.info("Copy completed from '{}' to '{}' for external object directory Id: {}", sourceContainerName, destinationContainerName, sourceBlobId);
+            return destinationUuid;
+        } catch (Exception e) {
+            throw new DartsException(String.format("Exception copying file from '%s' to '%s'. External object directory Id: %s",
+                    sourceContainerName, destinationContainerName, sourceBlobId), e);
+        }
+    }
+
     private ParallelTransferOptions createCommonTransferOptions() {
         return new ParallelTransferOptions()
             .setBlockSizeLong(dataManagementConfiguration.getBlobClientBlockSizeBytes())
@@ -205,5 +228,9 @@ public class DataManagementServiceImpl implements DataManagementService {
                 "Could not delete from storage container=" + containerName + ", blobId=" + blobId, e
             );
         }
+    }
+
+    private String buildBlobSasUrl(String containerName, String containerSasUrl, String sourceBlobId) {
+        return containerSasUrl.replace(containerName, containerName + "/" + sourceBlobId);
     }
 }

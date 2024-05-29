@@ -21,8 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.testutils.data.SecurityGroupTestData.buildGroupForRole;
-import static uk.gov.hmcts.darts.testutils.data.UserAccountTestData.minimalUserAccount;
+import static uk.gov.hmcts.darts.test.common.data.SecurityGroupTestData.buildGroupForRole;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
 
 @AutoConfigureMockMvc
 class PatchSecurityGroupIntTest extends IntegrationBase {

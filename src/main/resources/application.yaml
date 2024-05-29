@@ -1,6 +1,7 @@
 server:
   port: 4550
   max-http-request-header-size: 10MB
+  shutdown: graceful
 
 management:
   endpoint:
@@ -16,6 +17,8 @@ springdoc:
   packagesToScan: uk.gov.hmcts.darts
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: ${GRACEFUL_SHUTDOWN_TIMEOUT:30s}
   config:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
@@ -121,6 +124,11 @@ darts:
       - "mpeg2"
       - "mp2"
       - "audio/mpeg"
+      - "a00"
+      - "a01"
+      - "a02"
+      - "a03"
+      - "application/octet-stream"
     max-file-size: 524288000
     pre-amble-duration: 30
     post-amble-duration: 30
@@ -238,8 +246,12 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+      sas-url:
+        darts-inbound-container: ${DARTS_INBOUND_STORAGE_SAS_URL}
+        darts-unstructured: ${DARTS_UNSTRUCTURED_STORAGE_SAS_URL}
       delete:
         timeout: 60
+      az-copy-executable: /usr/bin/azcopy
     search:
       order: "UNSTRUCTURED,DETS,ARM,VODAFONE"
   transcription:

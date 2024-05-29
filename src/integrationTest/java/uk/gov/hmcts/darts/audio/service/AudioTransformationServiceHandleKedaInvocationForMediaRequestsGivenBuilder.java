@@ -223,5 +223,4 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         dartsDatabaseStub.getMediaRequestRepository()
             .saveAndFlush(mediaRequestEntity);
     }
-
 }
