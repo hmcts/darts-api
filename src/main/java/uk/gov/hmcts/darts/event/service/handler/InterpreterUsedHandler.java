@@ -10,12 +10,9 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
-
-import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
 @Slf4j
 @Service
@@ -35,13 +32,9 @@ public class InterpreterUsedHandler extends EventHandlerBase {
     @Override
     @Transactional
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
-        var hearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
-        var courtCase = hearing.getHearingEntity().getCourtCase();
+        var createdHearingAndEvent = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
-        if (hearing.isHearingNew() || hearing.isCourtroomDifferentFromHearing()) {
-            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE, hearing.getCourtroomId());
-            eventPublisher.publishEvent(notifyEvent);
-        }
+        var courtCase = createdHearingAndEvent.getHearingEntity().getCourtCase();
         courtCase.setInterpreterUsed(true);
         caseRepository.saveAndFlush(courtCase);
     }

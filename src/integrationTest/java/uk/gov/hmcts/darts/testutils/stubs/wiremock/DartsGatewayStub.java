@@ -36,10 +36,10 @@ public class DartsGatewayStub {
         });
     }
 
-    public void verifyNotificationUrl(String url) {
+    public void verifyNotificationUrl(String url, int count) {
         var notificationType = "\"notification_url\":\"" + url + "\"";
         waitForMax10SecondsWithOneSecondPoll(() -> {
-            verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
+            verify(exactly(count), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
                     .withRequestBody(containing(notificationType)));
             return true;
         });
