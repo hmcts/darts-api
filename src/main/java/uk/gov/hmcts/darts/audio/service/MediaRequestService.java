@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
+import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
@@ -52,4 +53,6 @@ public interface MediaRequestService {
     TransformedMediaEntity getTransformedMediaById(Integer id);
 
     MediaRequest getMediaRequestById(Integer mediaRequestId);
+
+    List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId);
 }
