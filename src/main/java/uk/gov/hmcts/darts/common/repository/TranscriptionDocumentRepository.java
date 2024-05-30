@@ -14,7 +14,7 @@ import java.util.List;
 public interface TranscriptionDocumentRepository extends JpaRepository<TranscriptionDocumentEntity, Integer> {
 
     @Query("""
-            SELECT new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
+            SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
             courtCase.id,
             courtCase.caseNumber,
             courthouse.id,
@@ -35,16 +35,15 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                  LEFT JOIN t.transcriptionWorkflowEntities wf
                  LEFT JOIN wf.workflowActor wfa
              WHERE
-                (:caseNumber IS NULL OR (:caseNumber IS NOT NULL AND (courtCase.caseNumber=:caseNumber)))AND
-                (:courtHouseDisplayName IS NULL OR (:courtHouseDisplayName IS NOT NULL 
-                AND (courthouse.displayName ILIKE CONCAT('%', :courtHouseDisplayName, '%') 
-                OR (hearingcourthouse.displayName ILIKE CONCAT('%', :courtHouseDisplayName, '%'))))) AND
-                (:hearingDate IS NULL OR (:hearingDate IS NOT NULL AND hearings.hearingDate=:hearingDate ))AND
-                (:isManualTranscription IS NULL OR (:isManualTranscription IS NOT NULL AND t.isManualTranscription=:isManualTranscription)) AND
-                (:requestedBy IS NULL OR (:requestedBy IS NOT NULL AND t.createdBy.userFullName ILIKE CONCAT('%', :requestedBy, '%')))AND
-                ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (:requestedAtFrom IS NOT NULL AND t.createdDateTime >= :requestedAtFrom)) AND
-                (:owner IS NULL OR (:owner IS NOT NULL AND wfa.userFullName ILIKE CONCAT('%', :owner, '%'))) AND
-                ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (:requestedAtTo IS NOT NULL AND t.createdDateTime <= :requestedAtTo))
+                (:caseNumber IS NULL OR ((courtCase.caseNumber=cast(:caseNumber as text)))) AND
+                (:courtHouseDisplayName IS NULL OR ((courthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%')
+                OR (hearingcourthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))))) AND
+                ((cast(:hearingDate AS LocalDate)) IS NULL OR (hearings.hearingDate=:hearingDate ))AND
+                (:isManualTranscription IS NULL OR t.isManualTranscription=:isManualTranscription) AND
+                (:requestedBy IS NULL OR (t.createdBy.userFullName ILIKE CONCAT('%', cast(:requestedBy as text), '%')))AND
+                ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (t.createdDateTime >= :requestedAtFrom)) AND
+                (:owner IS NULL OR (wfa.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
+                ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR t.createdDateTime <= :requestedAtTo)
            """)
     List<TranscriptionDocumentResult> findTranscriptionMedia(String caseNumber,
                                                              String courtHouseDisplayName,

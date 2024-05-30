@@ -146,7 +146,7 @@ public class TranscriptionStub {
                                                    List<CourtCaseEntity> courtCaseLst,
                                                    CourtroomEntity courtroomEntity,
                                                    UserAccountEntity userAccountEntity,
-                                                   TranscriptionWorkflowEntity workflowEntity,
+                                                   List<TranscriptionWorkflowEntity> workflowEntity,
                                                    Boolean isManualTranscription) {
         TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
         TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
@@ -225,7 +225,7 @@ public class TranscriptionStub {
                                                                 TranscriptionStatusEntity transcriptionStatus,
                                                                 TranscriptionUrgencyEntity transcriptionUrgency,
                                                                 UserAccountEntity testUser,
-                                                                TranscriptionWorkflowEntity workflowEntity,
+                                                                List<TranscriptionWorkflowEntity>  workflowEntity,
                                                                 boolean isManualTranscription) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         for (CourtCaseEntity caseEntity : courtCase) {
@@ -243,9 +243,12 @@ public class TranscriptionStub {
         }
 
         if (workflowEntity != null) {
-            workflowEntity.setTranscription(transcription);
 
-            transcription.getTranscriptionWorkflowEntities().add(workflowEntity);
+            for (TranscriptionWorkflowEntity wfe : workflowEntity) {
+                wfe.setTranscription(transcription);
+
+                transcription.getTranscriptionWorkflowEntities().add(wfe);
+            }
         }
 
         transcription.setTranscriptionType(transcriptionType);

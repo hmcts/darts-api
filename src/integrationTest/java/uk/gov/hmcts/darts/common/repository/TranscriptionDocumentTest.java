@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.RepositoryBase;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionDocumentStub;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
-class TranscriptionDocumentTest extends IntegrationBase {
+class TranscriptionDocumentTest extends RepositoryBase {
 
     @Autowired
     private TranscriptionDocumentStub transcriptionStub;
@@ -72,7 +72,6 @@ class TranscriptionDocumentTest extends IntegrationBase {
         Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
                                                  getExpectedResult(generatedDocumentEntities.get(1),
                                                                    null)));
-
     }
 
     @Test
@@ -84,12 +83,14 @@ class TranscriptionDocumentTest extends IntegrationBase {
                 .getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex)
+                                                                               .getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -100,13 +101,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPrefix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null, null);
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
-
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -116,12 +117,14 @@ class TranscriptionDocumentTest extends IntegrationBase {
             = transcriptionDocumentRepository.findTranscriptionMedia(
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPostfix(Integer.toString(nameMatchIndex)), null, null, null, null, null, null);
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities
+                                                                               .get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
 
     }
 
@@ -133,12 +136,15 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                 .getQueryStringPostfix(Integer.toString(nameMatchIndex)).toUpperCase(Locale.getDefault()), null, null, null, null, null, null);
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities
+                                                                               .get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex)
+                                                                               .getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -148,19 +154,20 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
+            Assertions.assertEquals(4, transcriptionDocumentResults.size());
+            Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                   generatedDocumentEntities.get(0)
+                                                                       .getTranscription().getCourtCases().get(0)),
                                                  getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
-
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(2),
+                                                                   generatedDocumentEntities.get(0)
+                                                                       .getTranscription().getCourtCases().get(1)),
                                                  getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(3),
+                                                                   generatedDocumentEntities.get(1)
+                                                                       .getTranscription().getCourtCases().get(0)),
                                                  getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+                                                                   generatedDocumentEntities.get(1)
+                                                                       .getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -175,19 +182,20 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null,
             TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
-
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(2),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(3),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities
+                                                                               .get(0).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities
+                                                                               .get(0).getTranscription().getCourtCases().get(1)),
+                                                         getExpectedResult(generatedDocumentEntities
+                                                                               .get(1),
+                                                                           generatedDocumentEntities
+                                                                               .get(1).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities
+                                                                               .get(1).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -199,17 +207,18 @@ class TranscriptionDocumentTest extends IntegrationBase {
             generatedDocumentEntities.get(1).getTranscription().getHearings().get(0).getHearingDate(), null, null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities
+                                                                               .get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
     void testFindTranscriptionDocumentWithManualTranscription() {
-
         dartsDatabase.clearDatabaseInThisOrder();
 
         generatedDocumentEntities = transcriptionStub
@@ -223,12 +232,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null, null,
             null, null, null, null, true, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntitiesWithManualTranscription.get(0),
-                                                                   null)));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntitiesWithManualTranscription.get(1),
-                                                                   null)));
+
+
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntitiesWithManualTranscription.get(0),
+                                                                           null),
+                                                         getExpectedResult(generatedDocumentEntitiesWithManualTranscription.get(1),
+                                                                           null))));
     }
 
     @Test
@@ -240,12 +250,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryString(Integer.toString(nameMatchIndex)));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -257,12 +268,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex)));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -275,13 +287,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix(Integer.toString(nameMatchIndex).toLowerCase(Locale.getDefault())));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
-
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -293,12 +305,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPostfix(Integer.toString(nameMatchIndex)));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -312,13 +325,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
                 .getQueryStringPostfix(Integer.toString(nameMatchIndex).toLowerCase(Locale.getDefault())));
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
-
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -328,20 +341,16 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null, null, null, null,
             null, null, null,  TranscriptionDocumentSubStringQueryEnum.OWNER.getQueryStringPrefix());
         Assertions.assertEquals(4, transcriptionDocumentResults.size());
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
-
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(2),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(3),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
- }
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
+    }
 
     @Test
     void testFindTranscriptionDocumentWithRequestedByExact() {
@@ -353,12 +362,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
 
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -370,13 +380,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPrefix(Integer.toString(nameMatchIndex)), null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
-
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -391,12 +401,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
 
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -408,14 +419,14 @@ class TranscriptionDocumentTest extends IntegrationBase {
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(Integer.toString(1)), null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
-
-    }
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
+}
 
     @Test
     void testFindTranscriptionDocumentWithRequestedByCaseInsensitivePostfix() {
@@ -427,12 +438,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
                 .getQueryStringPostfix(Integer.toString(1).toLowerCase(Locale.getDefault())), null, null, null, null);
         Assertions.assertEquals(2, transcriptionDocumentResults.size());
 
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
-                                                                   generatedDocumentEntities.get(nameMatchIndex).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(nameMatchIndex),
+                                                                           generatedDocumentEntities
+                                                                               .get(nameMatchIndex).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -441,20 +453,15 @@ class TranscriptionDocumentTest extends IntegrationBase {
             = transcriptionDocumentRepository.findTranscriptionMedia(
             null,  null, null,
             TranscriptionDocumentSubStringQueryEnum.REQUESTED_BY.getQueryStringPostfix(), null, null, null, null);
-
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
-
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(2),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(3),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -465,12 +472,13 @@ class TranscriptionDocumentTest extends IntegrationBase {
             null, null, null, null,
             generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(),
             generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null);
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
+
+
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -480,12 +488,11 @@ class TranscriptionDocumentTest extends IntegrationBase {
             = transcriptionDocumentRepository.findTranscriptionMedia(
             null,  null, null,
             null, generatedDocumentEntities.get(fromAtPosition).getTranscription().getCreatedDateTime(), null, null, null);
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -497,19 +504,15 @@ class TranscriptionDocumentTest extends IntegrationBase {
                                                                      null, null,
                                                                      generatedDocumentEntities.get(toPosition)
                                                                          .getTranscription().getCreatedDateTime(), null, null);
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(0),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(1),
-                                                 getExpectedResult(generatedDocumentEntities.get(0),
-                                                                   generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1))));
-
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(2),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0))));
-        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults.get(3),
-                                                 getExpectedResult(generatedDocumentEntities.get(1),
-                                                                   generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1))));
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities.get(0).getTranscription().getCourtCases().get(1)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities.get(1).getTranscription().getCourtCases().get(1)))));
     }
 
     @Test
@@ -530,7 +533,7 @@ class TranscriptionDocumentTest extends IntegrationBase {
                                 transcriptionDocumentResults.get(0).transcriptionDocumentId());
     }
 
-    private boolean assertResultEquals(TranscriptionDocumentResult asserted, TranscriptionDocumentResult expected) {
+    private boolean assertResultEquals(TranscriptionDocumentResult asserted,  TranscriptionDocumentResult expected) {
         Assertions.assertEquals(expected.transcriptionDocumentId(), asserted.transcriptionDocumentId());
         Assertions.assertEquals(expected.transcriptionId(), asserted.transcriptionId());
         Assertions.assertEquals(expected.caseNumber(), asserted.caseNumber());
@@ -544,6 +547,10 @@ class TranscriptionDocumentTest extends IntegrationBase {
         Assertions.assertEquals(expected.isManualTranscription(), asserted.isManualTranscription());
         Assertions.assertEquals(expected.isHidden(), asserted.isHidden());
         return true;
+    }
+
+    private boolean assertResultEquals(List<TranscriptionDocumentResult> assertedResults, List<TranscriptionDocumentResult> expected) {
+        return assertedResults.containsAll(expected);
     }
 
     private TranscriptionDocumentResult getExpectedResult(TranscriptionDocumentEntity transcriptionDocumentEntity, CourtCaseEntity caseEntity) {

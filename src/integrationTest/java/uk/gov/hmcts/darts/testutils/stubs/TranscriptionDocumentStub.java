@@ -71,7 +71,6 @@ public class TranscriptionDocumentStub {
         UserAccountEntity owner;
         CourtroomEntity courtroomEntity;
         TranscriptionDocumentEntity transcriptionDocumentEntity;
-        TranscriptionWorkflowEntity workflowEntity = null;
 
         List<HearingEntity> hearingEntityList;
         List<CourtCaseEntity> caseEntityList;
@@ -112,8 +111,8 @@ public class TranscriptionDocumentStub {
 
             transcriptionDocumentEntity = new TranscriptionDocumentEntity();
             transcriptionDocumentEntity.setHidden(false);
-            transcriptionDocumentEntity.setFileName("File name " + count);
-            transcriptionDocumentEntity.setFileType("File type " + count);
+            transcriptionDocumentEntity.setFileName("File name " + transriptionDocumentCount);
+            transcriptionDocumentEntity.setFileType("File type " + transriptionDocumentCount);
             transcriptionDocumentEntity.setFileSize(100);
             transcriptionDocumentEntity.setChecksum("");
 
@@ -124,17 +123,27 @@ public class TranscriptionDocumentStub {
             transcriptionDocumentEntity.setLastModifiedBy(requestedBy);
 
 
+            List<TranscriptionWorkflowEntity> workflowEntities = new ArrayList<>();
+            TranscriptionWorkflowEntity workflowEntity;
             if (associatedWorkflow) {
                 workflowEntity = new TranscriptionWorkflowEntity();
                 workflowEntity.setWorkflowActor(owner);
                 workflowEntity.setTranscriptionStatus(mapToTranscriptionStatusEntity(APPROVED));
                 workflowEntity.setWorkflowTimestamp(now());
+                workflowEntities.add(workflowEntity);
+
+                workflowEntity = new TranscriptionWorkflowEntity();
+                workflowEntity.setWorkflowActor(owner);
+                workflowEntity.setTranscriptionStatus(mapToTranscriptionStatusEntity(APPROVED));
+                workflowEntity.setWorkflowTimestamp(now());
+                workflowEntities.add(workflowEntity);
             }
 
             TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(hearingEntityList,
                                                                           caseEntityList,
                                                                           noCourtHouse ? null : courtroomEntity,
-                                                                          requestedBy, workflowEntity, isManualTranscription);
+                                                                          requestedBy, workflowEntities, isManualTranscription);
+
 
 
             transcriptionDocumentEntity.setTranscription(transcriptionEntity);

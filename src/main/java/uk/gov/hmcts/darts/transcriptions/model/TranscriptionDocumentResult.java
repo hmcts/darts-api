@@ -31,9 +31,12 @@ public record TranscriptionDocumentResult(
         }
         return transcriptionDocumentResult.transcriptionDocumentId.equals(transcriptionDocumentId)
             && transcriptionDocumentResult.transcriptionId.equals(transcriptionId)
-            && transcriptionDocumentResult.caseId != null && transcriptionDocumentResult.caseId.equals(caseId)
-            && transcriptionDocumentResult.hearingId != null && transcriptionDocumentResult.hearingId.equals(hearingId)
-            && transcriptionDocumentResult.courthouseId != null && transcriptionDocumentResult.courthouseId.equals(courthouseId);
+            && ((transcriptionDocumentResult.caseId != null && transcriptionDocumentResult.caseId.equals(caseId))
+            || (transcriptionDocumentResult.caseId == null && caseId == null))
+            && ((transcriptionDocumentResult.hearingId != null && transcriptionDocumentResult.hearingId.equals(hearingId))
+            || (transcriptionDocumentResult.hearingId == null && hearingId == null))
+            && ((transcriptionDocumentResult.courthouseId != null && transcriptionDocumentResult.courthouseId.equals(courthouseId))
+            || (transcriptionDocumentResult.courthouseId == null && courthouseId == null));
     }
 
     @Override
