@@ -445,18 +445,28 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     @Transactional
     public MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request) {
+        MediaPatchResponse returnResponse = new MediaPatchResponse();
+
         IdRequest<MediaPatchRequest> requestIdRequest = new IdRequest<>(request, mediaRequestId);
         mediaRequestValidator.validate(requestIdRequest);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId).get();
+        Optional<MediaRequestEntity> mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId);
 
         // if we have an owner id then map it to the owner of the request id
-        UserAccountEntity accountEntityToPatch = null;
-        if (request.getOwnerId() != null) {
-            accountEntityToPatch = userAccountRepository.findById(request.getOwnerId()).get();
-            mediaRequestEntity.setCurrentOwner(accountEntityToPatch);
-            mediaRequestRepository.save(mediaRequestEntity);
+        Optional<UserAccountEntity> accountEntityToPatch = null;
+        if (mediaRequestEntity.isPresent() && request.getOwnerId() != null) {
+            accountEntityToPatch = userAccountRepository.findById(request.getOwnerId());
+
+            if (accountEntityToPatch.isPresent()) {
+                mediaRequestEntity.get().setCurrentOwner(accountEntityToPatch.get());
+                mediaRequestRepository.save(mediaRequestEntity.get());
+
+                returnResponse = getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity.get());
+            }
+        } else if (mediaRequestEntity.isPresent()) {
+            returnResponse = getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity.get());
         }
-        return getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity);
+
+        return returnResponse;
     }
 }

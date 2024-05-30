@@ -1,19 +1,25 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
+import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
+import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -31,6 +37,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -77,6 +84,8 @@ class MediaRequestServiceImplTest {
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
 
+    @Mock
+    private AudioMediaPatchRequestValidator mediaRequestValidator;
 
     @InjectMocks
     private MediaRequestServiceImpl mediaRequestService;
@@ -111,6 +120,9 @@ class MediaRequestServiceImplTest {
 
     @Mock
     private AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
+
+    @Mock
+    private GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
 
     @BeforeEach
     void beforeEach() {
@@ -609,4 +621,79 @@ class MediaRequestServiceImplTest {
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
+    @Test
+    public void patchMediaRequestWithoutOwner() {
+        Integer mediaRequestId = 100;
+        MediaPatchRequest mediaPatchRequest = new MediaPatchRequest();
+
+        UserAccountEntity requestor = new UserAccountEntity();
+        requestor.setId(200);
+
+        UserAccountEntity owner = new UserAccountEntity();
+        requestor.setId(300);
+
+        MediaRequestEntity entity = new MediaRequestEntity();
+        entity.setId(400);
+        entity.setStartTime(OffsetDateTime.now());
+        entity.setEndTime(OffsetDateTime.now().plusDays(2));
+        entity.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
+        entity.setRequestor(requestor);
+        entity.setCurrentOwner(owner);
+
+        Mockito.when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(entity));
+
+        MediaPatchResponse expectedResponse = new MediaPatchResponse();
+        Mockito.when(getTransformedMediaDetailsMapper.mapToPatchResult(entity)).thenReturn(expectedResponse);
+
+        MediaPatchResponse actualResponse = mediaRequestService.patchMediaRequest(mediaRequestId, mediaPatchRequest);
+
+        Assertions.assertEquals(expectedResponse, actualResponse);
+
+        Mockito.verify(mediaRequestValidator, times(1))
+            .validate(Mockito.any());
+    }
+
+    @Test
+    public void patchMediaRequestWithOwner() {
+        Integer mediaRequestId = 100;
+        Integer ownerId = 200;
+        MediaPatchRequest mediaPatchRequest = new MediaPatchRequest();
+        mediaPatchRequest.setOwnerId(ownerId);
+
+        UserAccountEntity requestor = new UserAccountEntity();
+        requestor.setId(300);
+
+        UserAccountEntity owner = new UserAccountEntity();
+        requestor.setId(400);
+
+        MediaRequestEntity entity = new MediaRequestEntity();
+        entity.setId(500);
+        entity.setStartTime(OffsetDateTime.now());
+        entity.setEndTime(OffsetDateTime.now().plusDays(2));
+        entity.setCreatedDateTime(OffsetDateTime.now().minusHours(2));
+        entity.setRequestor(requestor);
+        entity.setCurrentOwner(owner);
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(ownerId);
+
+        Mockito.when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(entity));
+        Mockito.when(mockUserAccountRepository.findById(ownerId)).thenReturn(Optional.ofNullable(userAccountEntity));
+
+        MediaPatchResponse expectedResponse = new MediaPatchResponse();
+        Mockito.when(getTransformedMediaDetailsMapper.mapToPatchResult(entity)).thenReturn(expectedResponse);
+
+        MediaPatchResponse actualResponse = mediaRequestService.patchMediaRequest(mediaRequestId, mediaPatchRequest);
+
+        Assertions.assertEquals(expectedResponse, actualResponse);
+
+        // ensure the media request entity has its owner updated to the payload owner
+        Assertions.assertEquals(ownerId, entity.getCurrentOwner().getId());
+
+        // verify we have saved the record and called the validator
+        Mockito.verify(mediaRequestValidator, times(1))
+            .validate(Mockito.any());
+        Mockito.verify(mockMediaRequestRepository, times(1))
+            .save(entity);
+    }
 }

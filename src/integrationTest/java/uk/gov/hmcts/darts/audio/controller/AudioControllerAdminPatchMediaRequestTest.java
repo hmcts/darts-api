@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
-import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 
@@ -30,10 +29,9 @@ import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
-import static uk.gov.hmcts.darts.test.common.data.MediaRequestTestData.minimalRequestData;
 
 @AutoConfigureMockMvc
-class AudioControllerPatchMediaRequestTest extends IntegrationBase {
+class AudioControllerAdminPatchMediaRequestTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/admin/media-requests/");
 
