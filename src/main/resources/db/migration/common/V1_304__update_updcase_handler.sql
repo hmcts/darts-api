@@ -16,4 +16,4 @@ where event_type = '20936' and event_sub_type = '10633';
 
 update event_handler
 set event_name = 'Defendant subject to an electronically monitored curfew'
-where event_type = '20936' and event_sub_type = '10633';
+where event_type = '21500' and event_sub_type = '13703';
