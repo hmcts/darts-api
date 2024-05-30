@@ -456,8 +456,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             HearingEntity hearing = mediaRequest.getHearing();
             List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
             //filter by media that overlap with request
-            List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime()) &&
-                mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
+            List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
+                && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
             return AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing);
         }
         return new ArrayList<>();
