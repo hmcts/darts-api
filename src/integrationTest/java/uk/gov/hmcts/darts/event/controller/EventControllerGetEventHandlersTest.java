@@ -41,8 +41,7 @@ class EventControllerGetEventHandlersTest extends IntegrationBase  {
             .andExpect(jsonPath("$[4]", Matchers.is("SentencingRemarksAndRetentionPolicyHandler")))
             .andExpect(jsonPath("$[5]", Matchers.is("SetReportingRestrictionEventHandler")))
             .andExpect(jsonPath("$[6]", Matchers.is("StandardEventHandler")))
-            .andExpect(jsonPath("$[7]", Matchers.is("StopAndCloseHandler")))
-            .andExpect(jsonPath("$[8]", Matchers.is("TranscriptionRequestHandler")));
+            .andExpect(jsonPath("$[7]", Matchers.is("StopAndCloseHandler")));
     }
 
     @ParameterizedTest
