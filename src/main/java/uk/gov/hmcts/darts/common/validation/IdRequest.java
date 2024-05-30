@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class UserQueryRequest<T> {
+public class IdRequest<T> {
 
     private final T payload;
 
-    private final Integer userId;
+    private final Integer id;
 }

@@ -24,10 +24,13 @@ import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
@@ -53,6 +56,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -96,6 +100,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final CurrentTimeHelper currentTimeHelper;
     private final GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
     private final MediaRequestMapper mediaRequestMapper;
+    private final AudioMediaPatchRequestValidator mediaRequestValidator;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -437,4 +442,21 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
     }
 
+    @Override
+    @Transactional
+    public MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request) {
+        IdRequest<MediaPatchRequest> requestIdRequest = new IdRequest<>(request, mediaRequestId);
+        mediaRequestValidator.validate(requestIdRequest);
+
+        MediaRequestEntity mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId).get();
+
+        // if we have an owner id then map it to the owner of the request id
+        UserAccountEntity accountEntityToPatch = null;
+        if (request.getOwnerId() != null) {
+            accountEntityToPatch = userAccountRepository.findById(request.getOwnerId()).get();
+            mediaRequestEntity.setCurrentOwner(accountEntityToPatch);
+            mediaRequestRepository.save(mediaRequestEntity);
+        }
+        return getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity);
+    }
 }
