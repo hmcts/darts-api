@@ -164,6 +164,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RetentionPolicyType'
+        '409':
+          description: Conflict
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              examples:
+                non_unique_policy_name:
+                  summary: Non unique policy name
+                  description: Policy name must be unique
+                  value:
+                    type: "RETENTION_109"
+                    title: "The policy name already exists"
+                    status: 409
+                    detail: Policy name "my retention policy" already exists
+                non_unique_policy_display_name:
+                  summary: Non unique policy display name
+                  description: Display name must be unique
+                  value:
+                    type: "RETENTION_110"
+                    title: "The policy display name already exists"
+                    status: 409
+                    detail: Display name "my retention policy display name" already exists
+                non_unique_fixed_policy_key:
+                  summary: Non unique fixed policy key
+                  description: Fixed policy key must be unique
+                  value:
+                    type: "RETENTION_114"
+                    title: "The fixed policy key already exists"
+                    status: 409
+                    detail: Fixed policy key 4 already exists.
 
   /admin/retention-policy-types/{id}:
     get:
@@ -225,11 +256,28 @@ paths:
               schema:
                 $ref: './problem.yaml'
         '409':
-          description: "Conflict"
+          description: Conflict
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+              examples:
+                non_unique_policy_name:
+                  summary: Non unique policy name
+                  description: Policy name must be unique
+                  value:
+                    type: "RETENTION_109"
+                    title: "The policy name already exists"
+                    status: 409
+                    detail: Policy name "my retention policy" already exists
+                non_unique_policy_display_name:
+                  summary: Non unique policy display name
+                  description: Display name must be unique
+                  value:
+                    type: "RETENTION_110"
+                    title: "The policy display name already exists"
+                    status: 409
+                    detail: Display name "my retention policy display name" already exists
 
 components:
   schemas:
