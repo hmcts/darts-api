@@ -7,8 +7,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -216,8 +216,8 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
     @Test
     void ignoresDuplicateEvent() {
-        dartsDatabase.createCourthouseUnlessExists(SWANSEA_COURTHOUSE);
-        var sentencingRemarksDartsEvent = createSentencingRemarksDartsEventFor(SWANSEA_COURTHOUSE);
+        dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
+        var sentencingRemarksDartsEvent = createSentencingRemarksDartsEventFor(SOME_COURTHOUSE);
 
         eventDispatcher.receive(sentencingRemarksDartsEvent);
 

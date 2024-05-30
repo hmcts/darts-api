@@ -49,6 +49,7 @@ class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBase {
         dartsDatabase.createTestUserAccount();
     }
 
+    //Handle a generic DartsException that is not a Duplicate one.
     @Test
     void handleNonDuplicateDartsException() {
 
@@ -69,7 +70,7 @@ class SentencingRemarksAndRetentionPolicyHandler2Test extends IntegrationBase {
         var endTime = startTime.plusHours(2);
         return new DartsEvent()
             .messageId("some-message-id")
-            .type("40730")
+            .type("40735")
             .subType("10808")
             .courthouse(courthouseName)
             .caseNumbers(List.of(SOME_CASE_NUMBER))
