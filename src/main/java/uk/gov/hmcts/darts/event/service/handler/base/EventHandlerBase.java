@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.event.model.CreatedHearingAndEvent;
+import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
+import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
 @SuppressWarnings({"PMD.TooManyMethods"})
 @Slf4j
@@ -81,19 +83,22 @@ public abstract class EventHandlerBase implements EventHandler {
             EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity, eventHandler);
             setHearingToActive(hearingEntity);
 
-            return CreatedHearingAndEvent.builder()
+            var createdHearingAndEvent = CreatedHearingAndEvent.builder()
                 .hearingEntity(hearingEntity)
                 .isHearingNew(hearingEntity.isNew())
                 .isCourtroomDifferentFromHearing(false)//for now always creating a new one
                 .eventEntity(eventEntity)
                 .build();
+
+            publishEventIfHearingNewOrCourtroomDifferent(dartsEvent, createdHearingAndEvent);
+
+            return createdHearingAndEvent;
         } catch (DartsApiException dartsException) {
             if (dartsException.getError() == CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST) {
                 logApi.missingCourthouse(dartsEvent);
             }
             throw dartsException;
         }
-
     }
 
     private void setHearingToActive(HearingEntity hearingEntity) {
@@ -108,6 +113,16 @@ public abstract class EventHandlerBase implements EventHandler {
         eventEntity.addHearing(hearingEntity);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
+    }
+
+    private void publishEventIfHearingNewOrCourtroomDifferent(DartsEvent dartsEvent, CreatedHearingAndEvent createdHearingAndEvent) {
+        if (isTheHearingNewOrTheCourtroomIsDifferent(
+            createdHearingAndEvent.isHearingNew(),
+            createdHearingAndEvent.isCourtroomDifferentFromHearing()
+        )) {
+            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE, createdHearingAndEvent.getCourtroomId());
+            eventPublisher.publishEvent(notifyEvent);
+        }
     }
 
     protected boolean isTheHearingNewOrTheCourtroomIsDifferent(boolean hearingIsNew, boolean isCourtroomDifferentFromHearing) {

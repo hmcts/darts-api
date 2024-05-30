@@ -5,18 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -31,15 +26,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings({"PMD.DoNotUseThreads"})
-class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
-
-    public static final String UNKNOWN_COURTHOUSE = "unknown-courthouse";
-    public static final String SOME_COURTHOUSE = "some-courthouse";
-    public static final String SOME_ROOM = "some-room";
-    public static final String SOME_OTHER_ROOM = "some-other-room";
-    public static final String SOME_CASE_NUMBER = "some-case-number";
-    private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 23, 10, 0, 0);
-    private static final OffsetDateTime HEARING_DATE_ODT = HEARING_DATE.atOffset(ZoneOffset.UTC);
+class StandardEventHandlerTest extends HandlerTestData {
 
     @Autowired
     EventDispatcher eventDispatcher;
@@ -54,6 +41,10 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
     public void setupStubs() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroom);
+        dartsGateway.darNotificationReturnsSuccess();
     }
 
     @Test
@@ -67,13 +58,8 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
     }
 
     @Test
-    void handlesScenarioWhereCourtCaseAndHearingDontExist() {
-        CourtroomEntity courtroomEntity = dartsDatabase.givenTheDatabaseContainsCourthouseWithRoom(
-            SOME_COURTHOUSE,
-            SOME_ROOM
-        );
-        nodeRegisterStub.setupNodeRegistry(courtroomEntity);
-        dartsGateway.darNotificationReturnsSuccess();
+    void givenStandardEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
 
         eventDispatcher.receive(someMinimalDartsEvent()
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
@@ -101,17 +87,17 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
-    void handlesScenarioWhereHearingDoesntExist() {
-        CourtCaseEntity courtCaseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+
+    void givenStandardEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
-        nodeRegisterStub.setupNodeRegistry(dartsDatabase.getRetrieveCoreObjectService().retrieveOrCreateCourtroom(courtCaseEntity.getCourthouse(), SOME_ROOM));
-        dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
@@ -136,19 +122,19 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
         dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
-    void handlesScenarioWhereCaseAndHearingExistsButRoomNumberHasChanged() {
+    void givenStandardEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdate() {
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
 
-        CourtroomEntity courtroomEntity = dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
-        nodeRegisterStub.setupNodeRegistry(courtroomEntity);
-        dartsGateway.darNotificationReturnsSuccess();
+        CourtroomEntity otherCourtroom = dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
+        nodeRegisterStub.setupNodeRegistry(otherCourtroom);
 
         eventDispatcher.receive(someMinimalDartsEvent()
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
@@ -172,21 +158,20 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(caseHearing.size()).isEqualTo(1);
         assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
 
-        assertTrue(
-            dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
+        assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
 
         dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
-    void handlesScenarioWhereCaseAndHearingExistsAndHearingLevelDataHasntChanged() {
+    void givenStandardEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM,
             HEARING_DATE
         );
-        dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
                                     .caseNumbers(List.of(SOME_CASE_NUMBER))
