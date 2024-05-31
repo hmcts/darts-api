@@ -41,12 +41,13 @@ class DailylistFunctionalTest extends FunctionalTest {
     void postDailyList(SourceType sourceType) throws IOException {
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
-        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
-        String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
+
+        String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
+        String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
         PostDailyListRequest request = new PostDailyListRequest();
         request.setSourceSystem(sourceType.toString());
