@@ -32,8 +32,6 @@ class DailyListEntityTest extends IntegrationBase {
 
     public static final String DAILYLISTS = "/dailylists";
     public static final String SOURCE_SYSTEM = "source_system";
-    public static final String MESSAGE_ID = "message_id";
-    public static final String JSON_STRING = "json_string";
     public static final String DAL_ID = "dal_id";
     @Autowired
     private transient MockMvc mockMvc;
