@@ -1,5 +1,8 @@
 package uk.gov.hmcts.darts.dailylist;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
@@ -8,9 +11,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.dailylist.model.PatchDailyListRequest;
+import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -39,20 +46,27 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
-
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
+
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem(sourceType.toString());
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 9, 23, 30, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
+        request.setXmlDocument(xmlDocument);
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        String requestBody = objectMapper.writeValueAsString(request);
 
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
-            .queryParam("source_system", sourceType)
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
-            .header("xml_document", xmlDocument)
+            .body(requestBody)
             .when()
             .baseUri(getUri(POST_DAILYLIST_URL))
             .redirects().follow(false)
@@ -62,13 +76,16 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         Integer dalId = response.jsonPath().get("dal_id");
 
-        String jsonDocument = getJsonDocumentWithValues(todayDateString, tomorrowDateString, uniqueId);
+        String jsonDocument = getJsonDocumentWithValues(request.getPublishedTs(), request.getHearingDate(), uniqueId);
+
+        PatchDailyListRequest patchRequest = new PatchDailyListRequest();
+        patchRequest.setDalId(dalId);
+        patchRequest.setJsonString(jsonDocument);
 
         //then patch it with JSON
         response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
-            .queryParam("dal_id", dalId)
-            .header("json_string", jsonDocument)
+            .body(objectMapper.writeValueAsString(patchRequest))
             .when()
             .baseUri(getUri(POST_DAILYLIST_URL))
             .redirects().follow(false)
@@ -78,11 +95,11 @@ class DailylistFunctionalTest extends FunctionalTest {
     }
 
 
-    private String getJsonDocumentWithValues(String todayDateString, String tomorrowDateString, String uniqueId) throws IOException {
-        String jsonDocument = getContentsFromFile("DailyListRequest.json");
+    private String getJsonDocumentWithValues(OffsetDateTime publishedDate, LocalDate hearingDate, String uniqueId) throws IOException {
+        String jsonDocument = getContentsFromFile("test/dailylist/DailylistFunctionalTest/DailyListRequestTemplate.json");
 
-        jsonDocument = jsonDocument.replace("<<TODAY>>", todayDateString);
-        jsonDocument = jsonDocument.replace("<<TOMORROW>>", tomorrowDateString);
+        jsonDocument = jsonDocument.replace("<<PUBLISHED_DATETIME>>", publishedDate.toString());
+        jsonDocument = jsonDocument.replace("<<HEARING_DATE>>", hearingDate.toString());
         jsonDocument = jsonDocument.replace("<<CASENUMBER>>", UUID.randomUUID().toString());
         jsonDocument = jsonDocument.replace("<<JUDGENAME>>", UUID.randomUUID().toString());
         jsonDocument = jsonDocument.replace("<<UNIQUEID>>", uniqueId);
