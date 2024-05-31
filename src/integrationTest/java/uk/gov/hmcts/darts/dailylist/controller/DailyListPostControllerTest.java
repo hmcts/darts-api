@@ -11,11 +11,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.DailyListStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.Matchers.isA;
@@ -27,8 +29,8 @@ import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 @AutoConfigureMockMvc
 class DailyListPostControllerTest extends IntegrationBase {
 
-    @Autowired
-    protected DailyListStub dailyListStub;
+    private static final String ENDPOINT_URL = "/dailylists";
+
     @Autowired
     private transient MockMvc mockMvc;
     @MockBean
@@ -50,19 +52,20 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
         String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
-
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
-        MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
-            .queryParam("source_system", "CPP")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
-            .header("json_string", jsonPostRequest)
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("CPP");
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
+        request.setJsonString(jsonPostRequest);
+
+        String requestBody = objectMapper.writeValueAsString(request);
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
@@ -73,26 +76,26 @@ class DailyListPostControllerTest extends IntegrationBase {
     @Test
     void shouldSuccessfullyPostDailyListWhenXmlAndValidQueryParams() throws Exception {
 
-        String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
-
         superAdminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
         String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("CPP");
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
+        request.setXmlDocument("<?xml version=\"1.0\"?><dummy></dummy>");
 
-        MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
-            .queryParam("source_system", "CPP")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
-            .header("xml_document", xmlString)
+        String requestBody = objectMapper.writeValueAsString(request);
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
+
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
             .andExpect(jsonPath("$.dal_id").value(isA(Integer.class)));
@@ -111,17 +114,19 @@ class DailyListPostControllerTest extends IntegrationBase {
         final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
-        MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
-            .queryParam("source_system", "")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
-            .header("xml_document", jsonPostRequest)
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("");
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
+        request.setXmlDocument(jsonPostRequest);
+
+        String requestBody = objectMapper.writeValueAsString(request);
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
@@ -143,16 +148,17 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         final String expectedResponse = getExpectedResponse();
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("CPP");
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
 
-        MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
-            .queryParam("source_system", "CPP")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
+        String requestBody = objectMapper.writeValueAsString(request);
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
@@ -174,20 +180,21 @@ class DailyListPostControllerTest extends IntegrationBase {
 
         final String expectedResponse = "{\"type\":\"DAILYLIST_105\",\"title\":\"Invalid source system. Should be CPP or XHB.\",\"status\":400}";
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
-
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("CPP");
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
+        request.setXmlDocument(jsonPostRequest);
 
-        MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
-            .queryParam("source_system", "RUB")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
-            .header("xml_document", jsonPostRequest)
+        String requestBody = objectMapper.writeValueAsString(request);
+        requestBody = requestBody.replace("CPP", "TEST");
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
@@ -207,23 +214,25 @@ class DailyListPostControllerTest extends IntegrationBase {
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
         String messageId = "func-unique-id-" + randomAlphanumeric(7);
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
-
         final String jsonPostRequest = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
 
-        MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
-            .queryParam("courthouse", courthouseName)
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", uniqueId)
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", messageId)
-            .header("json_string", jsonPostRequest)
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("CPP");
+        request.setCourthouse(courthouseName);
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId(uniqueId);
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        request.setMessageId(messageId);
+        request.setJsonString(jsonPostRequest);
+
+        String requestBody = objectMapper.writeValueAsString(request);
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
             .andExpect(jsonPath("$.dal_id").value(isA(Integer.class)));
 
     }
-    }
+}
 

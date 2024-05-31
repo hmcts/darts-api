@@ -30,9 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-class DailyListPatchControllerV2Test extends IntegrationBase {
+class DailyListPatchControllerTest extends IntegrationBase {
 
-    private static final String ENDPOINT_URL = "/dailylists/v2";
+    private static final String ENDPOINT_URL = "/dailylists";
 
     @Autowired
     private transient MockMvc mockMvc;
