@@ -10,20 +10,13 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
 import uk.gov.hmcts.darts.log.api.LogApi;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
-import static java.time.OffsetDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
-class DartsEventNullHandlerTest extends IntegrationBase {
-
-    private static final String SOME_COURTHOUSE = "";
-    private static final String SOME_ROOM = "some-room";
-    private final OffsetDateTime today = now();
+class DartsEventNullHandlerTest extends HandlerTestData {
 
     @SpyBean
     DartsEventNullHandler nullEventHandler;

@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
-import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 import uk.gov.hmcts.darts.testutils.stubs.NodeRegisterStub;
 
 import java.time.OffsetDateTime;
@@ -44,11 +43,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.someMinimalCase;
 
-class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
+class StopAndCloseHandlerTest extends HandlerTestData {
 
-    private static final String SOME_COURTHOUSE = "some-courthouse";
-    private static final String SOME_ROOM = "some-room";
-    private static final String SOME_CASE_NUMBER = "CASE1";
     private static final String ARCHIVE_CASE_EVENT_TYPE = "3000";
     private static final String ARCHIVE_CASE_EVENT_NAME = "Archive Case";
     private static final String STOP_AND_CLOSE_HANDLER = "StopAndCloseHandler";
@@ -69,15 +65,6 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
 
-    @Test
-    void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(someMinimalCase());
-        DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
-        event.setCaseNumbers(List.of("123"));
-        event.setDateTime(testTime);
-        assertThatThrownBy(() -> eventDispatcher.receive(event))
-            .isInstanceOf(DartsApiException.class);
-    }
 
     @BeforeEach
     public void setupStubs() {
@@ -85,42 +72,33 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        nodeRegisterStub.setupNodeRegistry(courtroom);
+        dartsGateway.darNotificationReturnsSuccess();
     }
 
     @Test
-    void shouldNotifyDarStopRecordingForHearingEndedAndCaseClosedFlagAndDate() {
-        CourtroomEntity courtroom = dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
-        nodeRegisterStub.setupNodeRegistry(courtroom);
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
-        assertFalse(courtCaseEntity.getClosed());
-        assertNull(courtCaseEntity.getCaseClosedTimestamp());
+    void throwsOnUnknownCourthouse() {
+        dartsDatabase.save(someMinimalCase());
+        DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
+        event.setCaseNumbers(List.of("123"));
+        event.setDateTime(HEARING_DATE_ODT);
+        assertThatThrownBy(() -> eventDispatcher.receive(event))
+            .isInstanceOf(DartsApiException.class);
+    }
 
-        dartsGateway.darNotificationReturnsSuccess();
+    @Test
+    void givenDarStopAndCloseEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdateAndNotifyDarStopRecording() {
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
 
-        List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
-            STOP_AND_CLOSE_HANDLER);
-        assertEquals(2, eventHandlerEntityList.size());
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
 
-        EventHandlerEntity hearingEndedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> ARCHIVE_CASE_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
-
-        DartsEvent dartsEvent = someMinimalDartsEvent()
-            .type(hearingEndedEventHandler.getType())
-            .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
-            .dateTime(testTime);
-
-        eventDispatcher.receive(dartsEvent);
-
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
-            SOME_COURTHOUSE
-        ).get();
-
-        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-            SOME_COURTHOUSE, SOME_ROOM, testTime.toLocalDate());
+        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -130,9 +108,114 @@ class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
         assertThat(persistedCase.getClosed()).isTrue();
-        assertEquals(testTime, persistedCase.getCaseClosedTimestamp());
+        assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
 
         dartsGateway.verifyReceivedNotificationType(2);
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+    }
+
+    @Test
+    void givenDarStopAndCloseEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdateAndNotifyDarStopRecording() {
+        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
+
+        assertFalse(caseEntity.getClosed());
+        assertNull(caseEntity.getCaseClosedTimestamp());
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+
+        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(hearingsForCase.size()).isEqualTo(1);
+        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+
+        assertThat(persistedCase.getClosed()).isTrue();
+        assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
+
+        dartsGateway.verifyReceivedNotificationType(2);
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+    }
+
+
+    @Test
+    void givenDarStopAndCloseEventEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdateAndNotifyDarStopRecording() {
+        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
+
+        assertFalse(caseEntity.getClosed());
+        assertNull(caseEntity.getCaseClosedTimestamp());
+
+        CourtroomEntity otherCourtroom = dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
+        nodeRegisterStub.setupNodeRegistry(otherCourtroom);
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_OTHER_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+
+        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
+
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(hearingsForCase.size()).isEqualTo(1);
+        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+
+        assertTrue(dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate()).isEmpty());
+
+        assertThat(persistedCase.getClosed()).isTrue();
+        assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
+
+        dartsGateway.verifyReceivedNotificationType(2);
+        dartsGateway.verifyReceivedNotificationType(3);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 2);
+    }
+
+    @Test
+    void givenDarStopAndCloseEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenNotifyDarStopRecording() {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM,
+            HEARING_DATE
+        );
+
+        eventDispatcher.receive(someMinimalDartsEvent()
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(HEARING_DATE_ODT));
+
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+
+        var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
+
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
+
+        assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
+        assertThat(hearingsForCase.size()).isEqualTo(1);
+        assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
+
+        assertThat(persistedCase.getClosed()).isTrue();
+        assertEquals(HEARING_DATE_ODT, persistedCase.getCaseClosedTimestamp());
+
+        dartsGateway.verifyReceivedNotificationType(2);
+        dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
     }
 
     @Test
