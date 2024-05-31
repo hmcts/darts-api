@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -28,12 +29,25 @@ class DailylistFunctionalTest extends FunctionalTest {
 
     public static final String POST_DAILYLIST_URL = "/dailylists";
 
+
+    ObjectMapper objectMapper;
+
+    @BeforeEach
+    void createObjectMApper() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
+
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
             .baseUri(getUri("/functional-tests/clean"))
             .redirects().follow(false)
             .delete();
+
+
     }
 
     @ParameterizedTest
@@ -57,11 +71,6 @@ class DailylistFunctionalTest extends FunctionalTest {
         request.setPublishedTs(OffsetDateTime.of(2020, 10, 9, 23, 30, 0, 0, ZoneOffset.UTC));
         request.setMessageId(messageId);
         request.setXmlDocument(xmlDocument);
-
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -110,18 +119,17 @@ class DailylistFunctionalTest extends FunctionalTest {
     @Test
     void postNoDocument() throws IOException {
 
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
+        PostDailyListRequest request = new PostDailyListRequest();
+        request.setSourceSystem("XHB");
+        request.setCourthouse("Swansea");
+        request.setHearingDate(LocalDate.of(2020, 10, 10));
+        request.setUniqueId("1111111");
+        request.setPublishedTs(OffsetDateTime.of(2020, 10, 9, 23, 30, 0, 0, ZoneOffset.UTC));
+        request.setMessageId("some-message-id");
 
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
-            .queryParam("source_system", "XHB")
-            .queryParam("courthouse", "Swansea")
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", "1111111")
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .queryParam("message_id", "some-message-id")
-
+            .body(objectMapper.writeValueAsString(request))
             .when()
             .baseUri(getUri(POST_DAILYLIST_URL))
             .redirects().follow(false)
