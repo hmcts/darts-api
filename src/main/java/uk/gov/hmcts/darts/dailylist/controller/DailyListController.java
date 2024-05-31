@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.http.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListPostRequestMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.PatchDailyListRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
@@ -62,7 +62,7 @@ public class DailyListController implements DailyListsApi {
             throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }
 
-        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
+        DailyListPatchRequestInternal dailyListPatchRequest = new DailyListPatchRequestInternal();
         dailyListPatchRequest.setDailyListId(patchDailyListRequest.getDalId());
         dailyListPatchRequest.setDailyListJson(jsonDocument);
         PostDailyListResponse postDailyListResponse = dailyListService.updateDailyListInDatabase(dailyListPatchRequest);
@@ -116,7 +116,7 @@ public class DailyListController implements DailyListsApi {
             throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }
 
-        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
+        DailyListPatchRequestInternal dailyListPatchRequest = new DailyListPatchRequestInternal();
         dailyListPatchRequest.setDailyListId(patchDailyListRequest.getDalId());
         dailyListPatchRequest.setDailyListJson(jsonDocument);
         PostDailyListResponse postDailyListResponse = dailyListService.updateDailyListInDatabase(dailyListPatchRequest);
