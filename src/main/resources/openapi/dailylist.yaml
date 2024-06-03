@@ -75,63 +75,10 @@ paths:
     post:
       tags:
         - DailyLists
-      summary: XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
-      description: |-
-        description
-      parameters:
-        - in: query
-          name: source_system
-          schema:
-            type: string
-            enum: [ CPP, XHB ]
-          description: "The source system that has sent the message"
-          required: false
-        - in: query
-          name: courthouse
-          schema:
-            type: string
-          description: "The courthouse that the dailyList represents. <p>
-                        **Conditional mandatory**, required if json_document not provided"
-        - in: query
-          name: hearing_date
-          schema:
-            type: string
-            format: date
-          description: "The date that the dailyList represents. <p>
-                        **Conditional mandatory**, required if json_document not provided"
-        - in: query
-          name: unique_id
-          schema:
-            type: string
-          description: "The uniqueId. <p>
-                        **Conditional mandatory**, required if json_document not provided"
-        - in: query
-          name: published_ts
-          schema:
-            type: string
-            format: date-time
-          description: "The date that the dailyList was published. <p>
-                        **Conditional mandatory**, required if json_document not provided"
-        - in: query
-          name: message_id
-          schema:
-            type: string
-          description: "The message id of the event. <p>
-                        **Conditional mandatory**, required if json_document not provided"
-        - in: header
-          name: xml_document
-          schema:
-            type: string
-          description: "XML representation of the 'document' received in the addDocument request.<p>
-            **Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string"
-        - in: header
-          name: json_string #json_document
-          schema:
-            type: string
-            #$ref: '#/components/schemas/PostDailyListJson'
-          description: "JSON representation of the 'document' received in the addDocument request.<p>
-            **Conditional mandatory** either this or xml_document needs to be provided, or both."
-
+      summary: Send Daily List
+      description: XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
+      requestBody:
+        $ref: '#/components/requestBodies/PostDailyListRequest'
       responses:
         '200':
           description: OK
@@ -165,23 +112,8 @@ paths:
       tags:
         - DailyLists
       summary: Update existing DailyList
-      description: |-
-        description
-      parameters:
-        - in: query
-          name: dal_id
-          schema:
-            type: integer
-          description: "ID of the DailyList in the database."
-          required: true
-        - in: header
-          name: json_string #json_document
-          schema:
-            type: string
-            #$ref: '#/components/schemas/PostDailyListJson'
-          description: "JSON representation of the 'document' received in the addDocument request.<p>
-            **Conditional mandatory** either this or xml_document needs to be provided, or both."
-          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/PatchDailyListRequest'
 
       responses:
         '200':

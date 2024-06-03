@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.http.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListPostRequestMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.PatchDailyListRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
@@ -26,9 +26,6 @@ import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.dailylist.validation.DailyListPostValidator;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -57,16 +54,16 @@ public class DailyListController implements DailyListsApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
-    public ResponseEntity<PostDailyListResponse> dailylistsPatch(Integer dalId, String jsonString) {
+    public ResponseEntity<PostDailyListResponse> dailylistsPatch(PatchDailyListRequest patchDailyListRequest) {
         DailyListJsonObject jsonDocument;
         try {
-            jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
+            jsonDocument = objectMapper.readValue(patchDailyListRequest.getJsonString(), DailyListJsonObject.class);
         } catch (JsonProcessingException ex) {
             throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }
 
-        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
-        dailyListPatchRequest.setDailyListId(dalId);
+        DailyListPatchRequestInternal dailyListPatchRequest = new DailyListPatchRequestInternal();
+        dailyListPatchRequest.setDailyListId(patchDailyListRequest.getDalId());
         dailyListPatchRequest.setDailyListJson(jsonDocument);
         PostDailyListResponse postDailyListResponse = dailyListService.updateDailyListInDatabase(dailyListPatchRequest);
         return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
@@ -83,40 +80,11 @@ public class DailyListController implements DailyListsApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    public ResponseEntity<PostDailyListResponse> dailylistsPost(
-        String sourceSystem,
-        String courthouse,
-        LocalDate hearingDate,
-        String uniqueId,
-        OffsetDateTime publishedTs,
-        String messageId,
-        String xmlDocument,
-        String jsonString
-    ) {
-        DailyListJsonObject jsonDocument = null;
-        Optional<String> jsonDoc = Optional.ofNullable(jsonString);
-        if (jsonDoc.isPresent()) {
-            try {
-                jsonDocument = objectMapper.readValue(jsonDoc.get(), DailyListJsonObject.class);
-            } catch (JsonProcessingException ex) {
-                throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
-            }
-        }
-
-        DailyListPostRequestInternal postRequest = new DailyListPostRequestInternal();
-        postRequest.setSourceSystem(sourceSystem);
-        postRequest.setCourthouse(courthouse);
-        postRequest.setDailyListXml(xmlDocument);
-        postRequest.setDailyListJson(jsonDocument);
-        postRequest.setHearingDate(hearingDate);
-        postRequest.setUniqueId(uniqueId);
-        postRequest.setPublishedDateTime(publishedTs);
-        postRequest.setMessageId(messageId);
-
-        DailyListPostValidator.validate(postRequest);
-        PostDailyListResponse postDailyListResponse = dailyListService.saveDailyListToDatabase(postRequest);
+    public ResponseEntity<PostDailyListResponse> dailylistsPost(PostDailyListRequest postDailyListRequest) {
+        DailyListPostRequestInternal internalRequest = dailyListPostRequestMapper.map(postDailyListRequest);
+        DailyListPostValidator.validate(internalRequest);
+        PostDailyListResponse postDailyListResponse = dailyListService.saveDailyListToDatabase(internalRequest);
         return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
-
     }
 
     @Override
@@ -148,7 +116,7 @@ public class DailyListController implements DailyListsApi {
             throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, ex);
         }
 
-        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
+        DailyListPatchRequestInternal dailyListPatchRequest = new DailyListPatchRequestInternal();
         dailyListPatchRequest.setDailyListId(patchDailyListRequest.getDalId());
         dailyListPatchRequest.setDailyListJson(jsonDocument);
         PostDailyListResponse postDailyListResponse = dailyListService.updateDailyListInDatabase(dailyListPatchRequest);
