@@ -38,6 +38,11 @@ public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityPr
         }
     }
 
+    @Override
+    public Set<AuditActivity> getAuditActivities() {
+        return auditActivities;
+    }
+
     private boolean courthousesInGroupAreUpdated(SecurityGroupEntity entity, SecurityGroupPatch patch) {
         Set<Integer> patchValues = patch.getCourthouseIds() == null ? new HashSet<>() : new HashSet<>(patch.getCourthouseIds());
         var prePatchValues = entity.getCourthouseEntities().stream().map((CourthouseEntity::getId)).collect(toSet());
@@ -50,11 +55,6 @@ public class SecurityGroupUpdateAuditActivityProvider implements AuditActivityPr
         var prePatchValues = prePatched.getUsers().stream().map((UserAccountEntity::getId)).collect(toSet());
 
         return notNullAndDifferent(prePatchValues, patchValues);
-    }
-
-    @Override
-    public Set<AuditActivity> getAuditActivities() {
-        return auditActivities;
     }
 
     private boolean basicDetailsAreUpdated(SecurityGroupEntity prePatched, SecurityGroupPatch patch) {

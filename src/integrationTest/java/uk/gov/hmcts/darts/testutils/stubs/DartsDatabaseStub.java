@@ -31,6 +31,9 @@ import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -104,6 +107,7 @@ import static java.time.LocalDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
@@ -796,5 +800,29 @@ public class DartsDatabaseStub {
 
     public Revisions<Long, SecurityGroupEntity> findSecurityGroupRevisionsFor(Integer id) {
         return securityGroupRepository.findRevisions(id);
+    }
+
+    public Revisions<Long, TranscriptionEntity> findTranscriptionRevisionsFor(Integer id) {
+        return transcriptionRepository.findRevisions(id);
+    }
+
+    @Transactional
+    public Revisions<Long, TranscriptionWorkflowEntity> findTranscriptionWorkflowRevisionsFor(Integer transcriptionId) {
+        var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        var latestWorkflow = transcription.getTranscriptionWorkflowEntities().stream()
+            .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp))
+            .orElseThrow();
+
+        return transcriptionWorkflowRepository.findRevisions(latestWorkflow.getId());
+    }
+
+    @Transactional
+    public Revisions<Long, TranscriptionCommentEntity> findTranscriptionCommentRevisionsFor(Integer transcriptionId) {
+        var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        var latestComment = transcription.getTranscriptionCommentEntities().stream()
+            .min(comparing(TranscriptionCommentEntity::getCreatedDateTime))
+            .orElseThrow();
+
+        return transcriptionCommentRepository.findRevisions(latestComment.getId());
     }
 }
