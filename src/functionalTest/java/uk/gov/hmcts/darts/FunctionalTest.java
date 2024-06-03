@@ -31,7 +31,7 @@ import java.time.format.DateTimeParseException;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @SpringBootTest(
-    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
+    classes = {AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
         AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class,
         AzureAdB2CDarPcMidtierGlobalAuthenticationProperties.class},
     webEnvironment = WebEnvironment.NONE

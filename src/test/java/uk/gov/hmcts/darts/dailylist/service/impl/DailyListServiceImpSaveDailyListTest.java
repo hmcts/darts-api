@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 
 import java.io.IOException;
@@ -131,7 +131,7 @@ class DailyListServiceImpSaveDailyListTest {
 
         when(dailyListRepository.findById(1)).thenReturn(Optional.of(dailyListEntity));
 
-        DailyListPatchRequest request = new DailyListPatchRequest(1, getDailyListJson());
+        DailyListPatchRequestInternal request = new DailyListPatchRequestInternal(1, getDailyListJson());
         service.updateDailyListInDatabase(request);
 
         verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());

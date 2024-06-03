@@ -52,7 +52,7 @@ public class AnnotationPersistenceService {
         externalObjectDirectoryRepository.save(inboundExternalObjectDirectory);
         externalObjectDirectoryRepository.save(unstructuredExternalObjectDirectory);
 
-        auditApi.recordAudit(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearing.getCourtCase());
+        auditApi.record(IMPORT_ANNOTATION, userIdentity.getUserAccount(), hearing.getCourtCase());
     }
 
     @Transactional

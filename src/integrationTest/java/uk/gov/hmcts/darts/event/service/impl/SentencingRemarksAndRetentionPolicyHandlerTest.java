@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -211,6 +212,22 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         List<CaseManagementRetentionEntity> caseManagementRetentionEntities = dartsDatabase.getCaseManagementRetentionRepository().findAll();
         assertEquals(0, caseManagementRetentionEntities.size());
+    }
+
+    @Test
+    void ignoresDuplicateEvent() {
+        dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
+        var sentencingRemarksDartsEvent = createSentencingRemarksDartsEventFor(SOME_COURTHOUSE);
+
+        eventDispatcher.receive(sentencingRemarksDartsEvent);
+
+        //receive same event again, but should save to db and ignore duplicate exception
+        eventDispatcher.receive(sentencingRemarksDartsEvent);
+
+        var persistedTranscriptions = dartsDatabase.getTranscriptionRepository().findAll();
+        assertEquals(1, persistedTranscriptions.size());
+        List<EventEntity> allEvents = dartsDatabase.getEventRepository().findAll();
+        assertEquals(2, allEvents.size());
     }
 
     private UserAccountEntity givenATranscriberIsAuthorisedFor(CourthouseEntity courthouse) {
