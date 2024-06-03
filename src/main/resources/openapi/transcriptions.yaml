@@ -829,6 +829,43 @@ paths:
                 type: "USER_MANAGEMENT_108"
                 title: "The provided transcription does not exist"
                 status: 404
+
+  /admin/transcription-documents/{transcription_document_id}:
+    get:
+      tags:
+        - Transcription
+      summary: Gets a transcription document id
+      operationId: getByDocumentId
+      parameters:
+        - name: transcription_document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/SearchTranscriptionDocumentByIdResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
 components:
   schemas:
     TranscriptionSearchRequest:
@@ -1349,6 +1386,35 @@ components:
         is_manual_transcription:
           type: boolean
 
+    SearchTranscriptionDocumentByIdResponse:
+      type: object
+      properties:
+        transcription_document_id:
+          type: integer
+          description: 'The transcription document id'
+        transcription_id:
+          type: integer
+          description: 'The transcription id'
+        file_type:
+          type: string
+          description: 'The transcription document file type'
+        file_name:
+          type: string
+          description: 'The transcription document file name'
+        file_size_bytes:
+          type: integer
+          description: 'The transcription document size in bytes'
+        uploaded_at:
+          type: string
+          format: date-time
+          description: 'The transcription document date time of the transcription document'
+        uploaded_by:
+          type: integer
+          description: 'The transcription document uploaded by'
+        is_hidden:
+          type: boolean
+          description: 'Whether the transcription document is hidden'
+
     TranscriptionsErrorCode:
       type: string
       enum:
@@ -1364,7 +1430,9 @@ components:
         - "TRANSCRIPTION_109"
         - "TRANSCRIPTION_110"
         - "TRANSCRIPTION_111"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]
+        - "TRANSCRIPTION_112"
+        - "TRANSCRIPTION_113"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND ]
 
     TranscriptionsTitleErrors:
       type: string
@@ -1381,4 +1449,6 @@ components:
         - "Failed to download transcript"
         - "Transcription could not be requested, no audio"
         - "Transcription could not be requested, times outside of hearing times"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]
+        - "The user is not a transcriber"
+        - "Transcription document not found"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND ]

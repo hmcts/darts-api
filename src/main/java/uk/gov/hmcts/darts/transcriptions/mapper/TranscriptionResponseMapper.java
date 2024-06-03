@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminRespon
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -289,4 +290,18 @@ public class TranscriptionResponseMapper {
         details.requestedAt(transcriptionEntity.getCreatedDateTime());
         return details;
     }
+
+    public SearchTranscriptionDocumentByIdResponse getSearchByTranscriptionDocumentId(TranscriptionDocumentEntity entity) {
+        SearchTranscriptionDocumentByIdResponse response = new SearchTranscriptionDocumentByIdResponse();
+        response.setTranscriptionDocumentId(entity.getId());
+        response.setTranscriptionId(entity.getTranscription().getId());
+        response.setFileName(entity.getFileName());
+        response.setFileType(entity.getFileType());
+        response.setFileSizeBytes(entity.getFileSize());
+        response.setUploadedAt(entity.getUploadedDateTime());
+        response.setUploadedBy(entity.getUploadedBy().getId());
+        response.setIsHidden(entity.isHidden());
+        return response;
+    }
+
 }

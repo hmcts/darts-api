@@ -87,6 +87,11 @@ public enum TranscriptionApiError implements DartsApiError {
         UpdateTranscription400ErrorCode.REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER.getValue(),
         HttpStatus.BAD_REQUEST,
         "Transcription requestor cannot approve or reject their own transcription requests."
+    ),
+    TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_NOT_FOUND.getValue()
     );
 
 
