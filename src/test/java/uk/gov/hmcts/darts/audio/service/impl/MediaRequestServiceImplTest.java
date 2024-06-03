@@ -164,14 +164,14 @@ class MediaRequestServiceImplTest {
         when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
-        doNothing().when(auditApi).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).record(any(), any(), any());
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
         assertEquals(request.getId(), mockMediaRequestEntity.getId());
         verify(mockHearingRepository).getReferenceById(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
-        verify(auditApi).recordAudit(AuditActivity.REQUEST_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
+        verify(auditApi).record(AuditActivity.REQUEST_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
     }
 
     @Test
@@ -386,7 +386,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
-        doNothing().when(auditApi).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).record(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
@@ -398,7 +398,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findById(transformedMediaId);
         verifyNoInteractions(mockTransientObjectDirectoryRepository);
-        verify(auditApi).recordAudit(AuditActivity.EXPORT_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
+        verify(auditApi).record(AuditActivity.EXPORT_AUDIO, mockUserAccountEntity, mockCourtCaseEntity);
     }
 
     @Test
@@ -513,7 +513,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(Optional.ofNullable(mockTransformedMediaEntity));
 
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
-        doNothing().when(auditApi).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).record(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
@@ -525,7 +525,7 @@ class MediaRequestServiceImplTest {
 
         verify(mockTransformedMediaRepository).findById(transformedMediaId);
         verifyNoInteractions(mockTransientObjectDirectoryRepository);
-        verify(auditApi).recordAudit(AuditActivity.AUDIO_PLAYBACK, mockUserAccountEntity, mockCourtCaseEntity);
+        verify(auditApi).record(AuditActivity.AUDIO_PLAYBACK, mockUserAccountEntity, mockCourtCaseEntity);
     }
 
     @Test

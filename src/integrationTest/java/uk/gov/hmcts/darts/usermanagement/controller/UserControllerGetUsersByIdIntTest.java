@@ -63,7 +63,7 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
 
         Assertions.assertEquals("Judgedefault@example.com", userWithIdAndTimestamps.getEmailAddress());
         Assertions.assertTrue(userWithIdAndTimestamps.getActive());
-        Assertions.assertEquals("JudgedefaultUsername", userWithIdAndTimestamps.getFullName());
+        Assertions.assertEquals("JudgedefaultFullName", userWithIdAndTimestamps.getFullName());
         Assertions.assertEquals(-3, userWithIdAndTimestamps.getSecurityGroupIds().get(0));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(SUPER_ADMIN, SUPER_USER));

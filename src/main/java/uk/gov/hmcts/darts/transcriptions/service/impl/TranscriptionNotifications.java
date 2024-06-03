@@ -54,7 +54,7 @@ public class TranscriptionNotifications {
                 if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
                     notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED.toString());
                 }
-                auditApi.recordAudit(
+                auditApi.record(
                     AUTHORISE_TRANSCRIPTION,
                     userAccountEntity,
                     courtCaseEntity
@@ -67,14 +67,14 @@ public class TranscriptionNotifications {
                 if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
                     notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED.toString(), templateParams);
                 }
-                auditApi.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+                auditApi.record(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
-            case WITH_TRANSCRIBER -> auditApi.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            case WITH_TRANSCRIBER -> auditApi.record(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             case COMPLETE -> {
                 if (Boolean.TRUE.equals(transcriptionEntity.getIsManualTranscription())) {
                     notifyRequestor(transcriptionEntity, TRANSCRIPTION_AVAILABLE.toString());
                 }
-                auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+                auditApi.record(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
             default -> {
                 // Do nothing for unmatched status

@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -39,6 +41,7 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toSet;
+import static uk.gov.hmcts.darts.usermanagement.auditing.UserAccountUpdateAuditActivityProvider.auditActivitiesFor;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +60,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final AuthorisedUserPermissionsValidator userActivationPermissionsValidator;
     private final UserDeactivateNotLastInSuperAdminGroupValidator userNotLastSuperAdminValidator;
     private final TranscriptionService transcriptionService;
+    private final AuditApi auditApi;
 
     @Override
     @Transactional
@@ -79,6 +83,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userEntity.setLastModifiedDateTime(now);
 
         var createdUserEntity = userAccountRepository.save(userEntity);
+        auditApi.record(AuditActivity.CREATE_USER, authorisationApi.getCurrentUser(), null);
 
         UserWithId userWithId = userAccountMapper.mapToUserWithIdModel(createdUserEntity);
         List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
@@ -95,22 +100,21 @@ public class UserManagementServiceImpl implements UserManagementService {
         userActivationPermissionsValidator.validate(userPatch);
         userNotLastSuperAdminValidator.validate(new UserQueryRequest<>(userPatch, userId));
 
-        List<Integer> rolledBackTranscriptions;
-        Optional<UserAccountEntity> userAccountEntity = userAccountRepository.findById(userId);
-        if (userAccountEntity.isPresent()) {
-            rolledBackTranscriptions = updatedUserAccount(userPatch, userAccountEntity.get());
-        } else {
-            throw new NoSuchElementException("No value present");
-        }
+        var userAccountEntity = userAccountRepository.findById(userId)
+            .orElseThrow(() -> new NoSuchElementException("No value present"));
 
-        UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity.get());
+        var activitiesForAudit = auditActivitiesFor(userAccountEntity, userPatch);
+        var rolledBackTranscriptionsIds = updatedUserAccount(userPatch, userAccountEntity);
+        auditApi.recordAll(activitiesForAudit);
+
+        UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
 
         // lets add the rolled back transcription ids
-        if (!rolledBackTranscriptions.isEmpty()) {
-            user.setRolledBackTranscriptRequests(rolledBackTranscriptions);
+        if (!rolledBackTranscriptionsIds.isEmpty()) {
+            user.setRolledBackTranscriptRequests(rolledBackTranscriptionsIds);
         }
 
-        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.get().getSecurityGroupEntities());
+        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities());
         user.setSecurityGroupIds(securityGroupIds);
 
         return user;
@@ -172,7 +176,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         String name = userPatch.getFullName();
         if (name != null) {
-            userAccountEntity.setUserName(name);
+            userAccountEntity.setUserFullName(name);
         }
 
         String description = userPatch.getDescription();
