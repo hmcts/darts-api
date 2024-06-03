@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -183,7 +183,7 @@ class DailyListServiceTest extends IntegrationBase {
         String dailyListJson = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/ok_saveDl_xml_then_json/document.json");
         DailyListJsonObject dailyListJsonObject = MAPPER.readValue(dailyListJson, DailyListJsonObject.class);
-        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest(
+        DailyListPatchRequestInternal dailyListPatchRequest = new DailyListPatchRequestInternal(
             dailyListFromDb.getId(),
             dailyListJsonObject
         );
