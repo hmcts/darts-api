@@ -41,7 +41,6 @@ public class UserController implements UserApi {
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = SUPER_ADMIN)
     public ResponseEntity<UserWithId> createUser(User user) {
         UserWithId createdUser = userManagementService.createUser(user);
-
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(createdUser);
     }

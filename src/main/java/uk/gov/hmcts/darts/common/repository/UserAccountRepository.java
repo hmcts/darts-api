@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -14,7 +15,10 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Integer>, JpaSpecificationExecutor<UserAccountEntity> {
+public interface UserAccountRepository extends
+    RevisionRepository<UserAccountEntity, Integer, Long>,
+    JpaRepository<UserAccountEntity, Integer>,
+    JpaSpecificationExecutor<UserAccountEntity> {
 
     List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 

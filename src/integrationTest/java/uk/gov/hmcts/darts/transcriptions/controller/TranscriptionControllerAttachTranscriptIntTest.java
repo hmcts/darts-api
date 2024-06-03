@@ -122,7 +122,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
 
         doNothing().when(mockAuditApi)
-            .recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            .record(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -292,8 +292,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
         assertTrue(templateList.contains(TRANSCRIPTION_AVAILABLE.toString()));
 
-        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
-        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).record(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).record(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -363,8 +363,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
         assertTrue(templateList.contains(TRANSCRIPTION_AVAILABLE.toString()));
 
-        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
-        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).record(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).record(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
     }
 
 }

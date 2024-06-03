@@ -13,16 +13,24 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 @Entity
 @Table(name = "user_account")
 @Getter
 @Setter
+@Audited
+@AuditTable("user_account_aud")
 public class UserAccountEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -31,9 +39,11 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "usr_gen", sequenceName = "usr_seq", allocationSize = 1)
     private Integer id;
 
+    @NotAudited
     @Column(name = "dm_user_s_object_id", length = 16)
     private String dmObjectId;
 
+    @NotAudited
     @Column(name = "user_name")
     private String userName;
 
@@ -50,15 +60,20 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_active")
     private Boolean active;
 
+    @NotAudited
     @Column(name = "last_login_ts")
     private OffsetDateTime lastLoginTime;
 
+    @NotAudited
     @Column(name = "account_guid")
     private String accountGuid;
 
+    @NotAudited
     @Column(name = "is_system_user", nullable = false)
     private Boolean isSystemUser;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @AuditJoinTable(name = "security_group_user_account_ae_aud")
     @ManyToMany
     @JoinTable(name = "security_group_user_account_ae",
         joinColumns = {@JoinColumn(name = "usr_id")},
