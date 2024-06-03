@@ -44,8 +44,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -167,6 +169,8 @@ class AudioUploadServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
 
         // When
+        UUID externalLocation = UUID.randomUUID();
+        when(dataManagementApi.saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture())).thenReturn(externalLocation);
         audioService.addAudio(audioFile, addAudioMetadataRequest);
 
         // Then
@@ -174,6 +178,7 @@ class AudioUploadServiceImplTest {
         verify(mediaRepository, times(2)).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
         verify(logApi, times(1)).audioUploaded(addAudioMetadataRequest);
+        verify(externalObjectDirectoryRepository).save(externalObjectDirectoryEntityArgumentCaptor.capture());
 
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
@@ -182,6 +187,11 @@ class AudioUploadServiceImplTest {
         assertEquals(2, savedMedia.getTotalChannels());
         assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
         assertEquals("1", savedMedia.getCourtroom().getName());
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryEntityArgumentCaptor.getValue();
+        assertEquals(savedMedia.getChecksum(), externalObjectDirectoryEntity.getChecksum());
+        assertNotNull(externalObjectDirectoryEntity.getChecksum());
+        assertEquals(externalLocation, externalObjectDirectoryEntity.getExternalLocation());
     }
 
     @Test
