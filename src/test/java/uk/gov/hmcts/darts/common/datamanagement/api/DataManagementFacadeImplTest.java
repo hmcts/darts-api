@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRetrievalQueueEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -383,6 +384,77 @@ class DataManagementFacadeImplTest {
 
         verify(objectRetrievalQueueRepository, times(0)).saveAndFlush(any());
         assertTrue(exception.getMessage().contains("No storedEodEntities found for mediaId"));
+    }
+
+    @Test
+    void insertMediaEntityInObjectRetrievalQueueWhenNotFoundIn() throws Exception {
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(1);
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setContentObjectId("2");
+        mediaEntity.setClipId("clip-id");
+        mediaEntity.setCreatedBy(userAccount);
+        mediaEntity.setLastModifiedBy(userAccount);
+
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setMedia(mediaEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(mediaEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(mediaEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(mediaEntity.getClipId());
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+
+        // make the assertion on the response
+        assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(mediaEntity)
+        );
+
+        verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
+    }
+
+    @Test
+    void insertTranscriptionEntityInObjectRetrievalQueueWhenNotFoundIn() throws Exception {
+        final List<BlobContainerDownloadable> blobContainerDownloadables = new ArrayList<>();
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(1);
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(1);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setId(1);
+        transcriptionDocumentEntity.setContentObjectId("2");
+        transcriptionDocumentEntity.setClipId("clip-id");
+        transcriptionDocumentEntity.setUploadedBy(userAccount);
+        transcriptionDocumentEntity.setLastModifiedBy(userAccount);
+
+        ObjectRetrievalQueueEntity objectRetrievalQueueEntity = new ObjectRetrievalQueueEntity();
+        objectRetrievalQueueEntity.setTranscriptionDocument(transcriptionDocumentEntity);
+        objectRetrievalQueueEntity.setCreatedBy(userAccount);
+        objectRetrievalQueueEntity.setLastModifiedBy(userAccount);
+        objectRetrievalQueueEntity.setParentObjectId(String.valueOf(transcriptionDocumentEntity.getId()));
+        objectRetrievalQueueEntity.setContentObjectId(transcriptionDocumentEntity.getContentObjectId());
+        objectRetrievalQueueEntity.setClipId(transcriptionDocumentEntity.getClipId());
+
+        // execute the code
+        final DataManagementFacadeImpl dmFacade = new DataManagementFacadeImpl(blobContainerDownloadables, externalObjectDirectoryRepository,
+                                                                               objectRecordStatusRepository, storageOrderHelper, unstructuredDataHelper,
+                                                                               dataManagementConfiguration, armApiService, objectRetrievalQueueRepository);
+
+        // make the assertion on the response
+        assertThrows(
+            FileNotDownloadedException.class,
+            () -> dmFacade.retrieveFileFromStorage(transcriptionDocumentEntity)
+        );
+
+        verify(objectRetrievalQueueRepository, times(1)).saveAndFlush(objectRetrievalQueueEntity);
     }
 
     @Test
