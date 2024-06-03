@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -81,6 +82,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
     @Autowired
     private ArchiveRecordService archiveRecordService;
 
+    @Autowired
+    private UserAccountRepository userAccountRepository;
 
     @BeforeEach
     void setUp() {
@@ -150,6 +153,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", media.getStart().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", media.getEnd().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", media.getCreatedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(armEod.getCreatedBy().getId()));
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -213,6 +217,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", media.getStart().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", media.getEnd().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", media.getRetainUntilTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(armEod.getCreatedBy().getId()));
 
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -272,6 +277,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<EODID>", String.valueOf(armEod.getId()));
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(savedMedia.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(savedMedia.getId()));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(armEod.getCreatedBy().getId()));
+
         log.info("expect Response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
@@ -339,6 +346,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
+
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
@@ -409,6 +418,8 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", transcriptionDocumentEntity.getRetainUntilTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
+
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
@@ -478,6 +489,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", transcriptionDocumentEntity.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<START_DATE_TIME>", transcriptionDocumentEntity.getTranscription().getStartTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE_TIME>", transcriptionDocumentEntity.getTranscription().getEndTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -540,6 +552,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -603,6 +616,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
         expectedResponse = expectedResponse.replaceAll("<EVENT_DATE_TIME>", annotationDocument.getRetainUntilTs().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -664,6 +678,7 @@ class ArchiveRecordServiceIntTest extends IntegrationBase {
         expectedResponse = expectedResponse.replaceAll("<OBJECT_ID>", String.valueOf(annotationDocument.getId()));
         expectedResponse = expectedResponse.replaceAll("<PARENT_ID>", String.valueOf(annotationDocument.getAnnotation().getId()));
         expectedResponse = expectedResponse.replaceAll("<UPLOADED_DATE_TIME>", annotationDocument.getUploadedDateTime().format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<UPLOADED_BY>", String.valueOf(testUser.getId()));
 
         log.info("expect response {}", expectedResponse);
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);

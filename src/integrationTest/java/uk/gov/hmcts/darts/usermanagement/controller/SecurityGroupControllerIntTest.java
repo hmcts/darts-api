@@ -13,11 +13,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.test.common.TestUtils;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -445,7 +447,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         addCourthouseToSecurityGroup(courthouseEntity, -4);
 
         // add 2 users - system/non-system. only expect to see non-system in response
-        userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
+        List<UserAccountEntity> accountEntities = userAccountStub.createAuthorisedIntegrationTestUsersSystemAndNonSystem(courthouseEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ADMIN_SECURITY_GROUPS_ENDPOINT_URL)
             .queryParam("courthouse_id", courthouseEntity.getId().toString())
@@ -458,7 +460,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
         String expectedJson = String.format("""
                 [
                   {
-                    "user_ids":[3],
+                    "user_ids":[${USER_ID}],
                     "id":-4,
                     "security_role_id":4,
                     "global_access":false,
@@ -467,7 +469,7 @@ class SecurityGroupControllerIntTest extends IntegrationBase {
                     "name":"Test Transcriber"
                   }
                 ]
-            """, courthouseEntity.getId().toString());
+            """.replace("${USER_ID}", accountEntities.get(0).getId().toString()), courthouseEntity.getId().toString());
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }

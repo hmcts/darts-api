@@ -1,13 +1,17 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -20,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -43,6 +48,14 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
 
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    void setupData() {
+        when(mockUserIdentity.userHasGlobalAccess(Mockito.any())).thenReturn(false);
+    }
 
     @Test
     void transformedMediaDeleteShouldReturnSuccess() throws Exception {
@@ -119,15 +132,14 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
         mockMvc.perform(requestBuilder)
             .andExpect(status().is2xxSuccessful());
 
-        //create extra one
-        TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectRecordStatusEntity,
-                blobId
-            ));
+        TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+            mediaRequestEntity,
+            objectRecordStatusEntity,
+            blobId);
 
-        assertTrue(dartsDatabase.getTransformedMediaRepository().findById(extraTransientObjectDirectoryEntity.getId()).isPresent());
+        //create extra one
+        extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository().saveAndFlush(extraTransientObjectDirectoryEntity);
+        assertTrue(dartsDatabase.getTransformedMediaRepository().findById(extraTransientObjectDirectoryEntity.getTransformedMedia().getId()).isPresent());
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,

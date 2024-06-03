@@ -72,9 +72,9 @@ class AnnotationGetTest extends IntegrationBase {
         when(downloadResponseMetaData.getInputStream()).thenReturn(inputStreamResource);
         when(dataManagementFacade.retrieveFileFromStorage(anyList())).thenReturn(downloadResponseMetaData);
 
-        dartsDatabase.createValidAnnotationDocumentForDownload(judge);
+        AnnotationEntity annotation = dartsDatabase.createValidAnnotationDocumentForDownload(judge);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, 1, 1);
+        MockHttpServletRequestBuilder requestBuilder = get(ANNOTATION_DOCUMENT_ENDPOINT, annotation.getId(), 1);
 
         mockMvc.perform(
                 requestBuilder)

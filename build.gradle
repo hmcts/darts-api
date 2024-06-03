@@ -528,7 +528,7 @@ flyway {
   println "FLYWAY schemas=${schemas}"
   baselineOnMigrate = true
   baselineVersion = '000'
-  locations = ["db/migration/common", "db/migration/postgres"]
+  locations = ["db/migration/common", "db/migration/postgres", "db/migration/postgrestest"]
   // change to false to allow flyway clean to be run
   cleanDisabled = true
 }

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -8,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
@@ -18,6 +21,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -38,6 +42,14 @@ class AudioRequestsControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
+
+    @MockBean
+    private UserIdentity identity;
+
+    @BeforeEach
+    void setupData() {
+        when(identity.userHasGlobalAccess(Mockito.any())).thenReturn(false);
+    }
 
     @Test
     void audioRequestDeleteShouldReturnSuccess() throws Exception {

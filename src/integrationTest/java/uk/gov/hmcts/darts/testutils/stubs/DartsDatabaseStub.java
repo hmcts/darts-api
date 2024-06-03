@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -9,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.commons.JUnitException;
 import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -172,7 +172,6 @@ public class DartsDatabaseStub {
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
-
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
     private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
@@ -180,6 +179,7 @@ public class DartsDatabaseStub {
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
 
+    @Transactional
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
@@ -197,6 +197,7 @@ public class DartsDatabaseStub {
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
+
         annotationRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
@@ -676,7 +677,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
+    public AnnotationEntity createValidAnnotationDocumentForDownload(UserAccountEntity judge) {
 
         var annotation = someAnnotationCreatedBy(judge);
 
@@ -708,6 +709,8 @@ public class DartsDatabaseStub {
         );
         armEod.setTransferAttempts(1);
         save(armEod2);
+
+        return annotationRepository.getReferenceById(annotation.getId());
     }
 
     protected AnnotationEntity someAnnotationCreatedBy(UserAccountEntity userAccount) {
@@ -752,7 +755,7 @@ public class DartsDatabaseStub {
         return automatedTaskRepository.findAll();
     }
 
-    @Transactional(dontRollbackOn = RuntimeException.class)
+    @jakarta.transaction.Transactional(dontRollbackOn = RuntimeException.class)
     public void lockTaskUntil(String taskName, OffsetDateTime taskReleaseDateTime) {
         var updateRowForTaskSql = """
         update darts.shedlock

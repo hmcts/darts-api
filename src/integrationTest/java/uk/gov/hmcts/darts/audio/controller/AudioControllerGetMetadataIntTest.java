@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,11 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    void setupData() {
+        when(mockUserIdentity.userHasGlobalAccess(Mockito.any())).thenReturn(false);
+    }
 
     @Test
     void getAudioMetadataGetShouldReturnMediaChannel1MetadataAssociatedWithProvidedHearing() throws Exception {
@@ -73,14 +80,14 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         String expectedJson = """
             [
               {
-                "id": 1,
+                "id": ${MEDIA_ID},
                 "media_start_timestamp": "2023-01-01T12:00:00Z",
                 "media_end_timestamp": "2023-01-01T13:00:00Z",
                 "is_archived": false,
                 "is_available": true
               }
             ]
-            """;
+            """.replace("${MEDIA_ID}", mediaChannel1.getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 

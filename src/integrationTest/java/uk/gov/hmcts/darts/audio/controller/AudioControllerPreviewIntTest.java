@@ -1,8 +1,15 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import io.restassured.internal.assertion.BodyMatcherGroup;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,7 +20,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.service.RedisService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -22,9 +32,14 @@ import java.time.Duration;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audio.enums.AudioPreviewStatus.READY;
@@ -36,6 +51,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.test.common.AwaitabilityUtil.waitForMaxWithOneSecondPoll;
 
 @AutoConfigureMockMvc
+//@TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 @TestPropertySource(properties = {"darts.audio.transformation.service.audio.file=tests/audio/WithViqHeader/viq0001min.mp2"})
 class AudioControllerPreviewIntTest extends IntegrationBase {
 
@@ -50,22 +66,29 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
 
     private MediaEntity mediaEntity;
 
+    private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
+
     @Autowired
     private RedisService<AudioPreview> binaryDataRedisService;
+
+    @MockBean
+    private UserIdentity identity;
 
     @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setupData() {
+        when(identity.userHasGlobalAccess(Mockito.any())).thenReturn(false);
+
         given.setupTest();
+
         mediaEntity = given.getMediaEntity1();
         given.externalObjectDirForMedia(mediaEntity);
         doNothing().when(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
         );
-
     }
 
     @AfterEach
@@ -85,9 +108,11 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         waitUntilPreviewEncodedAndCached();
         mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
+        ContentsMatcher contentsMatcher = new ContentsMatcher(Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA));
+
         verify(authorisation, times(2)).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            eq(mediaEntity.getId()),
+            argThat(contentsMatcher)
         );
     }
 
@@ -101,9 +126,11 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         waitUntilPreviewEncodedAndCached();
         mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
+        ContentsMatcher contentsMatcher = new ContentsMatcher(Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA));
+
         verify(authorisation, times(2)).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            eq(mediaEntity.getId()),
+            argThat(contentsMatcher)
         );
     }
 
@@ -117,10 +144,22 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         waitUntilPreviewEncodedAndCached();
         mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
+        ContentsMatcher contentsMatcher = new ContentsMatcher(Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA));
         verify(authorisation, times(2)).authoriseByMediaId(
-            mediaEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA)
+            eq(mediaEntity.getId()),
+            argThat(contentsMatcher)
         );
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    class ContentsMatcher implements ArgumentMatcher<Set<SecurityRoleEnum>> {
+        private final Set<SecurityRoleEnum> assertionSet;
+
+        @Override
+        public boolean matches(Set<SecurityRoleEnum> set) {
+            return assertionSet.containsAll(set);
+        }
     }
 
     private void waitUntilPreviewEncodedAndCached() {
