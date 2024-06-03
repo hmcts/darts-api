@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
-
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.Problem;
@@ -23,6 +22,7 @@ import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
+
 import java.net.URI;
 
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
@@ -155,7 +155,7 @@ class AudioControllerAdminPatchMediaRequestTest extends IntegrationBase {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
 
         MediaPatchRequest request = new MediaPatchRequest();
-        request.setOwnerId(343434);
+        request.setOwnerId(343_434);
 
         MvcResult result = mockMvc.perform(
                 patch(ENDPOINT + String.valueOf(mediaRequestEntity.getId()))

@@ -22,7 +22,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
-public class AudioMediaPatchRequestValidatorTest {
+class AudioMediaPatchRequestValidatorTest {
 
     @Mock
     private UserAccountRepository userAccountRepository;
@@ -34,7 +34,7 @@ public class AudioMediaPatchRequestValidatorTest {
     private AudioMediaPatchRequestValidator audioMediaPatchRequestValidator;
 
     @Test
-    public void successfulPatchWithoutOwner() {
+    void successfulPatchWithoutOwner() {
         Integer mediaRequestId = 200;
         MediaPatchRequest mediaPatchRequestId = new MediaPatchRequest();
         IdRequest<MediaPatchRequest> mediaPatchRequest = new IdRequest<>(mediaPatchRequestId, mediaRequestId);
@@ -46,7 +46,7 @@ public class AudioMediaPatchRequestValidatorTest {
     }
 
     @Test
-    public void successfulPatchWithOwner() {
+    void successfulPatchWithOwner() {
         Integer mediaRequestId = 200;
         Integer ownerIntger = 200;
 
@@ -64,7 +64,7 @@ public class AudioMediaPatchRequestValidatorTest {
     }
 
     @Test
-    public void failureWithMediaRequestId() {
+    void failureWithMediaRequestId() {
         Integer mediaRequestId = 200;
         Integer ownerIntger = 200;
 
@@ -80,7 +80,7 @@ public class AudioMediaPatchRequestValidatorTest {
     }
 
     @Test
-    public void failureWithUserOwnerId() {
+    void failureWithUserOwnerId() {
         Integer mediaRequestId = 200;
         Integer ownerIntger = 200;
 
