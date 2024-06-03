@@ -175,14 +175,14 @@ checkstyle {
 
 var sourceSetsCopy = sourceSets
 pmd {
-  toolVersion = "7.1.0"
+  toolVersion = "7.2.0"
   sourceSets = [sourceSetsCopy.main]
   reportsDir = file("$project.buildDir/reports/pmd")
   ruleSetFiles = files("config/pmd/main-ruleset.xml")
 }
 
 pmd {
-  toolVersion = "7.1.0"
+  toolVersion = "7.2.0"
   sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
