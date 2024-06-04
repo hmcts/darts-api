@@ -464,7 +464,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         Optional<MediaRequestEntity> mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId);
 
         // if we have an owner id then map it to the owner of the request id
-        Optional<UserAccountEntity> accountEntityToPatch = null;
+        Optional<UserAccountEntity> accountEntityToPatch = Optional.empty();
         if (mediaRequestEntity.isPresent() && request.getOwnerId() != null) {
             accountEntityToPatch = userAccountRepository.findById(request.getOwnerId());
 
