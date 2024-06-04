@@ -84,17 +84,16 @@ public class TranscriptionDocumentStub {
 
             // add the cases to the transcription
             CourtCaseEntity caseEntity;
-            for (int i = 0; i < caseCount; i++) {
-                caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
-                    UUID.randomUUID() + "Case Number" + transriptionDocumentCount + i));
-                caseEntityList.add(caseEntity);
-            }
-
             courtroomEntity = courtroomStub.createCourtroomUnlessExists(
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(Integer.toString(transriptionDocumentCount)),
                 TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE
                     .getQueryString(UUID.randomUUID() + Integer.toString(transriptionDocumentCount)));
 
+            for (int i = 0; i < caseCount; i++) {
+                caseEntity = courtCaseStub.createAndSaveMinimalCourtCase(TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryString(
+                    UUID.randomUUID() + "Case Number" + transriptionDocumentCount + i), courtroomEntity.getCourthouse().getId());
+                caseEntityList.add(caseEntity);
+            }
 
             HearingEntity hearingEntity;
             for (int i = 0; i < hearingCount; i++) {

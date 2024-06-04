@@ -43,7 +43,7 @@ class TranscriptionDocumentTest extends RepositoryBase {
             = transcriptionDocumentRepository
             .findTranscriptionMedia(generatedDocumentEntities.get(nameMatchIndex)
                                         .getTranscription().getCourtCases().get(0).getCaseNumber(),null,null,null,null,null, null, null);
-        Assertions.assertEquals(1, transcriptionDocumentResults.size());
+        Assertions.assertEquals(2, transcriptionDocumentResults.size());
     }
 
     @Test
@@ -171,11 +171,39 @@ class TranscriptionDocumentTest extends RepositoryBase {
     }
 
     @Test
-    void testFindTranscriptionDocumentWithHearingCourthouseDisplayNameNoTranscriptionCourtHouseSubstringMatchAll() {
+    void testFindTranscriptionDocumentWithHearingCourthouseDisplayNameNoCaseCourtHouseSubstringMatchAll() {
         dartsDatabase.clearDatabaseInThisOrder();
 
         generatedDocumentEntities = transcriptionStub
             .generateTranscriptionEntities(GENERATION_COUNT, GENERATION_HEARING_PER_TRANSCRIPTION, GENERATION_CASES_PER_TRANSCRIPTION, false, true, true);
+
+        List<TranscriptionDocumentResult> transcriptionDocumentResults
+            = transcriptionDocumentRepository.findTranscriptionMedia(
+            null,
+            TranscriptionDocumentSubStringQueryEnum.COURT_HOUSE.getQueryStringPrefix(), null, null, null, null, null, null);
+
+        Assertions.assertTrue(assertResultEquals(transcriptionDocumentResults,
+                                                 List.of(getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities
+                                                                               .get(0).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(0),
+                                                                           generatedDocumentEntities
+                                                                               .get(0).getTranscription().getCourtCases().get(1)),
+                                                         getExpectedResult(generatedDocumentEntities
+                                                                               .get(1),
+                                                                           generatedDocumentEntities
+                                                                               .get(1).getTranscription().getCourtCases().get(0)),
+                                                         getExpectedResult(generatedDocumentEntities.get(1),
+                                                                           generatedDocumentEntities
+                                                                               .get(1).getTranscription().getCourtCases().get(1)))));
+    }
+
+    @Test
+    void testFindTranscriptionDocumentWithNoHearingWithCourtCaseMatchAll() {
+        dartsDatabase.clearDatabaseInThisOrder();
+
+        generatedDocumentEntities = transcriptionStub
+            .generateTranscriptionEntities(GENERATION_COUNT, 0, GENERATION_CASES_PER_TRANSCRIPTION, false, false, true);
 
         List<TranscriptionDocumentResult> transcriptionDocumentResults
             = transcriptionDocumentRepository.findTranscriptionMedia(
@@ -528,7 +556,7 @@ class TranscriptionDocumentTest extends RepositoryBase {
                                                                       generatedDocumentEntities.get(0).getTranscription().getCreatedDateTime(), false,
                                                                       generatedDocumentEntities.get(0).getTranscription().getTranscriptionWorkflowEntities()
                                         .get(0).getWorkflowActor().getUserFullName());
-        Assertions.assertEquals(1, transcriptionDocumentResults.size());
+        Assertions.assertEquals(2, transcriptionDocumentResults.size());
         Assertions.assertEquals(generatedDocumentEntities.get(0).getId(),
                                 transcriptionDocumentResults.get(0).transcriptionDocumentId());
     }
@@ -556,16 +584,15 @@ class TranscriptionDocumentTest extends RepositoryBase {
     private TranscriptionDocumentResult getExpectedResult(TranscriptionDocumentEntity transcriptionDocumentEntity, CourtCaseEntity caseEntity) {
         Integer caseId = caseEntity != null ? caseEntity.getId() : null;
         String caseNumber = caseEntity != null ? caseEntity.getCaseNumber() : null;
-        Integer courthouseId = transcriptionDocumentEntity.getTranscription().getCourtroom() != null
-            ? transcriptionDocumentEntity
-            .getTranscription().getCourtroom().getCourthouse().getId() : null;
-        String courthouseDisplayName = transcriptionDocumentEntity.getTranscription().getCourtroom() != null ? transcriptionDocumentEntity
-            .getTranscription().getCourtroom().getCourthouse().getDisplayName() : null;
+        Integer courthouseId = getCourthouseId(caseEntity);
+        String courthouseDisplayName = getCourthouseDisplayName(caseEntity);
 
         Integer hearingCourthouseId = null;
         String hearingCourthouseDisplayName = null;
         Integer hearingId = null;
         LocalDate hearingDate = null;
+        Integer hearingCaseId = null;   
+        String hearingCaseNumber = null;
 
         if (transcriptionDocumentEntity.getTranscription().getHearing() != null) {
             hearingCourthouseId = transcriptionDocumentEntity.getTranscription().getHearing().getCourtroom().getCourthouse().getId();
@@ -574,10 +601,18 @@ class TranscriptionDocumentTest extends RepositoryBase {
             hearingDate = transcriptionDocumentEntity.getTranscription().getHearing().getHearingDate();
         }
 
+        if (transcriptionDocumentEntity.getTranscription().getHearing() != null
+            && transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase() != null) {
+            hearingCaseId = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getId();
+            hearingCaseNumber = transcriptionDocumentEntity.getTranscription().getHearing().getCourtCase().getCaseNumber();
+        }
+
         return new TranscriptionDocumentResult(transcriptionDocumentEntity.getId(),
                                                transcriptionDocumentEntity.getTranscription().getId(),
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingCaseId,
+                                                                             hearingCaseNumber,
                                                                              courthouseId,
                                                                              courthouseDisplayName,
                                                                              hearingCourthouseId,
@@ -587,5 +622,16 @@ class TranscriptionDocumentTest extends RepositoryBase {
                                                transcriptionDocumentEntity.getTranscription().getIsManualTranscription(),
                                                transcriptionDocumentEntity.isHidden()
         );
+    }
+
+    private Integer getCourthouseId(CourtCaseEntity caseEntity) {
+        return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null
+            ? caseEntity.getCourthouse().getId() : null;
+    }
+
+
+    private String getCourthouseDisplayName(CourtCaseEntity caseEntity) {
+        return caseEntity != null && caseEntity.getCourthouse().getCourthouseName() != null
+            ? caseEntity.getCourthouse().getCourthouseName() : null;
     }
 }

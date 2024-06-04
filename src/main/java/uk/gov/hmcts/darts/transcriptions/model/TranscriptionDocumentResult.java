@@ -8,6 +8,8 @@ public record TranscriptionDocumentResult(
     Integer transcriptionId,
     Integer caseId,
     String caseNumber,
+    Integer hearingCaseId,
+    String hearingCaseNumber,
     Integer courthouseId,
     String courthouseDisplayName,
     Integer hearingCourthouseId,
@@ -33,10 +35,14 @@ public record TranscriptionDocumentResult(
             && transcriptionDocumentResult.transcriptionId.equals(transcriptionId)
             && ((transcriptionDocumentResult.caseId != null && transcriptionDocumentResult.caseId.equals(caseId))
             || (transcriptionDocumentResult.caseId == null && caseId == null))
+            && ((transcriptionDocumentResult.hearingCaseId != null && transcriptionDocumentResult.hearingCaseId.equals(hearingCaseId))
+            || (transcriptionDocumentResult.hearingCaseId == null && hearingCaseId == null))
             && ((transcriptionDocumentResult.hearingId != null && transcriptionDocumentResult.hearingId.equals(hearingId))
             || (transcriptionDocumentResult.hearingId == null && hearingId == null))
             && ((transcriptionDocumentResult.courthouseId != null && transcriptionDocumentResult.courthouseId.equals(courthouseId))
-            || (transcriptionDocumentResult.courthouseId == null && courthouseId == null));
+            || (transcriptionDocumentResult.courthouseId == null && courthouseId == null)
+            && ((transcriptionDocumentResult.hearingCourthouseId != null && transcriptionDocumentResult.hearingCourthouseId.equals(hearingCourthouseId))
+            || (transcriptionDocumentResult.hearingCourthouseId == null && hearingCourthouseId == null)));
     }
 
     @Override

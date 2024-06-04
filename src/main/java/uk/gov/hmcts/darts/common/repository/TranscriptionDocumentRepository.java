@@ -17,6 +17,8 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
             SELECT distinct new uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult(tmd.id, t.id,
             courtCase.id,
             courtCase.caseNumber,
+            hearingCase.id,
+            hearingCase.caseNumber,
             courthouse.id,
             courthouse.displayName,
             hearingcourthouse.id,
@@ -29,13 +31,13 @@ public interface TranscriptionDocumentRepository extends JpaRepository<Transcrip
                  JOIN tmd.transcription t
                  LEFT JOIN t.hearings hearings
                  LEFT JOIN t.courtCases courtCase
-                 LEFT JOIN t.courtroom courtroom
-                 LEFT JOIN courtroom.courthouse courthouse
+                 LEFT JOIN hearings.courtCase hearingCase                 
+                 LEFT JOIN courtCase.courthouse courthouse
                  LEFT JOIN hearings.courtroom.courthouse hearingcourthouse
                  LEFT JOIN t.transcriptionWorkflowEntities wf
                  LEFT JOIN wf.workflowActor wfa
              WHERE
-                (:caseNumber IS NULL OR ((courtCase.caseNumber=cast(:caseNumber as text)))) AND
+                (:caseNumber IS NULL OR ((courtCase.caseNumber=cast(:caseNumber as text) OR hearingCase.caseNumber=cast(:caseNumber as text)))) AND
                 (:courtHouseDisplayName IS NULL OR ((courthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%')
                 OR (hearingcourthouse.displayName ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))))) AND
                 ((cast(:hearingDate AS LocalDate)) IS NULL OR (hearings.hearingDate=:hearingDate ))AND

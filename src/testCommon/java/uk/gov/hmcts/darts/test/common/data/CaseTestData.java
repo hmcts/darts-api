@@ -25,8 +25,18 @@ public class CaseTestData {
     }
 
     public static CourtCaseEntity createSomeMinimalCase(String caseNumber) {
+        return createSomeMinimalCase(caseNumber,null);
+    }
+
+    public static CourtCaseEntity createSomeMinimalCase(String caseNumber, CourthouseEntity courthouseEntity) {
         var courtCaseEntity = new CourtCaseEntity();
-        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+
+        if (courthouseEntity == null) {
+            courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        } else {
+            courtCaseEntity.setCourthouse(courthouseEntity);
+        }
+
         courtCaseEntity.setCaseNumber(caseNumber);
         courtCaseEntity.setClosed(false);
         courtCaseEntity.setInterpreterUsed(false);

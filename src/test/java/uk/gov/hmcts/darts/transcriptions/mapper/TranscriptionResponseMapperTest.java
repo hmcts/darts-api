@@ -368,11 +368,14 @@ class TranscriptionResponseMapperTest {
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
+        Integer hearingCaseId = 1000;
+        String hearingCaseNumber = "hearing case" + caseId;
+
         Integer courthouseId = 906;
         String courthouseDisplayNumber = "courthouse" + caseId;
 
         Integer hearingcourthouseId = 901;
-        String hearingcourthouseDisplayNumber = "hearingcourthouse" + caseId;
+        String hearingcourthouseDisplayName = "hearingcourthouse" + caseId;
 
         Integer hearingid = 902;
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
@@ -384,10 +387,12 @@ class TranscriptionResponseMapperTest {
                                                                              transactionId,
                                                                              caseId,
                                                                              caseNumber,
+                                                                             hearingCaseId,
+                                                                             hearingCaseNumber,
                                                                              courthouseId,
                                                                              courthouseDisplayNumber,
                                                                              hearingcourthouseId,
-                                                                             hearingcourthouseDisplayNumber,
+                                                                             hearingcourthouseDisplayName,
                                                                              hearingid,
                                                                              hearingDate,
                                                                              isManualTranscription,
@@ -397,31 +402,80 @@ class TranscriptionResponseMapperTest {
         SearchTranscriptionDocumentResponse response = transcriptionResponseMapper.mapSearchTranscriptionDocumentResult(result);
         assertEquals(transcriptionDocumentId, response.getTranscriptionDocumentId());
         assertEquals(transactionId, response.getTranscriptionId());
-        assertEquals(caseId, response.getCase().getId());
-        assertEquals(caseNumber, response.getCase().getCaseNumber());
+        assertEquals(hearingCaseId, response.getCase().getId());
+        assertEquals(hearingCaseNumber, response.getCase().getCaseNumber());
         assertEquals(hearingid, response.getHearing().getId());
         assertEquals(hearingDate, response.getHearing().getHearingDate());
 
         // ensure we prioritise the courthouse directly mapped to the transcription not the hearing courthouse
-        assertEquals(courthouseId, response.getCourthouse().getId());
-        assertEquals(courthouseDisplayNumber, response.getCourthouse().getDisplayName());
+        assertEquals(hearingcourthouseId, response.getCourthouse().getId());
+        assertEquals(hearingcourthouseDisplayName, response.getCourthouse().getDisplayName());
         assertEquals(isManualTranscription, response.getIsManualTranscription());
         assertEquals(isHidden, response.getIsHidden());
     }
 
     @Test
-    void mapSearchTranscriptionDocumentSearchResultWithHearingCourthouse() {
+    void mapSearchTranscriptionDocumentSearchResultWithNoHearingCourthouse() {
         Integer transactionId = 200;
         Integer transcriptionDocumentId = 300;
 
         Integer caseId = 900;
         String caseNumber = "case" + caseId;
 
-        Integer hearingcourthouseId = 901;
-        String hearingcourthouseDisplayNumber = "hearingcourthouse" + caseId;
+        Integer hearingCaseId = 1000;
+        String hearingCaseNumber = "hearing case" + caseId;
 
         Integer hearingid = 902;
         LocalDate hearingDate = LocalDate.now().plusMonths(10);
+
+        Integer courthouseId = 906;
+        String courthouseDisplayName = "courthouse" + caseId;
+
+        boolean isManualTranscription = true;
+        boolean isHidden = false;
+
+        TranscriptionDocumentResult result = new TranscriptionDocumentResult(transcriptionDocumentId,
+                                                                             transactionId,
+                                                                             caseId,
+                                                                             caseNumber,
+                                                                             hearingCaseId,
+                                                                             hearingCaseNumber,
+                                                                             courthouseId,
+                                                                             courthouseDisplayName,
+                                                                             null,
+                                                                             null,
+                                                                             hearingid,
+                                                                             hearingDate,
+                                                                             isManualTranscription,
+                                                                             isHidden);
+
+
+        SearchTranscriptionDocumentResponse response = transcriptionResponseMapper.mapSearchTranscriptionDocumentResult(result);
+        assertEquals(transcriptionDocumentId, response.getTranscriptionDocumentId());
+        assertEquals(transactionId, response.getTranscriptionId());
+        assertEquals(hearingCaseId, response.getCase().getId());
+        assertEquals(hearingCaseNumber, response.getCase().getCaseNumber());
+        assertEquals(hearingid, response.getHearing().getId());
+        assertEquals(hearingDate, response.getHearing().getHearingDate());
+        assertEquals(courthouseId, response.getCourthouse().getId());
+        assertEquals(courthouseDisplayName, response.getCourthouse().getDisplayName());
+        assertEquals(isManualTranscription, response.getIsManualTranscription());
+        assertEquals(isHidden, response.getIsHidden());
+    }
+
+    @Test
+    void mapSearchTranscriptionDocumentSearchResultWithNoHearingCase() {
+        Integer transactionId = 200;
+        Integer transcriptionDocumentId = 300;
+
+        Integer caseId = 900;
+        String caseNumber = "case" + caseId;
+
+        Integer hearingid = 902;
+        LocalDate hearingDate = LocalDate.now().plusMonths(10);
+
+        Integer courthouseId = 906;
+        String courthouseDisplayName = "courthouse" + caseId;
 
         boolean isManualTranscription = true;
         boolean isHidden = false;
@@ -432,8 +486,10 @@ class TranscriptionResponseMapperTest {
                                                                              caseNumber,
                                                                              null,
                                                                              null,
-                                                                             hearingcourthouseId,
-                                                                             hearingcourthouseDisplayNumber,
+                                                                             courthouseId,
+                                                                             courthouseDisplayName,
+                                                                             null,
+                                                                             null,
                                                                              hearingid,
                                                                              hearingDate,
                                                                              isManualTranscription,
@@ -447,8 +503,8 @@ class TranscriptionResponseMapperTest {
         assertEquals(caseNumber, response.getCase().getCaseNumber());
         assertEquals(hearingid, response.getHearing().getId());
         assertEquals(hearingDate, response.getHearing().getHearingDate());
-        assertEquals(hearingcourthouseId, response.getCourthouse().getId());
-        assertEquals(hearingcourthouseDisplayNumber, response.getCourthouse().getDisplayName());
+        assertEquals(courthouseId, response.getCourthouse().getId());
+        assertEquals(courthouseDisplayName, response.getCourthouse().getDisplayName());
         assertEquals(isManualTranscription, response.getIsManualTranscription());
         assertEquals(isHidden, response.getIsHidden());
     }
@@ -471,6 +527,8 @@ class TranscriptionResponseMapperTest {
                                                                              null,
                                                                              null,
                                                                              null,
+                                                                             null,
+                                                                             null,
                                                                              isManualTranscription,
                                                                              isHidden);
 
@@ -478,9 +536,9 @@ class TranscriptionResponseMapperTest {
         SearchTranscriptionDocumentResponse response = transcriptionResponseMapper.mapSearchTranscriptionDocumentResult(result);
         assertEquals(transcriptionDocumentId, response.getTranscriptionDocumentId());
         assertEquals(transactionId, response.getTranscriptionId());
-        assertNull(response.getCase());
+        assertNull(response.getCase().getId());
         assertNull(response.getHearing());
-        assertNull(response.getCourthouse());
+        assertNull(response.getCourthouse().getId());
         assertEquals(isManualTranscription, response.getIsManualTranscription());
         assertEquals(isHidden, response.getIsHidden());
     }
