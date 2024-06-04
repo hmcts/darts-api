@@ -1,6 +1,5 @@
 [
   {
-    "case_id": 1,
     "case_number": "Case1",
     "courthouse": "SWANSEA",
     "defendants": [
@@ -27,6 +26,25 @@
       {
         "date": "2023-05-22",
         "courtroom": "courtroom1",
+        "judges": [
+          "aJudge"
+        ]
+      }
+    ]
+  },
+  {
+    "case_number": "case10",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "hearings": [
+      {
+        "date": "2023-10-23",
+        "courtroom": "courtroom4",
         "judges": [
           "aJudge"
         ]

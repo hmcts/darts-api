@@ -32,9 +32,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 
@@ -44,6 +41,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static uk.gov.hmcts.darts.cases.service.impl.CaseServiceImpl.MAX_RESULTS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @Component
 @SuppressWarnings({"PMD.TooManyMethods"})
@@ -76,18 +74,19 @@ public class AdvancedSearchRequestHelper {
     private List<Predicate> createPredicates(GetCasesSearchRequest request,
                                              CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) throws AdvancedSearchNoResultsException {
         List<Predicate> predicates = new ArrayList<>();
-        CollectionUtils.addAll(predicates, addCourthouseVisibilityCriteria(request, criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addCourthouseAccessCriteria(caseRoot));
         CollectionUtils.addAll(predicates, addCaseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addCourthouseCourtroomCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addEUseInterpreterCriteria(criteriaBuilder, caseRoot));
 
         return predicates;
     }
 
-    private Predicate addCourthouseVisibilityCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private Predicate addCourthouseAccessCriteria(Root<CourtCaseEntity> caseRoot) {
 
         //add courthouse permissions
         List<Integer> courthouseIdsUserHasAccessTo = authorisationApi.getListOfCourthouseIdsUserHasAccessTo();
@@ -256,6 +255,15 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
+    private List<Predicate> addEUseInterpreterCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+        List<Predicate> predicateList = new ArrayList<>();
+        if (authorisationApi.userHasOneOfRoles(List.of(TRANSLATION_QA))) {
+            predicateList.add(criteriaBuilder.isTrue(
+                caseRoot.get(CourtCaseEntity_.interpreterUsed)
+            ));
+        }
+        return predicateList;
+    }
 
     @SuppressWarnings({"unchecked", "PMD.LiteralsFirstInComparisons"})
     private Join<CourtCaseEntity, HearingEntity> joinHearing(Root<CourtCaseEntity> caseRoot) {
@@ -267,17 +275,6 @@ public class AdvancedSearchRequestHelper {
 
     private Join<CourtCaseEntity, JudgeEntity> joinJudge(Root<CourtCaseEntity> caseRoot) {
         return caseRoot.join(CourtCaseEntity_.JUDGES, JoinType.INNER);
-    }
-
-    private Join<CourtCaseEntity, UserAccountEntity> joinUser(Root<CourtCaseEntity> caseRoot) {
-        //case -> courthouse -> securityGroups -> user
-        Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
-
-        Join<CourthouseEntity, SecurityGroupEntity> securityGroupJoin = courthouseJoin.join(
-            CourthouseEntity_.SECURITY_GROUPS,
-            JoinType.INNER
-        );
-        return securityGroupJoin.join(SecurityGroupEntity_.USERS, JoinType.INNER);
     }
 
     @SuppressWarnings("unchecked")

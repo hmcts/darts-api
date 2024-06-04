@@ -100,9 +100,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         CourtCaseEntity case9 = createCaseAt(londonCourthouse);
         case9.setCaseNumber("Case9");
 
+        CourtCaseEntity case10 = createCaseAt(swanseaCourthouse);
+        case10.setCaseNumber("case10");
+
         JudgeEntity judge = createJudgeWithName("aJudge");
         courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
-        courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
         HearingEntity hearing1a = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
 
         HearingEntity hearing1b = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
@@ -148,7 +150,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         HearingEntity hearing7b = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
         HearingEntity hearing8 = createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
+        courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
         HearingEntity hearing9 = createHearingWithDefaults(case9, courtroomLondon, LocalDate.of(2023, 5, 20), judge3a);
+
+        CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
+        HearingEntity hearing10a = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
@@ -156,8 +162,10 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
                               hearing4a, hearing4b, hearing4c,
                               hearing5a, hearing5b, hearing5c,
                               hearing6a, hearing6b, hearing6c,
-                              hearing7a, hearing7b, hearing8,
-                              hearing9
+                              hearing7a, hearing7b,
+                              hearing8,
+                              hearing9,
+                              hearing10a
         );
 
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
@@ -400,7 +408,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(8, resultList.size());
+        assertEquals(9, resultList.size());
     }
 
     @Test
@@ -428,7 +436,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(8, resultList.size());
+        assertEquals(9, resultList.size());
     }
 
     @Test
