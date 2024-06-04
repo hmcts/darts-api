@@ -29,7 +29,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
-import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
@@ -390,7 +390,7 @@ class TranscriptionResponseMapperTest {
         transcriptionDocumentEntity.setFileSize(fileBytes);
         transcriptionDocumentEntity.setHidden(hidden);
 
-        SearchTranscriptionDocumentByIdResponse response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(transcriptionDocumentEntity);
+        GetTranscriptionDocumentByIdResponse response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(transcriptionDocumentEntity);
 
         assertEquals(transId, response.getTranscriptionId());
         assertEquals(transDocumentId, response.getTranscriptionDocumentId());

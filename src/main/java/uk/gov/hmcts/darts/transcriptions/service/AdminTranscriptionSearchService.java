@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
-import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 
@@ -14,5 +14,5 @@ public interface AdminTranscriptionSearchService {
 
     List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom);
 
-    SearchTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument);
+    GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument);
 }

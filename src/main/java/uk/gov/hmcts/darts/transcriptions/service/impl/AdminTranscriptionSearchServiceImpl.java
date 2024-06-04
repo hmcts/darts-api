@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
-import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
@@ -101,7 +101,7 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     }
 
     @Override
-    public SearchTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument) {
+    public GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument) {
         Optional<TranscriptionDocumentEntity> fndEntity = transcriptionDocumentRepository.findById(transcriptionDocument);
         if (fndEntity.isPresent()) {
             return transcriptionMapper.getSearchByTranscriptionDocumentId(fndEntity.get());

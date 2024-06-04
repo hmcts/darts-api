@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
-import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
@@ -178,7 +178,7 @@ class AdminTranscriptionSearchServiceTest {
         when(transcriptionDocumentRepository.findById(transDocId)).thenReturn(Optional.empty());
 
         DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
-                        () -> adminTranscriptionSearchService.getTranscriptionDocumentById(Mockito.eq(transDocId)));
+                        () -> adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId));
 
         Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND, exception.getError());
     }
@@ -189,11 +189,11 @@ class AdminTranscriptionSearchServiceTest {
 
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = Mockito.mock(TranscriptionDocumentEntity.class);
-        SearchTranscriptionDocumentByIdResponse expectedResponse = new SearchTranscriptionDocumentByIdResponse();
+        GetTranscriptionDocumentByIdResponse expectedResponse = new GetTranscriptionDocumentByIdResponse();
         when(transcriptionDocumentRepository.findById(Mockito.eq(transDocId))).thenReturn(Optional.ofNullable(transcriptionDocumentEntity));
         when(transcriptionResponseMapper.getSearchByTranscriptionDocumentId(Mockito.eq(transcriptionDocumentEntity))).thenReturn(expectedResponse);
 
-        SearchTranscriptionDocumentByIdResponse actualResponse = adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId);
+        GetTranscriptionDocumentByIdResponse actualResponse = adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId);
 
         Assertions.assertEquals(expectedResponse, actualResponse);
     }

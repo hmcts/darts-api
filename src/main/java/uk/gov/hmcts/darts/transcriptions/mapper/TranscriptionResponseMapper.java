@@ -21,10 +21,10 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
-import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -291,8 +291,8 @@ public class TranscriptionResponseMapper {
         return details;
     }
 
-    public SearchTranscriptionDocumentByIdResponse getSearchByTranscriptionDocumentId(TranscriptionDocumentEntity entity) {
-        SearchTranscriptionDocumentByIdResponse response = new SearchTranscriptionDocumentByIdResponse();
+    public GetTranscriptionDocumentByIdResponse getSearchByTranscriptionDocumentId(TranscriptionDocumentEntity entity) {
+        GetTranscriptionDocumentByIdResponse response = new GetTranscriptionDocumentByIdResponse();
         response.setTranscriptionDocumentId(entity.getId());
         response.setTranscriptionId(entity.getTranscription().getId());
         response.setFileName(entity.getFileName());

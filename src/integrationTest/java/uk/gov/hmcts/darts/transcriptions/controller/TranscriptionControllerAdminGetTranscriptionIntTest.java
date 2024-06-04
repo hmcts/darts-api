@@ -25,8 +25,8 @@ import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.Problem;
-import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 
 import java.time.LocalDateTime;
@@ -311,8 +311,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        SearchTranscriptionDocumentByIdResponse transcriptionResponse
-            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), SearchTranscriptionDocumentByIdResponse.class);
+        GetTranscriptionDocumentByIdResponse transcriptionResponse
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDocumentByIdResponse.class);
 
         assertEquals(transcriptionEntity.getId(), transcriptionResponse.getTranscriptionId());
         assertEquals(transcriptionDocumentEntity.getId(), transcriptionResponse.getTranscriptionDocumentId());
