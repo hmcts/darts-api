@@ -87,6 +87,9 @@ public class AudioUploadServiceImpl implements AudioUploadService {
             Optional<AudioBlobUploadDetails> detailsOption = saveAudioToInbound(audioFileStream);
             if (detailsOption.isEmpty()) {
                 objectRecordStatusEntity = objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND.getId());
+            } else {
+                externalLocation = detailsOption.get().uuid();
+                checksum = detailsOption.get().checksum();
             }
 
             // if we have not found any duplicate audio files to process lets add a new one
