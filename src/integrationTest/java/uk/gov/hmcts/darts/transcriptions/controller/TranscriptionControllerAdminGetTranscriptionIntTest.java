@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -19,9 +20,12 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.data.UserAccountTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.TransactionDocumentStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.Problem;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 
@@ -45,6 +49,8 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
     private static final String ENDPOINT_URL_NO_USER = "/admin/transcriptions?requested_at_from=${REQUESTED_FROM}";
 
+    private static final String ENDPOINT_GET_DOCUMENT_ID = "/admin/transcription-documents/";
+
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
@@ -65,6 +71,9 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private TransactionDocumentStub transactionDocumentStub;
 
     @Test
     void getTransactionsForUserWithoutDate() throws Exception {
@@ -274,6 +283,68 @@ class TranscriptionControllerAdminGetTranscriptionIntTest extends IntegrationBas
         mockMvc.perform(get(getEndpointUrl(null,
                                                                  OffsetDateTime.now().minusMonths(2).toString())))
             .andExpect(status().isBadRequest())
+            .andReturn();
+    }
+
+    @Test
+    void testSearchForTranscriptionDocumentByIdSuccess() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        CourtroomEntity courtroomAtNewcastleEntity = dartsDatabase.createCourtroomUnlessExists("Newcastle", "room_a");
+        HearingEntity headerEntity = dartsDatabase.createHearing(
+            courtroomAtNewcastleEntity.getCourthouse().getCourthouseName(),
+            courtroomAtNewcastleEntity.getName(),
+            "c1",
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
+        );
+
+        String fileName = "file";
+        String fileType = "fileType";
+        Integer fileBytes = 299;
+        boolean hidden = true;
+
+        TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transactionDocumentStub
+            .createTranscriptionDocument(fileName, fileBytes, fileType, hidden, transcriptionEntity);
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_GET_DOCUMENT_ID + transcriptionDocumentEntity.getId()).header("Content-Type", "application/json"))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn();
+
+        GetTranscriptionDocumentByIdResponse transcriptionResponse
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), GetTranscriptionDocumentByIdResponse.class);
+
+        assertEquals(transcriptionEntity.getId(), transcriptionResponse.getTranscriptionId());
+        assertEquals(transcriptionDocumentEntity.getId(), transcriptionResponse.getTranscriptionDocumentId());
+        assertEquals(fileName, transcriptionResponse.getFileName());
+        assertEquals(fileBytes, transcriptionResponse.getFileSizeBytes());
+        assertEquals(fileType, transcriptionResponse.getFileType());
+        assertEquals(hidden, transcriptionResponse.getIsHidden());
+        assertEquals(transcriptionDocumentEntity.getUploadedBy().getId(), transcriptionResponse.getUploadedBy());
+        assertEquals(transcriptionDocumentEntity.getUploadedDateTime()
+                                    .atZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime(), transcriptionResponse.getUploadedAt());
+    }
+
+    @Test
+    void testSearchForTranscriptionDocumentByIdNotFound() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_GET_DOCUMENT_ID + 10).header("Content-Type", "application/json"))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        Problem transcriptionProblemResponse
+            = objectMapper.readValue(mvcResult.getResponse().getContentAsByteArray(), Problem.class);
+
+        assertEquals(transcriptionProblemResponse.getType(), TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND.getType());
+    }
+
+    @Test
+    void testSearchForTranscriptionDocumentByIdAuthorisationProblem() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity, SecurityRoleEnum.DAR_PC);
+
+        mockMvc.perform(get(ENDPOINT_GET_DOCUMENT_ID + 10).header("Content-Type", "application/json"))
+            .andExpect(status().isForbidden())
             .andReturn();
     }
 

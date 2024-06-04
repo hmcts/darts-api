@@ -7,11 +7,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
@@ -23,6 +27,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -49,12 +54,16 @@ class AdminTranscriptionSearchServiceTest {
     @Mock
     private UserAccountExistsValidator userAccountExistsValidator;
 
+    @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+
     @BeforeEach
     void setUp() {
         adminTranscriptionSearchService
             = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery,
                                                       transcriptionRepository, transcriptionResponseMapper,
-                                                      userAccountExistsValidator);
+                                                      userAccountExistsValidator,
+                                                      transcriptionDocumentRepository);
     }
 
     @Test
@@ -160,6 +169,33 @@ class AdminTranscriptionSearchServiceTest {
                 .getTranscriptionsForUser(userId, dateTimeOfSearch);
         });
         Assertions.assertEquals(UserManagementError.USER_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void getTranscriptionDocumentByIdNotExist() {
+        Integer transDocId = 200;
+
+        when(transcriptionDocumentRepository.findById(transDocId)).thenReturn(Optional.empty());
+
+        DartsApiException exception = Assertions.assertThrows(DartsApiException.class,
+                        () -> adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId));
+
+        Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void getTranscriptionDocumentById() {
+        Integer transDocId = 200;
+
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = Mockito.mock(TranscriptionDocumentEntity.class);
+        GetTranscriptionDocumentByIdResponse expectedResponse = new GetTranscriptionDocumentByIdResponse();
+        when(transcriptionDocumentRepository.findById(Mockito.eq(transDocId))).thenReturn(Optional.ofNullable(transcriptionDocumentEntity));
+        when(transcriptionResponseMapper.getSearchByTranscriptionDocumentId(Mockito.eq(transcriptionDocumentEntity))).thenReturn(expectedResponse);
+
+        GetTranscriptionDocumentByIdResponse actualResponse = adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId);
+
+        Assertions.assertEquals(expectedResponse, actualResponse);
     }
 
     private static Set<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {

@@ -2,10 +2,15 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
@@ -16,6 +21,7 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -31,6 +37,8 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     private final TranscriptionResponseMapper transcriptionMapper;
 
     private final UserAccountExistsValidator userAccountExistsValidator;
+
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     @Override
     @SuppressWarnings({"PMD.NullAssignment"})
@@ -90,5 +98,15 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         transcriptionSearchResponse.setIsManualTranscription(transcriptionSearchResult.isManualTranscription());
         transcriptionSearchResponse.setTranscriptionStatusId(transcriptionSearchResult.transcriptionStatusId());
         return transcriptionSearchResponse;
+    }
+
+    @Override
+    public GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument) {
+        Optional<TranscriptionDocumentEntity> fndEntity = transcriptionDocumentRepository.findById(transcriptionDocument);
+        if (fndEntity.isPresent()) {
+            return transcriptionMapper.getSearchByTranscriptionDocumentId(fndEntity.get());
+        } else {
+            throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
+        }
     }
 }
