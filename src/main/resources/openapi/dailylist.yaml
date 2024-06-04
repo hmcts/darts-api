@@ -12,65 +12,6 @@ servers:
 
 
 paths:
-  /dailylists/v2:
-    post:
-      tags:
-        - DailyLists
-      summary: Send Daily List
-      description: XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
-      requestBody:
-        $ref: '#/components/requestBodies/PostDailyListRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PostDailyListResponse'
-
-        '400':
-          description: Bad Request - Invalid XML Document
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
-        '404':
-          description: Not Found - Courthouse not found
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
-    patch:
-      tags:
-        - DailyLists
-      summary: Update existing DailyList
-      requestBody:
-        $ref: '#/components/requestBodies/PatchDailyListRequest'
-
-      responses:
-        '200':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PostDailyListResponse'
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
   /dailylists:
     post:
       tags:
