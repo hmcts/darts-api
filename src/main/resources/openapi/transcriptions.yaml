@@ -834,7 +834,7 @@ paths:
     get:
       tags:
         - Transcription
-      summary: Gets a transcription document id
+      summary: Gets a transcription document by id
       operationId: getByDocumentId
       parameters:
         - name: transcription_document_id
