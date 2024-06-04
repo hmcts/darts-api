@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.mapper;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCase;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponseCourthouse;
@@ -57,6 +59,17 @@ public class GetTransformedMediaDetailsMapper {
         transformedMediaDetails.setHearing(hearingResponse);
 
         return transformedMediaDetails;
+    }
+
+    public MediaPatchResponse mapToPatchResult(MediaRequestEntity mediaRequestEntity) {
+        MediaPatchResponse mediaPatchResponse = new MediaPatchResponse();
+        mediaPatchResponse.setId(mediaRequestEntity.getId());
+        mediaPatchResponse.setStartAt(mediaRequestEntity.getStartTime());
+        mediaPatchResponse.setEndAt(mediaRequestEntity.getEndTime());
+        mediaPatchResponse.setRequestedAt(mediaRequestEntity.getCreatedDateTime());
+        mediaPatchResponse.setRequestedById(mediaRequestEntity.getRequestor().getId());
+        mediaPatchResponse.setOwnerId(mediaRequestEntity.getCurrentOwner().getId());
+        return mediaPatchResponse;
     }
 
 }
