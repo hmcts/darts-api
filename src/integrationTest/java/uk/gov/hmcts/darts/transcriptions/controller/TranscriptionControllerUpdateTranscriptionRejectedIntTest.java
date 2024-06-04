@@ -84,7 +84,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         testUserId = testUser.getId();
 
         doNothing().when(mockAuditApi)
-            .recordAudit(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            .record(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -153,7 +153,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         );
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        verify(mockAuditApi).recordAudit(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).record(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test

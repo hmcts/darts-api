@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequestInternal;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
@@ -83,7 +83,7 @@ public class DailyListServiceImpl implements DailyListService {
     }
 
     @Override
-    public PostDailyListResponse updateDailyListInDatabase(DailyListPatchRequest patchRequest) {
+    public PostDailyListResponse updateDailyListInDatabase(DailyListPatchRequestInternal patchRequest) {
         Optional<DailyListEntity> foundDailyListOpt = dailyListRepository.findById(patchRequest.getDailyListId());
         if (foundDailyListOpt.isEmpty()) {
             throw new DartsApiException(DailyListError.DAILY_LIST_NOT_FOUND);

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DailyListPatchRequest {
+public class DailyListPatchRequestInternal {
 
     Integer dailyListId;
     DailyListJsonObject dailyListJson;

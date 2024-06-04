@@ -107,7 +107,7 @@ class PatchUserIntTest extends IntegrationBase {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
+            assertEquals("Jimmy Smith", latestUserAccountEntity.getUserFullName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
             assertEquals(ORIGINAL_ACTIVE_STATE, latestUserAccountEntity.isActive());
@@ -155,7 +155,7 @@ class PatchUserIntTest extends IntegrationBase {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
+            assertEquals("Jimmy Smith", latestUserAccountEntity.getUserFullName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals("An updated description", latestUserAccountEntity.getUserDescription());
             assertEquals(false, latestUserAccountEntity.isActive());
@@ -202,7 +202,7 @@ class PatchUserIntTest extends IntegrationBase {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUserName());
+            assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUserFullName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals("", latestUserAccountEntity.getUserDescription());
             assertEquals(ORIGINAL_ACTIVE_STATE, latestUserAccountEntity.isActive());

@@ -112,7 +112,7 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Service
 @AllArgsConstructor
 @SuppressWarnings({
-    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
+    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
@@ -219,7 +219,6 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
-        auditRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -531,12 +530,12 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
-    public void addToTrash(SecurityGroupEntity... securityGroupEntities) {
-        this.securityGroupBin.addAll(asList(securityGroupEntities));
-    }
-
     public void addToTrash(Set<SecurityGroupEntity> securityGroupEntities) {
         this.securityGroupBin.addAll(securityGroupEntities);
+    }
+
+    public void addSecurityGroupToTrashById(Integer id) {
+        this.securityGroupBin.add(securityGroupRepository.getReferenceById(id));
     }
 
     public void addToUserAccountTrash(String... emailAddresses) {
@@ -784,5 +783,13 @@ public class DartsDatabaseStub {
 
     public Revisions<Long, CourthouseEntity> findCourthouseRevisionsFor(Integer id) {
         return courthouseRepository.findRevisions(id);
+    }
+
+    public Revisions<Long, UserAccountEntity> findUserAccountRevisionsFor(Integer id) {
+        return userAccountRepository.findRevisions(id);
+    }
+
+    public Revisions<Long, SecurityGroupEntity> findSecurityGroupRevisionsFor(Integer id) {
+        return securityGroupRepository.findRevisions(id);
     }
 }

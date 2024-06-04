@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audio.validation.AddAudioFileValidator;
 import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
+import uk.gov.hmcts.darts.audio.validation.AdminMediaSearchRequestValidator;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -113,5 +115,12 @@ public class AudioController implements AudioApi {
         GetTransformedMediaResponse response = transformedMediaMapper.mapToGetTransformedMediaResponse(transformedMedia);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
+    }
+
+    @Override
+    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId, Integer transcriptionDocumentId) {
+        AdminMediaSearchRequestValidator.validate(transformedMediaId, transcriptionDocumentId);
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, transcriptionDocumentId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
