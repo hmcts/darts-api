@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.validation.UserQueryRequest;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
@@ -98,7 +98,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userAccountExistsValidator.validate(userId);
         userTypeValidator.validate(userId);
         userActivationPermissionsValidator.validate(userPatch);
-        userNotLastSuperAdminValidator.validate(new UserQueryRequest<>(userPatch, userId));
+        userNotLastSuperAdminValidator.validate(new IdRequest<>(userPatch, userId));
 
         var userAccountEntity = userAccountRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("No value present"));

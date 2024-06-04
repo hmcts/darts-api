@@ -26,10 +26,13 @@ import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
@@ -57,6 +60,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -102,6 +106,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final CurrentTimeHelper currentTimeHelper;
     private final GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
     private final MediaRequestMapper mediaRequestMapper;
+
+    private final AudioMediaPatchRequestValidator mediaRequestValidator;
+
     private final MediaRepository mediaRepository;
 
     private static final String ADMIN_SEARCH_TRANSFORMED_MEDIA_NOT_FOUND = "The requested transformed media ID {0} cannot be found";
@@ -444,6 +451,34 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public TransformedMediaEntity getTransformedMediaById(Integer id) {
         return transformedMediaRepository.findById(id).orElseThrow(
             () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    public MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request) {
+        MediaPatchResponse returnResponse = new MediaPatchResponse();
+
+        IdRequest<MediaPatchRequest> requestIdRequest = new IdRequest<>(request, mediaRequestId);
+        mediaRequestValidator.validate(requestIdRequest);
+
+        Optional<MediaRequestEntity> mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId);
+
+        // if we have an owner id then map it to the owner of the request id
+        Optional<UserAccountEntity> accountEntityToPatch = Optional.empty();
+        if (mediaRequestEntity.isPresent() && request.getOwnerId() != null) {
+            accountEntityToPatch = userAccountRepository.findById(request.getOwnerId());
+
+            if (accountEntityToPatch.isPresent()) {
+                mediaRequestEntity.get().setCurrentOwner(accountEntityToPatch.get());
+                mediaRequestRepository.save(mediaRequestEntity.get());
+
+                returnResponse = getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity.get());
+            }
+        } else if (mediaRequestEntity.isPresent()) {
+            returnResponse = getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity.get());
+        }
+
+        return returnResponse;
     }
 
     @Override
