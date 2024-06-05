@@ -123,7 +123,7 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     void transformedMediaIsDoesNotExist() throws Exception {
 
         // given
-        var user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
