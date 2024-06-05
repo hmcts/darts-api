@@ -246,8 +246,8 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "AUDIO_100"
-                title: "Either media_request_id or transcription_document_id must be provided in the request."
+                type: "AUDIO_109"
+                title: "Either transformed_media_id or transcription_document_id must be provided in the request, but not both."
                 status: 400
         '401':
           description: Unauthorised Error
@@ -259,16 +259,6 @@ paths:
                 type: "AUTHORISATION_100"
                 title: "User is not authorised for the associated courthouse"
                 status: 401
-        '404':
-          description: Not Found Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "HEARING_100"
-                title: "The requested hearing cannot be found"
-                status: 404
 components:
   schemas:
     AdminMediaSearchResponseItem:
@@ -448,7 +438,6 @@ components:
         - "AUDIO_107"
         - "AUDIO_108"
         - "AUDIO_109"
-        - "AUDIO_110"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED ]
 
@@ -464,7 +453,7 @@ components:
         - "The file type is not acceptable"
         - "The duration of the audio exceeds maximum threshold"
         - "The audio metadata size exceeds maximum threshold"
-        - "Either media_request_id or transcription_document_id must be provided in the request, but not both."
+        - "Either transformed_media_id or transcription_document_id must be provided in the request, but not both."
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
                          FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED ]

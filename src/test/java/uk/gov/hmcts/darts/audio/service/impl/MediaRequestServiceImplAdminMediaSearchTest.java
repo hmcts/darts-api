@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -19,7 +20,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
@@ -30,8 +30,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,15 +52,18 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     }
 
     @Test
-    void transformedMediaIdNotExist() {
+    void transformedMediaIdNotExist() throws JsonProcessingException {
         Integer transformedMediaId = 1;
         when(mockTransformedMediaRepository.findById(transformedMediaId))
             .thenReturn(Optional.empty());
 
-        DartsApiException dartsApiException = assertThrows(DartsApiException.class, () ->
-            mediaRequestService.adminMediaSearch(transformedMediaId, null));
+        ResponseEntity<List<AdminMediaSearchResponseItem>> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
 
-        assertEquals("The requested transformed media ID 1 cannot be found", dartsApiException.getDetail());
+        String responseString = objectMapper.writeValueAsString(response.getBody());
+        String expectedString = """
+            [
+             ]""";
+        JSONAssert.assertEquals(expectedString, responseString, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -93,9 +94,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(mediaEntity));
 
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
+        ResponseEntity<List<AdminMediaSearchResponseItem>> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
 
-        String responseString = objectMapper.writeValueAsString(response);
+        String responseString = objectMapper.writeValueAsString(response.getBody());
         String expectedString = """
             [
                {
@@ -158,9 +159,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(mediaEntity, mediaEntity2));
 
 
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
+        ResponseEntity<List<AdminMediaSearchResponseItem>> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
 
-        String responseString = objectMapper.writeValueAsString(response);
+        String responseString = objectMapper.writeValueAsString(response.getBody());
         String expectedString = """
             [
               {
