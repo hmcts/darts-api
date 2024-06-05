@@ -160,7 +160,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("RETENTION_114"))
             .andExpect(jsonPath("$.title").value("Fixed policy key must be unique"));
     }
@@ -194,7 +194,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("RETENTION_109"))
             .andExpect(jsonPath("$.title").value("Policy name must be unique"));
     }
@@ -228,7 +228,7 @@ class RetentionControllerCreateRetentionPolicyTypeIntTest extends IntegrationBas
 
         // Then
         resultActions
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("RETENTION_110"))
             .andExpect(jsonPath("$.title").value("Display name must be unique"));
     }

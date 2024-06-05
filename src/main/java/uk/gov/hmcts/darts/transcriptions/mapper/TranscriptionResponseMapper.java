@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
@@ -346,5 +347,18 @@ public class TranscriptionResponseMapper {
         }
 
         return mappedDetails;
+    }
+
+    public GetTranscriptionDocumentByIdResponse getSearchByTranscriptionDocumentId(TranscriptionDocumentEntity entity) {
+        GetTranscriptionDocumentByIdResponse response = new GetTranscriptionDocumentByIdResponse();
+        response.setTranscriptionDocumentId(entity.getId());
+        response.setTranscriptionId(entity.getTranscription().getId());
+        response.setFileName(entity.getFileName());
+        response.setFileType(entity.getFileType());
+        response.setFileSizeBytes(entity.getFileSize());
+        response.setUploadedAt(entity.getUploadedDateTime());
+        response.setUploadedBy(entity.getUploadedBy().getId());
+        response.setIsHidden(entity.isHidden());
+        return response;
     }
 }

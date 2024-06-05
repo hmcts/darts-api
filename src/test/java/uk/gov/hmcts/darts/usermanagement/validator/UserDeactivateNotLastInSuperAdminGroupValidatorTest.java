@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.validation.UserQueryRequest;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
 import java.util.HashSet;
@@ -43,7 +43,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
         UserPatch patch = new UserPatch();
         patch.setActive(false);
-        UserQueryRequest<UserPatch> request = new UserQueryRequest<>(patch, userId);
+        IdRequest<UserPatch> request = new IdRequest<>(patch, userId);
 
         DartsApiException ex = Assertions.assertThrows(DartsApiException.class, () -> userDeactivateNotLastSuperAdminValidator.validate(request));
         Assertions.assertEquals(AuthorisationError.UNABLE_TO_DEACTIVATE_USER.getTitle(), ex.getMessage());
@@ -65,7 +65,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
         UserPatch patch = new UserPatch();
         patch.setActive(false);
-        UserQueryRequest<UserPatch> request = new UserQueryRequest<>(patch, userId);
+        IdRequest<UserPatch> request = new IdRequest<>(patch, userId);
 
         userDeactivateNotLastSuperAdminValidator.validate(request);
     }
@@ -86,7 +86,7 @@ class UserDeactivateNotLastInSuperAdminGroupValidatorTest {
 
         UserPatch patch = new UserPatch();
         patch.setActive(true);
-        UserQueryRequest<UserPatch> request = new UserQueryRequest<>(patch, userId);
+        IdRequest<UserPatch> request = new IdRequest<>(patch, userId);
 
         userDeactivateNotLastSuperAdminValidator.validate(request);
     }
