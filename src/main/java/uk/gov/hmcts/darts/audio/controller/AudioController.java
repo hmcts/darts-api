@@ -118,9 +118,10 @@ public class AudioController implements AudioApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
     public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId, Integer transcriptionDocumentId) {
         AdminMediaSearchRequestValidator.validate(transformedMediaId, transcriptionDocumentId);
-        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId, transcriptionDocumentId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return mediaRequestService.adminMediaSearch(transformedMediaId, transcriptionDocumentId);
     }
 }
