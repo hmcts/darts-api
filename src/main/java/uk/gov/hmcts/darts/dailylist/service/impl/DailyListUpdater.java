@@ -97,7 +97,6 @@ class DailyListUpdater {
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
                         courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
-                        updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
@@ -114,14 +113,6 @@ class DailyListUpdater {
         dailyListEntity.setLastModifiedBy(dailyListSystemUser);
         dailyListEntity.setStatus(statusType);
     }
-
-    private void updateCaseClosed(CourtCaseEntity courtCase) {
-        if (courtCase.getClosed() != null && courtCase.getClosed()) {
-            courtCase.setClosed(false);
-            courtCase.setCaseClosedTimestamp(null);
-        }
-    }
-
 
     private LocalTime getScheduledStartTime(Sitting sitting, Hearing dailyListHearing) {
         String timeMarkingNoteText = dailyListHearing.getTimeMarkingNote();
