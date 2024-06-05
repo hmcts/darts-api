@@ -266,15 +266,20 @@
 				{
 					"name": "/admin/medias",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [
-							{
-								"key": "accept",
-								"value": "audio/mpeg"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{serverUrl}}/admin/medias?transformed_media_id=123",
+							"raw": "{{serverUrl}}/admin/medias?transformed_media_id=3",
 							"host": [
 								"{{serverUrl}}"
 							],
@@ -285,11 +290,11 @@
 							"query": [
 								{
 									"key": "transformed_media_id",
-									"value": "123"
+									"value": "3"
 								},
 								{
 									"key": "transcription_document_id",
-									"value": null,
+									"value": "",
 									"disabled": true
 								}
 							]

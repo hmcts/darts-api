@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
@@ -58,5 +59,5 @@ public interface MediaRequestService {
 
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
-    List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId);
+    ResponseEntity<List<AdminMediaSearchResponseItem>> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId);
 }
