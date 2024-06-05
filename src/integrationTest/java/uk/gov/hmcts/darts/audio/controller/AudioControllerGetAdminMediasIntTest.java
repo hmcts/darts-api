@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -18,9 +19,11 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaRequestStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
+import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.OffsetDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +37,8 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
     MockMvc mockMvc;
     @Autowired
     SuperAdminUserStub superAdminUserStub;
+    @Autowired
+    UserAccountStub userAccountStub;
     @MockBean
     UserIdentity userIdentity;
     @Autowired
@@ -110,10 +115,66 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
                  }
                }
              ]
-              """
-            .formatted(transformedMedia.getId(),
-                       transformedMedia.getMediaRequest().getHearing().getCourtCase().getId(),
-                       transformedMedia.getMediaRequest().getId());
+              """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void transformedMediaIsDoesNotExist() throws Exception {
+
+        // given
+        var user = superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("transformed_media_id", "-1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            [
+               
+             ]
+              """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void transformedMediaNotProvided() throws Exception {
+
+        // given
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("transformed_media_id", ""))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertTrue(StringUtils.contains(actualJson, "Either transformed_media_id or transcription_document_id must be provided in the request, but not both."));
+    }
+
+    @Test
+    void wrongPermissions() throws Exception {
+
+        // given
+        userAccountStub.givenUserIsAuthorisedJudge(userIdentity);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
+                                                  .queryParam("transformed_media_id", "1"))
+            .andExpect(status().isForbidden())
+            .andReturn();
+
+        // then
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}
+              """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
