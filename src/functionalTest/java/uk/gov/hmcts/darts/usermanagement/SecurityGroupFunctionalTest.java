@@ -3,8 +3,6 @@ package uk.gov.hmcts.darts.usermanagement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONObject;
@@ -19,6 +17,7 @@ import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
+import uk.gov.hmcts.darts.testutil.TestUtils;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRoleAndUsers;
 
@@ -36,12 +35,11 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.SUPER_ADMIN;
 
 class SecurityGroupFunctionalTest extends FunctionalTest {
 
-    public static final ObjectMapper MAPPER = new ObjectMapper();
+    private static ObjectMapper objectMapper;
 
     @BeforeAll
     static void beforeAll() {
-        MAPPER.registerModule(new JavaTimeModule());
-        MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper = TestUtils.createObjectMapper();
     }
 
     @AfterEach
@@ -114,10 +112,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .get()
             .thenReturn();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRoleAndUsers> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<>() {
-                                                                                              });
+        List<SecurityGroupWithIdAndRoleAndUsers> securityGroupWithIdAndRoles = TestUtils.createObjectMapper()
+            .readValue(response.asString(), new TypeReference<>() {});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
 
         List<SecurityGroupWithIdAndRoleAndUsers> staticGroups =
@@ -204,8 +200,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         patchContent = patchContent.replace("<userId1>", Integer.toString(userId1));
         patchContent = patchContent.replace("<userId2>", Integer.toString(userId2));
 
-        SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
-                                                                                  new TypeReference<>() {
+        SecurityGroupWithIdAndRole securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+                                                                                        new TypeReference<>() {
                                                                                   });
 
         response = buildRequestWithExternalGlobalAccessAuth()
@@ -215,8 +211,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .patch()
             .thenReturn();
 
-        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = MAPPER.readValue(response.asString(),
-                                                                                                 new TypeReference<>() {
+        SecurityGroupWithIdAndRoleAndUsers securityGroupWithIdAndRoleAndUsers = objectMapper.readValue(response.asString(),
+                                                                                                       new TypeReference<>() {
                                                                                                  });
 
         assertEquals(newName, securityGroupWithIdAndRoleAndUsers.getName());
@@ -233,8 +229,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .get()
             .thenReturn();
 
-        SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = MAPPER.readValue(response.asString(),
-                                                                                           new TypeReference<>() {
+        SecurityGroupWithIdAndRole retrievedSecurityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
+                                                                                                 new TypeReference<>() {
                                                                                            });
 
         assertEquals(newName, retrievedSecurityGroupWithIdAndRoles.getName());
@@ -257,8 +253,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
             .post()
             .thenReturn();
 
-        ExtendedCourthousePost extendedCourthousePost = MAPPER.readValue(response.asString(),
-                                                                         new TypeReference<>() {
+        ExtendedCourthousePost extendedCourthousePost = objectMapper.readValue(response.asString(),
+                                                                               new TypeReference<>() {
                                                                          });
         return extendedCourthousePost.getId();
     }

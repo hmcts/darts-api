@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.dailylist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +12,7 @@ import uk.gov.hmcts.darts.FunctionalTest;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.model.PatchDailyListRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListRequest;
+import uk.gov.hmcts.darts.testutil.TestUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -34,11 +33,8 @@ class DailylistFunctionalTest extends FunctionalTest {
 
     @BeforeEach
     void createObjectMApper() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper = TestUtils.createObjectMapper();
     }
-
 
     @AfterEach
     void cleanData() {

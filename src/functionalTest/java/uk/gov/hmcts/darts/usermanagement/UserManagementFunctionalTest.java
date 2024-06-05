@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.usermanagement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONArray;
@@ -15,18 +14,25 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
-import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
+import uk.gov.hmcts.darts.testutil.TestUtils;
+import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 class UserManagementFunctionalTest extends FunctionalTest {
-    private static final String EMAIL_ADDRESS = "Email-Address";
-    private static final String COURTHOUSE_ID = "courthouse_id";
-    private static final String ADMIN_USERS = "/admin/users";
+
+    private static final String ADMIN_USERS_BASE_PATH = "/admin/users";
+    private static final String ID_PATH_PARAM_NAME = "id";
+    private static final String ADMIN_USERS_BY_ID_PATH = "/admin/users/{" + ID_PATH_PARAM_NAME + "}";
+    private static final String ADMIN_USERS_SEARCH_PATH = "/admin/users/search";
+    private static final String EMAIL_ADDRESS_HEADER_NAME = "Email-Address";
 
     @AfterEach
     void tearDown() {
@@ -37,6 +43,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
     void shouldCreateUser() {
         Response response = createUser();
 
+        assertEquals(201, response.getStatusCode());
         JSONAssert.assertEquals(
             """
                 {
@@ -56,23 +63,24 @@ class UserManagementFunctionalTest extends FunctionalTest {
         );
     }
 
+
+
     @Test
     void shouldModifyUser() {
-        Response createUserResponse = createUser();
-        int userId = new JSONObject(createUserResponse.asString())
-            .getInt("id");
+        int userId = extractId(createUser());
 
         Response modifyUserResponse = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/users/" + userId))
             .contentType(ContentType.JSON)
+            .pathParam(ID_PATH_PARAM_NAME, userId)
             .body("""
                       {
                            "full_name": "Jimmy Smith"
                       }
                       """)
-            .patch()
+            .patch(getUri(ADMIN_USERS_BY_ID_PATH))
             .thenReturn();
 
+        assertEquals(200, modifyUserResponse.getStatusCode());
         JSONAssert.assertEquals(
             """
                 {
@@ -98,22 +106,20 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
     @Test
     void getUserByEmail() {
-        Response createUserResponse = createUser();
-        int userId = new JSONObject(createUserResponse.asString())
-            .getInt("id");
+        int userId = extractId(createUser());
 
         Response getUserResponse = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri(ADMIN_USERS))
             .contentType(ContentType.JSON)
-            .queryParam(COURTHOUSE_ID, 21)
-            .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
-            .get()
+            .header(EMAIL_ADDRESS_HEADER_NAME, "james.smith@hmcts.net")
+            .queryParam("courthouse_id", 21)
+            .get(getUri(ADMIN_USERS_BASE_PATH))
             .thenReturn();
 
         JSONArray jsonArray = new JSONArray(getUserResponse.asString());
         List jsonArraySize = getUserResponse.jsonPath().getList("$");
         String firstDoc = jsonArray.getJSONObject(jsonArraySize.size() - 1).toString();
 
+        assertEquals(200, getUserResponse.getStatusCode());
         JSONAssert.assertEquals(
             """
                     {
@@ -140,15 +146,14 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldGetUserById() {
-        Response createUserResponse = createUserWithSecurityGroups();
-        int userId = new JSONObject(createUserResponse.asString())
-            .getInt("id");
+        int userId  = extractId(createUserWithSecurityGroups());
 
         Response getUserByIdResponse = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/users/" + userId))
-            .get()
+            .pathParam(ID_PATH_PARAM_NAME, userId)
+            .get(getUri(ADMIN_USERS_BY_ID_PATH))
             .thenReturn();
 
+        assertEquals(200, getUserByIdResponse.getStatusCode());
         JSONAssert.assertEquals(
             """
                 {
@@ -172,9 +177,75 @@ class UserManagementFunctionalTest extends FunctionalTest {
         );
     }
 
+    @Test
+    void shouldGetUsers() throws JsonProcessingException {
+        // Given
+        int userId = extractId(createUser());
+
+        // When
+        Response getUsersResponse = buildRequestWithExternalGlobalAccessAuth()
+            .get(getUri(ADMIN_USERS_BASE_PATH))
+            .thenReturn();
+
+        // Then
+        assertEquals(200, getUsersResponse.getStatusCode());
+        List<UserWithIdAndTimestamps> users = TestUtils.createObjectMapper()
+            .readValue(getUsersResponse.asString(), new TypeReference<>() {});
+        assertFalse(users.isEmpty());
+
+        Optional<UserWithIdAndTimestamps> expectedUser = users.stream()
+            .filter(user -> user.getId().equals(userId))
+            .findFirst();
+        assertTrue(expectedUser.isPresent());
+        assertNotNull(expectedUser.get().getId());
+    }
+
+    @Test
+    void shouldGetUsersBySearchCriteria() throws JsonProcessingException {
+        // Given
+        int userId = extractId(createUser());
+
+        // When
+        Response searchResponse = buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .body("""
+                      {
+                           "email_address": "james.smith"
+                      }
+                      """)
+            .post(getUri(ADMIN_USERS_SEARCH_PATH))
+            .thenReturn();
+
+        // Then
+        assertEquals(200, searchResponse.getStatusCode());
+        List<UserWithIdAndTimestamps> users = TestUtils.createObjectMapper()
+            .readValue(searchResponse.asString(), new TypeReference<>() {});
+        assertEquals(1, users.size());
+
+        var user = users.get(0);
+        assertEquals(userId, user.getId());
+    }
+
+    private Response createUser() {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .contentType(ContentType.JSON)
+            .body("""
+                      {
+                           "full_name": "James Smith",
+                           "email_address": "james.smith@hmcts.net",
+                           "description": "A temporary user created by functional test"
+                      }
+                      """)
+            .post(getUri(ADMIN_USERS_BASE_PATH))
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        return response;
+    }
+
     private Response createUserWithSecurityGroups() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/users"))
             .contentType(ContentType.JSON)
             .body("""
                       {
@@ -184,7 +255,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                            "security_group_ids": [-1, -2, -3]
                       }
                       """)
-            .post()
+            .post(getUri(ADMIN_USERS_BASE_PATH))
             .thenReturn();
 
         assertEquals(201, response.getStatusCode());
@@ -192,36 +263,9 @@ class UserManagementFunctionalTest extends FunctionalTest {
         return response;
     }
 
-    private Response createUser() {
-        Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri(ADMIN_USERS))
-            .contentType(ContentType.JSON)
-            .body("""
-                      {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net",
-                           "description": "A temporary user created by functional test"
-                      }
-                      """)
-            .post()
-            .thenReturn();
-
-        assertEquals(201, response.getStatusCode());
-
-        return response;
+    private int extractId(Response response) {
+        return new JSONObject(response.asString())
+            .getInt("id");
     }
 
-    @Test
-    void shouldGetSecurityGroups() throws JsonProcessingException {
-        Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/admin/security-groups"))
-            .contentType(ContentType.JSON)
-            .get()
-            .thenReturn();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(),
-                                                                                              new TypeReference<>(){});
-        assertFalse(securityGroupWithIdAndRoles.isEmpty());
-    }
 }
