@@ -56,6 +56,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.HiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -135,6 +136,7 @@ public class DartsDatabaseStub {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final HearingRepository hearingRepository;
+    private final HiddenReasonRepository hiddenReasonRepository;
     private final JudgeRepository judgeRepository;
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
