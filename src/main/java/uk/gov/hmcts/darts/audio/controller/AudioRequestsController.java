@@ -21,6 +21,8 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
@@ -181,4 +183,11 @@ public class AudioRequestsController implements AudioRequestsApi {
         return new ResponseEntity<>(mediaRequest, HttpStatus.OK);
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<MediaPatchResponse> patchMediaRequest(Integer mediaRequestId, MediaPatchRequest mediaPatchRequest) {
+        MediaPatchResponse mediaPatchResponse = mediaRequestService.patchMediaRequest(mediaRequestId, mediaPatchRequest);
+        return new ResponseEntity<>(mediaPatchResponse, HttpStatus.OK);
+    }
 }

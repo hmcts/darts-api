@@ -14,10 +14,12 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
@@ -27,11 +29,13 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -356,5 +360,45 @@ class TranscriptionResponseMapperTest {
         Assertions.assertNull(fndResponse.getCaseNumber());
         assertEquals(hearingDate, fndResponse.getHearingDate());
         assertEquals(courthouseId, fndResponse.getCourthouseId());
+    }
+
+    @Test
+    void mapTransactionEntityToDocumentIdSearchResult() {
+        Integer transId = 200;
+        Integer userId = 500;
+        Integer transDocumentId = 400;
+        OffsetDateTime uploadedAt = OffsetDateTime.now();
+
+        UserAccountEntity accountEntity = new UserAccountEntity();
+        accountEntity.setId(userId);
+
+        TranscriptionEntity transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setId(transId);
+
+        String fileName = "file";
+        String fileType = "fileType";
+        Integer fileBytes = 299;
+        boolean hidden = true;
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setId(transDocumentId);
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setUploadedBy(accountEntity);
+        transcriptionDocumentEntity.setUploadedDateTime(uploadedAt);
+        transcriptionDocumentEntity.setFileName(fileName);
+        transcriptionDocumentEntity.setFileType(fileType);
+        transcriptionDocumentEntity.setFileSize(fileBytes);
+        transcriptionDocumentEntity.setHidden(hidden);
+
+        GetTranscriptionDocumentByIdResponse response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(transcriptionDocumentEntity);
+
+        assertEquals(transId, response.getTranscriptionId());
+        assertEquals(transDocumentId, response.getTranscriptionDocumentId());
+        assertEquals(fileName, response.getFileName());
+        assertEquals(fileType, response.getFileType());
+        assertEquals(fileBytes, response.getFileSizeBytes());
+        assertEquals(userId, response.getUploadedBy());
+        assertEquals(uploadedAt, response.getUploadedAt());
+        assertEquals(hidden, response.getIsHidden());
     }
 }
