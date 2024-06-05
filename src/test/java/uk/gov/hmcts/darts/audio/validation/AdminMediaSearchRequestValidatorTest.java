@@ -22,7 +22,7 @@ class AdminMediaSearchRequestValidatorTest {
     void failProvidingBoth() {
         DartsApiException dartsApiException = assertThrows(DartsApiException.class, () ->
             AdminMediaSearchRequestValidator.validate(1, 1));
-        assertEquals("Either media_request_id or transcription_document_id must be provided in the request, but not both.",
+        assertEquals("Either transformed_media_id or transcription_document_id must be provided in the request, but not both.",
                      dartsApiException.getMessage());
     }
 
@@ -30,7 +30,7 @@ class AdminMediaSearchRequestValidatorTest {
     void failProvidingNeither() {
         DartsApiException dartsApiException = assertThrows(DartsApiException.class, () ->
             AdminMediaSearchRequestValidator.validate(null, null));
-        assertEquals("Either media_request_id or transcription_document_id must be provided in the request, but not both.",
+        assertEquals("Either transformed_media_id or transcription_document_id must be provided in the request, but not both.",
                      dartsApiException.getMessage());
     }
 

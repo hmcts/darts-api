@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
+import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -22,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
+import static org.mockito.ArgumentMatchers.argThat;
 
 @Component
 @RequiredArgsConstructor
@@ -335,5 +338,16 @@ public class UserAccountStub {
         testUserSystem = userAccountRepository.saveAndFlush(testUserSystem);
 
         return Arrays.asList(testUserNonSystem, testUserSystem);
+    }
+
+    public UserAccountEntity givenUserIsAuthorisedJudge(UserIdentity userIdentity) {
+        var user = createJudgeUser();
+
+        Mockito.when(userIdentity.getUserAccount())
+            .thenReturn(user);
+        Mockito.when(userIdentity.userHasGlobalAccess(argThat(t -> t.contains(SecurityRoleEnum.JUDGE))))
+            .thenReturn(true);
+
+        return user;
     }
 }
