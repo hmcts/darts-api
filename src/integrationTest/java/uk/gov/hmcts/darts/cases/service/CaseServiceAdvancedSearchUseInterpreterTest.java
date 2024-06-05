@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.createCourthouse;
@@ -222,6 +223,30 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, swanseaCourthouse);
         securityGroupSwansea.setGlobalAccess(false);
         securityGroupSwansea.setUseInterpreter(true);
+        assignSecurityGroupToUser(user, securityGroupSwansea);
+
+        var securityGroupCardiff = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, cardiffCourthouse);
+        securityGroupCardiff.setGlobalAccess(false);
+        securityGroupCardiff.setUseInterpreter(true);
+        assignSecurityGroupToUser(user, securityGroupCardiff);
+
+        userAccountRepository.save(user);
+
+        // when
+        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+
+        // then
+        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+        assertThat(caseNumbers).containsExactlyInAnyOrder("Case2", "Case4");
+    }
+
+    @Test
+    void testSearchCasesWithMultipleSecurityGroupsOneBeingTranslationQaThenOnlyCasesWithInterpreterAreReturned() {
+        // given
+        var securityGroupSwansea = SecurityGroupTestData.buildGroupForRoleAndCourthouse(APPROVER, swanseaCourthouse);
+        securityGroupSwansea.setGlobalAccess(false);
+        securityGroupSwansea.setUseInterpreter(false);
         assignSecurityGroupToUser(user, securityGroupSwansea);
 
         var securityGroupCardiff = SecurityGroupTestData.buildGroupForRoleAndCourthouse(TRANSLATION_QA, cardiffCourthouse);
