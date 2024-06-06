@@ -24,6 +24,8 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdRespo
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
@@ -241,11 +243,23 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     @Override
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
+    public ResponseEntity<List<SearchTranscriptionDocumentResponse>> searchForTranscriptionMedia(
+        SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
+
+        List<SearchTranscriptionDocumentResponse> foundTransformedMediaResponse =
+            adminTranscriptionSearchService.searchTranscriptionDocument(searchTranscriptionDocumentRequest);
+
+        return new ResponseEntity<>(foundTransformedMediaResponse, HttpStatus.OK);
+    }
+
+    @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
         globalAccessSecurityRoles = {SUPER_ADMIN, SUPER_USER})
     public ResponseEntity<GetTranscriptionDocumentByIdResponse> getByDocumentId(Integer transcriptionDocumentId) {
         return new ResponseEntity<>(adminTranscriptionSearchService.getTranscriptionDocumentById(transcriptionDocumentId),
                                     HttpStatus.OK);
+
     }
 }
