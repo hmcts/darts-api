@@ -92,7 +92,25 @@ public enum TranscriptionApiError implements DartsApiError {
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_NOT_FOUND.getValue(),
         HttpStatus.NOT_FOUND,
         TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_NOT_FOUND.getValue()
-    );
+    ),
+    TRANSCRIPTION_ALREADY_HIDDEN(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue(),
+        HttpStatus.CONFLICT,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()),
+    TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue());
 
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";

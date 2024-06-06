@@ -38,7 +38,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
-public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionService {
+public class AdminTranscriptionServiceImpl implements AdminTranscriptionService {
 
     private final TranscriptionSearchQuery transcriptionSearchQuery;
 
@@ -166,11 +166,9 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         } else {
             List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
 
-            if (objectAdminActionEntityLst.size() > 0) {
-                // get the hidden data to return
+            if (!objectAdminActionEntityLst.isEmpty()) {
                 response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), objectAdminActionEntityLst.get(0));
-            }
-            else {
+            } else {
                 response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
             }
 

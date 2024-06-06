@@ -4,11 +4,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -16,8 +22,11 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.AdminActionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
 import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionService;
@@ -37,11 +46,14 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AdminTranscriptionSearchServiceTest {
+class AdminTranscriptionServiceTest {
 
     private AdminTranscriptionService adminTranscriptionSearchService;
 
@@ -69,16 +81,26 @@ class AdminTranscriptionSearchServiceTest {
     @Mock
     private ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
+    @Mock
+    private UserIdentity userIdentity;
+
+    @Captor
+    ArgumentCaptor<ObjectAdminActionEntity> objectAdminActionEntityArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<TranscriptionDocumentEntity> transcriptionDocumentEntityArgumentCaptor;
+
     @BeforeEach
     void setUp() {
         adminTranscriptionSearchService
-            = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery,
-                                                      transcriptionRepository, transcriptionResponseMapper,
-                                                      userAccountExistsValidator,
-                                                      transcriptionDocumentRepository,
-                                                      transcriptionDocumentHideOrShowValidator,
-                                                      objectAdminActionRepository,
-                                                      objectHiddenReasonRepository);
+            = new AdminTranscriptionServiceImpl(transcriptionSearchQuery,
+                                                transcriptionRepository, transcriptionResponseMapper,
+                                                userAccountExistsValidator,
+                                                transcriptionDocumentRepository,
+                                                transcriptionDocumentHideOrShowValidator,
+                                                objectAdminActionRepository,
+                                                objectHiddenReasonRepository,
+                                                userIdentity);
     }
 
     @Test
@@ -202,8 +224,7 @@ class AdminTranscriptionSearchServiceTest {
     void getTranscriptionDocumentById() {
         Integer transDocId = 200;
 
-
-        TranscriptionDocumentEntity transcriptionDocumentEntity = Mockito.mock(TranscriptionDocumentEntity.class);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = mock(TranscriptionDocumentEntity.class);
         GetTranscriptionDocumentByIdResponse expectedResponse = new GetTranscriptionDocumentByIdResponse();
         when(transcriptionDocumentRepository.findById(Mockito.eq(transDocId))).thenReturn(Optional.ofNullable(transcriptionDocumentEntity));
         when(transcriptionResponseMapper.getSearchByTranscriptionDocumentId(Mockito.eq(transcriptionDocumentEntity))).thenReturn(expectedResponse);
@@ -211,6 +232,109 @@ class AdminTranscriptionSearchServiceTest {
         GetTranscriptionDocumentByIdResponse actualResponse = adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId);
 
         Assertions.assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void testTranscriptionDocumentHide() {
+        TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
+        request.setIsHidden(true);
+        setupTestTranscriptionDocumentHide(request);
+    }
+
+    @Test
+    void testTranscriptionDocumentHideDefaultIsHidden() {
+        TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
+        setupTestTranscriptionDocumentHide(request);
+    }
+
+    void setupTestTranscriptionDocumentHide(TranscriptionDocumentHideRequest request) {
+        Integer hideOrUnhideTranscriptionDocument = 343;
+        Integer reasonId = 555;
+
+        String ticketReference = "my ticket reference";
+        String comments = "my comments";
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        adminActionRequest.setReasonId(reasonId);
+        adminActionRequest.setTicketReference(ticketReference);
+        adminActionRequest.setComments(comments);
+
+        request.setAdminAction(adminActionRequest);
+
+        UserAccountEntity userAccountEntity = mock(UserAccountEntity.class);
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        when(transcriptionDocumentRepository.findById(hideOrUnhideTranscriptionDocument)).thenReturn(Optional.of(transcriptionDocumentEntity));
+        when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
+
+        when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        ObjectHiddenReasonEntity objectHiddenReasonEntity = new ObjectHiddenReasonEntity();
+        TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
+
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(objectHiddenReasonEntity));
+
+        when(objectAdminActionRepository.saveAndFlush(objectAdminActionEntityArgumentCaptor.capture())).thenReturn(objectAdminActionEntity);
+
+        when(transcriptionResponseMapper.mapHideOrShowResponse(transcriptionDocumentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
+
+        //run the test
+        TranscriptionDocumentHideResponse actualResponse
+            = adminTranscriptionSearchService.hideOrUnhideTranscriptionDocumentById(hideOrUnhideTranscriptionDocument, request);
+
+
+        // make the assertion
+        Assertions.assertTrue(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
+        Assertions.assertEquals(expectedResponse, actualResponse);
+        Assertions.assertEquals(request.getAdminAction().getComments(), objectAdminActionEntityArgumentCaptor.getValue().getComments());
+        Assertions.assertEquals(request.getAdminAction().getReasonId(), reasonId);
+        Assertions.assertFalse(objectAdminActionEntityArgumentCaptor.getValue().isMarkedForManualDeletion());
+        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenBy());
+        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getHiddenDateTime());
+        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelBy());
+        Assertions.assertNotNull(objectAdminActionEntityArgumentCaptor.getValue().getMarkedForManualDelDateTime());
+    }
+
+    @Test
+    void testTranscriptionDocumentShow() {
+        TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
+        request.setIsHidden(false);
+
+        Integer hideOrUnhideTranscriptionDocument = 343;
+        Integer reasonId = 555;
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        adminActionRequest.setReasonId(reasonId);
+        request.setAdminAction(adminActionRequest);
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        when(transcriptionDocumentRepository.findById(hideOrUnhideTranscriptionDocument)).thenReturn(Optional.of(transcriptionDocumentEntity));
+
+        Integer objectAdminActionEntityId = 1000;
+        Integer objectAdminActionEntityId1 = 1001;
+
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        objectAdminActionEntity.setId(objectAdminActionEntityId);
+        ObjectAdminActionEntity objectAdminActionEntity1 = new ObjectAdminActionEntity();
+        objectAdminActionEntity1.setId(objectAdminActionEntityId1);
+
+        when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
+        when(objectAdminActionRepository
+                 .findByTranscriptionDocument_Id(hideOrUnhideTranscriptionDocument)).thenReturn(List.of(objectAdminActionEntity, objectAdminActionEntity1));
+
+        TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
+
+        when(transcriptionResponseMapper.mapHideOrShowResponse(transcriptionDocumentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
+
+        // run the test
+        TranscriptionDocumentHideResponse actualResponse
+            = adminTranscriptionSearchService.hideOrUnhideTranscriptionDocumentById(hideOrUnhideTranscriptionDocument, request);
+
+        // make the assertion
+        Assertions.assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());
+        Assertions.assertEquals(expectedResponse, actualResponse);
+        verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId);
+        verify(objectAdminActionRepository, times(1)).deleteById(objectAdminActionEntityId1);
     }
 
     private static Set<TranscriptionSearchResult> someSetOfTranscriptionSearchResult(int quantity) {

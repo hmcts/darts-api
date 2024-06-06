@@ -25,6 +25,8 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
@@ -36,7 +38,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionRequest;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
-import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
+import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
@@ -63,7 +65,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;
-    private final AdminTranscriptionSearchService adminTranscriptionSearchService;
+    private final AdminTranscriptionService adminTranscriptionSearchService;
     private final AuthorisationUnitOfWork authorisation;
 
     private final Validator<TranscriptionRequestDetails> transcriptionRequestDetailsValidator;
@@ -247,5 +249,16 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<GetTranscriptionDocumentByIdResponse> getByDocumentId(Integer transcriptionDocumentId) {
         return new ResponseEntity<>(adminTranscriptionSearchService.getTranscriptionDocumentById(transcriptionDocumentId),
                                     HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        globalAccessSecurityRoles = {SUPER_ADMIN})
+    public ResponseEntity<TranscriptionDocumentHideResponse> hideTranscriptionDocumentId(Integer transcriptionDocumentId,
+                                                                                         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
+        TranscriptionDocumentHideResponse response
+            = adminTranscriptionSearchService.hideOrUnhideTranscriptionDocumentById(transcriptionDocumentId, transcriptionDocumentHideRequest);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
