@@ -2,20 +2,30 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
-import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
+import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
+import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionDocumentHideOrShowValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
 import java.time.OffsetDateTime;
@@ -28,7 +38,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
-public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSearchService {
+public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionService {
 
     private final TranscriptionSearchQuery transcriptionSearchQuery;
 
@@ -39,6 +49,14 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
     private final UserAccountExistsValidator userAccountExistsValidator;
 
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+
+    private final TranscriptionDocumentHideOrShowValidator transcriptionDocumentHideOrShowValidator;
+
+    private final ObjectAdminActionRepository objectAdminActionRepository;
+
+    private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
+
+    private final UserIdentity userIdentity;
 
     @Override
     @SuppressWarnings({"PMD.NullAssignment"})
@@ -108,5 +126,59 @@ public class AdminTranscriptionSearchServiceImpl implements AdminTranscriptionSe
         } else {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
         }
+    }
+
+    @Transactional
+    public TranscriptionDocumentHideResponse hideOrUnhideTranscriptionDocumentById(Integer transcriptionDocumentId,
+                                                                         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
+
+        TranscriptionDocumentHideResponse response;
+
+        IdRequest<TranscriptionDocumentHideRequest> request = new IdRequest<>(transcriptionDocumentHideRequest, transcriptionDocumentId);
+        transcriptionDocumentHideOrShowValidator.validate(request);
+
+        Optional<TranscriptionDocumentEntity> transcriptionDocumentEntity
+            = transcriptionDocumentRepository.findById(transcriptionDocumentId);
+        TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
+
+        documentEntity.setHidden(transcriptionDocumentHideRequest.getIsHidden());
+        documentEntity = transcriptionDocumentRepository.saveAndFlush(documentEntity);
+
+        ObjectHiddenReasonEntity objectHiddenReasonEntity;
+        if (request.getPayload().getIsHidden()) {
+            objectHiddenReasonEntity = objectHiddenReasonRepository.findById(transcriptionDocumentHideRequest.getAdminAction().getReasonId()).get();
+
+            // on hiding add the relevant hide record
+            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+            objectAdminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity);
+            objectAdminActionEntity.setTicketReference(transcriptionDocumentHideRequest.getAdminAction().getTicketReference());
+            objectAdminActionEntity.setComments(transcriptionDocumentHideRequest.getAdminAction().getComments());
+            objectAdminActionEntity.setTranscriptionDocument(documentEntity);
+            objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
+            objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
+            objectAdminActionEntity.setMarkedForManualDeletion(false);
+            objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
+            objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+
+            objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
+
+            response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
+        } else {
+            List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
+
+            if (objectAdminActionEntityLst.size() > 0) {
+                // get the hidden data to return
+                response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), objectAdminActionEntityLst.get(0));
+            }
+            else {
+                response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
+            }
+
+            for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
+                objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
+            }
+        }
+
+        return response;
     }
 }

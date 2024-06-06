@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -18,8 +20,9 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminRespon
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
-import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionSearchService;
+import uk.gov.hmcts.darts.transcriptions.service.AdminTranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
+import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionDocumentHideOrShowValidator;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
@@ -40,7 +43,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AdminTranscriptionSearchServiceTest {
 
-    private AdminTranscriptionSearchService adminTranscriptionSearchService;
+    private AdminTranscriptionService adminTranscriptionSearchService;
 
     @Mock
     private TranscriptionSearchQuery transcriptionSearchQuery;
@@ -57,13 +60,25 @@ class AdminTranscriptionSearchServiceTest {
     @Mock
     private TranscriptionDocumentRepository transcriptionDocumentRepository;
 
+    @Mock
+    private TranscriptionDocumentHideOrShowValidator transcriptionDocumentHideOrShowValidator;
+
+    @Mock
+    private ObjectAdminActionRepository objectAdminActionRepository;
+
+    @Mock
+    private ObjectHiddenReasonRepository objectHiddenReasonRepository;
+
     @BeforeEach
     void setUp() {
         adminTranscriptionSearchService
             = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery,
                                                       transcriptionRepository, transcriptionResponseMapper,
                                                       userAccountExistsValidator,
-                                                      transcriptionDocumentRepository);
+                                                      transcriptionDocumentRepository,
+                                                      transcriptionDocumentHideOrShowValidator,
+                                                      objectAdminActionRepository,
+                                                      objectHiddenReasonRepository);
     }
 
     @Test
