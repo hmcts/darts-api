@@ -27,5 +27,11 @@ public class ArmApiConfigurationProperties {
     private String updateMetadataPath;
     @NotEmpty
     private String downloadDataPath;
+    @NotEmpty
+    private String availableEntitlementProfilesPath;
+    @NotEmpty
+    private String selectEntitlementProfilePath;
+    @NotEmpty
+    private String armServiceProfile;
 
 }

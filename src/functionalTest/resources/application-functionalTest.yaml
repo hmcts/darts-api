@@ -37,6 +37,7 @@ darts:
     arm-api:
       arm-username: ${ARM_USERNAME:func-username}
       arm-password: ${ARM_PASSWORD:func-password}
+      arm-service-profile: ${ARM_SERVICE_PROFILE:func-profile}
       url: ${ARM_URL:http://localhost:4551}
   automated-tasks-pod: true
   api-pod: true
