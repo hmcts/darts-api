@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityGroupEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.validation.UserQueryRequest;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 
 import java.util.Iterator;
@@ -18,12 +18,12 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validator<UserQueryRequest<UserPatch>> {
+public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validator<IdRequest<UserPatch>> {
 
     private final SecurityGroupRepository securityGroupRepository;
 
     @Override
-    public void validate(UserQueryRequest<UserPatch> userPatch) {
+    public void validate(IdRequest<UserPatch> userPatch) {
         if (userPatch.getPayload().getActive() != null && !userPatch.getPayload().getActive()) {
             Optional<SecurityGroupEntity> securityGroupEntityLst = securityGroupRepository.findByGroupNameIgnoreCase(SecurityGroupEnum.SUPER_ADMIN.getName());
             Set<UserAccountEntity> accountEntities = securityGroupEntityLst.orElseThrow().getUsers();
@@ -32,7 +32,7 @@ public class UserDeactivateNotLastInSuperAdminGroupValidator implements Validato
             if (accountEntities.size() == 1) {
                 Iterator<UserAccountEntity> entity = accountEntities.iterator();
                 UserAccountEntity userAccountEntity = entity.next();
-                if (userAccountEntity.getId().equals(userPatch.getUserId())) {
+                if (userAccountEntity.getId().equals(userPatch.getId())) {
                     throw new DartsApiException(AuthorisationError.UNABLE_TO_DEACTIVATE_USER);
                 }
             }

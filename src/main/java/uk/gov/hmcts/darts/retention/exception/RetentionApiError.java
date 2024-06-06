@@ -49,11 +49,11 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.RETENTION_POLICY_TYPE_ID_NOT_FOUND.toString()
     ), NON_UNIQUE_POLICY_NAME(
         RetentionErrorCode.NON_UNIQUE_POLICY_NAME.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
         RetentionTitleErrors.NON_UNIQUE_POLICY_NAME.toString()
     ), NON_UNIQUE_POLICY_DISPLAY_NAME(
         RetentionErrorCode.NON_UNIQUE_POLICY_DISPLAY_NAME.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
         RetentionTitleErrors.NON_UNIQUE_POLICY_DISPLAY_NAME.toString()
     ), DURATION_TOO_SHORT(
         RetentionErrorCode.DURATION_TOO_SHORT.getValue(),
@@ -69,7 +69,7 @@ public enum RetentionApiError implements DartsApiError {
         RetentionTitleErrors.POLICY_START_DATE_MUST_BE_PAST.toString()
     ), NON_UNIQUE_FIXED_POLICY_KEY(
         RetentionErrorCode.NON_UNIQUE_FIXED_POLICY_KEY.getValue(),
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
         RetentionTitleErrors.NON_UNIQUE_FIXED_POLICY_KEY.toString()
     ), FIXED_POLICY_KEY_NOT_FOUND(
         RetentionErrorCode.FIXED_POLICY_KEY_NOT_FOUND.getValue(),

@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -53,5 +54,10 @@ public class MediaRequestStub {
     @Transactional
     public MediaRequestEntity createAndSaveMediaRequestEntity(UserAccountEntity requestor) {
         return createAndLoadMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD, MediaRequestStatus.COMPLETED);
+    }
+
+    @Transactional
+    public Optional<MediaRequestEntity> getFindId(MediaRequestEntity mediaRequestEntity) {
+        return mediaRequestRepository.findById(mediaRequestEntity.getId());
     }
 }

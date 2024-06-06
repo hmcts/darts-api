@@ -10,8 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
-import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -34,8 +32,6 @@ class DailyListEntityTest extends IntegrationBase {
 
     public static final String DAILYLISTS = "/dailylists";
     public static final String SOURCE_SYSTEM = "source_system";
-    public static final String MESSAGE_ID = "message_id";
-    public static final String JSON_STRING = "json_string";
     public static final String DAL_ID = "dal_id";
     @Autowired
     private transient MockMvc mockMvc;
@@ -49,12 +45,10 @@ class DailyListEntityTest extends IntegrationBase {
 
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
-        String jsonDocument = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
+        String requestBody = getContentsFromFile("tests/dailylist/DailyListEntityTest/dailyListAddDailyListEndpoint/requestBody.json");
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(MESSAGE_ID, "some-message-id")
-            .header(JSON_STRING, jsonDocument);
+            .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         assertThat(response.getResponse().getContentAsString()).contains(DAL_ID);
@@ -66,28 +60,33 @@ class DailyListEntityTest extends IntegrationBase {
 
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
-        String jsonDocument = "";
+        String requestBody = """
+            {
+              "source_system": "CPP",
+              "json_string": "{"
+            }""";
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(MESSAGE_ID, "some-message-id")
-            .header(JSON_STRING, jsonDocument);
+            .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is5xxServerError()).andReturn();
 
         assertEquals(500, response.getResponse().getStatus());
     }
 
     @Test
-    void dailyListAddXmlDailyListEndpoint() throws Exception {
+    void dailyListAddXmlDailyListEndpointMissingCriteria() throws Exception {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
-        String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
+        String requestBody = """
+            {
+              "source_system": "CPP",
+              "message_id": "some-message-id-example",
+              "xml_document": "<dummy></dummy>"
+            }""";
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(MESSAGE_ID, "some-message-id")
-            .header("xml_document", xmlString);
+            .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
         assertEquals(400, response.getResponse().getStatus());
@@ -98,12 +97,15 @@ class DailyListEntityTest extends IntegrationBase {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(false);
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
-        String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
+        String requestBody = """
+            {
+              "source_system": "CPP",
+              "message_id": "some-message-id-example",
+              "xml_document": "<dummy></dummy>"
+            }""";
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(MESSAGE_ID, "some-message-id")
-            .header("xml_document", xmlString);
+            .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
 
         assertEquals(403, response.getResponse().getStatus());
@@ -121,30 +123,23 @@ class DailyListEntityTest extends IntegrationBase {
 
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
-        String jsonDocument1 = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
-        String jsonDocument2 = getContentsFromFile("tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
+        String postRequestBody = getContentsFromFile("tests/dailylist/DailyListEntityTest/dailyListPatchDailyListEndpoint/postRequestBody.json");
 
         MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(MESSAGE_ID, "some-message-id")
-            .header(JSON_STRING, jsonDocument1);
+            .content(postRequestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
-        DailyListJsonObject dailyList = objectMapper.readValue(jsonDocument1, DailyListJsonObject.class);
         PostDailyListResponse postDailyListResponse = objectMapper.readValue(response.getResponse().getContentAsString(), PostDailyListResponse.class);
-
-        DailyListPatchRequest patchRequest = new DailyListPatchRequest();
-        patchRequest.setDailyListId(postDailyListResponse.getDalId());
-        patchRequest.setDailyListJson(dailyList);
 
         String dalID = String.valueOf(postDailyListResponse.getDalId());
 
+        String patchRequestBody = getContentsFromFile("tests/dailylist/DailyListEntityTest/dailyListPatchDailyListEndpoint/patchRequestBody.json");
+        patchRequestBody = patchRequestBody.replace("<<dal_id>>", dalID);
         MockHttpServletRequestBuilder requestBuilder2 = patch(DAILYLISTS)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam(SOURCE_SYSTEM, "CPP")
-            .queryParam(DAL_ID, dalID)
-            .header(JSON_STRING, jsonDocument2);
+            .content(patchRequestBody);
         MvcResult patchResponse = mockMvc.perform(requestBuilder2).andExpect(status().isOk()).andReturn();
 
         assertThat(patchResponse.getResponse().getContentAsString()).contains(DAL_ID);

@@ -33,9 +33,6 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.FAILED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.IGNORED;
 import static uk.gov.hmcts.darts.dailylist.enums.JobStatusType.PARTIALLY_PROCESSED;
@@ -269,82 +266,6 @@ class DailyListProcessorTest extends IntegrationBase {
 
         }
 
-    }
-
-    @Test
-    void dailyListReopenCaseWithNewHearing() throws IOException {
-        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
-
-        dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
-        dailyListProcessor.processAllDailyLists();
-
-        DailyListLogJobReport report = new DailyListLogJobReport(1, SourceType.CPP);
-        report.registerResult(PROCESSED);
-
-        assertEquals(1, logAppender.searchLogApiLogs(report.toString(), Level.toLevel(Level.INFO_INT)).size());
-
-        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
-        assertEquals(URN_1, newCase1.getCaseNumber());
-        assertFalse(newCase1.getClosed());
-        assertNull(newCase1.getCaseClosedTimestamp());
-
-        newCase1.setClosed(true);
-        newCase1.setCaseClosedTimestamp(OffsetDateTime.now());
-        caseRepository.save(newCase1);
-
-        CourtCaseEntity closedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
-        assertEquals(URN_1, closedCase.getCaseNumber());
-        assertTrue(closedCase.getClosed());
-        assertNotNull(closedCase.getCaseClosedTimestamp());
-
-        dartsDatabase.createDailyLists(SWANSEA);
-        dailyListProcessor.processAllDailyLists();
-
-        CourtCaseEntity updatedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
-        assertEquals(URN_1, updatedCase.getCaseNumber());
-        assertFalse(updatedCase.getClosed());
-        assertNull(updatedCase.getCaseClosedTimestamp());
-    }
-
-    @Test
-    void dailyListReopenCaseWithNewHearingPartialUpdate() throws IOException {
-        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
-        dartsDatabase.createDailyLists("courtthousedoesnotexist");
-        dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
-
-        dailyListProcessor.processAllDailyLists();
-
-        DailyListLogJobReport reportCpp = new DailyListLogJobReport(2, SourceType.CPP);
-        DailyListLogJobReport reportXhb = new DailyListLogJobReport(2, SourceType.XHB);
-        reportCpp.registerResult(PARTIALLY_PROCESSED);
-        reportXhb.registerResult(PARTIALLY_PROCESSED);
-        reportCpp.registerResult(PROCESSED);
-        reportXhb.registerResult(PROCESSED);
-
-        assertEquals(1, logAppender.searchLogApiLogs(reportCpp.toString(), Level.toLevel(Level.INFO_INT)).size());
-        assertEquals(1, logAppender.searchLogApiLogs(reportXhb.toString(), Level.toLevel(Level.INFO_INT)).size());
-
-        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
-        assertEquals(URN_1, newCase1.getCaseNumber());
-        assertFalse(newCase1.getClosed());
-        assertNull(newCase1.getCaseClosedTimestamp());
-
-        newCase1.setClosed(true);
-        newCase1.setCaseClosedTimestamp(OffsetDateTime.now());
-        caseRepository.save(newCase1);
-
-        CourtCaseEntity closedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
-        assertEquals(URN_1, closedCase.getCaseNumber());
-        assertTrue(closedCase.getClosed());
-        assertNotNull(closedCase.getCaseClosedTimestamp());
-
-        dartsDatabase.createDailyLists(SWANSEA);
-        dailyListProcessor.processAllDailyLists();
-
-        CourtCaseEntity updatedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
-        assertEquals(URN_1, updatedCase.getCaseNumber());
-        assertFalse(updatedCase.getClosed());
-        assertNull(updatedCase.getCaseClosedTimestamp());
     }
 
     @Test

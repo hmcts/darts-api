@@ -1,10 +1,72 @@
 openapi: 3.0.1
+
 info:
-  title: An include file to define sortable attributes
-  version: 1.0.0
-paths: { }
+  title: 'Modernised DARTS'
+  description: 'Modernised DARTS (Digital Audio Recording and Transcription Service).'
+  version: '${version}'
+
+
+########################################################################################################################
+# PATH DEFINITIONS
+########################################################################################################################
+
+paths:
+  /admin/hidden-reasons:
+    get:
+      tags:
+        - HiddenReason
+      operationId: getHiddenReasons
+      description: Obtain all hidden reasons
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HiddenReason'
+
+########################################################################################################################
+# COMPONENT DEFINITIONS
+########################################################################################################################
+
 components:
   schemas:
+    HiddenReason:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        reason:
+          $ref: '#/components/schemas/Reason'
+        display_name:
+          $ref: '#/components/schemas/DisplayName'
+        display_state:
+          $ref: '#/components/schemas/DisplayState'
+        display_order:
+          $ref: '#/components/schemas/DisplayOrder'
+        marked_for_deletion:
+          $ref: '#/components/schemas/MarkedForDeletion'
+
+    Id:
+      type: integer
+
+    Reason:
+      type: string
+
+    DisplayName:
+      type: string
+
+    DisplayState:
+      type: boolean
+
+    DisplayOrder:
+      type: integer
+
+    MarkedForDeletion:
+      type: boolean
+
     reporting_restrictions:
       type: array
       default: [ ]

@@ -23,6 +23,8 @@ import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsReposito
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,7 +77,7 @@ public class CasesMapper {
         CourtCaseEntity courtCase = hearing.getCourtCase();
         ScheduledCase scheduledCase = mapToScheduledCase(courtCase);
         scheduledCase.setHearingDate(hearing.getHearingDate());
-        scheduledCase.setScheduledStart(toStringOrDefaultTo(hearing.getScheduledStartTime(), ""));
+        scheduledCase.setScheduledStart(toStringOrDefaultTo(hearing.getScheduledStartTime()));
         scheduledCase.setCourtroom(hearing.getCourtroom().getName());
         return scheduledCase;
     }
@@ -195,10 +197,10 @@ public class CasesMapper {
     }
 
 
-    private String toStringOrDefaultTo(Object obj, String defaultStr) {
-        if (Objects.isNull(obj)) {
-            return defaultStr;
+    private String toStringOrDefaultTo(LocalTime time) {
+        if (Objects.isNull(time)) {
+            return "";
         }
-        return obj.toString();
+        return time.truncatedTo(ChronoUnit.MINUTES).toString();
     }
 }

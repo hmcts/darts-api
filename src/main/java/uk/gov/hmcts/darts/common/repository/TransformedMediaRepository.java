@@ -59,7 +59,7 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         """)
     List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
 
-    @Query("""
+    @Query(value = """
         SELECT tm
             FROM TransformedMediaEntity tm
             JOIN tm.mediaRequest media
@@ -68,15 +68,15 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
             JOIN hearing.courtroom courtroom
             JOIN courtroom.courthouse courthouse
         WHERE
-           (:mediaId IS NULL OR (:mediaId IS NOT NULL AND media.id=:mediaId)) AND
-           (:caseNumber IS NULL  OR (:caseNumber IS NOT NULL AND courtCase.caseNumber=:caseNumber)) AND
-           (:courtHouseDisplayName IS NULL OR (:courtHouseDisplayName IS NOT NULL AND courthouse.displayName 
-           ILIKE CONCAT('%', :courtHouseDisplayName, '%'))) AND
-           (:hearingDate IS NULL OR (:hearingDate IS NOT NULL AND hearing.hearingDate=:hearingDate )) AND
-           (:owner IS NULL OR (:owner IS NOT NULL AND media.currentOwner.userFullName ILIKE CONCAT('%', :owner, '%'))) AND
-           (:requestedBy IS NULL OR (:requestedBy IS NOT NULL AND tm.createdBy.userFullName ILIKE CONCAT('%', :requestedBy, '%'))) AND
-           ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR (:requestedAtFrom IS NOT NULL AND media.createdDateTime >= :requestedAtFrom)) AND
-           ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (:requestedAtTo IS NOT NULL AND media.createdDateTime <= :requestedAtTo))
+           (:mediaId IS NULL OR (media.id=:mediaId)) AND
+           (:caseNumber IS NULL OR (courtCase.caseNumber=cast(:caseNumber as text))) AND
+           (:courtHouseDisplayName IS NULL OR (courthouse.displayName
+           ILIKE CONCAT('%', cast(:courtHouseDisplayName as text), '%'))) AND
+           ((cast(:hearingDate as LocalDate)) IS NULL OR (cast(:hearingDate as LocalDate) IS NOT NULL AND hearing.hearingDate=:hearingDate )) AND
+           (:owner IS NULL OR (media.currentOwner.userFullName ILIKE CONCAT('%', cast(:owner as text), '%'))) AND
+           (:requestedBy IS NULL OR (tm.createdBy.userFullName ILIKE CONCAT('%', cast (:requestedBy as text), '%'))) AND
+           ((cast(:requestedAtFrom as TIMESTAMP)) IS NULL OR media.createdDateTime >= :requestedAtFrom) AND
+           ((cast(:requestedAtTo as TIMESTAMP)) IS NULL OR (media.createdDateTime <= :requestedAtTo))
            """)
     List<TransformedMediaEntity> findTransformedMedia(Integer mediaId,
                                                       String caseNumber,

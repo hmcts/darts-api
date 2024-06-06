@@ -3,14 +3,14 @@
     "document_name": "DailyList_457_20210219174938.xml",
     "unique_id": "<<UNIQUEID>>",
     "document_type": "DL",
-    "time_stamp": "<<TODAY>>T17:49:38.391+01:00"
+    "time_stamp": "<<PUBLISHED_DATETIME>>"
   },
   "list_header": {
     "list_category": "Criminal",
-    "start_date": "<<TODAY>>",
-    "end_date": "<<TODAY>>",
+    "start_date": "<<HEARING_DATE>>",
+    "end_date": "<<HEARING_DATE>>",
     "version": "NOT VERSIONED",
-    "published_time": "<<TODAY>>T17:49:38.767+01:00"
+    "published_time": "<<PUBLISHED_DATETIME>>"
   },
   "crown_court": {
     "court_house_type": "Crown Court",
@@ -49,7 +49,7 @@
               "hearing_details": {
                 "hearing_type": "PTR",
                 "hearing_description": "For Pre-Trial Review",
-                "hearing_date": "<<TOMORROW>>"
+                "hearing_date": "<<HEARING_DATE>>"
               },
               "time_marking_note": "NOT BEFORE 11:00 AM",
               "case_number": "<<CASENUMBER>>",

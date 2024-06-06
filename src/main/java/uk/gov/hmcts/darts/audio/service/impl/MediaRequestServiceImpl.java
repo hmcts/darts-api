@@ -10,6 +10,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
@@ -18,16 +20,21 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
+import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.mapper.GetTransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
+import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
@@ -42,6 +49,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -49,10 +57,12 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.validation.IdRequest;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -61,6 +71,7 @@ import java.io.InputStream;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -96,6 +107,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final CurrentTimeHelper currentTimeHelper;
     private final GetTransformedMediaDetailsMapper getTransformedMediaDetailsMapper;
     private final MediaRequestMapper mediaRequestMapper;
+
+    private final AudioMediaPatchRequestValidator mediaRequestValidator;
+
+    private final MediaRepository mediaRepository;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -148,7 +163,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             request.getEndTime(),
             request.getRequestType()
         );
-        auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
+        auditApi.record(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
         return mediaRequest;
     }
 
@@ -358,18 +373,18 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public List<SearchTransformedMediaResponse> searchRequest(SearchTransformedMediaRequest getTransformedMediaRequest) {
         List<TransformedMediaEntity> mediaEntities = null;
         OffsetDateTime requestedAtFrom = getTransformedMediaRequest.getRequestedAtFrom()
-            != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(),LocalTime.MIN, ZoneOffset.UTC) : null;
+            != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
         OffsetDateTime requestedAtTo = getTransformedMediaRequest.getRequestedAtTo()
             != null ? OffsetDateTime.of(getTransformedMediaRequest.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC) : null;
 
         mediaEntities = transformedMediaRepository.findTransformedMedia(getTransformedMediaRequest.getMediaRequestId(),
-                                                                                                     getTransformedMediaRequest.getCaseNumber(),
-                                                                                                     getTransformedMediaRequest.getCourthouseDisplayName(),
-                                                                                                     getTransformedMediaRequest.getHearingDate(),
-                                                                                                     getTransformedMediaRequest.getOwner(),
-                                                                                                     getTransformedMediaRequest.getRequestedBy(),
-                                                                                                     requestedAtFrom,
-                                                                                                     requestedAtTo);
+                                                                        getTransformedMediaRequest.getCaseNumber(),
+                                                                        getTransformedMediaRequest.getCourthouseDisplayName(),
+                                                                        getTransformedMediaRequest.getHearingDate(),
+                                                                        getTransformedMediaRequest.getOwner(),
+                                                                        getTransformedMediaRequest.getRequestedBy(),
+                                                                        requestedAtFrom,
+                                                                        requestedAtTo);
 
 
         return getTransformedMediaDetailsMapper.mapSearchResults(mediaEntities);
@@ -382,7 +397,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         final UUID blobId = getBlobId(transformedMediaEntity);
 
-        auditApi.recordAudit(
+        auditApi.record(
             auditActivity,
             this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
@@ -437,4 +452,51 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
     }
 
+    @Override
+    @Transactional
+    public MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request) {
+        MediaPatchResponse returnResponse = new MediaPatchResponse();
+
+        IdRequest<MediaPatchRequest> requestIdRequest = new IdRequest<>(request, mediaRequestId);
+        mediaRequestValidator.validate(requestIdRequest);
+
+        Optional<MediaRequestEntity> mediaRequestEntity = mediaRequestRepository.findById(mediaRequestId);
+
+        // if we have an owner id then map it to the owner of the request id
+        Optional<UserAccountEntity> accountEntityToPatch = Optional.empty();
+        if (mediaRequestEntity.isPresent() && request.getOwnerId() != null) {
+            accountEntityToPatch = userAccountRepository.findById(request.getOwnerId());
+
+            if (accountEntityToPatch.isPresent()) {
+                mediaRequestEntity.get().setCurrentOwner(accountEntityToPatch.get());
+                mediaRequestRepository.save(mediaRequestEntity.get());
+
+                returnResponse = getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity.get());
+            }
+        } else if (mediaRequestEntity.isPresent()) {
+            returnResponse = getTransformedMediaDetailsMapper.mapToPatchResult(mediaRequestEntity.get());
+        }
+
+        return returnResponse;
+    }
+
+    @Override
+    public ResponseEntity<List<AdminMediaSearchResponseItem>> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId) {
+        if (transformedMediaId != null) {
+            Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
+            if (transformedMediaOpt.isEmpty()) {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+            }
+            TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
+            MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
+            HearingEntity hearing = mediaRequest.getHearing();
+            List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
+            //filter by media that overlap with request
+            List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
+                && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
+            return new ResponseEntity<>(AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);//future functionality
+        }
+    }
 }

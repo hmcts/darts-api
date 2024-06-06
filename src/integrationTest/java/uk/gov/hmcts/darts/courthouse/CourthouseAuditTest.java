@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.courthouse;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
@@ -35,12 +36,10 @@ class CourthouseAuditTest extends IntegrationBase {
                 .courthouseName(courthouse.getCourthouseName())
                 .displayName(courthouse.getDisplayName()));
 
-        var audits = dartsDatabase.findAudits();
-        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId());
-        assertThat(audits).extracting("auditActivity.name").containsExactly("Create Courthouse");
+        var createCourtHouseActivity = findAuditActivity("Create Courthouse", dartsDatabase.findAudits());
+        assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
         var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
-
         assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(INSERT);
         assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
     }
@@ -59,12 +58,10 @@ class CourthouseAuditTest extends IntegrationBase {
             initialCourthouse.getId(),
             new CourthousePatch().displayName("some-other-display-name"));
 
-        var audits = dartsDatabase.findAudits();
-        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId(), userAccountEntity.getId());
-        assertThat(audits).extracting("auditActivity.name").contains("Update Courthouse");
+        var createCourtHouseActivity = findAuditActivity("Update Courthouse", dartsDatabase.findAudits());
+        assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
         var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
-
         assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
         assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
     }
@@ -83,12 +80,10 @@ class CourthouseAuditTest extends IntegrationBase {
             initialCourthouse.getId(),
             new CourthousePatch().securityGroupIds(List.of(2)));
 
-        var audits = dartsDatabase.findAudits();
-        assertThat(audits).extracting("user.id").containsExactly(userAccountEntity.getId(), userAccountEntity.getId());
-        assertThat(audits).extracting("auditActivity.name").contains("Update Courthouse Group");
+        var createCourtHouseActivity = findAuditActivity("Update Courthouse Group", dartsDatabase.findAudits());
+        assertThat(createCourtHouseActivity.getUser().getId()).isEqualTo(userAccountEntity.getId());
 
         var courthouseRevisions = dartsDatabase.findCourthouseRevisionsFor(courthouseAndGroups.getId());
-
         assertThat(courthouseRevisions.getLatestRevision().getMetadata().getRevisionType()).isEqualTo(UPDATE);
         assertThat(courthouseRevisions.getLatestRevision().getEntity().getId()).isEqualTo(courthouseAndGroups.getId());
     }
@@ -100,6 +95,12 @@ class CourthouseAuditTest extends IntegrationBase {
         assertThatThrownBy(() -> courthouseService.createCourthouseAndGroups(
             new CourthousePost().courthouseName("some-courthouse").displayName("some-display-name").regionId(-1)));
         assertThat(dartsDatabase.findAudits()).isEmpty();
+    }
+
+    private AuditEntity findAuditActivity(String activity, List<AuditEntity> audits) {
+        return audits.stream()
+            .filter(audit -> activity.equals(audit.getAuditActivity().getName()))
+            .findFirst().orElseThrow();
     }
 
 }

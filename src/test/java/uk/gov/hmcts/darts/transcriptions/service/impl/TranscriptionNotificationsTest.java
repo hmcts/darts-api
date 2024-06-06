@@ -179,7 +179,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.get(1).getUserAccountsToEmail().size(), 1);
         assertEquals(actual.get(1).getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
         // audit
-        verify(auditApi).recordAudit(AUTHORISE_TRANSCRIPTION, approver, caseEntity);
+        verify(auditApi).record(AUTHORISE_TRANSCRIPTION, approver, caseEntity);
     }
 
     @Test
@@ -202,7 +202,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getTemplateValues().size(), 1);
         assertEquals(actual.getTemplateValues().get(REJECTION_REASON), reason);
         // audit
-        verify(auditApi).recordAudit(REJECT_TRANSCRIPTION, rejecter, caseEntity);
+        verify(auditApi).record(REJECT_TRANSCRIPTION, rejecter, caseEntity);
     }
 
     @Test
@@ -215,7 +215,7 @@ class TranscriptionNotificationsTest {
         transcriptionNotifications.handleNotificationsAndAudit(transcriber, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
 
         // audit
-        verify(auditApi).recordAudit(ACCEPT_TRANSCRIPTION, transcriber, caseEntity);
+        verify(auditApi).record(ACCEPT_TRANSCRIPTION, transcriber, caseEntity);
     }
 
     @Test
@@ -234,7 +234,7 @@ class TranscriptionNotificationsTest {
         assertEquals(actual.getUserAccountsToEmail().size(), 1);
         assertEquals(actual.getUserAccountsToEmail().get(0).getEmailAddress(), requester.getEmailAddress());
         // audit
-        verify(auditApi).recordAudit(COMPLETE_TRANSCRIPTION, transcriber, caseEntity);
+        verify(auditApi).record(COMPLETE_TRANSCRIPTION, transcriber, caseEntity);
     }
 
     @Test
@@ -249,7 +249,7 @@ class TranscriptionNotificationsTest {
 
         verifyNoInteractions(notificationApi);
         // audit
-        verify(auditApi).recordAudit(AUTHORISE_TRANSCRIPTION, transcriber, caseEntity);
+        verify(auditApi).record(AUTHORISE_TRANSCRIPTION, transcriber, caseEntity);
     }
 
 
@@ -265,7 +265,7 @@ class TranscriptionNotificationsTest {
 
         verifyNoInteractions(notificationApi);
         // audit
-        verify(auditApi).recordAudit(REJECT_TRANSCRIPTION, transcriber, caseEntity);
+        verify(auditApi).record(REJECT_TRANSCRIPTION, transcriber, caseEntity);
     }
 
     @Test
@@ -280,7 +280,7 @@ class TranscriptionNotificationsTest {
 
         verifyNoInteractions(notificationApi);
         // audit
-        verify(auditApi).recordAudit(COMPLETE_TRANSCRIPTION, transcriber, caseEntity);
+        verify(auditApi).record(COMPLETE_TRANSCRIPTION, transcriber, caseEntity);
     }
 
     private void mockTranscribers() {

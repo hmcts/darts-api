@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -27,14 +27,14 @@ import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.CREATE_GROUP;
+import static uk.gov.hmcts.darts.usermanagement.auditing.SecurityGroupUpdateAuditActivityProvider.auditActivitiesFor;
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_ALLOWED;
 import static uk.gov.hmcts.darts.usermanagement.exception.UserManagementError.SECURITY_GROUP_NOT_FOUND;
 
@@ -50,6 +50,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityGroupCourthouseMapper securityGroupCourthouseMapper;
     private final SecurityGroupWithIdAndRoleAndUsersMapper securityGroupWithIdAndRoleAndUsersMapper;
     private final SecurityGroupCreationValidation securityGroupCreationValidation;
+    private final AuditApi auditApi;
 
     private final List<SecurityRoleEnum> securityRolesAllowedToBeCreatedInGroup = List.of(SecurityRoleEnum.TRANSCRIBER, SecurityRoleEnum.TRANSLATION_QA);
 
@@ -96,8 +97,10 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupEntity.setGlobalAccess(false);
         securityGroupEntity.setDisplayState(true);
 
-        var transcriberRoleEntity = securityRoleRepository.getReferenceById(securityGroupModel.getRoleId());
-        securityGroupEntity.setSecurityRoleEntity(transcriberRoleEntity);
+        var role = securityRoleRepository.getReferenceById(securityGroupModel.getRoleId());
+        securityGroupEntity.setSecurityRoleEntity(role);
+
+        auditApi.record(CREATE_GROUP);
 
         return securityGroupRepository.saveAndFlush(securityGroupEntity);
     }
@@ -118,28 +121,23 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
         return securityGroupEntities.stream()
             .map(securityGroupWithIdAndRoleAndUsersMapper::mapToSecurityGroupWithIdAndRoleAndUsers).toList();
-
-
     }
 
     @Transactional
     @Override
     public SecurityGroupWithIdAndRoleAndUsers modifySecurityGroup(Integer securityGroupId, SecurityGroupPatch securityGroupPatch) {
+        var securityGroupEntity = securityGroupRepository.findById(securityGroupId)
+            .orElseThrow(() -> new DartsApiException(SECURITY_GROUP_NOT_FOUND));
 
-        Optional<SecurityGroupEntity> securityGroupEntityOptional = securityGroupRepository.findById(securityGroupId);
+        var auditableActivities = auditActivitiesFor(securityGroupEntity, securityGroupPatch);
 
-        if (securityGroupEntityOptional.isPresent()) {
-            SecurityGroupEntity securityGroupEntity = securityGroupEntityOptional.get();
-            updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
-            var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
-            return securityGroupCourthouseMapper.mapToSecurityGroupWithCourthousesAndUsers(updatedGroup);
-        } else {
-            //throw a 404 not found
-            throw new DartsApiException(
-                SECURITY_GROUP_NOT_FOUND,
-                String.format("Security group id %d not found", securityGroupId));
-        }
+        updateSecurityGroupEntity(securityGroupPatch, securityGroupEntity);
 
+        var updatedGroup = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        auditApi.recordAll(auditableActivities);
+
+        return securityGroupCourthouseMapper.mapToSecurityGroupWithCourthousesAndUsers(updatedGroup);
     }
 
     void updateSecurityGroupEntity(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {
@@ -159,23 +157,21 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         if (description != null) {
             securityGroupEntity.setDescription(description);
         }
-        List<Integer> courthouseIds = securityGroupPatch.getCourthouseIds();
-        if (courthouseIds != null) {
-            Set<CourthouseEntity> courthouseEntities = new HashSet<>();
-            for (Integer courthouseId : courthouseIds) {
-                Optional<CourthouseEntity> courthouseEntity = courthouseRepository.findById(courthouseId);
-                if (courthouseEntity.isPresent()) {
-                    courthouseEntities.add(courthouseEntity.get());
-                } else {
-                    throw new DartsApiException(
-                        UserManagementError.COURTHOUSE_NOT_FOUND,
-                        String.format("Courthouse id %d not found", courthouseId));
-                }
-            }
-            securityGroupEntity.setCourthouseEntities(courthouseEntities);
+        if (securityGroupPatch.getCourthouseIds() != null) {
+            securityGroupPatch.getCourthouseIds()
+                .forEach(courthouseId -> addToSecurityGroup(courthouseId, securityGroupEntity));
         }
 
         patchSecurityGroupUsers(securityGroupPatch, securityGroupEntity);
+    }
+
+    private void addToSecurityGroup(Integer courthouseId, SecurityGroupEntity securityGroupEntity) {
+        var courthouseEntity = courthouseRepository.findById(courthouseId)
+            .orElseThrow(() -> new DartsApiException(
+                UserManagementError.COURTHOUSE_NOT_FOUND,
+                String.format("Courthouse id %d not found", courthouseId)));
+
+        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
     }
 
     private void patchSecurityGroupUsers(SecurityGroupPatch securityGroupPatch, SecurityGroupEntity securityGroupEntity) {

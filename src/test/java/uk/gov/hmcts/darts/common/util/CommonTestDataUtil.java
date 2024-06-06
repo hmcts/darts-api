@@ -373,7 +373,7 @@ public class CommonTestDataUtil {
 
     public List<HearingEntity> createHearings(int numOfHearings) {
         List<HearingEntity> returnList = new ArrayList<>();
-        LocalTime time = LocalTime.of(9, 0, 0);
+        LocalTime time = LocalTime.of(9, 0, 30);
         for (int counter = 1; counter <= numOfHearings; counter++) {
             returnList.add(createHearing("caseNum_" + counter, time));
             time = time.plusHours(1);

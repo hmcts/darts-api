@@ -62,6 +62,7 @@ public class MediaTestData {
         mediaEntity.setFileSize(1000L);
         mediaEntity.setChecksum(getChecksum());
         mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
+
         return mediaEntity;
     }
 

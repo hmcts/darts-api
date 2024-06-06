@@ -83,7 +83,7 @@ class TranscriptionControllerUpdateTranscriptionAdminApprovedIntTest extends Int
         transcriptCreatorId = authorisationStub.getTestUser().getId();
 
         doNothing().when(mockAuditApi)
-            .recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+            .record(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
