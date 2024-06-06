@@ -18,7 +18,8 @@ public enum AutomatedTaskName {
     PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles"),
     APPLY_RETENTION_TASK_NAME("ApplyRetention"),
     APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME("ApplyRetentionCaseAssociatedObjects"),
-    CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),
+    CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFilesIndividual"),
+    BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("BatchCleanupArmResponseFilesBatch"),
     CLOSE_OLD_CASES_TASK_NAME("CloseOldCases"),
     DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping"),
     ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME("ArmRetentionEventDateCalculator");

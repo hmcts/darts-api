@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.service.impl.CleanupArmResponseFilesServiceImpl;
+import uk.gov.hmcts.darts.arm.service.impl.BatchCleanupArmResponseFilesServiceImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CleanupArmResponseFilesServiceImplTest {
+class BatchCleanupArmResponseFilesServiceImplTest {
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -52,6 +52,7 @@ class CleanupArmResponseFilesServiceImplTest {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
+
 
     @Mock
     private ExternalLocationTypeEntity externalLocationTypeArm;
@@ -71,7 +72,7 @@ class CleanupArmResponseFilesServiceImplTest {
     @Mock
     private UserAccountEntity testUser;
 
-    private CleanupArmResponseFilesService cleanupArmResponseFilesService;
+    private BatchCleanupArmResponseFilesService cleanupArmResponseFilesService;
 
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
@@ -79,7 +80,7 @@ class CleanupArmResponseFilesServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        cleanupArmResponseFilesService = new CleanupArmResponseFilesServiceImpl(
+        cleanupArmResponseFilesService = new BatchCleanupArmResponseFilesServiceImpl(
             externalObjectDirectoryRepository,
             objectRecordStatusRepository,
             externalLocationTypeRepository,

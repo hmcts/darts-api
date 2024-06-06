@@ -60,7 +60,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findByEntityAndStatus(TranscriptionDocumentEntity transcriptionDocument, ObjectRecordStatusEntity status);
 
     List<ExternalObjectDirectoryEntity> findByTranscriptionDocumentEntityAndExternalLocationType(TranscriptionDocumentEntity transcriptionDocument,
-                                                                                              ExternalLocationTypeEntity externalLocationType);
+                                                                                                 ExternalLocationTypeEntity externalLocationType);
 
     @Query(
         """
@@ -173,7 +173,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
                                                                            ExternalLocationTypeEntity externalLocationType);
 
     List<ExternalObjectDirectoryEntity> findByAnnotationDocumentEntityAndExternalLocationType(AnnotationDocumentEntity annotationDocument,
-                                                                           ExternalLocationTypeEntity externalLocationType);
+                                                                                              ExternalLocationTypeEntity externalLocationType);
 
     List<ExternalObjectDirectoryEntity> findByCaseDocumentAndExternalLocationType(CaseDocumentEntity caseDocument,
                                                                                   ExternalLocationTypeEntity externalLocationTypeEntity);
@@ -237,14 +237,36 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.externalLocationType = :locationType
             AND eod.responseCleaned = :responseCleaned
             AND eod.lastModifiedDateTime < :lastModifiedBefore
+            and eod.manifestFile is not null
+            and eod.manifestFile like CONCAT(:manifestFileBatchPrefix, '%')
             order by eod.lastModifiedDateTime
+            LIMIT :limit
             """
     )
-    List<ExternalObjectDirectoryEntity> findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+    List<ExternalObjectDirectoryEntity> findBatchArmResponseFiles(
         List<ObjectRecordStatusEntity> statuses,
         ExternalLocationTypeEntity locationType,
         boolean responseCleaned,
-        OffsetDateTime lastModifiedBefore);
+        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix, int limit);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status in :statuses
+            AND eod.externalLocationType = :locationType
+            AND eod.responseCleaned = :responseCleaned
+            AND eod.lastModifiedDateTime < :lastModifiedBefore
+            and (eod.manifestFile is null
+            or eod.manifestFile not like ':manifestFileBatchPrefix%')
+            order by eod.lastModifiedDateTime
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findSingleArmResponseFiles(
+        List<ObjectRecordStatusEntity> statuses,
+        ExternalLocationTypeEntity locationType,
+        boolean responseCleaned,
+        OffsetDateTime lastModifiedBefore,
+        String manifestFileBatchPrefix);
 
     @Modifying(clearAutomatically = true)
     @Query(

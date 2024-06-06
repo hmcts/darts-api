@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper;
+import uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil;
 import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -74,11 +74,12 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             armDataManagementConfiguration.getResponseCleanupBufferDays());
 
         List<ExternalObjectDirectoryEntity> objectDirectoryDataToBeDeleted =
-            externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+            externalObjectDirectoryRepository.findSingleArmResponseFiles(
                 statuses,
                 armLocation,
                 false,
-                dateTimeForDeletion
+                dateTimeForDeletion,
+                armDataManagementConfiguration.getManifestFilePrefix()
             );
 
         if (CollectionUtils.isNotEmpty(objectDirectoryDataToBeDeleted)) {
@@ -105,7 +106,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         if (CollectionUtils.isNotEmpty(inputUploadBlobs)) {
             for (String armInputUploadFilename : inputUploadBlobs) {
                 log.debug("Found ARM input upload file {} for cleanup", armInputUploadFilename);
-                if (armInputUploadFilename.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
+                if (armInputUploadFilename.endsWith(ArmResponseFilesUtil.generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
                     processInputUploadFile(externalObjectDirectory, armInputUploadFilename);
                 } else {
                     log.warn("ARM response file {} not input upload file for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
@@ -142,11 +143,11 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
         String invalidFileFilename = null;
 
         for (String responseFile : responseBlobs) {
-            if (responseFile.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
+            if (responseFile.endsWith(ArmResponseFilesUtil.generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
                 createRecordFilename = responseFile;
-            } else if (responseFile.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
+            } else if (responseFile.endsWith(ArmResponseFilesUtil.generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
                 uploadFilename = responseFile;
-            } else if (responseFile.endsWith(ArmResponseFilesHelper.generateSuffix(ARM_INVALID_LINE_FILENAME_KEY))) {
+            } else if (responseFile.endsWith(ArmResponseFilesUtil.generateSuffix(ARM_INVALID_LINE_FILENAME_KEY))) {
                 invalidFileFilename = responseFile;
             }
         }
@@ -196,8 +197,6 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
                 log.info("Successfully cleaned up response files for EOD {}", externalObjectDirectory.getId());
             } else {
                 log.warn("Unable to delete input upload response file for EOD {}", externalObjectDirectory.getId());
-                externalObjectDirectory.setResponseCleaned(true);
-                updateExternalObjectDirectory(externalObjectDirectory);
             }
         } else {
             log.warn("Unable to delete all response files for EOD {}", externalObjectDirectory.getId());
@@ -214,7 +213,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
     private String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
         return new StringBuilder(String.valueOf(externalObjectDirectory.getId()))
             .append(ARM_FILENAME_SEPARATOR)
-            .append(ArmResponseFilesHelper.getObjectTypeId(externalObjectDirectory))
+            .append(ArmResponseFilesUtil.getObjectTypeId(externalObjectDirectory))
             .append(ARM_FILENAME_SEPARATOR).toString();
     }
 }
