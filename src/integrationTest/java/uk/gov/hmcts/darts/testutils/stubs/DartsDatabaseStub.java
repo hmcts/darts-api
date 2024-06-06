@@ -61,6 +61,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
@@ -135,6 +136,7 @@ public class DartsDatabaseStub {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final HearingRepository hearingRepository;
+    private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
     private final JudgeRepository judgeRepository;
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
