@@ -49,21 +49,22 @@ class AdminTranscriptionSearchServiceTest {
     private TranscriptionRepository transcriptionRepository;
 
     @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+
+    @Mock
     private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @Mock
     private UserAccountExistsValidator userAccountExistsValidator;
 
-    @Mock
-    private TranscriptionDocumentRepository transcriptionDocumentRepository;
-
     @BeforeEach
     void setUp() {
         adminTranscriptionSearchService
             = new AdminTranscriptionSearchServiceImpl(transcriptionSearchQuery,
-                                                      transcriptionRepository, transcriptionResponseMapper,
-                                                      userAccountExistsValidator,
-                                                      transcriptionDocumentRepository);
+                                                      transcriptionRepository,
+                                                      transcriptionDocumentRepository, transcriptionResponseMapper,
+                                                      userAccountExistsValidator
+                                                      );
     }
 
     @Test
