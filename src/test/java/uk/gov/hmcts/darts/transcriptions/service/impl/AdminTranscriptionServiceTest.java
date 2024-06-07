@@ -64,13 +64,13 @@ class AdminTranscriptionServiceTest {
     private TranscriptionRepository transcriptionRepository;
 
     @Mock
+    private TranscriptionDocumentRepository transcriptionDocumentRepository;
+
+    @Mock
     private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @Mock
     private UserAccountExistsValidator userAccountExistsValidator;
-
-    @Mock
-    private TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     @Mock
     private TranscriptionDocumentHideOrShowValidator transcriptionDocumentHideOrShowValidator;
@@ -94,14 +94,15 @@ class AdminTranscriptionServiceTest {
     void setUp() {
         adminTranscriptionSearchService
             = new AdminTranscriptionServiceImpl(transcriptionSearchQuery,
-                                                transcriptionRepository, transcriptionResponseMapper,
-                                                userAccountExistsValidator,
+                                                transcriptionRepository,
                                                 transcriptionDocumentRepository,
+                                                transcriptionResponseMapper,
+                                                userAccountExistsValidator,
                                                 transcriptionDocumentHideOrShowValidator,
                                                 objectAdminActionRepository,
                                                 objectHiddenReasonRepository,
                                                 userIdentity);
-    }
+  }
 
     @Test
     void returnsEmptyIfOwnerFilterProvidedWithNoMatches() {

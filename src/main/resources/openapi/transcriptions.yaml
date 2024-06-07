@@ -952,6 +952,7 @@ paths:
               schema:
                 allOf:
                   - $ref: './problem.yaml'
+
 components:
   schemas:
     TranscriptionSearchRequest:

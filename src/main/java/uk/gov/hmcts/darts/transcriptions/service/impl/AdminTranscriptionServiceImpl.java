@@ -18,8 +18,11 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResult;
@@ -28,7 +31,9 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionSearchQuery;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptionDocumentHideOrShowValidator;
 import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsValidator;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,11 +49,11 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
     private final TranscriptionRepository transcriptionRepository;
 
+    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
+
     private final TranscriptionResponseMapper transcriptionMapper;
 
     private final UserAccountExistsValidator userAccountExistsValidator;
-
-    private final TranscriptionDocumentRepository transcriptionDocumentRepository;
 
     private final TranscriptionDocumentHideOrShowValidator transcriptionDocumentHideOrShowValidator;
 
@@ -88,6 +93,26 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         return transcriptionSearchQuery.searchTranscriptions(request, transcriptionIds).stream()
             .map(this::toTranscriptionSearchResponse)
             .toList();
+    }
+
+    public List<SearchTranscriptionDocumentResponse> searchTranscriptionDocument(SearchTranscriptionDocumentRequest searchTranscriptionDocumentRequest) {
+        OffsetDateTime requestedAtFrom = searchTranscriptionDocumentRequest.getRequestedAtFrom()
+            != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtFrom(), LocalTime.MIN, ZoneOffset.UTC) : null;
+        OffsetDateTime requestedAtTo = searchTranscriptionDocumentRequest.getRequestedAtTo()
+            != null ? OffsetDateTime.of(searchTranscriptionDocumentRequest.getRequestedAtTo(), LocalTime.MAX, ZoneOffset.UTC) : null;
+
+        List<TranscriptionDocumentResult> results = transcriptionDocumentRepository.findTranscriptionMedia(
+            searchTranscriptionDocumentRequest.getCaseNumber(),
+            searchTranscriptionDocumentRequest.getCourthouseDisplayName(),
+            searchTranscriptionDocumentRequest.getHearingDate(),
+            searchTranscriptionDocumentRequest.getRequestedBy(),
+            requestedAtFrom,
+            requestedAtTo,
+            searchTranscriptionDocumentRequest.getIsManualTranscription(),
+            searchTranscriptionDocumentRequest.getOwner()
+        );
+
+        return transcriptionMapper.mapSearchTranscriptionDocumentResults(results);
     }
 
     @Override

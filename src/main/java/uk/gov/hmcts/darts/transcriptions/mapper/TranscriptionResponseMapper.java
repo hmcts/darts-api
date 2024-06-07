@@ -27,7 +27,12 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdRespo
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionWorkflowsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.ReportingRestriction;
 import uk.gov.hmcts.darts.transcriptions.model.Requestor;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCase;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCourthouse;
+import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseHearing;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -292,6 +297,59 @@ public class TranscriptionResponseMapper {
 
         details.requestedAt(transcriptionEntity.getCreatedDateTime());
         return details;
+    }
+
+    public SearchTranscriptionDocumentResponse mapSearchTranscriptionDocumentResult(TranscriptionDocumentResult transcriptionDocumentResponse) {
+        SearchTranscriptionDocumentResponse transformedMediaDetails = new SearchTranscriptionDocumentResponse();
+        transformedMediaDetails.setTranscriptionDocumentId(transcriptionDocumentResponse.transcriptionDocumentId());
+        transformedMediaDetails.setTranscriptionId(transcriptionDocumentResponse.transcriptionId());
+
+        transformedMediaDetails.isManualTranscription(transcriptionDocumentResponse.isManualTranscription());
+        transformedMediaDetails.isHidden(transcriptionDocumentResponse.isHidden());
+
+        // prioritise the case from the hearing
+        if (transcriptionDocumentResponse.hearingCaseId() != null) {
+            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
+            caseResponse.setId(transcriptionDocumentResponse.hearingCaseId());
+            caseResponse.setCaseNumber(transcriptionDocumentResponse.hearingCaseNumber());
+            transformedMediaDetails.setCase(caseResponse);
+        } else {
+            SearchTranscriptionDocumentResponseCase caseResponse = new SearchTranscriptionDocumentResponseCase();
+            caseResponse.setId(transcriptionDocumentResponse.caseId());
+            caseResponse.setCaseNumber(transcriptionDocumentResponse.caseNumber());
+            transformedMediaDetails.setCase(caseResponse);
+        }
+
+        // prioritise the courthouse that is connected to the hearing
+        if  (transcriptionDocumentResponse.hearingCourthouseId() != null) {
+            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
+            courthouseResponse.setId(transcriptionDocumentResponse.hearingCourthouseId());
+            courthouseResponse.setDisplayName(transcriptionDocumentResponse.hearingCourthouseDisplayName());
+            transformedMediaDetails.setCourthouse(courthouseResponse);
+        } else {
+            SearchTranscriptionDocumentResponseCourthouse courthouseResponse = new SearchTranscriptionDocumentResponseCourthouse();
+            courthouseResponse.setId(transcriptionDocumentResponse.courthouseId());
+            courthouseResponse.setDisplayName(transcriptionDocumentResponse.courthouseDisplayName());
+            transformedMediaDetails.setCourthouse(courthouseResponse);
+        }
+
+        if (transcriptionDocumentResponse.hearingId() != null) {
+            SearchTranscriptionDocumentResponseHearing hearingResponse = new SearchTranscriptionDocumentResponseHearing();
+            hearingResponse.setId(transcriptionDocumentResponse.hearingId());
+            hearingResponse.setHearingDate(transcriptionDocumentResponse.hearingDate());
+            transformedMediaDetails.setHearing(hearingResponse);
+        }
+
+        return transformedMediaDetails;
+    }
+
+    public List<SearchTranscriptionDocumentResponse> mapSearchTranscriptionDocumentResults(List<TranscriptionDocumentResult> entityList) {
+        List<SearchTranscriptionDocumentResponse> mappedDetails = new ArrayList<>();
+        for (TranscriptionDocumentResult entity : entityList) {
+            mappedDetails.add(mapSearchTranscriptionDocumentResult(entity));
+        }
+
+        return mappedDetails;
     }
 
     public GetTranscriptionDocumentByIdResponse getSearchByTranscriptionDocumentId(TranscriptionDocumentEntity entity) {
