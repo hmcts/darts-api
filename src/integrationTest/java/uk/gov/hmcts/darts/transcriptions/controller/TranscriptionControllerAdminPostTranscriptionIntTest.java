@@ -31,7 +31,6 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -133,7 +132,9 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         assertEquals(objectAdminActionEntity.get(0).getObjectHiddenReason().getId(), transcriptionResponse.getAdminAction().getReasonId());
         assertFalse(objectAdminActionEntity.get(0).isMarkedForManualDeletion());
         assertEquals(objectAdminActionEntity.get(0).getHiddenBy().getId(), transcriptionResponse.getAdminAction().getHiddenById());
-        assertEquals(objectAdminActionEntity.get(0).getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
+        assertEquals(objectAdminActionEntity.get(0)
+                         .getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
+                     transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
         assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelBy().getId(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
         assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionAt());
     }
