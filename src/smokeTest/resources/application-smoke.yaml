@@ -5,6 +5,7 @@ darts:
     arm-api:
       arm-username: some-username
       arm-password: some-password
+      arm-service-profile: some-profile
       url: http://localhost:4551
   automated-tasks-pod: true
   api-pod: true
