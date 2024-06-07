@@ -171,7 +171,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     public String getAutomatedTaskCronExpression(AutomatedTask automatedTask) {
         String cronExpression = getAutomatedTaskCronExpression(automatedTask.getTaskName());
         if (cronExpression == null) {
-            log.info("Unable to find cron expression for task: {}", automatedTask.getTaskName());
+            log.error("Unable to find cron expression for task: {}", automatedTask.getTaskName());
             throw new DartsApiException(INVALID_CRON_EXPRESSION);
         }
         return cronExpression;
