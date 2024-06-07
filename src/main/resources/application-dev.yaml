@@ -20,6 +20,7 @@ darts:
     arm-api:
       arm-username: ${ARM_USERNAME:dev-username}
       arm-password: ${ARM_PASSWORD:dev-password}
+      arm-service-profile: ${ARM_SERVICE_PROFILE:dev-profile}
       url: ${ARM_URL:http://localhost:4551}
 
 logging:
