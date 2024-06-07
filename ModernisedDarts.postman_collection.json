@@ -2062,9 +2062,18 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
 									"var data = JSON.parse(responseBody);",
-									"postman.clearGlobalVariable(\"jwt_token\");",
-									"postman.setGlobalVariable(\"jwt_token\", data.jwt_token);"
+									"postman.clearGlobalVariable(\"access_token\");",
+									"postman.setGlobalVariable(\"access_token\", data.access_token);"
 								],
 								"type": "text/javascript"
 							}
