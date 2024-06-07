@@ -231,8 +231,6 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         .andReturn();
 
         transcriptionDocumentHideRequest.setAdminAction(null);
-
-        List<ObjectAdminActionEntity> objectAdminActionEntity = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentEntity.getId());
         transcriptionDocumentHideRequest.setIsHidden(false);
 
         // now show the transcription document
