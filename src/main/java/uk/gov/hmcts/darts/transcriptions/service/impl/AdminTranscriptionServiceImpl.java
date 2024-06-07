@@ -186,6 +186,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
             objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
 
             objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
+            objectAdminActionEntity = objectAdminActionRepository.findById(objectAdminActionEntity.getId()).get();
 
             response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
         } else {
