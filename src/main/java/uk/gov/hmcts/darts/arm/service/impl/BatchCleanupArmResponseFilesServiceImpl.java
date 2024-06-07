@@ -78,7 +78,8 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
         if (CollectionUtils.isNotEmpty(eodEntitiesToBeDeleted)) {
             int counter = 1;
             for (ExternalObjectDirectoryEntity eodEntity : eodEntitiesToBeDeleted) {
-                log.info("Batch Cleanup ARM Response Files about to process {} of {} rows", counter++, eodEntitiesToBeDeleted.size());
+                log.info("Batch Cleanup ARM Response Files - about to process eodId {}, row {} of {} rows", eodEntity.getId(), counter++,
+                         eodEntitiesToBeDeleted.size());
                 try {
                     cleanupResponseFilesForExternalObjectDirectory(eodEntity);
                 } catch (UnableToReadArmFileException e) {

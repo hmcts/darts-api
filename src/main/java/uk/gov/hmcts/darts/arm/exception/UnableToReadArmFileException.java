@@ -10,4 +10,7 @@ public class UnableToReadArmFileException extends Exception {
         super(cause);
         this.armFilename = armFilename;
     }
+
+    public UnableToReadArmFileException() {
+    }
 }
