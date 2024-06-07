@@ -190,7 +190,7 @@ public class CleanupArmResponseFilesServiceImpl implements CleanupArmResponseFil
             log.info("About to delete {} for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
             // Make sure to only delete the Input Upload filename after the other response files have been deleted as once this is deleted
             // you cannot find the other response files
-            boolean deletedInputUploadFile = deletedFileStatuses.add(armDataManagementApi.deleteBlobData(armInputUploadFilename));
+            boolean deletedInputUploadFile = armDataManagementApi.deleteBlobData(armInputUploadFilename);
             if (deletedInputUploadFile) {
                 externalObjectDirectory.setResponseCleaned(true);
                 updateExternalObjectDirectory(externalObjectDirectory);

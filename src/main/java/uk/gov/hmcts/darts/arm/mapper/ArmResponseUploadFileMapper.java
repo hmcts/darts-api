@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
@@ -30,9 +29,8 @@ public class ArmResponseUploadFileMapper {
     private UploadNewFileRecord readInputJson(String input) {
         UploadNewFileRecord uploadNewFileRecord = null;
         if (StringUtils.isNotEmpty(input)) {
-            String unescapedJson = StringEscapeUtils.unescapeJson(input);
             try {
-                uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
+                uploadNewFileRecord = objectMapper.readValue(input, UploadNewFileRecord.class);
             } catch (JsonMappingException e) {
                 log.error("Unable to map the input field {}", e.getMessage());
             } catch (JsonProcessingException e) {

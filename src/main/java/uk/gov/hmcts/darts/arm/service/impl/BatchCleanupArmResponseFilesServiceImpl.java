@@ -6,17 +6,17 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.exception.UnableToReadArmFileException;
 import uk.gov.hmcts.darts.arm.helper.ArmResponseFileHelper;
+import uk.gov.hmcts.darts.arm.model.EodIdAndAssociatedFilenames;
 import uk.gov.hmcts.darts.arm.model.InputUploadAndAssociatedFilenames;
 import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
-import uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -27,11 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_MANIFEST_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DELETED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
 
@@ -67,7 +65,7 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
         Integer cleanupBufferMinutes = armDataManagementConfiguration.getBatchResponseCleanupBufferMinutes();
         OffsetDateTime dateTimeForDeletion = currentTimeHelper.currentOffsetDateTime().minusMinutes(cleanupBufferMinutes);
 
-        List<ExternalObjectDirectoryEntity> objectDirectoryDataToBeDeleted =
+        List<ExternalObjectDirectoryEntity> eodEntitiesToBeDeleted =
             externalObjectDirectoryRepository.findBatchArmResponseFiles(
                 statusToSearch,
                 armLocation,
@@ -77,88 +75,85 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
                 batchsize
             );
 
-        if (CollectionUtils.isNotEmpty(objectDirectoryDataToBeDeleted)) {
+        if (CollectionUtils.isNotEmpty(eodEntitiesToBeDeleted)) {
             int counter = 1;
-            for (ExternalObjectDirectoryEntity externalObjectDirectory : objectDirectoryDataToBeDeleted) {
-                log.info("Batch Cleanup ARM Response Files about to process {} of {} rows", counter++, objectDirectoryDataToBeDeleted.size());
-                cleanupResponseFilesForExternalObjectDirectory(externalObjectDirectory);
+            for (ExternalObjectDirectoryEntity eodEntity : eodEntitiesToBeDeleted) {
+                log.info("Batch Cleanup ARM Response Files about to process {} of {} rows", counter++, eodEntitiesToBeDeleted.size());
+                try {
+                    cleanupResponseFilesForExternalObjectDirectory(eodEntity);
+                } catch (UnableToReadArmFileException e) {
+                    log.error("Cannot process eodId {} due to corrupt ARM file.", eodEntity.getId());
+                }
             }
         } else {
             log.info("No ARM responses found to be deleted}");
         }
     }
 
-    private void cleanupResponseFilesForExternalObjectDirectory(ExternalObjectDirectoryEntity eodEntity) {
+    private void cleanupResponseFilesForExternalObjectDirectory(ExternalObjectDirectoryEntity eodEntity) throws UnableToReadArmFileException {
         String manifestFile = eodEntity.getManifestFile();
         log.debug("Found ARM manifest file {} for cleanup", manifestFile);
-        List<InputUploadAndAssociatedFilenames> correspondingArmFiles = armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(manifestFile);
-        for (InputUploadAndAssociatedFilenames correspondingArmFile : correspondingArmFiles) {
-            deleteResponseFiles(eodEntity, correspondingArmFile);
+        List<InputUploadAndAssociatedFilenames> inputUploadAndAssociatedList = armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(manifestFile);
+        for (InputUploadAndAssociatedFilenames inputUploadAndAssociates : inputUploadAndAssociatedList) {
+            deleteResponseFiles(eodEntity, inputUploadAndAssociates);
         }
     }
 
     private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory, InputUploadAndAssociatedFilenames inputUploadAndAssociates) {
-        List<String> associatedFiles = inputUploadAndAssociates.getAssociatedFiles();
+        List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = inputUploadAndAssociates.getEodIdAndAssociatedFilenamesList();
         List<Boolean> deletedFileStatuses = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(associatedFiles)) {
-            for (String responseFile : associatedFiles) {
+        for (EodIdAndAssociatedFilenames eodIdAndAssociatedFilenames : eodIdAndAssociatedFilenamesList) {
+            boolean successfullyDeletedAssociatedFiles = true;
+            Integer eodId = eodIdAndAssociatedFilenames.getEodId();
+            for (String associatedFile : eodIdAndAssociatedFilenames.getAssociatedFiles()) {
                 try {
-                    Integer eodIdFromArmFile = armResponseFileHelper.getEodIdFromArmFile(responseFile);
-                    log.info("About to delete file {} for EOD {}, linked to EOD {}", responseFile, eodIdFromArmFile, externalObjectDirectory.getId());
-                    boolean responseFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(responseFile);
+                    log.info("About to delete file {} for EOD {}, linked to EOD {}", associatedFile, eodId, externalObjectDirectory.getId());
+                    boolean responseFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(associatedFile);
                     deletedFileStatuses.add(responseFileDeletedSuccessfully);
                     if (!responseFileDeletedSuccessfully) {
-                        log.warn("Response file {} failed to delete successfully, but ignoring.", responseFile);
+                        log.warn("Response file {} failed to delete successfully, but ignoring.", associatedFile);
+                        successfullyDeletedAssociatedFiles = false;
                         break;
                     }
-                    Optional<ExternalObjectDirectoryEntity> eodEntityOpt = externalObjectDirectoryRepository.findById(eodIdFromArmFile);
-                    if (eodEntityOpt.isEmpty()) {
-                        log.error("EodEntity {}, found in ARM response file {}, cannot be found.", eodIdFromArmFile, responseFile);
-                        throw new Exception();
-                    }
-                    ExternalObjectDirectoryEntity eodEntity = eodEntityOpt.get();
-                    updateExternalObjectDirectory(eodEntity, DELETED);
                 } catch (Exception e) {
-                    log.error("Failure to delete response file {} for EOD {} - {}", responseFile, externalObjectDirectory.getId(), e.getMessage(), e);
+                    log.error("Failure to delete response file {} for EOD {} - {}", associatedFile, externalObjectDirectory.getId(), e.getMessage(), e);
                     deletedFileStatuses.add(false);
+                    successfullyDeletedAssociatedFiles = false;
                 }
             }
+            if (successfullyDeletedAssociatedFiles) {
+                Optional<ExternalObjectDirectoryEntity> eodEntityOpt = externalObjectDirectoryRepository.findById(eodId);
+                if (eodEntityOpt.isEmpty()) {
+                    log.error("EodEntity {} cannot be found.", eodId);
+                    break;
+                }
+                ExternalObjectDirectoryEntity eodEntity = eodEntityOpt.get();
+                setResponseCleaned(eodEntity);
+            }
         }
+
+
         if (deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
             String armInputUploadFilename = inputUploadAndAssociates.getInputUploadFilename();
             log.info("All associated Eod entries deleted, about to delete {} for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
             // Make sure to only delete the Input Upload filename after the other response files have been deleted as once this is deleted
             // you cannot find the other response files
             boolean inputUploadFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(armInputUploadFilename);
+            setResponseCleaned(externalObjectDirectory);
             if (inputUploadFileDeletedSuccessfully) {
-                externalObjectDirectory.setResponseCleaned(true);
-                updateExternalObjectDirectory(externalObjectDirectory);
                 log.info("Successfully cleaned up response files for EOD {}", externalObjectDirectory.getId());
             } else {
                 log.warn("Unable to delete input upload response file for EOD {}", externalObjectDirectory.getId());
-                externalObjectDirectory.setResponseCleaned(true);
-                updateExternalObjectDirectory(externalObjectDirectory);
             }
         } else {
             log.warn("Unable to delete all response files for EOD {}", externalObjectDirectory.getId());
         }
     }
 
-    private void updateExternalObjectDirectory(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEnum status) {
-        externalObjectDirectory.setStatus(objectRecordStatusRepository.getReferenceById(status.getId()));
-        updateExternalObjectDirectory(externalObjectDirectory);
-    }
-
-    private void updateExternalObjectDirectory(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void setResponseCleaned(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        externalObjectDirectory.setResponseCleaned(true);
         externalObjectDirectory.setLastModifiedBy(userAccount);
-        externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
 
-    private String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        return new StringBuilder(String.valueOf(externalObjectDirectory.getId()))
-            .append(ARM_FILENAME_SEPARATOR)
-            .append(ArmResponseFilesUtil.getObjectTypeId(externalObjectDirectory))
-            .append(ARM_FILENAME_SEPARATOR).toString();
-    }
 }
