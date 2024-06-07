@@ -136,7 +136,9 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
                          .getHiddenDateTime().truncatedTo(ChronoUnit.SECONDS),
                      transcriptionResponse.getAdminAction().getHiddenAt().truncatedTo(ChronoUnit.SECONDS));
         assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelBy().getId(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionAt());
+        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime()
+                         .truncatedTo(ChronoUnit.SECONDS), transcriptionResponse.getAdminAction()
+            .getMarkedForManualDeletionAt().truncatedTo(ChronoUnit.SECONDS));
     }
 
     @Test
