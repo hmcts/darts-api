@@ -34,6 +34,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
+@SuppressWarnings({"PMD.NcssCount"})
 class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 9, 26, 10, 0, 0);
@@ -81,7 +82,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
      */
     void successProcess1InputUploadWith4AssociatedFilesOver2uuids() throws IOException {
         String manifestFilePrefix = "DARTS_";
-        String inputUploadUUID = "InputUploadUUID";
+        String inputUploadUuid = "InputUploadUUID";
 
         ExternalObjectDirectoryEntity armIuEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -90,7 +91,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
-        String manifestFilename = manifestFilePrefix + inputUploadUUID + ".a360";
+        String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
         armIuEod.setLastModifiedDateTime(latestDateTime);
         armIuEod.setTransferAttempts(1);
         armIuEod.setResponseCleaned(false);
@@ -105,7 +106,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String inputUploadFilename = manifestFilePrefix + inputUploadUUID + "_" + inputUploadHash + "_1_iu.rsp";
+        String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
         when(armDataManagementApi.listResponseBlobs("DARTS_InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
 
         String createRecordFilename1 = inputUploadHash + "_00000001-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
@@ -168,7 +169,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundMediaEod2.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobs(inputUploadHash);
-        verify(armDataManagementApi).listResponseBlobs(manifestFilePrefix + inputUploadUUID);
+        verify(armDataManagementApi).listResponseBlobs(manifestFilePrefix + inputUploadUuid);
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
         verify(armDataManagementApi).getBlobData(createRecordFilename2);
@@ -194,7 +195,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     void successProcess1InputUploadWith6AssociatedFilesOver3uuids1ResponseFail() throws IOException {
 
         String manifestFilePrefix = "DARTS_";
-        String inputUploadUUID = "InputUploadUUID";
+        String inputUploadUuid = "InputUploadUUID";
 
         ExternalObjectDirectoryEntity armIuEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -203,7 +204,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
             UUID.randomUUID()
         );
         OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
-        String manifestFilename = manifestFilePrefix + inputUploadUUID + ".a360";
+        String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
         armIuEod.setLastModifiedDateTime(latestDateTime);
         armIuEod.setTransferAttempts(1);
         armIuEod.setResponseCleaned(false);
@@ -218,7 +219,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
-        String inputUploadFilename = manifestFilePrefix + inputUploadUUID + "_" + inputUploadHash + "_1_iu.rsp";
+        String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
         when(armDataManagementApi.listResponseBlobs("DARTS_InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
 
         String createRecordFilename1 = inputUploadHash + "_00000001-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
@@ -301,7 +302,7 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         assertTrue(foundChildEod3.isResponseCleaned());
 
         verify(armDataManagementApi).listResponseBlobs(inputUploadHash);
-        verify(armDataManagementApi).listResponseBlobs(manifestFilePrefix + inputUploadUUID);
+        verify(armDataManagementApi).listResponseBlobs(manifestFilePrefix + inputUploadUuid);
         verify(armDataManagementApi).getBlobData(createRecordFilename1);
         verify(armDataManagementApi).getBlobData(uploadFileFilename1);
         verify(armDataManagementApi).getBlobData(createRecordFilename2);

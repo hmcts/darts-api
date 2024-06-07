@@ -12,12 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 public class InputUploadAndAssociatedFilenames {
     String inputUploadFilename;
-    List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList;
+    List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = new ArrayList<>();
 
     public void addAssociatedFile(Integer eodId, String filename) {
-        if (eodIdAndAssociatedFilenamesList == null) {
-            eodIdAndAssociatedFilenamesList = new ArrayList<>();
-        }
         for (EodIdAndAssociatedFilenames eodIdAndAssociatedFilenames : eodIdAndAssociatedFilenamesList) {
             if (eodId.equals(eodIdAndAssociatedFilenames.getEodId())) {
                 eodIdAndAssociatedFilenames.addAssociatedFile(filename);

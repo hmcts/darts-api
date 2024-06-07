@@ -31,11 +31,15 @@ public class ArmResponseFileHelper {
 
         List<InputUploadAndAssociatedFilenames> responseList = new ArrayList<>();
         String manifestFilePrefix = armDataManagementConfiguration.getManifestFilePrefix();
-        if (manifestFileName.startsWith(manifestFilePrefix) &&
-            manifestFileName.endsWith(DOT_A360)) {
+        if (manifestFileName.startsWith(manifestFilePrefix)
+            && manifestFileName.endsWith(DOT_A360)) {
             //is a Batch response UI file.
             String armUuidValue = StringUtils.removeEnd(manifestFileName, DOT_A360);
             List<String> matchingInputUploadFiles = armDataManagementApi.listResponseBlobs(armUuidValue);
+            //there should only be 1 matching InputUpload file, but looping through it just in case.
+            if (matchingInputUploadFiles.size() > 1) {
+                log.warn("Found more than 1 inputUpload file for uuid {}. Continuing anyway.", armUuidValue);
+            }
             for (String inputUploadFile : matchingInputUploadFiles) {
                 InputUploadAndAssociatedFilenames inputUploadAndAssociatedFilenames = new InputUploadAndAssociatedFilenames();
                 inputUploadAndAssociatedFilenames.setInputUploadFilename(inputUploadFile);

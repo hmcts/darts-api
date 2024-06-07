@@ -94,6 +94,7 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
         String manifestFile = eodEntity.getManifestFile();
         log.debug("Found ARM manifest file {} for cleanup", manifestFile);
         List<InputUploadAndAssociatedFilenames> inputUploadAndAssociatedList = armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(manifestFile);
+        //inputUploadAndAssociatedList should only contain 1 matching InputUpload file, but looping through it just in case.
         for (InputUploadAndAssociatedFilenames inputUploadAndAssociates : inputUploadAndAssociatedList) {
             deleteResponseFiles(eodEntity, inputUploadAndAssociates);
         }
@@ -109,18 +110,17 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
                 try {
                     log.info("About to delete file {} for EOD {}, linked to EOD {}", associatedFile, eodId, externalObjectDirectory.getId());
                     boolean responseFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(associatedFile);
-                    deletedFileStatuses.add(responseFileDeletedSuccessfully);
                     if (!responseFileDeletedSuccessfully) {
-                        log.warn("Response file {} failed to delete successfully, but ignoring.", associatedFile);
+                        log.warn("Response file {} failed to delete successfully.", associatedFile);
                         successfullyDeletedAssociatedFiles = false;
                         break;
                     }
                 } catch (Exception e) {
                     log.error("Failure to delete response file {} for EOD {} - {}", associatedFile, externalObjectDirectory.getId(), e.getMessage(), e);
-                    deletedFileStatuses.add(false);
                     successfullyDeletedAssociatedFiles = false;
                 }
             }
+            deletedFileStatuses.add(successfullyDeletedAssociatedFiles);
             if (successfullyDeletedAssociatedFiles) {
                 Optional<ExternalObjectDirectoryEntity> eodEntityOpt = externalObjectDirectoryRepository.findById(eodId);
                 if (eodEntityOpt.isEmpty()) {
