@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -261,16 +262,8 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
         // assert that the action data that existed before deletion is returned
         assertEquals(documentEntity.getId(), transcriptionResponse.getId());
         assertEquals(documentEntity.isHidden(), transcriptionResponse.getIsHidden());
-        assertEquals(objectAdminActionEntity.get(0).getId(), transcriptionResponse.getAdminAction().getId());
-        assertEquals(objectAdminActionEntity.get(0).getComments(), transcriptionResponse.getAdminAction().getComments());
-        assertEquals(objectAdminActionEntity.get(0).getTicketReference(), transcriptionResponse.getAdminAction().getTicketReference());
-        assertEquals(objectAdminActionEntity.get(0).getObjectHiddenReason().getId(), transcriptionResponse.getAdminAction().getReasonId());
-        assertFalse(objectAdminActionEntity.get(0).isMarkedForManualDeletion());
-        assertEquals(objectAdminActionEntity.get(0).getHiddenBy().getId(), transcriptionResponse.getAdminAction().getHiddenById());
-        assertEquals(objectAdminActionEntity.get(0).getHiddenDateTime(), transcriptionResponse.getAdminAction().getHiddenAt());
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelBy().getId(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionById());
-        assertEquals(objectAdminActionEntity.get(0).getMarkedForManualDelDateTime(), transcriptionResponse.getAdminAction().getMarkedForManualDeletionAt());
-    }
+        assertNull(transcriptionResponse.getAdminAction());
+   }
 
     @Test
     void testTranscriptionDocumentShowForbidden() throws Exception {

@@ -325,7 +325,7 @@ class AdminTranscriptionServiceTest {
 
         TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
 
-        when(transcriptionResponseMapper.mapHideOrShowResponse(transcriptionDocumentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
+        when(transcriptionResponseMapper.mapHideOrShowResponse(transcriptionDocumentEntity, null)).thenReturn(expectedResponse);
 
         // run the test
         TranscriptionDocumentHideResponse actualResponse

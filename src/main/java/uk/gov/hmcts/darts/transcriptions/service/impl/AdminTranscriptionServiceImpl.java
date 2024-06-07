@@ -191,11 +191,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         } else {
             List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
 
-            if (!objectAdminActionEntityLst.isEmpty()) {
-                response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), objectAdminActionEntityLst.get(0));
-            } else {
-                response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
-            }
+            response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
 
             for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
                 objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
