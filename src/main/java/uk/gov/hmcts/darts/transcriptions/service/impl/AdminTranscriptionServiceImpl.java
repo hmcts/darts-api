@@ -154,8 +154,8 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
     }
 
     @Transactional
-    public TranscriptionDocumentHideResponse hideOrUnhideTranscriptionDocumentById(Integer transcriptionDocumentId,
-                                                                         TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
+    public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
+                                                                                 TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
 
         TranscriptionDocumentHideResponse response;
 

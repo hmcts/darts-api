@@ -272,7 +272,7 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<TranscriptionDocumentHideResponse> hideTranscriptionDocumentId(Integer transcriptionDocumentId,
                                                                                          TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
         TranscriptionDocumentHideResponse response
-            = adminTranscriptionSearchService.hideOrUnhideTranscriptionDocumentById(transcriptionDocumentId, transcriptionDocumentHideRequest);
+            = adminTranscriptionSearchService.hideOrShowTranscriptionDocumentById(transcriptionDocumentId, transcriptionDocumentHideRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

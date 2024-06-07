@@ -249,7 +249,7 @@ class AdminTranscriptionServiceTest {
     }
 
     void setupTestTranscriptionDocumentHide(TranscriptionDocumentHideRequest request) {
-        Integer hideOrUnhideTranscriptionDocument = 343;
+        Integer hideOrShowTranscriptionDocument = 343;
         Integer reasonId = 555;
 
         String ticketReference = "my ticket reference";
@@ -265,7 +265,7 @@ class AdminTranscriptionServiceTest {
         UserAccountEntity userAccountEntity = mock(UserAccountEntity.class);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        when(transcriptionDocumentRepository.findById(hideOrUnhideTranscriptionDocument)).thenReturn(Optional.of(transcriptionDocumentEntity));
+        when(transcriptionDocumentRepository.findById(hideOrShowTranscriptionDocument)).thenReturn(Optional.of(transcriptionDocumentEntity));
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
@@ -281,7 +281,7 @@ class AdminTranscriptionServiceTest {
 
         //run the test
         TranscriptionDocumentHideResponse actualResponse
-            = adminTranscriptionSearchService.hideOrUnhideTranscriptionDocumentById(hideOrUnhideTranscriptionDocument, request);
+            = adminTranscriptionSearchService.hideOrShowTranscriptionDocumentById(hideOrShowTranscriptionDocument, request);
 
 
         // make the assertion
@@ -301,7 +301,7 @@ class AdminTranscriptionServiceTest {
         TranscriptionDocumentHideRequest request = new TranscriptionDocumentHideRequest();
         request.setIsHidden(false);
 
-        Integer hideOrUnhideTranscriptionDocument = 343;
+        Integer hideOrShowTranscriptionDocument = 343;
         Integer reasonId = 555;
 
         AdminActionRequest adminActionRequest = new AdminActionRequest();
@@ -309,7 +309,7 @@ class AdminTranscriptionServiceTest {
         request.setAdminAction(adminActionRequest);
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        when(transcriptionDocumentRepository.findById(hideOrUnhideTranscriptionDocument)).thenReturn(Optional.of(transcriptionDocumentEntity));
+        when(transcriptionDocumentRepository.findById(hideOrShowTranscriptionDocument)).thenReturn(Optional.of(transcriptionDocumentEntity));
 
         Integer objectAdminActionEntityId = 1000;
         Integer objectAdminActionEntityId1 = 1001;
@@ -321,7 +321,7 @@ class AdminTranscriptionServiceTest {
 
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
         when(objectAdminActionRepository
-                 .findByTranscriptionDocument_Id(hideOrUnhideTranscriptionDocument)).thenReturn(List.of(objectAdminActionEntity, objectAdminActionEntity1));
+                 .findByTranscriptionDocument_Id(hideOrShowTranscriptionDocument)).thenReturn(List.of(objectAdminActionEntity, objectAdminActionEntity1));
 
         TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
 
@@ -329,7 +329,7 @@ class AdminTranscriptionServiceTest {
 
         // run the test
         TranscriptionDocumentHideResponse actualResponse
-            = adminTranscriptionSearchService.hideOrUnhideTranscriptionDocumentById(hideOrUnhideTranscriptionDocument, request);
+            = adminTranscriptionSearchService.hideOrShowTranscriptionDocumentById(hideOrShowTranscriptionDocument, request);
 
         // make the assertion
         Assertions.assertFalse(transcriptionDocumentEntityArgumentCaptor.getValue().isHidden());

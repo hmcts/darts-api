@@ -22,6 +22,6 @@ public interface AdminTranscriptionService {
 
     GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument);
 
-    TranscriptionDocumentHideResponse hideOrUnhideTranscriptionDocumentById(Integer transcriptionDocumentId,
-                                                                            TranscriptionDocumentHideRequest transcriptionDocumentHideRequest);
+    TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
+                                                                          TranscriptionDocumentHideRequest transcriptionDocumentHideRequest);
 }
