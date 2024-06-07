@@ -12,14 +12,14 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_CLEANUP_ARM
 @Slf4j
 public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableAutomatedTask {
     protected String taskName = BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME.getTaskName();
-    private final BatchCleanupArmResponseFilesService cleanupArmResponseFilesService;
+    private final BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService;
 
     public BatchCleanupArmResponseFilesAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                                      LockProvider lockProvider,
                                                      AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                     BatchCleanupArmResponseFilesService cleanupArmResponseFilesService, LogApi logApi) {
+                                                     BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService, LogApi logApi) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
-        this.cleanupArmResponseFilesService = cleanupArmResponseFilesService;
+        this.batchCleanupArmResponseFilesService = batchCleanupArmResponseFilesService;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
             batchSize = 1000000;
         }
 
-        cleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
+        batchCleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
     }
 
     @Override

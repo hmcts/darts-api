@@ -69,6 +69,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.APPLY_RETENTION_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLEANUP_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
@@ -224,22 +225,22 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
         switch (AutomatedTaskName.valueOfTaskName(taskName)) {
-            case PROCESS_DAILY_LIST_TASK_NAME -> rescheduleProcessDailyListAutomatedTask();
-            case CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME -> rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
-            case OUTBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleOutboundAudioDeleterAutomatedTask();
-            case INBOUND_TO_UNSTRUCTURED_TASK_NAME -> rescheduleInboundToUnstructuredAutomatedTask();
-            case EXTERNAL_DATASTORE_DELETER_TASK_NAME -> rescheduleExternalDataStoreDeleterAutomatedTask();
-            case INBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleInboundAudioDeleterAutomatedTask();
-            case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
-            case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
-            case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcessArmResponseFilesAutomatedTask();
-            case APPLY_RETENTION_TASK_NAME -> rescheduleApplyRetentionAutomatedTask();
             case APPLY_RETENTION_CASE_ASSOCIATED_OBJECTS_TASK_NAME -> rescheduleCaseObjectApplyRetentionAutomatedTask();
+            case APPLY_RETENTION_TASK_NAME -> rescheduleApplyRetentionAutomatedTask();
+            case ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME -> rescheduleArmRetentionEventDateCalculatorAutomatedTask();
+            case BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleBatchCleanupArmResponseFilesAutomatedTask();
             case CLEANUP_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleCleanupArmResponseFilesAutomatedTask();
             case CLOSE_OLD_CASES_TASK_NAME -> rescheduleCloseOldCasesAutomatedTask();
-
+            case CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME -> rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
             case DAILY_LIST_HOUSEKEEPING_TASK_NAME -> rescheduleDailyListHousekeepingAutomatedTask();
-            case ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME -> rescheduleArmRetentionEventDateCalculatorAutomatedTask();
+            case EXTERNAL_DATASTORE_DELETER_TASK_NAME -> rescheduleExternalDataStoreDeleterAutomatedTask();
+            case INBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleInboundAudioDeleterAutomatedTask();
+            case INBOUND_TO_UNSTRUCTURED_TASK_NAME -> rescheduleInboundToUnstructuredAutomatedTask();
+            case OUTBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleOutboundAudioDeleterAutomatedTask();
+            case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcessArmResponseFilesAutomatedTask();
+            case PROCESS_DAILY_LIST_TASK_NAME -> rescheduleProcessDailyListAutomatedTask();
+            case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
+            case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -728,6 +729,24 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(cleanupArmResponseFilesAutomatedTask);
             taskScheduler.schedule(cleanupArmResponseFilesAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleBatchCleanupArmResponseFilesAutomatedTask() {
+
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(BATCH_CLEANUP_ARM_RESPONSE_FILES_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var batchCleanupArmResponseFilesAutomatedTask = new BatchCleanupArmResponseFilesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                batchCleanupArmResponseFilesService,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(batchCleanupArmResponseFilesAutomatedTask);
+            taskScheduler.schedule(batchCleanupArmResponseFilesAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
