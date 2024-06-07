@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -153,7 +154,7 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
         }
     }
 
-    @Transactional
+    //@Transactional
     public TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
                                                                                  TranscriptionDocumentHideRequest transcriptionDocumentHideRequest) {
 
