@@ -19,14 +19,14 @@ class ArmResponseUploadFileMapperTest extends IntegrationBase {
     private ArmResponseUploadFileMapper armResponseUploadFileMapper;
 
     @Test
-    public void parseOk() throws IOException, UnableToReadArmFileException {
+    void parseOk() throws IOException, UnableToReadArmFileException {
         String fileContents = getContentsFromFile("tests/arm/mapper/ArmResponseUploadFileMapperTest/parseOk.json");
         ArmResponseUploadFileRecordObject result = armResponseUploadFileMapper.map(fileContents);
         assertEquals("0002", result.getInput().getRelationId());
     }
 
     @Test
-    public void parseFailInputJson() throws IOException {
+    void parseFailInputJson() throws IOException {
         String fileContents = getContentsFromFile("tests/arm/mapper/ArmResponseUploadFileMapperTest/parseFailInputJson.json");
         assertThrows(JsonParseException.class,
                      () -> armResponseUploadFileMapper.map(fileContents));
@@ -34,7 +34,7 @@ class ArmResponseUploadFileMapperTest extends IntegrationBase {
     }
 
     @Test
-    public void parseFailInputBlank() throws IOException {
+    void parseFailInputBlank() throws IOException {
         String fileContents = getContentsFromFile("tests/arm/mapper/ArmResponseUploadFileMapperTest/parseFailInputBlank.json");
         assertThrows(UnableToReadArmFileException.class,
                      () -> armResponseUploadFileMapper.map(fileContents));
