@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.AdminAction;
 import uk.gov.hmcts.darts.transcriptions.model.AdminActionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
@@ -353,16 +354,40 @@ public class TranscriptionResponseMapper {
     }
 
     public GetTranscriptionDocumentByIdResponse getSearchByTranscriptionDocumentId(TranscriptionDocumentEntity entity) {
-        GetTranscriptionDocumentByIdResponse response = new GetTranscriptionDocumentByIdResponse();
-        response.setTranscriptionDocumentId(entity.getId());
-        response.setTranscriptionId(entity.getTranscription().getId());
-        response.setFileName(entity.getFileName());
-        response.setFileType(entity.getFileType());
-        response.setFileSizeBytes(entity.getFileSize());
-        response.setUploadedAt(entity.getUploadedDateTime());
-        response.setUploadedBy(entity.getUploadedBy().getId());
-        response.setIsHidden(entity.isHidden());
-        return response;
+        return new GetTranscriptionDocumentByIdResponse()
+            .transcriptionDocumentId(entity.getId())
+            .transcriptionId(entity.getTranscription().getId())
+            .fileName(entity.getFileName())
+            .fileType(entity.getFileType())
+            .fileSizeBytes(entity.getFileSize())
+            .uploadedAt(entity.getUploadedDateTime())
+            .uploadedBy(entity.getUploadedBy().getId())
+            .isHidden(entity.isHidden())
+            .retainUntil(entity.getRetainUntilTs())
+            .contentObjectId(entity.getContentObjectId())
+            .clipId(entity.getClipId())
+            .checksum(entity.getChecksum())
+            .lastModifiedAt(entity.getLastModifiedTimestamp())
+            .lastModifiedBy(entity.getLastModifiedBy().getId())
+            .adminAction(buildAdminAction(entity));
+    }
+
+    private AdminAction buildAdminAction(TranscriptionDocumentEntity entity) {
+        if (entity.getAdminActions().isEmpty() || !entity.isHidden()) {
+            return null;
+        }
+
+        var action = entity.getAdminActions().get(0); // assume only 1 exists
+        return new AdminAction()
+            .comments(action.getComments())
+            .id(action.getId())
+            .reasonId(action.getObjectHiddenReason().getId())
+            .hiddenById(action.getHiddenBy().getId())
+            .hiddenAt(action.getHiddenDateTime())
+            .isMarkedForManualDeletion(action.isMarkedForManualDeletion())
+            .markedForManualDeletionAt(action.getMarkedForManualDelDateTime())
+            .ticketReference(action.getTicketReference())
+            .markedForManualDeletionById(action.getMarkedForManualDelBy().getId());
     }
 
     public TranscriptionDocumentHideResponse mapHideOrShowResponse(TranscriptionDocumentEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
