@@ -269,11 +269,8 @@ class AdminTranscriptionServiceTest {
         when(userIdentity.getUserAccount()).thenReturn(userAccountEntity);
 
         when(transcriptionDocumentRepository.saveAndFlush(transcriptionDocumentEntityArgumentCaptor.capture())).thenReturn(transcriptionDocumentEntity);
-        Integer objectAdminActionId = -1;
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-        objectAdminActionEntity.setId(objectAdminActionId);
         ObjectHiddenReasonEntity objectHiddenReasonEntity = new ObjectHiddenReasonEntity();
-
         TranscriptionDocumentHideResponse expectedResponse = new TranscriptionDocumentHideResponse();
 
         when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(objectHiddenReasonEntity));
@@ -281,7 +278,6 @@ class AdminTranscriptionServiceTest {
         when(objectAdminActionRepository.saveAndFlush(objectAdminActionEntityArgumentCaptor.capture())).thenReturn(objectAdminActionEntity);
 
         when(transcriptionResponseMapper.mapHideOrShowResponse(transcriptionDocumentEntity, objectAdminActionEntity)).thenReturn(expectedResponse);
-        when(objectAdminActionRepository.findById(objectAdminActionId)).thenReturn(Optional.of(objectAdminActionEntity));
 
         //run the test
         TranscriptionDocumentHideResponse actualResponse
