@@ -15,6 +15,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.component.AutomatedTaskProcessorFactory;
 import uk.gov.hmcts.darts.arm.service.ArmRetentionEventDateProcessor;
+import uk.gov.hmcts.darts.arm.service.BatchCleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.arm.service.CleanupArmResponseFilesService;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ApplyRetentionCaseAssociatedObjectsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ArmRetentionEventDateCalculatorAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.BatchCleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CleanupArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
@@ -128,6 +130,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final ApplyRetentionCaseAssociatedObjectsProcessor applyRetentionCaseAssociatedObjectsProcessor;
 
+    private final BatchCleanupArmResponseFilesService batchCleanupArmResponseFilesService;
     private final CleanupArmResponseFilesService cleanupArmResponseFilesService;
 
     private final CloseOldCasesProcessor closeOldCasesProcessor;
@@ -141,22 +144,22 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         log.info("Automated tasks are loading");
-        addProcessDailyListToTaskRegistrar(taskRegistrar);
-        addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
-        addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
-        addInboundToUnstructuredTaskRegistrar(taskRegistrar);
-        addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
-        addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
-        addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
-        addUnstructuredToArmTaskRegistrar(taskRegistrar);
-        addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
         addApplyRetentionToTaskRegistrar(taskRegistrar);
+        addArmRetentionEventDateCalculatorToTaskRegister(taskRegistrar);
+        addBatchCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
         addCaseObjectApplyRetentionToTaskRegistrar(taskRegistrar);
         addCleanupArmResponseFilesTaskRegistrar(taskRegistrar);
+        addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
         addCloseOldCasesTaskRegistrar(taskRegistrar);
-
         addDailyListHouseKeepingToTaskRegistrar(taskRegistrar);
-        addArmRetentionEventDateCalculatorToTaskRegister(taskRegistrar);
+        addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
+        addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
+        addInboundToUnstructuredTaskRegistrar(taskRegistrar);
+        addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
+        addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
+        addProcessDailyListToTaskRegistrar(taskRegistrar);
+        addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
+        addUnstructuredToArmTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -465,6 +468,19 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         cleanupArmResponseFilesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(cleanupArmResponseFilesAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(cleanupArmResponseFilesAutomatedTask);
         taskRegistrar.addTriggerTask(cleanupArmResponseFilesAutomatedTask, trigger);
+    }
+
+    private void addBatchCleanupArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var batchCleanupArmResponseFilesAutomatedTask = new BatchCleanupArmResponseFilesAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            batchCleanupArmResponseFilesService,
+            logApi
+        );
+        batchCleanupArmResponseFilesAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(batchCleanupArmResponseFilesAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(batchCleanupArmResponseFilesAutomatedTask);
+        taskRegistrar.addTriggerTask(batchCleanupArmResponseFilesAutomatedTask, trigger);
     }
 
     private void addCloseOldCasesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
