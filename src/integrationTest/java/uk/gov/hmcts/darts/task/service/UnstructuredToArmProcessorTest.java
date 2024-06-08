@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
@@ -48,7 +49,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     private static final LocalDateTime HEARING_DATE = LocalDateTime.of(2023, 6, 10, 10, 0, 0);
     private UnstructuredToArmProcessor unstructuredToArmProcessor;
-    @MockBean
+    @SpyBean
     private ArmDataManagementApi armDataManagementApi;
 
     @Autowired
@@ -437,7 +438,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         BlobStorageException blobStorageException = mock(BlobStorageException.class);
         when(blobStorageException.getStatusCode()).thenReturn(123);
         when(blobStorageException.getMessage()).thenReturn("Copying blob failed");
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenReturn("1_1_1").thenThrow(blobStorageException);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(blobStorageException);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

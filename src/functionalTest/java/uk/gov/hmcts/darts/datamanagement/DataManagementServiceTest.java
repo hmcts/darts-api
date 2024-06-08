@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -33,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles({"dev", "h2db"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class DataManagementServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
@@ -46,6 +49,8 @@ class DataManagementServiceTest {
     DataManagementService dataManagementService;
     @Autowired
     DataManagementConfiguration dataManagementConfiguration;
+    @Autowired
+    ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
@@ -128,18 +133,19 @@ class DataManagementServiceTest {
 
         var sourceUuid = dataManagementService.saveBlobData(dataManagementConfiguration.getInboundContainerName(), data);
 
-        UUID destinationUuid = dataManagementService.copyBlobData(
+        UUID destinationLocation = UUID.randomUUID();
+        dataManagementService.copyBlobData(
             dataManagementConfiguration.getInboundContainerName(),
             dataManagementConfiguration.getUnstructuredContainerName(),
-            sourceUuid);
+            sourceUuid.toString(), destinationLocation.toString());
 
         var blobData = dataManagementService.getBlobData(
             dataManagementConfiguration.getUnstructuredContainerName(),
-            destinationUuid
+            destinationLocation
         );
 
         dataManagementService.deleteBlobData(dataManagementConfiguration.getInboundContainerName(), sourceUuid);
-        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), destinationUuid);
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), destinationLocation);
 
         assertEquals(TEST_BINARY_STRING, blobData.toString());
     }
