@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.test.common.TestUtils;
@@ -35,6 +36,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.test.common.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.test.common.data.CourthouseTestData.someMinimalCourthouse;
@@ -55,14 +57,20 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @Autowired
     CaseService service;
     CourthouseEntity swanseaCourthouse;
+    CourthouseEntity londonCourthouse;
     UserAccountEntity user;
     CourtroomEntity courtroom1;
+    CourtroomEntity courtroomLondon;
 
     @BeforeEach
     void setupData() {
         swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
         swanseaCourthouse.setDisplayName("SWANSEA");
+
+        londonCourthouse = someMinimalCourthouse();
+        londonCourthouse.setCourthouseName("LONDON");
+        londonCourthouse.setDisplayName("LONDON");
 
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");
@@ -88,6 +96,12 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtCaseEntity case8 = createCaseAt(swanseaCourthouse);
         case8.setCaseNumber("case8");
+
+        CourtCaseEntity case9 = createCaseAt(londonCourthouse);
+        case9.setCaseNumber("Case9");
+
+        CourtCaseEntity case10 = createCaseAt(swanseaCourthouse);
+        case10.setCaseNumber("case10");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -136,14 +150,22 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         HearingEntity hearing7b = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
         HearingEntity hearing8 = createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
+        courtroomLondon = createCourtRoomWithNameAtCourthouse(londonCourthouse, "courtroomLondon");
+        HearingEntity hearing9 = createHearingWithDefaults(case9, courtroomLondon, LocalDate.of(2023, 5, 20), judge3a);
+
+        CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom4");
+        HearingEntity hearing10a = createHearingWithDefaults(case10, courtroom4, LocalDate.of(2023, 10, 23), judge);
+
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
                               hearing3a, hearing3b, hearing3c,
                               hearing4a, hearing4b, hearing4c,
                               hearing5a, hearing5b, hearing5c,
                               hearing6a, hearing6b, hearing6c,
-                              hearing7a, hearing7b, hearing8
-
+                              hearing7a, hearing7b,
+                              hearing8,
+                              hearing9,
+                              hearing10a
         );
 
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
@@ -166,13 +188,44 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .caseNumber("sE1")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
 
+    @Test
+    void getWithCaseNumberWithoutAccess() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("sE1")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertTrue(resultList.isEmpty());
+    }
+
+    @Test
+    void getWithCaseNumberGlobalAccess() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("sE1")
+            .build();
+
+        setupUserAccountSecurityGroupGlobal(APPROVER, londonCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -182,7 +235,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateFrom(LocalDate.of(2023, 7, 21))
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -198,7 +252,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateTo(LocalDate.of(2023, 6, 21))
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -215,7 +270,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateTo(LocalDate.of(2023, 7, 21))
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -232,7 +288,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateTo(LocalDate.of(2023, 10, 22))
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -248,12 +305,48 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .judgeName("3A")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithJudge/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void getWithJudgeMultipleCourtHouses() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .judgeName("3A")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        setupUserAccountSecurityGroup(REQUESTER, londonCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithJudgeMultipleCourtHouses/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void getWithJudgeGlobalAccess() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .judgeName("3A")
+            .build();
+
+        setupUserAccountSecurityGroupGlobal(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithJudgeMultipleCourtHouses/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 
@@ -265,13 +358,29 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .courtroom("roOm2")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroom/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void getWithCourthouseCourtroomWithoutAccess() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouse(swanseaCourthouse.getCourthouseName())
+            .courtroom("roOm2")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertTrue(resultList.isEmpty());
     }
 
     @Test
@@ -281,23 +390,39 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .courthouse("jyguiyfgiytfuiytfuyrt")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertTrue(resultList.isEmpty());
     }
 
     @Test
-    void getWithCourthouse() throws IOException {
+    void getWithCourthouse() {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .courthouse(swanseaCourthouse.getCourthouseName())
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(8, resultList.size());
+        assertEquals(9, resultList.size());
+    }
+
+    @Test
+    void getWithCourthouseWithoutAccess() {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courthouse(swanseaCourthouse.getCourthouseName())
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertTrue(resultList.isEmpty());
     }
 
     @Test
@@ -307,10 +432,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .courthouseId(swanseaCourthouse.getId())
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
-        assertEquals(8, resultList.size());
+        assertEquals(9, resultList.size());
     }
 
     @Test
@@ -320,13 +446,28 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .courtroom("roOm2")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroom/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void getWithCourtroomWithoutAccess() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .courtroom("roOm2")
+            .build();
+
+        setupUserAccountSecurityGroup(APPROVER, londonCourthouse);
+        userAccountRepository.save(user);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        assertTrue(resultList.isEmpty());
     }
 
     @Test
@@ -337,7 +478,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .courtroomId(courtroom1.getId())
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         assertEquals(8, resultList.size());
@@ -350,7 +492,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .eventTextContains("nT5b")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -368,7 +511,8 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .judgeName("dGe6B")
             .build();
 
-        setupUserAccountAndSecurityGroup();
+        setupUserAccountSecurityGroup(APPROVER, swanseaCourthouse);
+        userAccountRepository.save(user);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -400,9 +544,16 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
-    private void setupUserAccountAndSecurityGroup() {
-        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(APPROVER, swanseaCourthouse);
+    private void setupUserAccountSecurityGroup(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
+        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(securityRole, courthouse);
         securityGroup.setGlobalAccess(false);
+        securityGroup.setUseInterpreter(false);
+        assignSecurityGroupToUser(user, securityGroup);
+    }
+
+    private void setupUserAccountSecurityGroupGlobal(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
+        var securityGroup = SecurityGroupTestData.buildGroupForRoleAndCourthouse(securityRole, courthouse);
+        securityGroup.setGlobalAccess(true);
         securityGroup.setUseInterpreter(false);
         assignSecurityGroupToUser(user, securityGroup);
     }
@@ -411,7 +562,6 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         securityGroup.getUsers().add(user);
         user.getSecurityGroupEntities().add(securityGroup);
         securityGroupRepository.save(securityGroup);
-        userAccountRepository.save(user);
     }
 
     private static void compareJson(String actualResponse, String expectedResponse) {
