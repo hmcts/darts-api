@@ -1603,20 +1603,20 @@ components:
           description: 'Id of the admin action'
         reason_id:
           type: integer
-          description: 'Id if the reason'
+          description: 'Id of the reason'
         hidden_by_id:
           type: integer
-          description: 'User who hid the action'
+          description: 'Id of user who hid it'
         hidden_at:
           type: string
           format: date-time
           description: 'The time it was hidden'
         is_marked_for_manual_deletion:
           type: boolean
-          description: 'Whether the it is marked for manual deletion'
+          description: 'Whether it is marked for manual deletion'
         marked_for_manual_deletion_by_id:
           type: integer
-          description: 'Who marked it for manual deletion'
+          description: 'Id of the user Who marked it for manual deletion'
         marked_for_manual_deletion_at:
           type: string
           format: date-time
