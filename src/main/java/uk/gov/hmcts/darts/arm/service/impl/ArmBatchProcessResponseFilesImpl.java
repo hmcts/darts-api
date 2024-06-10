@@ -463,19 +463,34 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
 
             int transcriptionDocumentId = externalObjectDirectory.getTranscriptionDocumentEntity().getId();
             TranscriptionDocumentEntity transcriptionDocumentEntity = transcriptionDocumentRepository.findById(transcriptionDocumentId).orElseThrow();
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocumentEntity.getChecksum());
+            if (nonNull(transcriptionDocumentEntity.getChecksum())) {
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, transcriptionDocumentEntity.getChecksum());
+            } else {
+                log.warn("Unable to verify Transcription Document checksum for external object {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
+            }
 
         } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
 
             int annotationDocumentId = externalObjectDirectory.getAnnotationDocumentEntity().getId();
             AnnotationDocumentEntity annotationDocumentEntity = annotationDocumentRepository.findById(annotationDocumentId).orElseThrow();
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocumentEntity.getChecksum());
+            if (nonNull(annotationDocumentEntity.getChecksum())) {
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, annotationDocumentEntity.getChecksum());
+            } else {
+                log.warn("Unable to verify Annotation Document checksum for external object {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
+            }
 
         } else if (nonNull(externalObjectDirectory.getCaseDocument())) {
 
             int caseDocumentId = externalObjectDirectory.getCaseDocument().getId();
             CaseDocumentEntity caseDocumentEntity = caseDocumentRepository.findById(caseDocumentId).orElseThrow();
-            verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, caseDocumentEntity.getChecksum());
+            if (nonNull(caseDocumentEntity.getChecksum())) {
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, caseDocumentEntity.getChecksum());
+            } else {
+                log.warn("Unable to verify Case Document checksum for external object {}", externalObjectDirectory.getId());
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseChecksumVerificationFailedStatus());
+            }
 
         } else {
             updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseProcessingFailedStatus());
