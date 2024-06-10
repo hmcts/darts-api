@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -46,6 +47,8 @@ class DataManagementServiceTest {
     DataManagementService dataManagementService;
     @Autowired
     DataManagementConfiguration dataManagementConfiguration;
+    @Autowired
+    ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Test
     void saveBinaryDataToBlobStorage() {
@@ -128,18 +131,19 @@ class DataManagementServiceTest {
 
         var sourceUuid = dataManagementService.saveBlobData(dataManagementConfiguration.getInboundContainerName(), data);
 
-        UUID destinationUuid = dataManagementService.copyBlobData(
+        UUID destinationLocation = UUID.randomUUID();
+        dataManagementService.copyBlobData(
             dataManagementConfiguration.getInboundContainerName(),
             dataManagementConfiguration.getUnstructuredContainerName(),
-            sourceUuid);
+            sourceUuid.toString(), destinationLocation.toString());
 
         var blobData = dataManagementService.getBlobData(
             dataManagementConfiguration.getUnstructuredContainerName(),
-            destinationUuid
+            destinationLocation
         );
 
         dataManagementService.deleteBlobData(dataManagementConfiguration.getInboundContainerName(), sourceUuid);
-        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), destinationUuid);
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getUnstructuredContainerName(), destinationLocation);
 
         assertEquals(TEST_BINARY_STRING, blobData.toString());
     }
