@@ -721,8 +721,8 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public EventHandlerEntity createEventHandlerData() {
-        var eventHandler = createEventHandlerWith("DarStartHandler", "99999", "8888");
+    public EventHandlerEntity createEventHandlerData(String subtype) {
+        var eventHandler = createEventHandlerWith("DarStartHandler", "99999", subtype);
         save(eventHandler);
         return eventHandler;
     }
