@@ -26,9 +26,12 @@ import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
+import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
+import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.validation.AudioMediaPatchRequestValidator;
+import uk.gov.hmcts.darts.audio.validation.MediaHideOrShowValidator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -50,6 +53,8 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -59,6 +64,8 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -111,6 +118,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final AudioMediaPatchRequestValidator mediaRequestValidator;
 
     private final MediaRepository mediaRepository;
+
+    private final MediaHideOrShowValidator mediaHideOrShowValidator;
+
+    private final ObjectAdminActionRepository objectAdminActionRepository;
+
+    private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -505,5 +518,60 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);//future functionality
         }
+    }
+
+    @Override
+    public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
+        MediaHideResponse response;
+
+        IdRequest<MediaHideRequest> request = new IdRequest<>(mediaHideRequest, mediaId);
+        mediaHideOrShowValidator.validate(request);
+
+        Optional<MediaEntity> mediaEntityOptional
+            = mediaRepository.findById(mediaId);
+        if (mediaEntityOptional.isPresent()) {
+            MediaEntity mediaEntity = mediaEntityOptional.get();
+
+            mediaEntity.setHidden(mediaHideRequest.getIsHidden());
+            mediaEntity = mediaRepository.saveAndFlush(mediaEntity);
+
+            if (request.getPayload().getIsHidden()) {
+                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity;
+                objectHiddenReasonEntity = objectHiddenReasonRepository.findById(mediaHideRequest.getAdminAction().getReasonId());
+
+                if (objectHiddenReasonEntity.isEmpty()) {
+                    throw new DartsApiException(AudioApiError
+                                                    .MEDIA_HIDE_ACTION_REASON_NOT_FOUND);
+                }
+
+                // on hiding add the relevant hide record
+                ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+                objectAdminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity.get());
+                objectAdminActionEntity.setTicketReference(mediaHideRequest.getAdminAction().getTicketReference());
+                objectAdminActionEntity.setComments(mediaHideRequest.getAdminAction().getComments());
+                objectAdminActionEntity.setMedia(mediaEntity);
+                objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
+                objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
+                objectAdminActionEntity.setMarkedForManualDeletion(false);
+                objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
+                objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+
+                objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
+
+                response = AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntity, objectAdminActionEntity);
+            } else {
+                List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByMedia_Id(mediaId);
+
+                response = AdminMediaSearchResponseMapper.mapHideOrShowResponse(mediaEntityOptional.get(), null);
+
+                for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
+                    objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
+                }
+            }
+        } else {
+            throw new DartsApiException(AudioApiError.MEDIA_NOT_FOUND);
+        }
+
+        return response;
     }
 }

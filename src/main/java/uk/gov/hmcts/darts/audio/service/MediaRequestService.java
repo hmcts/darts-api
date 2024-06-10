@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
+import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
+import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
@@ -62,4 +64,6 @@ public interface MediaRequestService {
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
     ResponseEntity<List<AdminMediaSearchResponseItem>> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId);
+
+    MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest);
 }

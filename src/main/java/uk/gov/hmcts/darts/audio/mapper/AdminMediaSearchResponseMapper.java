@@ -2,17 +2,19 @@ package uk.gov.hmcts.darts.audio.mapper;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.darts.audio.model.AdminActionResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCase;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCourthouse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseCourtroom;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseHearing;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
+import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,5 +73,26 @@ public class AdminMediaSearchResponseMapper {
         return responseCourthouse;
     }
 
+    public MediaHideResponse mapHideOrShowResponse(MediaEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
+        MediaHideResponse response = new MediaHideResponse();
+        response.setId(entity.getId());
+        response.setIsHidden(entity.isHidden());
 
+        if (objectAdminActionEntity != null) {
+            AdminActionResponse adminActionResponse = new AdminActionResponse();
+            adminActionResponse.setId(objectAdminActionEntity.getId());
+            adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
+            adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
+            adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
+            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+            adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
+            adminActionResponse.setComments(objectAdminActionEntity.getComments());
+
+            response.setAdminAction(adminActionResponse);
+        }
+
+        return response;
+    }
 }
