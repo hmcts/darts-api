@@ -38,8 +38,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,8 +52,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmProcessorImplTest {
 
-    private static final String TEST_BINARY_DATA = "test binary data";
     private static final Integer MAX_RETRY_ATTEMPTS = 3;
+    private static final UUID UNSTRUCTURED_UUID = UUID.randomUUID();
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
@@ -119,11 +123,11 @@ class UnstructuredToArmProcessorImplTest {
             batchSize
         );
 
+        lenient().when(externalObjectDirectoryEntityUnstructured.getExternalLocation()).thenReturn(UNSTRUCTURED_UUID);
     }
 
     @Test
     void processMovingDataFromUnstructuredStorageToArm() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
@@ -151,98 +155,15 @@ class UnstructuredToArmProcessorImplTest {
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-
-    }
-
-    @Test
-    void processMovingDataFromUnstructuredStorageToArmWhereBlobExists() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-
-        String fileLocation = tempDirectory.getAbsolutePath();
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .fileGenerationSuccessful(true)
-            .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
-
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
-            objectRecordStatusEntityStored,
-            externalLocationTypeUnstructured,
-            externalLocationTypeArm
-        )).thenReturn(inboundList);
-
-        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
-        when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
-        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
-
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
-
-        // Example: Failed to move BLOB metadata for file /opt/app/arm/tempworkspace/5728_1794_1.a360 due to Status code 409,
-        // "﻿<?xml version="1.0" encoding="utf-8"?><Error><Code>BlobAlreadyExists</Code><Message>The specified blob already exists
-        BlobStorageException blobStorageException = mock(BlobStorageException.class);
-        when(blobStorageException.getStatusCode()).thenReturn(409);
-        when(blobStorageException.getMessage()).thenReturn("The specified blob already exists");
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(blobStorageException);
-
-        unstructuredToArmProcessor.processUnstructuredToArm();
-
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-    }
-
-    @Test
-    void processMovingDataFromUnstructuredStorageToArmWhereBlobCopyFailed() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-
-        when(objectRecordStatusRepository.findById(2)).thenReturn(Optional.ofNullable(objectRecordStatusEntityStored));
-        when(objectRecordStatusRepository.findById(12)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmIngestion));
-        when(objectRecordStatusRepository.findById(14)).thenReturn(Optional.ofNullable(objectRecordStatusEntityRawDataFailed));
-        when(objectRecordStatusRepository.findById(15)).thenReturn(Optional.ofNullable(objectRecordStatusEntityManifestFailed));
-        when(objectRecordStatusRepository.findById(13)).thenReturn(Optional.ofNullable(objectRecordStatusEntityArmDropZone));
-
-        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
-            objectRecordStatusEntityStored,
-            externalLocationTypeUnstructured,
-            externalLocationTypeArm
-        )).thenReturn(inboundList);
-
-        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
-        when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
-        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
-
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
-
-        BlobStorageException blobStorageException = mock(BlobStorageException.class);
-        when(blobStorageException.getStatusCode()).thenReturn(400);
-        when(blobStorageException.getMessage()).thenReturn("Copying blob failed");
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(blobStorageException);
-
-        unstructuredToArmProcessor.processUnstructuredToArm();
-
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(armDataManagementApi).copyBlobDataToArm(eq(UNSTRUCTURED_UUID.toString()), any());
     }
 
     @Test
     void processMovingDataFromUnstructuredStorageToArmThrowsException() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
@@ -264,10 +185,8 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
 
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
-
         NullPointerException genericException = new NullPointerException();
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
+        doThrow(genericException).when(armDataManagementApi).copyBlobDataToArm(any(), any());
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
@@ -376,11 +295,8 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
 
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
-
         NullPointerException genericException = new NullPointerException();
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenReturn("1_1_1").thenThrow(genericException);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
@@ -419,11 +335,8 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
 
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
-
         NullPointerException genericException = new NullPointerException();
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenReturn("1_1_1").thenThrow(genericException);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(genericException);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

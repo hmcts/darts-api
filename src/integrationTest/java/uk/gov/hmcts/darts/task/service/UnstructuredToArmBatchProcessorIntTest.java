@@ -184,8 +184,8 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         var rawFile0Name = format("%d_%d_1", armDropZoneEodsMedia0.get(0).getId(), medias.get(0).getId());
         var rawFile1Name = format("%d_%d_1", armDropZoneEodsMedia1.get(0).getId(), medias.get(1).getId());
 
-        verify(armDataManagementApi, times(1)).saveBlobDataToArm(eq(rawFile0Name), any());
-        verify(armDataManagementApi, times(1)).saveBlobDataToArm(eq(rawFile1Name), any());
+        verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), eq(rawFile0Name));
+        verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), eq(rawFile0Name));
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
 
         verify(archiveRecordFileGenerator).generateArchiveRecords(any(), manifestFileNameCaptor.capture());
@@ -222,9 +222,9 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         //then
-        verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches(".+_.+_2"), any());
+        verify(armDataManagementApi, times(1)).copyBlobDataToArm(any(), matches(".+_.+_2"));
         verify(armDataManagementApi, times(1)).saveBlobDataToArm(matches("DARTS_.+\\.a360"), any());
-        verify(armDataManagementApi, times(2)).saveBlobDataToArm(any(), any());
+        verify(armDataManagementApi, times(1)).saveBlobDataToArm(any(), any());
 
         var armDropzoneEodsMedia0 = eodRepository.findByMediaStatusAndType(medias.get(0), armDropZoneStatus(), armLocation());
         assertThat(armDropzoneEodsMedia0).hasSize(1);
@@ -291,7 +291,7 @@ class UnstructuredToArmBatchProcessorIntTest extends IntegrationBase {
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), STORED, UNSTRUCTURED);
         externalObjectDirectoryStub.createAndSaveEod(medias.get(1), ARM_RAW_DATA_FAILED, ARM);
 
-        doThrow(RuntimeException.class).when(armDataManagementApi).saveBlobDataToArm(matches(".+_.+_2"), any());
+        doThrow(RuntimeException.class).when(armDataManagementApi).copyBlobDataToArm(any(), matches(".+_.+_2"));
 
         //when
         unstructuredToArmProcessor.processUnstructuredToArm();
