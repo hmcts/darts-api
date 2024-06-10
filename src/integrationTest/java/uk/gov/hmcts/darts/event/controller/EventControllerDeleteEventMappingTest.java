@@ -36,7 +36,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
     @Test
     void deleteOk() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var entity = dartsDatabase.createEventHandlerData();
+        var entity = dartsDatabase.createEventHandlerData("8888");
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
     }
@@ -45,7 +45,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
     @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
     void wrongPermission(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
-        var entity = dartsDatabase.createEventHandlerData();
+        var entity = dartsDatabase.createEventHandlerData("8888");
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
         MvcResult response = mockMvc.perform(requestBuilder)
             .andExpect(status().isForbidden())
@@ -67,7 +67,7 @@ class EventControllerDeleteEventMappingTest extends IntegrationBase {
     @Test
     void mappingInactive() throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(SUPER_ADMIN);
-        var entity = dartsDatabase.createEventHandlerData();
+        var entity = dartsDatabase.createEventHandlerData("8888");
         entity.setActive(false);
         dartsDatabase.save(entity);
         MockHttpServletRequestBuilder requestBuilder = delete(EVENT_MAPPINGS_ENDPOINT, entity.getId());
