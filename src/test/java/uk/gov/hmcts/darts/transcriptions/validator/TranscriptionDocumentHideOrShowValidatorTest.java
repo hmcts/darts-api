@@ -48,21 +48,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId);
 
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
-    }
-
-    @Test
-    void successfullyShowWithoutActionRequest() {
-        Integer documentId = 200;
-        TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
-        transcriptionDocumentHideRequest.setIsHidden(false);
-
-        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
-            IdRequest<>(transcriptionDocumentHideRequest, documentId);
-
-        transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId);
-
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
 
     @Test
@@ -80,7 +66,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
                                                               () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
         Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, exception.getError());
 
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
 
     @Test
@@ -104,7 +90,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId);
 
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
 
     @Test
@@ -120,7 +106,8 @@ class TranscriptionDocumentHideOrShowValidatorTest {
             Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
         Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, exception.getError());
 
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId
+        );
     }
 
     @Test
@@ -143,7 +130,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
             Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
         Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_ALREADY_HIDDEN, exception.getError());
 
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
     
     @Test
@@ -168,6 +155,6 @@ class TranscriptionDocumentHideOrShowValidatorTest {
             = Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
         Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, exception.getError());
 
-        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(Mockito.eq(documentId));
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
 }

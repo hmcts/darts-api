@@ -170,8 +170,8 @@ class AdminTranscriptionServiceTest {
 
         when(transcriptionRepository.findTranscriptionForUserOnOrAfterDate(userId, dateTimeOfSearch))
             .thenReturn(transcriptionEntityList);
-        when(transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(Mockito.eq(transcriptionEntity))).thenReturn(response);
-        when(transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(Mockito.eq(transcriptionEntity1))).thenReturn(response1);
+        when(transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity)).thenReturn(response);
+        when(transcriptionResponseMapper.mapTransactionEntityToTransactionDetails(transcriptionEntity1)).thenReturn(response1);
 
         List<GetTranscriptionDetailAdminResponse> fndTranscriptions = adminTranscriptionSearchService
             .getTranscriptionsForUser(userId, dateTimeOfSearch);
@@ -227,8 +227,8 @@ class AdminTranscriptionServiceTest {
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = mock(TranscriptionDocumentEntity.class);
         GetTranscriptionDocumentByIdResponse expectedResponse = new GetTranscriptionDocumentByIdResponse();
-        when(transcriptionDocumentRepository.findById(Mockito.eq(transDocId))).thenReturn(Optional.ofNullable(transcriptionDocumentEntity));
-        when(transcriptionResponseMapper.getSearchByTranscriptionDocumentId(Mockito.eq(transcriptionDocumentEntity))).thenReturn(expectedResponse);
+        when(transcriptionDocumentRepository.findById(transDocId)).thenReturn(Optional.ofNullable(transcriptionDocumentEntity));
+        when(transcriptionResponseMapper.getSearchByTranscriptionDocumentId(transcriptionDocumentEntity)).thenReturn(expectedResponse);
 
         GetTranscriptionDocumentByIdResponse actualResponse = adminTranscriptionSearchService.getTranscriptionDocumentById(transDocId);
 

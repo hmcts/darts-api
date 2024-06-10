@@ -22,6 +22,7 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
     @Override
+    @SuppressWarnings("java:S5411")
     public void validate(IdRequest<TranscriptionDocumentHideRequest> request) {
          transcriptionDocumentIdValidator.validate(request.getId());
 
@@ -38,12 +39,10 @@ public class TranscriptionDocumentHideOrShowValidator implements Validator<IdReq
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE);
         }
 
-        if (request.getPayload().getAdminAction() != null) {
-            if (request.getPayload().getAdminAction().getReasonId() != null
-                && !objectHiddenReasonRepository.findById(request.getPayload().getAdminAction().getReasonId()).isPresent()) {
+        if (request.getPayload().getAdminAction() != null && request.getPayload().getAdminAction().getReasonId() != null
+                && objectHiddenReasonRepository.findById(request.getPayload().getAdminAction().getReasonId()).isEmpty()) {
                 throw new DartsApiException(TranscriptionApiError
                                                 .TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND);
-            }
         }
     }
 }

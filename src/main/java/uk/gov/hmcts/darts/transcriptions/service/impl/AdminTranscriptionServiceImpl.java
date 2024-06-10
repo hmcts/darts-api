@@ -164,38 +164,47 @@ public class AdminTranscriptionServiceImpl implements AdminTranscriptionService 
 
         Optional<TranscriptionDocumentEntity> transcriptionDocumentEntity
             = transcriptionDocumentRepository.findById(transcriptionDocumentId);
-        TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
+        if (transcriptionDocumentEntity.isPresent()) {
+            TranscriptionDocumentEntity documentEntity = transcriptionDocumentEntity.get();
 
-        documentEntity.setHidden(transcriptionDocumentHideRequest.getIsHidden());
-        documentEntity = transcriptionDocumentRepository.saveAndFlush(documentEntity);
+            documentEntity.setHidden(transcriptionDocumentHideRequest.getIsHidden());
+            documentEntity = transcriptionDocumentRepository.saveAndFlush(documentEntity);
 
-        ObjectHiddenReasonEntity objectHiddenReasonEntity;
-        if (request.getPayload().getIsHidden()) {
-            objectHiddenReasonEntity = objectHiddenReasonRepository.findById(transcriptionDocumentHideRequest.getAdminAction().getReasonId()).get();
+            if (request.getPayload().getIsHidden()) {
+                Optional<ObjectHiddenReasonEntity> objectHiddenReasonEntity;
+                objectHiddenReasonEntity = objectHiddenReasonRepository.findById(transcriptionDocumentHideRequest.getAdminAction().getReasonId());
 
-            // on hiding add the relevant hide record
-            ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
-            objectAdminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity);
-            objectAdminActionEntity.setTicketReference(transcriptionDocumentHideRequest.getAdminAction().getTicketReference());
-            objectAdminActionEntity.setComments(transcriptionDocumentHideRequest.getAdminAction().getComments());
-            objectAdminActionEntity.setTranscriptionDocument(documentEntity);
-            objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
-            objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
-            objectAdminActionEntity.setMarkedForManualDeletion(false);
-            objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
-            objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+                if (objectHiddenReasonEntity.isEmpty()) {
+                    throw new DartsApiException(TranscriptionApiError
+                                                    .TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND);
+                }
 
-            objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
+                // on hiding add the relevant hide record
+                ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+                objectAdminActionEntity.setObjectHiddenReason(objectHiddenReasonEntity.get());
+                objectAdminActionEntity.setTicketReference(transcriptionDocumentHideRequest.getAdminAction().getTicketReference());
+                objectAdminActionEntity.setComments(transcriptionDocumentHideRequest.getAdminAction().getComments());
+                objectAdminActionEntity.setTranscriptionDocument(documentEntity);
+                objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
+                objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
+                objectAdminActionEntity.setMarkedForManualDeletion(false);
+                objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
+                objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
 
-            response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
-        } else {
-            List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
+                objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
 
-            response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
+                response = transcriptionMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
+            } else {
+                List<ObjectAdminActionEntity> objectAdminActionEntityLst = objectAdminActionRepository.findByTranscriptionDocument_Id(transcriptionDocumentId);
 
-            for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
-                objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
+                response = transcriptionMapper.mapHideOrShowResponse(transcriptionDocumentEntity.get(), null);
+
+                for (ObjectAdminActionEntity objectAdminActionEntity : objectAdminActionEntityLst) {
+                    objectAdminActionRepository.deleteById(objectAdminActionEntity.getId());
+                }
             }
+        } else {
+            throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND);
         }
 
         return response;
