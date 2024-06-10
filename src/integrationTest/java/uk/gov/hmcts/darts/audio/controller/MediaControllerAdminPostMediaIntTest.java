@@ -14,11 +14,8 @@ import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.audio.model.Problem;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.enums.HiddenReason;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -28,12 +25,9 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.MediaStub;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
-import javax.print.attribute.standard.Media;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -108,6 +102,7 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         // ensure that the database data is contained in the response
         assertEquals(documentEntity.getId(), mediaResponse.getId());
         assertEquals(documentEntity.isHidden(), mediaResponse.getIsHidden());
+        assertEquals(documentEntity.isDeleted(), mediaResponse.getIsDeleted());
         assertEquals(objectAdminActionEntity.get(0).getId(), mediaResponse.getAdminAction().getId());
         assertEquals(objectAdminActionEntity.get(0).getComments(), mediaResponse.getAdminAction().getComments());
         assertEquals(objectAdminActionEntity.get(0).getTicketReference(), mediaResponse.getAdminAction().getTicketReference());
@@ -309,6 +304,35 @@ class MediaControllerAdminPostMediaIntTest extends IntegrationBase {
         String content = mvcResult.getResponse().getContentAsString();
         Problem problemResponse = objectMapper.readValue(content, Problem.class);
         assertEquals(AudioApiError.MEDIA_HIDE_ACTION_REASON_NOT_FOUND.getType(), problemResponse.getType());
+    }
+
+    @Test
+    void testMediaIdHideAdminActionWithMarkedForDeletionReason() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        MediaEntity mediaEntity = mediaStub.createAndSaveMedia();
+
+        MediaHideRequest mediaHideRequest = new MediaHideRequest();
+        mediaHideRequest.setIsHidden(true);
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        Integer markedForDeletionReason = HiddenReason.PUBLIC_INTEREST_IMMUNITY.getId();
+        adminActionRequest.setReasonId(markedForDeletionReason);
+        adminActionRequest.setComments("");
+        adminActionRequest.setTicketReference("");
+        mediaHideRequest.setAdminAction(adminActionRequest);
+
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
+                MEDIA_ID_SUBSTITUTION_KEY, mediaEntity.getId().toString()))
+                                                  .content(objectMapper.writeValueAsString(mediaHideRequest))
+                                                  .header("Content-Type", "application/json"))
+
+            .andExpect(status().isNotImplemented())
+            .andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        assertEquals(AudioApiError.REASON_IS_MARKED_FOR_DELETION.getType(), problemResponse.getType());
     }
 
     @Test

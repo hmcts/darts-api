@@ -1,14 +1,11 @@
 package uk.gov.hmcts.darts.audio.mapper;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 
 import java.time.OffsetDateTime;
 
@@ -16,16 +13,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MediaResponseMapperTest {
+class MediaResponseMapperTest {
 
     @Test
     void mapHideResponse() {
         Integer mediaId = 100;
         boolean hide = true;
+        boolean deleted = true;
 
         MediaEntity mediaEntity = new MediaEntity();
         mediaEntity.setId(mediaId);
         mediaEntity.setHidden(hide);
+        mediaEntity.setDeleted(deleted);
 
         Integer objectAdminActionId = 101;
         String comments = "comments";
@@ -52,6 +51,7 @@ public class MediaResponseMapperTest {
 
         assertEquals(response.getId(), mediaEntity.getId());
         assertEquals(response.getIsHidden(), mediaEntity.isHidden());
+        assertEquals(response.getIsDeleted(), mediaEntity.isHidden());
         assertEquals(response.getAdminAction().getReasonId(), objectAdminActionEntity.getObjectHiddenReason().getId());
         assertEquals(response.getAdminAction().getComments(), objectAdminActionEntity.getComments());
         assertEquals(response.getAdminAction().getTicketReference(), objectAdminActionEntity.getTicketReference());

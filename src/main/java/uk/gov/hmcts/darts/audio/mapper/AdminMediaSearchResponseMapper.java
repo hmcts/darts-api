@@ -15,8 +15,10 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Slf4j
 @UtilityClass
@@ -77,6 +79,7 @@ public class AdminMediaSearchResponseMapper {
         MediaHideResponse response = new MediaHideResponse();
         response.setId(entity.getId());
         response.setIsHidden(entity.isHidden());
+        response.setIsDeleted(entity.isDeleted());
 
         if (objectAdminActionEntity != null) {
             AdminActionResponse adminActionResponse = new AdminActionResponse();

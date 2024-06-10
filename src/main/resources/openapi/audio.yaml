@@ -505,6 +505,9 @@ components:
         is_hidden:
           type: boolean
           description: 'The media hidden state'
+        is_deleted:
+          type: boolean
+          description: 'The media deleted state'
         admin_action:
           $ref: '#/components/schemas/AdminActionResponse'
           description: 'The media admin action data when the request was made'
@@ -560,10 +563,11 @@ components:
         - "AUDIO_111"
         - "AUDIO_112"
         - "AUDIO_113"
+        - "AUDIO_114"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE,
                          MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE, FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS,
                          ADMIN_SEARCH_CRITERIA_NOT_PROVIDED,  MEDIA_ALREADY_HIDDEN, MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND ]
+                         MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION ]
 
     AddAudioTitleErrors:
       type: string
@@ -582,8 +586,9 @@ components:
         - "Hide media action payload not correct"
         - "Showing media action payload not correct"
         - "Hide reason is incorrect"
+        - "Reason has been marked for deletion"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED,  MEDIA_NOT_FOUND,
                          FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER, AUDIO_NOT_PROVIDED, UNEXPECTED_FILE_TYPE,
                          FILE_DURATION_OUT_OF_BOUNDS, FILE_SIZE_OUT_OF_BOUNDS, ADMIN_SEARCH_CRITERIA_NOT_PROVIDED, MEDIA_ALREADY_HIDDEN,
                          MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
-                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND]
+                         MEDIA_HIDE_ACTION_REASON_NOT_FOUND, MEDIA_HIDE_ACTION_REASON_MARKED_FOR_DELETION]

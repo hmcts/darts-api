@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.validation.IdRequest;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -85,7 +84,7 @@ class MediaHideOrShowValidatorTest {
         ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
 
         Mockito.when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        Mockito.when(objectAdminActionRepository.findByTranscriptionDocument_Id(mediaId)).thenReturn(List.of());
+        Mockito.when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -122,7 +121,7 @@ class MediaHideOrShowValidatorTest {
 
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
 
-        Mockito.when(objectAdminActionRepository.findByTranscriptionDocument_Id(mediaId)).thenReturn(List.of(objectAdminActionEntity));
+        Mockito.when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of(objectAdminActionEntity));
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
@@ -147,7 +146,7 @@ class MediaHideOrShowValidatorTest {
         adminActionResponse.setReasonId(reasonId);
 
         Mockito.when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
-        Mockito.when(objectAdminActionRepository.findByTranscriptionDocument_Id(mediaId)).thenReturn(List.of());
+        Mockito.when(objectAdminActionRepository.findByMedia_Id(mediaId)).thenReturn(List.of());
 
         IdRequest<MediaHideRequest> mediaHideRequestIdRequest = new
             IdRequest<>(mediaHideRequest, mediaId);
