@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -86,11 +87,13 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.retentions.model.RetentionPolicyType;
 import uk.gov.hmcts.darts.test.common.data.AudioTestData;
 import uk.gov.hmcts.darts.test.common.data.CourthouseTestData;
 import uk.gov.hmcts.darts.test.common.data.DailyListTestData;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -184,6 +187,7 @@ public class DartsDatabaseStub {
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
     private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
+    private final List<RetentionPolicyTypeEntity> retentionPolicyTypeBin = new ArrayList<>();
 
     private final EntityManager entityManager;
     private final CurrentTimeHelper currentTimeHelper;
@@ -217,6 +221,8 @@ public class DartsDatabaseStub {
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
+        retentionPolicyTypeRepository.deleteAll(retentionPolicyTypeBin);
+        retentionPolicyTypeBin.clear();
         userAccountRepository.deleteAll(userAccountBin);
         userAccountBin.clear();
         securityGroupRepository.deleteAll(securityGroupBin);
@@ -491,6 +497,49 @@ public class DartsDatabaseStub {
         }
     }
 
+    @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.AvoidAccessibilityAlteration"})
+    @Transactional
+    public <T> T saveWithTransientEntities(T entity) {
+        try {
+            // Check and persist transient entities
+            Class<?> clazz = entity.getClass();
+            while (clazz != null) {
+                Field[] fields = clazz.getDeclaredFields();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    Object fieldValue = field.get(entity);
+                    if (fieldValue != null && isEntity(fieldValue)) {
+                        // Check if the entity is transient
+                        Method getIdMethod = fieldValue.getClass().getMethod("getId");
+                        Object id = getIdMethod.invoke(fieldValue);
+                        if (id == null || (id instanceof Integer && (Integer) id == 0)) {
+                            // Save the transient entity
+                            entityManager.persist(fieldValue);
+                            entityManager.flush();
+                        }
+                    }
+                }
+                clazz = clazz.getSuperclass();
+            }
+
+            // Proceed with original save logic
+            Method getIdInstanceMethod = entity.getClass().getMethod("getId");
+            Integer id = (Integer) getIdInstanceMethod.invoke(entity);
+            if (id == null) {
+                entityManager.persist(entity);
+                return entity;
+            } else {
+                return entityManager.merge(entity);
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new JUnitException("Failed to save entity", e);
+        }
+    }
+
+    private boolean isEntity(Object obj) {
+        return obj.getClass().isAnnotationPresent(Entity.class);
+    }
+
     @SneakyThrows
     @Transactional
     public void saveAll(Object... entities) {
@@ -517,6 +566,7 @@ public class DartsDatabaseStub {
         });
     }
 
+    @Transactional
     public void saveAll(UserAccountEntity... testUsers) {
         stream(testUsers).forEach(user -> {
             UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
@@ -531,7 +581,15 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public MediaRequestEntity saveWithTransientEntities(MediaRequestEntity mediaRequestEntity) {
+    public void saveAllWithTransient(Object... entities) {
+        if (entities == null) {
+            return;
+        }
+        stream(entities).forEach(this::saveWithTransientEntities);
+    }
+
+    @Transactional
+    public MediaRequestEntity saveWithMediaRequestWithTransientEntities(MediaRequestEntity mediaRequestEntity) {
         save(mediaRequestEntity.getHearing());
         save(mediaRequestEntity.getRequestor());
         save(mediaRequestEntity.getCurrentOwner());
@@ -540,6 +598,15 @@ public class DartsDatabaseStub {
 
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
+    }
+
+    public void addToTrash(RetentionPolicyType retentionPolicy) {
+        this.retentionPolicyTypeBin.add(
+            retentionPolicyTypeRepository.getReferenceById(retentionPolicy.getId()));
+    }
+
+    public void addToTrash(RetentionPolicyTypeEntity... retentionPolicyTypeEntities) {
+        this.retentionPolicyTypeBin.addAll(asList(retentionPolicyTypeEntities));
     }
 
     public void addToTrash(Set<SecurityGroupEntity> securityGroupEntities) {
@@ -733,7 +800,7 @@ public class DartsDatabaseStub {
     @Transactional
     public EventHandlerEntity createEventHandlerData(String subtype) {
         var eventHandler = createEventHandlerWith("DarStartHandler", "99999", subtype);
-        save(eventHandler);
+        saveWithTransientEntities(eventHandler);
         return eventHandler;
     }
 
@@ -828,4 +895,9 @@ public class DartsDatabaseStub {
 
         return transcriptionCommentRepository.findRevisions(latestComment.getId());
     }
+
+    public Revisions<Long, RetentionPolicyTypeEntity> findRetentionPolicyRevisionsFor(Integer id) {
+        return retentionPolicyTypeRepository.findRevisions(id);
+    }
+
 }
