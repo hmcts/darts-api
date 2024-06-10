@@ -558,7 +558,7 @@ class AudioTransformationServiceImplTest {
         when(mockMediaRequestService.getMediaRequestEntityById(1)).thenReturn(mediaRequestEntity);
         doNothing().when(unstructuredDataHelper).waitForAllJobsToFinish();
         audioTransformationService.handleKedaInvocationForMediaRequests();
-        verify(mockMediaRequestService, never()).updateAudioRequestStatus(any(), any());
+        verify(mockMediaRequestService, never()).updateAudioRequestStatus(mockMediaRequestEntity, MediaRequestStatus.PROCESSING);
     }
 
 }

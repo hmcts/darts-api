@@ -138,6 +138,13 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
 
+    @Transactional
+    @Override
+    public MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus status) {
+        mediaRequestEntity.setStatus(status);
+        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
     @Override
     public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails) {
 
