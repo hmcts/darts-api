@@ -4,13 +4,15 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminRespon
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRequest;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideRequest;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchRequest;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionSearchResponse;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public interface AdminTranscriptionSearchService {
+public interface AdminTranscriptionService {
 
     List<TranscriptionSearchResponse> searchTranscriptions(TranscriptionSearchRequest request);
 
@@ -19,4 +21,7 @@ public interface AdminTranscriptionSearchService {
     List<GetTranscriptionDetailAdminResponse> getTranscriptionsForUser(Integer userId, OffsetDateTime requestedAtFrom);
 
     GetTranscriptionDocumentByIdResponse getTranscriptionDocumentById(Integer transcriptionDocument);
+
+    TranscriptionDocumentHideResponse hideOrShowTranscriptionDocumentById(Integer transcriptionDocumentId,
+                                                                          TranscriptionDocumentHideRequest transcriptionDocumentHideRequest);
 }

@@ -13,6 +13,8 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -43,6 +46,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
 
 
@@ -586,4 +591,65 @@ class TranscriptionResponseMapperTest {
         assertEquals(uploadedAt, response.getUploadedAt());
         assertEquals(hidden, response.getIsHidden());
     }
+
+    @Test
+    void mapHideResponse() {
+        Integer documentId = 100;
+        boolean hide = true;
+
+        TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+        documentEntity.setId(documentId);
+        documentEntity.setHidden(hide);
+
+        Integer objectAdminActionId = 101;
+        String comments = "comments";
+        String reference = "reference";
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+
+        ObjectHiddenReasonEntity reasonEntity = mock(ObjectHiddenReasonEntity.class);
+        when(reasonEntity.getId()).thenReturn(2332);
+
+        OffsetDateTime creationDate = OffsetDateTime.now();
+        ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setComments(comments);
+        objectAdminActionEntity.setTicketReference(reference);
+        objectAdminActionEntity.setId(objectAdminActionId);
+        objectAdminActionEntity.setHiddenBy(userAccountEntity);
+        objectAdminActionEntity.setHiddenDateTime(creationDate);
+        objectAdminActionEntity.setMarkedForManualDelBy(userAccountEntity);
+        objectAdminActionEntity.setMarkedForManualDelDateTime(creationDate);
+        objectAdminActionEntity.setObjectHiddenReason(reasonEntity);
+
+        TranscriptionDocumentHideResponse response = transcriptionResponseMapper.mapHideOrShowResponse(documentEntity, objectAdminActionEntity);
+
+        assertEquals(response.getId(), documentEntity.getId());
+        assertEquals(response.getIsHidden(), documentEntity.isHidden());
+        assertEquals(response.getAdminAction().getReasonId(), objectAdminActionEntity.getObjectHiddenReason().getId());
+        assertEquals(response.getAdminAction().getComments(), objectAdminActionEntity.getComments());
+        assertEquals(response.getAdminAction().getTicketReference(), objectAdminActionEntity.getTicketReference());
+        assertEquals(response.getAdminAction().getId(), objectAdminActionEntity.getId());
+        assertEquals(response.getAdminAction().getHiddenAt(), objectAdminActionEntity.getHiddenDateTime());
+        assertEquals(response.getAdminAction().getHiddenById(), objectAdminActionEntity.getHiddenBy().getId());
+        assertEquals(response.getAdminAction().getHiddenById(), userAccountEntity.getId());
+        assertEquals(response.getAdminAction().getMarkedForManualDeletionById(), objectAdminActionEntity.getMarkedForManualDelBy().getId());
+        assertEquals(response.getAdminAction().getMarkedForManualDeletionAt(), objectAdminActionEntity.getMarkedForManualDelDateTime());
+        assertEquals(response.getAdminAction().getIsMarkedForManualDeletion(), objectAdminActionEntity.isMarkedForManualDeletion());
+    }
+
+    @Test
+    void mapShowResponseWithNoObjectAdminAction() {
+        Integer documentId = 100;
+        boolean hide = true;
+
+        TranscriptionDocumentEntity documentEntity = new TranscriptionDocumentEntity();
+        documentEntity.setId(documentId);
+        documentEntity.setHidden(hide);
+
+        TranscriptionDocumentHideResponse response = transcriptionResponseMapper.mapHideOrShowResponse(documentEntity, null);
+
+        assertEquals(response.getId(), documentEntity.getId());
+        assertEquals(response.getIsHidden(), documentEntity.isHidden());
+     }
 }

@@ -61,6 +61,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
@@ -159,6 +160,7 @@ public class DartsDatabaseStub {
     private final UserAccountRepository userAccountRepository;
     private final RegionRepository regionRepository;
     private final AutomatedTaskRepository automatedTaskRepository;
+    private final ObjectAdminActionRepository objectAdminActionRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -183,6 +185,7 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
 
     public void clearDatabaseInThisOrder() {
+        objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         annotationDocumentRepository.deleteAll();

@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.AdminActionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDetailAdminResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionDocumentByIdResponse;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentRespon
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCase;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseCourthouse;
 import uk.gov.hmcts.darts.transcriptions.model.SearchTranscriptionDocumentResponseHearing;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentHideResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionDocumentResult;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyDetails;
@@ -361,4 +364,28 @@ public class TranscriptionResponseMapper {
         response.setIsHidden(entity.isHidden());
         return response;
     }
+
+    public TranscriptionDocumentHideResponse mapHideOrShowResponse(TranscriptionDocumentEntity entity, ObjectAdminActionEntity objectAdminActionEntity) {
+        TranscriptionDocumentHideResponse response = new TranscriptionDocumentHideResponse();
+        response.setId(entity.getId());
+        response.setIsHidden(entity.isHidden());
+
+        if (objectAdminActionEntity != null) {
+            AdminActionResponse adminActionResponse = new AdminActionResponse();
+            adminActionResponse.setId(objectAdminActionEntity.getId());
+            adminActionResponse.setReasonId(objectAdminActionEntity.getObjectHiddenReason().getId());
+            adminActionResponse.setHiddenById(objectAdminActionEntity.getHiddenBy().getId());
+            adminActionResponse.setHiddenAt(objectAdminActionEntity.getHiddenDateTime());
+            adminActionResponse.setIsMarkedForManualDeletion(objectAdminActionEntity.isMarkedForManualDeletion());
+            adminActionResponse.setMarkedForManualDeletionById(objectAdminActionEntity.getMarkedForManualDelBy().getId());
+            adminActionResponse.setMarkedForManualDeletionAt(objectAdminActionEntity.getMarkedForManualDelDateTime());
+            adminActionResponse.setTicketReference(objectAdminActionEntity.getTicketReference());
+            adminActionResponse.setComments(objectAdminActionEntity.getComments());
+
+            response.setAdminAction(adminActionResponse);
+        }
+
+        return response;
+    }
+
 }
