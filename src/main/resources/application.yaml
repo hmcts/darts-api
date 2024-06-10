@@ -224,11 +224,14 @@ darts:
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
+      arm-service-profile: ${ARM_SERVICE_PROFILE:}
       cabinet-id: 100
       url: ${ARM_URL}
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+      available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
+      select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-dets

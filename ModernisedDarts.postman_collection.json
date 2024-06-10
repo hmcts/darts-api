@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "2ec376dc-36f4-4ba1-9056-72f3a1a6bfd2",
+		"_postman_id": "7a8bd3ef-7cae-410c-904e-e0066a0c08b9",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30362290"
+		"_exporter_id": "15829068",
+		"_collection_link": "https://speeding-resonance-716248.postman.co/workspace/darts-workspace~7b348c54-cda1-41d9-aca3-fe24f04ce206/collection/15829068-7a8bd3ef-7cae-410c-904e-e0066a0c08b9?action=share&source=collection_link&creator=15829068"
 	},
 	"item": [
 		{
@@ -456,6 +457,34 @@
 									"key": "media_request_id",
 									"value": "-1"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/transformed-medias/search",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"case_number\":\"T20230001\",\n   \"hearing_date\":\"2024-06-15\",\n   \"owner\":\"Owner2post owner\",\n   \"requested_by\":\"Requested By2post requested by\",\n   \"requested_at_from\":\"2024-06-07\",\n   \"requested_at_to\":\"2024-06-07\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/admin/transformed-medias/search",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transformed-medias",
+								"search"
 							]
 						}
 					},
@@ -2028,6 +2057,28 @@
 			"item": [
 				{
 					"name": "Generate Bearer Token - AAD_B2C_ROPC",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"postman.clearGlobalVariable(\"access_token\");",
+									"postman.setGlobalVariable(\"access_token\", data.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -2627,6 +2678,81 @@
 							"path": [
 								"transcriptions",
 								"transcriber-counts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/transcriptions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/admin/transcriptions?user_id=-37&requested_at_from=2024-02-22T13:53:00.581648Z",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transcriptions"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "-37"
+								},
+								{
+									"key": "requested_at_from",
+									"value": "2024-02-22T13:53:00.581648Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/transcription-documents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/admin/transcription-documents/241",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transcription-documents",
+								"241"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/transcription-documents/search",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"case_number\":\"C3154006\",\n   \"owner\":\"Req\",\n   \"requested_by\":\"REQ\",\n   \"requested_at_from\":\"2024-03-22\",\n   \"requested_at_to\":\"2024-03-22\",\n   \"hearing_date\":\"2024-03-22\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/admin/transcription-documents/search",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"transcription-documents",
+								"search"
 							]
 						}
 					},

@@ -94,6 +94,8 @@ java:
           alias: DARTS_INBOUND_STORAGE_SAS_URL
         - name: DartsUnstructuredStorageSasUrl
           alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
+        - name: ArmServiceProfile
+          alias: ARM_SERVICE_PROFILE
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -200,6 +202,8 @@ function:
           alias: DARTS_INBOUND_STORAGE_SAS_URL
         - name: DartsUnstructuredStorageSasUrl
           alias: DARTS_UNSTRUCTURED_STORAGE_SAS_URL
+        - name: ArmServiceProfile
+          alias: ARM_SERVICE_PROFILE
   environment:
     ATS_MODE: true
     API_MODE: false

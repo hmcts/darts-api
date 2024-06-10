@@ -89,6 +89,8 @@ java:
           alias: ARM_USERNAME
         - name: ArmPassword
           alias: ARM_PASSWORD
+        - name: ArmServiceProfile
+          alias: ARM_SERVICE_PROFILE
         - name: DartsInboundStorageSasUrl
           alias: DARTS_INBOUND_STORAGE_SAS_URL
         - name: DartsUnstructuredStorageSasUrl
