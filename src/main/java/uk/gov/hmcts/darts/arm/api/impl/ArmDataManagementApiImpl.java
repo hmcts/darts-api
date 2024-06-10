@@ -13,7 +13,9 @@ import uk.gov.hmcts.darts.common.datamanagement.StorageConfiguration;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -27,10 +29,20 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     private final ArmService armService;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final ArmApiService armApiService;
+    private final DataManagementConfiguration dataManagementConfiguration;
+    private final DataManagementService dataManagementService;
 
     @Override
     public String saveBlobDataToArm(String filename, BinaryData binaryData) {
         return armService.saveBlobData(armDataManagementConfiguration.getContainerName(), filename, binaryData);
+    }
+
+    @Override
+    public void copyBlobDataToArm(String unstructuredUuid, String filename) {
+
+        String blobPathAndName = armDataManagementConfiguration.getFolders().getSubmission() + filename;
+        dataManagementService.copyBlobData(
+            dataManagementConfiguration.getUnstructuredContainerName(), armDataManagementConfiguration.getContainerName(), unstructuredUuid, blobPathAndName);
     }
 
     @Override

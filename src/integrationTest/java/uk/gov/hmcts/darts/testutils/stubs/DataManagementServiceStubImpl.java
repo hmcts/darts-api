@@ -98,16 +98,16 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
         logStubUsageWarning();
 
-        if (sourceBlobId.equals(FAILURE_UUID)) {
+        if (sourceLocation.equals(FAILURE_UUID.toString())) {
             throw new DartsException("Exception thrown since copy requested with failure UUID");
         }
 
-        log.debug("Copy blob with id '{}' from '{}' to '{}' executed", sourceBlobId, sourceContainerName, destinationContainerName);
-
-        return UUID.randomUUID();
+        log.debug("Copy blob from '{}' to '{}' executed. Source location '{}, destination location '{}'",
+                  sourceContainerName, destinationContainerName, sourceLocation, destinationLocation);
     }
 
     @Override

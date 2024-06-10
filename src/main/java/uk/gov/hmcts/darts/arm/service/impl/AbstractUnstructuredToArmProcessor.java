@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobStorageException;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
@@ -169,10 +167,8 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                 Instant start = Instant.now();
                 log.info("ARM PERFORMANCE PUSH START for EOD {} started at {}", armExternalObjectDirectory.getId(), start);
 
-                BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
-                    unstructuredExternalObjectDirectory.getExternalLocation());
                 log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
-                armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
+                armDataManagementApi.copyBlobDataToArm(unstructuredExternalObjectDirectory.getExternalLocation().toString(), filename);
                 log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
 
                 Instant finish = Instant.now();
@@ -185,19 +181,11 @@ public abstract class AbstractUnstructuredToArmProcessor implements Unstructured
                 armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("BLOB raw data already exists {}", e.getMessage());
-            } else {
-                log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(), e.getMessage());
-                recoveryAction.run();
-                return false;
-            }
         } catch (Exception e) {
             log.error(
-                "Error moving BLOB data for file {} due to {}",
+                "Error copying BLOB data for file {}",
                 unstructuredExternalObjectDirectory.getExternalLocation(),
-                e.getMessage()
+                e
             );
             recoveryAction.run();
             return false;

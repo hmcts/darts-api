@@ -27,6 +27,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 class InboundToUnstructuredProcessorSingleElementImplTest {
 
     private static final Integer INBOUND_ID = 5555;
+    public static final String UUID_REGEX = "([a-f0-9]{8}(-[a-f0-9]{4}){4}[a-f0-9]{8})";
     private static final UUID EXTERNAL_LOCATION_UUID = UUID.randomUUID();
     private static final String INBOUND_CONTAINER_NAME = "darts-inbound-container";
     private static final String UNSTRUCTURED_CONTAINER_NAME = "darts-unstructured";
@@ -104,7 +107,8 @@ class InboundToUnstructuredProcessorSingleElementImplTest {
         inboundToUnstructuredProcessor.processSingleElement(INBOUND_ID);
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        verify(dataManagementService).copyBlobData(INBOUND_CONTAINER_NAME, UNSTRUCTURED_CONTAINER_NAME, EXTERNAL_LOCATION_UUID);
+        verify(dataManagementService).copyBlobData(
+            eq(INBOUND_CONTAINER_NAME), eq(UNSTRUCTURED_CONTAINER_NAME), eq(EXTERNAL_LOCATION_UUID.toString()), matches(UUID_REGEX));
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
         ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();

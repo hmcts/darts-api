@@ -249,9 +249,11 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+        arm: dropzone
       sas-url:
         darts-inbound-container: ${DARTS_INBOUND_STORAGE_SAS_URL}
         darts-unstructured: ${DARTS_UNSTRUCTURED_STORAGE_SAS_URL}
+        dropzone: ${ARM_SAS_ENDPOINT}
       delete:
         timeout: 60
       az-copy-executable: /usr/bin/azcopy

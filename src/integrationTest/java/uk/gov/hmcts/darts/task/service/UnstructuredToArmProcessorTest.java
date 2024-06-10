@@ -437,7 +437,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         BlobStorageException blobStorageException = mock(BlobStorageException.class);
         when(blobStorageException.getStatusCode()).thenReturn(123);
         when(blobStorageException.getMessage()).thenReturn("Copying blob failed");
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenReturn("1_1_1").thenThrow(blobStorageException);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(blobStorageException);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
