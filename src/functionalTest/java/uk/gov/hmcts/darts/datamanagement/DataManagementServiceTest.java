@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.datamanagement;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles({"dev", "h2db"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 class DataManagementServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
