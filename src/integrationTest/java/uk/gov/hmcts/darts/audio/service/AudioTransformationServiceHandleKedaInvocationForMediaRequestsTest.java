@@ -240,7 +240,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
         audioTransformationService.handleKedaInvocationForMediaRequests();
 
-        verify(mediaRequestService, never()).updateAudioRequestStatus(any(), any());
+        verify(mediaRequestService, never()).updateAudioRequestStatus(any(MediaRequestEntity.class), any());
     }
 
     private static Map<String, String> getTemplateValuesMap(NotificationEntity notificationEntity) {
