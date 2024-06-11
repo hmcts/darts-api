@@ -2,10 +2,10 @@ package uk.gov.hmcts.darts;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import uk.gov.hmcts.darts.enums.GrantType;
-import uk.gov.hmcts.darts.testutil.TestUtils;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -47,7 +47,7 @@ public class AccessTokenClient {
             .send(request, BodyHandlers.ofString())
             .body();
 
-        TokenResponse tokenResponse = TestUtils.createObjectMapper()
+        TokenResponse tokenResponse = new ObjectMapper()
             .readValue(response, TokenResponse.class);
 
         return tokenResponse.accessToken();

@@ -111,7 +111,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
         Response getUserResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .header(EMAIL_ADDRESS_HEADER_NAME, "james.smith@hmcts.net")
-            .queryParam("courthouse_id", 21)
             .get(getUri(ADMIN_USERS_BASE_PATH))
             .thenReturn();
 
