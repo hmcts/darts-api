@@ -49,6 +49,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.test.common.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.minimalTranscriptionDocument;
+import static uk.gov.hmcts.darts.test.common.data.TranscriptionDocumentTestData.transcriptionDocumentWithAdminAction;
+import static uk.gov.hmcts.darts.test.common.data.UserAccountTestData.minimalUserAccount;
+import static uk.gov.hmcts.darts.util.EntityIdPopulator.withIdsPopulated;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -569,6 +573,11 @@ class TranscriptionResponseMapperTest {
         String fileType = "fileType";
         Integer fileBytes = 299;
         boolean hidden = true;
+        OffsetDateTime lastModifiedAt = OffsetDateTime.parse("2007-12-03T10:15:30+00:00");
+        String clipId = "clipId";
+        String contentObjectId = "contentObjectId";
+        String checksum = "checksum";
+        UserAccountEntity lastModifiedBy = withIdsPopulated(minimalUserAccount());
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setId(transDocumentId);
@@ -579,6 +588,11 @@ class TranscriptionResponseMapperTest {
         transcriptionDocumentEntity.setFileType(fileType);
         transcriptionDocumentEntity.setFileSize(fileBytes);
         transcriptionDocumentEntity.setHidden(hidden);
+        transcriptionDocumentEntity.setContentObjectId(contentObjectId);
+        transcriptionDocumentEntity.setClipId(clipId);
+        transcriptionDocumentEntity.setChecksum(checksum);
+        transcriptionDocumentEntity.setLastModifiedTimestamp(lastModifiedAt);
+        transcriptionDocumentEntity.setLastModifiedBy(lastModifiedBy);
 
         GetTranscriptionDocumentByIdResponse response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(transcriptionDocumentEntity);
 
@@ -590,6 +604,37 @@ class TranscriptionResponseMapperTest {
         assertEquals(userId, response.getUploadedBy());
         assertEquals(uploadedAt, response.getUploadedAt());
         assertEquals(hidden, response.getIsHidden());
+        assertEquals(checksum, response.getChecksum());
+        assertEquals(lastModifiedBy.getId(), response.getLastModifiedBy());
+        assertEquals(lastModifiedAt, response.getLastModifiedAt());
+        assertEquals(clipId, response.getClipId());
+        assertEquals(contentObjectId, response.getContentObjectId());
+    }
+
+    @Test
+    void includesAdminActionWhenDocumentIsHidden() {
+        var hiddenTranscriptionDocument = withIdsPopulated(transcriptionDocumentWithAdminAction());
+        var adminActionEntity = hiddenTranscriptionDocument.getAdminActions().get(0);
+
+        var response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(hiddenTranscriptionDocument);
+
+        var adminActionResponse = response.getAdminAction();
+        assertEquals(adminActionEntity.getHiddenBy().getId(), adminActionResponse.getHiddenById());
+        assertEquals(adminActionEntity.getComments(), adminActionResponse.getComments());
+        assertEquals(adminActionEntity.getHiddenDateTime(), adminActionResponse.getHiddenAt());
+        assertEquals(adminActionEntity.getMarkedForManualDelBy().getId(), adminActionResponse.getMarkedForManualDeletionById());
+        assertEquals(adminActionEntity.getObjectHiddenReason().getId(), adminActionResponse.getReasonId());
+        assertEquals(adminActionEntity.getTicketReference(), adminActionResponse.getTicketReference());
+        assertEquals(adminActionEntity.getMarkedForManualDelDateTime(), adminActionResponse.getMarkedForManualDeletionAt());
+    }
+
+    @Test
+    void doesntIncludeAdminActionWhenDocumentIsVisible() {
+        var visibleTranscriptionDocument = minimalTranscriptionDocument();
+
+        var response = transcriptionResponseMapper.getSearchByTranscriptionDocumentId(visibleTranscriptionDocument);
+
+        assertNull(response.getAdminAction());
     }
 
     @Test

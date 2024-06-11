@@ -8,6 +8,10 @@ info:
   version: ${version}
   title: Modernised DARTS
 
+########################################################################################################################
+# PATH DEFINITIONS
+########################################################################################################################
+
 paths:
   /audio/hearings/{hearing_id}/audios:
     get:
@@ -254,24 +258,156 @@ paths:
                 type: "AUTHORISATION_100"
                 title: "User is not authorised for the associated courthouse"
                 status: 401
+
+  /admin/medias/{id}:
+    get:
+      tags:
+        - Audio
+      operationId: getAdminMediasById
+      description: Returns a representation of a media record
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/MediaId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminMediaResponse'
+
+########################################################################################################################
+# COMPONENT DEFINITIONS
+########################################################################################################################
+
 components:
   schemas:
+    AdminMediaResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/MediaId'
+        start_at:
+          $ref: '#/components/schemas/StartAt'
+        end_at:
+          $ref: '#/components/schemas/EndAt'
+        channel:
+          $ref: '#/components/schemas/Channel'
+        total_channels:
+          $ref: '#/components/schemas/TotalChannels'
+        media_type:
+          $ref: '#/components/schemas/MediaType'
+        media_format:
+          $ref: '#/components/schemas/Format'
+        file_size_bytes:
+          $ref: '#/components/schemas/FileSize'
+        filename:
+          $ref: '#/components/schemas/Filename'
+        media_object_id:
+          $ref: '#/components/schemas/MediaObjectId'
+        content_object_id:
+          $ref: '#/components/schemas/ContentObjectId'
+        clip_id:
+          $ref: '#/components/schemas/ClipId'
+        reference_id:
+          $ref: '#/components/schemas/ReferenceId'
+        checksum:
+          $ref: '#/components/schemas/Checksum'
+        media_status:
+          $ref: '#/components/schemas/MediaStatus'
+        is_hidden:
+          $ref: '#/components/schemas/Hidden'
+        is_deleted:
+          $ref: '#/components/schemas/Deleted'
+        admin_action:
+          $ref: '#/components/schemas/AdminActionResponse'
+        version:
+          $ref: '#/components/schemas/Version'
+        chronicle_id:
+          $ref: '#/components/schemas/ChronicleId'
+        antecedent_id:
+          $ref: '#/components/schemas/AntecedentId'
+        retain_until:
+          $ref: '#/components/schemas/RetainUntil'
+        created_at:
+          $ref: '#/components/schemas/CreatedAt'
+        created_by_id:
+          $ref: '#/components/schemas/CreatedBy'
+        last_modified_at:
+          $ref: '#/components/schemas/LastModifiedAt'
+        last_modified_by_id:
+          $ref: '#/components/schemas/LastModifiedBy'
+        courthouse:
+          $ref: '#/components/schemas/AdminMediaCourthouseResponse'
+        courtroom:
+          $ref: '#/components/schemas/AdminMediaCourtroomResponse'
+        hearings:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminMediaHearingResponseItem'
+
+    AdminActionResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/AdminActionId'
+        reason_id:
+          $ref: '#/components/schemas/ReasonId'
+        hidden_by_id:
+          $ref: '#/components/schemas/HiddenById'
+        hidden_at:
+          $ref: '#/components/schemas/HiddenAt'
+        is_marked_for_manual_deletion:
+          $ref: '#/components/schemas/MarkedForManualDeletion'
+        marked_for_manual_deletion_by_id:
+          $ref: '#/components/schemas/MarkedForDeletionById'
+        marked_for_manual_deletion_at:
+          $ref: '#/components/schemas/MarkedForManualDeletionAt'
+        ticket_reference:
+          $ref: '#/components/schemas/TicketReference'
+        comments:
+          $ref: '#/components/schemas/Comments'
+
+    AdminMediaCourthouseResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CourthouseId'
+        display_name:
+          $ref: '#/components/schemas/CourthouseDisplayName'
+
+    AdminMediaCourtroomResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CourtroomId'
+        name:
+          $ref: '#/components/schemas/CourtroomName'
+
+    AdminMediaHearingResponseItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/HearingId'
+        hearing_date:
+          $ref: '#/components/schemas/HearingDate'
+        case_id:
+          $ref: '#/components/schemas/CaseId'
+
     AdminMediaSearchResponseItem:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
-          description: med_id
+          $ref: '#/components/schemas/MediaId'
         channel:
-          type: integer
-          example: 1
+          $ref: '#/components/schemas/Channel'
         start_at:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/StartAt'
         end_at:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/EndAt'
         case:
           $ref: '#/components/schemas/AdminMediaSearchResponseCase'
         hearing:
@@ -285,9 +421,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
-          description: med_id
+          $ref: '#/components/schemas/CaseId'
         case_number:
           type: string
 
@@ -295,37 +429,31 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
+          $ref: '#/components/schemas/HearingId'
         hearing_date:
-          type: string
-          format: date
+          $ref: '#/components/schemas/HearingDate'
 
     AdminMediaSearchResponseCourthouse:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
+          $ref: '#/components/schemas/CourthouseId'
         display_name:
-          type: string
+          $ref: '#/components/schemas/CourthouseDisplayName'
 
     AdminMediaSearchResponseCourtroom:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
+          $ref: '#/components/schemas/CourtroomId'
         display_name:
-          type: string
+          $ref: '#/components/schemas/CourtroomName'
 
     AudioMetadata:
       type: object
       properties:
         id:
-          type: integer
-          example: 1
-          description: med_id
+          $ref: '#/components/schemas/MediaId'
         media_start_timestamp:
           type: string
           format: date-time
@@ -362,21 +490,13 @@ components:
           format: date-time
           description: 'End timestamp of the audio recording'
         channel:
-          type: integer
-          format: int32
-          description: 'Channel number of the audio recording'
+          $ref: '#/components/schemas/Channel'
         total_channels:
-          type: integer
-          format: int32
-          description: 'Number of channels making up the complete audio that this recording is part of'
+          $ref: '#/components/schemas/TotalChannels'
         format:
-          type: string
-          description: 'Media format of the audio recording'
-          maxLength: 64
+          $ref: '#/components/schemas/Format'
         filename:
-          type: string
-          description: 'Filename of the audio recording'
-          maxLength: 255
+          $ref: '#/components/schemas/Filename'
         courthouse:
           type: string
           description: 'Courthouse the audio was recorded in'
@@ -390,9 +510,7 @@ components:
           description: 'The file for the audio'
           maxLength: 255
         file_size:
-          type: integer
-          format: int64
-          description: 'The size of the file in bytes'
+          $ref: '#/components/schemas/FileSize'
         checksum:
           type: string
           description: 'Checksum to ensure integrity of file'
@@ -419,6 +537,153 @@ components:
           type: integer
         media_request_id:
           type: integer
+
+    ####################################################################################################################
+    # PRIMITIVES
+    ####################################################################################################################
+
+    MediaId:
+      type: integer
+      description: med_id
+
+    Format:
+      type: string
+      description: 'Media format of the audio recording'
+      maxLength: 64
+
+    Filename:
+      type: string
+      description: 'Filename of the audio recording'
+      maxLength: 255
+
+    MediaType:
+      type: string
+      maxLength: 255
+
+    FileSize:
+      type: integer
+      format: int64
+      description: 'The size of the file in bytes'
+
+    Hidden:
+      type: boolean
+
+    Deleted:
+      type: boolean
+
+    CreatedAt:
+      type: string
+      format: date-time
+
+    Channel:
+      type: integer
+      format: int32
+      description: 'Channel number of the audio recording'
+
+    TotalChannels:
+      type: integer
+      format: int32
+      description: 'Number of channels making up the complete audio that this recording is part of'
+
+    StartAt:
+      type: string
+      format: date-time
+
+    EndAt:
+      type: string
+      format: date-time
+
+    RetainUntil:
+      type: string
+      format: date-time
+
+    AdminActionId:
+      type: integer
+
+    ReasonId:
+      type: integer
+
+    HiddenById:
+      type: integer
+
+    HiddenAt:
+      type: string
+      format: date-time
+
+    MarkedForManualDeletion:
+      type: boolean
+
+    MarkedForDeletionById:
+      type: integer
+
+    MarkedForManualDeletionAt:
+      type: string
+      format: date-time
+
+    TicketReference:
+      type: string
+
+    Comments:
+      type: string
+
+    HearingId:
+      type: integer
+
+    HearingDate:
+      type: string
+      format: date
+
+    CaseId:
+      type: integer
+
+    CourthouseId:
+      type: integer
+
+    CourthouseDisplayName:
+      type: string
+
+    CourtroomId:
+      type: integer
+
+    CourtroomName:
+      type: string
+
+    ReferenceId:
+      type: string
+
+    Checksum:
+      type: string
+
+    MediaObjectId:
+      type: string
+
+    ContentObjectId:
+      type: string
+
+    ClipId:
+      type: string
+
+    ChronicleId:
+      type: string
+
+    AntecedentId:
+      type: string
+
+    MediaStatus:
+      type: string
+
+    Version:
+      type: string
+
+    CreatedBy:
+      type: integer
+
+    LastModifiedBy:
+      type: integer
+
+    LastModifiedAt:
+      type: string
+      format: date-time
 
     AddAudioErrorCode:
       type: string

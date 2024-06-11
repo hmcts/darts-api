@@ -30,8 +30,9 @@ public enum AuditActivity {
     CREATE_GROUP(21),
     UPDATE_GROUP(22),
     UPDATE_USERS_GROUP(23),
-    ENABLE_DISABLE_JOB(24),
-    RUN_JOB_MANUALLY(25);
+    AMEND_TRANSCRIPTION_WORKFLOW(24),
+    RUN_JOB_MANUALLY(25),
+    ENABLE_DISABLE_JOB(26);
 
     private final Integer id;
 }
