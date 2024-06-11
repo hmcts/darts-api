@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.UnableToReadArmFileException;
 import uk.gov.hmcts.darts.arm.mapper.ArmResponseUploadFileMapper;
@@ -22,8 +23,8 @@ import java.util.List;
 @Slf4j
 public class ArmResponseFileHelper {
 
-    public static final String DOT_A360 = ".a360";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ArmBatchCleanupConfiguration armBatchCleanupConfiguration;
     private final ArmDataManagementApi armDataManagementApi;
     private final ArmResponseUploadFileMapper uploadFileMapper;
 
@@ -32,9 +33,9 @@ public class ArmResponseFileHelper {
         List<InputUploadAndAssociatedFilenames> responseList = new ArrayList<>();
         String manifestFilePrefix = armDataManagementConfiguration.getManifestFilePrefix();
         if (manifestFileName.startsWith(manifestFilePrefix)
-            && manifestFileName.endsWith(DOT_A360)) {
+            && manifestFileName.endsWith(armBatchCleanupConfiguration.getManifestFileSuffix())) {
             //is a Batch response UI file.
-            String armUuidValue = StringUtils.removeEnd(manifestFileName, DOT_A360);
+            String armUuidValue = StringUtils.removeEnd(manifestFileName, armBatchCleanupConfiguration.getManifestFileSuffix());
             List<String> matchingInputUploadFiles = armDataManagementApi.listResponseBlobs(armUuidValue);
             //there should only be 1 matching InputUpload file, but looping through it just in case.
             if (matchingInputUploadFiles.size() > 1) {

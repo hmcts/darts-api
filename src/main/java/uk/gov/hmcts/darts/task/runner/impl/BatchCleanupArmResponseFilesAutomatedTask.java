@@ -30,10 +30,6 @@ public class BatchCleanupArmResponseFilesAutomatedTask extends AbstractLockableA
     @Override
     protected void runTask() {
         Integer batchSize = getAutomatedTaskBatchSize(taskName);
-        if (batchSize == 0) {
-            batchSize = 1000000;
-        }
-
         batchCleanupArmResponseFilesService.cleanupResponseFiles(batchSize);
     }
 

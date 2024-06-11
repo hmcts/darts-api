@@ -58,6 +58,10 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
 
     @Override
     public void cleanupResponseFiles(int batchsize) {
+        if (batchsize == 0) {
+            log.warn("Batch Cleanup ARM Response Files - Batch size is 0, so not running");
+            return;
+        }
         List<ObjectRecordStatusEntity> statusToSearch = objectRecordStatusRepository.getReferencesByStatus(
             List.of(STORED, ARM_RESPONSE_PROCESSING_FAILED, ARM_RESPONSE_MANIFEST_FAILED, ARM_RESPONSE_CHECKSUM_VERIFICATION_FAILED));
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());

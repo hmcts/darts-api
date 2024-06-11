@@ -80,6 +80,11 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
             ));
         dartsDatabase.save(savedMedia);
 
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");
+        when(batchCleanupConfiguration.getManifestFileSuffix()).thenReturn(".a360");
+        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
+
+
     }
 
     @Test
@@ -101,9 +106,6 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
@@ -190,9 +192,6 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
-
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
         when(armDataManagementApi.listResponseBlobs("DARTS_InputUploadUUID")).thenReturn(List.of(inputUploadFilename));
@@ -274,13 +273,8 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
     @Test
     void successNoResults() {
-        String manifestFilePrefix = "DARTS_";
-
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -298,16 +292,11 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
      */
     void successLargeNumber() throws IOException {
 
-        String manifestFilePrefix = "DARTS_";
-
         OffsetDateTime lastModifiedDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
         createTestData(5, 3, lastModifiedDateTime);
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
-
-        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
-        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
