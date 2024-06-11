@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -13,7 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
-public interface TranscriptionRepository extends JpaRepository<TranscriptionEntity, Integer> {
+public interface TranscriptionRepository extends RevisionRepository<TranscriptionEntity, Integer, Long>, JpaRepository<TranscriptionEntity, Integer> {
 
     @Query(value = """
         SELECT *
