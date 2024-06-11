@@ -29,7 +29,9 @@ public enum AuditActivity {
     UPDATE_USER(20),
     CREATE_GROUP(21),
     UPDATE_GROUP(22),
-    UPDATE_USERS_GROUP(23);
+    UPDATE_USERS_GROUP(23),
+    ENABLE_DISABLE_JOB(24),
+    RUN_JOB_MANUALLY(25);
 
     private final Integer id;
 }

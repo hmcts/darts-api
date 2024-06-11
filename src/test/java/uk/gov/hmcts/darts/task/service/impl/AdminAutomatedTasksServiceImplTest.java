@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -39,6 +41,12 @@ class AdminAutomatedTasksServiceImplTest {
     @Mock
     private AbstractLockableAutomatedTask someAutomatedTask;
 
+    @Mock
+    private AuditApi auditApi;
+
+    @Mock
+    private AuthorisationApi authorisationApi;
+
     private AdminAutomatedTaskService adminAutomatedTaskService;
 
     @BeforeEach
@@ -48,7 +56,9 @@ class AdminAutomatedTasksServiceImplTest {
             mapper,
             manualTaskService,
             automatedTaskRunner,
-            currentTimeHelper
+            currentTimeHelper,
+            auditApi,
+            authorisationApi
         );
 
         when(someAutomatedTask.getTaskName()).thenReturn("some-task-name");

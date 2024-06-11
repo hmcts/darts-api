@@ -1,11 +1,19 @@
 package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
+import uk.gov.hmcts.darts.testutils.EnversAuditQueryHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,6 +25,20 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
     private boolean initialValue;
     private AutomatedTaskEntity persistedAutomatedTaskEntity;
 
+    @Autowired
+    private AuditRepository auditRepository;
+
+    @Autowired
+    private SuperAdminUserStub superAdminUserStub;
+
+
+    @Autowired
+    private EnversAuditQueryHelper enversAuditQueryHelper;
+
+
+    @MockBean
+    private UserIdentity userIdentity;
+
     @AfterEach
     void tearDown() {
         persistedAutomatedTaskEntity.setTaskEnabled(initialValue);
@@ -25,12 +47,20 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
 
     @Test
     void canUpdateIsEnabledFieldToFalse() {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
         persistedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         initialValue = persistedAutomatedTaskEntity.getTaskEnabled(); // So we can revert it later as part of test clean up
         persistedAutomatedTaskEntity.setTaskEnabled(true);
         dartsDatabase.save(persistedAutomatedTaskEntity);
 
         adminAutomatedTaskService.updateAutomatedTask(1, new AutomatedTaskPatch().isActive(false));
+
+        Assertions.assertEquals(1, auditRepository.findAll().size());
+        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        Assertions.assertEquals(AuditActivity.ENABLE_DISABLE_JOB.getId(), auditEntity.getAuditActivity().getId());
+
+        Assertions.assertTrue(enversAuditQueryHelper.hasBeenAudited(AutomatedTaskEntity.class, 1));
 
         var updatedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         assertThat(updatedAutomatedTaskEntity.getTaskEnabled()).isFalse();
@@ -44,6 +74,12 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         dartsDatabase.save(persistedAutomatedTaskEntity);
 
         adminAutomatedTaskService.updateAutomatedTask(1, new AutomatedTaskPatch().isActive(true));
+
+        Assertions.assertEquals(1, auditRepository.findAll().size());
+        AuditEntity auditEntity = auditRepository.findAll().get(0);
+        Assertions.assertEquals(AuditActivity.ENABLE_DISABLE_JOB.getId(), auditEntity.getAuditActivity().getId());
+
+        Assertions.assertTrue(enversAuditQueryHelper.hasBeenAudited(AutomatedTaskEntity.class, 1));
 
         var updatedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         assertThat(updatedAutomatedTaskEntity.getTaskEnabled()).isTrue();

@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.task.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
@@ -18,6 +20,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.ENABLE_DISABLE_JOB;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.RUN_JOB_MANUALLY;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_ALREADY_RUNNING;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskApiError.AUTOMATED_TASK_NOT_FOUND;
 
@@ -31,6 +35,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
     private final ManualTaskService manualTaskService;
     private final AutomatedTaskRunner automatedTaskRunner;
     private final CurrentTimeHelper currentTimeHelper;
+    private final AuditApi auditApi;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     public List<AutomatedTaskSummary> getAllAutomatedTasks() {
@@ -68,6 +74,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
         }
 
         automatedTaskRunner.run(automatedTask.get());
+
+        auditApi.record(RUN_JOB_MANUALLY, authorisationApi.getCurrentUser(), null);;
     }
 
     @Override
@@ -76,6 +84,8 @@ public class AdminAutomatedTasksServiceImpl implements AdminAutomatedTaskService
             .orElseThrow(() -> new DartsApiException(AUTOMATED_TASK_NOT_FOUND));
 
         automatedTask.setTaskEnabled(automatedTaskPatch.getIsActive());
+
+        auditApi.record(ENABLE_DISABLE_JOB, authorisationApi.getCurrentUser(), null);;
 
         var updatedTask = automatedTaskRepository.save(automatedTask);
 
