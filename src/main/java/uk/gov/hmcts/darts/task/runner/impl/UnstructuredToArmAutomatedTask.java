@@ -19,10 +19,10 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                           LockProvider lockProvider,
                                           AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                          AutomatedTaskProcessorFactory processor,
+                                          AutomatedTaskProcessorFactory taskProcessorFactory,
                                           LogApi logApi) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties, logApi);
-        this.automatedTaskProcessorFactory = processor;
+        this.automatedTaskProcessorFactory = taskProcessorFactory;
     }
 
     @Override

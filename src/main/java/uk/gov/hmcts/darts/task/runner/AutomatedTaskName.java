@@ -21,7 +21,8 @@ public enum AutomatedTaskName {
     CLEANUP_ARM_RESPONSE_FILES_TASK_NAME("CleanupArmResponseFiles"),
     CLOSE_OLD_CASES_TASK_NAME("CloseOldCases"),
     DAILY_LIST_HOUSEKEEPING_TASK_NAME("DailyListHousekeeping"),
-    ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME("ArmRetentionEventDateCalculator");
+    ARM_RETENTION_EVENT_DATE_CALCULATOR_TASK_NAME("ArmRetentionEventDateCalculator"),
+    GENERATE_CASE_DOCUMENT_TASK_NAME("GenerateCaseDocument");
 
     private final String taskName;
 
