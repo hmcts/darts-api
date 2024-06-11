@@ -174,13 +174,38 @@ class DataManagementServiceImplTest {
             .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
         when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
-        UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
+        UUID sourceBlobId = UUID.randomUUID();
+        UUID destinationUuid = UUID.randomUUID();
 
-        UUID destinationUuid = dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId);
+        dataManagementService.copyBlobData("darts-inbound-container",
+                                           "darts-unstructured",
+                                           sourceBlobId.toString(),
+                                           destinationUuid.toString());
 
         verify(azureCopyUtil).copy(
-            "https://dartssastg.blob....net/darts-inbound-container/00941996-0000-0000-0000-4a1712ff6934?sp=r&st=2024-05-23T13...%3D",
-            "https://dartssastg.blob....net/darts-unstructured/" + destinationUuid.toString() + "?sp=r&st=2024-05-23T13...%3D"
+            "https://dartssastg.blob....net/darts-inbound-container/" + sourceBlobId + "?sp=r&st=2024-05-23T13...%3D",
+            "https://dartssastg.blob....net/darts-unstructured/" + destinationUuid + "?sp=r&st=2024-05-23T13...%3D"
+        );
+    }
+
+    @Test
+    void testCopyDataToArm() {
+        when(dataManagementConfiguration.getArmContainerName()).thenReturn("dropzone");
+        when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
+            .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
+        when(dataManagementConfiguration.getContainerSasUrl("dropzone"))
+            .thenReturn("https://dartsarmstg.blob....net/dropzone/DARTS?sp=rwdl&st=2024-03-28T08...sdd=1");
+        UUID sourceBlobId = UUID.randomUUID();
+        String destinationLocation = "DARTS/submission/" + UUID.randomUUID();
+
+        dataManagementService.copyBlobData("darts-unstructured",
+                                           "dropzone",
+                                           sourceBlobId.toString(),
+                                           destinationLocation);
+
+        verify(azureCopyUtil).copy(
+            "https://dartssastg.blob....net/darts-unstructured/" + sourceBlobId + "?sp=r&st=2024-05-23T13...%3D",
+            "https://dartsarmstg.blob....net/dropzone/" + destinationLocation + "?sp=rwdl&st=2024-03-28T08...sdd=1"
         );
     }
 
@@ -190,10 +215,13 @@ class DataManagementServiceImplTest {
             .thenReturn("https://dartssastg.blob....net/darts-inbound-container?sp=r&st=2024-05-23T13...%3D");
         when(dataManagementConfiguration.getContainerSasUrl("darts-unstructured"))
             .thenReturn("https://dartssastg.blob....net/darts-unstructured?sp=r&st=2024-05-23T13...%3D");
-        UUID sourceBlobId = UUID.fromString("00941996-0000-0000-0000-4a1712ff6934");
         doThrow(RuntimeException.class).when(azureCopyUtil).copy(any(), any());
 
         assertThrows(DartsException.class, () ->
-            dataManagementService.copyBlobData("darts-inbound-container", "darts-unstructured", sourceBlobId));
+            dataManagementService.copyBlobData(
+                "darts-inbound-container",
+                "darts-unstructured",
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString()));
     }
 }

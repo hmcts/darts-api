@@ -100,7 +100,7 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
     void allowSuperAdminToPostEventMappingsWithIsRevisionTrueAndMakePreviousRevisionInactive(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
-        var entity = dartsDatabase.createEventHandlerData();
+        var entity = dartsDatabase.createEventHandlerData("8888");
 
         MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -112,6 +112,34 @@ class EventControllerPostEventMappingTest extends IntegrationBase  {
             .andExpect(jsonPath("$.id").exists())
             .andExpect(jsonPath("$.type", Matchers.is("99999")))
             .andExpect(jsonPath("$.sub_type", Matchers.is("8888")))
+            .andExpect(jsonPath("$.name", Matchers.is("My Test Event")))
+            .andExpect(jsonPath("$.handler", Matchers.is("DarStartHandler")))
+            .andExpect(jsonPath("$.is_active", Matchers.is(true)))
+            .andExpect(jsonPath("$.has_restrictions", Matchers.is(true)))
+            .andExpect(jsonPath("$.created_at").exists());
+
+        var updatedPreviousActiveMapping = dartsDatabase.findEventHandlerMappingFor(entity.getId());
+
+        assertFalse(updatedPreviousActiveMapping.getActive());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SecurityRoleEnum.class, names = {"SUPER_ADMIN"}, mode = EnumSource.Mode.INCLUDE)
+    void allowSuperAdminToPostEventMappingsWithIsRevisionTrueAndEmptySubtypeAndMakePreviousRevisionInactive(SecurityRoleEnum role) throws Exception {
+        given.anAuthenticatedUserWithGlobalAccessAndRole(role);
+
+        var entity = dartsDatabase.createEventHandlerData(null);
+
+        MockHttpServletRequestBuilder requestBuilder = post(EVENT_MAPPINGS_ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam("is_revision", "true")
+            .content(getContentsFromFile(
+                "tests/events/EventControllerPostEventMappingTest/createEventMappingWithEmptySubtypeAndRevisionTruePost.json"));
+
+        mockMvc.perform(requestBuilder).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.type", Matchers.is("99999")))
+            .andExpect(jsonPath("$.sub_type").doesNotExist())
             .andExpect(jsonPath("$.name", Matchers.is("My Test Event")))
             .andExpect(jsonPath("$.handler", Matchers.is("DarStartHandler")))
             .andExpect(jsonPath("$.is_active", Matchers.is(true)))

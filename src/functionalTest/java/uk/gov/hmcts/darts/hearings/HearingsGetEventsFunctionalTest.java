@@ -111,7 +111,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         caseBody = caseBody.replace("<<caseNumber>>", caseNumber);
 
         // search for case using case number
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASE_SEARCH_URL))

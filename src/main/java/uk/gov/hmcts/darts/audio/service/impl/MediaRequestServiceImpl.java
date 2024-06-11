@@ -10,8 +10,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
@@ -134,6 +132,13 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus status) {
         MediaRequestEntity mediaRequestEntity = getMediaRequestEntityById(id);
+        mediaRequestEntity.setStatus(status);
+        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
+    @Transactional
+    @Override
+    public MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus status) {
         mediaRequestEntity.setStatus(status);
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
@@ -481,22 +486,18 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public ResponseEntity<List<AdminMediaSearchResponseItem>> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId) {
-        if (transformedMediaId != null) {
-            Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
-            if (transformedMediaOpt.isEmpty()) {
-                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-            }
-            TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
-            MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
-            HearingEntity hearing = mediaRequest.getHearing();
-            List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
-            //filter by media that overlap with request
-            List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
-                && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
-            return new ResponseEntity<>(AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);//future functionality
+    public List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId) {
+        Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
+        if (transformedMediaOpt.isEmpty()) {
+            return new ArrayList<>();
         }
+        TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
+        MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
+        HearingEntity hearing = mediaRequest.getHearing();
+        List<MediaEntity> mediaList = mediaRepository.findAllByHearingId(hearing.getId());
+        //filter by media that overlap with request
+        List<MediaEntity> filteredMediaList = mediaList.stream().filter(mediaEntity -> mediaEntity.getStart().isBefore(mediaRequest.getEndTime())
+            && mediaEntity.getEnd().isAfter(mediaRequest.getStartTime())).toList();
+        return AdminMediaSearchResponseMapper.createResponseItemList(filteredMediaList, hearing);
     }
 }

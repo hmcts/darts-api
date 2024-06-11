@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
 
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
@@ -26,6 +25,8 @@ public interface MediaRequestService {
     MediaRequestEntity getMediaRequestEntityById(Integer id);
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus mediaRequestStatus);
+
+    MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus mediaRequestStatus);
 
     boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails);
 
@@ -59,5 +60,5 @@ public interface MediaRequestService {
 
     MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
 
-    ResponseEntity<List<AdminMediaSearchResponseItem>> adminMediaSearch(Integer transformedMediaId, Integer transcriptionDocumentId);
+    List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId);
 }

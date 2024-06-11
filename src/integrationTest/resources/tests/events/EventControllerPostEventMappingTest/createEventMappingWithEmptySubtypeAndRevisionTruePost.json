@@ -1,0 +1,6 @@
+{
+  "type": "99999",
+  "name": "My Test Event",
+  "handler": "DarStartHandler",
+  "has_restrictions": true
+}

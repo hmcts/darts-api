@@ -903,6 +903,56 @@ paths:
               schema:
                 allOf:
                   - $ref: './problem.yaml'
+
+  /admin/transcription-document/{transcription_document_id}/hide:
+    post:
+      tags:
+        - Transcription
+      summary: Hides or shows a transcription document
+      operationId: hideTranscriptionDocumentId
+      parameters:
+        - name: transcription_document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranscriptionDocumentHideRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionDocumentHideResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '409':
+          description: Data conflicting
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
 components:
   schemas:
     TranscriptionSearchRequest:
@@ -1524,6 +1574,75 @@ components:
           type: boolean
           description: 'Whether the transcription document is hidden'
 
+    TranscriptionDocumentHideRequest:
+      type: object
+      properties:
+        is_hidden:
+          type: boolean
+          default: true
+        admin_action:
+          $ref: '#/components/schemas/AdminActionRequest'
+
+    AdminActionRequest:
+      type: object
+      required:
+        - reason_id
+        - ticket_reference
+        - comments
+      properties:
+        reason_id:
+          type: integer
+        ticket_reference:
+          type: string
+        comments:
+          type: string
+
+    TranscriptionDocumentHideResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The transcription document id'
+        is_hidden:
+          type: boolean
+          description: 'The transcription document hidden state'
+        admin_action:
+          $ref: '#/components/schemas/AdminActionResponse'
+          description: 'The transcription document admin action data when the request was made'
+
+    AdminActionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The admin action id'
+        reason_id:
+          type: integer
+          description: 'The admin action reason id'
+        hidden_by_id:
+          type: integer
+          description: 'The user that made the entity hidden'
+        hidden_at:
+          type: string
+          format: date-time
+          description: 'The date and time that made the entity hidden'
+        is_marked_for_manual_deletion:
+          type: boolean
+          description: 'The entity was manually marked for deletion'
+        marked_for_manual_deletion_by_id:
+          type: integer
+          description: 'The user that marked the entity for deletion'
+        marked_for_manual_deletion_at:
+          type: string
+          format: date-time
+          description: 'The date and time that the entity was marked for deletion'
+        ticket_reference:
+          type: string
+          description: 'The ticket reference for the admin action'
+        comments:
+          type: string
+          description: 'The comments for the admin action'
+
     TranscriptionsErrorCode:
       type: string
       enum:
@@ -1541,7 +1660,12 @@ components:
         - "TRANSCRIPTION_111"
         - "TRANSCRIPTION_112"
         - "TRANSCRIPTION_113"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND ]
+        - "TRANSCRIPTION_113"
+        - "TRANSCRIPTION_114"
+        - "TRANSCRIPTION_115"
+        - "TRANSCRIPTION_116"
+        - "TRANSCRIPTION_117"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND, TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND]
 
     TranscriptionsTitleErrors:
       type: string
@@ -1560,4 +1684,8 @@ components:
         - "Transcription could not be requested, times outside of hearing times"
         - "The user is not a transcriber"
         - "Transcription document not found"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND ]
+        - "Transcription document is already hidden"
+        - "Hide transcription action payload not correct"
+        - "Showing transcription action payload not correct"
+        - "Hide reason is incorrect"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND,  TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND]

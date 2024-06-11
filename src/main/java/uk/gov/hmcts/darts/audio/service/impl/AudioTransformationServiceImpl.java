@@ -168,7 +168,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             }
 
             log.info("Starting processing for audio request id: {}", requestId);
-            mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
+            mediaRequestService.updateAudioRequestStatus(mediaRequestEntity, PROCESSING);
 
             hearingEntity = mediaRequestEntity.getHearing();
 

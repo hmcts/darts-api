@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.authorisation.api.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
@@ -50,6 +51,7 @@ public class AuthorisationApiImpl implements AuthorisationApi {
     Confirms whether the user has at least 1 of the supplied security roles.
      */
     @Override
+    @Transactional
     public boolean userHasOneOfRoles(List<SecurityRoleEnum> securityRoles) {
         Set<SecurityGroupEntity> securityGroupEntities = userIdentity.getUserAccount().getSecurityGroupEntities();
         return SecurityGroupUtil.matchesAtLeastOneSecurityGroup(securityGroupEntities, securityRoles);

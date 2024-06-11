@@ -126,7 +126,7 @@ class CasesFunctionalTest extends FunctionalTest {
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
         // search for case using case number
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_PATH + "/search"))
