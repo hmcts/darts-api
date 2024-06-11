@@ -232,22 +232,35 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            SELECT distinct(eod.manifestFile) FROM ExternalObjectDirectoryEntity eod
             WHERE eod.status in :statuses
             AND eod.externalLocationType = :locationType
             AND eod.responseCleaned = :responseCleaned
             AND eod.lastModifiedDateTime < :lastModifiedBefore
             and eod.manifestFile is not null
             and eod.manifestFile like CONCAT(:manifestFileBatchPrefix, '%')
-            order by eod.lastModifiedDateTime
-            LIMIT :limit
             """
     )
-    List<ExternalObjectDirectoryEntity> findBatchArmResponseFiles(
+    List<String> findBatchCleanupManifestFilenames(
         List<ObjectRecordStatusEntity> statuses,
         ExternalLocationTypeEntity locationType,
         boolean responseCleaned,
-        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix, int limit);
+        OffsetDateTime lastModifiedBefore, String manifestFileBatchPrefix);
+
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.externalLocationType = :locationType
+            AND eod.responseCleaned = :responseCleaned
+            and eod.manifestFile = :manifestFilename
+            order by eod.lastModifiedDateTime
+            """
+    )
+    List<ExternalObjectDirectoryEntity> findBatchCleanupEntriesByManifestFilename(
+        ExternalLocationTypeEntity locationType,
+        boolean responseCleaned,
+        String manifestFilename);
+
 
     @Query(
         """

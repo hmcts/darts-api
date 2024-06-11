@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.test.common.data.MediaTestData;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -21,9 +23,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -46,7 +50,12 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
     @MockBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @MockBean
+    private ArmBatchCleanupConfiguration batchCleanupConfiguration;
+    @MockBean
     private CurrentTimeHelper currentTimeHelper;
+
+    @Autowired
+    ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @Autowired
     private BatchCleanupArmResponseFilesService cleanupArmResponseFilesService;
@@ -84,25 +93,16 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         String manifestFilePrefix = "DARTS_";
         String inputUploadUuid = "InputUploadUUID";
 
-        ExternalObjectDirectoryEntity armIuEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
-        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
         String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
-        armIuEod.setLastModifiedDateTime(latestDateTime);
-        armIuEod.setTransferAttempts(1);
-        armIuEod.setResponseCleaned(false);
-        armIuEod.setManifestFile(manifestFilename);
-        armIuEod = dartsDatabase.save(armIuEod);
+
+        ExternalObjectDirectoryEntity eodEntry1 = createEodEntry(manifestFilename, lastModifiedDateTime);
+        ExternalObjectDirectoryEntity eodEntry2 = createEodEntry(manifestFilename, lastModifiedDateTime);
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-
-        when(armDataManagementConfiguration.getBatchResponseCleanupBufferMinutes()).thenReturn(15);
+        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
@@ -116,31 +116,19 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementApi.listResponseBlobs(inputUploadHash)).thenReturn(
             List.of(createRecordFilename1, uploadFileFilename1, createRecordFilename2, uploadFileFilename2));
 
-        ExternalObjectDirectoryEntity armChildEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
         String createRecordFileTemplate = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
-        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, armChildEod1.getId()));
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, eodEntry1.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
 
         String validUploadFileTemplate = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
-        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, armChildEod1.getId(), "123"));
+        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, eodEntry1.getId(), "123"));
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
 
-        ExternalObjectDirectoryEntity armChildEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
-        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, armChildEod2.getId()));
+        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, eodEntry2.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
 
-        BinaryData uploadFileBinaryDataTest2 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, armChildEod2.getId(), "123"));
+        BinaryData uploadFileBinaryDataTest2 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, eodEntry2.getId(), "123"));
         when(armDataManagementApi.getBlobData(uploadFileFilename2)).thenReturn(uploadFileBinaryDataTest2);
 
 
@@ -156,15 +144,11 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         cleanupArmResponseFilesService.cleanupResponseFiles(100);
 
-        ExternalObjectDirectoryEntity foundMediaEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armIuEod.getId())
-            .orElseThrow();
-        assertTrue(foundMediaEod.isResponseCleaned());
-
-        ExternalObjectDirectoryEntity foundMediaEod1 = dartsDatabase.getExternalObjectDirectoryRepository().findById(armChildEod1.getId())
+        ExternalObjectDirectoryEntity foundMediaEod1 = externalObjectDirectoryRepository.findById(eodEntry1.getId())
             .orElseThrow();
         assertTrue(foundMediaEod1.isResponseCleaned());
 
-        ExternalObjectDirectoryEntity foundMediaEod2 = dartsDatabase.getExternalObjectDirectoryRepository().findById(armChildEod2.getId())
+        ExternalObjectDirectoryEntity foundMediaEod2 = externalObjectDirectoryRepository.findById(eodEntry2.getId())
             .orElseThrow();
         assertTrue(foundMediaEod2.isResponseCleaned());
 
@@ -196,26 +180,17 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         String manifestFilePrefix = "DARTS_";
         String inputUploadUuid = "InputUploadUUID";
-
-        ExternalObjectDirectoryEntity armIuEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
-        OffsetDateTime latestDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
         String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
-        armIuEod.setLastModifiedDateTime(latestDateTime);
-        armIuEod.setTransferAttempts(1);
-        armIuEod.setResponseCleaned(false);
-        armIuEod.setManifestFile(manifestFilename);
-        armIuEod = dartsDatabase.save(armIuEod);
+
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+        ExternalObjectDirectoryEntity eodEntry1 = createEodEntry(manifestFilename, lastModifiedDateTime);
+        ExternalObjectDirectoryEntity eodEntry2 = createEodEntry(manifestFilename, lastModifiedDateTime);
+        ExternalObjectDirectoryEntity eodEntry3 = createEodEntry(manifestFilename, lastModifiedDateTime);
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-
-        when(armDataManagementConfiguration.getBatchResponseCleanupBufferMinutes()).thenReturn(15);
+        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
 
         String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
@@ -231,43 +206,25 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         when(armDataManagementApi.listResponseBlobs(inputUploadHash)).thenReturn(
             List.of(createRecordFilename1, uploadFileFilename1, createRecordFilename2, uploadFileFilename2, createRecordFilename3, uploadFileFilename3));
 
-        ExternalObjectDirectoryEntity armChildEod1 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
         String createRecordFileTemplate = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
-        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, armChildEod1.getId()));
+        BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, eodEntry1.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename1)).thenReturn(createRecordBinaryDataTest1);
 
         String validUploadFileTemplate = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
-        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, armChildEod1.getId(), "123"));
+        BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, eodEntry1.getId(), "123"));
         when(armDataManagementApi.getBlobData(uploadFileFilename1)).thenReturn(uploadFileBinaryDataTest1);
 
 
-        ExternalObjectDirectoryEntity armChildEod2 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
-        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, armChildEod2.getId()));
+        BinaryData createRecordBinaryDataTest2 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, eodEntry2.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename2)).thenReturn(createRecordBinaryDataTest2);
 
-        BinaryData uploadFileBinaryDataTest2 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, armChildEod2.getId(), "123"));
+        BinaryData uploadFileBinaryDataTest2 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, eodEntry2.getId(), "123"));
         when(armDataManagementApi.getBlobData(uploadFileFilename2)).thenReturn(uploadFileBinaryDataTest2);
 
-        ExternalObjectDirectoryEntity armChildEod3 = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            savedMedia,
-            STORED,
-            ARM,
-            UUID.randomUUID()
-        );
-        BinaryData createRecordBinaryDataTest3 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, armChildEod3.getId()));
+        BinaryData createRecordBinaryDataTest3 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, eodEntry3.getId()));
         when(armDataManagementApi.getBlobData(createRecordFilename3)).thenReturn(createRecordBinaryDataTest3);
 
-        BinaryData uploadFileBinaryDataTest3 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, armChildEod3.getId(), "123"));
+        BinaryData uploadFileBinaryDataTest3 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, eodEntry3.getId(), "123"));
         when(armDataManagementApi.getBlobData(uploadFileFilename3)).thenReturn(uploadFileBinaryDataTest3);
 
 
@@ -285,19 +242,15 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
 
         cleanupArmResponseFilesService.cleanupResponseFiles(100);
 
-        ExternalObjectDirectoryEntity foundChildEod = dartsDatabase.getExternalObjectDirectoryRepository().findById(armIuEod.getId())
-            .orElseThrow();
-        assertFalse(foundChildEod.isResponseCleaned());
-
-        ExternalObjectDirectoryEntity foundChildEod1 = dartsDatabase.getExternalObjectDirectoryRepository().findById(armChildEod1.getId())
+        ExternalObjectDirectoryEntity foundChildEod1 = dartsDatabase.getExternalObjectDirectoryRepository().findById(eodEntry1.getId())
             .orElseThrow();
         assertTrue(foundChildEod1.isResponseCleaned());
 
-        ExternalObjectDirectoryEntity foundChildEod2 = dartsDatabase.getExternalObjectDirectoryRepository().findById(armChildEod2.getId())
+        ExternalObjectDirectoryEntity foundChildEod2 = dartsDatabase.getExternalObjectDirectoryRepository().findById(eodEntry2.getId())
             .orElseThrow();
         assertFalse(foundChildEod2.isResponseCleaned());
 
-        ExternalObjectDirectoryEntity foundChildEod3 = dartsDatabase.getExternalObjectDirectoryRepository().findById(armChildEod3.getId())
+        ExternalObjectDirectoryEntity foundChildEod3 = dartsDatabase.getExternalObjectDirectoryRepository().findById(eodEntry3.getId())
             .orElseThrow();
         assertTrue(foundChildEod3.isResponseCleaned());
 
@@ -319,6 +272,54 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         verifyNoMoreInteractions(armDataManagementApi);
     }
 
+    @Test
+    void successNoResults() {
+        String manifestFilePrefix = "DARTS_";
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        cleanupArmResponseFilesService.cleanupResponseFiles(100);
+
+        verifyNoMoreInteractions(armDataManagementApi);
+    }
+
+
+    @Test
+    /*
+        process 3 InputUpload files out of 5 in the database.
+        each has 3 groups of createRecord/Upload response files.
+     */
+    void successLargeNumber() throws IOException {
+
+        String manifestFilePrefix = "DARTS_";
+
+        OffsetDateTime lastModifiedDateTime = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+        createTestData(5, 3, lastModifiedDateTime);
+
+        OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(20);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
+        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
+        when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn(manifestFilePrefix);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+
+        cleanupArmResponseFilesService.cleanupResponseFiles(3);
+
+        List<ExternalObjectDirectoryEntity> allEodEntities = dartsDatabase.getExternalObjectDirectoryRepository().findAll();
+        assertEquals(15, allEodEntities.size());
+        List<ExternalObjectDirectoryEntity> cleanedEodEntities = allEodEntities.stream().filter(ExternalObjectDirectoryEntity::isResponseCleaned).toList();
+        assertEquals(9, cleanedEodEntities.size());
+    }
 
     private BinaryData convertStringToBinaryData(String contents) {
         return BinaryData.fromString(contents);
@@ -337,5 +338,59 @@ class BatchCleanupArmResponseFilesServiceIntTest extends IntegrationBase {
         return expectedResponse;
     }
 
+    private ExternalObjectDirectoryEntity createEodEntry(String manifestFilename, OffsetDateTime latestModifiedDateTime) {
+        ExternalObjectDirectoryEntity eodEntity = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            STORED,
+            ARM,
+            UUID.randomUUID()
+        );
+        eodEntity.setLastModifiedDateTime(latestModifiedDateTime);
+        eodEntity.setResponseCleaned(false);
+        eodEntity.setManifestFile(manifestFilename);
+        dartsDatabase.save(eodEntity);
+        return eodEntity;
+    }
 
+
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops"})
+    private void createTestData(int numOfManifestFiles, int eodPerManifest, OffsetDateTime lastModifiedDateTime) throws IOException {
+        String manifestFilePrefix = "DARTS_";
+
+        for (int manifestFileCounter = 1; manifestFileCounter <= numOfManifestFiles; manifestFileCounter++) {
+            String inputUploadUuid = "InputUploadUUID" + manifestFileCounter;
+            String manifestFilename = manifestFilePrefix + inputUploadUuid + ".a360";
+            String inputUploadHash = "6a374f19a9ce7dc9cc480ea8d4eca0fb-" + manifestFileCounter;
+            String inputUploadFilename = manifestFilePrefix + inputUploadUuid + "_" + inputUploadHash + "_1_iu.rsp";
+            when(armDataManagementApi.listResponseBlobs(manifestFilePrefix + inputUploadUuid)).thenReturn(
+                List.of(inputUploadFilename));
+
+            List<String> responseFilenames = new ArrayList<>();
+
+            for (int eodPerManifestCounter = 1; eodPerManifestCounter <= eodPerManifest; eodPerManifestCounter++) {
+                ExternalObjectDirectoryEntity eodEntry = createEodEntry(manifestFilename, lastModifiedDateTime);
+
+                String createRecordFilename = inputUploadHash + "_" + String.format("%08d", eodPerManifestCounter) + "-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+
+                String createRecordFileTemplate = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/CreateRecord.rsp";
+                BinaryData createRecordBinaryDataTest1 = convertStringToBinaryData(getCreateRecordFileContents(createRecordFileTemplate, eodEntry.getId()));
+                when(armDataManagementApi.getBlobData(createRecordFilename)).thenReturn(createRecordBinaryDataTest1);
+                responseFilenames.add(createRecordFilename);
+                when(armDataManagementApi.deleteBlobData(createRecordFilename)).thenReturn(true);
+
+                String uploadFileFilename = inputUploadHash + "_" + String.format("%08d", eodPerManifestCounter) + "-952a-79b6-8362-13259aae1895_1_uf.rsp";
+                String validUploadFileTemplate = "tests/arm/service/ArmBatchResponseFilesProcessorTest/ValidResponses/UploadFile.rsp";
+                BinaryData uploadFileBinaryDataTest1 = convertStringToBinaryData(getUploadFileContents(validUploadFileTemplate, eodEntry.getId(), "123"));
+                when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryDataTest1);
+                responseFilenames.add(uploadFileFilename);
+
+                when(armDataManagementApi.deleteBlobData(uploadFileFilename)).thenReturn(true);
+
+            }
+
+            when(armDataManagementApi.listResponseBlobs(inputUploadHash)).thenReturn(
+                responseFilenames);
+        }
+
+    }
 }

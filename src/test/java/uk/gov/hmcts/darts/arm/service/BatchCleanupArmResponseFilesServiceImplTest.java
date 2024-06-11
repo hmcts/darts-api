@@ -8,6 +8,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.UnableToReadArmFileException;
 import uk.gov.hmcts.darts.arm.helper.ArmResponseFileHelper;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -57,6 +57,9 @@ class BatchCleanupArmResponseFilesServiceImplTest {
     private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    @Mock
+    private ArmBatchCleanupConfiguration batchCleanupConfiguration;
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
@@ -71,8 +74,6 @@ class BatchCleanupArmResponseFilesServiceImplTest {
     private ObjectRecordStatusEntity objectRecordStatusArmResponseProcessingFailed;
     @Mock
     private ObjectRecordStatusEntity objectRecordStatusArmResponseManifestFailed;
-
-    private ExternalObjectDirectoryEntity eodEntityForUiFile;
 
     @Mock
     private MediaEntity media;
@@ -95,36 +96,31 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             externalLocationTypeRepository,
             armDataManagementApi,
             userIdentity,
+            batchCleanupConfiguration,
             armDataManagementConfiguration,
             currentTimeHelper,
             armResponseFileHelper
         );
 
-        eodEntityForUiFile = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
-            media,
-            ExternalLocationTypeEnum.ARM,
-            ObjectRecordStatusEnum.STORED,
-            UUID.randomUUID());
-
-        eodEntityForUiFile.setManifestFile("DARTS_00000001.a360");
 
         when(objectRecordStatusRepository.getReferencesByStatus(anyList())).thenReturn(List.of(objectRecordStatusStored,
                                                                                                objectRecordStatusArmResponseManifestFailed,
                                                                                                objectRecordStatusArmResponseProcessingFailed,
                                                                                                objectRecordStatusArmResponseChecksumFailed
         ));
-        when(armDataManagementConfiguration.getBatchResponseCleanupBufferMinutes()).thenReturn(15);
+        when(batchCleanupConfiguration.getBufferMinutes()).thenReturn(15);
         when(armDataManagementConfiguration.getManifestFilePrefix()).thenReturn("DARTS_");
-    }
 
-    @Test
-    void cleanupResponseFilesSuccess() throws UnableToReadArmFileException {
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(externalObjectDirectoryRepository.findBatchArmResponseFiles(
+    }
+
+    @Test
+    void cleanupResponseFilesSuccess() throws UnableToReadArmFileException {
+        when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
             eq(List.of(objectRecordStatusStored,
                        objectRecordStatusArmResponseManifestFailed,
                        objectRecordStatusArmResponseProcessingFailed,
@@ -132,14 +128,25 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             eq(externalLocationTypeArm),
             eq(false),
             any(OffsetDateTime.class),
-            anyString(),
-            eq(100)
-        )).thenReturn(List.of(eodEntityForUiFile));
+            anyString()
+        )).thenReturn(List.of("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360"));
+
+        ExternalObjectDirectoryEntity eodEntityGroup1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+            media,
+            ExternalLocationTypeEnum.ARM,
+            ObjectRecordStatusEnum.STORED,
+            UUID.randomUUID());
+
+        eodEntityGroup1.setManifestFile("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360");
+
+        when(externalObjectDirectoryRepository.findBatchCleanupEntriesByManifestFilename(
+            eq(externalLocationTypeArm),
+            eq(false),
+            anyString()
+        )).thenReturn(List.of(eodEntityGroup1));
+
 
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
-        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
-
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
 
@@ -165,9 +172,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
 
         cleanupArmResponseFilesService.cleanupResponseFiles(100);
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        assertTrue(eodEntityForUiFile.isResponseCleaned());
-        assertTrue(eodEntityForAssociatedFiles1.isResponseCleaned());
+        verify(externalObjectDirectoryRepository).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
     }
 
     @Test
@@ -177,7 +182,7 @@ class BatchCleanupArmResponseFilesServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(externalObjectDirectoryRepository.findBatchArmResponseFiles(
+        when(externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
             eq(List.of(objectRecordStatusStored,
                        objectRecordStatusArmResponseManifestFailed,
                        objectRecordStatusArmResponseProcessingFailed,
@@ -185,9 +190,8 @@ class BatchCleanupArmResponseFilesServiceImplTest {
             eq(externalLocationTypeArm),
             eq(false),
             any(OffsetDateTime.class),
-            anyString(),
-            eq(100)
-        )).thenReturn(List.of(eodEntityForUiFile));
+            anyString()
+        )).thenReturn(List.of("DARTS_6a374f19a9ce7dc9cc480ea8d4eca0fb.a360"));
 
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
@@ -204,7 +208,6 @@ class BatchCleanupArmResponseFilesServiceImplTest {
 
         cleanupArmResponseFilesService.cleanupResponseFiles(100);
 
-        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
-        assertTrue(eodEntityForUiFile.isResponseCleaned());
+        verify(externalObjectDirectoryRepository, times(0)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
     }
 }

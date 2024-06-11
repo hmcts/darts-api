@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmBatchCleanupConfiguration;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.exception.UnableToReadArmFileException;
 import uk.gov.hmcts.darts.arm.helper.ArmResponseFileHelper;
@@ -47,6 +48,7 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
 
     private final ArmDataManagementApi armDataManagementApi;
     private final UserIdentity userIdentity;
+    private final ArmBatchCleanupConfiguration batchCleanupConfiguration;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
     private final CurrentTimeHelper currentTimeHelper;
     private final ArmResponseFileHelper armResponseFileHelper;
@@ -62,54 +64,81 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
 
         userAccount = userIdentity.getUserAccount();
 
-        Integer cleanupBufferMinutes = armDataManagementConfiguration.getBatchResponseCleanupBufferMinutes();
+        Integer cleanupBufferMinutes = batchCleanupConfiguration.getBufferMinutes();
         OffsetDateTime dateTimeForDeletion = currentTimeHelper.currentOffsetDateTime().minusMinutes(cleanupBufferMinutes);
 
-        List<ExternalObjectDirectoryEntity> eodEntitiesToBeDeleted =
-            externalObjectDirectoryRepository.findBatchArmResponseFiles(
+        List<String> manifestFilenames =
+            externalObjectDirectoryRepository.findBatchCleanupManifestFilenames(
                 statusToSearch,
                 armLocation,
                 false,
                 dateTimeForDeletion,
-                armDataManagementConfiguration.getManifestFilePrefix(),
-                batchsize
+                armDataManagementConfiguration.getManifestFilePrefix()
             );
+        if (manifestFilenames.isEmpty()) {
+            log.info("Batch Cleanup ARM Response Files - 0 rows returned, so stopping.");
+            return;
+        }
+        manifestFilenames = manifestFilenames.subList(0, Integer.min(manifestFilenames.size(), batchsize));
 
-        if (CollectionUtils.isNotEmpty(eodEntitiesToBeDeleted)) {
+        if (CollectionUtils.isNotEmpty(manifestFilenames)) {
             int counter = 1;
-            for (ExternalObjectDirectoryEntity eodEntity : eodEntitiesToBeDeleted) {
-                log.info("Batch Cleanup ARM Response Files - about to process eodId {}, row {} of {} rows", eodEntity.getId(), counter++,
-                         eodEntitiesToBeDeleted.size());
-                try {
-                    cleanupResponseFilesForExternalObjectDirectory(eodEntity);
-                } catch (UnableToReadArmFileException e) {
-                    log.error("Cannot process eodId {} due to corrupt ARM file.", eodEntity.getId());
-                }
+            for (String manifestFilename : manifestFilenames) {
+                log.info("Batch Cleanup ARM Response Files - about to process manifest filename {}, row {} of {} rows", manifestFilename, counter++,
+                         manifestFilenames.size());
+                cleanupFilesByManifestFilename(armLocation, statusToSearch, dateTimeForDeletion, manifestFilename);
             }
         } else {
             log.info("No ARM responses found to be deleted}");
         }
     }
 
-    private void cleanupResponseFilesForExternalObjectDirectory(ExternalObjectDirectoryEntity eodEntity) throws UnableToReadArmFileException {
-        String manifestFile = eodEntity.getManifestFile();
-        log.debug("Found ARM manifest file {} for cleanup", manifestFile);
-        List<InputUploadAndAssociatedFilenames> inputUploadAndAssociatedList = armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(manifestFile);
-        //inputUploadAndAssociatedList should only contain 1 matching InputUpload file, but looping through it just in case.
-        for (InputUploadAndAssociatedFilenames inputUploadAndAssociates : inputUploadAndAssociatedList) {
-            deleteResponseFiles(eodEntity, inputUploadAndAssociates);
+    private void cleanupFilesByManifestFilename(ExternalLocationTypeEntity armLocation, List<ObjectRecordStatusEntity> statusToSearch,
+                                                OffsetDateTime dateTimeForDeletion, String manifestFilename) {
+        try {
+            log.debug("Finding associated eodEntries for manifest filename {}", manifestFilename);
+            List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename = externalObjectDirectoryRepository.findBatchCleanupEntriesByManifestFilename(
+                armLocation, false, manifestFilename);
+
+            List<Integer> statusIdList = statusToSearch.stream().map(ObjectRecordStatusEntity::getId).toList();
+            boolean statusAllValid = eodEntriesWithManifestFilename.stream().allMatch(eodEntity -> statusIdList.contains(eodEntity.getStatusId()));
+            if (!statusAllValid) {
+                log.warn("Not all statuses are valid for manifestFilename {}, so skipping to next manifestFilename.", manifestFilename);
+            }
+
+            boolean lastModifiedAllValid = eodEntriesWithManifestFilename.stream().allMatch(
+                eodEntity -> eodEntity.getLastModifiedDateTime().isBefore(dateTimeForDeletion));
+            if (!lastModifiedAllValid) {
+                log.warn("Not all entries have been modified before {} for manifestFilename {}, so skipping to next manifestFilename.", dateTimeForDeletion,
+                         manifestFilename);
+            }
+
+            log.debug("Found ARM manifest file {} for cleanup", manifestFilename);
+            List<InputUploadAndAssociatedFilenames> inputUploadAndAssociatedList = armResponseFileHelper.getCorrespondingArmFilesForManifestFilename(
+                manifestFilename);
+            //inputUploadAndAssociatedList should only contain 1 matching InputUpload file, but looping through it just in case.
+            for (InputUploadAndAssociatedFilenames inputUploadAndAssociates : inputUploadAndAssociatedList) {
+                deleteResponseFiles(inputUploadAndAssociates, eodEntriesWithManifestFilename);
+            }
+
+        } catch (UnableToReadArmFileException e) {
+            log.error("Cannot process manifest filename {} due to corrupt ARM file.", manifestFilename);
         }
+
     }
 
-    private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory, InputUploadAndAssociatedFilenames inputUploadAndAssociates) {
+    private void deleteResponseFiles(InputUploadAndAssociatedFilenames inputUploadAndAssociates,
+                                     List<ExternalObjectDirectoryEntity> eodEntriesWithManifestFilename) {
         List<EodIdAndAssociatedFilenames> eodIdAndAssociatedFilenamesList = inputUploadAndAssociates.getEodIdAndAssociatedFilenamesList();
         List<Boolean> deletedFileStatuses = new ArrayList<>();
+        String inputUploadFilename = inputUploadAndAssociates.getInputUploadFilename();
         for (EodIdAndAssociatedFilenames eodIdAndAssociatedFilenames : eodIdAndAssociatedFilenamesList) {
             boolean successfullyDeletedAssociatedFiles = true;
             Integer eodId = eodIdAndAssociatedFilenames.getEodId();
             for (String associatedFile : eodIdAndAssociatedFilenames.getAssociatedFiles()) {
                 try {
-                    log.info("About to delete file {} for EOD {}, linked to EOD {}", associatedFile, eodId, externalObjectDirectory.getId());
+                    log.info("About to delete file {} for EOD {}, linked to inputUpload filename {}", associatedFile, eodId,
+                             inputUploadFilename);
                     boolean responseFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(associatedFile);
                     if (!responseFileDeletedSuccessfully) {
                         log.warn("Response file {} failed to delete successfully.", associatedFile);
@@ -117,37 +146,54 @@ public class BatchCleanupArmResponseFilesServiceImpl implements BatchCleanupArmR
                         break;
                     }
                 } catch (Exception e) {
-                    log.error("Failure to delete response file {} for EOD {} - {}", associatedFile, externalObjectDirectory.getId(), e.getMessage(), e);
+                    log.error("Failure to delete response file {} for EOD {} - {}", associatedFile, eodId, e.getMessage(), e);
                     successfullyDeletedAssociatedFiles = false;
+                    break;
                 }
             }
             deletedFileStatuses.add(successfullyDeletedAssociatedFiles);
             if (successfullyDeletedAssociatedFiles) {
                 Optional<ExternalObjectDirectoryEntity> eodEntityOpt = externalObjectDirectoryRepository.findById(eodId);
                 if (eodEntityOpt.isEmpty()) {
-                    log.error("EodEntity {} cannot be found.", eodId);
+                    log.error("EodEntity {} in response file for {} cannot be found.", eodId, inputUploadFilename);
                     break;
                 }
-                ExternalObjectDirectoryEntity eodEntity = eodEntityOpt.get();
-                setResponseCleaned(eodEntity);
+                ExternalObjectDirectoryEntity eodEntityFromRelationId = eodEntityOpt.get();
+
+                boolean matchesEodWithManifestFile = false;
+                for (ExternalObjectDirectoryEntity eodEntity : eodEntriesWithManifestFilename) {
+                    if (eodEntity.getId().equals(eodEntityFromRelationId.getId())) {
+                        matchesEodWithManifestFile = true;
+                        eodEntriesWithManifestFilename.remove(eodEntity);
+                        break;
+                    }
+                }
+
+                if (!matchesEodWithManifestFile) {
+                    log.warn("Deleted arm response file is not associated with any eodEntity with manifest file {}, but mentions relationId {}.",
+                             inputUploadFilename, eodEntityFromRelationId);
+                }
+                setResponseCleaned(eodEntityFromRelationId);
             }
         }
 
+        if (CollectionUtils.isNotEmpty(eodEntriesWithManifestFilename)) {
+            log.warn("All ARM response files related to InputUpload file {} have been deleted, but none referred to the following eodId's - {}.",
+                     inputUploadFilename, eodEntriesWithManifestFilename.stream().map(ExternalObjectDirectoryEntity::getId).toList());
+        }
 
         if (deletedFileStatuses.stream().allMatch(Boolean.TRUE::equals)) {
-            String armInputUploadFilename = inputUploadAndAssociates.getInputUploadFilename();
-            log.info("All associated Eod entries deleted, about to delete {} for EOD {}", armInputUploadFilename, externalObjectDirectory.getId());
+            log.info("All associated Eod entries deleted, about to delete InputUpload file {}", inputUploadFilename);
             // Make sure to only delete the Input Upload filename after the other response files have been deleted as once this is deleted
             // you cannot find the other response files
-            boolean inputUploadFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(armInputUploadFilename);
-            setResponseCleaned(externalObjectDirectory);
+            boolean inputUploadFileDeletedSuccessfully = armDataManagementApi.deleteBlobData(inputUploadFilename);
             if (inputUploadFileDeletedSuccessfully) {
-                log.info("Successfully cleaned up response files for EOD {}", externalObjectDirectory.getId());
+                log.info("Successfully cleaned up response files for InputUpload file {}", inputUploadFilename);
             } else {
-                log.warn("Unable to delete input upload response file for EOD {}", externalObjectDirectory.getId());
+                log.warn("Unable to delete input upload response file {}", inputUploadFilename);
             }
         } else {
-            log.warn("Unable to delete all response files for EOD {}", externalObjectDirectory.getId());
+            log.warn("Unable to delete all response files for InputUpload file {}", inputUploadFilename);
         }
     }
 
