@@ -47,6 +47,7 @@ import uk.gov.hmcts.darts.task.runner.impl.CloseOldCasesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.DailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.GenerateCaseDocumentAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
@@ -75,6 +76,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_CASES_T
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.DAILY_LIST_HOUSEKEEPING_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.GENERATE_CASE_DOCUMENT_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
@@ -161,6 +163,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addProcessDailyListToTaskRegistrar(taskRegistrar);
         addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
         addUnstructuredToArmTaskRegistrar(taskRegistrar);
+        addGenerateCaseDocumentToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -241,6 +244,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             case PROCESS_DAILY_LIST_TASK_NAME -> rescheduleProcessDailyListAutomatedTask();
             case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
             case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
+            case GENERATE_CASE_DOCUMENT_TASK_NAME -> rescheduleGenerateCaseDocumentAutomatedTask();
             default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
@@ -518,6 +522,17 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             getAutomatedTaskCronExpression(armRetentionEventDateCalculatorAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(armRetentionEventDateCalculatorAutomatedTask);
         taskRegistrar.addTriggerTask(armRetentionEventDateCalculatorAutomatedTask, trigger);
+    }
+
+    private void addGenerateCaseDocumentToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        var generateCaseDocumentAutomatedTask = new GenerateCaseDocumentAutomatedTask(automatedTaskRepository,
+                                                                  lockProvider,
+                                                                  automatedTaskConfigurationProperties,
+                                                                  automatedTaskProcessorFactory,
+                                                                  logApi);
+        generateCaseDocumentAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(generateCaseDocumentAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
+        taskRegistrar.addTriggerTask(generateCaseDocumentAutomatedTask, trigger);
     }
 
     private void rescheduleProcessDailyListAutomatedTask() {
@@ -802,6 +817,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(armRetentionEventDateCalculatorAutomatedTask);
             taskScheduler.schedule(armRetentionEventDateCalculatorAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleGenerateCaseDocumentAutomatedTask() {
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(GENERATE_CASE_DOCUMENT_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            var generateCaseDocumentAutomatedTask = new GenerateCaseDocumentAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                automatedTaskProcessorFactory,
+                logApi
+            );
+            Trigger trigger = createAutomatedTaskTrigger(generateCaseDocumentAutomatedTask);
+            taskScheduler.schedule(generateCaseDocumentAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
