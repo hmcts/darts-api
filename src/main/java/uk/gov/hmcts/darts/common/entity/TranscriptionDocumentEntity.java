@@ -72,4 +72,7 @@ public class TranscriptionDocumentEntity extends ModifiedBaseEntity {
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
 
+    @OneToMany(mappedBy = ObjectAdminActionEntity_.TRANSCRIPTION_DOCUMENT)
+    private List<ObjectAdminActionEntity> adminActions = new ArrayList<>();
+
 }
