@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
-import uk.gov.hmcts.darts.testutils.EnversAuditQueryHelper;
 import uk.gov.hmcts.darts.testutils.GivenBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -34,9 +33,6 @@ class AdminRunAutomatedTaskTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private EnversAuditQueryHelper enversAuditQueryHelper;
 
     @Autowired
     private AuditRepository auditRepository;

@@ -10,8 +10,8 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.tasks.model.AutomatedTaskPatch;
-import uk.gov.hmcts.darts.testutils.EnversAuditQueryHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SuperAdminUserStub;
 
@@ -31,13 +31,11 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     private SuperAdminUserStub superAdminUserStub;
 
-
-    @Autowired
-    private EnversAuditQueryHelper enversAuditQueryHelper;
-
-
     @MockBean
     private UserIdentity userIdentity;
+
+    @Autowired
+    private AutomatedTaskRepository automatedTaskRepository;
 
     @AfterEach
     void tearDown() {
@@ -60,7 +58,7 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         AuditEntity auditEntity = auditRepository.findAll().get(0);
         Assertions.assertEquals(AuditActivity.ENABLE_DISABLE_JOB.getId(), auditEntity.getAuditActivity().getId());
 
-        Assertions.assertTrue(enversAuditQueryHelper.hasBeenAudited(AutomatedTaskEntity.class, 1));
+        Assertions.assertFalse(automatedTaskRepository.findRevisions(1).isEmpty());
 
         var updatedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         assertThat(updatedAutomatedTaskEntity.getTaskEnabled()).isFalse();
@@ -68,6 +66,8 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
 
     @Test
     void canUpdateIsEnabledFieldToTrue() {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
         persistedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         initialValue = persistedAutomatedTaskEntity.getTaskEnabled(); // So we can revert it later as part of test clean up
         persistedAutomatedTaskEntity.setTaskEnabled(false);
@@ -79,7 +79,7 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
         AuditEntity auditEntity = auditRepository.findAll().get(0);
         Assertions.assertEquals(AuditActivity.ENABLE_DISABLE_JOB.getId(), auditEntity.getAuditActivity().getId());
 
-        Assertions.assertTrue(enversAuditQueryHelper.hasBeenAudited(AutomatedTaskEntity.class, 1));
+        Assertions.assertFalse(automatedTaskRepository.findRevisions(1).isEmpty());
 
         var updatedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         assertThat(updatedAutomatedTaskEntity.getTaskEnabled()).isTrue();
@@ -87,6 +87,8 @@ class AdminUpdateAutomatedTaskServiceTest extends IntegrationBase {
 
     @Test
     void returnsDetailedAutomatedTaskAfterUpdate() {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
         persistedAutomatedTaskEntity = dartsDatabase.getAutomatedTask(1);
         initialValue = persistedAutomatedTaskEntity.getTaskEnabled(); // So we can revert it later as part of test clean up
 
