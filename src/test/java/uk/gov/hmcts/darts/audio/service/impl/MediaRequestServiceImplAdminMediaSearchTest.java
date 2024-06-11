@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.mapper.AdminMediaSearchResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
@@ -104,9 +103,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
         when(mockTransformedMediaRepository.findById(transformedMediaId))
             .thenReturn(Optional.empty());
 
-        ResponseEntity<List<AdminMediaSearchResponseItem>> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
 
-        String responseString = objectMapper.writeValueAsString(response.getBody());
+        String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
             [
              ]""";
@@ -141,9 +140,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(mediaEntity));
 
 
-        ResponseEntity<List<AdminMediaSearchResponseItem>> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
 
-        String responseString = objectMapper.writeValueAsString(response.getBody());
+        String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
             [
                {
@@ -206,9 +205,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
             .thenReturn(List.of(mediaEntity, mediaEntity2));
 
 
-        ResponseEntity<List<AdminMediaSearchResponseItem>> response = mediaRequestService.adminMediaSearch(transformedMediaId, null);
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
 
-        String responseString = objectMapper.writeValueAsString(response.getBody());
+        String responseString = objectMapper.writeValueAsString(response);
         String expectedString = """
             [
               {

@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audio.validation.AddAudioFileValidator;
 import uk.gov.hmcts.darts.audio.validation.AddAudioMetaDataValidator;
-import uk.gov.hmcts.darts.audio.validation.AdminMediaSearchRequestValidator;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -122,9 +121,9 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
-    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId, Integer transcriptionDocumentId) {
-        AdminMediaSearchRequestValidator.validate(transformedMediaId, transcriptionDocumentId);
-        return mediaRequestService.adminMediaSearch(transformedMediaId, transcriptionDocumentId);
+    public ResponseEntity<List<AdminMediaSearchResponseItem>> getAdminMedias(Integer transformedMediaId) {
+        List<AdminMediaSearchResponseItem> response = mediaRequestService.adminMediaSearch(transformedMediaId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override

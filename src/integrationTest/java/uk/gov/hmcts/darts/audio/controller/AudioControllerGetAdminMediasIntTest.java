@@ -149,13 +149,13 @@ class AudioControllerGetAdminMediasIntTest extends IntegrationBase {
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL)
-                                                  .queryParam("transformed_media_id", ""))
+            )
             .andExpect(status().isBadRequest())
             .andReturn();
 
         // then
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTrue(StringUtils.contains(actualJson, "Either transformed_media_id or transcription_document_id must be provided in the request, but not both."));
+        assertTrue(StringUtils.contains(actualJson, "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"));
     }
 
     @Test

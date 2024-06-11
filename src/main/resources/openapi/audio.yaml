@@ -223,13 +223,8 @@ paths:
           name: transformed_media_id
           schema:
             type: integer
-          description: "Return media associated with this transformed_media_id. <p>*Conditional Mandatory* Either this or transcription_document_id must be provided"
-        - in: query
-          name: transcription_document_id
-          schema:
-            type: integer
-          description: "Return only media associated with the provided transcription document. <p>*Conditional Mandatory* Either this or transformed_media_id must be provided"
-
+          description: "Return media associated with this transformed_media_id."
+          required: true
       responses:
         '200':
           description: OK
@@ -247,7 +242,7 @@ paths:
                 $ref: './problem.yaml'
               example:
                 type: "AUDIO_109"
-                title: "Either transformed_media_id or transcription_document_id must be provided in the request, but not both."
+                title: "Either transformed_media_id must be provided in the request."
                 status: 400
         '401':
           description: Unauthorised Error
