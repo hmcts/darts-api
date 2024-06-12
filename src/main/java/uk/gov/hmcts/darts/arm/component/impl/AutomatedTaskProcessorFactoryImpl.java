@@ -19,11 +19,13 @@ import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmBatchProcessorImpl;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentProcessor;
+import uk.gov.hmcts.darts.casedocument.service.GenerateCaseDocumentSingleCaseDocumentProcessor;
 import uk.gov.hmcts.darts.casedocument.service.impl.GenerateCaseDocumentBatchProcessorImpl;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.CaseDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -55,6 +57,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     private final TranscriptionDocumentRepository transcriptionDocumentRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final CaseDocumentRepository caseDocumentRepository;
+    private final CaseRepository caseRepository;
+    private final GenerateCaseDocumentSingleCaseDocumentProcessor generateCaseDocumentSingleCaseDocumentProcessor;
 
     @Override
     public ArmResponseFilesProcessor createArmResponseFilesProcessor(int batchSize) {
@@ -119,7 +123,8 @@ public class AutomatedTaskProcessorFactoryImpl implements AutomatedTaskProcessor
     @Override
     public GenerateCaseDocumentProcessor createGenerateCaseDocumentProcessor(int batchSize) {
         if (batchSize > 0) {
-            return new GenerateCaseDocumentBatchProcessorImpl(batchSize);
+            return new GenerateCaseDocumentBatchProcessorImpl(
+                batchSize, caseRepository, generateCaseDocumentSingleCaseDocumentProcessor, currentTimeHelper);
         } else {
             throw new DartsException(String.format("batch size not supported: '%s'", batchSize));
         }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -45,4 +46,13 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
     List<CourtCaseEntity> findOpenCasesToClose(OffsetDateTime cutoffDate);
 
     List<CourtCaseEntity> findByIsRetentionUpdatedTrueAndRetentionRetriesLessThan(int maxRetentionRetries);
+
+    @Query("""
+        SELECT case FROM CourtCaseEntity case
+        WHERE case.closed = true
+        AND case.caseClosedTimestamp <= :caseClosedBeforeTimestamp
+        AND NOT EXISTS (select cde from CaseDocumentEntity cde
+            where (cde.courtCase.id = case.id))
+        """)
+    List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
 }

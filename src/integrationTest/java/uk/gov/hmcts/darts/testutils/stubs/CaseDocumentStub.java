@@ -19,10 +19,19 @@ import static java.time.ZoneOffset.UTC;
 public class CaseDocumentStub {
 
     private final CaseDocumentRepository caseDocumentRepository;
+    private final UserAccountStub userAccountStub;
 
     @Transactional
     public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity, UserAccountEntity uploadedBy) {
         CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, uploadedBy);
+        caseDocumentEntity = caseDocumentRepository.saveAndFlush(caseDocumentEntity);
+        return caseDocumentEntity;
+    }
+
+    @Transactional
+    public CaseDocumentEntity createAndSaveCaseDocumentEntity(CourtCaseEntity courtCaseEntity) {
+        UserAccountEntity testUser = userAccountStub.getIntegrationTestUserAccountEntity();
+        CaseDocumentEntity caseDocumentEntity = createCaseDocumentEntity(courtCaseEntity, testUser);
         caseDocumentEntity = caseDocumentRepository.saveAndFlush(caseDocumentEntity);
         return caseDocumentEntity;
     }
