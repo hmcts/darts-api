@@ -12,14 +12,20 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = "transcription_comment")
 @Getter
 @Setter
+@Audited
+@AuditTable("transcription_comment_aud")
 public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -28,10 +34,12 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "trc_gen", sequenceName = "trc_seq", allocationSize = 1)
     private Integer id;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "trw_id")
     private TranscriptionWorkflowEntity transcriptionWorkflow;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tra_id", nullable = false)
     private TranscriptionEntity transcription;

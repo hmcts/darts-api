@@ -13,15 +13,22 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 @Entity
 @Table(name = "transcription_workflow")
 @Getter
 @Setter
+@Audited
+@AuditTable("transcription_workflow_aud")
 public class TranscriptionWorkflowEntity {
 
     @Id
@@ -34,6 +41,7 @@ public class TranscriptionWorkflowEntity {
     @JoinColumn(name = "tra_id", nullable = false)
     private TranscriptionEntity transcription;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
     @ManyToOne
     @JoinColumn(name = "trs_id", nullable = false)
     private TranscriptionStatusEntity transcriptionStatus;
@@ -42,9 +50,11 @@ public class TranscriptionWorkflowEntity {
     @JoinColumn(name = "workflow_actor", nullable = false)
     private UserAccountEntity workflowActor;
 
+    @NotAudited
     @Column(name = "workflow_ts", nullable = false)
     private OffsetDateTime workflowTimestamp;
 
+    @NotAudited
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION_WORKFLOW)
     private List<TranscriptionCommentEntity> transcriptionComments = new ArrayList<>();
 }

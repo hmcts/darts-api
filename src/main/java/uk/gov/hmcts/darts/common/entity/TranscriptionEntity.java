@@ -16,6 +16,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.LocalDate;
@@ -26,11 +29,15 @@ import java.util.Optional;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
+import static java.util.Comparator.comparing;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = "transcription")
 @Getter
 @Setter
+@Audited
+@AuditTable("transcription_aud")
 public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -39,37 +46,45 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "tra_gen", sequenceName = "tra_seq", allocationSize = 1)
     private Integer id;
 
+    @NotAudited
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "cas_id")})
     private List<CourtCaseEntity> courtCases = new ArrayList<>();
 
+    @Audited(targetAuditMode = NOT_AUDITED)
     @ManyToOne
     @JoinColumn(name = "trt_id", nullable = false)
     private TranscriptionTypeEntity transcriptionType;
 
+    @Audited(targetAuditMode = NOT_AUDITED)
     @ManyToOne
     @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
+    @NotAudited
     @ManyToOne
     @JoinColumn(name = "tru_id")
     private TranscriptionUrgencyEntity transcriptionUrgency;
 
+    @NotAudited
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "hearing_transcription_ae",
         joinColumns = {@JoinColumn(name = "tra_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
     private List<HearingEntity> hearings = new ArrayList<>();
 
+    @NotAudited
     @ManyToOne
     @JoinColumn(name = "trs_id")
     private TranscriptionStatusEntity transcriptionStatus;
 
+    @NotAudited
     @Column(name = "transcription_object_id", length = 16)
     private String legacyObjectId;
 
+    @NotAudited
     @Column(name = "requestor")
     private String requestor;
 
@@ -82,37 +97,48 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "end_ts")
     private OffsetDateTime endTime;
 
+    @NotAudited
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
+    @NotAudited
     @Column(name = "is_manual_transcription", nullable = false)
     private Boolean isManualTranscription;
 
+    @NotAudited
     @Column(name = "hide_request_from_requestor", nullable = false)
     private Boolean hideRequestFromRequestor;
 
+    @NotAudited
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private UserAccountEntity deletedBy;
 
+    @NotAudited
     @Column(name = "deleted_ts")
     private OffsetDateTime deletedTimestamp;
 
+    @NotAudited
     @Column(name = "chronicle_id")
     private String chronicleId;
 
+    @NotAudited
     @Column(name = "antecedent_id")
     private String antecedentId;
 
+    @NotAudited
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
 
+    @NotAudited
     @OneToMany(cascade = {PERSIST, MERGE}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
     private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
 
+    @NotAudited
     @OneToMany(mappedBy = TranscriptionDocumentEntity_.TRANSCRIPTION)
     private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
 
@@ -182,5 +208,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
         var uniqueCases = io.vavr.collection.List.ofAll(allCourtCases).distinctBy(CourtCaseEntity::getId).toJavaList();
         return uniqueCases;
+    }
+
+    public Optional<TranscriptionWorkflowEntity> getLatestTranscriptionWorkflow() {
+        return transcriptionWorkflowEntities.stream()
+            .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp));
     }
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -112,8 +113,13 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTs;
 
+    @OneToMany(mappedBy = ObjectAdminActionEntity_.MEDIA,
+        fetch = FetchType.LAZY)
+    private List<ObjectAdminActionEntity> adminActionReasons = new ArrayList<>();
+
     public List<CourtCaseEntity> associatedCourtCases() {
         var cases = hearingList.stream().map(HearingEntity::getCourtCase);
         return io.vavr.collection.List.ofAll(cases).distinctBy(CourtCaseEntity::getId).toJavaList();
     }
+
 }

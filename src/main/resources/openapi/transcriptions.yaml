@@ -1573,6 +1573,60 @@ components:
         is_hidden:
           type: boolean
           description: 'Whether the transcription document is hidden'
+        retain_until:
+          type: string
+          format: date-time
+          description: 'When the transcription should be retained until'
+        content_object_id:
+          type: string
+          description: 'Content object id'
+        clip_id:
+          type: string
+          description: 'Clip id'
+        checksum:
+          type: string
+          description: 'Checksum of the transcription document'
+        last_modified_at:
+          type: string
+          format: date-time
+          description: 'When the transcription was last modified'
+        last_modified_by:
+          type: integer
+          description: 'Id of the user who last modified the transcription'
+        admin_action:
+          $ref: '#/components/schemas/AdminAction'
+    AdminAction:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'Id of the admin action'
+        reason_id:
+          type: integer
+          description: 'Id of the reason'
+        hidden_by_id:
+          type: integer
+          description: 'Id of user who hid it'
+        hidden_at:
+          type: string
+          format: date-time
+          description: 'The time it was hidden'
+        is_marked_for_manual_deletion:
+          type: boolean
+          description: 'Whether it is marked for manual deletion'
+        marked_for_manual_deletion_by_id:
+          type: integer
+          description: 'Id of the user Who marked it for manual deletion'
+        marked_for_manual_deletion_at:
+          type: string
+          format: date-time
+          description: 'The time it was marked fo manual deletion'
+        ticket_reference:
+          type: string
+          description: 'Reference of the ticket'
+        comments:
+          type: string
+          description: 'Comments about the action'
 
     TranscriptionDocumentHideRequest:
       type: object
