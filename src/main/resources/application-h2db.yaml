@@ -1,3 +1,6 @@
+server:
+  shutdown: immediate
+
 spring:
   datasource:
     #see "PostgreSQL Compatibility Mode" https://h2database.com/html/features.html#compatibility

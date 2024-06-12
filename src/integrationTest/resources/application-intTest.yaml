@@ -1,3 +1,6 @@
+server:
+  shutdown: immediate
+
 spring:
   security:
     oauth2:
