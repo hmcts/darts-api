@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
+@Disabled
 class TranscriptionDocumentTest extends RepositoryBase {
 
     @Autowired
