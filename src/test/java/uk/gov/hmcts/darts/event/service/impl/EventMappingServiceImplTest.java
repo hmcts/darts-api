@@ -9,6 +9,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -30,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -52,6 +55,9 @@ class EventMappingServiceImplTest {
 
     @Mock
     EventHandlerEnumerator eventHandlerEnumerator;
+
+    @Mock
+    AuditApi auditApi;
 
     @InjectMocks
     EventMappingServiceImpl eventMappingServiceImpl;
@@ -88,6 +94,7 @@ class EventMappingServiceImplTest {
 
         assertEquals(FIXED_DATETIME, savedEventHandlerEntity.getCreatedDateTime());
         assertEquals(eventHandlerEntity.getCreatedBy(), savedEventHandlerEntity.getCreatedBy());
+        verify(auditApi, times(1)).record(AuditActivity.ADDING_EVENT_MAPPING);
     }
 
     @Test
@@ -113,6 +120,9 @@ class EventMappingServiceImplTest {
         for (EventHandlerEntity updatedEntity : updatedEVentHandlerEntities) {
             assertFalse(updatedEntity.getActive());
         }
+
+        verify(auditApi, times(1)).record(AuditActivity.ADDING_EVENT_MAPPING);
+        verify(auditApi, times(1)).record(AuditActivity.CHANGE_EVENT_MAPPING);
     }
 
     @Test
@@ -249,6 +259,7 @@ class EventMappingServiceImplTest {
         eventMappingServiceImpl.deleteEventMapping(1);
 
         verify(eventHandlerRepository).delete(eventHandlerEntity);
+        verify(auditApi, times(1)).record(AuditActivity.DELETE_EVENT_MAPPING);
     }
 
     private EventMapping someEventMapping() {

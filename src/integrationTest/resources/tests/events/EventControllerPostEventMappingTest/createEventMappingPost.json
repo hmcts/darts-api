@@ -1,6 +1,6 @@
 {
-  "type": "12345",
-  "sub_type": "9876",
+  "type": "${TYPE}",
+  "sub_type": "${SUBTYPE}",
   "name": "My Test Event",
   "handler": "DarStartHandler",
   "has_restrictions": true

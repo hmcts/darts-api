@@ -9,12 +9,16 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
 import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = "event_handler")
 @Getter
 @Setter
+@Audited
+@AuditTable("event_handler_aud")
 public class EventHandlerEntity extends CreatedBaseEntity {
 
     @Id
