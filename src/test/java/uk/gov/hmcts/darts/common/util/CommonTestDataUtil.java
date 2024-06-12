@@ -242,28 +242,45 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
-        return createTranscriptionList(hearing, true, true, false);
+        return createTranscriptionList(hearing, true, true, false, null);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
-        return createTranscriptionList(hearing, generateStatus, true, false);
+        return createTranscriptionList(hearing, generateStatus, true, false, null);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
-        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false);
+        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, false,null);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(
         HearingEntity hearing,
         boolean generateStatus,
         boolean excludeWorkflow,
-        boolean generateRequestor
+        boolean generateRequestor) {
+        return createTranscriptionList(hearing, generateStatus, excludeWorkflow, generateRequestor,null);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(
+        HearingEntity hearing,
+        boolean generateStatus,
+        boolean excludeWorkflow,
+        boolean generateRequestor,
+        CourtroomEntity courtroom
     ) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
-        transcription.setCourtroom(hearing.getCourtroom());
-        transcription.addHearing(hearing);
+
+        if (hearing != null) {
+            transcription.addHearing(hearing);
+        }
+
+        if (courtroom != null) {
+            transcription.setCourtroom(courtroom);
+        }
+
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcription.setLegacyObjectId("legacyObjectId");
         transcription.setId(1);
         if (generateRequestor) {
             transcription.setCreatedBy(createUserAccountWithId());

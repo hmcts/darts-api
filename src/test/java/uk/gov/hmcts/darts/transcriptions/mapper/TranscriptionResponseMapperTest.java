@@ -141,8 +141,11 @@ class TranscriptionResponseMapperTest {
 
     @Test
     void mapToTranscriptionResponseWithNoHearingIdAndValidCourtCase() throws Exception {
-        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        String courtName = "1";
+        CourtroomEntity courtroomEntity = new CourtroomEntity();
+        courtroomEntity.setName(courtName);
+
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(null, true, false, false, courtroomEntity);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
         transcriptionEntity.setHearings(new ArrayList<>());
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
@@ -154,6 +157,22 @@ class TranscriptionResponseMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityNoHearing.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void mapToTranscriptionResponseWithCourtroom() throws Exception {
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(null, true, false, false, null);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        transcriptionEntity.setHearings(new ArrayList<>());
+        transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
+        transcriptionEntity.setCourtCases(List.of(CommonTestDataUtil.createCase("case1")));
+        GetTranscriptionByIdResponse transcriptionResponse =
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityNoCourtroom.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
@@ -172,6 +191,8 @@ class TranscriptionResponseMapperTest {
 
         assertEquals(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND, exception.getError());
     }
+
+
 
     @Test
     void mapToTranscriptionResponseWithWorkflow() throws Exception {

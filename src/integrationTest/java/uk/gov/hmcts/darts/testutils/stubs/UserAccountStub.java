@@ -151,8 +151,10 @@ public class UserAccountStub {
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
-        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
+        if (courthouseEntity != null) {
+            addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+        }
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);

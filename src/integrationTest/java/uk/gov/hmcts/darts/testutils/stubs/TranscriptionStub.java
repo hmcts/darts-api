@@ -91,6 +91,23 @@ public class TranscriptionStub {
         );
     }
 
+    public TranscriptionEntity createTranscription(CourtroomEntity courtroomEntity) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
+
+        UserAccountEntity authorisedIntegrationTestUser = userAccountStub
+            .createAuthorisedIntegrationTestUser(courtroomEntity != null ? courtroomEntity.getCourthouse() : null);
+        return createAndSaveTranscriptionEntity(
+            null,
+            transcriptionType,
+            transcriptionStatus,
+            Optional.of(transcriptionUrgencyEntity),
+            authorisedIntegrationTestUser,
+            courtroomEntity
+        );
+    }
+
     public TranscriptionEntity createTranscription(HearingEntity hearing, UserAccountEntity userAccountEntity) {
         return createTranscription(hearing, userAccountEntity, APPROVED);
     }
@@ -188,6 +205,15 @@ public class TranscriptionStub {
                                                                 TranscriptionStatusEntity transcriptionStatus,
                                                                 Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
                                                                 UserAccountEntity testUser) {
+        return createAndSaveTranscriptionEntity(hearing, transcriptionType, transcriptionStatus, transcriptionUrgency, testUser, null);
+    }
+
+    public TranscriptionEntity createAndSaveTranscriptionEntity(HearingEntity hearing,
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
+                                                                UserAccountEntity testUser,
+                                                                CourtroomEntity courtroomEntity) {
         TranscriptionEntity transcription = new TranscriptionEntity();
 
         if (hearing != null) {
@@ -195,6 +221,11 @@ public class TranscriptionStub {
             transcription.addHearing(hearing);
         }
 
+        if (courtroomEntity != null) {
+            transcription.setCourtroom(courtroomEntity);
+        }
+
+        transcription.setLegacyObjectId("legacyObjectId");
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);
 

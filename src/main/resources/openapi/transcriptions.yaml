@@ -1403,6 +1403,12 @@ components:
           example: 2023-06-26T13:00:00Z
         transcription_urgency:
           $ref: '#/components/schemas/TranscriptionUrgencyDetails'
+        courtroom:
+          type: string
+          example: CourtRoomA
+        transcription_object_id:
+          type: string
+          example: 1
     defendant:
       type: string
       example: Joe Bloggs
