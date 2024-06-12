@@ -3,6 +3,7 @@ server:
   max-http-request-header-size: 10MB
   shutdown: graceful
 
+
 management:
   endpoint:
     health:
