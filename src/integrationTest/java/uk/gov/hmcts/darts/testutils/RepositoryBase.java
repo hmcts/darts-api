@@ -19,6 +19,7 @@ public class RepositoryBase {
         PostgreSQLContainer<?> postgres =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"));
         postgres = postgres.withDatabaseName("darts");
+        postgres = postgres.withSharedMemorySize(128_000_000L);
         postgres.start();
 
         System.setProperty("spring.datasource.port", postgres.getMappedPort(5432).toString());
