@@ -33,6 +33,14 @@ public class MediaStub {
         return createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel, "mp2");
     }
 
+    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
+                                               String mediaType) {
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
+        MediaEntity mediaEntity = createMediaWith(courtroom, startTime, endTime, channel, mediaType);
+        mediaEntity.setHidden(true);
+        return mediaRepository.saveAndFlush(mediaEntity);
+    }
+
     public List<MediaEntity> createAndSaveSomeMedias() {
         return List.of(
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_1_START_TIME, MEDIA_1_END_TIME, 1),
