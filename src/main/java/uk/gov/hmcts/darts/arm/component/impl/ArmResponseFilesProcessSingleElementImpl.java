@@ -438,6 +438,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                     armResponseInvalidLineRecord.getExceptionDescription(),
                     armResponseInvalidLineRecord.getErrorStatus()
                 );
+                updateTransferAttempts(externalObjectDirectory);
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseManifestFailedStatus);
             } else {
                 log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
@@ -542,6 +543,17 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus)
                     .getStatus().getId());
         }
+    }
+
+    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+        log.debug(
+            "Updating failed transfer attempts from {} to {} for ID {}",
+            currentNumberOfAttempts,
+            currentNumberOfAttempts + 1,
+            externalObjectDirectoryEntity.getId()
+        );
+        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 
     private ExternalObjectDirectoryEntity updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,

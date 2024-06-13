@@ -649,8 +649,8 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
                         armResponseInvalidLineRecord.getExceptionDescription(),
                         armResponseInvalidLineRecord.getErrorStatus()
                     );
+                    updateTransferAttempts(externalObjectDirectory);
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, EodHelper.armResponseManifestFailedStatus());
-
                 } else {
                     log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
                              invalidLineFileFilenameProcessor.getInvalidLineFileFilenameAndPath());
@@ -722,6 +722,17 @@ public class ArmBatchProcessResponseFilesImpl implements ArmResponseFilesProcess
             log.error("Unable to find external object directory with ID {}", eodId, e);
         }
         return externalObjectDirectory;
+    }
+
+    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+        log.debug(
+            "Updating failed transfer attempts from {} to {} for ID {}",
+            currentNumberOfAttempts,
+            currentNumberOfAttempts + 1,
+            externalObjectDirectoryEntity.getId()
+        );
+        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,
