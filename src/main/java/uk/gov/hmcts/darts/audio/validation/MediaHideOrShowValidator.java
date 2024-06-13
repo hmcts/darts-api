@@ -40,12 +40,12 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
              }
          }
 
-        if (!request.getPayload().getIsHidden() && request.getPayload().getAdminAction() != null) {
+        if (!request.getPayload().getIsHidden() && adminActionRequest != null) {
             throw new DartsApiException(AudioApiError.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE);
         }
 
 
-        if (request.getPayload().getAdminAction() != null && adminActionRequest.getReasonId() != null) {
+        if (adminActionRequest != null && adminActionRequest.getReasonId() != null) {
             Optional<ObjectHiddenReasonEntity> optionalObjectHiddenReasonEntity = objectHiddenReasonRepository.findById(
                 adminActionRequest.getReasonId());
             if (optionalObjectHiddenReasonEntity.isEmpty()) {
