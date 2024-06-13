@@ -112,14 +112,15 @@ class CleanupArmResponseFilesServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+        when(externalObjectDirectoryRepository.findSingleArmResponseFiles(
             List.of(objectRecordStatusStored,
                     objectRecordStatusArmResponseManifestFailed,
                     objectRecordStatusArmResponseProcessingFailed,
                     objectRecordStatusArmResponseChecksumFailed),
             externalLocationTypeArm,
             false,
-            testTime
+            testTime,
+            armDataManagementConfiguration.getManifestFilePrefix()
         )).thenReturn(List.of(externalObjectDirectoryEntity));
 
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
@@ -158,14 +159,15 @@ class CleanupArmResponseFilesServiceImplTest {
         OffsetDateTime testTime = OffsetDateTime.now().plusMinutes(10);
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
 
-        when(externalObjectDirectoryRepository.findByStatusInAndExternalLocationTypeAndResponseCleanedAndLastModifiedDateTimeBefore(
+        when(externalObjectDirectoryRepository.findSingleArmResponseFiles(
             List.of(objectRecordStatusStored,
                     objectRecordStatusArmResponseManifestFailed,
                     objectRecordStatusArmResponseProcessingFailed,
                     objectRecordStatusArmResponseChecksumFailed),
             externalLocationTypeArm,
             false,
-            testTime
+            testTime,
+            armDataManagementConfiguration.getManifestFilePrefix()
         )).thenReturn(List.of(externalObjectDirectoryEntity));
 
         String inputUploadBlobFilename = "123_456_1_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";

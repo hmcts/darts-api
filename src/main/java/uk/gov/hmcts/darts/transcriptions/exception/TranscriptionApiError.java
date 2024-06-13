@@ -110,7 +110,12 @@ public enum TranscriptionApiError implements DartsApiError {
     TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND(
         TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue(),
         HttpStatus.BAD_REQUEST,
-        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue());
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue(),
+        HttpStatus.NOT_IMPLEMENTED,
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue());
 
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";

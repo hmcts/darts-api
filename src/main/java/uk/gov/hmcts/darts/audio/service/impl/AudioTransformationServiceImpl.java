@@ -98,7 +98,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public List<MediaEntity> getMediaMetadata(Integer hearingId) {
-        return mediaRepository.findAllByHearingId(hearingId);
+        List<MediaEntity> mediaEntityList = mediaRepository.findAllByHearingId(hearingId);
+        return mediaEntityList.stream()
+            .filter(m -> !m.isHidden())
+            .toList();
     }
 
     @Override

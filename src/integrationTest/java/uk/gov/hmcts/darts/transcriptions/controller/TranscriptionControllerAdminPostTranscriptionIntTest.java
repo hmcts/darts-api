@@ -391,6 +391,50 @@ class TranscriptionControllerAdminPostTranscriptionIntTest extends IntegrationBa
     }
 
     @Test
+    void testTranscriptionDocumentIdHideAdminActionWithDeletedReason() throws Exception {
+        superAdminUserStub.givenUserIsAuthorised(userIdentity);
+
+        CourtroomEntity courtroomAtNewcastleEntity = dartsDatabase.createCourtroomUnlessExists("Newcastle", "room_a");
+        HearingEntity headerEntity = dartsDatabase.createHearing(
+            courtroomAtNewcastleEntity.getCourthouse().getCourthouseName(),
+            courtroomAtNewcastleEntity.getName(),
+            "c1",
+            LocalDateTime.of(2020, 6, 20, 10, 0, 0)
+        );
+
+        String fileName = "file";
+        String fileType = "fileType";
+        Integer fileBytes = 299;
+        boolean hidden = true;
+
+        TranscriptionEntity transcriptionEntity = transcriptionStub.createTranscription(headerEntity);
+        TranscriptionDocumentEntity transcriptionDocumentEntity = transactionDocumentStub
+            .createTranscriptionDocument(fileName, fileBytes, fileType, hidden, transcriptionEntity);
+
+        TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
+        transcriptionDocumentHideRequest.setIsHidden(true);
+
+        AdminActionRequest adminActionRequest = new AdminActionRequest();
+        Integer deletedReason = HiddenReason.PUBLIC_INTEREST_IMMUNITY.getId();
+        adminActionRequest.setReasonId(deletedReason);
+        adminActionRequest.setComments("");
+        adminActionRequest.setTicketReference("");
+        transcriptionDocumentHideRequest.setAdminAction(adminActionRequest);
+
+
+        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL.replace(
+                "${TRANSACTION_DOCUMENT_ID}", transcriptionDocumentEntity.getId().toString()))
+                                                  .content(objectMapper.writeValueAsString(transcriptionDocumentHideRequest))
+                                                  .header("Content-Type", "application/json"))
+
+            .andExpect(status().isNotImplemented())
+            .andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        Problem problemResponse = objectMapper.readValue(content, Problem.class);
+        assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION.getType(), problemResponse.getType());
+    }
+
+    @Test
     void testTranscriptionDocumentShowWithAdminActionFailure() throws Exception {
         superAdminUserStub.givenUserIsAuthorised(userIdentity);
 
