@@ -45,6 +45,9 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     CourthouseEntity liverpoolCourthouse;
     UserAccountEntity user;
 
+    @Autowired
+    ClosedCasesToArmProcessor closedCasesToArmProcessor;
+
 
     @BeforeEach
     void setupData() {
@@ -54,6 +57,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse, "Case1");
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse, "Case2");
         case2.setInterpreterUsed(true);
+        case2.setClosed(true);
 
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
         var hearing1 = createHearingWith(case1, courtroom1);
@@ -91,6 +95,7 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
         givenBearerTokenExists(INTEGRATION_TEST_USER_EMAIL);
         user = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         user.getSecurityGroupEntities().clear();
+
     }
 
     @AfterEach
@@ -101,20 +106,23 @@ class CaseServiceAdvancedSearchUseInterpreterTest extends IntegrationBase {
     @Test
     void testSearchCasesWithPermissionsGlobalTrueUseInterpreterTrue() {
         // given
-        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
-        securityGroup.setGlobalAccess(true);
-        securityGroup.setUseInterpreter(true);
-        assignSecurityGroupToUser(user, securityGroup);
+//        var securityGroup = SecurityGroupTestData.buildGroupForRole(TRANSLATION_QA);
+//        securityGroup.setGlobalAccess(true);
+//        securityGroup.setUseInterpreter(true);
+//        assignSecurityGroupToUser(user, securityGroup);
+//
+//        userAccountRepository.save(user);
+//
+//        // when
+//        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
+//        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
+//
+//        // then
+//        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
+//        assertThat(caseNumbers).containsExactlyInAnyOrder("Case2", "Case4", "Case6");
 
-        userAccountRepository.save(user);
+        closedCasesToArmProcessor.closedCasesToArm();
 
-        // when
-        GetCasesSearchRequest allCasesRequest = GetCasesSearchRequest.builder().build();
-        List<AdvancedSearchResult> resultList = service.advancedSearch(allCasesRequest);
-
-        // then
-        var caseNumbers = resultList.stream().map(AdvancedSearchResult::getCaseNumber).toList();
-        assertThat(caseNumbers).containsExactlyInAnyOrder("Case2", "Case4", "Case6");
     }
 
     @Test

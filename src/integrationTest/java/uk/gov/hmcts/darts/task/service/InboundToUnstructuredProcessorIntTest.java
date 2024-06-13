@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import uk.gov.hmcts.darts.cases.service.ClosedCasesToArmProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -50,6 +51,9 @@ class InboundToUnstructuredProcessorIntTest extends IntegrationBase {
 
     @Autowired
     private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+
+    @Autowired
+    ClosedCasesToArmProcessor closedCasesToArmProcessor;
 
     @BeforeEach
     public void setup() {

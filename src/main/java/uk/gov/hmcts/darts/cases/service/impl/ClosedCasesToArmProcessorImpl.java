@@ -24,7 +24,8 @@ public class ClosedCasesToArmProcessorImpl implements ClosedCasesToArmProcessor 
     @Override
     @Transactional
     public void closedCasesToArm() {
-        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findClosedCases(OffsetDateTime.now().minusDays(7));
+        log.info("finding cases");
+        List<CourtCaseEntity> courtCaseEntityList = caseRepository.findClosedCases(OffsetDateTime.now().plusDays(7));
         courtCaseEntityList.forEach(this::createJsonStringFromCourtCaseEntity);
     }
 

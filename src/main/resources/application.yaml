@@ -80,6 +80,7 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: none
+      max_fetch_depth: 20
     properties:
       hibernate:
         default_schema: ${spring.datasource.schema}
