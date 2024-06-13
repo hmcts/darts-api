@@ -73,7 +73,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         String expectedJson = """
             [
               {
-                "id": 1,
+                "id": 5,
                 "media_start_timestamp": "2023-01-01T12:00:00Z",
                 "media_end_timestamp": "2023-01-01T13:00:00Z",
                 "is_archived": false,
@@ -112,6 +112,43 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         var requestBuilder = get(ENDPOINT_URL, 999);
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAudioMetadataGetShouldNotReturnHiddenMediaChannel1() throws Exception {
+        var mediaChannel1 = dartsDatabase.createHiddenMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var mediaChannel2 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 2);
+        var mediaChannel3 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 3);
+        var mediaChannel4 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 4);
+        dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(mediaChannel1,
+                                                                                     ObjectRecordStatusEnum.STORED,
+                                                                                     ExternalLocationTypeEnum.UNSTRUCTURED,
+                                                                                     UUID.randomUUID());
+
+        var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "999",
+            "test",
+            "test",
+            LocalDateTime.now()
+        );
+        hearingEntity.addMedia(mediaChannel1);
+        hearingEntity.addMedia(mediaChannel2);
+        hearingEntity.addMedia(mediaChannel3);
+        hearingEntity.addMedia(mediaChannel4);
+        dartsDatabase.save(hearingEntity);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
 }
