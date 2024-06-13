@@ -11,6 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -23,6 +26,26 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@NamedEntityGraph(
+    name = "CourtCase.caseDocument",
+    attributeNodes = {
+//        @NamedAttributeNode("deletedBy"),
+//        @NamedAttributeNode("defendantList"),
+        @NamedAttributeNode("prosecutorList")
+//        @NamedAttributeNode(
+//            value = "hearings",
+//            subgraph = "Hearing.caseDocument"
+//        )
+    },
+    subgraphs = {
+        @NamedSubgraph(
+            name="Hearing.caseDocument",
+            attributeNodes = {
+                @NamedAttributeNode("mediaList")
+            }
+        )
+    }
+)
 @Entity
 @Table(name = CourtCaseEntity.TABLE_NAME)
 @SuppressWarnings({"PMD.ShortClassName"})
@@ -83,13 +106,13 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     private Integer retentionRetries;
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<DefendantEntity> defendantList = new ArrayList<>();
+    private List<DefendantEntity> defendantList;
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
+    private List<ProsecutorEntity> prosecutorList;
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<DefenceEntity> defenceList = new ArrayList<>();
+    private List<DefenceEntity> defenceList;
 
     @Column(name = IS_DELETED)
     private boolean isDeleted;
