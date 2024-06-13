@@ -119,7 +119,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "audio.mp2",
             "audio/mpeg",
             IOUtils.toByteArray(Files.newInputStream(Path.of(Thread.currentThread().getContextClassLoader()
-                                                         .getResource("sample6.mp2").getFile())))
+                                                                 .getResource("sample6.mp2").getFile())))
         );
 
         MockMultipartFile metadataJson = new MockMultipartFile(
@@ -273,8 +273,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
 
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                                   .searchLogs("Duplicate audio upload detected", toLevel(
-            Level.INFO_INT)).isEmpty());
+                        .searchLogs("Duplicate audio upload detected", toLevel(
+                            Level.INFO_INT)).isEmpty());
     }
 
     @Test
@@ -503,6 +503,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
                                                                  .getResource("sample6.mp2").getFile())))
         ) {
             private int fileSignatureValidationCallCount;
+
             @Override
             public InputStream getInputStream() throws IOException {
                 // fail on any call other than for the file signature validation
@@ -672,31 +673,31 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
                                                           OffsetDateTime endedAt, String courthouse, String courtroom, String filetype) {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, filetype,
-                                     100,"case1", "case2", "case3");
+                                     100, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
                                                           OffsetDateTime endedAt, String courthouse, String courtroom) {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
-                                     "mp2", 100,"case1", "case2", "case3");
+                                     "mp2", 100, "case1", "case2", "case3");
     }
 
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt,
                                                           OffsetDateTime endedAt,
-        String courthouse, String courtroom,long fileSize) {
+                                                          String courthouse, String courtroom, long fileSize) {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom, "mp2", fileSize, "case1", "case2", "case3");
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom,  long fileSize, String...casesList) {
+                                                          String courthouse, String courtroom, long fileSize, String... casesList) {
         return createAddAudioRequest(startedAt, endedAt, courthouse, courtroom,
                                      "mp2", fileSize, casesList);
 
     }
 
     private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt,
-                                                          String courthouse, String courtroom, String filetype, long fileSize, String...casesList) {
+                                                          String courthouse, String courtroom, String filetype, long fileSize, String... casesList) {
         AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
         addAudioMetadataRequest.startedAt(startedAt);
         addAudioMetadataRequest.endedAt(endedAt);
@@ -719,7 +720,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     }
 
     @SuppressWarnings({"PMD.SignatureDeclareThrowsException"})
-    private void makeAddAudioCall(long fileSize, String...casesToMapTo) throws Exception {
+    private void makeAddAudioCall(long fileSize, String... casesToMapTo) throws Exception {
         UserAccountEntity testUser = authorisationStub.getSystemUser();
         dartsDatabase.getUserAccountRepository().save(testUser);
 
@@ -804,7 +805,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         List<MediaEntity> mediaEntities = dartsDatabase.getMediaRepository().findAllByHearingId(hearingEntity.getId());
         assertEquals(0, mediaEntities.size());//shouldn't have any as no audio in that courtroom
         assertFalse(Objects.requireNonNull(LogUtil.getMemoryLogger())
-                        .searchLogs("Uploading version of duplicate", toLevel(
+                        .searchLogs("Uploading new version of duplicate", toLevel(
                             Level.INFO_INT)).isEmpty());
 
         return media.getId();
