@@ -215,6 +215,9 @@ darts:
       case-record-properties-file: properties/arm/case-record.properties
 
       response-cleanup-buffer-days: 0
+      batch-response-cleanup:
+        buffer-minutes: 15
+        manifest-file-suffix: .a360
       event-date-adjustment-years: 100
 
       manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}
