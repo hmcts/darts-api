@@ -1,10 +1,10 @@
 package uk.gov.hmcts.darts.courthouse.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +14,22 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.courthouse.mapper.AdminCourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.AdminRegionToRegionEntityMapper;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
+import uk.gov.hmcts.darts.courthouse.service.impl.CourthouseServiceImpl;
 import uk.gov.hmcts.darts.courthouse.validation.CourthousePatchValidator;
+import uk.gov.hmcts.darts.usermanagement.api.UserManagementApi;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +37,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,7 +53,6 @@ class CourthouseServiceImplTest {
     public static final int SWANSEA_CODE = 457;
     public static final String SWANSEA_NAME_UC = "SWANSEA";
 
-    @InjectMocks
     CourthouseServiceImpl courthouseService;
 
     @Mock
@@ -80,6 +87,34 @@ class CourthouseServiceImplTest {
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
+
+    @Mock
+    HearingRepository hearingRepository;
+    @Mock
+    CaseRepository caseRepository;
+    @Mock
+    SecurityRoleRepository securityRoleRepository;
+    @Mock
+    AdminCourthouseToCourthouseEntityMapper adminMapper;
+    @Mock
+    UserManagementApi userManagementApi;
+
+    @BeforeEach
+    void setup() {
+        courthouseService = new CourthouseServiceImpl(courthouseRepository,
+                                                      hearingRepository,
+                                                      caseRepository,
+                                                      regionRepository,
+                                                      securityGroupRepository,
+                                                      securityRoleRepository,
+                                                      adminMapper,
+                                                      courthouseMapper,
+                                                      courthouseUpdateMapper,
+                                                      userManagementApi,
+                                                      courthousePatchValidator,
+                                                      authorisationApi,
+                                                      auditApi);
+    }
 
     @Test
     void testGetCourtHouseByIdTest() {
@@ -193,6 +228,11 @@ class CourthouseServiceImplTest {
     void validatesPatch() {
         when(courthouseRepository.findById(COURTHOUSE_ID)).thenReturn(Optional.of(someCourthouse()));
 
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+
+        when(courthouseUpdateMapper.mapPatchToEntity(any(CourthousePatch.class), any(CourthouseEntity.class))).thenReturn(new CourthouseEntity());
         var courthousePatch = new CourthousePatch();
         courthouseService.updateCourthouse(COURTHOUSE_ID, courthousePatch);
 

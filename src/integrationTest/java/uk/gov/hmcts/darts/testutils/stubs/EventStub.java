@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -21,6 +22,7 @@ public class EventStub {
     private final EventHandlerRepository eventHandlerRepository;
     private final UserAccountStub userAccountStub;
     private final CourtroomStub courtroomStub;
+    private final UserAccountRepository userAccountRepository;
 
     public EventEntity createEvent(HearingEntity hearing) {
         return createEvent(hearing, 10);
@@ -69,7 +71,7 @@ public class EventStub {
     }
 
     public EventEntity createDefaultEvent() {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists("testCourthouse", "testCourtroom");
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists("testCourthouse", "testCourtroom", userAccountRepository.getReferenceById(0));
         return createEvent(courtroom, 10, OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC),
                            "testEventName"
         );

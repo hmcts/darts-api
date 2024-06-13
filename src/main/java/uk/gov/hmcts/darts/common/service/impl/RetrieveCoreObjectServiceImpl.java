@@ -72,7 +72,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDateTime hearingDate,
                                         UserAccountEntity userAccount) {
         final CourtCaseEntity courtCase = retrieveOrCreateCase(courthouseName, caseNumber, userAccount);
-        final CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName);
+        final CourtroomEntity courtroom = retrieveOrCreateCourtroom(courtCase.getCourthouse(), courtroomName, userAccount);
         HearingEntity hearing = new HearingEntity();
 
         hearing.setCourtCase(courtCase);
@@ -90,17 +90,17 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     @Override
-    public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName) {
+    public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
             courthouse.getId(),
             courtroomName
         );
-        return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName));
+        return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName, userAccount));
     }
 
 
     @Override
-    public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
+    public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(
             courthouseName,
             courtroomName
@@ -110,14 +110,15 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         }
 
         CourthouseEntity courthouse = retrieveCourthouse(courthouseName);
-        return createCourtroom(courthouse, courtroomName);
+        return createCourtroom(courthouse, courtroomName, userAccount);
     }
 
 
-    private CourtroomEntity createCourtroom(CourthouseEntity courthouse, String courtroomName) {
+    private CourtroomEntity createCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount) {
         CourtroomEntity courtroom = new CourtroomEntity();
         courtroom.setCourthouse(courthouse);
         courtroom.setName(courtroomName);
+        courtroom.setCreatedBy(userAccount);
         courtroomRepository.saveAndFlush(courtroom);
         return courtroom;
     }
