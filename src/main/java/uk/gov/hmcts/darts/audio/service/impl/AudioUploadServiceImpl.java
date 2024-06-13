@@ -145,7 +145,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
                 saveEntity.setChronicleId(entity.getChronicleId());
                 saveEntity.setAntecedentId(entity.getId().toString());
 
-                log.info("Uploading version of duplicate filename {} with antecedent media id {}", entity.getMediaFile(), entity.getId().toString());
+                log.info("Uploading new version of duplicate filename {} with antecedent media id {}", entity.getMediaFile(), entity.getId().toString());
             } else {
                 log.info("New file uploaded {} with filename", entity.getMediaFile());
 
@@ -206,7 +206,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @SuppressWarnings({"PMD.LooseCoupling"})
     private Collection<MediaEntity> getDuplicateMediaFile(AddAudioMetadataRequest addAudioMetadataRequest) {
-        List<MediaEntity> mediaEntities =  mediaRepository.findMediaByDetails(
+        List<MediaEntity> mediaEntities = mediaRepository.findMediaByDetails(
             addAudioMetadataRequest.getCourthouse(),
             addAudioMetadataRequest.getCourtroom(),
             addAudioMetadataRequest.getChannel(),
@@ -220,7 +220,7 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         // now lets get the lowest level media objects so that they can act as a basis for the antecedent
         Tree<MediaEntityTreeNodeImpl> tree = new Tree<>();
         mediaEntities.stream().forEach(entry ->
-            tree.addNode(new MediaEntityTreeNodeImpl(entry))
+                                           tree.addNode(new MediaEntityTreeNodeImpl(entry))
         );
 
         return tree.getLowestLevelDescendants().stream().map(MediaEntityTreeNodeImpl::getEntity).toList();
@@ -283,10 +283,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
     }
 
     private void saveExternalObjectDirectory(UUID externalLocation,
-                                                                      String checksum,
-                                                                      UserAccountEntity userAccountEntity,
-                                                                      MediaEntity mediaEntity,
-                                                                      ObjectRecordStatusEntity objectRecordStatusEntity) {
+                                             String checksum,
+                                             UserAccountEntity userAccountEntity,
+                                             MediaEntity mediaEntity,
+                                             ObjectRecordStatusEntity objectRecordStatusEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -299,5 +299,6 @@ public class AudioUploadServiceImpl implements AudioUploadService {
         externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
     }
 
-    record AudioBlobUploadDetails(UUID uuid, String checksum) {}
+    record AudioBlobUploadDetails(UUID uuid, String checksum) {
+    }
 }
