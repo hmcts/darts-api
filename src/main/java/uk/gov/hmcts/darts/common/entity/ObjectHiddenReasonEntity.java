@@ -8,11 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
 
 @Entity
 @Table(name = "object_hidden_reason")
 @Getter
+@Setter
 @Immutable
 public class ObjectHiddenReasonEntity {
 

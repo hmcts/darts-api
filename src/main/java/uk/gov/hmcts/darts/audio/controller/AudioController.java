@@ -14,12 +14,14 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.mapper.TransformedMediaMapper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.audio.model.AdminMediaResponse;
 import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioPreview;
 import uk.gov.hmcts.darts.audio.model.GetTransformedMediaResponse;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideResponse;
+import uk.gov.hmcts.darts.audio.service.AdminMediaService;
 import uk.gov.hmcts.darts.audio.service.AudioPreviewService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioUploadService;
@@ -62,6 +64,7 @@ public class AudioController implements AudioApi {
     private final AddAudioFileValidator multipartFileValidator;
     private final MediaRequestService mediaRequestService;
     private final TransformedMediaMapper transformedMediaMapper;
+    private final AdminMediaService adminMediaService;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -132,5 +135,12 @@ public class AudioController implements AudioApi {
     public ResponseEntity<MediaHideResponse> postAdminHideMediaId(Integer mediaId, MediaHideRequest mediaHideRequest) {
         MediaHideResponse audioResponse = mediaRequestService.adminHideOrShowMediaById(mediaId, mediaHideRequest);
         return new ResponseEntity<>(audioResponse, HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = {SUPER_USER, SUPER_ADMIN})
+    public ResponseEntity<AdminMediaResponse> getAdminMediasById(Integer id) {
+        return new ResponseEntity<>(adminMediaService.getMediasById(id), HttpStatus.OK);
     }
 }
