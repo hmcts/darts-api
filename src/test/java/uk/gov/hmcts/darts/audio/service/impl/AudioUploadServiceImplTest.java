@@ -38,6 +38,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.log.api.LogApi;
+import uk.gov.hmcts.darts.test.common.data.HearingTestData;
 
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -50,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -343,16 +345,36 @@ class AudioUploadServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        HearingEntity hearing = new HearingEntity();
+        HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
-            anyString(),
+            eq("1"),
             any(),
             any()
-        )).thenReturn(hearing);
+        )).thenReturn(hearing1);
+
+        HearingEntity hearing2 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("2"),
+            any(),
+            any()
+        )).thenReturn(hearing2);
+
+        HearingEntity hearing3 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("3"),
+            any(),
+            any()
+        )).thenReturn(hearing3);
         audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
-        assertEquals(3, hearing.getMediaList().size());
+        assertEquals(1, hearing1.getMediaList().size());
+        assertEquals(1, hearing2.getMediaList().size());
+        assertEquals(1, hearing3.getMediaList().size());
     }
 }
