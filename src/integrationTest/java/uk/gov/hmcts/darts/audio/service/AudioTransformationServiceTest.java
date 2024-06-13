@@ -105,6 +105,21 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     @Test
+    void getMediaMetadataShouldNotReturnMediaEntitiesWhenMediaIsHidden() {
+        given.setupTest();
+        given.externalObjectDirForMedia(given.getMediaEntity4());
+        Integer hearingIdWithMedia = given.getHearingEntityWithMedia1().getId();
+
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
+
+        assertEquals(2, mediaEntities.size());
+
+        List<Integer> mediaIds = mediaEntities.stream().map(MediaEntity::getId).collect(toList());
+        assertTrue(mediaIds.contains(given.getMediaEntity1().getId()));
+        assertTrue(mediaIds.contains(given.getMediaEntity2().getId()));
+    }
+
+    @Test
     void getMediaMetadataShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
         given.setupTest();
         given.externalObjectDirForMedia(given.getMediaEntity1());

@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseInvalidLineRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
-import uk.gov.hmcts.darts.arm.util.ArmResponseFilesHelper;
+import uk.gov.hmcts.darts.arm.util.ArmResponseFilesUtil;
 import uk.gov.hmcts.darts.arm.util.files.CreateRecordFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InvalidLineFileFilenameProcessor;
@@ -105,7 +105,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
         // Search for Input Upload Files starting with the ExternalObjectDirectoryEntity id (EODID), document object id eg. media id and transfer attempts
         // - Expected filename: EODID_ObjectID_TransferAttempts_Hashcode_Status_iu.rsp
-        String prefix = ArmResponseFilesHelper.getPrefix(externalObjectDirectory);
+        String prefix = ArmResponseFilesUtil.getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
@@ -438,6 +438,7 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                     armResponseInvalidLineRecord.getExceptionDescription(),
                     armResponseInvalidLineRecord.getErrorStatus()
                 );
+                updateTransferAttempts(externalObjectDirectory);
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseManifestFailedStatus);
             } else {
                 log.warn("Incorrect status [{}] for invalid line file {}", invalidLineFileFilenameProcessor.getStatus(),
@@ -542,6 +543,17 @@ public class ArmResponseFilesProcessSingleElementImpl implements ArmResponseFile
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailedStatus)
                     .getStatus().getId());
         }
+    }
+
+    private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+        log.debug(
+            "Updating failed transfer attempts from {} to {} for ID {}",
+            currentNumberOfAttempts,
+            currentNumberOfAttempts + 1,
+            externalObjectDirectoryEntity.getId()
+        );
+        externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 
     private ExternalObjectDirectoryEntity updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory,

@@ -9,7 +9,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveResponseFileAt
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
-public class ArmResponseFilesHelper {
+public class ArmResponseFilesUtil {
 
     public static String generateSuffix(String filenameKey) {
         return ARM_FILENAME_SEPARATOR + filenameKey + ARM_RESPONSE_FILE_EXTENSION;
