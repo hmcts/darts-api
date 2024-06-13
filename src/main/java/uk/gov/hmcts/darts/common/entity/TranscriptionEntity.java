@@ -176,6 +176,14 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         return null;
     }
 
+    public CourtroomEntity getPrimaryOrSecondaryCourtroom() {
+        HearingEntity hearing = getHearing();
+        if (hearing != null) {
+            return hearing.getCourtroom();
+        }
+        return courtroom;
+    }
+
     public Optional<CourthouseEntity> getCourtHouse() {
         if (getHearing() != null) {
             return Optional.of(getHearing().getCourtroom().getCourthouse());
