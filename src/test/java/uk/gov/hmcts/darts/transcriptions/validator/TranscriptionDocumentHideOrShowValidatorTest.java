@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionDocumentHideOrShowValidatorTest {
@@ -82,8 +83,8 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         ObjectHiddenReasonEntity hiddenReasonEntity = new ObjectHiddenReasonEntity();
 
-        Mockito.when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
-        Mockito.when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(hiddenReasonEntity));
+        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -121,7 +122,7 @@ class TranscriptionDocumentHideOrShowValidatorTest {
 
         ObjectAdminActionEntity objectAdminActionEntity = new ObjectAdminActionEntity();
 
-        Mockito.when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of(objectAdminActionEntity));
+        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of(objectAdminActionEntity));
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -145,8 +146,8 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         Integer reasonId = 949;
         adminActionResponse.setReasonId(reasonId);
 
-        Mockito.when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
-        Mockito.when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.empty());
+        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
 
         IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
             IdRequest<>(transcriptionDocumentHideRequest, documentId);
@@ -154,6 +155,34 @@ class TranscriptionDocumentHideOrShowValidatorTest {
         DartsApiException exception
             = Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
         Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, exception.getError());
+
+        Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
+    }
+
+    @Test
+    void failWhenHideWithActionRequestAndWithReasonMarkedForDeletion() {
+        Integer documentId = 200;
+        AdminActionRequest adminActionResponse = new AdminActionRequest();
+
+        TranscriptionDocumentHideRequest transcriptionDocumentHideRequest = new TranscriptionDocumentHideRequest();
+        transcriptionDocumentHideRequest.setIsHidden(true);
+        transcriptionDocumentHideRequest.setAdminAction(adminActionResponse);
+
+        Integer reasonId = 949;
+        adminActionResponse.setReasonId(reasonId);
+
+        ObjectHiddenReasonEntity reasonEntity = Mockito.mock(ObjectHiddenReasonEntity.class);
+        when(reasonEntity.isMarkedForDeletion()).thenReturn(true);
+
+        when(objectHiddenReasonRepository.findById(reasonId)).thenReturn(Optional.of(reasonEntity));
+        when(objectAdminActionRepository.findByTranscriptionDocument_Id(documentId)).thenReturn(List.of());
+
+        IdRequest<TranscriptionDocumentHideRequest> transcriptionDocumentEntityUserId = new
+            IdRequest<>(transcriptionDocumentHideRequest, documentId);
+
+        DartsApiException exception
+            = Assertions.assertThrows(DartsApiException.class, () -> transcriptionDocumentHideOrShowValidator.validate(transcriptionDocumentEntityUserId));
+        Assertions.assertEquals(TranscriptionApiError.TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION, exception.getError());
 
         Mockito.verify(transcriptionDocumentIdValidator, times(1)).validate(documentId);
     }
