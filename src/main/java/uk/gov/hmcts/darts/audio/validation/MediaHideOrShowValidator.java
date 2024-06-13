@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.model.AdminActionRequest;
 import uk.gov.hmcts.darts.audio.model.MediaHideRequest;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
@@ -28,23 +29,25 @@ public class MediaHideOrShowValidator implements Validator<IdRequest<MediaHideRe
     public void validate(IdRequest<MediaHideRequest> request) {
         mediaIdValidator.validate(request.getId());
 
-         if (request.getPayload().getIsHidden() && request.getPayload().getAdminAction() == null) {
+        AdminActionRequest adminActionRequest = request.getPayload().getAdminAction();
+
+        if (request.getPayload().getIsHidden() && adminActionRequest  == null) {
              throw new DartsApiException(AudioApiError.MEDIA_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE);
          } else if (request.getPayload().getIsHidden()) {
              List<ObjectAdminActionEntity> objectAdminActionEntityList = objectAdminActionRepository.findByMedia_Id(request.getId());
              if (!objectAdminActionEntityList.isEmpty()) {
                  throw new DartsApiException(AudioApiError.MEDIA_ALREADY_HIDDEN);
              }
-
          }
 
         if (!request.getPayload().getIsHidden() && request.getPayload().getAdminAction() != null) {
             throw new DartsApiException(AudioApiError.MEDIA_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE);
         }
 
-        if (request.getPayload().getAdminAction() != null && request.getPayload().getAdminAction().getReasonId() != null) {
+
+        if (request.getPayload().getAdminAction() != null && adminActionRequest.getReasonId() != null) {
             Optional<ObjectHiddenReasonEntity> optionalObjectHiddenReasonEntity = objectHiddenReasonRepository.findById(
-                request.getPayload().getAdminAction().getReasonId());
+                adminActionRequest.getReasonId());
             if (optionalObjectHiddenReasonEntity.isEmpty()) {
                 throw new DartsApiException(AudioApiError
                                                 .MEDIA_HIDE_ACTION_REASON_NOT_FOUND);

@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectAdminActionEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectHiddenReasonEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
@@ -74,6 +75,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
 
     @Mock
     private UserIdentity userIdentity;
+
+    @Mock
+    private CurrentTimeHelper currentTimeHelper;
 
     @Captor
     ArgumentCaptor<ObjectAdminActionEntity> objectAdminActionEntityArgumentCaptor;
@@ -296,6 +300,9 @@ class MediaRequestServiceImplAdminMediaSearchTest {
     }
 
     void setupTestMediaHide(MediaHideRequest request) {
+        OffsetDateTime testTime = OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(testTime);
+
         adminMediaSearchResponseMapperMockedStatic = Mockito.mockStatic(AdminMediaSearchResponseMapper.class);
 
         Integer hideOrShowTranscriptionDocument = 343;

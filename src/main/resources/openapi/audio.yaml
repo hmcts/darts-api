@@ -819,7 +819,7 @@ components:
         - "The file type is not acceptable"
         - "The duration of the audio exceeds maximum threshold"
         - "The audio metadata size exceeds maximum threshold"
-        - "Either transformed_media_id or transcription_document_id must be provided in the request, but not both."
+        - "Required request parameter 'transformed_media_id' for method parameter type Integer is not present"
         - "Media is already hidden"
         - "Hide media action payload not correct"
         - "Showing media action payload not correct"

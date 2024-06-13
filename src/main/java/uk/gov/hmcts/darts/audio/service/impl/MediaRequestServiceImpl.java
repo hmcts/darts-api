@@ -123,6 +123,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
 
+
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
         return mediaRequestRepository.findTopByStatusOrderByLastModifiedDateTimeAsc(status);
@@ -515,6 +516,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
+    @Transactional
     public MediaHideResponse adminHideOrShowMediaById(Integer mediaId, MediaHideRequest mediaHideRequest) {
         MediaHideResponse response;
 
@@ -545,10 +547,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                 objectAdminActionEntity.setComments(mediaHideRequest.getAdminAction().getComments());
                 objectAdminActionEntity.setMedia(mediaEntity);
                 objectAdminActionEntity.setHiddenBy(userIdentity.getUserAccount());
-                objectAdminActionEntity.setHiddenDateTime(OffsetDateTime.now());
+                objectAdminActionEntity.setHiddenDateTime(currentTimeHelper.currentOffsetDateTime());
                 objectAdminActionEntity.setMarkedForManualDeletion(false);
                 objectAdminActionEntity.setMarkedForManualDelBy(userIdentity.getUserAccount());
-                objectAdminActionEntity.setMarkedForManualDelDateTime(OffsetDateTime.now());
+                objectAdminActionEntity.setMarkedForManualDelDateTime(currentTimeHelper.currentOffsetDateTime());
 
                 objectAdminActionEntity = objectAdminActionRepository.saveAndFlush(objectAdminActionEntity);
 
