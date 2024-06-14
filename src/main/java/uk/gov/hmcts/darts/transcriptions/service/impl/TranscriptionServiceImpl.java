@@ -89,6 +89,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSCRIPTION_ID;
+import static uk.gov.hmcts.darts.transcriptions.auditing.TranscriptionUpdateAuditActivityProvider.auditActivitiesFor;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
@@ -186,7 +187,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             transcriptionNotifications.notifyApprovers(transcription);
         }
 
-        auditApi.recordAudit(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
+        auditApi.record(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
 
         RequestTranscriptionResponse requestTranscriptionResponse = new RequestTranscriptionResponse();
         requestTranscriptionResponse.setTranscriptionId(transcription.getId());
@@ -230,6 +231,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection, true);
 
+        var auditActivityProvider = auditActivitiesFor(transcriptionEntity, updateTranscription);
+
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
@@ -238,6 +241,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             transcriptionStatusEntity,
             updateTranscription.getWorkflowComment()
         );
+
+        auditApi.recordAll(auditActivityProvider);
+
         transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
         UpdateTranscriptionAdminResponse updateTranscriptionResponse = new UpdateTranscriptionAdminResponse();
@@ -266,6 +272,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()),
             desiredTargetTranscriptionStatus,
             isAdmin)) {
+
             throw new DartsApiException(TRANSCRIPTION_WORKFLOW_ACTION_INVALID);
         }
 
@@ -428,7 +435,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryUnstructuredEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
 
-        auditApi.recordAudit(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+        auditApi.record(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
         attachTranscriptResponse.setTranscriptionDocumentId(transcriptionDocumentEntity.getId());

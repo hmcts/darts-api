@@ -192,7 +192,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
@@ -245,7 +245,7 @@ class TranscriptionServiceImplTest {
         assertTranscriptionComments();
         verifyNotification();
 
-        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -275,7 +275,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer hearingId = null;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
@@ -325,7 +325,7 @@ class TranscriptionServiceImplTest {
         assertTranscriptionComments();
         verifyNotification();
 
-        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -356,7 +356,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer caseId = null;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
@@ -410,7 +410,7 @@ class TranscriptionServiceImplTest {
         assertTranscriptionComments();
         verifyNotification();
 
-        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -443,7 +443,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         OffsetDateTime startDateTime = null;
         OffsetDateTime endDateTime = null;
@@ -498,7 +498,7 @@ class TranscriptionServiceImplTest {
         verifyNotification();
 
 
-        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).record(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     private void assertTranscriptionComments() {

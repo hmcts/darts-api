@@ -343,7 +343,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     void testExceptionOnOneObjectCausesRollbackOfAllChangesToAllObjectsAndProcessingOfOtherCasesContinues() {
 
         // given
-        doThrow(RuntimeException.class).when(eodRepository).findByMediaAndExternalLocationType(refEqMedia(medias.get(0)), refEq(EodHelper.armLocation()));
+        doThrow(RuntimeException.class).when(eodRepository).findByMediaAndExternalLocationType(reflectionEquals(medias.get(0)), refEq(EodHelper.armLocation()));
 
         // when
         processor.processApplyRetentionToCaseAssociatedObjects();
@@ -435,7 +435,7 @@ class ApplyRetentionCaseAssociatedObjectsProcessorIntTest extends IntegrationBas
     }
 
 
-    private static MediaEntity refEqMedia(MediaEntity media) {
-        return refEq(media, "courtroom", "hearingList", "retainUntilTs", "lastModifiedDateTime", "createdDateTime");
+    private static MediaEntity reflectionEquals(MediaEntity media) {
+        return refEq(media, "courtroom", "hearingList", "retainUntilTs", "lastModifiedDateTime", "createdDateTime", "adminActionReasons");
     }
 }

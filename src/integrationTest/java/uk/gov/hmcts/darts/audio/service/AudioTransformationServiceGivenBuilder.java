@@ -43,6 +43,7 @@ public class AudioTransformationServiceGivenBuilder {
     private MediaEntity mediaEntity1;
     private MediaEntity mediaEntity2;
     private MediaEntity mediaEntity3;
+    private MediaEntity mediaEntity4;
     private CourtroomEntity courtroomAtNewcastle;
     private CourtCaseEntity courtCase;
     private JudgeEntity judge;
@@ -86,6 +87,10 @@ public class AudioTransformationServiceGivenBuilder {
             courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
 
         mediaEntity3 = createMediaFor(courtroomAtNewcastle);
+
+        mediaEntity4 = dartsDatabase.addMediaToHearingNonTransactional(hearingEntityWithMedia1, createMediaWith(
+            courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
+        mediaEntity4.setHidden(true);
     }
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {

@@ -123,6 +123,7 @@ class DailyListUpdaterTest {
         "SITTING AT  10:00 am, 10:00",
         "SITTING AT 10:00 am, 10:00",
         "11:00 am, 11:00",
+        "3:00 PM, 15:00"
     })
     void getTimeFromTimeMarkingNote(String timeMarkingNote, String result) {
         assertThat(dailyListUpdater.getTimeFromTimeMarkingNote(timeMarkingNote)).isEqualTo(result);

@@ -215,6 +215,9 @@ darts:
       case-record-properties-file: properties/arm/case-record.properties
 
       response-cleanup-buffer-days: 0
+      batch-response-cleanup:
+        buffer-minutes: 15
+        manifest-file-suffix: .a360
       event-date-adjustment-years: 100
 
       manifest-file-prefix: ${ARM_MANIFEST_FILE_PREFIX:DARTS}
@@ -224,11 +227,14 @@ darts:
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
+      arm-service-profile: ${ARM_SERVICE_PROFILE:}
       cabinet-id: 100
       url: ${ARM_URL}
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
+      available-entitlement-profiles-path: /api/v1/availableEntitlementProfiles
+      select-entitlement-profile-path: /api/v1/selectEntitlementProfile/{profile_id}
     dets:
       sas-endpoint: ${DETS_SAS_URL_ENDPOINT:}
       container-name: darts-dets
@@ -246,9 +252,11 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+        arm: dropzone
       sas-url:
         darts-inbound-container: ${DARTS_INBOUND_STORAGE_SAS_URL}
         darts-unstructured: ${DARTS_UNSTRUCTURED_STORAGE_SAS_URL}
+        dropzone: ${ARM_SAS_ENDPOINT}
       delete:
         timeout: 60
       az-copy-executable: /usr/bin/azcopy

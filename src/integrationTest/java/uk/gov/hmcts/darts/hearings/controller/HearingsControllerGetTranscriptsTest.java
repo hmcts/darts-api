@@ -122,6 +122,7 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 2, 0, 0, ZoneOffset.UTC));
         transcription2.setIsManualTranscription(false);
+        transcription2.setLegacyObjectId(null);
         dartsDatabase.save(transcription2);
 
         //legacy manual transcription

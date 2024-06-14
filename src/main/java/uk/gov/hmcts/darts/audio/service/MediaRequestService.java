@@ -3,9 +3,12 @@ package uk.gov.hmcts.darts.audio.service;
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
+import uk.gov.hmcts.darts.audio.model.AdminMediaSearchResponseItem;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchRequest;
+import uk.gov.hmcts.darts.audiorequests.model.MediaPatchResponse;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaRequest;
 import uk.gov.hmcts.darts.audiorequests.model.SearchTransformedMediaResponse;
@@ -22,6 +25,8 @@ public interface MediaRequestService {
     MediaRequestEntity getMediaRequestEntityById(Integer id);
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus mediaRequestStatus);
+
+    MediaRequestEntity updateAudioRequestStatus(MediaRequestEntity mediaRequestEntity, MediaRequestStatus mediaRequestStatus);
 
     boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails);
 
@@ -52,4 +57,8 @@ public interface MediaRequestService {
     TransformedMediaEntity getTransformedMediaById(Integer id);
 
     MediaRequest getMediaRequestById(Integer mediaRequestId);
+
+    MediaPatchResponse patchMediaRequest(Integer mediaRequestId, MediaPatchRequest request);
+
+    List<AdminMediaSearchResponseItem> adminMediaSearch(Integer transformedMediaId);
 }

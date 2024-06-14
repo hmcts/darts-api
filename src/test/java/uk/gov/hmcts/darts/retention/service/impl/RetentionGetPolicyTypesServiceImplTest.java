@@ -137,8 +137,6 @@ class RetentionGetPolicyTypesServiceImplTest {
         assertEquals(RETENTION_POLICY_TYPE_ID_NOT_FOUND, exception.getError());
 
         verifyNoInteractions(retentionPolicyTypeMapper);
-
-
     }
 
     private RetentionPolicyTypeEntity getRetentionPolicyTypeEntity() {

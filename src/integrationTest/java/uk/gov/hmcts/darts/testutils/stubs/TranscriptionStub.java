@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -53,6 +54,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.GodClass")
 public class TranscriptionStub {
 
     public static final byte[] TRANSCRIPTION_TEST_DATA_BINARY_DATA = "test binary data".getBytes();
@@ -86,6 +88,23 @@ public class TranscriptionStub {
             transcriptionStatus,
             Optional.of(transcriptionUrgencyEntity),
             authorisedIntegrationTestUser
+        );
+    }
+
+    public TranscriptionEntity createTranscription(CourtroomEntity courtroomEntity) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
+
+        UserAccountEntity authorisedIntegrationTestUser = userAccountStub
+            .createAuthorisedIntegrationTestUser(courtroomEntity != null ? courtroomEntity.getCourthouse() : null);
+        return createAndSaveTranscriptionEntity(
+            null,
+            transcriptionType,
+            transcriptionStatus,
+            Optional.of(transcriptionUrgencyEntity),
+            authorisedIntegrationTestUser,
+            courtroomEntity
         );
     }
 
@@ -129,12 +148,36 @@ public class TranscriptionStub {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
         UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(courtCase
                                                                                                                   .getCourthouse());
-        return createAndSaveTranscriptionEntity(
-            courtCase,
-            transcriptionType,
-            transcriptionStatus,
-            transcriptionUrgencyEntity,
-            authorisedIntegrationTestUser
+        return createAndSaveTranscriptionEntity(null,
+                                                List.of(courtCase),
+                                                null,
+                                                transcriptionType,
+                                                transcriptionStatus,
+                                                transcriptionUrgencyEntity,
+                                                authorisedIntegrationTestUser,
+                                                null, true
+        );
+    }
+
+    public TranscriptionEntity createTranscription(List<HearingEntity> hearingEntityList,
+                                                   List<CourtCaseEntity> courtCaseLst,
+                                                   CourtroomEntity courtroomEntity,
+                                                   UserAccountEntity userAccountEntity,
+                                                   List<TranscriptionWorkflowEntity> workflowEntity,
+                                                   Boolean isManualTranscription) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
+
+        return createAndSaveTranscriptionEntity(hearingEntityList,
+                                                courtCaseLst,
+                                                courtroomEntity,
+                                                transcriptionType,
+                                                transcriptionStatus,
+                                                transcriptionUrgencyEntity,
+                                                userAccountEntity,
+                                                workflowEntity,
+                                                isManualTranscription
         );
     }
 
@@ -162,6 +205,15 @@ public class TranscriptionStub {
                                                                 TranscriptionStatusEntity transcriptionStatus,
                                                                 Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
                                                                 UserAccountEntity testUser) {
+        return createAndSaveTranscriptionEntity(hearing, transcriptionType, transcriptionStatus, transcriptionUrgency, testUser, null);
+    }
+
+    public TranscriptionEntity createAndSaveTranscriptionEntity(HearingEntity hearing,
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                Optional<TranscriptionUrgencyEntity> transcriptionUrgency,
+                                                                UserAccountEntity testUser,
+                                                                CourtroomEntity courtroomEntity) {
         TranscriptionEntity transcription = new TranscriptionEntity();
 
         if (hearing != null) {
@@ -169,6 +221,11 @@ public class TranscriptionStub {
             transcription.addHearing(hearing);
         }
 
+        if (courtroomEntity != null) {
+            transcription.setCourtroom(courtroomEntity);
+        }
+
+        transcription.setLegacyObjectId("legacyObjectId");
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);
 
@@ -189,6 +246,49 @@ public class TranscriptionStub {
             hearing.getTranscriptions().add(transcription);
         }
 
+        return transcriptionRepository.saveAndFlush(transcription);
+    }
+
+
+    public TranscriptionEntity createAndSaveTranscriptionEntity(List<HearingEntity> hearing, List<CourtCaseEntity> courtCase,
+                                                                CourtroomEntity courtroomEntity,
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                UserAccountEntity testUser,
+                                                                List<TranscriptionWorkflowEntity>  workflowEntity,
+                                                                boolean isManualTranscription) {
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        for (CourtCaseEntity caseEntity : courtCase) {
+            transcription.addCase(caseEntity);
+        }
+
+        if (hearing != null) {
+            for (HearingEntity hearingEntity : hearing) {
+                transcription.addHearing(hearingEntity);
+            }
+        }
+
+        if (courtroomEntity != null) {
+            transcription.setCourtroom(courtroomEntity);
+        }
+
+        if (workflowEntity != null) {
+
+            for (TranscriptionWorkflowEntity wfe : workflowEntity) {
+                wfe.setTranscription(transcription);
+
+                transcription.getTranscriptionWorkflowEntities().add(wfe);
+            }
+        }
+
+        transcription.setTranscriptionType(transcriptionType);
+        transcription.setTranscriptionStatus(transcriptionStatus);
+        transcription.setTranscriptionUrgency(transcriptionUrgency);
+        transcription.setCreatedBy(testUser);
+        transcription.setLastModifiedBy(testUser);
+        transcription.setIsManualTranscription(isManualTranscription);
+        transcription.setHideRequestFromRequestor(false);
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
@@ -262,10 +362,10 @@ public class TranscriptionStub {
 
     @Transactional
     public TranscriptionEntity createAndSaveWithTranscriberTranscription(UserAccountEntity userAccountEntity,
-                                                                   CourtCaseEntity courtCaseEntity,
-                                                                   HearingEntity hearingEntity,
-                                                                   OffsetDateTime workflowTimestamp,
-                                                                   Boolean hideRequestFromRequester) {
+                                                                         CourtCaseEntity courtCaseEntity,
+                                                                         HearingEntity hearingEntity,
+                                                                         OffsetDateTime workflowTimestamp,
+                                                                         Boolean hideRequestFromRequester) {
         var transcriptionEntity = this.createTranscriptionWithStatus(
             userAccountEntity,
             courtCaseEntity,
@@ -355,8 +455,8 @@ public class TranscriptionStub {
     }
 
     public TranscriptionWorkflowEntity createAndSaveTranscriptionWorkflow(TranscriptionEntity transcription,
-                                      OffsetDateTime workflowTimestamp,
-                                      TranscriptionStatusEntity transcriptionStatus) {
+                                                                          OffsetDateTime workflowTimestamp,
+                                                                          TranscriptionStatusEntity transcriptionStatus) {
 
         var transcriptionWorkflow = createTranscriptionWorkflowEntity(transcription, transcription.getCreatedBy(), workflowTimestamp, transcriptionStatus);
 

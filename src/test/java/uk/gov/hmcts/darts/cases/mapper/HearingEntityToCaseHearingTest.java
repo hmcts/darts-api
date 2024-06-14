@@ -63,6 +63,7 @@ class HearingEntityToCaseHearingTest {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(1);
         var hearingTranscripts = hearings.get(0).getTranscriptions();
         hearingTranscripts.get(0).setIsManualTranscription(false);
+        hearingTranscripts.get(0).setLegacyObjectId(null);
 
         List<Hearing> hearingList = HearingEntityToCaseHearing.mapToHearingList(hearings);
 

@@ -45,7 +45,7 @@ class EventControllerGetEventMappingByIdTest extends IntegrationBase {
     void allowSuperAdminToGetEventMappingById(SecurityRoleEnum role) throws Exception {
         given.anAuthenticatedUserWithGlobalAccessAndRole(role);
 
-        var eventHandlerEntity = dartsDatabase.createEventHandlerData();
+        var eventHandlerEntity = dartsDatabase.createEventHandlerData("8888");
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, eventHandlerEntity.getId());
 
@@ -73,7 +73,7 @@ class EventControllerGetEventMappingByIdTest extends IntegrationBase {
             DateConverterUtil.toLocalDateTime(SOME_DATE_TIME)
         );
 
-        var eventHandlerEntity = dartsDatabase.createEventHandlerData();
+        var eventHandlerEntity = dartsDatabase.createEventHandlerData("8888");
         dartsDatabase.createEvent(hearingEntity, eventHandlerEntity.getId());
 
         MockHttpServletRequestBuilder requestBuilder = get(EVENT_MAPPINGS_ENDPOINT, eventHandlerEntity.getId());

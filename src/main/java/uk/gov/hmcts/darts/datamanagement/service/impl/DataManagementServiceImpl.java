@@ -140,21 +140,20 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public UUID copyBlobData(String sourceContainerName, String destinationContainerName, UUID sourceBlobId) {
+    public void copyBlobData(String sourceContainerName, String destinationContainerName, String sourceLocation, String destinationLocation) {
         try {
             String sourceContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(sourceContainerName);
             String destinationContainerSasUrl = dataManagementConfiguration.getContainerSasUrl(destinationContainerName);
-            String sourceBlobSasUrl = buildBlobSasUrl(sourceContainerName, sourceContainerSasUrl, sourceBlobId.toString());
-            UUID destinationUuid = UUID.randomUUID();
-            String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, destinationUuid.toString());
+            String sourceBlobSasUrl = buildBlobSasUrl(sourceContainerName, sourceContainerSasUrl, sourceLocation);
+            String destinationBlobSasUrl = buildBlobSasUrl(destinationContainerName, destinationContainerSasUrl, destinationLocation);
 
             azureCopyUtil.copy(sourceBlobSasUrl, destinationBlobSasUrl);
 
-            log.info("Copy completed from '{}' to '{}' for external object directory Id: {}", sourceContainerName, destinationContainerName, sourceBlobId);
-            return destinationUuid;
+            log.info("Copy completed from '{}' to '{}'. Source location: {}, destination location: {}",
+                     sourceContainerName, destinationContainerName, sourceLocation, destinationLocation);
         } catch (Exception e) {
-            throw new DartsException(String.format("Exception copying file from '%s' to '%s'. External object directory Id: %s",
-                    sourceContainerName, destinationContainerName, sourceBlobId), e);
+            throw new DartsException(String.format("Exception copying file from '%s' to '%s'. Source location: %s",
+                                                   sourceContainerName, destinationContainerName, sourceLocation), e);
         }
     }
 
@@ -230,7 +229,12 @@ public class DataManagementServiceImpl implements DataManagementService {
         }
     }
 
-    private String buildBlobSasUrl(String containerName, String containerSasUrl, String sourceBlobId) {
-        return containerSasUrl.replace(containerName, containerName + "/" + sourceBlobId);
+    private String buildBlobSasUrl(String containerName, String containerSasUrl, String location) {
+        if (containerName.equals(dataManagementConfiguration.getArmContainerName())) {
+            // arm sas url contains folder 'DARTS' in the url, so replacing it to avoid 'DARTS' being present twice in the generated blob sas url
+            return containerSasUrl.replace(containerName + "/DARTS", containerName + "/" + location);
+        } else {
+            return containerSasUrl.replace(containerName, containerName + "/" + location);
+        }
     }
 }

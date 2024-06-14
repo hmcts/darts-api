@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
+import uk.gov.hmcts.darts.arm.client.model.AvailableEntitlementProfile;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.io.ByteArrayInputStream;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,12 +50,13 @@ class ArmApiServiceIntTest extends IntegrationBase {
     @BeforeEach
     void setup() {
         armTokenRequest = new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
+        ArmTokenResponse armTokenResponse = getArmTokenResponse();
         when(armTokenClient.getToken(armTokenRequest))
-            .thenReturn(ArmTokenResponse.builder()
-                            .accessToken("some-token")
-                            .tokenType("Bearer")
-                            .expiresIn("3600")
-                            .build());
+            .thenReturn(armTokenResponse);
+        when(armTokenClient.availableEntitlementProfiles(armTokenResponse.getAccessToken()))
+            .thenReturn(getAvailableEntitlementProfile());
+        when(armTokenClient.selectEntitlementProfile(armTokenResponse.getAccessToken(), "some-profile-id"))
+            .thenReturn(armTokenResponse);
     }
 
     @Test
@@ -79,6 +82,10 @@ class ArmApiServiceIntTest extends IntegrationBase {
             .responseStatus(0)
             .responseStatusMessages(null)
             .build();
+        when(armApiClient.updateMetadata(
+            bearerAuth,
+            updateMetadataRequest
+        )).thenReturn(updateMetadataResponse);
         when(armApiClient.updateMetadata(
             bearerAuth,
             updateMetadataRequest
@@ -116,4 +123,23 @@ class ArmApiServiceIntTest extends IntegrationBase {
         assertThat(downloadResponseMetaData.getInputStream().readAllBytes()).isEqualTo(binaryData);
     }
 
+    private AvailableEntitlementProfile getAvailableEntitlementProfile() {
+        List<AvailableEntitlementProfile.Profiles> profiles = List.of(AvailableEntitlementProfile.Profiles.builder()
+                        .profileName("some-profile-name")
+                        .profileId("some-profile-id")
+                        .build());
+
+        return AvailableEntitlementProfile.builder()
+            .profiles(profiles)
+            .isError(false)
+            .build();
+    }
+
+    private ArmTokenResponse getArmTokenResponse() {
+        return ArmTokenResponse.builder()
+            .accessToken("some-token")
+            .tokenType("Bearer")
+            .expiresIn("3600")
+            .build();
+    }
 }

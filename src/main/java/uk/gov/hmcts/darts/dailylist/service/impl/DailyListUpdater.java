@@ -47,7 +47,7 @@ import java.util.Optional;
 class DailyListUpdater {
     public static final String DL_TIME_NOT_BEFORE = "NOT BEFORE ";
     public static final String DL_TIME_SITTING_AT = "SITTING AT ";
-    public static final String TIME_MARKING_NOTE_FORMAT = "hh:mm a";
+    public static final String TIME_MARKING_NOTE_FORMAT = "h:mm a";
     public static final String SITTING_AT_FORMAT = "HH:mm:ss";
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
@@ -97,7 +97,6 @@ class DailyListUpdater {
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
                         courtCase.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
-                        updateCaseClosed(courtCase);
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
@@ -114,14 +113,6 @@ class DailyListUpdater {
         dailyListEntity.setLastModifiedBy(dailyListSystemUser);
         dailyListEntity.setStatus(statusType);
     }
-
-    private void updateCaseClosed(CourtCaseEntity courtCase) {
-        if (courtCase.getClosed() != null && courtCase.getClosed()) {
-            courtCase.setClosed(false);
-            courtCase.setCaseClosedTimestamp(null);
-        }
-    }
-
 
     private LocalTime getScheduledStartTime(Sitting sitting, Hearing dailyListHearing) {
         String timeMarkingNoteText = dailyListHearing.getTimeMarkingNote();
@@ -205,8 +196,8 @@ class DailyListUpdater {
         UserAccountEntity dailyListSystemUser = systemUserHelper.getDailyListProcessorUser();
         advocates.forEach(advocate -> {
             if (!isExistingProsecutor(courtCase, advocate)) {
-                      courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                          citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
+                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                    citizenNameMapper.getCitizenName(advocate.getName()), courtCase, dailyListSystemUser));
             }
         });
     }
@@ -218,7 +209,7 @@ class DailyListUpdater {
                 if (counselDetails == null) {
                     continue;
                 }
-                if  (!isExistingDefenders(courtCase, counselDetails)) {
+                if (!isExistingDefenders(courtCase, counselDetails)) {
                     courtCase.addDefence(retrieveCoreObjectService.createDefence(
                         citizenNameMapper.getCitizenName(counselDetails.getName()), courtCase, dailyListSystemUser));
                 }

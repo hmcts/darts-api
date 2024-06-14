@@ -829,6 +829,130 @@ paths:
                 type: "USER_MANAGEMENT_108"
                 title: "The provided transcription does not exist"
                 status: 404
+
+  /admin/transcription-documents/search:
+    post:
+      tags:
+        - Transcription
+      summary: Search for transcription documents
+      operationId: searchForTranscriptionMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchTranscriptionDocumentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchTranscriptionDocumentResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
+  /admin/transcription-documents/{transcription_document_id}:
+    get:
+      tags:
+        - Transcription
+      summary: Gets a transcription document by id
+      operationId: getByDocumentId
+      parameters:
+        - name: transcription_document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTranscriptionDocumentByIdResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
+  /admin/transcription-document/{transcription_document_id}/hide:
+    post:
+      tags:
+        - Transcription
+      summary: Hides or shows a transcription document
+      operationId: hideTranscriptionDocumentId
+      parameters:
+        - name: transcription_document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranscriptionDocumentHideRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionDocumentHideResponse'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '409':
+          description: Data conflicting
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+
 components:
   schemas:
     TranscriptionSearchRequest:
@@ -1279,6 +1403,12 @@ components:
           example: 2023-06-26T13:00:00Z
         transcription_urgency:
           $ref: '#/components/schemas/TranscriptionUrgencyDetails'
+        courtroom:
+          type: string
+          example: CourtRoomA
+        transcription_object_id:
+          type: string
+          example: 1
     defendant:
       type: string
       example: Joe Bloggs
@@ -1349,6 +1479,230 @@ components:
         is_manual_transcription:
           type: boolean
 
+    SearchTranscriptionDocumentRequest:
+      type: object
+      properties:
+        case_number:
+          type: string
+          description: 'The case number'
+        courthouse_display_name:
+          type: String
+          description: 'The court house display name'
+        hearing_date:
+          type: date
+          description: 'The hearing date'
+        owner:
+          type: string
+          description: 'The media owner'
+        requested_by:
+          type: string
+          description: 'The person that requested the media'
+        requested_at_from:
+          type: date
+          description: 'The start date range that the media was requested'
+        requested_at_to:
+          type: date
+          description: 'The end date range that the media was requested'
+        is_manual_transcription:
+          type: boolean
+          description: 'Is a manual transcription'
+
+    SearchTranscriptionDocumentResponse:
+      type: object
+      properties:
+        transcription_document_id:
+          type: integer
+          description: 'The transcription document id'
+        transcription_id:
+          type: integer
+          description: 'The transcription id'
+        case:
+          type: object
+          description: 'The case related details'
+          properties:
+            id:
+              type: integer
+              description: 'The case  id'
+            case_number:
+              type: string
+              description: 'The case number'
+        courthouse:
+          type: object
+          description: 'The courthouse related details'
+          properties:
+            id:
+              type: integer
+              description: 'The court house id'
+            display_name:
+              type: string
+              description: 'The court house display name'
+        hearing:
+          type: object
+          description: 'The hearing details'
+          properties:
+            id:
+              type: integer
+              description: 'The hearing id'
+            hearing_date:
+              type: date
+              description: 'The hearing date'
+        is_manual_transcription:
+          type: boolean
+        is_hidden:
+          type: boolean
+
+    GetTranscriptionDocumentByIdResponse:
+      type: object
+      properties:
+        transcription_document_id:
+          type: integer
+          description: 'The transcription document id'
+        transcription_id:
+          type: integer
+          description: 'The transcription id'
+        file_type:
+          type: string
+          description: 'The transcription document file type'
+        file_name:
+          type: string
+          description: 'The transcription document file name'
+        file_size_bytes:
+          type: integer
+          description: 'The transcription document size in bytes'
+        uploaded_at:
+          type: string
+          format: date-time
+          description: 'The transcription document date time of the transcription document'
+        uploaded_by:
+          type: integer
+          description: 'The transcription document uploaded by'
+        is_hidden:
+          type: boolean
+          description: 'Whether the transcription document is hidden'
+        retain_until:
+          type: string
+          format: date-time
+          description: 'When the transcription should be retained until'
+        content_object_id:
+          type: string
+          description: 'Content object id'
+        clip_id:
+          type: string
+          description: 'Clip id'
+        checksum:
+          type: string
+          description: 'Checksum of the transcription document'
+        last_modified_at:
+          type: string
+          format: date-time
+          description: 'When the transcription was last modified'
+        last_modified_by:
+          type: integer
+          description: 'Id of the user who last modified the transcription'
+        admin_action:
+          $ref: '#/components/schemas/AdminAction'
+    AdminAction:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'Id of the admin action'
+        reason_id:
+          type: integer
+          description: 'Id of the reason'
+        hidden_by_id:
+          type: integer
+          description: 'Id of user who hid it'
+        hidden_at:
+          type: string
+          format: date-time
+          description: 'The time it was hidden'
+        is_marked_for_manual_deletion:
+          type: boolean
+          description: 'Whether it is marked for manual deletion'
+        marked_for_manual_deletion_by_id:
+          type: integer
+          description: 'Id of the user Who marked it for manual deletion'
+        marked_for_manual_deletion_at:
+          type: string
+          format: date-time
+          description: 'The time it was marked fo manual deletion'
+        ticket_reference:
+          type: string
+          description: 'Reference of the ticket'
+        comments:
+          type: string
+          description: 'Comments about the action'
+
+    TranscriptionDocumentHideRequest:
+      type: object
+      properties:
+        is_hidden:
+          type: boolean
+          default: true
+        admin_action:
+          $ref: '#/components/schemas/AdminActionRequest'
+
+    AdminActionRequest:
+      type: object
+      required:
+        - reason_id
+        - ticket_reference
+        - comments
+      properties:
+        reason_id:
+          type: integer
+        ticket_reference:
+          type: string
+        comments:
+          type: string
+
+    TranscriptionDocumentHideResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The transcription document id'
+        is_hidden:
+          type: boolean
+          description: 'The transcription document hidden state'
+        admin_action:
+          $ref: '#/components/schemas/AdminActionResponse'
+          description: 'The transcription document admin action data when the request was made'
+
+    AdminActionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 'The admin action id'
+        reason_id:
+          type: integer
+          description: 'The admin action reason id'
+        hidden_by_id:
+          type: integer
+          description: 'The user that made the entity hidden'
+        hidden_at:
+          type: string
+          format: date-time
+          description: 'The date and time that made the entity hidden'
+        is_marked_for_manual_deletion:
+          type: boolean
+          description: 'The entity was manually marked for deletion'
+        marked_for_manual_deletion_by_id:
+          type: integer
+          description: 'The user that marked the entity for deletion'
+        marked_for_manual_deletion_at:
+          type: string
+          format: date-time
+          description: 'The date and time that the entity was marked for deletion'
+        ticket_reference:
+          type: string
+          description: 'The ticket reference for the admin action'
+        comments:
+          type: string
+          description: 'The comments for the admin action'
+
     TranscriptionsErrorCode:
       type: string
       enum:
@@ -1364,7 +1718,16 @@ components:
         - "TRANSCRIPTION_109"
         - "TRANSCRIPTION_110"
         - "TRANSCRIPTION_111"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]
+        - "TRANSCRIPTION_112"
+        - "TRANSCRIPTION_113"
+        - "TRANSCRIPTION_113"
+        - "TRANSCRIPTION_114"
+        - "TRANSCRIPTION_115"
+        - "TRANSCRIPTION_116"
+        - "TRANSCRIPTION_117"
+        - "TRANSCRIPTION_118"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND, TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND,
+                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION]
 
     TranscriptionsTitleErrors:
       type: string
@@ -1381,4 +1744,12 @@ components:
         - "Failed to download transcript"
         - "Transcription could not be requested, no audio"
         - "Transcription could not be requested, times outside of hearing times"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER ]
+        - "The user is not a transcriber"
+        - "Transcription document not found"
+        - "Transcription document is already hidden"
+        - "Hide transcription action payload not correct"
+        - "Showing transcription action payload not correct"
+        - "Hide reason is incorrect"
+        - "Reason has been marked for deletion"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, TRANSCRIPTION_DOCUMENT_NOT_FOUND,  TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE, TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE,
+                         TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND, TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION]

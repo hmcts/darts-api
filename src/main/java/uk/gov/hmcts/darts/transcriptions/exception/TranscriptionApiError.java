@@ -87,7 +87,35 @@ public enum TranscriptionApiError implements DartsApiError {
         UpdateTranscription400ErrorCode.REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER.getValue(),
         HttpStatus.BAD_REQUEST,
         "Transcription requestor cannot approve or reject their own transcription requests."
-    );
+    ),
+    TRANSCRIPTION_DOCUMENT_ID_NOT_FOUND(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_NOT_FOUND.getValue(),
+        HttpStatus.NOT_FOUND,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_NOT_FOUND.getValue()
+    ),
+    TRANSCRIPTION_ALREADY_HIDDEN(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue(),
+        HttpStatus.CONFLICT,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_ALREADY_HIDDEN.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_SHOW_ACTION_PAYLOAD_INCORRECT_USAGE.getValue()),
+    TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue(),
+        HttpStatus.BAD_REQUEST,
+        TranscriptionsTitleErrors.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_NOT_FOUND.getValue()
+    ),
+    TRANSCRIPTION_DOCUMENT_REASON_IS_MARKED_FOR_DELETION(
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue(),
+        HttpStatus.NOT_IMPLEMENTED,
+        TranscriptionsErrorCode.TRANSCRIPTION_DOCUMENT_HIDE_ACTION_REASON_MARKED_FOR_DELETION.getValue());
 
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";

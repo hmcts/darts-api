@@ -18,7 +18,7 @@ class ModernisedTranscriptionSearchTest extends IntegrationBase {
     private ModernisedTranscriptionSearchGivensBuilder given;
 
     @Autowired
-    private AdminTranscriptionSearchService adminTranscriptionSearchService;
+    private AdminTranscriptionService adminTranscriptionSearchService;
 
     @Test
     void findsTranscriptionByIdOnly() {

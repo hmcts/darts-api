@@ -98,7 +98,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public List<MediaEntity> getMediaMetadata(Integer hearingId) {
-        return mediaRepository.findAllByHearingId(hearingId);
+        List<MediaEntity> mediaEntityList = mediaRepository.findAllByHearingId(hearingId);
+        return mediaEntityList.stream()
+            .filter(m -> !m.isHidden())
+            .toList();
     }
 
     @Override
@@ -168,7 +171,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             }
 
             log.info("Starting processing for audio request id: {}", requestId);
-            mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
+            mediaRequestService.updateAudioRequestStatus(mediaRequestEntity, PROCESSING);
 
             hearingEntity = mediaRequestEntity.getHearing();
 

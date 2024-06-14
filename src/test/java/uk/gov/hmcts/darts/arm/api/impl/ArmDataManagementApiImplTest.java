@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,15 +15,19 @@ import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.datamanagement.component.impl.DownloadResponseMetaData;
 import uk.gov.hmcts.darts.common.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.exception.FileNotDownloadedException;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +38,7 @@ class ArmDataManagementApiImplTest {
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 
     private static final String ARM_BLOB_CONTAINER_NAME = "arm_dummy_container";
-
+    private static final String UNSTRUCTURED_CONTAINER_NAME = "darts-unstructured";
     private static final String ARM_DROP_ZONE = "arm_drop_zone/";
     private static final String EXTERNAL_RECORD_ID = "4bfe4fc7-4e2f-4086-8a0e-146cc4556260";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
@@ -42,15 +47,20 @@ class ArmDataManagementApiImplTest {
 
     @Mock
     private ArmService armService;
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
+    private DataManagementConfiguration dataManagementConfiguration;
+    @Mock
     private ArmApiService armApiService;
+    @Mock
+    private DataManagementService dataManagementService;
 
     @BeforeEach
     void setUp() {
         lenient().when(armDataManagementConfiguration.getContainerName()).thenReturn(ARM_BLOB_CONTAINER_NAME);
-        armDataManagementApi = new ArmDataManagementApiImpl(armService, armDataManagementConfiguration, armApiService);
+        armDataManagementApi = new ArmDataManagementApiImpl(
+            armService, armDataManagementConfiguration, armApiService, dataManagementConfiguration, dataManagementService);
     }
 
     @Test
@@ -106,5 +116,19 @@ class ArmDataManagementApiImplTest {
         DownloadResponseMetaData response = armDataManagementApi.downloadBlobFromContainer(DatastoreContainerType.ARM, entity);
 
         assertNotNull(response);
+    }
+
+    @Test
+    void copyBlobDataToArm() {
+
+        UUID unstructuredUuid = UUID.randomUUID();
+        String filename = "someFile";
+        when(dataManagementConfiguration.getUnstructuredContainerName()).thenReturn(UNSTRUCTURED_CONTAINER_NAME);
+        when(armDataManagementConfiguration.getFolders().getSubmission()).thenReturn("DARTS/submission/");
+
+        armDataManagementApi.copyBlobDataToArm(unstructuredUuid.toString(), filename);
+
+        verify(dataManagementService).copyBlobData(
+            UNSTRUCTURED_CONTAINER_NAME, ARM_BLOB_CONTAINER_NAME, unstructuredUuid.toString(), "DARTS/submission/" + filename);
     }
 }

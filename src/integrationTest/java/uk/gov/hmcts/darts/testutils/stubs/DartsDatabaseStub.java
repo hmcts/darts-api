@@ -31,6 +31,9 @@ import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
@@ -61,6 +64,8 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectAdminActionRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectHiddenReasonRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
@@ -102,6 +107,7 @@ import static java.time.LocalDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.test.common.data.AnnotationTestData.minimalAnnotationEntity;
@@ -112,7 +118,7 @@ import static uk.gov.hmcts.darts.test.common.data.HearingTestData.someMinimalHea
 @Service
 @AllArgsConstructor
 @SuppressWarnings({
-    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
+    "PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
@@ -135,6 +141,7 @@ public class DartsDatabaseStub {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final HearingRepository hearingRepository;
+    private final ObjectHiddenReasonRepository objectHiddenReasonRepository;
     private final JudgeRepository judgeRepository;
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
@@ -157,6 +164,7 @@ public class DartsDatabaseStub {
     private final UserAccountRepository userAccountRepository;
     private final RegionRepository regionRepository;
     private final AutomatedTaskRepository automatedTaskRepository;
+    private final ObjectAdminActionRepository objectAdminActionRepository;
 
     private final AnnotationStub annotationStub;
     private final AuditStub auditStub;
@@ -181,6 +189,7 @@ public class DartsDatabaseStub {
     private final CurrentTimeHelper currentTimeHelper;
 
     public void clearDatabaseInThisOrder() {
+        objectAdminActionRepository.deleteAll();
         auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         annotationDocumentRepository.deleteAll();
@@ -219,7 +228,6 @@ public class DartsDatabaseStub {
         annotationRepository.deleteAll();
         transcriptionRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
-        auditRepository.deleteAll();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -363,6 +371,10 @@ public class DartsDatabaseStub {
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         return mediaStub.createMediaEntity(courthouseName, courtroomName, startTime, endTime, channel);
+    }
+
+    public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        return mediaStub.createHiddenMediaEntity(courthouseName, courtroomName, startTime, endTime, channel,"mp2");
     }
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
@@ -531,12 +543,12 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
-    public void addToTrash(SecurityGroupEntity... securityGroupEntities) {
-        this.securityGroupBin.addAll(asList(securityGroupEntities));
-    }
-
     public void addToTrash(Set<SecurityGroupEntity> securityGroupEntities) {
         this.securityGroupBin.addAll(securityGroupEntities);
+    }
+
+    public void addSecurityGroupToTrashById(Integer id) {
+        this.securityGroupBin.add(securityGroupRepository.getReferenceById(id));
     }
 
     public void addToUserAccountTrash(String... emailAddresses) {
@@ -720,8 +732,8 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public EventHandlerEntity createEventHandlerData() {
-        var eventHandler = createEventHandlerWith("DarStartHandler", "99999", "8888");
+    public EventHandlerEntity createEventHandlerData(String subtype) {
+        var eventHandler = createEventHandlerWith("DarStartHandler", "99999", subtype);
         save(eventHandler);
         return eventHandler;
     }
@@ -784,5 +796,37 @@ public class DartsDatabaseStub {
 
     public Revisions<Long, CourthouseEntity> findCourthouseRevisionsFor(Integer id) {
         return courthouseRepository.findRevisions(id);
+    }
+
+    public Revisions<Long, UserAccountEntity> findUserAccountRevisionsFor(Integer id) {
+        return userAccountRepository.findRevisions(id);
+    }
+
+    public Revisions<Long, SecurityGroupEntity> findSecurityGroupRevisionsFor(Integer id) {
+        return securityGroupRepository.findRevisions(id);
+    }
+
+    public Revisions<Long, TranscriptionEntity> findTranscriptionRevisionsFor(Integer id) {
+        return transcriptionRepository.findRevisions(id);
+    }
+
+    @Transactional
+    public Revisions<Long, TranscriptionWorkflowEntity> findTranscriptionWorkflowRevisionsFor(Integer transcriptionId) {
+        var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        var latestWorkflow = transcription.getTranscriptionWorkflowEntities().stream()
+            .min(comparing(TranscriptionWorkflowEntity::getWorkflowTimestamp))
+            .orElseThrow();
+
+        return transcriptionWorkflowRepository.findRevisions(latestWorkflow.getId());
+    }
+
+    @Transactional
+    public Revisions<Long, TranscriptionCommentEntity> findTranscriptionCommentRevisionsFor(Integer transcriptionId) {
+        var transcription = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        var latestComment = transcription.getTranscriptionCommentEntities().stream()
+            .min(comparing(TranscriptionCommentEntity::getCreatedDateTime))
+            .orElseThrow();
+
+        return transcriptionCommentRepository.findRevisions(latestComment.getId());
     }
 }
