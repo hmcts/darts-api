@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.common.util;
 
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 
 import java.util.Locale;
 
-@Component
-public class StringUtils {
+@UtilityClass
+public class DartsStringUtils {
 
     public String toScreamingSnakeCase(String string) {
         return string.replace(" ", "_")

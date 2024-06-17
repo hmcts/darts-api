@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.NodeRegisterRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.noderegistration.service.NodeRegistrationService;
@@ -22,14 +23,15 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
     @Override
     @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
     public Integer registerDevices(String nodeType, String courthouse, String courtRoom, String hostName, String ipAddress, String macAddress) {
-        CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtRoom);
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
+        CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtRoom, userAccount);
         NodeRegisterEntity nodeRegisterEntity = new NodeRegisterEntity();
         nodeRegisterEntity.setCourtroom(courtroomEntity);
         nodeRegisterEntity.setNodeType(nodeType);
         nodeRegisterEntity.setHostname(hostName);
         nodeRegisterEntity.setIpAddress(ipAddress);
         nodeRegisterEntity.setMacAddress(macAddress);
-        nodeRegisterEntity.setCreatedBy(userIdentity.getUserAccount());
+        nodeRegisterEntity.setCreatedBy(userAccount);
         return nodeRegisterRepository.saveAndFlush(nodeRegisterEntity).getNodeId();
     }
 }

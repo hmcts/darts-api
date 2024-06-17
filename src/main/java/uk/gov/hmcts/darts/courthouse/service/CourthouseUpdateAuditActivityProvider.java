@@ -13,7 +13,7 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.UPDATE_COURTHOUSE_GROUP;
 
-class CourthouseUpdateAuditActivityProvider implements AuditActivityProvider {
+public class CourthouseUpdateAuditActivityProvider implements AuditActivityProvider {
     public static CourthouseUpdateAuditActivityProvider auditActivitiesFor(CourthousePatch patch, CourthouseEntity prePatched) {
         return new CourthouseUpdateAuditActivityProvider(prePatched, patch);
     }
