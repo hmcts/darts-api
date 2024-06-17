@@ -37,7 +37,7 @@ public class MediaStub {
 
     public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                                String mediaType) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
         MediaEntity mediaEntity = createMediaWith(courtroom, startTime, endTime, channel, mediaType);
         mediaEntity.setHidden(true);
         return mediaRepository.saveAndFlush(mediaEntity);
