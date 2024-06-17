@@ -232,7 +232,10 @@ public class AudioUploadServiceImpl implements AudioUploadService {
 
     @Override
     public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity mediaToReplace, MediaEntity newMedia) {
-        for (String caseNumber : addAudioMetadataRequest.getCases()) {
+        List<String> casesInMetadata = addAudioMetadataRequest.getCases();
+        //remove duplicate cases as they can appear more than once, e.g. if they broke for lunch.
+        casesInMetadata = casesInMetadata.stream().distinct().toList();
+        for (String caseNumber : casesInMetadata) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                 addAudioMetadataRequest.getCourthouse(),
                 addAudioMetadataRequest.getCourtroom(),

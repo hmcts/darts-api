@@ -390,4 +390,34 @@ class AudioUploadServiceImplTest {
         assertEquals(1, hearing2.getMediaList().size());
         assertEquals(1, hearing3.getMediaList().size());
     }
+
+    @Test
+    void linkAudioAndHearingDuplicateCases() {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        addAudioMetadataRequest.setCases(List.of("1", "2", "1"));
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        HearingEntity hearing1 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("1"),
+            any(),
+            any()
+        )).thenReturn(hearing1);
+
+        HearingEntity hearing2 = HearingTestData.createSomeMinimalHearing();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            eq("2"),
+            any(),
+            any()
+        )).thenReturn(hearing2);
+
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, null, mediaEntity);
+        verify(hearingRepository, times(2)).saveAndFlush(any());
+        assertEquals(1, hearing1.getMediaList().size());
+        assertEquals(1, hearing2.getMediaList().size());
+    }
 }
