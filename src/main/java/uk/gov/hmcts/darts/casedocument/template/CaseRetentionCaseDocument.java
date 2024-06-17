@@ -23,22 +23,22 @@ public class CaseRetentionCaseDocument extends CreatedModifiedCaseDocument {
     @Data
     @EqualsAndHashCode(callSuper = true)
     public static class RetentionPolicyTypeCaseDocument extends CreatedModifiedCaseDocument {
-        private Integer id;
-        private String fixedPolicyKey;
-        private String policyName;
-        private String displayName;
-        private String duration;
-        private OffsetDateTime policyStart;
-        private OffsetDateTime policyEnd;
-        private String description;
-        private String retentionPolicyObjectId;
+        private final Integer id;
+        private final String fixedPolicyKey;
+        private final String policyName;
+        private final String displayName;
+        private final String duration;
+        private final OffsetDateTime policyStart;
+        private final OffsetDateTime policyEnd;
+        private final String description;
+        private final String retentionPolicyObjectId;
     }
 
     @Data
     public static class CaseManagementRetentionCaseDocument {
-        private Integer id;
-        private RetentionPolicyTypeCaseDocument retentionPolicyType;
-        private EventCaseDocument event;
-        private String totalSentence;
+        private final Integer id;
+        private final RetentionPolicyTypeCaseDocument retentionPolicyType;
+        private final EventCaseDocument event;
+        private final String totalSentence;
     }
 }

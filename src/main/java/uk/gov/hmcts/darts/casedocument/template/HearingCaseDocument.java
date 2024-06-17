@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.casedocument.template;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -10,17 +12,14 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HearingCaseDocument {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class HearingCaseDocument extends CreatedModifiedCaseDocument {
 
     private Integer id;
-    private OffsetDateTime createdDateTime;
-    private Integer createdBy;
-    private OffsetDateTime lastModifiedDateTime;
-    private Integer lastModifiedBy;
     private CourtroomEntity courtroom;
     private LocalDate hearingDate;
     private LocalTime scheduledStartTime;

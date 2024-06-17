@@ -1,19 +1,17 @@
 package uk.gov.hmcts.darts.casedocument.template;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.time.OffsetDateTime;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class EventHandlerCaseDocument {
+public class EventHandlerCaseDocument extends CreatedCaseDocument {
 
-    private Integer id;
-    private OffsetDateTime createdDateTime;
-    private Integer createdBy;
-    private String type;
-    private String subType;
-    private String eventName;
-    private String handler;
-    private Boolean active;
-    private Boolean isReportingRestriction;
+    private final Integer id;
+    private final String type;
+    private final String subType;
+    private final String eventName;
+    private final String handler;
+    private final Boolean active;
+    private final Boolean isReportingRestriction;
 }

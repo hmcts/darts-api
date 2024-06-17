@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.casedocument.mapper;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mapstruct.factory.Mappers;
 import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -22,8 +23,8 @@ class CourtCaseDocumentMapperTest {
 
         assertAll(
             "Grouped assertions for Case Document top level properties",
-            () -> assertThat(doc.getId()).isNotNull().isEqualTo(cc.getId()),
-            () -> assertThat(doc.getCreatedBy()).isNotNull().isEqualTo(cc.getCreatedBy().getId()),
+            assertIsEqual(doc.getId(), cc.getId()),
+            assertIsEqual(doc.getCreatedBy(), cc.getCreatedBy().getId()),
             () -> assertThat(doc.getCreatedDateTime()).isNotNull().isEqualTo(cc.getCreatedDateTime()),
             () -> assertThat(doc.getLastModifiedBy()).isNotNull().isEqualTo(cc.getLastModifiedBy().getId()),
             () -> assertThat(doc.getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getLastModifiedDateTime()),
@@ -158,4 +159,9 @@ class CourtCaseDocumentMapperTest {
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getIsReportingRestriction()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getIsReportingRestriction())
         );
     }
+
+    private static <D, C> Executable assertIsEqual(D value1, C value2) {
+        return () -> assertThat(value1).isNotNull().isEqualTo(value2);
+    }
+
 }
