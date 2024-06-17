@@ -7,9 +7,9 @@ import java.time.OffsetDateTime;
 @Data
 public class EventHandlerCaseDocument {
 
+    private Integer id;
     private OffsetDateTime createdDateTime;
     private Integer createdBy;
-    private Integer id;
     private String type;
     private String subType;
     private String eventName;

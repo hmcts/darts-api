@@ -1,15 +1,13 @@
 package uk.gov.hmcts.darts.casedocument.template;
 
 import lombok.Data;
-
-import java.time.OffsetDateTime;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class CourthouseCaseDocument {
+@EqualsAndHashCode(callSuper = true)
+public class CourthouseCaseDocument extends CreatedModifiedCaseDocument {
 
     private final Integer id;
-    private final OffsetDateTime createdDateTime;
-    private final OffsetDateTime lastModifiedDateTime;
     private final Integer code;
     private final String courthouseName;
     private final RegionCaseDocument region;

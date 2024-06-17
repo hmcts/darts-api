@@ -1,21 +1,44 @@
 package uk.gov.hmcts.darts.casedocument.template;
 
-import uk.gov.hmcts.darts.common.entity.CaseManagementRetentionEntity;
-import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
-public class CaseRetentionCaseDocument {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CaseRetentionCaseDocument extends CreatedModifiedCaseDocument {
 
-    private Integer id;
-    private RetentionPolicyTypeEntity retentionPolicyType;
-    private CaseManagementRetentionEntity caseManagementRetention;
-    private String totalSentence;
-    private OffsetDateTime retainUntil;
-    private OffsetDateTime retainUntilAppliedOn;
-    private String currentState;
-    private String comments;
-    private String retentionObjectId;
-    private UserAccountEntity submittedBy;
+    private final Integer id;
+    private final RetentionPolicyTypeCaseDocument retentionPolicyType;
+    private final CaseManagementRetentionCaseDocument caseManagementRetention;
+    private final String totalSentence;
+    private final OffsetDateTime retainUntil;
+    private final OffsetDateTime retainUntilAppliedOn;
+    private final String currentState;
+    private final String comments;
+    private final String retentionObjectId;
+    private final Integer submittedBy;
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class RetentionPolicyTypeCaseDocument extends CreatedModifiedCaseDocument {
+        private Integer id;
+        private String fixedPolicyKey;
+        private String policyName;
+        private String displayName;
+        private String duration;
+        private OffsetDateTime policyStart;
+        private OffsetDateTime policyEnd;
+        private String description;
+        private String retentionPolicyObjectId;
+    }
+
+    @Data
+    public static class CaseManagementRetentionCaseDocument {
+        private Integer id;
+        private RetentionPolicyTypeCaseDocument retentionPolicyType;
+        private EventCaseDocument event;
+        private String totalSentence;
+    }
 }

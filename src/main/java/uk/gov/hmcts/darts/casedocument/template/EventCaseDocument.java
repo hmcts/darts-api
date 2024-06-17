@@ -1,0 +1,23 @@
+package uk.gov.hmcts.darts.casedocument.template;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.time.OffsetDateTime;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class EventCaseDocument extends CreatedModifiedCaseDocument {
+
+    private Integer id;
+    private String legacyObjectId;
+    private EventHandlerCaseDocument eventType;
+    private Integer legacyEventId;
+    private String eventText;
+    private OffsetDateTime timestamp;
+    private String legacyVersionLabel;
+    private String messageId;
+    private Boolean isLogEntry;
+    private String chronicleId;
+    private String antecedentId;
+}

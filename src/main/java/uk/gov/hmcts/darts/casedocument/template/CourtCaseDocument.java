@@ -1,21 +1,16 @@
 package uk.gov.hmcts.darts.casedocument.template;
 
 import lombok.Data;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class CourtCaseDocument {
+@EqualsAndHashCode(callSuper = true)
+public class CourtCaseDocument extends CreatedModifiedCaseDocument {
 
     private Integer id;
-    private OffsetDateTime createdDateTime;
-    private Integer createdBy;
-    private OffsetDateTime lastModifiedDateTime;
-    private Integer lastModifiedBy;
     private EventHandlerCaseDocument reportingRestrictions;
     private String legacyCaseObjectId;
     private String caseNumber;
@@ -30,9 +25,9 @@ public class CourtCaseDocument {
     private boolean isDeleted;
     private Integer deletedBy;
     private OffsetDateTime deletedTimestamp;
-//    private List<CaseRetentionCaseDocument> caseRetentionEntities = new ArrayList<>();
-    private List<HearingEntity> hearings = new ArrayList<>();
-    private List<JudgeEntity> judges = new ArrayList<>();
+    private List<CaseRetentionCaseDocument> caseRetentions;
+//    private List<HearingEntity> hearings;
+    private List<JudgeCourtCaseDocument> judges;
     private boolean isDataAnonymised;
     private Integer dataAnonymisedBy;
     private OffsetDateTime dataAnonymisedTs;
