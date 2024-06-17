@@ -16,9 +16,9 @@ import java.util.List;
 public class HearingReportingRestrictionsEntity {
     public static final String VIEW_NAME = "hearing_reporting_restrictions";
 
+    @Column(name = "eve_id")
     @Id
-    @Column(name = "id")
-    Long id;
+    Integer id;
 
     @Column(name = "cas_id")
     Integer caseId;
@@ -38,9 +38,6 @@ public class HearingReportingRestrictionsEntity {
     @Column(name = "active")
     boolean active;
 
-    @Column(name = "eve_id")
-    Integer eventId;
-
     @Column(name = "ctr_id")
     Integer courtroomId;
 
@@ -51,7 +48,7 @@ public class HearingReportingRestrictionsEntity {
     String eventObjectId;
 
     @Column(name = "event_id")
-    Integer mojEventId;
+    Integer eventId;
 
     @Column(name = "event_text")
     String eventText;

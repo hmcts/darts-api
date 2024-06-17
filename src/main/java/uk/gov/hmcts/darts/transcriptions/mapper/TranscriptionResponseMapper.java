@@ -257,7 +257,7 @@ public class TranscriptionResponseMapper {
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {
         var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventId(restrictionsEntity.getEventId());
+        reportingRestriction.setEventId(restrictionsEntity.getId());
         reportingRestriction.setEventName(restrictionsEntity.getEventName());
         reportingRestriction.setEventText(restrictionsEntity.getEventText());
         reportingRestriction.setHearingId(restrictionsEntity.getHearingId());
