@@ -58,10 +58,10 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
 
     @Test
     void givenInterpreterUsedEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
-        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
@@ -70,7 +70,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -90,13 +90,13 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
     @Test
     void givenInterpreterUsedEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
@@ -105,7 +105,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -125,7 +125,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
     @Test
     void givenInterpreterUsedEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdate() {
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
@@ -134,7 +134,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
         nodeRegisterStub.setupNodeRegistry(otherCourtroom);
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
@@ -143,7 +143,7 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
         dartsGateway.verifyNotificationUrl("http://1.2.3.4/VIQDARNotifyEvent/DARNotifyEvent.asmx", 1);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -165,20 +165,20 @@ class InterpreterUsedHandlerTest extends HandlerTestData {
     @Test
     void givenInterpreterUsedEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM,
             HEARING_DATE
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 

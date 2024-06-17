@@ -42,16 +42,16 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
     @Test
     void givenSetReportingRestrictionEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
-        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -77,19 +77,19 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     @Test
     void givenSetReportingRestrictionEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -115,7 +115,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     @Test
     void givenSetReportingRestrictionEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdate() {
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
@@ -124,13 +124,13 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
         nodeRegisterStub.setupNodeRegistry(otherCourtroom);
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -158,20 +158,20 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     @Test
     void givenSetReportingRestrictionEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM,
             HEARING_DATE
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -197,13 +197,13 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
     void givenClearRestrictionsEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdateAndClearRestrictions() {
 
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM
         );
 
         eventDispatcher.receive(clearReportingRestrictionsDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
@@ -213,7 +213,7 @@ class SetReportingRestrictionEventHandlerTest extends HandlerTestData {
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 

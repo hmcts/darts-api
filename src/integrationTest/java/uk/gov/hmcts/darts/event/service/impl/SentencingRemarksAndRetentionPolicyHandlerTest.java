@@ -55,7 +55,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
     void givenSentencingRemarksAndRetentionPolicyEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdate() {
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -72,11 +72,11 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
     @Test
     void givenSentencingRemarksAndRetentionPolicyEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdate() {
-        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER_1, SOME_COURTHOUSE, SOME_ROOM);
 
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -94,14 +94,14 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
     @Test
     void givenSentencingRemarksAndRetentionPolicyEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdate() {
-        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
+        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER_1, SOME_COURTHOUSE, SOME_ROOM);
 
         CourtroomEntity otherCourtroom = dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
         nodeRegisterStub.setupNodeRegistry(otherCourtroom);
 
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE).courtroom(SOME_OTHER_ROOM));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -121,7 +121,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
     @Test
     void givenSentencingRemarksAndRetentionPolicyEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenDoNotNotifyDar() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM,
             HEARING_DATE
@@ -129,7 +129,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -156,12 +156,12 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
         assertThat(persistedTranscription.getStartTime()).isEqualTo(sentencingRemarksDartsEvent.getStartTime());
         assertThat(persistedTranscription.getEndTime()).isEqualTo(sentencingRemarksDartsEvent.getEndTime());
         assertThat(persistedTranscription.getHearing()).isNotNull();
-        assertThat(persistedTranscription.getCourtCase().getCaseNumber()).isEqualTo(SOME_CASE_NUMBER);
+        assertThat(persistedTranscription.getCourtCase().getCaseNumber()).isEqualTo(SOME_CASE_NUMBER_1);
         assertThat(persistedTranscription.getTranscriptionStatus().getId()).isEqualTo(APPROVED.getId());
         assertThat(persistedTranscription.getTranscriptionUrgency().getId()).isEqualTo(STANDARD.getId());
 
         var transcriptionWorkflows = dartsDatabase.getTranscriptionWorkflowRepository().findAll().stream()
-            .filter(t -> SOME_CASE_NUMBER.equals(t.getTranscription().getCourtCase().getCaseNumber()))
+            .filter(t -> SOME_CASE_NUMBER_1.equals(t.getTranscription().getCourtCase().getCaseNumber()))
             .toList();
 
         assertThat(transcriptionWorkflows).extracting("transcriptionStatus.id")
@@ -179,7 +179,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
 
         eventDispatcher.receive(createSentencingRemarksDartsEventFor(SOME_COURTHOUSE));
 
-        var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER);
+        var notifications = dartsDatabase.getNotificationFor(SOME_CASE_NUMBER_1);
         assertThat(notifications).extracting("emailAddress")
             .hasSameElementsAs(List.of(transcriber.getEmailAddress()));
 
@@ -246,7 +246,7 @@ class SentencingRemarksAndRetentionPolicyHandlerTest extends HandlerTestData {
             .type("40750")
             .subType("11527")
             .courthouse(courthouseName)
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .caseNumbers(List.of(SOME_CASE_NUMBER_1))
             .courtroom(SOME_ROOM)
             .dateTime(HEARING_DATE_ODT)
             .startTime(startTime)

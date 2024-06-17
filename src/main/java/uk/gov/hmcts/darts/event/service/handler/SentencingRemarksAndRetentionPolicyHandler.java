@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
+import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
@@ -38,10 +38,10 @@ public class SentencingRemarksAndRetentionPolicyHandler extends EventHandlerBase
                                                       CaseRepository caseRepository,
                                                       ApplicationEventPublisher eventPublisher,
                                                       TranscriptionsApi transcriptionsApi,
-                                                      AuthorisationApi authorisationApi,
                                                       LogApi logApi,
-                                                      CaseManagementRetentionService caseManagementRetentionService) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
+                                                      CaseManagementRetentionService caseManagementRetentionService,
+                                                      EventPersistenceService eventPersistenceService) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService);
         this.transcriptionsApi = transcriptionsApi;
         this.caseManagementRetentionService = caseManagementRetentionService;
     }

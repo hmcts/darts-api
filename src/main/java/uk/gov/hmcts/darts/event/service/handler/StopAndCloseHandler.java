@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.DartsEventRetentionPolicy;
 import uk.gov.hmcts.darts.event.model.stopandclosehandler.PendingRetention;
 import uk.gov.hmcts.darts.event.service.CaseManagementRetentionService;
+import uk.gov.hmcts.darts.event.service.EventPersistenceService;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import uk.gov.hmcts.darts.log.api.LogApi;
 import uk.gov.hmcts.darts.retention.api.RetentionApi;
@@ -45,6 +46,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
     private final CaseRetentionRepository caseRetentionRepository;
     private final RetentionApi retentionApi;
     private final CaseManagementRetentionService caseManagementRetentionService;
+    private final AuthorisationApi authorisationApi;
 
     @Value("${darts.retention.overridable-fixed-policy-keys}")
     List<String> overridableFixedPolicyKeys;
@@ -59,11 +61,13 @@ public class StopAndCloseHandler extends EventHandlerBase {
                                RetentionApi retentionApi,
                                AuthorisationApi authorisationApi,
                                LogApi logApi,
-                               CaseManagementRetentionService caseManagementRetentionService) {
-        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, authorisationApi, logApi);
+                               CaseManagementRetentionService caseManagementRetentionService,
+                               EventPersistenceService eventPersistenceService) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher, logApi, eventPersistenceService);
         this.caseRetentionRepository = caseRetentionRepository;
         this.caseManagementRetentionService = caseManagementRetentionService;
         this.retentionApi = retentionApi;
+        this.authorisationApi = authorisationApi;
     }
 
 

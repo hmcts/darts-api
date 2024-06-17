@@ -65,7 +65,6 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     @Mock
     private CaseRetentionRepository caseRetentionRepository;
 
-
     @BeforeEach
     public void setupStubs() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -91,12 +90,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     @Test
     void givenDarStopAndCloseEventReceivedAndCourtCaseAndHearingDoesNotExist_thenNotifyDarUpdateAndNotifyDarStopRecording() {
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -117,18 +116,18 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void givenDarStopAndCloseEventReceivedAndHearingDoesNotExist_thenNotifyDarUpdateAndNotifyDarStopRecording() {
-        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
+        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER_1, SOME_COURTHOUSE, SOME_ROOM);
 
         assertFalse(caseEntity.getClosed());
         assertNull(caseEntity.getCaseClosedTimestamp());
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -150,7 +149,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void givenDarStopAndCloseEventEventReceivedAndCaseAndHearingExistButRoomHasChanged_thenNotifyDarUpdateAndNotifyDarStopRecording() {
-        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER, SOME_COURTHOUSE, SOME_ROOM);
+        var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(SOME_CASE_NUMBER_1, SOME_COURTHOUSE, SOME_ROOM);
 
         assertFalse(caseEntity.getClosed());
         assertNull(caseEntity.getCaseClosedTimestamp());
@@ -159,12 +158,12 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         nodeRegisterStub.setupNodeRegistry(otherCourtroom);
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_OTHER_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_OTHER_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -188,19 +187,19 @@ class StopAndCloseHandlerTest extends HandlerTestData {
     @Test
     void givenDarStopAndCloseEventReceivedAndCaseAndHearingExistAndRoomHasNotChanged_thenNotifyDarStopRecording() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE,
             SOME_ROOM,
             HEARING_DATE
         );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER_1))
                                     .courthouse(SOME_COURTHOUSE)
                                     .courtroom(SOME_ROOM)
                                     .dateTime(HEARING_DATE_ODT));
 
-        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE).get();
+        var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(SOME_CASE_NUMBER_1, SOME_COURTHOUSE).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, HEARING_DATE_ODT.toLocalDate());
 
@@ -247,7 +246,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void shouldCreateNewCaseRetentionWhenNoneExist() {
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
@@ -266,14 +265,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .caseNumbers(List.of(SOME_CASE_NUMBER_1))
             .dateTime(testTime)
             .retentionPolicy(retentionPolicy);
 
         eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -300,11 +299,11 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void shouldUpdateExistingCaseRetentionWhenPendingExist() {
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
-        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
+        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER_1,
                                                                              DateConverterUtil.toLocalDateTime(testTime));
 
         //setup existing retention
@@ -338,7 +337,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .caseNumbers(List.of(SOME_CASE_NUMBER_1))
             .dateTime(testTime.plusSeconds(10))
             .retentionPolicy(retentionPolicy2);
 
@@ -369,11 +368,11 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void shouldDoNothingWhenPendingExistBeforeThisOne() {
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
-        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER,
+        HearingEntity hearing = dartsDatabase.getHearingStub().createHearing(SOME_COURTHOUSE, SOME_ROOM, SOME_CASE_NUMBER_1,
                                                                              DateConverterUtil.toLocalDateTime(testTime));
 
         //setup existing retention
@@ -406,7 +405,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .caseNumbers(List.of(SOME_CASE_NUMBER_1))
             .dateTime(testTime.plusSeconds(10))
             .retentionPolicy(retentionPolicy2);
 
@@ -436,7 +435,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void shouldIgnoreWhenManualRetentionExists() {
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
@@ -458,14 +457,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .caseNumbers(List.of(SOME_CASE_NUMBER_1))
             .dateTime(testTime)
             .retentionPolicy(retentionPolicy);
 
         eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
@@ -493,7 +492,7 @@ class StopAndCloseHandlerTest extends HandlerTestData {
 
     @Test
     void shouldCreateNewCaseRetentionWithDefaultPolicyWhenNotDefined() {
-        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER_1);
         assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
@@ -508,14 +507,14 @@ class StopAndCloseHandlerTest extends HandlerTestData {
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingEndedEventHandler.getType())
             .subType(hearingEndedEventHandler.getSubType())
-            .caseNumbers(List.of(SOME_CASE_NUMBER))
+            .caseNumbers(List.of(SOME_CASE_NUMBER_1))
             .dateTime(testTime)
             .retentionPolicy(null);
 
         eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-            SOME_CASE_NUMBER,
+            SOME_CASE_NUMBER_1,
             SOME_COURTHOUSE
         ).get();
 
