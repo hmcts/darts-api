@@ -30,3 +30,6 @@ bin/generated-sources/
 
 applicationinsights-agent-*.jar
 *.log
+/src/main/resources/application-perf.yaml
+/src/main/resources/application-dets.yaml
+/src/main/resources/application-demo.yaml
