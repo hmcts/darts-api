@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
@@ -33,12 +34,15 @@ class CommonTransactionalServiceImplTest {
             anyString()
         )).thenReturn(Optional.of(CommonTestDataUtil.createCourtroom(
             "test result")));
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(0);
 
         CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("test");
         courthouse.setId(100);
         CourtroomEntity createdCourtroom = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
             courthouse,
-            "Courtroom Name 1"
+            "Courtroom Name 1",
+            userAccount
         );
         assertEquals("test result", createdCourtroom.getName());
     }

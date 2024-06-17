@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
@@ -68,9 +67,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         dartsDatabase.saveAll(activeHandler, inactiveHandler);
 
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("swansea");
-        courthouse.setDisplayName("swansea");
+        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("swansea");
 
         courthouse = dartsDatabase.getCourthouseRepository().save(courthouse);
 
@@ -112,16 +109,9 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
     @Test
     void useExistingCase() throws Exception {
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("swansea1");
-        courthouse.setDisplayName("swansea1");
+        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("swansea1");
 
-        CourtCaseEntity courtCase = new CourtCaseEntity();
-        courtCase.setCaseNumber("CaseNumber");
-        courtCase.setClosed(false);
-        courtCase.setInterpreterUsed(false);
-        courtCase.setCourthouse(courthouse);
-        dartsDatabase.getCaseRepository().save(courtCase);
+        dartsDatabase.createCase(courthouse.getCourthouseName(), "CaseNumber");
 
         String requestBody = """
             {
@@ -156,16 +146,9 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
     @Test
     void eventTypeWithCorrectSubType() throws Exception {
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("swansea");
-        courthouse.setDisplayName("swansea1");
+        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("swansea");
 
-        CourtCaseEntity courtCase = new CourtCaseEntity();
-        courtCase.setCaseNumber("CaseNumber");
-        courtCase.setClosed(false);
-        courtCase.setInterpreterUsed(false);
-        courtCase.setCourthouse(courthouse);
-        dartsDatabase.getCaseRepository().save(courtCase);
+        dartsDatabase.createCase(courthouse.getCourthouseName(), "CaseNumber");
 
         String requestBody = """
             {
@@ -202,16 +185,9 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
     @Test
     void eventTypeWithInvalidSubType() throws Exception {
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName("swansea");
-        courthouse.setDisplayName("swansea1");
+        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("swansea");
 
-        CourtCaseEntity courtCase = new CourtCaseEntity();
-        courtCase.setCaseNumber("CaseNumber");
-        courtCase.setClosed(false);
-        courtCase.setInterpreterUsed(false);
-        courtCase.setCourthouse(courthouse);
-        dartsDatabase.getCaseRepository().save(courtCase);
+        dartsDatabase.createCase(courthouse.getCourthouseName(), "CaseNumber");
 
         String requestBody = """
             {

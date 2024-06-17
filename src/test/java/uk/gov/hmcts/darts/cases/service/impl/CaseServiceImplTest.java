@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -200,8 +201,12 @@ class CaseServiceImplTest {
         request.setCourtroom(courtroomName);
         request.setDate(LocalDate.of(2023, 6, 20));
 
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setId(10);
+        when(authorisationApi.getCurrentUser()).thenReturn(userAccount);
+        
         service.getHearings(request);
-        verify(retrieveCoreObjectService).retrieveOrCreateCourtroom(eq(SWANSEA), eq("99"));
+        verify(retrieveCoreObjectService).retrieveOrCreateCourtroom(eq(SWANSEA), eq("99"), any(UserAccountEntity.class));
         verify(logApi, times(1)).casesRequestedByDarPc(request);
     }
 

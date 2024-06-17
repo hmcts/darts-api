@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -22,10 +23,11 @@ public class MediaStub {
 
     private final MediaRepository mediaRepository;
     private final CourtroomStub courtroomStub;
+    private final UserAccountRepository userAccountRepository;
 
     public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
-    String mediaType) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
+                                         String mediaType) {
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
         return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel, mediaType));
     }
 
@@ -35,7 +37,7 @@ public class MediaStub {
 
     public MediaEntity createHiddenMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel,
                                                String mediaType) {
-        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
+        CourtroomEntity courtroom = courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
         MediaEntity mediaEntity = createMediaWith(courtroom, startTime, endTime, channel, mediaType);
         mediaEntity.setHidden(true);
         return mediaRepository.saveAndFlush(mediaEntity);
@@ -51,7 +53,7 @@ public class MediaStub {
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_2_START_TIME, MEDIA_2_END_TIME, 2),
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_2_START_TIME, MEDIA_2_END_TIME, 3),
             createMediaEntity("testCourthouse", "testCourtroom", MEDIA_2_START_TIME, MEDIA_2_END_TIME, 4)
-       );
+        );
     }
 
     public MediaEntity createAndSaveMedia() {

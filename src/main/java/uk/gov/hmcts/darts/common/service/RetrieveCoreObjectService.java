@@ -31,11 +31,11 @@ public interface RetrieveCoreObjectService {
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
-    CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName);
+    CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName, UserAccountEntity userAccount);
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
-    CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName);
+    CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName, UserAccountEntity userAccount);
 
     @Transactional
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})

@@ -265,11 +265,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourtroomEntity givenTheCourtHouseHasRoom(CourthouseEntity courthouse, String roomName) {
-        var courtroom = new CourtroomEntity();
-        courtroom.setName(roomName);
-        courtroom.setCourthouse(courthouseRepository.getReferenceById(courthouse.getId()));
-        courtroomRepository.saveAndFlush(courtroom);
-        return courtroom;
+        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, roomName, userAccountRepository.getReferenceById(0));
     }
 
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -301,7 +297,7 @@ public class DartsDatabaseStub {
     }
 
     public CourtroomEntity createCourtroomUnlessExists(String courthouseName, String courtroomName) {
-        return courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName);
+        return courtroomStub.createCourtroomUnlessExists(courthouseName, courtroomName, userAccountRepository.getReferenceById(0));
     }
 
     @Transactional
@@ -338,6 +334,9 @@ public class DartsDatabaseStub {
         var courthouse = CourthouseTestData.createCourthouse(name);
         courthouse.setCode(code);
         courthouse.setDisplayName(displayName);
+        UserAccountEntity defaultUser = userAccountRepository.getReferenceById(0);
+        courthouse.setCreatedBy(defaultUser);
+        courthouse.setLastModifiedBy(defaultUser);
         return courthouseRepository.save(courthouse);
     }
 
@@ -739,7 +738,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-        public EventHandlerEntity findEventHandlerMappingFor(Integer eventHandlerMappingId) {
+    public EventHandlerEntity findEventHandlerMappingFor(Integer eventHandlerMappingId) {
         return eventHandlerRepository.findById(eventHandlerMappingId).orElseThrow();
     }
 
@@ -767,10 +766,10 @@ public class DartsDatabaseStub {
     @Transactional(dontRollbackOn = RuntimeException.class)
     public void lockTaskUntil(String taskName, OffsetDateTime taskReleaseDateTime) {
         var updateRowForTaskSql = """
-        update darts.shedlock
-        set lock_until = (?)
-        where name = (?)
-        """;
+            update darts.shedlock
+            set lock_until = (?)
+            where name = (?)
+            """;
         var numOfRowsUpdated = entityManager.createNativeQuery(updateRowForTaskSql, Integer.class)
             .setParameter(1, taskReleaseDateTime)
             .setParameter(2, taskName)
@@ -778,9 +777,9 @@ public class DartsDatabaseStub {
 
         if (numOfRowsUpdated == 0) {
             var insertRowForTaskSql = """
-            insert into darts.shedlock (name, lock_until, locked_at, locked_by)
-            values ((?), (?), (?), (?))
-            """;
+                insert into darts.shedlock (name, lock_until, locked_at, locked_by)
+                values ((?), (?), (?), (?))
+                """;
             entityManager.createNativeQuery(insertRowForTaskSql, Integer.class)
                 .setParameter(1, taskName)
                 .setParameter(2, taskReleaseDateTime)

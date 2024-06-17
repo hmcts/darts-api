@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
+import uk.gov.hmcts.darts.courthouse.service.impl.CourthouseUpdateMapperImpl;
 
 import java.util.List;
 
@@ -26,11 +27,11 @@ class CourthouseUpdatePatchToEntityMapperTest {
 
     @Mock
     private SecurityGroupRepository securityGroupRepository;
-    private CourthouseUpdateMapper courthouseUpdateMapper;
+    private CourthouseUpdateMapperImpl courthouseUpdateMapper;
 
     @BeforeEach
     void setUp() {
-        courthouseUpdateMapper = new CourthouseUpdateMapper(regionRepository, securityGroupRepository);
+        courthouseUpdateMapper = new CourthouseUpdateMapperImpl(regionRepository, securityGroupRepository);
     }
 
     @Test

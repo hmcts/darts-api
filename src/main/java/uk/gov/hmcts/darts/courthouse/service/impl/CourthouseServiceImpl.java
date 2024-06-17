@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.courthouse.service;
+package uk.gov.hmcts.darts.courthouse.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.RegionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.model.SecurityGroupModel;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.RegionRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.common.util.DartsStringUtils;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
@@ -31,6 +33,8 @@ import uk.gov.hmcts.darts.courthouse.model.CourthousePatch;
 import uk.gov.hmcts.darts.courthouse.model.CourthousePost;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthousePost;
+import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
+import uk.gov.hmcts.darts.courthouse.service.CourthouseUpdateMapper;
 import uk.gov.hmcts.darts.usermanagement.api.UserManagementApi;
 
 import java.util.ArrayList;
@@ -65,8 +69,6 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     private final BiValidator<CourthousePatch, Integer> courthousePatchValidator;
 
-    private final uk.gov.hmcts.darts.common.util.StringUtils stringUtils;
-
     private final AuthorisationApi authorisationApi;
 
     private final AuditApi auditApi;
@@ -98,7 +100,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         }
 
         adminCourthouse.setHasData(hearingRepository.hearingsExistForCourthouse(id)
-            || caseRepository.caseExistsForCourthouse(id));
+                                       || caseRepository.caseExistsForCourthouse(id));
 
         return adminCourthouse;
     }
@@ -142,9 +144,10 @@ public class CourthouseServiceImpl implements CourthouseService {
         validatedSecurityGroupEntities.add(createAndSaveGroupForRole(courthouseName, displayName, SecurityRoleEnum.APPROVER));
         validatedSecurityGroupEntities.add(createAndSaveGroupForRole(courthouseName, displayName, SecurityRoleEnum.REQUESTER));
 
-        var courthouseEntity = createAndSaveCourthouseEntity(courthousePost, validatedRegionEntity, validatedSecurityGroupEntities);
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        var courthouseEntity = createAndSaveCourthouseEntity(courthousePost, validatedRegionEntity, validatedSecurityGroupEntities, currentUser);
 
-        auditApi.record(CREATE_COURTHOUSE, authorisationApi.getCurrentUser(), null);
+        auditApi.record(CREATE_COURTHOUSE, currentUser, null);
 
         return mapToPostResponse(courthouseEntity);
     }
@@ -162,12 +165,15 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     private CourthouseEntity createAndSaveCourthouseEntity(CourthousePost courthousePost,
                                                            RegionEntity regionEntity,
-                                                           Set<SecurityGroupEntity> securityGroupEntities) {
+                                                           Set<SecurityGroupEntity> securityGroupEntities,
+                                                           UserAccountEntity currentUser) {
         CourthouseEntity courthouseEntity = courthouseMapper.mapToEntity(courthousePost);
 
         courthouseEntity.setRegion(regionEntity);
         courthouseEntity.setSecurityGroups(securityGroupEntities);
 
+        courthouseEntity.setCreatedBy(currentUser);
+        courthouseEntity.setLastModifiedBy(currentUser);
         courthouseRepository.saveAndFlush(courthouseEntity);
 
         return courthouseEntity;
@@ -180,7 +186,7 @@ public class CourthouseServiceImpl implements CourthouseService {
             .orElseThrow();
 
         SecurityGroupModel securityGroupModel = SecurityGroupModel.builder()
-            .name(stringUtils.toScreamingSnakeCase(courthouseName + " " + securityRoleEntity.getRoleName()))
+            .name(DartsStringUtils.toScreamingSnakeCase(courthouseName + " " + securityRoleEntity.getRoleName()))
             .displayName(displayName + " " + securityRoleEntity.getDisplayName())
             .description("System generated group for " + courthouseName)
             .useInterpreter(false)
@@ -260,6 +266,8 @@ public class CourthouseServiceImpl implements CourthouseService {
         if (foundCourthouse.getCode() == null && courthouseCode != null) {
             //update courthouse in database with new code
             foundCourthouse.setCode(courthouseCode);
+            UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+            foundCourthouse.setLastModifiedBy(currentUser);
             courthouseRepository.saveAndFlush(foundCourthouse);
         } else {
             if (!StringUtils.equalsIgnoreCase(foundCourthouse.getCourthouseName(), courthouseName)
@@ -292,9 +300,11 @@ public class CourthouseServiceImpl implements CourthouseService {
         var courthouseEntity = courthouseRepository.findById(courthouseId)
             .orElseThrow(() -> new DartsApiException(COURTHOUSE_NOT_FOUND));
         courthousePatchValidator.validate(courthousePatch, courthouseId);
-        
+
         var auditActivities = auditActivitiesFor(courthousePatch, courthouseEntity);
-        var patchedCourthouse = courthouseUpdateMapper.mapPatchToEntity(courthousePatch, courthouseEntity);
+        CourthouseEntity patchedCourthouse = courthouseUpdateMapper.mapPatchToEntity(courthousePatch, courthouseEntity);
+        UserAccountEntity currentUser = authorisationApi.getCurrentUser();
+        patchedCourthouse.setLastModifiedBy(currentUser);
         courthouseRepository.saveAndFlush(patchedCourthouse);
 
         auditApi.recordAll(auditActivities);
