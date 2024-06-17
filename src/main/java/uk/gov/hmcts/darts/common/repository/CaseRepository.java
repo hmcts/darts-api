@@ -58,12 +58,12 @@ public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> 
         """)
     List<CourtCaseEntity> findCasesNeedingCaseDocumentGenerated(OffsetDateTime caseClosedBeforeTimestamp, Pageable pageable);
 
-    @EntityGraph(value = "CourtCase.caseDocument", type = EntityGraphType.LOAD)
+//    @EntityGraph(value = "CourtCase.caseDocument", type = EntityGraphType.LOAD)
 //    @Query("""
 //        SELECT case FROM CourtCaseEntity case
 //        WHERE case.id = :courtCaseId
 //        """)
-    Optional<CourtCaseEntity> findById(Integer courtCaseId);
+//    Optional<CourtCaseEntity> findById(Integer courtCaseId);
 
     @EntityGraph(value = "CourtCase.caseDocument", type = EntityGraphType.LOAD)
     @Query("""

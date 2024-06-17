@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GenerateCaseDocumentAutomatedTaskTest {
+class GenerateCourtCaseDocumentAutomatedTaskTest {
 
     public static final int BATCH_SIZE = 50;
     @Mock

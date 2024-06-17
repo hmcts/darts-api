@@ -1,8 +1,10 @@
 {
   "createdDateTime" : "2024-03-19T14:15:31.478621Z",
+  "createdBy" : null, //add this. UserAccountEntity only the ID
   "lastModifiedDateTime" : "2024-04-17T14:18:31.8037Z",
+  "lastModifiedBy" : null, //missing from original json, do we want it? YES ADD
   "id" : 2,
-  "reportingRestrictions" : null,
+  "reportingRestrictions" : null,  // add all properties of EventHandlerEntity
   "legacyCaseObjectId" : null,
   "caseNumber" : "case1",
   "courthouse" : {
@@ -21,25 +23,26 @@
   "interpreterUsed" : false,
   "caseClosedTimestamp" : "2024-04-02T08:01:00.619296Z",
   "retentionRetries" : 0,   //REMOVE
-  "defendantList" : [ ],
-  "prosecutorList" : [ {
+  "defendantList" : [ ], // defendants
+  "prosecutorList" : [ {  // prosecutors
     "createdDateTime" : "2024-03-19T14:06:39.81837Z",
     "lastModifiedDateTime" : "2024-03-19T14:06:39.818379Z",
     "id" : 1,
     "name" : "CASE1_DMP461-P001"
   } ],
-  "defenceList" : [ ],
-  "legacyVersionLabel" : null,
+  "defenceList" : [ ], // defences
+  "legacyVersionLabel" : null,   //REMOVE, old property now removed
   "deletedBy" : null,
   "deletedTimestamp" : null,
   "hearings" : [ {
     "id" : 1,
     "createdDateTime" : null,
+    "courtroom" : null // ADD THIS
     "lastModifiedDateTime" : null,
     "hearingDate" : "2024-04-11",
     "scheduledStartTime" : "09:54:30.68",
     "hearingIsActual" : false,
-    "judgeHearingDate" : null,  //what is this? hearing date?
+    "judgeHearingDate" : null,  //keep this?
     "mediaList" : [ {
       "id" : 141,
       "createdDateTime" : "2024-04-12T09:17:08.470794Z",
@@ -56,7 +59,7 @@
       "referenceId" : null,
       "start" : "2023-11-23T10:36:05.362Z",
       "end" : "2023-11-23T10:36:05.362Z",
-      "caseNumberList" : [ "case1" ],
+      "caseNumberList" : [ "case1" ],  // REMOVE THIS
       "legacyVersionLabel" : null,
       "mediaFile" : "sample",
       "mediaFormat" : "mp2",
@@ -82,9 +85,9 @@
         "lastModifiedDateTime" : "2024-04-12T15:37:40.142952Z",
         "id" : 300004558,
         "media" : 141,
-        "transcriptionDocumentEntity" : null,    //REMOVE
-        "annotationDocumentEntity" : null,    //REMOVE
-        "caseDocument" : null,   //REMOVE but add caseDocuments outside EOD same as annotation and transcription
+        "transcriptionDocumentEntity" : null,
+        "annotationDocumentEntity" : null,
+        "caseDocument" : null,
         "status" : {
           "id" : 2,
           "description" : "Stored"
@@ -92,7 +95,7 @@
         "externalLocationType" : {
           "id" : 2,
           "description" : "unstructured",
-          "hibernateLazyInitializer" : { }
+          "hibernateLazyInitializer" : { }   //remove
         },
         "externalLocation" : "928c2199-0b43-4325-bb87-251b32dc37e7",
         "externalFileId" : null,
@@ -140,7 +143,7 @@
       } ],
       "hidden" : false,
       "deleted" : false
-    } ],
+    } ], // medias
     "transcriptions" : [ {
       "id" : 4,
       "createdDateTime" : "2024-04-03T09:35:21.453534Z",
@@ -156,7 +159,7 @@
       "deletedTimestamp" : null,
       "chronicleId" : null,
       "antecedentId" : null,
-      "transcriptionDocumentEntities" : [ {
+      "transcriptionDocumentEntities" : [ {  // transcriptionDocuments
         "id" : 1,
         "lastModifiedTimestamp" : "2024-04-03T09:53:04.487209Z",
         "lastModifiedBy" : null,
@@ -166,7 +169,7 @@
         "fileName" : "DMP-410-Test-Report.docx",
         "fileType" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "fileSize" : 18547,
-        "uploadedBy" : {
+        "uploadedBy" : {  // only ID
           "createdDateTime" : "2023-09-29T10:48:37.928Z",
           "lastModifiedDateTime" : "2023-09-29T10:48:37.928Z",
           "id" : -45,
@@ -315,7 +318,7 @@
       } ],
       "hearing" : 1,
       "deleted" : false,
-      "courtCase" : {
+      "courtCase" : {    // REMOVE
         "createdDateTime" : "2024-03-19T14:15:31.478621Z",
         "lastModifiedDateTime" : "2024-04-17T14:18:31.8037Z",
         "id" : 2,
@@ -1125,11 +1128,13 @@
       } ],
       "hearingList" : [ 1 ]
     } ],
-    "new" : false,
-    "judgesStringList" : [ "CASE1_DMP461-J001" ]
+    "mediaRequests" : [],  // ADD THIS
+    "events" : [],  // ADD THIS   EventEntity - CourtroomEntity only ID, no hearingEntities, EventHandlerEntity entire object
+    "new" : false,   // remove it
+    "judgesStringList" : [ "CASE1_DMP461-J001" ]   // REMOVE this, helper method
+    "judges" : [] // ADD THIS it's not in the JSON
   }, 2, 21 ],
-  "caseRetentionEntities" : [ ],
-  "userAccountCourtCaseEntities" : null,
+  "caseRetentionEntities" : [ ],   // all properties of CaseRetentionEntity apart for court case circular relation
   "judges" : [ {
     "createdDateTime" : "2024-03-19T14:06:39.819517Z",
     "lastModifiedDateTime" : "2024-03-19T14:06:39.819526Z",
@@ -1138,8 +1143,11 @@
   } ],
   "deleted" : false,
   "retentionUpdated" : true,
-  "defendantStringList" : [ ],
-  "prosecutorsStringList" : [ "CASE1_DMP461-P001" ],
-  "defenceStringList" : [ ],
-  "judgeStringList" : [ "CASE1_DMP461-J001" ]
+  "defendantStringList" : [ ],  // REMOVE these are helper methods?
+  "prosecutorsStringList" : [ "CASE1_DMP461-P001" ], // REMOVE these are helper methods?
+  "defenceStringList" : [ ], // REMOVE these are helper methods?
+  "judgeStringList" : [ "CASE1_DMP461-J001" ] // REMOVE these are helper methods?
+  "caseDocuments" : [] // collection of CaseDocument, which include EOD . It's not mapped in CourtCase, use the CaseDocumentRepository. All properties execpt courtcase
 }
+
+// add anonymised 3 attributes

@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.casedocument.service.model.CaseDocument;
+import uk.gov.hmcts.darts.casedocument.mapper.CourtCaseDocumentMapper;
+import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 
@@ -15,10 +16,11 @@ import uk.gov.hmcts.darts.common.repository.CaseRepository;
 public class CaseDocumentServiceImpl implements CaseDocumentService {
 
     private final CaseRepository caseRepository;
+    private final CourtCaseDocumentMapper mapper;
     private final EntityManager entityManager;
 
     @Transactional
-    public CaseDocument generateCaseDocument(Integer caseId) {
+    public CourtCaseDocument generateCaseDocument(Integer caseId) {
 //        Map<String, Object> properties = Map.of(
 //            "javax.persistence.loadgraph",
 //            entityManager.getEntityGraph("CourtCase.caseDocument")
@@ -28,7 +30,7 @@ public class CaseDocumentServiceImpl implements CaseDocumentService {
 //        CourtCaseEntity courtCase = entityManager.find(CourtCaseEntity.class, caseId);
 
         CourtCaseEntity courtCase = caseRepository.findById(caseId).orElseThrow();
-
-        return null;
+        CourtCaseDocument courtCaseDocument = mapper.mapToCourtCaseDocument(courtCase);
+        return courtCaseDocument;
     }
 }

@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.casedocument.service;
 
-import uk.gov.hmcts.darts.casedocument.service.model.CaseDocument;
+import uk.gov.hmcts.darts.casedocument.template.CourtCaseDocument;
 
 public interface CaseDocumentService {
 
-    CaseDocument generateCaseDocument(Integer caseId);
+    CourtCaseDocument generateCaseDocument(Integer caseId);
 }

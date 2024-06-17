@@ -458,6 +458,8 @@ dependencies {
   testImplementation 'io.github.hakky54:logcaptor:2.9.3'
   testImplementation 'org.testcontainers:testcontainers:1.19.8'
 
+  testImplementation group: 'org.jeasy', name: 'easy-random-core', version: '5.0.0'
+
   compileJava.dependsOn = openApiGenerateTaskList
 }
 

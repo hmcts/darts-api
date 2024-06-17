@@ -106,13 +106,13 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     private Integer retentionRetries;
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<DefendantEntity> defendantList;
+    private List<DefendantEntity> defendantList = new ArrayList<>();
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<ProsecutorEntity> prosecutorList;
+    private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<DefenceEntity> defenceList;
+    private List<DefenceEntity> defenceList = new ArrayList<>();
 
     @Column(name = IS_DELETED)
     private boolean isDeleted;
