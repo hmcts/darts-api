@@ -19,7 +19,7 @@ class CourtCaseDocumentMapperTest {
 
         CourtCaseEntity cc = createCourtCaseAndAssociatedEntitiesWithRandomValues();
 
-        CourtCaseDocument doc = mapper.mapToCourtCaseDocument(cc);
+        CourtCaseDocument doc = mapper.map(cc);
 
         assertAll(
             "Grouped assertions for Case Document top level properties",
@@ -157,6 +157,71 @@ class CourtCaseDocumentMapperTest {
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getHandler()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getHandler()),
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getActive()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getActive()),
             () -> assertThat(doc.getCaseRetentions().get(0).getCaseManagementRetention().getEvent().getEventType().getIsReportingRestriction()).isNotNull().isEqualTo(cc.getCaseRetentionEntities().get(0).getCaseManagementRetention().getEventEntity().getEventType().getIsReportingRestriction())
+        );
+
+        assertAll(
+            "Grouped assertions for Case Document hearings",
+            () -> assertThat(doc.getHearings().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getHearingDate()).isNotNull().isEqualTo(cc.getHearings().get(0).getHearingDate()),
+            () -> assertThat(doc.getHearings().get(0).getScheduledStartTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getScheduledStartTime()),
+            () -> assertThat(doc.getHearings().get(0).getHearingIsActual()).isNotNull().isEqualTo(cc.getHearings().get(0).getHearingIsActual()),
+            () -> assertThat(doc.getHearings().get(0).getJudgeHearingDate()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudgeHearingDate()),
+
+            () -> assertThat(doc.getHearings().get(0).getCourtroom().getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getCourtroom().getId()),
+            () -> assertThat(doc.getHearings().get(0).getCourtroom().getName()).isNotNull().isEqualTo(cc.getHearings().get(0).getCourtroom().getName()),
+            () -> assertThat(doc.getHearings().get(0).getCourtroom().getCreatedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getCourtroom().getCreatedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getCourtroom().getCreatedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getCourtroom().getCreatedDateTime()),
+
+            () -> assertThat(doc.getHearings().get(0).getJudges().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudges().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getJudges().get(0).getName()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudges().get(0).getName()),
+            () -> assertThat(doc.getHearings().get(0).getJudges().get(0).getCreatedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudges().get(0).getCreatedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getJudges().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudges().get(0).getLastModifiedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getJudges().get(0).getCreatedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudges().get(0).getCreatedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getJudges().get(0).getLastModifiedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getJudges().get(0).getLastModifiedBy().getId()),
+
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getCurrentOwner()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getCurrentOwner().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getRequestor()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getRequestor().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getStatus()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getStatus()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getRequestType()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getRequestType()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getAttempts()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getAttempts()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getStartTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getStartTime()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getEndTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getEndTime()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getCreatedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getCreatedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getLastModifiedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getCreatedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getCreatedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getLastModifiedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getLastModifiedBy().getId()),
+
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getCreatedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getCreatedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getLastModifiedDateTime()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getLastModifiedDateTime()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getCreatedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getCreatedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getLastModifiedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getLastModifiedBy().getId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getLegacyObjectId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getLegacyObjectId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getChannel()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getChannel()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getTotalChannels()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getTotalChannels()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getReferenceId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getReferenceId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getStart()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getStart()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getEnd()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getEnd()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getLegacyVersionLabel()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getLegacyVersionLabel()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getMediaFile()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getMediaFile()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getMediaFormat()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getMediaFormat()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getChecksum()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getChecksum()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getFileSize()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getFileSize()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getMediaType()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getMediaType()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getContentObjectId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getContentObjectId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getClipId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getClipId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getChronicleId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getChronicleId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getAntecedentId()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getAntecedentId()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).isHidden()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).isHidden()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).isDeleted()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).isDeleted()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getDeletedTimestamp()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getDeletedTimestamp()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getMediaStatus()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getMediaStatus()),
+            () -> assertThat(doc.getHearings().get(0).getMedias().get(0).getRetainUntilTs()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaList().get(0).getRetainUntilTs()),
+
+
+            () -> assertThat(doc.getHearings().get(0).getMediaRequests().get(0).getCreatedBy()).isNotNull().isEqualTo(cc.getHearings().get(0).getMediaRequests().get(0).getCreatedBy().getId())
+
         );
     }
 

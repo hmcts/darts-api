@@ -26,8 +26,8 @@ public class CourtCaseDocument extends CreatedModifiedCaseDocument {
     private final Integer deletedBy;
     private final OffsetDateTime deletedTimestamp;
     private final List<CaseRetentionCaseDocument> caseRetentions;
-//    private final List<HearingEntity> hearings;
-    private final List<JudgeCourtCaseDocument> judges;
+    private final List<HearingCaseDocument> hearings;
+    private final List<JudgeCaseDocument> judges;
     private final boolean dataAnonymised;
     private final Integer dataAnonymisedBy;
     private final OffsetDateTime dataAnonymisedTs;

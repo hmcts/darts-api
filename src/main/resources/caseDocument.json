@@ -37,12 +37,12 @@
   "hearings" : [ {
     "id" : 1,
     "createdDateTime" : null,
-    "courtroom" : null // ADD THIS
+    "courtroom" : null,
     "lastModifiedDateTime" : null,
     "hearingDate" : "2024-04-11",
     "scheduledStartTime" : "09:54:30.68",
     "hearingIsActual" : false,
-    "judgeHearingDate" : null,  //keep this?
+    "judgeHearingDate" : null,  //keep this
     "mediaList" : [ {
       "id" : 141,
       "createdDateTime" : "2024-04-12T09:17:08.470794Z",

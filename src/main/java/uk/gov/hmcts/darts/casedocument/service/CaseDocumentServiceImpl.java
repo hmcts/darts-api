@@ -30,7 +30,7 @@ public class CaseDocumentServiceImpl implements CaseDocumentService {
 //        CourtCaseEntity courtCase = entityManager.find(CourtCaseEntity.class, caseId);
 
         CourtCaseEntity courtCase = caseRepository.findById(caseId).orElseThrow();
-        CourtCaseDocument courtCaseDocument = mapper.mapToCourtCaseDocument(courtCase);
+        CourtCaseDocument courtCaseDocument = mapper.map(courtCase);
         return courtCaseDocument;
     }
 }
