@@ -161,7 +161,7 @@ public class CasesMapper {
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {
         var reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setEventId(restrictionsEntity.getId());
+        reportingRestriction.setEventId(restrictionsEntity.getEveId());
         reportingRestriction.setEventName(restrictionsEntity.getEventName());
         reportingRestriction.setEventText(restrictionsEntity.getEventText());
         reportingRestriction.setHearingId(restrictionsEntity.getHearingId());
